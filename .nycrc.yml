@@ -1,0 +1,5 @@
+extends: "@istanbuljs/nyc-config-typescript"
+reporter:
+  - lcovonly
+  - text-summary
+  - text

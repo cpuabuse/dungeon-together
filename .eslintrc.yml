@@ -1,0 +1,94 @@
+env:
+  es6: true
+  node: true
+parser: "@typescript-eslint/parser"
+plugins:
+  - "@typescript-eslint"
+  - prettier
+extends:
+  - airbnb
+  - prettier
+parserOptions:
+  ecmaVersion: 2019
+  sourceType: module
+  ecmaFeatures:
+    impliedStrict: true
+rules:
+  prettier/prettier: error
+
+  # Requires type definitions to exist.
+  # We want all types. Multiple options on by default.
+  "@typescript-eslint/typedef":
+    - error
+    - objectDestructuring: true
+      variableDeclaration: true
+
+  # Require explicit return types on functions and class methods.
+  # We want all types.
+  "@typescript-eslint/explicit-function-return-type":
+    - error
+
+  # Require a consistent member declaration order.
+  # Order what can be ordered. Alphabetize is on the way https://github.com/typescript-eslint/typescript-eslint/pull/263
+  "@typescript-eslint/member-ordering":
+    - error
+
+  # Enforce consistent indentation.
+  # Managed by prettier.
+  indent: off
+
+  # When there is only a single export from a module, prefer using default export over named export.
+  # To have persistent imports there is no need for arbitrary default imports as modules will grow.
+  import/prefer-default-export: off
+
+  # Disallow Array constructors.
+  # Let programmer decide.
+  no-array-constructor: off
+
+  # The use of bitwise operators in JavaScript is very rare and often & or | is simply a mistyped && or ||, which will lead to unexpected behavior.
+  # Bitwise is essential.
+  no-bitwise: off
+
+  # Disallow Object constructors.
+  # Let programmer decide.
+  no-new-object: off
+
+  # Disallow Magic Numbers.
+  # We should use consts.
+  no-magic-numbers:
+    - error
+    - ignore:
+        - 0
+        - 1
+        - -1
+
+  # Disallow the unary operators ++ and --.
+  # Always.
+  no-plusplus: off
+
+  # Suggest using const.
+  # Let programmer decide.
+  prefer-const: off
+
+  # Checks for presence of jsdoc comments, on class declarations as well as functions.
+  # Properly document everything. Default is `"FunctionDeclaration": true`.
+  require-jsdoc:
+    - error
+    - require:
+        MethodDefinition: true
+        ClassDeclaration: true
+        ArrowFunctionExpression: true
+        FunctionExpression: true
+
+  # Import Sorting.
+  # Sort everything.
+  sort-imports:
+    - error
+
+  # Require object keys to be sorted.
+  # Sort everything.
+  sort-keys: error
+
+  # Variable Sorting
+  # Sort everything
+  sort-vars: error

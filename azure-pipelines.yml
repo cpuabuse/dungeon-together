@@ -1,0 +1,39 @@
+stages:
+  - stage: test
+    jobs:
+      - job: server
+        strategy:
+          matrix:
+            linux_13:
+              os: ubuntu-latest
+              node_version: 13.x
+            macos_13:
+              os: macOS-latest
+              node_version: 13.x
+            windows_13:
+              os: windows-latest
+              node_version: 13.x
+        pool:
+          vmImage: $(os)
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(node_version)
+          - pwsh: script/pipeline/Invoke-Test.ps1
+  - stage: deploy
+    jobs:
+      - deployment: coverage
+        environment: coverage
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+              - task: NodeTool@0
+                inputs:
+                  versionSpec: 13.x
+              - checkout: self
+              - pwsh: script/pipeline/Invoke-CodacyDeployment.ps1
+                env:
+                  CODACY_PROJECT_TOKEN: $(CodacyProjectToken)
