@@ -1,7 +1,7 @@
 stages:
   - stage: test
     jobs:
-      - job: server
+      - job: node
         strategy:
           matrix:
             linux_13:
@@ -19,7 +19,7 @@ stages:
           - task: NodeTool@0
             inputs:
               versionSpec: $(node_version)
-          - pwsh: script/pipeline/Invoke-Test.ps1
+          - pwsh: script/pipeline/Test-Node.ps1
   - stage: deploy
     jobs:
       - deployment: coverage
@@ -34,6 +34,6 @@ stages:
                 inputs:
                   versionSpec: 13.x
               - checkout: self
-              - pwsh: script/pipeline/Invoke-CodacyDeployment.ps1
+              - pwsh: script/pipeline/Deploy-Codacy.ps1
                 env:
                   CODACY_PROJECT_TOKEN: $(CodacyProjectToken)
