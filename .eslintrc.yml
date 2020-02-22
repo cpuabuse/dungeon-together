@@ -26,6 +26,7 @@ rules:
     - objectDestructuring: true
       variableDeclaration: true
       parameter: false
+      arrowParameter: false
 
   # Require explicit return types on functions and class methods.
   # We want all types.
