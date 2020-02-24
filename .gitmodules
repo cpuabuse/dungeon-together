@@ -1,0 +1,4 @@
+[submodule "pixi.js"]
+	path = include/pixi.js
+	url = https://github.com/pixijs/pixi.js
+	branch = master
