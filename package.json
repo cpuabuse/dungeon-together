@@ -10,10 +10,11 @@
 		"node": ">=13"
 	},
 	"scripts": {
-		"codacy": "npm run coverage && cross-cat coverage/lcov.info | codacy-coverage",
-		"coverage": "nyc npm run ts-test",
 		"build": "npm run build:dev",
 		"build:dev": "tsc",
+		"codacy": "npm run coverage && cross-cat coverage/lcov.info | codacy-coverage",
+		"coverage": "nyc npm run ts-test",
+		"junit": "npm run build && mocha test --reporter mocha-junit-reporter",
 		"test": "mocha build/dev/test/test.js",
 		"ts-test": "mocha --require ts-node/register test/test.ts"
 	},
