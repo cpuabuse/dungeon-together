@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"declaration": true,
 		"esModuleInterop": true,
-		"lib": ["es2020"],
+		"lib": ["DOM", "es2020"],
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"noImplicitAny": true,
