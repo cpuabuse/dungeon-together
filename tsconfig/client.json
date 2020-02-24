@@ -1,5 +1,7 @@
 {
+	"compilerOptions": {
+		"module": "es6"
+	},
 	"extends": "../tsconfig.json",
-	"include": ["../src/client/**/*"],
-	"module": "es6"
+	"include": ["../src/client/**/*"]
 }
