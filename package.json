@@ -16,7 +16,7 @@
 		"build:release:rollup": "tsc --project tsconfig/release/rollup.json",
 		"build:release:server": "tsc --project tsconfig/release/server.json",
 		"build:stage": "npm run build:stage:client & npm run build:stage:server & npm run build:stage:server",
-		"build:stage:client": "npm run build:stage:rollup && rollup --config build/stage/bin/rollup/stage.js && mkdirp build/stage/artifacts/terser && terser build/stage/artifacts/rollup/client.js --compress --mangle --beautify --output build/stage/artifacts/terser/client.js && mkdirp build/stage/client && ncp build/stage/artifacts/terser/client.js build/stage/client/index.js",
+		"build:stage:client": "npm run build:stage:rollup && rollup --config build/stage/bin/rollup/stage.js && mkdirp build/stage/artifacts/terser && terser build/stage/artifacts/rollup/client.js --compress --mangle --beautify --output build/stage/artifacts/terser/client.js && mkdirp build/stage/client && ncp build/stage/artifacts/terser/client.js build/stage/client/index.js && mkdirp build/stage/standalone/js && ncp build/stage/artifacts/terser/client.js build/stage/standalone/index.js",
 		"build:stage:rollup": "tsc --project tsconfig/stage/rollup.json",
 		"build:stage:server": "tsc --project tsconfig/stage/server.json",
 		"build:test": "npm run build:test:client & npm run build:test:rollup & npm run build:test:server",
