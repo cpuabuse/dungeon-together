@@ -1,7 +1,0 @@
-{
-	"compilerOptions": {
-		"outDir": "../../build/dev/rollup"
-	},
-	"extends": "./base.json",
-	"include": ["../../src/rollup/**/*"]
-}

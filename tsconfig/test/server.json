@@ -1,8 +1,8 @@
 {
 	"compilerOptions": {
-		"outDir": "../../build/dev/client"
+		"outDir": "../../build/test/server"
 	},
 	"extends": "./base.json",
 	"include": ["../../src/app/**/*"],
-	"exclude": ["../../src/app/server.ts"]
+	"exclude": ["../../src/app/client.ts"]
 }

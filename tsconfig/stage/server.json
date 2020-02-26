@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"outDir": "../../build/dev/server"
+		"outDir": "../../build/stage/server"
 	},
 	"extends": "./base.json",
 	"include": ["../../src/app/**/*"],

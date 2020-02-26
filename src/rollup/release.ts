@@ -4,9 +4,9 @@ import resolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 
 export default {
-	input: join(__dirname, "..", "..", "..", "src", "app", "client.ts"),
+	input: join(__dirname, "..", "..", "..", "..", "src", "app", "client.ts"),
 	output: {
-		file: join(__dirname, "..", "client", "stage", "rollup.js"),
+		file: join(__dirname, "..", "..", "artifacts", "rollup", "client.js"),
 		format: "esm",
 		name: "pixi"
 	},
