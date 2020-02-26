@@ -10,8 +10,14 @@
 		"node": ">=13"
 	},
 	"scripts": {
-		"build": "npm run build:dev",
-		"build:dev": "tsc",
+		"build": "npm run build:dev & npm run build:prod",
+		"build:dev": "npm run build:dev:client & npm run build:dev:rollup & npm run build:dev:server",
+		"build:dev:client": "tsc --project tsconfig/dev/client.json",
+		"build:dev:rollup": "tsc --project tsconfig/dev/rollup.json",
+		"build:dev:server": "tsc --project tsconfig/dev/server.json",
+		"build:prod": "npm run build:prod:client & npm run build:prod:server",
+		"build:prod:client": "npm run build:dev:rollup && rollup --config build/dev/rollup/client.js && terser build/prod/client/stage/rollup.js --compress --mangle --beautify --output build/prod/client/stage/terser.js && mkdirp build/prod/client/release && ncp build/prod/client/stage/terser.js build/prod/client/release/index.js",
+		"build:prod:server": "tsc --project tsconfig/prod/server.json",
 		"codacy": "npm run coverage && cross-cat coverage/lcov.info | codacy-coverage",
 		"coverage": "nyc npm run ts-test",
 		"junit": "npm run build && mocha test --reporter mocha-junit-reporter",
@@ -36,24 +42,34 @@
 	"homepage": "https://github.com/cpuabuse/dungeon-together#readme",
 	"devDependencies": {
 		"@istanbuljs/nyc-config-typescript": "^1.0.1",
+		"@rollup/plugin-commonjs": "^11.0.2",
+		"@rollup/plugin-node-resolve": "^7.1.1",
+		"@rollup/plugin-typescript": "^3.0.0",
 		"@types/mocha": "^7.0.1",
 		"@types/node": "^13.7.4",
 		"@typescript-eslint/eslint-plugin": "^2.20.0",
 		"@typescript-eslint/parser": "^2.20.0",
 		"browserify": "^16.5.0",
 		"codacy-coverage": "^3.4.0",
+		"cpy-cli": "^3.1.0",
 		"cross-cat": "0.0.8",
 		"eslint": "^6.8.0",
 		"eslint-config-airbnb-base": "^14.0.0",
 		"eslint-config-prettier": "^6.10.0",
+		"eslint-plugin-import": "^2.20.1",
 		"eslint-plugin-prettier": "^3.1.2",
+		"mkdirp": "^1.0.3",
 		"mocha": "^7.0.1",
+		"ncp": "^2.0.0",
 		"nyc": "^15.0.0",
 		"prettier": "^1.19.1",
+		"rollup": "^1.31.1",
+		"terser": "^4.6.4",
 		"ts-node": "^8.6.2",
 		"typescript": "^3.8.2"
 	},
 	"dependencies": {
+		"npm": "^6.14.0",
 		"pixi.js": "^5.2.1"
 	}
 }

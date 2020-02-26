@@ -4,9 +4,10 @@
 */
 
 /**
- * Grid for the dungeons.
+ * Cells making up the grid.
  */
 
+import { None } from "../units/none";
 import { Unit } from "./unit";
 
 /**
@@ -22,21 +23,23 @@ interface Nav {
 }
 
 /**
- * The grid itself.
- */
-export class Grid {
-	/**
-	 * Actual cells inside of the grid.
-	 */
-	cells: Array<Cell>;
-}
-
-/**
  * The cell within the grid.
  */
 export class Cell implements Nav {
+	down: Cell = this;
+
+	left: Cell = this;
+
+	right: Cell = this;
+
 	/**
 	 * Unit occupying a cell.
 	 */
-	unit: Unit;
+	unit: Unit = new None(this);
+
+	up: Cell = this;
+
+	zDown: Cell = this;
+
+	zUp: Cell = this;
 }

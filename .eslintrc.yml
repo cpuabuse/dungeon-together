@@ -1,5 +1,6 @@
 env:
   es6: true
+  browser: true
   node: true
 parser: "@typescript-eslint/parser"
 plugins:
@@ -9,6 +10,9 @@ extends:
   - eslint:recommended
   - plugin:@typescript-eslint/eslint-recommended
   - plugin:@typescript-eslint/recommended
+  - plugin:import/errors
+  - plugin:import/warnings
+  - plugin:import/typescript
   - airbnb-base
   - prettier
 parserOptions:
@@ -16,11 +20,15 @@ parserOptions:
   sourceType: module
   ecmaFeatures:
     impliedStrict: true
+settings:
+  import/resolver:
+    node:
+      extensions: [.ts, .tsx]
 rules:
   prettier/prettier: error
 
-  # Requires type definitions to exist.
-  # We want all types. Multiple options on by default.
+  # Requires type definitions to exist
+  # We want all types. Multiple options on by default
   "@typescript-eslint/typedef":
     - error
     - objectDestructuring: true
@@ -28,52 +36,67 @@ rules:
       parameter: false
       arrowParameter: false
 
-  # Require explicit return types on functions and class methods.
-  # We want all types.
+  # Require explicit return types on functions and class methods
+  # We want all types
   "@typescript-eslint/explicit-function-return-type":
     - error
 
-  # Require a consistent member declaration order.
+  # Require a consistent member declaration order
   # Order what can be ordered. Alphabetize is on the way https://github.com/typescript-eslint/typescript-eslint/pull/263
   "@typescript-eslint/member-ordering":
     - error
 
-  # Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.
-  # We want the types to be forced.
+  # Disallow generic Array constructors
+  # We want to use array constructor often
+  "@typescript-eslint/no-array-constructor": off
+
+  # Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean
+  # We want the types to be forced
   "@typescript-eslint/no-inferrable-types": off
 
-  # Require or disallow named function expressions.
-  # Creates too much clutter.
+  # Require or disallow named function expressions
+  # Creates too much clutter
   func-names:
     - error
-    - never
 
-  # Enforce consistent indentation.
-  # Managed by prettier.
+  # Enforce consistent indentation
+  # Managed by prettier
   indent: off
 
-  # When there is only a single export from a module, prefer using default export over named export.
-  # To have persistent imports there is no need for arbitrary default imports as modules will grow.
+  # Ensure consistent use of file extension within the import path
+  # No extensions in typescript
+  import/extensions:
+    - error
+    - always
+    - ts: never
+      tsx: never
+
+  # Ensures that there is no resolvable path back to this module via its dependencies
+  # Sometimes it is necessary to have circular dependencies
+  import/no-cycle: off
+
+  # When there is only a single export from a module, prefer using default export over named export
+  # To have persistent imports there is no need for arbitrary default imports as modules will grow
   import/prefer-default-export: off
 
-  # A file may not contain more than the specified number of classes.
-  # Let programmer decide.
+  # A file may not contain more than the specified number of classes
+  # Let programmer decide
   max-classes-per-file: off
 
-  # Disallow Array constructors.
-  # Let programmer decide.
+  # Disallow Array constructors
+  # Let programmer decide
   no-array-constructor: off
 
-  # The use of bitwise operators in JavaScript is very rare and often & or | is simply a mistyped && or ||, which will lead to unexpected behavior.
-  # Bitwise is essential.
+  # The use of bitwise operators in JavaScript is very rare and often & or | is simply a mistyped && or ||, which will lead to unexpected behavior
+  # Bitwise is essential
   no-bitwise: off
 
-  # Disallow Object constructors.
-  # Let programmer decide.
+  # Disallow Object constructors
+  # Let programmer decide
   no-new-object: off
 
-  # Disallow Magic Numbers.
-  # We should use consts.
+  # Disallow Magic Numbers
+  # We should use consts
   no-magic-numbers:
     - error
     - ignore:
@@ -81,16 +104,21 @@ rules:
         - 1
         - -1
 
-  # Disallow the unary operators ++ and --.
-  # Always.
+  # Disallow the unary operators ++ and --
+  # Always
   no-plusplus: off
 
-  # Suggest using const.
-  # Let programmer decide.
+  # Suggest using const
+  # Let programmer decide
   prefer-const: off
 
-  # Checks for presence of jsdoc comments, on class declarations as well as functions.
-  # Properly document everything. Default is `"FunctionDeclaration": true`.
+  # Prefer destructuring from arrays and objects
+  # Shorter syntax
+  prefer-destructuring:
+    - error
+
+  # Checks for presence of jsdoc comments, on class declarations as well as functions
+  # Properly document everything. Default is `"FunctionDeclaration": true`
   require-jsdoc:
     - error
     - require:
@@ -99,13 +127,13 @@ rules:
         ArrowFunctionExpression: true
         FunctionExpression: true
 
-  # Import Sorting.
-  # Sort everything.
+  # Import Sorting
+  # Sort everything
   sort-imports:
     - error
 
-  # Require object keys to be sorted.
-  # Sort everything.
+  # Require object keys to be sorted
+  # Sort everything
   sort-keys: error
 
   # Variable Sorting
