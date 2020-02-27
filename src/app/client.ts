@@ -10,7 +10,7 @@ const app: Application = new Application();
 document.body.appendChild(app.view);
 
 // load the texture we need
-app.loader.add("bunny", "bunny.png").load((loader, resources) => {
+app.loader.add("bunny", "img/bunny.png").load((loader, resources) => {
 	if (resources.bunny !== undefined) {
 		// This creates a texture from a 'bunny.png' image
 		const bunny: Sprite = new Sprite(resources.bunny.texture);

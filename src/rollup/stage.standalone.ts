@@ -6,9 +6,9 @@ import typescript from "@rollup/plugin-typescript";
 export default {
 	input: join(__dirname, "..", "..", "..", "..", "src", "app", "client.ts"),
 	output: {
-		file: join(__dirname, "..", "..", "artifacts", "rollup", "client.js"),
+		file: join(__dirname, "..", "..", "artifacts", "rollup", "standalone.js"),
 		format: "esm",
-		name: "pixi"
+		name: "client"
 	},
 	plugins: [commonjs(), resolve({ preferBuiltins: true }), typescript({ tsconfig: false })]
 };

@@ -2,17 +2,8 @@
 
 ## Environments
 
-### Test
-
-- Unit testing
-- Integration testing
-- Scripted system testing
-
-### Stage
-
-- Manual system testing
-
-### Release
-
-- Acceptance testing
-- Deployment
+Environment(build) | Testing | Additional builds
+--- | --- | ---
+Test | Unit, integration, scripted system
+Stage | Manual system | Standalone
+Release | Acceptance

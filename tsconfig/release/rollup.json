@@ -3,6 +3,5 @@
 		"outDir": "../../build/release/bin/rollup"
 	},
 	"extends": "./base.json",
-	"include": ["../../src/rollup/**/*"],
-	"exclude": ["../../src/rollup/stage.ts"]
+	"include": ["../../src/rollup/release*"]
 }

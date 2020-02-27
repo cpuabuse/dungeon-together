@@ -8,7 +8,7 @@ export default {
 	output: {
 		file: join(__dirname, "..", "..", "artifacts", "rollup", "client.js"),
 		format: "esm",
-		name: "pixi"
+		name: "client"
 	},
 	plugins: [commonjs(), resolve({ preferBuiltins: true }), typescript({ tsconfig: false })]
 };
