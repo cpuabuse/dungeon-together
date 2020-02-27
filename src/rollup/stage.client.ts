@@ -8,7 +8,8 @@ export default {
 	output: {
 		file: join(__dirname, "..", "..", "artifacts", "rollup", "client.js"),
 		format: "esm",
-		name: "client"
+		name: "client",
+		sourcemap: "inline"
 	},
 	plugins: [commonjs(), resolve({ preferBuiltins: true }), typescript({ tsconfig: false })]
 };
