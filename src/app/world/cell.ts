@@ -8,7 +8,18 @@
  */
 
 import { None } from "../units/none";
+import { Occupant } from "./occupant";
+import { Stackable } from "./stackable";
 import { Unit } from "./unit";
+import { Exclusive } from "./exclusive";
+
+/**
+ * An occupant that has identified type.
+ */
+interface IdentifiedOccupant {
+	name: string;
+	occupant: Occupant;
+}
 
 /**
  * Freedom of movement for cell.
@@ -28,9 +39,13 @@ interface Nav {
 export class Cell implements Nav {
 	down: Cell = this;
 
+	exclusive: Array<IdentifiedOccupant>;
+
 	left: Cell = this;
 
 	right: Cell = this;
+
+	stackable: Array<Stackable>;
 
 	/**
 	 * Unit occupying a cell.
@@ -42,4 +57,6 @@ export class Cell implements Nav {
 	zDown: Cell = this;
 
 	zUp: Cell = this;
+
+	constructor(exclusive: Exclusive | undefined, stackable: Stackable | undefined) {}
 }

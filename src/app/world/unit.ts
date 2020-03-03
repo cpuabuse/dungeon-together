@@ -7,21 +7,11 @@
  * Units to be occupying cells within the grid.
  */
 
-import { Cell } from "./cell";
+import { Occupant } from "./occupant";
 
 /**
  * Actual unit base class.
  */
-export class Unit {
-	/**
-	 * Cell occupied by the unit.
-	 */
-	cell: Cell;
-
-	/**
-	 * Constructor for unit.
-	 */
-	constructor(cell: Cell) {
-		this.cell = cell;
-	}
+export class Unit extends Occupant {
+	// Nothing
 }
