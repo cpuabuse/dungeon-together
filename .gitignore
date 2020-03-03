@@ -1,4 +1,5 @@
-sbuild
+# Ignore
+build
 coverage
 *.d.ts
 *.js
