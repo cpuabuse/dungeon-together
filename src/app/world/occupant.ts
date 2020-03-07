@@ -21,7 +21,7 @@ export class Occupant {
 	/**
 	 * Constructor for occupant.
 	 */
-	constructor(cell: Cell) {
+	constructor(cell: Cell | undefined) {
 		this.cell = cell;
 	}
 }
