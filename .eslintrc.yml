@@ -80,6 +80,10 @@ rules:
   # Sometimes it is necessary to have circular dependencies
   import/no-cycle: off
 
+  # Enforce a convention in module import order
+  # Handled by ESLint
+  import/order: off
+
   # When there is only a single export from a module, prefer using default export over named export
   # To have persistent imports there is no need for arbitrary default imports as modules will grow
   import/prefer-default-export: off
