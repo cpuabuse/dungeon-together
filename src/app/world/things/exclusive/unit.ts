@@ -7,11 +7,11 @@
  * Units to be occupying cells within the grid.
  */
 
-import { Occupant } from "../../thing";
+import { Exclusive } from "../exclusive";
 
 /**
  * Actual unit base class.
  */
-export class Unit extends Occupant {
+export class Unit extends Exclusive {
 	// Nothing
 }

@@ -7,37 +7,8 @@
  * Cells making up the grid.
  */
 
-import { Kind, Thing } from "./thing";
-import { None } from "./things/none";
+import { Thing } from "./thing";
 import { World } from "./world";
-
-/**
- * Arguments of a cell.
- */
-export interface CellArgs {
-	things?: Array<Thing>;
-	world: World;
-}
-
-/**
- * Manifest defining occupnats kinds in the cell.
- */
-export interface Manifest {
-	/**
-	 * Kinds, an array.
-	 */
-	manifestKinds: Array<ManifestKind>;
-}
-
-/**
- * Information about a kind in manifest.
- */
-export interface ManifestKind {
-	/**
-	 *  Should refer to classes implementing kinds, for static methods.
-	 */
-	kind: Kind;
-}
 
 /**
  * Freedom of movement for cell.
@@ -86,53 +57,60 @@ export class Cell implements Nav {
 	/**
 	 * Down movement.
 	 */
-	private down: Cell = this;
+	public down: Cell = this;
 
 	/**
 	 * Left movement.
 	 */
-	private left: Cell = this;
+	public left: Cell = this;
 
 	/**
 	 * Right movement.
 	 */
-	private right: Cell = this;
+	public right: Cell = this;
 
 	/**
 	 * Up movement.
 	 */
-	private up: Cell = this;
+	public up: Cell = this;
 
 	/**
 	 * Vertical down movement.
 	 */
-	private zDown: Cell = this;
+	public zDown: Cell = this;
 
 	/**
 	 * Vertical up movement.
 	 */
-	private zUp: Cell = this;
+	public zUp: Cell = this;
 
 	/**
 	 * Indicates which world this cell is part of.
 	 */
-	private world: World;
+	public world: World;
 
 	/**
 	 * Cell constructor.
 	 */
-	public constructor({ things, world }: CellArgs) {
+	public constructor({ things, world }: { things?: Array<Thing>; world: World }) {
 		// Set world
 		this.world = world;
 
 		// Initialize manifest
-		this.world.manifest.manifestKinds.forEach(manifestKind => {
-			manifestKind.kind.initializeKind(this);
+		Object.values(this.world.thingKinds).forEach(thingKind => {
+			thingKind.kind.initialize(this);
 		});
 
 		// Initialize things
-		things.forEach(thing => {
-			thing.initialize(this);
-		});
+		if (things !== undefined) {
+			things.forEach(thing => {
+				thing.initialize(this);
+			});
+		}
 	}
 }
+
+/**
+ * Literally nowhere.
+ */
+export class Nowhere extends Cell {}

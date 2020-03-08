@@ -8,43 +8,34 @@ cpuabuse.com
  */
 
 import { Cell } from "../cell";
-import { Thing, Kind, ThingArgs } from "../thing";
+import { Thing, ThingArgs } from "../thing";
 import { Renderable } from "../../render/renderable";
 
 /**
  * A drawable thing occupying a cell.
  */
-export abstract class Exclusive extends Renderable implements Thing, Kind {
-	/**
-	 * Cell this resides in.
-	 */
-	public cell: Cell;
-	
+export abstract class Exclusive extends Thing {
 	/**
 	 * Maximum number of exclusives in a cell.
 	 */
-	public max: number = 1;
+	public static max: number = 1;
 
 	/**
 	 * Exclusive constructor;
 	 */
-	public constructor({ world }: ThingArgs) {
+	public constructor({ cell, world }: ThingArgs, max: number) {
 		// Call superclass
-		super();
+		super({ cell, world });
 
-		// Initialize an empty cell
-		this.cell = new Cell({
-			things: new Array(this),
-			world
-		});
 	}
 	
 	/**
 	 * Populates the cell with an array, if max is reached, swaps.
 	 */
-	public initialize(cell: Cell): void {
+	public static initialize(cell: Cell): void {
 		// Ensure there is extra space
-	
+		
+		
 		// If occupant was found in interface
 		let occupantsNotSet: boolean = true;
 

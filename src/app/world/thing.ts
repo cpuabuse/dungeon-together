@@ -7,7 +7,7 @@
  * Occupant of cells.
  */
 
-import { Cell } from "./cell";
+import { Cell, Nowhere } from "./cell";
 import { Renderable } from "../render/renderable";
 import { World } from "./world";
 
@@ -18,6 +18,11 @@ export interface ThingArgs {
 	cell?: Cell;
 	world: World;
 }
+
+/**
+ * Literally nothing.
+ */
+export class None extends Thing {}
 
 /**
  * The occupant itself.
@@ -38,7 +43,7 @@ export abstract class Thing extends Renderable {
 		// Connect with cell
 		if (cell === undefined) {
 			// Initialize an empty cell
-			this.cell = new Cell({
+			this.cell = new Nowhere({
 				things: [this],
 				world
 			});
@@ -65,7 +70,7 @@ export abstract class Thing extends Renderable {
 	 */
 	public initialize(cell: Cell): void {
 		// @ts-ignore:2511 This is only an example
-		let thing: Thing = new Thing({ cell, world: this.world });
+		let thing: Thing = new None({ cell, world: this.world });
 		this.swap(thing);
 	}
 
