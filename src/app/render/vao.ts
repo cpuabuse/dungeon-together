@@ -78,7 +78,7 @@ export class Vao {
 		this.rus.push(new Ru({ x: 4 }));
 		this.rus.forEach(function(ru) {
 			// Create a new base texture from an image path
-			const bunnyBaseTexture: BaseTexture = new BaseTexture("img/bunny.png");
+			const bunnyBaseTexture: BaseTexture = new BaseTexture("img/bunny.svg");
 
 			// Create a new texture from base texture
 			const bunnyTexture: Texture = new Texture(bunnyBaseTexture);

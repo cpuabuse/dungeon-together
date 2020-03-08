@@ -7,7 +7,7 @@
  * Units to be occupying cells within the grid.
  */
 
-import { Occupant } from "./occupant";
+import { Occupant } from "../../thing";
 
 /**
  * Actual unit base class.

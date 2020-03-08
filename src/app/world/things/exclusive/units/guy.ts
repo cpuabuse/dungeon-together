@@ -7,7 +7,7 @@
  * Avatar/ player.
  */
 
-import { Unit } from "../world/unit";
+import { Unit } from "../unit";
 
 /**
  * Avatar for the user or player.
