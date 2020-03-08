@@ -27,14 +27,9 @@ settings:
 rules:
   prettier/prettier: error
 
-  # Requires type definitions to exist
-  # We want all types. Multiple options on by default
-  "@typescript-eslint/typedef":
-    - error
-    - objectDestructuring: true
-      variableDeclaration: true
-      parameter: false
-      arrowParameter: false
+  # Bans “// @ts-ignore” comments from being used
+  # Sometimes functionality is necessary
+  "@typescript-eslint/ban-ts-ignore": off
 
   # Require explicit return types on functions and class methods
   # We want all types
@@ -57,6 +52,15 @@ rules:
   # Disallow Early Use
   # There is hoisting
   "@typescript-eslint/no-use-before-define": off
+
+  # Requires type definitions to exist
+  # We want all types. Multiple options on by default
+  "@typescript-eslint/typedef":
+    - error
+    - objectDestructuring: true
+      variableDeclaration: true
+      parameter: false
+      arrowParameter: false
 
   # Require or disallow named function expressions
   # Creates too much clutter
