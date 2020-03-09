@@ -31,6 +31,11 @@ rules:
   # Sometimes functionality is necessary
   "@typescript-eslint/ban-ts-ignore": off
 
+  # Require explicit accessibility modifiers on class properties and methods
+  # Makes it clear
+  "@typescript-eslint/explicit-member-accessibility":
+    - error
+
   # Require explicit return types on functions and class methods
   # We want all types
   "@typescript-eslint/explicit-function-return-type":
@@ -45,9 +50,17 @@ rules:
   # We want to use array constructor often
   "@typescript-eslint/no-array-constructor": off
 
+  # Disallow usage of the any type
+  # That is why any can only be explicit
+  "@typescript-eslint/no-explicit-any": off
+
   # Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean
   # We want the types to be forced
   "@typescript-eslint/no-inferrable-types": off
+
+  # Disallow unused variables
+  # Duplicate of eslint native no-unused-vars
+  "@typescript-eslint/no-unused-vars": off
 
   # Disallow Early Use
   # There is hoisting
