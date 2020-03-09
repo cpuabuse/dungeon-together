@@ -7,61 +7,54 @@ cpuabuse.com
  * A thing.
  */
 
-import { Cell } from "../cell";
-import { Thing, ThingArgs } from "../thing";
-import { Renderable } from "../../render/renderable";
+import { InitializeArgs, Thing, ThingArgs } from "../thing";
 
 /**
  * A drawable thing occupying a cell.
  */
 export abstract class Exclusive extends Thing {
 	/**
-	 * Maximum number of exclusives in a cell.
-	 */
-	public static max: number = 1;
-
-	/**
 	 * Exclusive constructor;
 	 */
-	public constructor({ cell, world }: ThingArgs, max: number) {
+	public constructor({ cell, kind, world }: ThingArgs) {
 		// Call superclass
-		super({ cell, world });
-
+		super({ cell, kind, world });
 	}
-	
+
 	/**
 	 * Populates the cell with an array, if max is reached, swaps.
 	 */
-	public static initialize(cell: Cell): void {
-		// Ensure there is extra space
-		
-		
-		// If occupant was found in interface
-		let occupantsNotSet: boolean = true;
-
-		// Occupants to push to this class
-		let occupants: Array<Exclusive>;
-
-		// Search for argument entry
-		if (identifiedOccupants.exclusive !== undefined) {
-			let identifiedOccupant: IdentifiedExclusive | undefined = identifiedOccupants.exclusive.find(function(
-				IdentifiedOccupantElement
-			) {
-				return IdentifiedOccupantElement.name === name;
-			});
-
-			if (identifiedOccupant !== undefined) {
-				occupants = identifiedOccupant.occupants;
-				occupantsNotSet = false;
+	public static initialize({ cell, kind, world }: InitializeArgs): void {
+		// Get max
+		let max: number = 1;
+		let nextMax: any = world.thingKinds[kind]?.max;
+		if (typeof nextMax === "number") {
+			if (nextMax >= 0) {
+				max = nextMax;
 			}
 		}
 
-		// Set the occupants to default
-		if (occupantsNotSet) {
-			occupants = new Array(new None(this));
+		// Get min
+		let min: number = max;
+		let nextMin: any = world.thingKinds[kind]?.min;
+		if (typeof nextMin === "number") {
+			if (nextMax >= 0 && nextMax <= max) {
+				max = nextMax;
+			}
 		}
 
-		// @ts-ignore:2454 Variable is definitely assigned
-		this.exclusive.push({ name, occupants });
-	});
+		// Get current
+		let current: number = cell.things.filter(function(thing) {
+			return thing.kind === kind;
+		}).length;
+
+		// Provision minimum if needed
+		if (current < min) {
+			for (let i: number = 0; i < min; i++) {
+				// The cell will properly register new thing
+				// @ts-ignore:2511 This method is an example to be overriden by extending class
+				new Exclusive({ cell, kind, world }); // eslint-disable-line no-new
+			}
+		}
+	}
 }

@@ -9,12 +9,25 @@ cpuabuse.com
 
 import { Thing } from "./thing";
 
+// TODO: Symbols will to be used as keys, but TS currently does not support it https://github.com/microsoft/TypeScript/issues/1863
 /**
  * An interface like thing kind, only requiring certain kinds to be there.
  */
 interface ThingKinds {
-	kind: {
-		[key: string]: typeof Thing;
+	/**
+	 * Per kind entries.
+	 */
+	[key: string]: {
+		// Will be typechecked dynamicallly on each aceess.
+		/**
+		 * Information about kind.
+		 */
+		[key: string]: any;
+
+		/**
+		 * Literally, kind class.
+		 */
+		kind: typeof Thing;
 	};
 }
 

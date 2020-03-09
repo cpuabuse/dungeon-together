@@ -7,50 +7,98 @@
  * Occupant of cells.
  */
 
-import { Cell, Nowhere } from "./cell";
-import { Renderable } from "../render/renderable";
+import { Cell } from "./cell";
+import { Occupant } from "../comms/comms";
 import { World } from "./world";
 
 /**
  * Arguments for constructor of a thing.
  */
 export interface ThingArgs {
+	/**
+	 * Cell to occupy.
+	 */
 	cell?: Cell;
+
+	/**
+	 * Kind of thing in world.
+	 */
+	kind: string;
+
+	/**
+	 * The whole world
+	 */
 	world: World;
 }
 
 /**
+ * Arguments for constructor of a thing.
+ */
+export interface InitializeArgs {
+	/**
+	 * Cell to occupy.
+	 */
+	cell: Cell;
+
+	/**
+	 * Kind of thing in world.
+	 */
+	kind: string;
+
+	/**
+	 * The whole world
+	 */
+	world: World;
+}
+
+/**
+ * An abstract entry not representing a class.
+ * It is a form of thing and classes that extend it, that was created just to fill the cell with something.
+ * The classes create instances which this represents, when they are using reduced number of arguments in constructors, and it chains down to the thing.
  * Literally nothing.
  */
-export class None extends Thing {}
+abstract class None extends Thing {} // eslint-disable-line no-unused-vars
 
 /**
  * The occupant itself.
  */
-export abstract class Thing extends Renderable {
+export abstract class Thing implements Occupant {
+	/**
+	 * Kind of this thing in the world.
+	 */
+	public kind: string;
+
 	/**
 	 * Cell occupied by the thing.
 	 */
 	private cell: Cell;
 
 	/**
-	 * Exclusive constructor;
+	 * World this is in.
 	 */
-	public constructor({ cell, world }: ThingArgs) {
-		// Call superclass
-		super();
+	private world: World;
+
+	/**
+	 * Constructor.
+	 */
+	public constructor({ cell, kind, world }: ThingArgs) {
+		// Set kind
+		this.kind = kind;
+
+		// Set world
+		this.world = world;
 
 		// Connect with cell
 		if (cell === undefined) {
 			// Initialize an empty cell
-			this.cell = new Nowhere({
+			this.cell = new Cell({
 				things: [this],
-				world
+				worlds: [world]
 			});
 		} else {
 			// Connect this cell with provided cell
 			this.cell = cell;
-			cell.things.push(this);
+			cell.locations.push(this);
 		}
 	}
 
@@ -59,18 +107,21 @@ export abstract class Thing extends Renderable {
 	 */
 	public static initialize(
 		// Fix the linting errors; This method is defined to provide type
-		// eslint-disable-next-line
-		cell: Cell
+		{
+			cell, // eslint-disable-line no-unused-vars
+			kind, // eslint-disable-line no-unused-vars
+			world // eslint-disable-line no-unused-vars
+		}: InitializeArgs
 	): void {
 		// Do nothing
 	}
 
 	/**
 	 * Initializes the cell. To be overriden by extending the class.
+	 * Creates none if cell not provided, so should classes extending this class.
 	 */
 	public initialize(cell: Cell): void {
-		// @ts-ignore:2511 This is only an example
-		let thing: Thing = new None({ cell, world: this.world });
+		let thing: Thing = this.constructor({ cell, kind: this.kind, world: this.world });
 		this.swap(thing);
 	}
 
@@ -78,10 +129,12 @@ export abstract class Thing extends Renderable {
 	 * Swaps cells with a target thing. To be overriden by extending class.
 	 */
 	public swap(thing: Thing): void {
-		let thisCell: Cell = this.cell;
-		this.cell = thing.cell;
+		if (this.kind === thing.kind) {
+			let thisCell: Cell = this.cell;
+			this.cell = thing.cell;
 
-		// Parameter is a class instance to be referenced.
-		thing.cell = thisCell;
+			// Parameter is a class instance to be referenced.
+			thing.cell = thisCell;
+		}
 	}
 }

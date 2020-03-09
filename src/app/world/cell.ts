@@ -7,6 +7,7 @@
  * Cells making up the grid.
  */
 
+import { Square } from "../render/vao";
 import { Thing } from "./thing";
 import { World } from "./world";
 
@@ -48,11 +49,11 @@ export interface Nav {
 /**
  * The cell within the grid.
  */
-export class Cell implements Nav {
+export class Cell implements Nav, Square {
 	/**
 	 * Cell occupants
 	 */
-	public things: Array<Thing> = new Array();
+	public occupants: Array<Thing> = new Array();
 
 	/**
 	 * Down movement.
@@ -87,18 +88,21 @@ export class Cell implements Nav {
 	/**
 	 * Indicates which world this cell is part of.
 	 */
-	public world: World;
+	public worlds: Array<World>;
 
 	/**
 	 * Cell constructor.
+	 * Creates nowhere by default.
 	 */
-	public constructor({ things, world }: { things?: Array<Thing>; world: World }) {
+	public constructor({ things, worlds }: { things?: Array<Thing>; worlds: Array<World> }) {
 		// Set world
-		this.world = world;
+		this.worlds = worlds;
 
-		// Initialize manifest
-		Object.values(this.world.thingKinds).forEach(thingKind => {
-			thingKind.kind.initialize(this);
+		// Initialize manifests
+		this.worlds.forEach(world => {
+			Object.keys(world.thingKinds).forEach(thingKind => {
+				world.thingKinds[thingKind].kind.initialize({ cell: this, kind: thingKind, world });
+			});
 		});
 
 		// Initialize things
@@ -109,8 +113,3 @@ export class Cell implements Nav {
 		}
 	}
 }
-
-/**
- * Literally nowhere.
- */
-export class Nowhere extends Cell {}
