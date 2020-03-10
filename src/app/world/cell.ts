@@ -7,7 +7,7 @@
  * Cells making up the grid.
  */
 
-import { Square } from "../render/vao";
+import { Location } from "../comms/interfaces";
 import { Thing } from "./thing";
 import { World } from "./world";
 
@@ -49,7 +49,7 @@ export interface Nav {
 /**
  * The cell within the grid.
  */
-export class Cell implements Nav, Square {
+export class Cell implements Nav, Location {
 	/**
 	 * Cell occupants
 	 */

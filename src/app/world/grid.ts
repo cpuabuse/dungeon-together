@@ -8,7 +8,7 @@
  */
 
 import { Cell } from "./cell";
-import { Vector } from "../render/vao";
+import { Vector } from "../common/vector";
 import { World } from "./world";
 
 /**
@@ -21,17 +21,17 @@ export class Grid implements Vector {
 	public cells: Array<Cell> = new Array();
 
 	/**
-	 * X coordinate.
+	 * What was the x-depth during creation. Not the current state. For constructor.
 	 */
 	public readonly x: number;
 
 	/**
-	 * Y coordinate.
+	 * What was the y-depth during creation. Not the current state. For constructor.
 	 */
 	public readonly y: number;
 
 	/**
-	 * Z coordinate.
+	 * What was the z-depth during creation. Not the current state. For constructor.
 	 */
 	public readonly z: number;
 
@@ -63,9 +63,3 @@ export class Grid implements Vector {
 		}
 	}
 }
-
-/**
- * Collection of VAOs.
- * Corresponds to grid.
- */
-export class VaoCollection {}

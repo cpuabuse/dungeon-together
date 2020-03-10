@@ -5,6 +5,7 @@ cpuabuse.com
 
 /**
  * A game world.
+ * It has nothing to do with resource organization. It is more like a dimension, that is shared between multiple grids.
  */
 
 import { Thing } from "./thing";

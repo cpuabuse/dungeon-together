@@ -8,7 +8,7 @@
  */
 
 import { Cell } from "./cell";
-import { Occupant } from "../comms/comms";
+import { Occupant } from "../comms/interfaces";
 import { World } from "./world";
 
 /**

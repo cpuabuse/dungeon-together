@@ -1,175 +1,21 @@
 /*
-File: src/app/render/vao.ts
-cpuabuse.com
+	File: src/app/render/vao.ts
+	cpuabuse.com
 */
 
-/**
- * Vector array object.
- */
-
-import { AnimatedSprite, Application, BaseTexture, Sprite, Texture } from "pixi.js";
-import { Location, Map, Occupant } from "../comms/comms";
+import { Map } from "../comms/interfaces";
+import { Screen } from "./screen";
+import { Square } from "./square";
 
 /**
- * Default mode string.
- * Linked to modes interface.
+ * Squares on screen.
  */
-const defaultMode: string = "default";
 
 /**
- * The vector representing a point of display.
+ * Arguments of the VAO.
  */
-export interface Vector {
-	/**
-	 * X coordinate.
-	 */
-	x?: number;
-
-	/**
-	 * Y coordinate.
-	 */
-	y?: number;
-
-	/**
-	 * Z coordinate.
-	 */
-	z?: number;
-}
-
-/**
- * The vector representing a point of display.
- * Definitely 3D.
- */
-export interface Vector3D extends Vector {
-	/**
-	 * X coordinate.
-	 */
-	x: number;
-
-	/**
-	 * Y coordinate.
-	 */
-	y: number;
-
-	/**
-	 * Z coordinate.
-	 */
-	z: number;
-}
-
-/**
- * Display mode.
- */
-export interface Mode {
-	/**
-	 * Animated sprite.
-	 */
-	sprite: AnimatedSprite;
-}
-
-/**
- * Display mode for RU.
- */
-export interface Modes {
-	/**
-	 * Modes.
-	 */
-	[key: string]: Mode;
-
-	/**
-	 * Special mandatory default mode.
-	 */
-	default: Mode;
-}
-
-/**
- * Render unit, representing the smallest renderable.
- */
-export class Ru implements Occupant {
-	/**
-	 * Parent location.
-	 */
-	location: Square;
-
-	/**
-	 * Mode.
-	 */
-	mode: string = defaultMode;
-
-	/**
-	 * Modes of dispay.
-	 */
-	private modes: Modes;
-
-	/**
-	 * Initializes RU.
-	 */
-	public constructor(square: Square, app: Application) {
-		// Set this square
-		this.location = square;
-
-		// Create a new base texture from an image path
-		const bunnyBaseTexture: BaseTexture = new BaseTexture("img/bunny.svg");
-
-		// Create a new texture from base texture
-		const bunnyTexture: Texture = new Texture(bunnyBaseTexture);
-
-		// Create a new Sprite from texture
-		const bunnySprite: Sprite = new Sprite(bunnyTexture);
-
-		bunnySprite.x = 100 * square.x;
-		bunnySprite.y = 100 * square.y;
-		bunnySprite.height = 100;
-		bunnySprite.width = 100;
-		app.stage.addChild(bunnySprite);
-
-		app.ticker.add(() => {
-			bunnySprite.x = 100 * this.location.x;
-			bunnySprite.y = 100 * this.location.y;
-		});
-	}
-}
-
-/**
- * Square(Vector).
- */
-export class Square implements Location, Vector3D {
-	/**
-	 * X coordinate.
-	 */
-	x: number;
-
-	/**
-	 * Y coordinate.
-	 */
-	y: number;
-
-	/**
-	 * Z coordinate.
-	 */
-	z: number;
-
-	/**
-	 * Contents of square.
-	 */
-	occupants: Array<Ru> = new Array();
-
-	/**
-	 * Constructs square.
-	 */
-	constructor(app: Application, { x = 0, y = 0, z = 0 }: Vector, occupants?: Array<unknown>) {
-		// Initialize coordinates
-		this.x = x;
-		this.y = y;
-		this.z = z;
-
-		// Fill occupants
-		if (occupants !== undefined) {
-			occupants.forEach(() => {
-				this.occupants.push(new Ru(this, app));
-			});
-		}
-	}
+export interface VaoArgs extends Map {
+	screen: Screen;
 }
 
 /**
@@ -179,5 +25,16 @@ export class Vao implements Map {
 	/**
 	 * Locations.
 	 */
-	locations: Array<Square> = new Array();
+	public locations: Array<Square> = new Array();
+
+	/**
+	 * Constructor.
+	 */
+	public constructor({ locations, screen }: VaoArgs) {
+		locations.forEach(location => {
+			this.locations.push(
+				new Square({ occupants: location.occupants, screen, x: location.x, y: location.y, z: location.z })
+			);
+		});
+	}
 }
