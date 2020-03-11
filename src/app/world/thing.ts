@@ -9,26 +9,27 @@
 
 import { Cell } from "./cell";
 import { Occupant } from "../comms/interfaces";
-import { World } from "./world";
+import { Universe } from "./universe";
+import { defaultMode } from "../common/defaults";
 
 /**
  * Arguments for constructor of a thing.
  */
 export interface ThingArgs {
 	/**
-	 * Cell to occupy.
-	 */
-	cell?: Cell;
-
-	/**
 	 * Kind of thing in world.
 	 */
 	kind: string;
 
 	/**
+	 * Cell or universe to get information from.
+	 */
+	parent: Cell | Universe;
+
+	/**
 	 * The whole world
 	 */
-	world: World;
+	world: string;
 }
 
 /**
@@ -48,19 +49,17 @@ export interface InitializeArgs {
 	/**
 	 * The whole world
 	 */
-	world: World;
+	world: string;
 }
 
 /**
- * An abstract entry not representing a class.
+ * The occupant itself.
+ *
+ * **About `None`**
+ *
+ * Special case of a [[Thing]], literally nothing.
  * It is a form of thing and classes that extend it, that was created just to fill the cell with something.
  * The classes create instances which this represents, when they are using reduced number of arguments in constructors, and it chains down to the thing.
- * Literally nothing.
- */
-abstract class None extends Thing {} // eslint-disable-line no-unused-vars
-
-/**
- * The occupant itself.
  */
 export abstract class Thing implements Occupant {
 	/**
@@ -69,36 +68,53 @@ export abstract class Thing implements Occupant {
 	public kind: string;
 
 	/**
+	 * Mode of the thing.
+	 */
+	public mode: string = defaultMode;
+
+	/**
 	 * Cell occupied by the thing.
 	 */
-	private cell: Cell;
+	public cell: Cell;
+
+	/**
+	 * Universe this resides in.
+	 */
+	public universe: Universe;
 
 	/**
 	 * World this is in.
 	 */
-	private world: World;
+	public world: string;
 
 	/**
 	 * Constructor.
 	 */
-	public constructor({ cell, kind, world }: ThingArgs) {
-		// Set kind
-		this.kind = kind;
+	public constructor({ kind, parent, world }: ThingArgs) {
+		// Cell exists
+		let cellIsParent: boolean = parent instanceof Cell;
+
+		// Set universe
+		this.universe = cellIsParent ? (parent as Cell).universe : (parent as Universe);
 
 		// Set world
 		this.world = world;
 
+		// Set kind
+		this.kind = kind;
+
 		// Connect with cell
-		if (cell === undefined) {
+		if (cellIsParent) {
+			// Connect this thing with provided cell
+			this.cell = parent as Cell;
+			(parent as Cell).occupants.push(this);
+		} else {
 			// Initialize an empty cell
 			this.cell = new Cell({
 				things: [this],
-				worlds: [world]
+				universe: this.universe,
+				worlds: new Set(this.world)
 			});
-		} else {
-			// Connect this cell with provided cell
-			this.cell = cell;
-			cell.locations.push(this);
 		}
 	}
 
@@ -134,6 +150,7 @@ export abstract class Thing implements Occupant {
 			this.cell = thing.cell;
 
 			// Parameter is a class instance to be referenced.
+			// eslint-disable-next-line no-param-reassign
 			thing.cell = thisCell;
 		}
 	}

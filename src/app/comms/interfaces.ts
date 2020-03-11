@@ -13,7 +13,7 @@ import { Vector } from "../common/vector";
  * Everything-like.
  */
 export interface Instance {
-	maps: Array<Map>;
+	maps: Array<CommsMap>;
 }
 
 /**
@@ -26,7 +26,7 @@ export interface Location extends Vector {
 /**
  * A map-like.
  */
-export interface Map {
+export interface CommsMap {
 	locations: Array<Location>;
 }
 

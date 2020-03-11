@@ -7,7 +7,7 @@
  * Renderable unit.
  */
 
-import { AnimatedSprite, Application, Texture } from "pixi.js";
+import { AnimatedSprite, Texture } from "pixi.js";
 import { Occupant } from "../comms/interfaces";
 import { Screen } from "./screen";
 import { Square } from "./square";

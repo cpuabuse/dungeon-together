@@ -3,7 +3,7 @@
 	cpuabuse.com
 */
 
-import { Map } from "../comms/interfaces";
+import { CommsMap } from "../comms/interfaces";
 import { Screen } from "./screen";
 import { Square } from "./square";
 
@@ -14,14 +14,14 @@ import { Square } from "./square";
 /**
  * Arguments of the VAO.
  */
-export interface VaoArgs extends Map {
+export interface VaoArgs extends CommsMap {
 	screen: Screen;
 }
 
 /**
  * Vector Array Object.
  */
-export class Vao implements Map {
+export class Vao implements CommsMap {
 	/**
 	 * Locations.
 	 */

@@ -9,7 +9,28 @@
 
 import { Location } from "../comms/interfaces";
 import { Thing } from "./thing";
-import { World } from "./world";
+import { ThingKinds } from "./world";
+import { Universe } from "./universe";
+
+/**
+ * Arguments for cell constructor.
+ */
+export interface CellArgs {
+	/**
+	 * Possible things to add.
+	 */
+	things?: Array<Thing>;
+
+	/**
+	 * Worlds
+	 */
+	worlds: Set<string>;
+
+	/**
+	 * Parent universe.
+	 */
+	universe: Universe;
+}
 
 /**
  * Freedom of movement for cell.
@@ -88,20 +109,29 @@ export class Cell implements Nav, Location {
 	/**
 	 * Indicates which world this cell is part of.
 	 */
-	public worlds: Array<World>;
+	public worlds: Set<string>;
+
+	/**
+	 * Parent universe.
+	 */
+	public readonly universe: Universe;
 
 	/**
 	 * Cell constructor.
 	 * Creates nowhere by default.
 	 */
-	public constructor({ things, worlds }: { things?: Array<Thing>; worlds: Array<World> }) {
+	public constructor({ things, universe, worlds }: CellArgs) {
+		// Set universe
+		this.universe = universe;
+
 		// Set world
-		this.worlds = worlds;
+		this.worlds = new Set(worlds);
 
 		// Initialize manifests
 		this.worlds.forEach(world => {
-			Object.keys(world.thingKinds).forEach(thingKind => {
-				world.thingKinds[thingKind].kind.initialize({ cell: this, kind: thingKind, world });
+			let kinds: ThingKinds = universe.worlds[world].thingKinds;
+			Object.keys(kinds).forEach(thingKind => {
+				kinds[thingKind].kind.initialize({ cell: this, kind: thingKind, world });
 			});
 		});
 

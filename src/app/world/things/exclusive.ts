@@ -16,9 +16,9 @@ export abstract class Exclusive extends Thing {
 	/**
 	 * Exclusive constructor;
 	 */
-	public constructor({ cell, kind, world }: ThingArgs) {
+	public constructor({ kind, parent, world }: ThingArgs) {
 		// Call superclass
-		super({ cell, kind, world });
+		super({ kind, parent, world });
 	}
 
 	/**
@@ -27,7 +27,7 @@ export abstract class Exclusive extends Thing {
 	public static initialize({ cell, kind, world }: InitializeArgs): void {
 		// Get max
 		let max: number = 1;
-		let nextMax: any = world.thingKinds[kind]?.max;
+		let nextMax: any = cell.universe.worlds[world].thingKinds[kind]?.max;
 		if (typeof nextMax === "number") {
 			if (nextMax >= 0) {
 				max = nextMax;
@@ -36,7 +36,7 @@ export abstract class Exclusive extends Thing {
 
 		// Get min
 		let min: number = max;
-		let nextMin: any = world.thingKinds[kind]?.min;
+		let nextMin: any = cell.universe.worlds[world].thingKinds[kind]?.min;
 		if (typeof nextMin === "number") {
 			if (nextMax >= 0 && nextMax <= max) {
 				max = nextMax;
@@ -44,7 +44,7 @@ export abstract class Exclusive extends Thing {
 		}
 
 		// Get current
-		let current: number = cell.things.filter(function(thing) {
+		let current: number = cell.occupants.filter(function(thing) {
 			return thing.kind === kind;
 		}).length;
 

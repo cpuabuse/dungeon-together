@@ -8,17 +8,17 @@ cpuabuse.com
  * It has nothing to do with resource organization. It is more like a dimension, that is shared between multiple grids.
  */
 
+import { Default } from "../common/types";
+import { DefaultKinds } from "../common/defaults";
 import { Thing } from "./thing";
 
 // TODO: Symbols will to be used as keys, but TS currently does not support it https://github.com/microsoft/TypeScript/issues/1863
 /**
  * An interface like thing kind, only requiring certain kinds to be there.
  */
-interface ThingKinds {
-	/**
-	 * Per kind entries.
-	 */
-	[key: string]: {
+export type ThingKinds = Default<
+	DefaultKinds,
+	{
 		// Will be typechecked dynamicallly on each aceess.
 		/**
 		 * Information about kind.
@@ -29,8 +29,8 @@ interface ThingKinds {
 		 * Literally, kind class.
 		 */
 		kind: typeof Thing;
-	};
-}
+	}
+>;
 
 /**
  * Manifest defining occupnats kinds in the cell.

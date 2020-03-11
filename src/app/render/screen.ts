@@ -8,7 +8,7 @@
  */
 
 import { Application, BaseTexture, Texture } from "pixi.js";
-import { Instance, Map } from "../comms/interfaces";
+import { CommsMap, Instance } from "../comms/interfaces";
 import { Vao } from "./vao";
 
 /**
@@ -68,7 +68,7 @@ export class Screen implements Instance {
 	/**
 	 * An array of maps for screen.
 	 */
-	public maps: Array<Map> = new Array();
+	public maps: Array<CommsMap> = new Array();
 
 	/**
 	 * Constructor for a screen.

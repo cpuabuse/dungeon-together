@@ -13,5 +13,18 @@ import { Exclusive } from "../exclusive";
  * Actual unit base class.
  */
 export class Unit extends Exclusive {
-	// Nothing
+	/**
+	 * CP.
+	 */
+	combatPoints: number = 0;
+
+	/**
+	 * HP.
+	 */
+	healthPoints: number = 1;
+
+	/**
+	 * MP.
+	 */
+	manaPoints: number = 0;
 }
