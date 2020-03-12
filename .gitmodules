@@ -1,0 +1,4 @@
+[submodule "dungeon-together-assets"]
+	path = include/dungeon-together-assets
+	url = https://github.com/cpuabuse/dungeon-together-assets
+	branch = dev
