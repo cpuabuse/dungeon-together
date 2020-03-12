@@ -54,8 +54,8 @@ export class Square implements Location, Vector3D {
 
 		// Fill occupants
 		if (occupants !== undefined) {
-			occupants.forEach(() => {
-				this.occupants.push(new Ru(this, screen));
+			occupants.forEach(occupant => {
+				this.occupants.push(new Ru({ mode: occupant.mode, screen, square: this }));
 			});
 		}
 	}

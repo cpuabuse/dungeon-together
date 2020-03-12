@@ -12,4 +12,9 @@ import { Item } from "../item";
 /**
  * Coins.
  */
-export class Gold extends Item {}
+export class Gold extends Item {
+	/**
+	 * Mode override.
+	 */
+	public mode: string = "gold";
+}

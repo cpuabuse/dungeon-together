@@ -1,5 +1,5 @@
 /*
-	File: src/shared/world/unit.ts
+	File: src/app/world/things/exclusive/unit.ts
 	cpuabuse.com
 */
 
@@ -16,15 +16,15 @@ export class Unit extends Exclusive {
 	/**
 	 * CP.
 	 */
-	combatPoints: number = 0;
+	public combatPoints: number = 0;
 
 	/**
 	 * HP.
 	 */
-	healthPoints: number = 1;
+	public healthPoints: number = 1;
 
 	/**
 	 * MP.
 	 */
-	manaPoints: number = 0;
+	public manaPoints: number = 0;
 }

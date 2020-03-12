@@ -7,40 +7,18 @@
  * Renderable unit.
  */
 
-import { AnimatedSprite, Texture } from "pixi.js";
+import { AnimatedSprite } from "pixi.js";
 import { Occupant } from "../comms/interfaces";
 import { Screen } from "./screen";
 import { Square } from "./square";
+import { defaultMode } from "../common/defaults";
 
 /**
- * Default mode string.
- * Linked to modes interface.
+ * Args for [[Ru]] constructor.
  */
-const defaultMode: string = "default";
-
-/**
- * Display mode.
- */
-export interface Mode {
-	/**
-	 * Animated sprite.
-	 */
-	textures: Array<Texture>;
-}
-
-/**
- * Display mode for RU.
- */
-export interface Modes {
-	/**
-	 * Modes.
-	 */
-	[key: string]: Mode;
-
-	/**
-	 * Special mandatory default mode.
-	 */
-	default: Mode;
+export interface RuArgs extends Occupant {
+	square: Square;
+	screen: Screen;
 }
 
 /**
@@ -55,7 +33,7 @@ export class Ru implements Occupant {
 	/**
 	 * Mode.
 	 */
-	public mode: string = defaultMode;
+	public mode: string;
 
 	/**
 	 * Animated sprite.
@@ -65,13 +43,16 @@ export class Ru implements Occupant {
 	/**
 	 * Initializes RU.
 	 */
-	public constructor(square: Square, screen: Screen) {
+	public constructor({ mode = defaultMode, square, screen }: RuArgs) {
 		// Set this square
 		this.location = square;
 
+		// Set mode
+		this.mode = mode;
+
 		// Create a new Sprite from texture
-		this.sprite = new AnimatedSprite(screen.animations.default.textures);
-		this.sprite.animationSpeed = 0.015;
+		this.sprite = new AnimatedSprite(screen.modes[this.mode].textures);
+		this.sprite.animationSpeed = 0.03;
 		this.sprite.play();
 
 		this.sprite.x = 100 * square.x;

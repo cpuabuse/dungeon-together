@@ -9,12 +9,14 @@
 
 import { Application, BaseTexture, Texture } from "pixi.js";
 import { CommsMap, Instance } from "../comms/interfaces";
+import { Default } from "../common/types";
+import { DefaultModes, defaultModes } from "../common/defaults";
 import { Vao } from "./vao";
 
 /**
  * Screen textures and meta.
  */
-export interface Animation {
+export interface Mode {
 	/**
 	 * Actual texture array.
 	 */
@@ -24,16 +26,26 @@ export interface Animation {
 /**
  * Animations for screen.
  */
-export interface Animations {
+export interface Modes {
 	/**
 	 * Actual animation.
 	 */
-	[key: string]: Animation;
+	[key: string]: Mode;
+}
+
+/**
+ * Animations for screen.
+ */
+export interface StrictModes {
+	/**
+	 * Actual animation.
+	 */
+	[key: string]: Mode;
 
 	/**
 	 * Mandatory default animation.
 	 */
-	default: Animation;
+	default: Mode;
 }
 
 /**
@@ -41,6 +53,7 @@ export interface Animations {
  */
 export interface ScreenArgs extends Instance {
 	app: Application;
+	modes: Modes;
 }
 
 /**
@@ -48,9 +61,10 @@ export interface ScreenArgs extends Instance {
  */
 export class Screen implements Instance {
 	/**
-	 * Different unique textures for animated sprites to take.
+	 * Different unique textures for sprites to take.
+	 * Has built-in default mode, which is readonly.
 	 */
-	public animations: Animations = {
+	public modes: Default<DefaultModes, Mode> = {
 		default: {
 			textures: [
 				new Texture(new BaseTexture("img/bunny-red.svg")),
@@ -73,9 +87,25 @@ export class Screen implements Instance {
 	/**
 	 * Constructor for a screen.
 	 */
-	public constructor({ app, maps }: ScreenArgs) {
+	public constructor({ app, maps, modes }: ScreenArgs) {
 		// Set the app
 		this.app = app;
+
+		// Set the modes
+		Object.keys(modes).forEach(mode => {
+			// Cannot overwrite readonly; Since types are different, the literal comparison instead of "includes" used
+			let notDefault: boolean = true;
+			defaultModes.forEach(function(defaultMode) {
+				if (defaultMode === mode) {
+					notDefault = false;
+				}
+			});
+
+			// Set mode
+			if (notDefault) {
+				this.modes[mode] = modes[mode];
+			}
+		});
 
 		// Extract data from screen
 		maps.forEach(map => {

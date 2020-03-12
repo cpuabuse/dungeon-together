@@ -34,9 +34,19 @@ type DefaultWords = "default";
 const defaultWord: DefaultWords = "default";
 
 /**
- * Literally default world name.
+ * List of defualt words.
+ */
+const defaultWords: Array<DefaultWords> = ["default"];
+
+/**
+ * Literally default kind name.
  */
 export const defaultKind: DefaultKinds = defaultWord;
+
+/**
+ * Default kind names.
+ */
+export const defaultKinds: Array<DefaultKinds> = defaultWords;
 
 /**
  * Literally default world name.
@@ -44,6 +54,16 @@ export const defaultKind: DefaultKinds = defaultWord;
 export const defaultWorld: DefaultWorlds = defaultWord;
 
 /**
+ * List for default world names.
+ */
+export const defaultWorlds: Array<DefaultWorlds> = defaultWords;
+
+/**
  * Literally default mode.
  */
 export const defaultMode: DefaultModes = defaultWord;
+
+/**
+ * List for default modes.
+ */
+export const defaultModes: Array<DefaultModes> = defaultWords;
