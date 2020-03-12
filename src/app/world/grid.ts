@@ -16,7 +16,7 @@ import { Vector } from "../common/vector";
  * Arguments for the grid.
  * Parent universe is defined, but the worlds are not, as it is not grid-related.
  */
-export interface GridArgs extends CommsMap, Vector {
+export interface GridArgs extends Vector {
 	worlds: Set<string>;
 	universe: Universe;
 }
@@ -63,7 +63,7 @@ export class Grid implements CommsMap, Vector {
 	 * Initializes the grid.
 	 * @param worlds The default world will be ignored, as it is already present by default.
 	 */
-	constructor({ universe, worlds, x = 1, y = 1, z = 1 }: GridArgs) {
+	public constructor({ universe, worlds, x = 1, y = 1, z = 1 }: GridArgs) {
 		// Set universe
 		this.universe = universe;
 
@@ -88,7 +88,9 @@ export class Grid implements CommsMap, Vector {
 		for (let xCoord: number = 0; xCoord < this.x; xCoord++) {
 			for (let yCoord: number = 0; yCoord < this.y; yCoord++) {
 				for (let zCoord: number = 0; zCoord < this.z; zCoord++) {
-					this.locations.push(new Cell({ universe: this.universe, worlds: this.worlds }));
+					this.locations.push(
+						new Cell({ universe: this.universe, worlds: this.worlds, x: xCoord, y: yCoord, z: zCoord })
+					);
 				}
 			}
 		}

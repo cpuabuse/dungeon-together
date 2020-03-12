@@ -11,11 +11,12 @@ import { Location } from "../comms/interfaces";
 import { Thing } from "./thing";
 import { ThingKinds } from "./world";
 import { Universe } from "./universe";
+import { Vector } from "../common/vector";
 
 /**
  * Arguments for cell constructor.
  */
-export interface CellArgs {
+export interface CellArgs extends Vector {
 	/**
 	 * Possible things to add.
 	 */
@@ -72,6 +73,11 @@ export interface Nav {
  */
 export class Cell implements Nav, Location {
 	/**
+	 * Coordinates in map. An id given during creation. Does not represent anything visually or logically.
+	 */
+	public coordinates: [number, number, number];
+
+	/**
 	 * Cell occupants
 	 */
 	public occupants: Array<Thing> = new Array();
@@ -120,12 +126,15 @@ export class Cell implements Nav, Location {
 	 * Cell constructor.
 	 * Creates nowhere by default.
 	 */
-	public constructor({ things, universe, worlds }: CellArgs) {
+	public constructor({ things, universe, worlds, x = 0, y = 0, z = 0 }: CellArgs) {
 		// Set universe
 		this.universe = universe;
 
 		// Set world
 		this.worlds = new Set(worlds);
+
+		// Set coordinates
+		this.coordinates = [x, y, z];
 
 		// Initialize manifests
 		this.worlds.forEach(world => {

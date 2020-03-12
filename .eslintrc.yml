@@ -58,10 +58,6 @@ rules:
   # We want the types to be forced
   "@typescript-eslint/no-inferrable-types": off
 
-  # Disallow unused variables
-  # Duplicate of eslint native no-unused-vars
-  "@typescript-eslint/no-unused-vars": off
-
   # Disallow Early Use
   # There is hoisting
   "@typescript-eslint/no-use-before-define": off

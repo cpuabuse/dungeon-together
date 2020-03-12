@@ -30,4 +30,32 @@ export class Universe implements Instance {
 	public worlds: Default<DefaultWorlds, World> = {
 		[defaultWorld]: new World({ thingKinds: { [defaultKind]: { kind: Thing } } })
 	};
+
+	/**
+	 * Gets the state for synchronization.
+	 */
+	public getInstance(): Instance {
+		let instance: Instance = {
+			maps: new Array()
+		};
+
+		this.maps.forEach(function(grid: Grid) {
+			instance.maps.push({
+				locations: grid.locations.map(function(cell) {
+					let [x, y, z]: [number, number, number] = cell.coordinates;
+					return {
+						occupants: cell.occupants.map(function(thing) {
+							return { mode: thing.mode };
+						}),
+						x,
+						y,
+						z
+					};
+				})
+			});
+		});
+
+		// Return
+		return instance;
+	}
 }

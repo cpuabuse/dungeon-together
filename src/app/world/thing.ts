@@ -124,9 +124,9 @@ export abstract class Thing implements Occupant {
 	public static initialize(
 		// Fix the linting errors; This method is defined to provide type
 		{
-			cell, // eslint-disable-line no-unused-vars
-			kind, // eslint-disable-line no-unused-vars
-			world // eslint-disable-line no-unused-vars
+			cell, // eslint-disable-line no-unused-vars, @typescript-eslint/no-unused-vars
+			kind, // eslint-disable-line no-unused-vars, @typescript-eslint/no-unused-vars
+			world // eslint-disable-line no-unused-vars, @typescript-eslint/no-unused-vars
 		}: InitializeArgs
 	): void {
 		// Do nothing

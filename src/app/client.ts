@@ -1,7 +1,8 @@
-import { Screen } from "./render/screen";
-import { Vao } from "./render/vao";
 import { Application } from "pixi.js";
-import { Square } from "./render/square";
+import { Gold } from "./world/things/stackable/items/gold";
+import { Grid } from "./world/grid";
+import { Screen } from "./render/screen";
+import { Universe } from "./world/universe";
 
 // The application will create a renderer using WebGL, if possible,
 // with a fallback to a canvas render. It will also setup the ticker
@@ -30,11 +31,13 @@ window.addEventListener("wheel", function(args) {
 // can then insert into the DOM
 document.body.appendChild(app.view);
 
+const universe: Universe = new Universe();
+universe.maps.push(new Grid({ universe, worlds: new Set(["default"]), x: 150, y: 150, z: 1 }));
+universe.maps[0].locations.forEach(function(cell) {
+	cell.occupants.push(new Gold({ kind: "default", parent: cell, world: "default" }));
+});
+
 const screen: Screen = new Screen({
 	app,
-	maps: [
-		{
-			locations: [{ occupants: [{ mode: "default" }] }, { occupants: [{ mode: "default" }], x: 1, y: 1 }]
-		}
-	]
+	maps: universe.getInstance().maps
 });

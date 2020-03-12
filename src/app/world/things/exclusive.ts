@@ -1,6 +1,6 @@
 /*
-File: src/shared/world/thing.ts
-cpuabuse.com
+	File: src/shared/world/thing.ts
+	cpuabuse.com
 */
 
 /**
