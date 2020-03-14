@@ -2,12 +2,21 @@ env:
   es6: true
   browser: true
   node: true
+globals:
+  after: readonly
+  afterEach: readonly
+  before: readonly
+  beforeEach: readonly
+  describe: readonly
+  it: readonly
 parser: "@typescript-eslint/parser"
 plugins:
   - "@typescript-eslint"
+  - mocha
   - prettier
 extends:
   - eslint:recommended
+  - plugin:mocha/recommended
   - plugin:@typescript-eslint/eslint-recommended
   - plugin:@typescript-eslint/recommended
   - plugin:import/errors
