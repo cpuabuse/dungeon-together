@@ -4,7 +4,6 @@
 
 ```mermaid
 classDiagram
-
 	class Exclusive{
 
 	}

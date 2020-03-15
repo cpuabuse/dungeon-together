@@ -1,6 +1,5 @@
-build
+/build
 coverage
-docs
 *.d.ts
 *.js
 *.js.map

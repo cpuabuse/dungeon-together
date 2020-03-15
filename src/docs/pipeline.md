@@ -2,8 +2,8 @@
 
 ## Environments
 
-Environment(build) | Testing | Additional builds
+Environment | Builds | Testing
 --- | --- | ---
-Test | Unit, integration, scripted system
-Stage | Manual system | Standalone
-Release | Acceptance
+Test | Test | Unit, integration, scripted system
+Stage | Client, docs, server, standalone | Manual system
+Release | Client, docs, server | Acceptance
