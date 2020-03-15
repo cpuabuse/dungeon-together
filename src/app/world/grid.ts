@@ -17,10 +17,6 @@ import { Vector3D } from "../common/vector";
  * The [[Vector]] is for convinience of generation only.
  */
 export interface GridArgs extends CommsMap {
-	/**
-	 * Overrides the [[CommsMap.locations]].
-	 */
-	locations: Array<Cell>;
 	worlds: Set<string>;
 	universe: Universe;
 }
@@ -69,7 +65,7 @@ export class Grid implements CommsMap {
 		this.worlds = new Set(worlds);
 
 		// Create cells
-		locations.forEach((location, index) => {
+		locations.forEach(location => {
 			let cell: Cell = new Cell({ occupants: location.occupants, universe: this.universe, worlds: this.worlds });
 			this.locations.push(cell);
 			this.index.set(cell.uuid, { cell, x: location.x, y: location.y, z: location.z });

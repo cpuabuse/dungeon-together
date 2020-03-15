@@ -15,12 +15,7 @@ import { defaultMode } from "../common/defaults";
 /**
  * Arguments for constructor of a thing.
  */
-export interface ThingArgs {
-	/**
-	 * Kind of thing in world.
-	 */
-	kind: string;
-
+export interface ThingArgs extends Occupant {
 	/**
 	 * Cell or universe to get information from.
 	 */
@@ -111,7 +106,6 @@ export abstract class Thing implements Occupant {
 		} else {
 			// Initialize an empty cell
 			this.cell = new Cell({
-				id: 0,
 				occupants: [this],
 				universe: this.universe,
 				worlds: new Set(this.world)

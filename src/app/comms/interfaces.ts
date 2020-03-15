@@ -43,4 +43,9 @@ export interface Occupant {
 	 * Mode of the occupant.
 	 */
 	mode: string;
+
+	/**
+	 * World in which occupant resides.
+	 */
+	world: string;
 }

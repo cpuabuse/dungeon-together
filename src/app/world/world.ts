@@ -12,7 +12,6 @@ import { Default } from "../common/types";
 import { DefaultKinds } from "../common/defaults";
 import { Thing } from "./thing";
 
-// TODO: Symbols will to be used as keys, but TS currently does not support it https://github.com/microsoft/TypeScript/issues/1863
 /**
  * An interface like thing kind, only requiring certain kinds to be there.
  */
@@ -50,12 +49,12 @@ export class World implements ThingManifest {
 	/**
 	 * Kinds of the things defining world "schema".
 	 */
-	thingKinds: ThingKinds;
+	public thingKinds: ThingKinds;
 
 	/**
 	 * World constructor.
 	 */
-	constructor(thingManifest: ThingManifest) {
+	public constructor(thingManifest: ThingManifest) {
 		this.thingKinds = thingManifest.thingKinds;
 	}
 }

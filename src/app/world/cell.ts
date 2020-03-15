@@ -18,12 +18,6 @@ import { v4 as uuid } from "uuid";
  */
 export interface CellArgs extends Location {
 	/**
-	 * Possible things to add.
-	 * Overrides [[Location]] occupants.
-	 */
-	occupants: Array<Thing>;
-
-	/**
 	 * Parent universe.
 	 */
 	universe: Universe;
@@ -136,7 +130,7 @@ export class Cell implements Nav, Location {
 
 		// Initialize manifests
 		this.worlds.forEach(world => {
-			let kinds: ThingKinds = universe.worlds[world].thingKinds;
+			let kinds: ThingKinds = this.universe.worlds[world].thingKinds;
 			Object.keys(kinds).forEach(thingKind => {
 				kinds[thingKind].kind.initialize({ cell: this, kind: thingKind, world });
 			});
@@ -144,7 +138,7 @@ export class Cell implements Nav, Location {
 
 		// Initialize things
 		occupants.forEach(thing => {
-			thing.initialize(this);
+			this.occupants.push(new this.universe.worlds[thing.world].thingKinds[thing.kind].kind(this));
 		});
 	}
 }
