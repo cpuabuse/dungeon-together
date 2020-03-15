@@ -34,5 +34,13 @@ export interface CommsMap {
  * An object-like.
  */
 export interface Occupant {
+	/**
+	 * Kind of occupant.
+	 */
+	kind: string;
+
+	/**
+	 * Mode of the occupant.
+	 */
 	mode: string;
 }

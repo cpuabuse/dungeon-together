@@ -111,7 +111,8 @@ export abstract class Thing implements Occupant {
 		} else {
 			// Initialize an empty cell
 			this.cell = new Cell({
-				things: [this],
+				id: 0,
+				occupants: [this],
 				universe: this.universe,
 				worlds: new Set(this.world)
 			});

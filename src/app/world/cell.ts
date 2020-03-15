@@ -11,26 +11,27 @@ import { Location } from "../comms/interfaces";
 import { Thing } from "./thing";
 import { ThingKinds } from "./world";
 import { Universe } from "./universe";
-import { Vector } from "../common/vector";
+import { v4 as uuid } from "uuid";
 
 /**
  * Arguments for cell constructor.
  */
-export interface CellArgs extends Vector {
+export interface CellArgs extends Location {
 	/**
 	 * Possible things to add.
+	 * Overrides [[Location]] occupants.
 	 */
-	things?: Array<Thing>;
-
-	/**
-	 * Worlds
-	 */
-	worlds: Set<string>;
+	occupants: Array<Thing>;
 
 	/**
 	 * Parent universe.
 	 */
 	universe: Universe;
+
+	/**
+	 * Worlds
+	 */
+	worlds: Set<string>;
 }
 
 /**
@@ -73,11 +74,6 @@ export interface Nav {
  */
 export class Cell implements Nav, Location {
 	/**
-	 * Coordinates in map. An id given during creation. Does not represent anything visually or logically.
-	 */
-	public coordinates: [number, number, number];
-
-	/**
 	 * Cell occupants
 	 */
 	public occupants: Array<Thing> = new Array();
@@ -103,6 +99,11 @@ export class Cell implements Nav, Location {
 	public up: Cell = this;
 
 	/**
+	 * Coordinates in map. An id given during creation. Does not represent anything visually or logically.
+	 */
+	public uuid: string = uuid();
+
+	/**
 	 * Vertical down movement.
 	 */
 	public zDown: Cell = this;
@@ -126,15 +127,12 @@ export class Cell implements Nav, Location {
 	 * Cell constructor.
 	 * Creates nowhere by default.
 	 */
-	public constructor({ things, universe, worlds, x = 0, y = 0, z = 0 }: CellArgs) {
+	public constructor({ occupants, universe, worlds }: CellArgs) {
 		// Set universe
 		this.universe = universe;
 
 		// Set world
 		this.worlds = new Set(worlds);
-
-		// Set coordinates
-		this.coordinates = [x, y, z];
 
 		// Initialize manifests
 		this.worlds.forEach(world => {
@@ -145,10 +143,8 @@ export class Cell implements Nav, Location {
 		});
 
 		// Initialize things
-		if (things !== undefined) {
-			things.forEach(thing => {
-				thing.initialize(this);
-			});
-		}
+		occupants.forEach(thing => {
+			thing.initialize(this);
+		});
 	}
 }

@@ -41,7 +41,7 @@ const dungeon: Dungeon = build({ height: 51, width: 51 });
 
 const universe: Universe = new Universe();
 
-universe.maps.push(new Grid({ universe, worlds: new Set(["default"]), x: 51, y: 51, z: 1 }));
+universe.maps.push(new Grid({ locations: new Array(), universe, worlds: new Set(["default"]) }));
 dungeon.tiles.forEach(function(tiles, x) {
 	tiles.forEach(function(tile, y) {
 		// Set cell

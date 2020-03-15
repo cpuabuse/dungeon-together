@@ -10,21 +10,37 @@
 import { Cell } from "./cell";
 import { CommsMap } from "../comms/interfaces";
 import { Universe } from "./universe";
-import { Vector } from "../common/vector";
+import { Vector3D } from "../common/vector";
 
 /**
  * Arguments for the grid.
- * Parent universe is defined, but the worlds are not, as it is not grid-related.
+ * The [[Vector]] is for convinience of generation only.
  */
-export interface GridArgs extends Vector {
+export interface GridArgs extends CommsMap {
+	/**
+	 * Overrides the [[CommsMap.locations]].
+	 */
+	locations: Array<Cell>;
 	worlds: Set<string>;
 	universe: Universe;
 }
 
 /**
+ * Indexing for things, index of array of which is the id of the cell.
+ */
+export interface Index extends Vector3D {
+	cell: Cell;
+}
+
+/**
  * The grid itself.
  */
-export class Grid implements CommsMap, Vector {
+export class Grid implements CommsMap {
+	/**
+	 * Index for cells.
+	 */
+	public index: Map<string, Index> = new Map();
+
 	/**
 	 * Actual cells inside of the grid.
 	 */
@@ -42,57 +58,21 @@ export class Grid implements CommsMap, Vector {
 	public readonly worlds: Set<string>;
 
 	/**
-	 * What was the x-depth during creation.
-	 * Not the current state. For cell constructor. Hence readonly.
-	 */
-	public readonly x: number;
-
-	/**
-	 * What was the y-depth during creation.
-	 * Not the current state. For cell constructor. Hence readonly.
-	 */
-	public readonly y: number;
-
-	/**
-	 * What was the z-depth during creation.
-	 * Not the current state. For cell constructor. Hence readonly.
-	 */
-	public readonly z: number;
-
-	/**
 	 * Initializes the grid.
 	 * @param worlds The default world will be ignored, as it is already present by default.
 	 */
-	public constructor({ universe, worlds, x = 1, y = 1, z = 1 }: GridArgs) {
+	public constructor({ locations, universe, worlds }: GridArgs) {
 		// Set universe
 		this.universe = universe;
 
 		// Set worlds
 		this.worlds = new Set(worlds);
 
-		// Set dimensions
-		this.x = Math.ceil(Math.abs(x));
-		if (this.x < 1) {
-			this.x = 1;
-		}
-		this.y = Math.ceil(Math.abs(y));
-		if (this.y < 1) {
-			this.y = 1;
-		}
-		this.z = Math.ceil(Math.abs(z));
-		if (this.x < z) {
-			this.z = z;
-		}
-
 		// Create cells
-		for (let xCoord: number = 0; xCoord < this.x; xCoord++) {
-			for (let yCoord: number = 0; yCoord < this.y; yCoord++) {
-				for (let zCoord: number = 0; zCoord < this.z; zCoord++) {
-					this.locations.push(
-						new Cell({ universe: this.universe, worlds: this.worlds, x: xCoord, y: yCoord, z: zCoord })
-					);
-				}
-			}
-		}
+		locations.forEach((location, index) => {
+			let cell: Cell = new Cell({ occupants: location.occupants, universe: this.universe, worlds: this.worlds });
+			this.locations.push(cell);
+			this.index.set(cell.uuid, { cell, x: location.x, y: location.y, z: location.z });
+		});
 	}
 }

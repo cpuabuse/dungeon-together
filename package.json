@@ -58,6 +58,7 @@
 		"@types/cli-progress": "^3.4.2",
 		"@types/mocha": "^7.0.1",
 		"@types/node": "^13.7.4",
+		"@types/uuid": "^7.0.0",
 		"@typescript-eslint/eslint-plugin": "^2.20.0",
 		"@typescript-eslint/parser": "^2.20.0",
 		"codacy-coverage": "^3.4.0",
@@ -84,6 +85,7 @@
 	},
 	"dependencies": {
 		"dungeoneer": "^2.1.4",
-		"pixi.js": "^5.2.1"
+		"pixi.js": "^5.2.1",
+		"uuid": "^7.0.2"
 	}
 }

@@ -15,6 +15,13 @@ import { Thing } from "./thing";
 import { World } from "./world";
 
 /**
+ * Universe args.
+ */
+export interface UniverseArgs extends Instance {
+	maps: Array<Grid>;
+}
+
+/**
  * A whole universe.
  */
 export class Universe implements Instance {
@@ -42,14 +49,13 @@ export class Universe implements Instance {
 		this.maps.forEach(function(grid: Grid) {
 			instance.maps.push({
 				locations: grid.locations.map(function(cell) {
-					let [x, y, z]: [number, number, number] = cell.coordinates;
 					return {
 						occupants: cell.occupants.map(function(thing) {
 							return { mode: thing.mode };
 						}),
-						x,
-						y,
-						z
+						x: grid.index[cell.id].x,
+						y: grid.index[cell.id].y,
+						z: grid.index[cell.id].z
 					};
 				})
 			});
