@@ -18,14 +18,14 @@ import { v4 as uuid } from "uuid";
  */
 export interface CellArgs extends Location {
 	/**
-	 * Parent universe.
+	 * Parent universe. Overrides [[Location.instance]].
 	 */
-	universe: Universe;
+	instance: Universe;
 
 	/**
-	 * Worlds
+	 * Things inside. Overrides [[Location.occupants]].
 	 */
-	worlds: Set<string>;
+	occupants: Array<Thing>;
 }
 
 /**

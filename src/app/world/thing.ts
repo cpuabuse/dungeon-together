@@ -15,21 +15,6 @@ import { defaultMode } from "../common/defaults";
 /**
  * Arguments for constructor of a thing.
  */
-export interface ThingArgs extends Occupant {
-	/**
-	 * Cell or universe to get information from.
-	 */
-	parent: Cell | Universe;
-
-	/**
-	 * The whole world
-	 */
-	world: string;
-}
-
-/**
- * Arguments for constructor of a thing.
- */
 export interface InitializeArgs {
 	/**
 	 * Cell to occupy.
@@ -47,14 +32,19 @@ export interface InitializeArgs {
 	world: string;
 }
 
+// TODO: Check that "Thing.new" generates documentation correctly
 /**
- * The occupant itself.
- *
- * **About `None`**
- *
- * Special case of a [[Thing]], literally nothing.
- * It is a form of thing and classes that extend it, that was created just to fill the cell with something.
- * The classes create instances which this represents, when they are using reduced number of arguments in constructors, and it chains down to the thing.
+ * Arguments for [[Thing.new]].
+ */
+export interface ThingArgs extends Occupant {
+	/**
+	 * Universe this is part of. Overrides [[Occupant.instance]].
+	 */
+	instace: Universe;
+}
+
+/**
+ * The thing itself. Can be anything that resides within the [[Cell]].
  */
 export abstract class Thing implements Occupant {
 	/**
@@ -70,12 +60,12 @@ export abstract class Thing implements Occupant {
 	/**
 	 * Cell occupied by the thing.
 	 */
-	public cell: Cell;
+	public location: Cell;
 
 	/**
 	 * Universe this resides in.
 	 */
-	public universe: Universe;
+	public instance: Universe;
 
 	/**
 	 * World this is in.
@@ -85,18 +75,18 @@ export abstract class Thing implements Occupant {
 	/**
 	 * Constructor.
 	 */
-	public constructor({ kind, parent, world }: ThingArgs) {
-		// Cell exists
-		let cellIsParent: boolean = parent instanceof Cell;
-
+	public constructor({ instance, kind, location, world }: ThingArgs) {
 		// Set universe
-		this.universe = cellIsParent ? (parent as Cell).universe : (parent as Universe);
-
-		// Set world
-		this.world = world;
+		this.instance = instance;
 
 		// Set kind
 		this.kind = kind;
+
+		// Set location
+		this.location = location;
+
+		// Set world
+		this.world = world;
 
 		// Connect with cell
 		if (cellIsParent) {
