@@ -12,7 +12,7 @@ import { Vector } from "../common/vector";
 /**
  * Base type for a managed object.
  */
-export interface Base {
+export interface Identifiable {
 	uuid: Uuid;
 }
 
@@ -20,22 +20,20 @@ export interface Base {
  * Everything-like.
  */
 export interface Instance {
-	maps: Array<CommsMap>;
+	/**
+	 * Locations.
+	 */
+	maps: Map<Uuid, Location>;
 }
 
 /**
  * A location-like.
  */
-export interface Location extends Base, Vector {
+export interface Location extends Identifiable, Vector {
 	/**
 	 * Array of occupants.
 	 */
 	occupants: Array<Occupant>;
-
-	/**
-	 * Instance this belongs to.
-	 */
-	instance: Uuid;
 
 	/**
 	 * Worlds
@@ -53,32 +51,40 @@ export interface CommsMap extends Base {
 /**
  * An object-like.
  */
-export interface Occupant extends Base {
+export interface Occupant extends Identifiable {
+	/**
+	 * Instance occupant is is part of.
+	 */
+	instance: Uuid;
+
 	/**
 	 * Kind of occupant.
 	 */
-	kind: string;
-
-	/**
-	 * Location occupant occupies.
-	 */
-	location: Uuid;
+	kind: Uuid;
 
 	/**
 	 * Mode of the occupant.
 	 */
-	mode: string;
+	mode: Uuid;
 
 	/**
-	 * Instance occupant is is part of.
+	 * UUID.
 	 */
-	instance: Instance;
+	uuid: OccupantUuid;
 
 	/**
 	 * World in which occupant resides.
 	 */
-	world: string;
+	world: Uuid;
 }
+
+export type InstaceUuid = Uuid;
+export type KindUuid = Uuid;
+export type LocationUuid = Uuid;
+export type ModeUuid = Uuid;
+export type OccupantUuid = Uuid;
+export type ViewUuid = Uuid;
+export type WorldUuid = Uuid;
 
 /**
  * Alias for uuid.
