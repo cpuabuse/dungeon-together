@@ -23,7 +23,7 @@ export interface Instance {
 	/**
 	 * Locations.
 	 */
-	maps: Map<Uuid, Location>;
+	maps: Array<CommsMap>;
 }
 
 /**
@@ -36,16 +36,29 @@ export interface Location extends Identifiable, Vector {
 	occupants: Array<Occupant>;
 
 	/**
+	 * UUID. Overrides [[Identifiable.uuid]].
+	 */
+	uuid: LocationUuid;
+
+	/**
 	 * Worlds
 	 */
-	worlds: Set<string>;
+	worlds: Set<WorldUuid>;
 }
 
 /**
  * A map-like.
  */
-export interface CommsMap extends Base {
+export interface CommsMap extends Identifiable {
+	/**
+	 * Locations within the map.
+	 */
 	locations: Array<Location>;
+
+	/**
+	 * UUID. Overrides [[Identifiable.uuid]].
+	 */
+	uuid: CommsMapUuid;
 }
 
 /**
@@ -55,30 +68,31 @@ export interface Occupant extends Identifiable {
 	/**
 	 * Instance occupant is is part of.
 	 */
-	instance: Uuid;
+	instance: InstanceUuid;
 
 	/**
 	 * Kind of occupant.
 	 */
-	kind: Uuid;
+	kind: KindUuid;
 
 	/**
 	 * Mode of the occupant.
 	 */
-	mode: Uuid;
+	mode: ModeUuid;
 
 	/**
-	 * UUID.
+	 * UUID. Overrides [[Identifiable.uuid]].
 	 */
 	uuid: OccupantUuid;
 
 	/**
 	 * World in which occupant resides.
 	 */
-	world: Uuid;
+	world: WorldUuid;
 }
 
-export type InstaceUuid = Uuid;
+export type InstanceUuid = Uuid;
+export type CommsMapUuid = Uuid;
 export type KindUuid = Uuid;
 export type LocationUuid = Uuid;
 export type ModeUuid = Uuid;
