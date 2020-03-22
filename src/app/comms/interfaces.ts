@@ -10,16 +10,9 @@ import { Vector } from "../common/vector";
  */
 
 /**
- * Base type for a managed object.
- */
-export interface Identifiable {
-	uuid: Uuid;
-}
-
-/**
  * Everything-like.
  */
-export interface Instance {
+export interface Instance extends InstancePath {
 	/**
 	 * Locations.
 	 */
@@ -27,18 +20,23 @@ export interface Instance {
 }
 
 /**
+ * Way to get to instance.
+ */
+export interface InstancePath {
+	/**
+	 * Instance uuid.
+	 */
+	instance: InstanceUuid;
+}
+
+/**
  * A location-like.
  */
-export interface Location extends Identifiable, Vector {
+export interface Location extends LocationPath, Vector {
 	/**
 	 * Array of occupants.
 	 */
 	occupants: Array<Occupant>;
-
-	/**
-	 * UUID. Overrides [[Identifiable.uuid]].
-	 */
-	uuid: LocationUuid;
 
 	/**
 	 * Worlds
@@ -47,29 +45,49 @@ export interface Location extends Identifiable, Vector {
 }
 
 /**
+ * Way to get to location.
+ */
+export interface LocationPath extends CommsMappablePath {
+	/**
+	 * Location uuid.
+	 */
+	location: LocationUuid;
+}
+
+/**
  * A map-like.
  */
-export interface CommsMap extends Identifiable {
+export interface CommsMap extends CommsMapPath {
 	/**
 	 * Locations within the map.
 	 */
 	locations: Array<Location>;
+}
 
+/**
+ * A path that might point to a map.
+ */
+export interface CommsMappablePath extends InstancePath {
 	/**
-	 * UUID. Overrides [[Identifiable.uuid]].
+	 * Map uuid.
 	 */
-	uuid: CommsMapUuid;
+	map: CommsMapUuid | null;
+}
+
+/**
+ * Way to get to map.
+ */
+export interface CommsMapPath extends CommsMappablePath {
+	/**
+	 * Map uuid.
+	 */
+	map: CommsMapUuid;
 }
 
 /**
  * An object-like.
  */
-export interface Occupant extends Identifiable {
-	/**
-	 * Instance occupant is is part of.
-	 */
-	instance: InstanceUuid;
-
+export interface Occupant extends OccupantPath {
 	/**
 	 * Kind of occupant.
 	 */
@@ -81,14 +99,19 @@ export interface Occupant extends Identifiable {
 	mode: ModeUuid;
 
 	/**
-	 * UUID. Overrides [[Identifiable.uuid]].
-	 */
-	uuid: OccupantUuid;
-
-	/**
 	 * World in which occupant resides.
 	 */
 	world: WorldUuid;
+}
+
+/**
+ * Path to an occupant.
+ */
+export interface OccupantPath extends LocationPath {
+	/**
+	 * Location uuid.
+	 */
+	occupant: OccupantUuid;
 }
 
 export type InstanceUuid = Uuid;
