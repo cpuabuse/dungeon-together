@@ -7,8 +7,17 @@
  * Renderable unit.
  */
 
+import {
+	CommsMapUuid,
+	InstanceUuid,
+	KindUuid,
+	LocationUuid,
+	ModeUuid,
+	Occupant,
+	OccupantUuid,
+	WorldUuid
+} from "../comms/interfaces";
 import { AnimatedSprite } from "pixi.js";
-import { Occupant } from "../comms/interfaces";
 import { Screen } from "./screen";
 import { Square } from "./square";
 import { defaultMode } from "../common/defaults";
@@ -26,14 +35,34 @@ export interface RuArgs extends Occupant {
  */
 export class Ru implements Occupant {
 	/**
+	 * Screen.
+	 */
+	public instance: InstanceUuid;
+
+	/**
 	 * Parent location.
 	 */
-	public location: Square;
+	public location: LocationUuid;
+
+	/**
+	 * Kind.
+	 */
+	public kind: KindUuid;
+
+	/**
+	 * Map.
+	 */
+	public map: CommsMapUuid | null;
 
 	/**
 	 * Mode.
 	 */
-	public mode: string;
+	public mode: ModeUuid;
+
+	/**
+	 * This.
+	 */
+	public occupant: OccupantUuid;
 
 	/**
 	 * Animated sprite.
@@ -41,14 +70,22 @@ export class Ru implements Occupant {
 	public sprite: AnimatedSprite;
 
 	/**
+	 * World.
+	 */
+	public world: WorldUuid;
+
+	/**
 	 * Initializes RU.
 	 */
-	public constructor({ mode = defaultMode, square, screen }: RuArgs) {
-		// Set this square
-		this.location = square;
-
-		// Set mode
+	public constructor({ instance, location, kind, map, mode, occupant, world }: Occupant) {
+		// Assing members from interface
+		this.instance = instance;
+		this.location = location;
+		this.kind = kind;
+		this.map = map;
 		this.mode = mode;
+		this.occupant = occupant;
+		this.world = world;
 
 		// Create a new Sprite from texture
 		this.sprite = new AnimatedSprite(screen.modes[this.mode].textures);
