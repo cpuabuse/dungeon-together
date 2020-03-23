@@ -10,6 +10,21 @@ import { Vector } from "../common/vector";
  */
 
 /**
+ * For objects existing as part of instances.
+ */
+export interface Instanceable {
+	/**
+	 * Gets the instance.
+	 */
+	getInstance(uuid: InstanceUuid): Instance | undefined;
+
+	/**
+	 * Actual instances.
+	 */
+	readonly instances: Map<InstanceUuid, Instance>;
+}
+
+/**
  * Everything-like.
  */
 export interface Instance extends InstancePath {
@@ -114,13 +129,44 @@ export interface OccupantPath extends LocationPath {
 	occupant: OccupantUuid;
 }
 
-export type InstanceUuid = Uuid;
+/**
+ * Uuid alias for [[CommsMap]].
+ */
 export type CommsMapUuid = Uuid;
+
+/**
+ * Uuid alias for [[Instance]].
+ */
+export type InstanceUuid = Uuid;
+
+/**
+ * Uuid alias for [[Kind]].
+ */
 export type KindUuid = Uuid;
+
+/**
+ * Uuid alias for [[Location]].
+ */
 export type LocationUuid = Uuid;
+
+/**
+ * Uuid alias for [[Mode]].
+ */
 export type ModeUuid = Uuid;
+
+/**
+ * Uuid alias for [[Occupant]].
+ */
 export type OccupantUuid = Uuid;
+
+/**
+ * Uuid alias for [[View]].
+ */
 export type ViewUuid = Uuid;
+
+/**
+ * Uuid alias for [[World]].
+ */
 export type WorldUuid = Uuid;
 
 /**

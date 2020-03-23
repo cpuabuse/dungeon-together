@@ -21,6 +21,7 @@ import { AnimatedSprite } from "pixi.js";
 import { Screen } from "./screen";
 import { Square } from "./square";
 import { defaultMode } from "../common/defaults";
+import { Screenable } from "./screenable";
 
 /**
  * Args for [[Ru]] constructor.
@@ -33,7 +34,7 @@ export interface RuArgs extends Occupant {
 /**
  * Render unit, representing the smallest renderable.
  */
-export class Ru implements Occupant {
+export class Ru extends Screenable implements Occupant {
 	/**
 	 * Screen.
 	 */
@@ -78,6 +79,9 @@ export class Ru implements Occupant {
 	 * Initializes RU.
 	 */
 	public constructor({ instance, location, kind, map, mode, occupant, world }: Occupant) {
+		// Ceremoniously call superconstructor
+		super();
+
 		// Assing members from interface
 		this.instance = instance;
 		this.location = location;

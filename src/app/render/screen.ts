@@ -8,10 +8,11 @@
  */
 
 import { Application, BaseTexture, Texture } from "pixi.js";
-import { CommsMap, Instance } from "../comms/interfaces";
+import { CommsMap, Instance, InstanceUuid } from "../comms/interfaces";
 import { Default } from "../common/types";
 import { DefaultModes, defaultModes } from "../common/defaults";
 import { Vao } from "./vao";
+import { Screenable } from "./screenable";
 
 /**
  * Screen textures and meta.
@@ -59,7 +60,12 @@ export interface ScreenArgs extends Instance {
 /**
  * A class for everything happening on the screen.
  */
-export class Screen implements Instance {
+export class Screen extends Screenable implements Instance {
+	/**
+	 * This.
+	 */
+	instance: InstanceUuid;
+
 	/**
 	 * Different unique textures for sprites to take.
 	 * Has built-in default mode, which is readonly.
@@ -87,7 +93,10 @@ export class Screen implements Instance {
 	/**
 	 * Constructor for a screen.
 	 */
-	public constructor({ app, maps, modes }: ScreenArgs) {
+	public constructor({ instance }: Instance) {
+		// Call super constructor
+		super();
+
 		// Set the app
 		this.app = app;
 
