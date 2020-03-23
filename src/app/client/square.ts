@@ -7,7 +7,7 @@
  * Squares on screen.
  */
 
-import { Location } from "../comms/interfaces";
+import { Location } from "../shared/interfaces";
 import { Ru } from "./ru";
 import { Screen } from "./screen";
 import { Vector3D } from "../common/vector";

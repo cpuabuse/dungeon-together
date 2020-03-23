@@ -3,7 +3,7 @@
 	cpuabuse.com
 */
 
-import { CommsMap } from "../comms/interfaces";
+import { CommsMap } from "../shared/interfaces";
 import { Screen } from "./screen";
 import { Square } from "./square";
 

@@ -8,7 +8,7 @@
  */
 
 import { Cell } from "./cell";
-import { CommsMap } from "../comms/interfaces";
+import { CommsMap } from "../shared/interfaces";
 import { Universe } from "./universe";
 import { Vector3D } from "../common/vector";
 

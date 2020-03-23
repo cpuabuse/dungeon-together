@@ -7,7 +7,7 @@
  * Cells making up the grid.
  */
 
-import { Location } from "../comms/interfaces";
+import { Location } from "../shared/interfaces";
 import { Thing } from "./thing";
 import { ThingKinds } from "./world";
 import { Universe } from "./universe";

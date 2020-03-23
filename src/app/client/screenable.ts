@@ -3,7 +3,7 @@
 	cpuabuse.com
 */
 
-import { Instanceable, InstanceUuid } from "../comms/interfaces";
+import { Instanceable, InstanceUuid } from "../shared/interfaces";
 import { Screen } from "./screen";
 
 /**

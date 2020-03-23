@@ -16,7 +16,7 @@ import {
 	Occupant,
 	OccupantUuid,
 	WorldUuid
-} from "../comms/interfaces";
+} from "../shared/interfaces";
 import { AnimatedSprite } from "pixi.js";
 import { Screen } from "./screen";
 import { Square } from "./square";

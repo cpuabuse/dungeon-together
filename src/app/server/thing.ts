@@ -8,7 +8,7 @@
  */
 
 import { Cell } from "./cell";
-import { Occupant } from "../comms/interfaces";
+import { Occupant } from "../shared/interfaces";
 import { Universe } from "./universe";
 import { defaultMode } from "../common/defaults";
 

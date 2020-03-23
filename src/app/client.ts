@@ -10,16 +10,16 @@
  */
 
 import { Application, Texture, BaseTexture, groupD8 } from "pixi.js";
-import { Gold } from "./world/things/stackable/items/gold";
-import { Grid } from "./world/grid";
-import { Screen } from "./render/screen";
-import { Universe } from "./world/universe";
+import { Gold } from "./server/things/stackable/items/gold";
+import { Grid } from "./server/grid";
+import { Screen } from "./client/screen";
+import { Universe } from "./server/universe";
 import { build, Dungeon, Tile } from "dungeoneer";
-import { Guy } from "./world/things/exclusive/units/guy";
-import { Wall } from "./world/things/exclusive/immovable/wall";
-import { Door } from "./world/things/exclusive/immovable/door";
-import { Floor } from "./world/things/exclusive/immovable/floor";
-import { Cell } from "./world/cell";
+import { Guy } from "./server/things/exclusive/units/guy";
+import { Wall } from "./server/things/exclusive/immovable/wall";
+import { Door } from "./server/things/exclusive/immovable/door";
+import { Floor } from "./server/things/exclusive/immovable/floor";
+import { Cell } from "./server/cell";
 
 // The application will create a renderer using WebGL, if possible,
 // with a fallback to a canvas render. It will also setup the ticker

@@ -10,7 +10,7 @@
 import { DefaultWorlds, defaultKind, defaultWorld } from "../common/defaults";
 import { Default } from "../common/types";
 import { Grid } from "./grid";
-import { Instance } from "../comms/interfaces";
+import { Instance } from "../shared/interfaces";
 import { Thing } from "./thing";
 import { World } from "./world";
 

@@ -8,11 +8,12 @@
  */
 
 import { Application, BaseTexture, Texture } from "pixi.js";
-import { CommsMap, Instance, InstanceUuid } from "../comms/interfaces";
+import { CommsMap, Instance, InstanceUuid, Instanceability } from "../shared/interfaces";
 import { Default } from "../common/types";
 import { DefaultModes, defaultModes } from "../common/defaults";
 import { Vao } from "./vao";
 import { Screenable } from "./screenable";
+import { ClientReality } from "./client-reality";
 
 /**
  * Screen textures and meta.
@@ -55,6 +56,13 @@ export interface StrictModes {
 export interface ScreenArgs extends Instance {
 	app: Application;
 	modes: Modes;
+}
+
+/**
+ * Allows [[Screenable]] access [[DisplayReality]].
+ */
+export interface Screen extends Instanceability {
+	reality: ClientReality;
 }
 
 /**
