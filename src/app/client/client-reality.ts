@@ -7,7 +7,8 @@
  * Client reality.
  */
 
-import { InstanceUuid, Reality } from "../shared/interfaces";
+import { InstanceUuid } from "../shared/comms/uuid";
+import { Reality } from "../shared/reality";
 import { Screen } from "./screen";
 
 /**

@@ -7,7 +7,8 @@
  * Shared reality.
  */
 
-import { Instance, InstanceUuid } from "./interfaces";
+import { Instance } from "./comms/instance";
+import { InstanceUuid } from "./comms/uuid";
 
 /**
  * For objects existing as part of [[Reality]].
