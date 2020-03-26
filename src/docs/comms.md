@@ -1,26 +1,66 @@
 # Communications
 
-## Classes outline
+## Classes
+
+Communication interface | Server implementation | Client implementation
+--- | --- | ---
+Pool | Server | Client
+Instance | Shard | Canvas
+Map | Grid | Board
+Location | Cell | Square
+Occupant | Thing | Ru
+World
+Kind
+Mode
+
+
+
+## Class diagram
 
 ```mermaid
-graph TB
-	subgraph instance
-		universe
-		screen
-	end
+classDiagram
+	class Instance {
+		<<interface>>
 
-	subgraph map
-		universe --> grid
-		screen --> vao
-	end
+	}
+	
+	class instance_client{
 
-	subgraph location
-		grid --> cell
-		vao --> square
-	end
+	}
 
-	subgraph occupant
-		cell --> thing
-		square --> ru
-	end
+	class instance_server{
+
+	}
+
+	class Kind{
+
+	}
+
+	class Location{
+
+	}
+
+	class Map{
+
+	}
+
+	class Mode{
+
+	}
+
+	class Occupant{
+
+	}
+
+	class Reality{
+
+	}
+
+	class World{
+
+	}
+
+	%% Instance
+	Instance <|.. instance_client : implements
+	Instance <|.. instance_server : implements
 ```
