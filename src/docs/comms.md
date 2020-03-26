@@ -3,17 +3,12 @@
 ## Classes
 
 Communication interface | Server implementation | Client implementation
---- | --- | ---
+--: | --- | --- | ---
 Pool | Server | Client
 Instance | Shard | Canvas
-Map | Grid | Board
-Location | Cell | Square
-Occupant | Thing | Ru
-World
-Kind
-Mode
-
-
+Mappa | Area | Grid
+Location | Place | Square
+Occupant | Thing | Animation
 
 ## Class diagram
 
@@ -21,46 +16,42 @@ Mode
 classDiagram
 	class Instance {
 		<<interface>>
-
+		+Mappa [0..*] maps
 	}
 	
-	class instance_client{
+	class Shard{
+		+Area [0..*] maps
+	}
+
+	class Canvas{
+		+Grid [0..*] maps
+	}
+
+	class Mappa{
+		<<interface>>
+	}
+
+	class Area{
 
 	}
 
-	class instance_server{
-
-	}
-
-	class Kind{
+	class Grid{
 
 	}
 
 	class Location{
-
-	}
-
-	class Map{
-
-	}
-
-	class Mode{
-
+		<<interface>>
 	}
 
 	class Occupant{
-
+		<<interface>>
 	}
 
-	class Reality{
+	%% Core
+	Instance <|.. Shard : implements
+	Instance <|.. Canvas : implements
 
-	}
-
-	class World{
-
-	}
-
-	%% Instance
-	Instance <|.. instance_client : implements
-	Instance <|.. instance_server : implements
+	%% Auxiliary
+	Mappa <|.. Area : implements
+	Mappa <|.. Grid : implements
 ```
