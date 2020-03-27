@@ -58,11 +58,9 @@ classDiagram
 
 	%% Pool
 	Pool "1" *-- "1" Poolable : contains
-
 	Pool <|.. Server : implements
 	Poolable <|.. Serverable : implements
 	Server "1" *-- "1" Serverable: contains
-
 	Pool <|.. Client : implements
 	Poolable <|.. Clientable : implements
 	Client "1" *-- "1" Clientable : contains
@@ -84,4 +82,11 @@ classDiagram
 	Clientable <|-- Square : extends
 	Square "1" o-- "0..*" Animation : contains
 	Clientable <|-- Animation : extends
+
+	%% Associations
+	Clientable -- Serverable : Poolable
+	Shard -- Canvas : Instance
+	Area -- Grid : Mappa
+	Place -- Square : Location
+	Thing -- Animation : Occupant
 ```

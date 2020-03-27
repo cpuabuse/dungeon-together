@@ -118,6 +118,12 @@ classDiagram
 	Location <|.. Square : implements
 	Square "1" o-- "0..*" Animation : contains
 	Occupant <|.. Animation : implements
+
+	%% Associations
+	Shard -- Canvas : Instance
+	Area -- Grid : Mappa
+	Place -- Square : Location
+	Thing -- Animation : Occupant
 ```
 
 # Pool classes
