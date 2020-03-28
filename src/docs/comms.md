@@ -2,14 +2,14 @@
 
 ## Classes
 
-Communication interface | Server implementation | Client implementation
---: | --- | --- | ---
-Pool | Server | Client
-Poolable | Serverable | Clientable
-Instance | Shard | Canvas
-Mappa | Area | Grid
-Location | Place | Square
-Occupant | Thing | Animation
+Communication interface | Explanation | Server implementation | Client implementation
+--: | --- | --- | --- | ---
+Pool | Is a collection of instances, the collection of connections | Server | Client
+Poolable | Is an object, that belongs to a pool | Serverable | Clientable
+Instance | Is an independent operational unit of the application, for synchronization between server and client | Shard | Canvas
+Mappa | A collection of locations | Area | Grid
+Location | A collection of occupants | Place | Square
+Occupant | The smallest game unit | Thing | Animation
 
 ## Classes
 
