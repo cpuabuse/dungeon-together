@@ -2,35 +2,45 @@
  * Occupant.
  */
 
-import { KindUuid, ModeUuid, OccupantUuid, WorldUuid } from "./uuid";
-import { LocationPath } from "./location";
+import { LocusPath } from "./locus";
+import { Uuid } from "../../common/uuid";
 
 /**
  * An object-like.
  */
-export interface Occupant extends OccupantPath {
+export interface OccupantArgs extends OccupantPath {
 	/**
 	 * Kind of occupant.
 	 */
-	kind: KindUuid;
+	kindUuid: Uuid;
 
 	/**
 	 * Mode of the occupant.
 	 */
-	mode: ModeUuid;
+	modeUuid: Uuid;
 
 	/**
 	 * World in which occupant resides.
 	 */
-	world: WorldUuid;
+	worldUuid: Uuid;
+}
+
+/**
+ * Implementable [[OccupantArgs]].
+ */
+export interface Occupant extends OccupantArgs {
+	/**
+	 * Terminates `this`.
+	 */
+	terminate(): void;
 }
 
 /**
  * Path to an occupant.
  */
-export interface OccupantPath extends LocationPath {
+export interface OccupantPath extends LocusPath {
 	/**
 	 * Location uuid.
 	 */
-	occupant: OccupantUuid;
+	occupantUuid: Uuid;
 }

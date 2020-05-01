@@ -1,3 +1,9 @@
 {
-	"eslint.probe": ["typescript"]
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.insertSpaces": false,
+	"eslint.probe": [
+		"typescript"
+	],
+	"files.eol": "\n",
+	"liveserver"
 }

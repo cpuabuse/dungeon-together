@@ -59,7 +59,8 @@
 		"@types/mocha": "^7.0.1",
 		"@types/node": "^13.7.4",
 		"@types/uuid": "^7.0.0",
-		"@typescript-eslint/eslint-plugin": "^2.20.0",
+		"@types/ws": "^7.2.4",
+		"@typescript-eslint/eslint-plugin": "^2.27.0",
 		"@typescript-eslint/parser": "^2.20.0",
 		"codacy-coverage": "^3.4.0",
 		"cpy-cli": "^3.1.0",
@@ -67,7 +68,7 @@
 		"dungeon-together-assets": "file:include/dungeon-together-assets",
 		"eslint": "^6.8.0",
 		"eslint-config-airbnb-base": "^14.0.0",
-		"eslint-config-prettier": "^6.10.0",
+		"eslint-config-prettier": "^6.10.1",
 		"eslint-plugin-import": "^2.20.1",
 		"eslint-plugin-mocha": "^6.3.0",
 		"eslint-plugin-prettier": "^3.1.2",
@@ -75,7 +76,7 @@
 		"mocha": "^7.0.1",
 		"ncp": "^2.0.0",
 		"nyc": "^15.0.0",
-		"prettier": "^1.19.1",
+		"prettier": "^2.0.4",
 		"rimraf": "^3.0.2",
 		"rollup": "^1.31.1",
 		"terser": "^4.6.4",
@@ -86,6 +87,7 @@
 	"dependencies": {
 		"dungeoneer": "^2.1.4",
 		"pixi.js": "^5.2.1",
-		"uuid": "^7.0.2"
+		"uuid": "^7.0.2",
+		"ws": "^7.2.3"
 	}
 }

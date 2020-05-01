@@ -11,5 +11,5 @@ export default {
 		name: "client",
 		sourcemap: "inline"
 	},
-	plugins: [commonjs(), resolve({ preferBuiltins: true }), typescript({ tsconfig: false })]
+	plugins: [commonjs(), resolve({ browser: true, preferBuiltins: true }), typescript()]
 };

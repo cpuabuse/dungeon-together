@@ -13,11 +13,11 @@ classDiagram
 	}
 
 	class Area{
-		+Place [0..*] locations
+		+Place [0..*] locis
 	}
 
 	class Grid{
-		+Square [0..*] locations
+		+Square [0..*] locis
 	}
 
 	class Place{
@@ -25,13 +25,13 @@ classDiagram
 	}
 
 	class Square{
-		+Animation [0..*] occupants
+		+Scene [0..*] occupants
 	}
 
 	class Thing{
 	}
 
-	class Animation{
+	class Scene{
 	}
 
 	class Poolable{
@@ -80,13 +80,13 @@ classDiagram
 	Clientable <|-- Grid : extends
 	Grid "1" o-- "0..*" Square : contains
 	Clientable <|-- Square : extends
-	Square "1" o-- "0..*" Animation : contains
-	Clientable <|-- Animation : extends
+	Square "1" o-- "0..*" Scene : contains
+	Clientable <|-- Scene : extends
 
 	%% Associations
 	Clientable -- Serverable : Poolable
 	Shard -- Canvas : Instance
 	Area -- Grid : Mappa
-	Place -- Square : Location
-	Thing -- Animation : Occupant
+	Place -- Square : Locus
+	Thing -- Scene : Occupant
 ```

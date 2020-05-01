@@ -6,9 +6,9 @@ Communication interface | Explanation | Server implementation | Client implement
 --: | --- | --- | --- | ---
 Pool | Is a collection of instances, the collection of connections | Server | Client
 Instance | Is an independent operational unit of the application, for synchronization between server and client | Shard | Canvas
-Mappa | A collection of locations | Area | Grid
-Location | A collection of occupants | Place | Square
-Occupant | The smallest game unit | Thing | Animation
+Mappa | A collection of locis | Area | Grid
+Locus | A collection of occupants | Place | Square
+Occupant | The smallest game unit | Thing | Scene
 
 ## Classes
 
@@ -34,7 +34,7 @@ classDiagram
 
 	class Mappa{
 		<<interface>>
-		+Location [0..*] locations
+		+Locus [0..*] locis
 	}
 
 	class MappaPath{
@@ -43,21 +43,21 @@ classDiagram
 	}
 
 	class Area{
-		+Place [0..*] locations
+		+Place [0..*] locis
 	}
 
 	class Grid{
-		+Square [0..*] locations
+		+Square [0..*] locis
 	}
 
-	class Location{
+	class Locus{
 		<<interface>>
 		+Occupant [0..*] occupants
 	}
 
-	class LocationPath{
+	class LocusPath{
 		<<interface>>
-		+LocationUuid location
+		+LocusUuid locus
 	}
 
 	class Place{
@@ -65,7 +65,7 @@ classDiagram
 	}
 
 	class Square{
-		+Animation [0..*] occupants
+		+Scene [0..*] occupants
 	}
 
 	class Occupant{
@@ -83,29 +83,29 @@ classDiagram
 	class Thing{
 	}
 
-	class Animation{
+	class Scene{
 	}
 
 	%% Comms
 	InstancePath <|-- Instance : extends
 	Instance "1" o-- "0..*" Mappa : contains
 	MappaPath <|-- Mappa : extends
-	Mappa "1" o-- "0..*" Location : contains
-	LocationPath <|-- Location : extends
-	Location "1" o-- "0..*" Occupant : contains
+	Mappa "1" o-- "0..*" Locus : contains
+	LocusPath <|-- Locus : extends
+	Locus "1" o-- "0..*" Occupant : contains
 	OccupantPath <|-- Occupant : extends
 
 	%% Paths
 	InstancePath <|-- MappaPath : extends
-	MappaPath <|-- LocationPath : extends
-	LocationPath <|-- OccupantPath : extends
+	MappaPath <|-- LocusPath : extends
+	LocusPath <|-- OccupantPath : extends
 
 	%% Server
 	Instance <|.. Shard : implements
 	Shard "1" o-- "0..*" Area : contains
 	Mappa <|.. Area : implements
 	Area "1" o-- "0..*" Place : contains
-	Location <|.. Place : implements
+	Locus <|.. Place : implements
 	Place "1" o-- "0..*" Thing : contains
 	Occupant <|.. Thing : implements
 	
@@ -114,15 +114,15 @@ classDiagram
 	Canvas "1" o-- "0..*" Grid : contains
 	Mappa <|.. Grid : implements
 	Grid "1" o-- "0..*" Square : contains
-	Location <|.. Square : implements
-	Square "1" o-- "0..*" Animation : contains
-	Occupant <|.. Animation : implements
+	Locus <|.. Square : implements
+	Square "1" o-- "0..*" Scene : contains
+	Occupant <|.. Scene : implements
 
 	%% Associations
 	Shard -- Canvas : Instance
 	Area -- Grid : Mappa
-	Place -- Square : Location
-	Thing -- Animation : Occupant
+	Place -- Square : Locus
+	Thing -- Scene : Occupant
 ```
 
 # Pool classes

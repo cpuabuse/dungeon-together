@@ -10,5 +10,5 @@ export default {
 		format: "esm",
 		name: "client"
 	},
-	plugins: [commonjs(), resolve({ preferBuiltins: true }), typescript({ tsconfig: false })]
+	plugins: [commonjs(), resolve({ browser: true, preferBuiltins: true }), typescript()]
 };
