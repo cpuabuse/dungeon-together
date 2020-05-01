@@ -1,6 +1,6 @@
 /*
-	File: src/shared/world/grid.ts
-	cpuabuse.com
+	Copyright 2020 cpuabuse.com
+	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
@@ -115,7 +115,7 @@ export class Area extends Serverable implements Mappa {
 	 * Terminates `this`.
 	 */
 	public terminate(): void {
-		this.locis.forEach(function (place) {
+		this.locis.forEach(function(place) {
 			place.terminate();
 		});
 	}

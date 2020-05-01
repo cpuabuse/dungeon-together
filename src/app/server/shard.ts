@@ -1,6 +1,6 @@
 /*
-	File: src/shared/world/universe.ts
-	cpuabuse.com
+	Copyright 2020 cpuabuse.com
+	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
@@ -131,7 +131,7 @@ export class Shard extends Serverable implements Instance {
 	 * Terminates `this`.
 	 */
 	public terminate(): void {
-		this.mappas.forEach(function (area) {
+		this.mappas.forEach(function(area) {
 			area.terminate();
 		});
 	}

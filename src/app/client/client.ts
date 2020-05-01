@@ -1,6 +1,6 @@
 /*
-	File: src/app/client/display-reality.ts
-	cpuabuse.com
+	Copyright 2020 cpuabuse.com
+	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
@@ -110,10 +110,10 @@ export class Client implements Pool {
 				(this.modesIndex.get(instanceUuid) as Array<Uuid>).forEach(modeUuid => {
 					if (
 						!Array.from(this.modesIndex)
-							.filter(function ([key]) {
+							.filter(function([key]) {
 								return key !== instanceUuid;
 							})
-							.reduce(function (result, [, modesArray]) {
+							.reduce(function(result, [, modesArray]) {
 								return new Set([...Array.from(result), ...modesArray]);
 							}, new Set())
 							.has(modeUuid)
@@ -164,7 +164,9 @@ export class Client implements Pool {
 	 * A shortcut function.
 	 */
 	public getLocus(path: LocusPath): Square {
-		return this.getInstance(path).getMappa(path).getLocus(path);
+		return this.getInstance(path)
+			.getMappa(path)
+			.getLocus(path);
 	}
 
 	/**
@@ -182,7 +184,10 @@ export class Client implements Pool {
 	 * A shortcut function.
 	 */
 	public getOccupant(path: OccupantPath): Scene {
-		return this.getInstance(path).getMappa(path).getLocus(path).getOccupant(path);
+		return this.getInstance(path)
+			.getMappa(path)
+			.getLocus(path)
+			.getOccupant(path);
 	}
 
 	/**
@@ -207,8 +212,8 @@ export class Client implements Pool {
 export async function InitClient(): Promise<void> {
 	// Instances
 	(Clientable.prototype.pool as Client) = new Client();
-	return new Promise(function (resolve) {
-		setTimeout(function () {
+	return new Promise(function(resolve) {
+		setTimeout(function() {
 			resolve();
 		});
 	});

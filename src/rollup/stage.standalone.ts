@@ -1,3 +1,8 @@
+/*
+	Copyright 2020 cpuabuse.com
+	Licensed under the ISC License (https://opensource.org/licenses/ISC)
+*/
+
 import commonjs from "@rollup/plugin-commonjs";
 import { join } from "path";
 import resolve from "@rollup/plugin-node-resolve";
