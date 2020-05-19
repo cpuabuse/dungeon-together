@@ -115,7 +115,7 @@ export class Area extends Serverable implements Mappa {
 	 * Terminates `this`.
 	 */
 	public terminate(): void {
-		this.locis.forEach(function(place) {
+		this.locis.forEach(function (place) {
 			place.terminate();
 		});
 	}

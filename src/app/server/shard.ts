@@ -131,7 +131,7 @@ export class Shard extends Serverable implements Instance {
 	 * Terminates `this`.
 	 */
 	public terminate(): void {
-		this.mappas.forEach(function(area) {
+		this.mappas.forEach(function (area) {
 			area.terminate();
 		});
 	}
