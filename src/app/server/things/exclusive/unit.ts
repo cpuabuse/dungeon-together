@@ -27,4 +27,29 @@ export class Unit extends Exclusive {
 	 * MP.
 	 */
 	public manaPoints: number = 0;
+
+	/**
+	 * Speed.
+	 */
+	public speed: number;
+
+	/**
+	 * Attack.
+	 */
+	public attack: string;
+
+	/**
+	 * Strength
+	 */
+	public strength: number;
+
+	/**
+	 * DF.
+	 */
+	public defense: number;
+
+	/**
+	 * LVL.
+	 */
+	public level: number;
 }
