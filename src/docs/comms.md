@@ -1,128 +1,132 @@
 # Communications
 
-## Classes
+## Hierarchy
 
-Communication interface | Explanation | Server implementation | Client implementation
+Common name | Explanation | Communication interface | Server implementation | Client implementation
 --: | --- | --- | --- | ---
-Pool | Is a collection of instances, the collection of connections | Server | Client
-Instance | Is an independent operational unit of the application, for synchronization between server and client | Shard | Canvas
-Mappa | A collection of locis | Area | Grid
-Locus | A collection of occupants | Place | Square
-Occupant | The smallest game unit | Thing | Scene
+Universe | Is a collection of shards, the collection of connections | CommsUniverse | ServerUniverse | ClientUniverse
+Shard | Is an independent operational unit of the application, for synchronization between server(ServerUniverse) and client(ClientUniverse) | CommsShard | ServerShard | ClientShard
+Grid | A collection of cells | CommsGrid | ServerGrid | ClientGrid
+Cell | A collection of entities | CommsCell | ServerCell | ClientCell
+Entity | The smallest game unit | CommsEntity | ServerEntity | ClientEntity
 
 ## Classes
 
 ```mermaid
 classDiagram
-	class Instance {
+	%% Shard
+	class ShardPath{
 		<<interface>>
-		+Mappa [0..*] maps
+		+Uuid shardUuid
 	}
-	
-	class InstancePath{
+
+	class CommsShard {
 		<<interface>>
-		+InstanceUuid instance
-	}
-	
-	class Shard{
-		+Area [0..*] maps
+		+CommsGrid [0..*] grids
 	}
 
-	class Canvas{
-		+Grid [0..*] maps
+	class ServerShard{
+		+ServerGrid [0..*] grids
 	}
 
-	class Mappa{
+	class ClientShard{
+		+ClientGrid [0..*] grids
+	}
+
+	%% Grid
+	class GridPath{
 		<<interface>>
-		+Locus [0..*] locis
+		+Uuid gridUuid
 	}
 
-	class MappaPath{
+	class CommsGrid{
 		<<interface>>
-		+MappaUuid mappa
+		+CommsCell [0..*] cells
 	}
 
-	class Area{
-		+Place [0..*] locis
+	class ServerGrid{
+		+ServerCell [0..*] cells
 	}
 
-	class Grid{
-		+Square [0..*] locis
+	class ClientGrid{
+		+ClientCell [0..*] cells
 	}
 
-	class Locus{
+	%% Cell
+	class CellPath{
 		<<interface>>
-		+Occupant [0..*] occupants
+		+Uuid cellUuid
 	}
 
-	class LocusPath{
+	class CommsCell{
 		<<interface>>
-		+LocusUuid locus
+		+Entity [0..*] entities
 	}
 
-	class Place{
-		+Thing [0..*] occupants
+	class ServerCell{
+		+ServerEntity [0..*] entities
 	}
 
-	class Square{
-		+Scene [0..*] occupants
+	class ClientCell{
+		+ClientEntity [0..*] entities
 	}
 
-	class Occupant{
+	%% Entity
+	class EntityPath{
 		<<interface>>
-		+KindUuid: kind
-		+ModeUuid: mode
-		+KindUuid: world
+		+Uuid entityUuid
 	}
 
-	class OccupantPath{
+	class CommsEntity{
 		<<interface>>
-		+OccupantUuid occupant
+		+Uuid: kindUuid
+		+Uuid: modeUuid
+		+Uuid: worldUuid
 	}
 
-	class Thing{
+	class ServerEntity{
 	}
 
-	class Scene{
+	class ClientEntity{
 	}
 
 	%% Comms
-	InstancePath <|-- Instance : extends
-	Instance "1" o-- "0..*" Mappa : contains
-	MappaPath <|-- Mappa : extends
-	Mappa "1" o-- "0..*" Locus : contains
-	LocusPath <|-- Locus : extends
-	Locus "1" o-- "0..*" Occupant : contains
-	OccupantPath <|-- Occupant : extends
+	ShardPath <|-- CommsShard : extends
+	CommsShard "1" o-- "0..*" CommsGrid : contains
+	GridPath <|-- CommsGrid : extends
+	CommsGrid "1" o-- "0..*" CommsCell : contains
+	CellPath <|-- CommsCell : extends
+	CommsCell "1" o-- "0..*" CommsEntity : contains
+	EntityPath <|-- CommsEntity : extends
 
 	%% Paths
-	InstancePath <|-- MappaPath : extends
-	MappaPath <|-- LocusPath : extends
-	LocusPath <|-- OccupantPath : extends
+	ShardPath <|-- GridPath : extends
+	GridPath <|-- CellPath : extends
+	CellPath <|-- EntityPath : extends
 
 	%% Server
-	Instance <|.. Shard : implements
-	Shard "1" o-- "0..*" Area : contains
-	Mappa <|.. Area : implements
-	Area "1" o-- "0..*" Place : contains
-	Locus <|.. Place : implements
-	Place "1" o-- "0..*" Thing : contains
-	Occupant <|.. Thing : implements
+	CommsShard <|.. ServerShard : implements
+	ServerShard "1" o-- "0..*" ServerGrid : contains
+	CommsGrid <|.. ServerGrid : implements
+	ServerGrid "1" o-- "0..*" ServerCell : contains
+	CommsCell <|.. ServerCell : implements
+	ServerCell "1" o-- "0..*" ServerEntity : contains
+	CommsEntity <|.. ServerEntity : implements
 	
 	%% Client
-	Instance <|.. Canvas : implements
-	Canvas "1" o-- "0..*" Grid : contains
-	Mappa <|.. Grid : implements
-	Grid "1" o-- "0..*" Square : contains
-	Locus <|.. Square : implements
-	Square "1" o-- "0..*" Scene : contains
-	Occupant <|.. Scene : implements
+	CommsShard <|.. ClientShard : implements
+	ClientShard "1" o-- "0..*" ClientGrid : contains
+	CommsGrid <|.. ClientGrid : implements
+	ClientGrid "1" o-- "0..*" ClientCell : contains
+	CommsCell <|.. ClientCell : implements
+	ClientCell "1" o-- "0..*" ClientEntity : contains
+	CommsEntity <|.. ClientEntity : implements
 
 	%% Associations
-	Shard -- Canvas : Instance
-	Area -- Grid : Mappa
-	Place -- Square : Locus
-	Thing -- Scene : Occupant
+	ServerShard -- ClientShard : Shard
+	ServerGrid -- ClientGrid : Grid
+	ServerCell -- ClientCell : Cell
+	ServerEntity -- ClientEntity : Entity
 ```
 
 # Pool classes
