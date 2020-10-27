@@ -4,17 +4,17 @@
 */
 
 /**
- * Poolable, part of pool.
+ * Poolable, part of universe.
  */
 
-import { Pool } from "./pool";
+import { CommsUniverse } from "./comms-universe";
 
 /**
- * For objects existing as part of [[Pool]].
+ * For objects existing as part of [[CommsUniverse]].
  */
 export interface Poolable {
 	/**
-	 * Actual pool.
+	 * Actual universe.
 	 */
-	pool: Pool;
+	universe: CommsUniverse;
 }

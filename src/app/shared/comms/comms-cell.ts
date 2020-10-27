@@ -19,7 +19,7 @@ export interface CommsCellArgs extends CellPath, Vector {
 	/**
 	 * Array of entities.
 	 */
-	occupants: Map<Uuid, CommsEntityArgs>;
+	entities: Map<Uuid, CommsEntityArgs>;
 
 	/**
 	 * Worlds
