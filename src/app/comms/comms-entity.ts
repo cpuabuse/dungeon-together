@@ -8,7 +8,7 @@
  */
 
 import { CellPath } from "./comms-cell";
-import { Uuid } from "../../common/uuid";
+import { Uuid } from "../common/uuid";
 
 /**
  * An object-like.

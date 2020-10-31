@@ -8,8 +8,8 @@
  */
 
 import { Application, Container, Matrix, Renderer, utils } from "pixi.js";
-import { Instance, InstanceArgs } from "../shared/comms/instance";
-import { MappaArgs, MappaPath } from "../shared/comms/mappa";
+import { CommsShard, CommsShardArgs } from "../comms/comms-shard";
+import { CommsGridArgs, GridPath } from "../comms/comms-grid";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import {
 	defaultMinimumScenesInColumn,
@@ -22,8 +22,8 @@ import {
 	urlPathSeparator
 } from "../common/defaults";
 import { ClientConnection } from "./connection";
-import { Clientable } from "./clientable";
-import { Grid } from "./grid";
+import { ClientProto } from "./client-proto";
+import { ClientGrid } from "./grid";
 import { Mode } from "./mode";
 import { View } from "./view";
 
@@ -32,7 +32,7 @@ import { View } from "./view";
  *
  * Each instance to not interact with another and be treated as a separate thread.
  */
-export class Canvas extends Clientable implements Instance, View {
+export class ClientShard extends ClientProto implements CommsShard, View {
 	/**
 	 * Pixi application.
 	 */
@@ -48,9 +48,9 @@ export class Canvas extends Clientable implements Instance, View {
 	public connection: ClientConnection = new Object() as ClientConnection;
 
 	/**
-	 * UUID for default [[Grid]].
+	 * UUID for default [[ClientGrid]].
 	 */
-	public readonly defaultMappaUuid: Uuid;
+	public readonly defaultGridUuid: Uuid;
 
 	/**
 	 * Container for pixi.
@@ -60,17 +60,17 @@ export class Canvas extends Clientable implements Instance, View {
 	/**
 	 * This UUID.
 	 */
-	public readonly instanceUuid: Uuid;
+	public readonly shardUuid: Uuid;
 
 	/**
-	 * Mappas for the canvas.
+	 * Grids for the client shard.
 	 *
 	 * Should be treated as "readonly".
 	 */
-	public readonly mappas: Map<Uuid, Grid> = new Map();
+	public readonly grids: Map<Uuid, ClientGrid> = new Map();
 
 	/**
-	 * Viewport for this canvas.
+	 * Viewport for this client shard.
 	 */
 	public matrix: Matrix = Matrix.IDENTITY;
 
@@ -92,14 +92,14 @@ export class Canvas extends Clientable implements Instance, View {
 	/**
 	 * Constructor for a screen.
 	 */
-	public constructor({ instanceUuid, mappas }: InstanceArgs) {
+	public constructor({ shardUuid, grids }: CommsShardArgs) {
 		// Call super constructor
 		super();
 
 		// Set this fields
-		this.instanceUuid = instanceUuid;
-		this.defaultMappaUuid = getDefaultUuid({
-			path: `${mappaUuidUrlPath}${urlPathSeparator}${this.instanceUuid}`
+		this.shardUuid = shardUuid;
+		this.defaultGridUuid = getDefaultUuid({
+			path: `${gridUuidUrlPath}${urlPathSeparator}${this.shardUuid}`
 		});
 
 		// Set scene
@@ -110,29 +110,29 @@ export class Canvas extends Clientable implements Instance, View {
 
 		setTimeout(() => {
 			// Initialize children
-			this.addMappa({
+			this.addGrid({
 				// Take path from this
 				...this,
-				locis: new Map(),
-				mappaUuid: this.defaultMappaUuid
+				cells: new Map(),
+				gridUuid: this.defaultGridUuid
 			});
 
-			// Extract data from [Instance]
-			mappas.forEach(mappa => {
-				this.addMappa(mappa);
+			// Extract data from [CommsShard]
+			grids.forEach(grid => {
+				this.addGrid(grid);
 			});
 		});
 	}
 
 	/**
-	 * Adds [[Grid]].
+	 * Adds [[ClientGrid]].
 	 */
-	public addMappa(mappa: MappaArgs): void {
-		if (this.mappas.has(mappa.instanceUuid)) {
-			// Clear the instance if it already exists
-			this.doRemoveGrid(mappa);
+	public addGrid(grid: CommsGridArgs): void {
+		if (this.grids.has(grid.shardUuid)) {
+			// Clear the shard if it already exists
+			this.doRemoveGrid(grid);
 		}
-		this.mappas.set(mappa.mappaUuid, new Grid(mappa));
+		this.grids.set(grid.gridUuid, new ClientGrid(grid));
 	}
 
 	/**
@@ -161,13 +161,13 @@ export class Canvas extends Clientable implements Instance, View {
 	}
 
 	/**
-	 * Shortcut to get the [[Grid]].
+	 * Shortcut to get the [[ClientGrid]].
 	 */
-	public getMappa({ mappaUuid }: MappaPath): Grid {
-		let grid: Grid | undefined = this.mappas.get(mappaUuid);
+	public getGrid({ gridUuid }: GridPath): ClientGrid {
+		let grid: ClientGrid | undefined = this.grids.get(gridUuid);
 
 		// Default grid is always there
-		return grid === undefined ? (this.mappas.get(this.defaultMappaUuid) as Grid) : grid;
+		return grid === undefined ? (this.grids.get(this.defaultGridUuid) as ClientGrid) : grid;
 	}
 
 	/**
@@ -178,32 +178,32 @@ export class Canvas extends Clientable implements Instance, View {
 	}
 
 	/**
-	 * Removes the [[Grid]]
-	 * @param uuid UUID of the [[Grid]]
+	 * Removes the [[ClientGrid]]
+	 * @param uuid UUID of the [[ClientGrid]]
 	 */
-	public removeMappa(path: MappaPath): void {
-		if (path.mappaUuid !== this.defaultMappaUuid) {
+	public removeGrid(path: GridPath): void {
+		if (path.gridUuid !== this.defaultGridUuid) {
 			this.doRemoveGrid(path);
 		}
 	}
 
 	/**
-	 * Performs the necessary cleanup when instance is removed, as a connection to server.
+	 * Performs the necessary cleanup when shard is removed, as a connection to server.
 	 */
 	public terminate(): void {
-		this.mappas.forEach(grid => {
+		this.grids.forEach(grid => {
 			this.doRemoveGrid(grid);
 		});
 	}
 
 	/**
-	 * Actually remove the [[Grid]] instance from "mappas".
+	 * Actually remove the [[ClientGrid]] shard from "grids".
 	 */
-	private doRemoveGrid({ mappaUuid }: MappaPath): void {
-		let grid: Grid | undefined = this.mappas.get(mappaUuid);
+	private doRemoveGrid({ gridUuid }: GridPath): void {
+		let grid: ClientGrid | undefined = this.grids.get(gridUuid);
 		if (grid !== undefined) {
 			grid.terminate();
-			this.mappas.delete(mappaUuid);
+			this.grids.delete(gridUuid);
 		}
 	}
 

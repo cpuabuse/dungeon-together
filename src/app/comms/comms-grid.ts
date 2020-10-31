@@ -9,7 +9,7 @@
 
 import { CommsCell, CommsCellArgs, CellPath } from "./comms-cell";
 import { ShardPath } from "./comms-shard";
-import { Uuid } from "../../common/uuid";
+import { Uuid } from "../common/uuid";
 
 /**
  * A grid-like.

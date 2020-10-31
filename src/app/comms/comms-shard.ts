@@ -8,7 +8,7 @@
  */
 
 import { CommsGrid, CommsGridArgs, GridPath } from "./comms-grid";
-import { Uuid } from "../../common/uuid";
+import { Uuid } from "../common/uuid";
 
 /**
  * Everything-like.

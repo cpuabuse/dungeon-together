@@ -9,8 +9,8 @@
 
 import { CommsEntity, CommsEntityArgs, EntityPath } from "./comms-entity";
 import { GridPath } from "./comms-grid";
-import { Uuid } from "../../common/uuid";
-import { Vector } from "../../common/vector";
+import { Uuid } from "../common/uuid";
+import { Vector } from "../common/vector";
 
 /**
  * A location-like.

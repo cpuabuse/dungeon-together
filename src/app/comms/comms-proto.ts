@@ -4,7 +4,7 @@
 */
 
 /**
- * Poolable, part of universe.
+ * Comms-proto, part of universe.
  */
 
 import { CommsUniverse } from "./comms-universe";
@@ -12,7 +12,7 @@ import { CommsUniverse } from "./comms-universe";
 /**
  * For objects existing as part of [[CommsUniverse]].
  */
-export interface Poolable {
+export interface CommsProto {
 	/**
 	 * Actual universe.
 	 */
