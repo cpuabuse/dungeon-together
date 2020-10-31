@@ -164,10 +164,10 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	 * Shortcut to get the [[ClientGrid]].
 	 */
 	public getGrid({ gridUuid }: GridPath): ClientGrid {
-		let grid: ClientGrid | undefined = this.grids.get(gridUuid);
+		let clientGrid: ClientGrid | undefined = this.grids.get(gridUuid);
 
 		// Default grid is always there
-		return grid === undefined ? (this.grids.get(this.defaultGridUuid) as ClientGrid) : grid;
+		return clientGrid === undefined ? (this.grids.get(this.defaultGridUuid) as ClientGrid) : clientGrid;
 	}
 
 	/**
