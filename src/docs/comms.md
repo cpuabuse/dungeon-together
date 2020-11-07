@@ -60,7 +60,7 @@ classDiagram
 
 	class CommsCell{
 		<<interface>>
-		+Entity [0..*] entities
+		+CommsEntity [0..*] entities
 	}
 
 	class ServerCell{
