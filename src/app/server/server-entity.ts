@@ -207,7 +207,7 @@ export abstract class Thing extends Serverable implements Occupant {
  *
  * Not to be used.
  */
-export class DefaultThing extends Thing {
+export class DefaultEntity extends Thing {
 	// No additional processing for a dummy class
 	/**
 	 * Performs actual initialization.
