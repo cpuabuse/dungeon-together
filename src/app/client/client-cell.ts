@@ -142,7 +142,7 @@ export class ClientCell extends ClientProto implements CommsCell {
 	}
 
 	/**
-	 * Terminates the [[Scene]].
+	 * Terminates the [[Cell]].
 	 */
 	public terminate(): void {
 		this.entities.forEach(clientEntity => {
