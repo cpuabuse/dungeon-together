@@ -3,7 +3,7 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
-import { defaultInstanceUuid, defaultServerUrl } from "../common/defaults";
+import { defaultShardUuid, defaultServerUrl } from "../common/defaults";
 import { Server } from "../server/server";
 import { ServerConnection } from "../server/connection";
 import { Uuid } from "../common/uuid";

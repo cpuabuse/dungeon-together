@@ -8,29 +8,29 @@
  */
 
 import { Application, Container, Matrix, Renderer, utils } from "pixi.js";
-import { CommsShard, CommsShardArgs } from "../comms/comms-shard";
 import { CommsGridArgs, GridPath } from "../comms/comms-grid";
+import { CommsShard, CommsShardArgs } from "../comms/comms-shard";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import {
-	defaultMinimumScenesInColumn,
-	defaultMinimumScenesInRow,
-	defaultMobileSceneHeight,
-	defaultMobileSceneWidth,
-	defaultSceneHeight,
-	defaultSceneWidth,
-	mappaUuidUrlPath,
+	defaultEntityHeight,
+	defaultEntityWidth,
+	defaultMinimumEntityInColumn,
+	defaultMinimumEntityInRow,
+	defaultMobileEntityHeight,
+	defaultMobileEntityWidth,
+	gridUuidUrlPath,
 	urlPathSeparator
 } from "../common/defaults";
 import { ClientConnection } from "./connection";
+import { ClientGrid } from "./client-grid";
 import { ClientProto } from "./client-proto";
-import { ClientGrid } from "./grid";
 import { Mode } from "./mode";
 import { View } from "./view";
 
 /**
  * A class for everything happening on the screen.
  *
- * Each instance to not interact with another and be treated as a separate thread.
+ * Each shard to not interact with another and be treated as a separate thread.
  */
 export class ClientShard extends ClientProto implements CommsShard, View {
 	/**
@@ -77,12 +77,12 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	/**
 	 * Scene height.
 	 */
-	public sceneHeight: number = defaultSceneHeight;
+	public sceneHeight: number = defaultEntityHeight;
 
 	/**
 	 * Scene width.
 	 */
-	public sceneWidth: number = defaultSceneWidth;
+	public sceneWidth: number = defaultEntityWidth;
 
 	/**
 	 * Attached to HTML Canvas or not.
@@ -212,28 +212,28 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	 */
 	private setScene(): void {
 		// Set defaults
-		let sceneHeight: number = utils.isMobile.any ? defaultMobileSceneHeight : defaultSceneHeight;
-		let sceneWidth: number = utils.isMobile.any ? defaultMobileSceneWidth : defaultSceneWidth;
-		let aspectRatio: number = sceneHeight / sceneWidth;
+		let entityHeight: number = utils.isMobile.any ? defaultMobileEntityHeight : defaultEntityHeight;
+		let entityWidth: number = utils.isMobile.any ? defaultMobileEntityWidth : defaultEntityWidth;
+		let aspectRatio: number = entityHeight / entityWidth;
 
 		// Fix height
-		if (sceneHeight > 0) {
-			if (this.app.screen.height / sceneHeight < defaultMinimumScenesInColumn) {
-				sceneHeight = defaultMinimumScenesInColumn;
-				sceneWidth = Math.ceil(sceneHeight / aspectRatio);
+		if (entityHeight > 0) {
+			if (this.app.screen.height / entityHeight < defaultMinimumEntityInColumn) {
+				entityHeight = defaultMinimumEntityInColumn;
+				entityWidth = Math.ceil(entityHeight / aspectRatio);
 			}
 		}
 
 		// Fix width
-		if (sceneWidth > 0) {
-			if (this.app.screen.width / sceneWidth < defaultMinimumScenesInRow) {
-				sceneWidth = defaultMinimumScenesInRow;
-				sceneHeight = Math.ceil(sceneWidth * aspectRatio);
+		if (entityWidth > 0) {
+			if (this.app.screen.width / entityWidth < defaultMinimumEntityInRow) {
+				entityWidth = defaultMinimumEntityInRow;
+				entityHeight = Math.ceil(entityWidth * aspectRatio);
 			}
 		}
 
 		// Set actual values
-		this.sceneHeight = sceneHeight;
-		this.sceneWidth = sceneWidth;
+		this.sceneHeight = entityHeight;
+		this.sceneWidth = entityWidth;
 	}
 }

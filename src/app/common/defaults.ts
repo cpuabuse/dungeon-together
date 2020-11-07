@@ -31,9 +31,9 @@ export const urlPathSeparator: string = "/";
 export const defaultUuidUrlKeyword: string = "default";
 
 /**
- * Instance path identifier for UUID.
+ * Shard path identifier for UUID.
  */
-export const instanceUuidUrlPath: string = "instance";
+export const shardUuidUrlPath: string = "shard";
 
 /**
  * Kind path identifier for UUID.
@@ -41,14 +41,14 @@ export const instanceUuidUrlPath: string = "instance";
 export const kindUuidUrlPath: string = "kind";
 
 /**
- * Locus path identifier for UUID.
+ * CommmsCell path identifier for UUID.
  */
-export const locusUuidUrlPath: string = "locus";
+export const cellUuidUrlPath: string = "cell";
 
 /**
- * Mappa path identifier for UUID.
+ * CommsGrid path identifier for UUID.
  */
-export const mappaUuidUrlPath: string = "mappa";
+export const gridUuidUrlPath: string = "grid";
 
 /**
  * Mode path identifier for UUID.
@@ -56,9 +56,9 @@ export const mappaUuidUrlPath: string = "mappa";
 export const modeUuidUrlPath: string = "mode";
 
 /**
- * Occupant path identifier for UUID.
+ * CommsEntity path identifier for UUID.
  */
-export const occupantUuidUrlPath: string = "occupant";
+export const entityUuidUrlPath: string = "entity";
 
 /**
  * World path identifier for UUID.
@@ -68,8 +68,8 @@ export const worldUuidUrlPath: string = "world";
 /**
  * Default instance UUID.
  */
-export const defaultInstanceUuid: Uuid = getDefaultUuid({
-	path: `${instanceUuidUrlPath}${urlPathSeparator}${defaultUuidUrlKeyword}`
+export const defaultShardUuid: Uuid = getDefaultUuid({
+	path: `${shardUuidUrlPath}${urlPathSeparator}${defaultUuidUrlKeyword}`
 });
 
 /**
@@ -94,39 +94,39 @@ export const defaultWorldUuid: Uuid = getDefaultUuid({
 });
 
 /**
- * Default mobile scene height.
+ * Default mobile entity height.
  */
-export const defaultMobileSceneHeight: number = 100;
+export const defaultMobileEntityHeight: number = 100;
 
 /**
- * Default mobile scene width.
+ * Default mobile entity width.
  */
-export const defaultMobileSceneWidth: number = 100;
+export const defaultMobileEntityWidth: number = 100;
 
 /**
- * Default scene height.
+ * Default entity height.
  */
-export const defaultSceneHeight: number = 50;
+export const defaultEntityHeight: number = 50;
 
 /**
- * Default scene width.
+ * Default entity width.
  */
-export const defaultSceneWidth: number = 50;
+export const defaultEntityWidth: number = 50;
 
 /**
- * Minimum number of scenes to fit in row in canvas.
+ * Minimum number of entity to fit in row in canvas.
  */
-export const defaultMinimumScenesInColumn: number = 12;
+export const defaultMinimumEntityInColumn: number = 12;
 
 /**
- * Minimum number of scenes to fit in column in canvas.
+ * Minimum number of entities to fit in column in clientShard.
  */
-export const defaultMinimumScenesInRow: number = 12;
+export const defaultMinimumEntityInRow: number = 12;
 
 /**
- * Default vector for default locuses.
+ * Default vector for default cells.
  */
-export const defaultLocusVector: Vector = { x: 0, y: 0, z: 0 };
+export const defaultCellVector: Vector = { x: 0, y: 0, z: 0 };
 
 // Current navigation
 let currentNav: number = 0;
