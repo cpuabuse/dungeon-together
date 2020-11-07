@@ -4,6 +4,5 @@
 	"eslint.probe": [
 		"typescript"
 	],
-	"files.eol": "\n",
-	"liveserver"
+	"files.eol": "\n"
 }
