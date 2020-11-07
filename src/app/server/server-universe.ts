@@ -8,40 +8,40 @@
  */
 
 import { Shard, ShardArgs } from "./shard";
-import { defaultInstanceUuid, defaultKindUuid, defaultWorldUuid } from "../common/defaults";
-import { Area } from "./area";
-import { InstancePath } from "../shared/comms/instance";
+import { defaultShardUuid, defaultKindUuid, defaultWorldUuid } from "../common/defaults";
+import { ServerGrid } from "./server-grid";
+import { ShardPath } from "../comms/comms-shard";
 import { Kind } from "./kind";
-import { LocusPath } from "../shared/comms/locus";
-import { MappaPath } from "../shared/comms/mappa";
-import { OccupantPath } from "../shared/comms/occupant";
+import { CellPath } from "../comms/comms-cell";
+import { GridPath } from "..comms/comms-grid";
+import { EntityPath } from "../comms/comms-entity";
 import { Place } from "./place";
-import { Pool } from "../shared/pool";
-import { Serverable } from "./serverable";
-import { Thing, DefaultThing } from "./thing";
+import { CommsUniverse } from "../comms/comms-universe";
+import { ServerProto } from "./server-proto";
+import { Thing, DefaultEntity } from "./thing";
 import { Uuid } from "../common/uuid";
 import { World } from "./world";
 
 /**
- * Arguments for a [[Server]].
+ * Arguments for a [[ServerUniverse]].
  */
-export interface ServerArgs {
+export interface ServerUniverseArgs {
 	worlds: Map<Uuid, World>;
 }
 
 /**
- * Server-side instance.
+ * Server-side universe.
  */
-export class Server implements Pool {
+export class ServerUniverse implements CommsUniverse {
 	/**
-	 * Instances.
+	 * Shards.
 	 */
-	public readonly instances: Map<Uuid, Shard> = new Map();
+	public readonly shards: Map<Uuid, Shard> = new Map();
 
 	/**
-	 * Thing kinds.
+	 * Entity kinds.
 	 */
-	private readonly kinds: Map<Uuid, Kind> = new Map([[defaultKindUuid, { typeOfThing: DefaultThing }]]);
+	private readonly kinds: Map<Uuid, Kind> = new Map([[defaultKindUuid, { typeOfEntity: DefaultEntity }]]);
 
 	/**
 	 * Game worlds.
@@ -53,16 +53,16 @@ export class Server implements Pool {
 	 */
 	public constructor() {
 		setTimeout(() => {
-			// Set default instance
-			this.addInstance({ instanceUuid: defaultInstanceUuid, mappas: new Map() });
+			// Set default shard
+			this.addShard({ grids: new Map(), shardUuid: defaultShardUuid });
 		});
 	}
 
 	/**
-	 * Add instance to pool.
+	 * Add shard to universe.
 	 */
-	public addInstance(instance: ShardArgs): void {
-		this.instances.set(instance.instanceUuid, new Shard(instance));
+	public addShard(shard: ShardArgs): void {
+		this.shards.set(shard.shardUuid, new ServerShard(shard));
 	}
 
 	/**
@@ -84,16 +84,16 @@ export class Server implements Pool {
 	}
 
 	/**
-	 * Get [[Shard]].
+	 * Get [[ServerShard]].
 	 *
 	 * A shortcut function.
 	 */
-	public getInstance({ instanceUuid }: InstancePath): Shard {
-		let shard: Shard | undefined = this.instances.get(instanceUuid);
+	public getShard({ shardUuid }: ShardPath): ServerShard {
+		let shard: ServerShard | undefined = this.shards.get(shardUuid);
 
 		if (shard === undefined) {
-			// "defaultInstanceUuid" is always present, since it is initialized and cannot be removed or overwritten
-			return this.instances.get(defaultInstanceUuid) as Shard;
+			// "defaultShardUuid" is always present, since it is initialized and cannot be removed or overwritten
+			return this.shards.get(defaultShardUuid) as ServerShard;
 		}
 		return shard;
 	}
@@ -111,30 +111,30 @@ export class Server implements Pool {
 	}
 
 	/**
-	 * Get [[Place]].
+	 * Get [[ServerCell]].
 	 *
 	 * A shortcut function.
 	 */
-	public getLocus(path: LocusPath): Place {
-		return this.getInstance(path).getMappa(path).getLocus(path);
+	public getCell(path: CellPath): Place {
+		return this.getShard(path).getGrid(path).getCell(path);
 	}
 
 	/**
-	 * Get [[Area]].
+	 * Get [[ServerGrid]].
 	 *
 	 * A shortcut function.
 	 */
-	public getMappa(path: MappaPath): Area {
-		return this.getInstance(path).getMappa(path);
+	public getGrid(path: GridPath): ServerGrid {
+		return this.getShard(path).getGrid(path);
 	}
 
 	/**
-	 * Get [[Thing]].
+	 * Get [[ServerEntity]].
 	 *
 	 * A shortcut function.
 	 */
-	public getOccupant(path: OccupantPath): Thing {
-		return this.getInstance(path).getMappa(path).getLocus(path).getOccupant(path);
+	public getEntity(path: EntityPath): Thing {
+		return this.getShard(path).getGrid(path).getCell(path).getEntity(path);
 	}
 
 	/**
@@ -150,11 +150,11 @@ export class Server implements Pool {
 	}
 
 	/**
-	 * Remove instance from pool.
+	 * Remove shard from universe.
 	 * @returns `true` on success, `false` on failure
 	 */
-	public removeInstance(instance: InstancePath): void {
-		this.doRemoveShard(instance);
+	public removeShard(shard: ShardPath): void {
+		this.doRemoveShard(shard);
 	}
 
 	/**
@@ -190,13 +190,13 @@ export class Server implements Pool {
 	}
 
 	/**
-	 * Actually removes the isntance.
+	 * Actually removes the shard.
 	 */
-	private doRemoveShard({ instanceUuid }: InstancePath): void {
-		let shard: Shard | undefined = this.instances.get(instanceUuid);
+	private doRemoveShard({ shardUuid }: ShardPath): void {
+		let shard: ClientShard | undefined = this.shards.get(shardUuid);
 		if (shard !== undefined) {
 			shard.terminate();
-			this.instances.delete(instanceUuid);
+			this.shards.delete(shardUuid);
 		}
 	}
 
@@ -216,13 +216,13 @@ export class Server implements Pool {
 }
 
 /**
- * Initialize the [[Server]].
+ * Initialize the [[ServerUniverse]].
  *
- * Timeouts in [[Server]] should be executed first.
+ * Timeouts in [[ServerUniverse]] should be executed first.
  */
 export async function InitServer(): Promise<void> {
-	// Instances
-	(Serverable.prototype.pool as Server) = new Server();
+	// Shards
+	(ServerProto.prototype.universe as ServerUniverse) = new ServerUniverse();
 	return new Promise(function (resolve) {
 		setTimeout(function () {
 			resolve();
@@ -231,10 +231,10 @@ export async function InitServer(): Promise<void> {
 }
 
 /**
- * Gets the [[Shard]].
+ * Gets the [[ServerShard]].
  *
  * @returns Shard or default shard
  */
-export async function getShard(path: InstancePath): Promise<Shard> {
-	return Serverable.prototype.pool.getInstance(path);
+export async function getShard(path: ShardPath): Promise<ServerShard> {
+	return ServerProto.prototype.universe.getShard(path);
 }

@@ -9,17 +9,17 @@
 
 import { BaseTexture, Texture } from "pixi.js";
 import { CommsShardArgs, ShardPath } from "../comms/comms-shard";
-import { defaultInstanceUuid, defaultModeUuid } from "../common/defaults";
-import { ClientShard } from "./client-shard";
-import { ClientProto } from "./client-proto";
-import { ClientGrid } from "./client-grid";
+import { defaultModeUuid, defaultShardUuid } from "../common/defaults";
 import { CellPath } from "../comms/comms-cell";
+import { ClientCell } from "./client-cell";
+import { ClientEntity } from "./client-entity";
+import { ClientGrid } from "./client-grid";
+import { ClientProto } from "./client-proto";
+import { ClientShard } from "./client-shard";
+import { CommsUniverse } from "../comms/comms-universe";
+import { EntityPath } from "../comms/comms-entity";
 import { GridPath } from "../comms/comms-grid";
 import { Mode } from "./mode";
-import { EntityPath } from "../comms/comms-entity";
-import { CommsUniverse } from "../comms/comms-universe";
-import { ClientEntity } from "./client-entity";
-import { ClientCell } from "./client-cell";
 import { Uuid } from "../common/uuid";
 
 /**
@@ -65,7 +65,7 @@ export class ClientUniverse implements CommsUniverse {
 	 */
 	public constructor() {
 		setTimeout(() => {
-			this.addShard({ shardUuid: defaultShardUuid, grids: new Map() });
+			this.addShard({ grids: new Map(), shardUuid: defaultShardUuid });
 		});
 	}
 

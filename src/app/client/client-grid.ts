@@ -10,7 +10,7 @@
 import { CellPath, CommsCellArgs } from "../comms/comms-cell";
 import { CommsGrid, CommsGridArgs } from "../comms/comms-grid";
 import { Uuid, getDefaultUuid } from "../common/uuid";
-import { defaultCellVector, defaultWorldUuid, cellUuidUrlPath, urlPathSeparator } from "../common/defaults";
+import { cellUuidUrlPath, defaultCellVector, defaultWorldUuid, urlPathSeparator } from "../common/defaults";
 import { ClientCell } from "./client-cell";
 import { ClientProto } from "./client-proto";
 

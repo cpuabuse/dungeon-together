@@ -7,17 +7,17 @@
  * Providing access to server resources.
  */
 
-import { Poolable } from "../shared/poolable";
+import { CommsProto } from "../comms/comms-proto";
 import { Server } from "./server";
 
 /**
  * Class that knows about shards.
  */
-export class Serverable {}
+export class ServerProto {}
 
 /**
- * Overload poolable class.
+ * Overload commsProto class.
  */
-export interface Serverable extends Poolable {
+export interface ServerProto extends CommsProto {
 	readonly pool: Server;
 }

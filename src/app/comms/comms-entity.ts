@@ -47,5 +47,5 @@ export interface EntityPath extends CellPath {
 	/**
 	 * Cell uuid.
 	 */
-	entitytUuid: Uuid;
+	entityUuid: Uuid;
 }
