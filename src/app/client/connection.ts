@@ -3,9 +3,9 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
-import { defaultShardUuid, defaultServerUrl } from "../common/defaults";
-import { Server } from "../server/server";
+import { defaultServerUrl, defaultShardUuid } from "../common/defaults";
 import { ServerConnection } from "../server/connection";
+import { ServerUniverse } from "../server/server-universe";
 import { Uuid } from "../common/uuid";
 
 /**
@@ -47,8 +47,8 @@ export class ClientConnection {
 
 		// Set socket
 		if (standalone) {
-			this.connection = Server.prototype
-				.getInstance({ instanceUuid: shardUuid === undefined ? defaultInstanceUuid : shardUuid })
+			this.connection = ServerUniverse.prototype
+				.getShard({ shardUuid: shardUuid === undefined ? defaultShardUuid : shardUuid })
 				.addConnection({ canvasUuid, connection: this, standalone });
 		} else {
 			this.connection = new WebSocket(url === undefined ? defaultServerUrl : url);
