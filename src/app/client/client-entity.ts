@@ -59,7 +59,7 @@ export class ClientEntity extends ClientProto implements CommsEntity {
 	/**
 	 * Initializes RU.
 	 */
-	public constructor({ shardUuid, cellUuid, kindUuid, gridUuid, modeUuid, entityUuid, worldUuid }: CommsEntitytArgs) {
+	public constructor({ shardUuid, cellUuid, kindUuid, gridUuid, modeUuid, entityUuid, worldUuid }: CommsEntityArgs) {
 		// Call superconstructor
 		super();
 
