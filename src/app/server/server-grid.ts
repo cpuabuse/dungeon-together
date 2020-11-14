@@ -7,107 +7,107 @@
  * Grid for the dungeons.
  */
 
-import { Mappa, MappaArgs } from "../shared/comms/mappa";
-import { Place, PlaceArgs } from "./place";
+import { CommsGrid, CommsGridArgs } from "../comms/comms-grid";
+import { ServerCell, ServerCellArgs } from "./server-cell";
 import { Uuid, getDefaultUuid } from "../common/uuid";
-import { defaultLocusVector, locusUuidUrlPath, navAmount, urlPathSeparator } from "../common/defaults";
-import { LocusPath } from "../shared/comms/locus";
-import { Serverable } from "./serverable";
+import { cellUuidUrlPath, defaultCellVector, navAmount, urlPathSeparator } from "../common/defaults";
+import { CellPath } from "../comms/comms-cell";
+import { ServerProto } from "./server-proto";
 
 /**
- * Arguments for the [[Area]].
+ * Arguments for the [[ServerGrid]].
  */
-export interface AreaArgs extends MappaArgs {
-	locis: Map<Uuid, PlaceArgs>;
+export interface ServerGridArgs extends CommsGridArgs {
+	cells: Map<Uuid, ServerCellArgs>;
 }
 
 /**
  * The grid itself.
  */
-export class Area extends Serverable implements Mappa {
+export class ServerGrid extends ServerProto implements ServerGrid {
 	/**
-	 * Default [[Thing]] UUID.
+	 * Default [[ServerEntity]] UUID.
 	 */
-	public defaultLocusUuid: Uuid;
+	public defaultCellUuid: Uuid;
 
 	/**
 	 * Parent universe.
 	 */
-	public readonly instanceUuid: Uuid;
+	public readonly shardUuid: Uuid;
 
 	/**
 	 * Actual cells inside of the grid.
 	 */
-	public locis: Map<Uuid, Place> = new Map();
+	public cells: Map<Uuid, ServerCell> = new Map();
 
 	/**
-	 * Mappa path.
+	 * Grid path.
 	 */
-	public readonly mappaUuid: Uuid;
+	public readonly gridUuid: Uuid;
 
 	/**
-	 * Initializes the grid.
+	 * Initializes the server grid.
 	 * @param worlds The default world will be ignored, as it is already present by default.
 	 */
-	public constructor({ instanceUuid, locis, mappaUuid }: AreaArgs) {
-		// Serverable
+	public constructor({ shardUuid, cells, gridUuid }: CommsGridArgs) {
+		// ServerProto
 		super();
 
 		// Set path
-		this.instanceUuid = instanceUuid;
-		this.mappaUuid = mappaUuid;
+		this.shardUuid = shardUuid;
+		this.gridUuid = gridUuid;
 
 		// Generate default
-		this.defaultLocusUuid = getDefaultUuid({
-			path: `${locusUuidUrlPath}${urlPathSeparator}${this.instanceUuid}`
+		this.defaultCellUuid = getDefaultUuid({
+			path: `${cellUuidUrlPath}${urlPathSeparator}${this.shardUuid}`
 		});
 
 		setTimeout(() => {
-			this.addLocus({
+			this.addCell({
 				...this,
-				locusUuid: this.defaultLocusUuid,
-				nav: new Array(navAmount).fill(this.defaultLocusUuid),
-				occupants: new Map(),
+				cellUuid: this.defaultCellUuid,
+				entities: new Map(),
+				nav: new Array(navAmount).fill(this.defaultCellUuid),
 				worlds: new Set(),
-				...defaultLocusVector
+				...defaultCellVector
 			});
 
 			// Create cells
-			locis.forEach(place => {
-				this.addLocus(place);
+			cells.forEach(serverCell => {
+				this.addCell(serverCell);
 			});
 		});
 	}
 
 	/**
-	 * Adds [[Place]].
+	 * Adds [[ServerCell]].
 	 */
-	public addLocus(locus: PlaceArgs): void {
-		if (this.locis.has(locus.instanceUuid)) {
-			// Clear the instance if it already exists
-			this.doRemovePlace(locus);
+	public addCell(cell: ServerCellArgs): void {
+		if (this.cells.has(cells.shardUuid)) {
+			// Clear the shard if it already exists
+			this.doRemoveCell(cell);
 		}
-		this.locis.set(locus.locusUuid, new Place(locus));
+		this.cells.set(cell.cellUuid, new ServerCell(cell));
 	}
 
 	/**
-	 * Gets [[Place]].
+	 * Gets [[ServerCell]].
 	 */
-	public getLocus({ locusUuid }: LocusPath): Place {
-		let place: Place | undefined = this.locis.get(locusUuid);
-		if (place === undefined) {
+	public getCell({ cellUuid }: CellPath): ServerCell {
+		let cell: ServerCell | undefined = this.cells.get(cellUuid);
+		if (cell === undefined) {
 			// The default is always preserved
-			return this.locis.get(this.defaultLocusUuid) as Place;
+			return this.cells.get(this.defaultCellUuid) as ServerCell;
 		}
-		return place;
+		return cell;
 	}
 
 	/**
-	 * Removes [[Place]].
+	 * Removes [[ServerCell]].
 	 */
-	public removeLocus(path: LocusPath): void {
-		if (path.locusUuid !== this.defaultLocusUuid) {
-			this.doRemovePlace(path);
+	public removeCell(path: CellPath): void {
+		if (path.cellUuid !== this.defaultCellUuid) {
+			this.doRemoveCell(path);
 		}
 	}
 
@@ -115,19 +115,19 @@ export class Area extends Serverable implements Mappa {
 	 * Terminates `this`.
 	 */
 	public terminate(): void {
-		this.locis.forEach(function (place) {
-			place.terminate();
+		this.cells.forEach(function (serverCell) {
+			serverCell.terminate();
 		});
 	}
 
 	/**
-	 * Actual removes [[Place]]
+	 * Actual removes [[ServerCell]]
 	 */
-	private doRemovePlace({ locusUuid }: LocusPath): void {
-		let place: Place | undefined = this.locis.get(locusUuid);
-		if (place !== undefined) {
-			place.terminate();
-			this.locis.delete(locusUuid);
+	private doRemoveCell({ cellUuid }: CellPath): void {
+		let serverCell: ServerCell | undefined = this.cells.get(cellUuid);
+		if (serverCell !== undefined) {
+			serverCell.terminate();
+			this.cells.delete(cellUuid);
 		}
 	}
 }

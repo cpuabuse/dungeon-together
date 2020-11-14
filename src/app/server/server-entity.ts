@@ -7,19 +7,19 @@
  * Occupant of cells.
  */
 
-import { Occupant, OccupantArgs, OccupantPath } from "../shared/comms/occupant";
-import { LocusPath } from "../shared/comms/locus";
-import { Place } from "./place";
-import { Serverable } from "./serverable";
+import { CommsEntity, CommsEntityArgs, EntityPath } from "../comms/comms-entity";
+import { CellPath } from "../comms/comms-cell";
+import { ServerCell } from "./server-cell";
+import { ServerProto } from "./server-proto";
 import { Uuid } from "../common/uuid";
 import { defaultModeUuid } from "../common/defaults";
 
 /**
- * Arguments for constructor of a thing.
+ * Arguments for constructor of a server entity.
  */
-export interface InitializeArgs extends LocusPath {
+export interface InitializeArgs extends CellPath {
 	/**
-	 * Kind of thing in world.
+	 * Kind of server entity in world.
 	 */
 	kindUuid: Uuid;
 
@@ -30,51 +30,51 @@ export interface InitializeArgs extends LocusPath {
 }
 
 /**
- * Arguments for a [[Thing]].
+ * Arguments for a [[ServerEntity]].
  */
-export interface ThingArgs extends OccupantArgs {
+export interface ServerEntityArgs extends CommsEntityArgs {
 	[key: string]: any;
 }
 
 /**
- * The thing itself. Can be anything that resides within the [[Cell]].
+ * The server entity itself. Can be anything that resides within the [[Cell]].
  *
- * It is a responsibility of the classes extending [[Thing]] to perform consistency checks on the arguments, thus the default values should always be provided.
+ * It is a responsibility of the classes extending [[ServerEntity]] to perform consistency checks on the arguments, thus the default values should always be provided.
  *
- * There are 2 ways to create a [[Thing]]:
+ * There are 2 ways to create a [[ServerEntity]]:
  *
  * // TODO: Add ways to create a thing
  */
-export abstract class Thing extends Serverable implements Occupant {
+export abstract class ServerEntity extends ServerProto implements CommsEntity {
 	/**
-	 * Kind of this thing in the world.
+	 * Kind of this server entity in the world.
 	 */
 	public kindUuid: Uuid;
 
 	/**
-	 * Mode of the thing.
+	 * Mode of the server entity.
 	 */
 	public modeUuid: string = defaultModeUuid;
 
 	/**
-	 * Cell occupied by the thing.
+	 * Cell occupied by the server entity.
 	 */
-	public locusUuid: Uuid;
+	public cellUuid: Uuid;
 
 	/**
 	 * Universe this resides in.
 	 */
-	public instanceUuid: Uuid;
+	public shardUuid: Uuid;
 
 	/**
-	 * Corresponding mappa.
+	 * Corresponding grid.
 	 */
-	public mappaUuid: Uuid;
+	public gridUuid: Uuid;
 
 	/**
 	 * This UUID.
 	 */
-	public occupantUuid: Uuid;
+	public entityUuid: Uuid;
 
 	/**
 	 * World this is in.
@@ -84,15 +84,15 @@ export abstract class Thing extends Serverable implements Occupant {
 	/**
 	 * Constructor.
 	 */
-	public constructor({ instanceUuid, kindUuid, locusUuid, mappaUuid, occupantUuid, worldUuid }: ThingArgs) {
-		// Serverable
+	public constructor({ shardUuid, kindUuid, cellUuid, gridUuid, entityUuid, worldUuid }: ServerEntityArgs) {
+		// ServerProto
 		super();
 
 		// Set path
-		this.instanceUuid = instanceUuid;
-		this.mappaUuid = mappaUuid;
-		this.locusUuid = locusUuid;
-		this.occupantUuid = occupantUuid;
+		this.shardUuid = shardUuid;
+		this.gridUuid = gridUuid;
+		this.cellUuid = cellUuid;
+		this.entityUuid = entityUuid;
 
 		// Set kind & world
 		this.kindUuid = kindUuid;
@@ -100,7 +100,7 @@ export abstract class Thing extends Serverable implements Occupant {
 	}
 
 	/**
-	 * Initializes the cell's things.
+	 * Initializes the cell's server entities.
 	 */
 	public static initialize(
 		// Fix the linting errors; This method is defined to provide type
@@ -111,66 +111,66 @@ export abstract class Thing extends Serverable implements Occupant {
 	}
 
 	/**
-	 * Initializes the [[Thing]] into the `Place`.
+	 * Initializes the [[ServerEntity]] into the `ServerCell`.
 	 *
-	 * To be called from `Place`.
+	 * To be called from `ServerCell`.
 	 */
 	public initialize(): void {
 		this.doInitialize();
-		this.pool.getLocus(this).attach(this);
+		this.universe.getCell(this).attach(this);
 	}
 
 	/**
 	 * Move.
 	 */
-	public move(locusPath: LocusPath): void {
-		this.performMove(locusPath);
+	public move(cellPath: CellPath): void {
+		this.performMove(cellPath);
 	}
 
 	/**
 	 * Move.
 	 */
-	public swap(occupantPath: OccupantPath): void {
-		let thing: Thing = this.pool.getOccupant(occupantPath);
-		if (thing.kindUuid === this.kindUuid && thing.worldUuid === this.worldUuid) {
-			this.performSwap(occupantPath);
+	public swap(entityPath: EntityPath): void {
+		let entity: ServerEntity = this.universe.getEntity(entityPath);
+		if (entity.kindUuid === this.kindUuid && entity.worldUuid === this.worldUuid) {
+			this.performSwap(entityPath);
 		}
 	}
 
 	/**
-	 * Terminates the [[Thing]].
+	 * Terminates the [[ServerEntity]].
 	 */
 	public terminate(): void {
-		this.pool.getLocus(this).detach(this);
+		this.universe.getCell(this).detach(this);
 		this.doTerminate();
 	}
 
 	/**
-	 * Actually moves the thing.
+	 * Actually moves the server cell.
 	 */
-	protected doMove(locusPath: LocusPath): void {
-		// Get place for accurate UUIDs
-		let place: Place = this.pool.getLocus(locusPath);
+	protected doMove(cellPath: CellPath): void {
+		// Get server cell for accurate UUIDs
+		let cell: ServerCell = this.universe.getCell(cellPath);
 
 		// Reattach
-		this.pool.getLocus(this).detach(this);
-		this.instanceUuid = place.instanceUuid;
-		this.mappaUuid = place.mappaUuid;
-		this.locusUuid = place.locusUuid;
-		place.attach(this);
+		this.universe.getCell(this).detach(this);
+		this.shardUuid = cell.shardUuid;
+		this.gridUuid = cell.gridUuid;
+		this.cellUuid = cell.cellUuid;
+		cell.attach(this);
 	}
 
 	/**
-	 * Swaps cells with a target thing.
+	 * Swaps cells with a target server entity.
 	 */
-	protected doSwap(occupantPath: OccupantPath): void {
+	protected doSwap(entityPath: EntityPath): void {
 		// Get thing while nothing is changed yet
-		let targetThing: Thing = this.pool.getOccupant(occupantPath);
-		let targetLocusPath: LocusPath = { ...occupantPath };
+		let targetEntity: ServerEntity = this.universe.getEntity(entityPath);
+		let targetCellPath: CellPath = { ...cellPath };
 
 		// Set target path
-		targetThing.doMove(this);
-		this.doMove(targetLocusPath);
+		targetEntity.doMove(this);
+		this.doMove(targetCellPath);
 	}
 
 	/**
@@ -190,24 +190,24 @@ export abstract class Thing extends Serverable implements Occupant {
 	 *
 	 * Should call [[doMove]].
 	 */
-	protected abstract performMove(locusPath: LocusPath): void;
+	protected abstract performMove(cellPath: CellPath): void;
 
 	/**
-	 * Performs the swap of 2 [[Thing]].
+	 * Performs the swap of 2 [[ServerEntity]].
 	 *
 	 * To be overriden by extending classes.
 	 *
 	 * Should call [[doSwap]].
 	 */
-	protected abstract performSwap(occupantPath: OccupantPath): void;
+	protected abstract performSwap(entityPath: EntityPath): void;
 }
 
 /**
- * [[Thing]] created by default.
+ * [[ServerEntity]] created by default.
  *
  * Not to be used.
  */
-export class DefaultEntity extends Thing {
+export class DefaultEntity extends ServerEntity {
 	// No additional processing for a dummy class
 	/**
 	 * Performs actual initialization.
@@ -225,16 +225,16 @@ export class DefaultEntity extends Thing {
 	/**
 	 * Moves to another location.
 	 */
-	protected performMove(locusPath: LocusPath): void {
-		this.doMove(locusPath);
+	protected performMove(cellPath: CellPath): void {
+		this.doMove(cellPath);
 	}
 
 	/**
-	 * Performs the swap of 2 [[Thing]].
+	 * Performs the swap of 2 [[ServerEntity]].
 	 *
 	 * To be overriden by extending classes.
 	 */
-	protected performSwap(occupantPath: OccupantPath): void {
-		this.doSwap(occupantPath);
+	protected performSwap(entityPath: EntityPath): void {
+		this.doSwap(entityPath);
 	}
 }

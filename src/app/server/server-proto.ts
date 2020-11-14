@@ -8,7 +8,7 @@
  */
 
 import { CommsProto } from "../comms/comms-proto";
-import { Server } from "./server";
+import { ServerUniverse } from "./server-universe";
 
 /**
  * Class that knows about shards.
@@ -19,5 +19,5 @@ export class ServerProto {}
  * Overload commsProto class.
  */
 export interface ServerProto extends CommsProto {
-	readonly pool: Server;
+	readonly universe: ServerUniverse;
 }

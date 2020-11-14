@@ -8,64 +8,66 @@
  */
 
 import { Area, AreaArgs } from "./area";
-import { Instance, InstanceArgs } from "../shared/comms/instance";
+import { CommsShard, CommsShardeArgs } from "../comms/comms-shard";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { mappaUuidUrlPath, urlPathSeparator } from "../common/defaults";
 import { ClientConnection } from "../client/connection";
 import { MappaPath } from "../shared/comms/mappa";
 import { ServerConnection } from "./connection";
 import { Serverable } from "./serverable";
+import { ServerProto } from "./server-proto";
+import { CommsShard } from "../comms/comms-shard";
 
 /**
  * Universe args.
  */
-export interface ShardArgs extends InstanceArgs {
+export interface ServerShardArgs extends CommsShardArgs {
 	mappas: Map<Uuid, AreaArgs>;
 }
 
 /**
  * A whole universe.
  */
-export class Shard extends Serverable implements Instance {
+export class ServerShard extends ServerProto implements CommsShard {
 	/**
 	 * Connection to client.
 	 */
 	public connection: Map<Uuid, ServerConnection> = new Map();
 
 	/**
-	 * Default [[Area]] UUID.
+	 * Default [[ServerGrid]] UUID.
 	 */
-	public defaultMappaUuid: Uuid;
+	public defaultGridUuid: Uuid;
 
 	/**
 	 * This UUID.
 	 */
-	public instanceUuid: Uuid;
+	public shardUuid: Uuid;
 
 	/**
 	 * Grids of the universe.
 	 */
-	public mappas: Map<Uuid, Area> = new Map();
+	public grids: Map<Uuid, ServerGrid> = new Map();
 
 	/**
 	 * Constructor.
 	 */
-	public constructor({ instanceUuid, mappas }: ShardArgs) {
-		// Serverable
+	public constructor({ shardeUuid, grids }: CommsShardArgs) {
+		// ServerProto
 		super();
 
 		// Set path
-		this.instanceUuid = instanceUuid;
+		this.shardUuid = shardUuid;
 
 		// Deal with default
-		this.defaultMappaUuid = getDefaultUuid({
-			path: `${mappaUuidUrlPath}${urlPathSeparator}${this.instanceUuid}`
+		this.defaultGridUuid = getDefaultUuid({
+			path: `${gridUuidUrlPath}${urlPathSeparator}${this.shardUuid}`
 		});
 		setTimeout(() => {
-			this.addMappa({ ...this, locis: new Map(), mappaUuid: this.defaultMappaUuid });
+			this.addGrid({ ...this, cells: new Map(), gridUuid: this.defaultGridUuid });
 
-			mappas.forEach(area => {
-				this.addMappa(area);
+			grids.forEach(serverGrid => {
+				this.addGrid(serverGrid);
 			});
 		});
 	}
@@ -96,34 +98,34 @@ export class Shard extends Serverable implements Instance {
 	}
 
 	/**
-	 * Adds [[Area]].
+	 * Adds [[ServerGrid]].
 	 */
-	public addMappa(mappa: AreaArgs): void {
-		if (this.mappas.has(mappa.mappaUuid)) {
-			// Clear the instance if it already exists
-			this.doRemoveArea(mappa);
+	public addGrid(grid
+		if (this.grids.has(grid.gridUuid)) {
+			// Clear the shard if it already exists
+			this.doRemoveGrid(grid);
 		}
 		this.mappas.set(mappa.mappaUuid, new Area(mappa));
 	}
 
 	/**
-	 * Gets [[Mappa]].
+	 * Gets [[ServerGrid]].
 	 */
-	public getMappa({ mappaUuid }: MappaPath): Area {
-		let area: Area | undefined = this.mappas.get(mappaUuid);
-		if (area === undefined) {
+	public getGrid({ gridUuid }: GridPath): ServerGrid {
+		let grid: ServerGrid | undefined = this.grids.get(gridUuid);
+		if (grid === undefined) {
 			// The default is always preserved
-			return this.mappas.get(this.defaultMappaUuid) as Area;
+			return this.grids.get(this.defaultGridUuid) as ServerGrid;
 		}
-		return area;
+		return grid;
 	}
 
 	/**
-	 * Removes [[Mappa]].
+	 * Removes [[CommsGrid]].
 	 */
-	public removeMappa(path: MappaPath): void {
-		if (path.mappaUuid !== this.defaultMappaUuid) {
-			this.doRemoveArea(path);
+	public removeGrid(path: GridPath): void {
+		if (path.gridUuid !== this.defaultGridUuid) {
+			this.doRemoveGrid(path);
 		}
 	}
 
@@ -131,19 +133,19 @@ export class Shard extends Serverable implements Instance {
 	 * Terminates `this`.
 	 */
 	public terminate(): void {
-		this.mappas.forEach(function (area) {
-			area.terminate();
+		this.grids.forEach(function (serverGrid) {
+			serverGrid.terminate();
 		});
 	}
 
 	/**
-	 * Actual removes [[Place]]
+	 * Actual removes [[ServerCell]]
 	 */
-	private doRemoveArea({ mappaUuid }: MappaPath): void {
-		let area: Area | undefined = this.mappas.get(mappaUuid);
-		if (area !== undefined) {
-			area.terminate();
-			this.mappas.delete(mappaUuid);
+	private doRemoveGrid({ gridUuid }: GridPath): void {
+		let serverGrid: ServerArea | undefined = this.grids.get(gridUuid);
+		if (serverGrid !== undefined) {
+			serverGrid.terminate();
+			this.grids.delete(gridUuid);
 		}
 	}
 }

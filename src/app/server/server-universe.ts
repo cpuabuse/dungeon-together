@@ -4,10 +4,10 @@
 */
 
 /**
- * "Server" pool.
+ * Server Universe.
  */
 
-import { Shard, ShardArgs } from "./shard";
+import { ServerShard, ShardArgs } from "./server-shard";
 import { defaultShardUuid, defaultKindUuid, defaultWorldUuid } from "../common/defaults";
 import { ServerGrid } from "./server-grid";
 import { ShardPath } from "../comms/comms-shard";
@@ -61,7 +61,7 @@ export class ServerUniverse implements CommsUniverse {
 	/**
 	 * Add shard to universe.
 	 */
-	public addShard(shard: ShardArgs): void {
+	public addShard(shard: ServerShardArgs): void {
 		this.shards.set(shard.shardUuid, new ServerShard(shard));
 	}
 

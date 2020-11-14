@@ -7,51 +7,51 @@
  * Cells making up the grid.
  */
 
-import { Locus, LocusArgs, LocusPath } from "../shared/comms/locus";
-import { Thing, ThingArgs } from "./thing";
+import { CellPath, CommsCell, CommsCellArgs } from "../comms/comms-cell";
+import { ServerEntity, ServerEntityArgs } from "./server-entity";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import {
 	defaultKindUuid,
 	defaultModeUuid,
 	defaultWorldUuid,
+	entityUuidUrlPath,
 	navAmount,
-	occupantUuidUrlPath,
 	urlPathSeparator
 } from "../common/defaults";
-import { OccupantPath } from "../shared/comms/occupant";
-import { Serverable } from "./serverable";
+import { EntityPath } from "../comms/comms-entity";
+import { ServerProto } from "./server-proto";
 
 /**
  * Navigation.
  */
-export type Nav = Array<LocusPath>;
+export type Nav = Array<CellPath>;
 
 /**
- * Arguments for the [[Place]] constructor.
+ * Arguments for the [[ServerCell]] constructor.
  */
-export interface PlaceArgs extends LocusArgs {
+export interface ServerCellArgs extends CommsCellArgs {
 	nav: Nav;
-	occupants: Map<Uuid, ThingArgs>;
+	entities: Map<Uuid, ServerEntityArgs>;
 }
 
 /**
  * The cell within the grid.
  */
-export class Place extends Serverable implements Locus {
+export class ServerCell extends ServerProto implements CommsCell {
 	/**
-	 * Default [[Thing]] UUID.
+	 * Default [[ServerEntity]] UUID.
 	 */
-	public defaultOccupantUuid: Uuid;
+	public defaultEntityUuid: Uuid;
 
 	/**
 	 * Parent universe.
 	 */
-	public readonly instanceUuid: Uuid;
+	public readonly shardUuid: Uuid;
 
 	/**
-	 * Mappa path.
+	 * CommsGrid path.
 	 */
-	public readonly mappaUuid: Uuid;
+	public readonly gridUuid: Uuid;
 
 	/**
 	 * Navigation.
@@ -59,14 +59,14 @@ export class Place extends Serverable implements Locus {
 	public readonly nav: Nav = new Array(navAmount).fill(this);
 
 	/**
-	 * Place occupants.
+	 * Place entities.
 	 */
-	public readonly occupants: Map<Uuid, Thing> = new Map();
+	public readonly entities: Map<Uuid, ServerEntity> = new Map();
 
 	/**
-	 * Coordinates in map. An id given during creation. Does not represent anything visually or logically.
+	 * Coordinates in grid. An id given during creation. Does not represent anything visually or logically.
 	 */
-	public readonly locusUuid: string;
+	public readonly cellUuid: string;
 
 	/**
 	 * Indicates which world this cell is part of.
@@ -94,14 +94,14 @@ export class Place extends Serverable implements Locus {
 	 * Creates nowhere by default.
 	 * @param nav Can be less than [[navAmount]], then `this.nav` will be filled with `this`, if longer than [[navAmount]], then extra values will be ignored
 	 */
-	public constructor({ instanceUuid, locusUuid, mappaUuid, nav, occupants, worlds, x, y, z }: PlaceArgs) {
-		// Serverable
+	public constructor({ shardUuid, cellUuid, gridUuid, nav, entities, worlds, x, y, z }: ServerCellArgs) {
+		// ServerProto
 		super();
 
 		// Set path
-		this.instanceUuid = instanceUuid;
-		this.mappaUuid = mappaUuid;
-		this.locusUuid = locusUuid;
+		this.shardUuid = shardUuid;
+		this.gridUuid = gridUuid;
+		this.cellUuid = cellUuid;
 
 		// Set coordinates
 		this.x = x;
@@ -113,21 +113,21 @@ export class Place extends Serverable implements Locus {
 			this.nav[i] = nav[i];
 		}
 
-		// Initialize "defaultOccupantUuid"
-		this.defaultOccupantUuid = getDefaultUuid({
-			path: `${occupantUuidUrlPath}${urlPathSeparator}${this.locusUuid}`
+		// Initialize "defaultEntityUuid"
+		this.defaultEntityUuid = getDefaultUuid({
+			path: `${entityUuidUrlPath}${urlPathSeparator}${this.cellUuid}`
 		});
 
 		// Set world; Generate a new object
 		this.worlds = new Set([...worlds, defaultWorldUuid]);
 
 		setTimeout(() => {
-			// Set default occupant
-			this.addOccupant({
+			// Set default entity
+			this.addEntity({
 				...this,
+				entityUuid: this.defaultEntityUuid,
 				kindUuid: defaultKindUuid,
 				modeUuid: defaultModeUuid,
-				occupantUuid: this.defaultOccupantUuid,
 				worldUuid: defaultWorldUuid
 			});
 
@@ -137,12 +137,12 @@ export class Place extends Serverable implements Locus {
 					kinds
 				}: {
 					kinds: Set<Uuid>;
-				} = this.pool.getWorld({
+				} = this.universe.getWorld({
 					uuid: worldUuid
 				});
 
 				kinds.forEach(kindUuid => {
-					this.pool
+					this.universe
 						.getKind({
 							uuid: kindUuid
 						})
@@ -154,64 +154,64 @@ export class Place extends Serverable implements Locus {
 				});
 			});
 
-			// Initialize things
-			occupants.forEach(thing => {
-				this.addOccupant(thing);
+			// Initialize entities
+			entities.forEach(serverEntity => {
+				this.addEntity(serverEntity);
 			});
 		});
 	}
 
 	/**
-	 * Adds [[Occupant]].
+	 * Adds [[ServerEntity]].
 	 */
-	public addOccupant(occupant: ThingArgs): void {
-		if (this.occupants.has(occupant.instanceUuid)) {
-			// Clear the instance if it already exists
-			this.doRemoveThing(occupant);
+	public addEntity(serverEntity: ServerEntityArgs): void {
+		if (this.entities.has(entity.shardUuid)) {
+			// Clear the shard if it already exists
+			this.doRemoveEntity(entity);
 		}
-		let TypeOfThing: typeof Thing = this.pool.getKind({ uuid: occupant.kind }).typeOfThing;
+		let TypeOfEntity: typeof ServerEntity = this.universe.getKind({ uuid: entity.kind }).typeOfEntity;
 
-		// The "TypeOfThing" will be classes extending "Thing", so abstract class should not be created
+		// The "TypeOfEntity" will be classes extending "ServerEntity", so abstract class should not be created
 		// @ts-ignore
-		new TypeOfThing({
-			...occupant,
-			instanceUuid: this.instanceUuid,
-			locusUuid: this.locusUuid,
-			mappaUuid: this.mappaUuid
+		new TypeOfEntity({
+			...entity,
+			cellUuid: this.cellUuid,
+			gridUuid: this.gridUuid,
+			shardUuid: this.shardUuid
 		}).initialize();
 	}
 
 	/**
-	 * Attach [[Thing]] to [[Locus]].
+	 * Attach [[ServerEntity]] to [[Locus]].
 	 */
-	public attach(thing: Thing): void {
-		this.occupants.set(thing.occupantUuid, thing);
+	public attach(serverEntity: ServerEntity): void {
+		this.entities.set(serverEntity.entityUuid, serverEntity);
 	}
 
 	/**
-	 * Detach [[Thing]] from [[Locus]].
+	 * Detach [[ServerEntity]] from [[CommsCell]].
 	 */
-	public detach({ occupantUuid }: Thing): void {
-		if (this.occupants.has(occupantUuid)) {
-			this.occupants.delete(occupantUuid);
+	public detach({ entityUuid }: ServerEntity): void {
+		if (this.entities.has(entityUuid)) {
+			this.entities.delete(entityUuid);
 		}
 	}
 
 	/**
-	 * Gets [[Occupant]].
+	 * Gets [[CommsEntity]].
 	 */
-	public getOccupant({ occupantUuid }: OccupantPath): Thing {
-		let thing: Thing | undefined = this.occupants.get(occupantUuid);
-		// Default scene is always there
-		return thing === undefined ? (this.occupants.get(this.defaultOccupantUuid) as Thing) : thing;
+	public getEntity({ entityUuid }: EntityPath): ServerEntity {
+		let entity: ServerEntity | undefined = this.entities.get(entityUuid);
+		// Default clientEntity is always there
+		return entity === undefined ? (this.entities.get(this.defaultEntityUuid) as ServerEntity) : entity;
 	}
 
 	/**
-	 * Removes [[Occupant]].
+	 * Removes [[CommsEntity]].
 	 */
-	public removeOccupant(path: OccupantPath): void {
-		if (path.occupantUuid !== this.defaultOccupantUuid) {
-			this.doRemoveThing(path);
+	public removeEntity(path: EntityPath): void {
+		if (path.entityUuid !== this.defaultEntityUuid) {
+			this.doRemoveEntity(path);
 		}
 	}
 
@@ -219,18 +219,18 @@ export class Place extends Serverable implements Locus {
 	 * Terminate `this`.
 	 */
 	public terminate(): void {
-		this.occupants.forEach(thing => {
-			this.doRemoveThing(thing);
+		this.entities.forEach(serverEntity => {
+			this.doRemoveEntity(serverEntity);
 		});
 	}
 
 	/**
-	 * Actually removes [[Occupant]].
+	 * Actually removes [[CommsEntity]].
 	 */
-	private doRemoveThing({ occupantUuid }: OccupantPath): void {
-		let thing: Thing | undefined = this.occupants.get(occupantUuid);
-		if (thing !== undefined) {
-			thing.terminate();
+	private doRemoveEntity({ entityUuid }: EntityPath): void {
+		let serverEntity: ServerEntity | undefined = this.entities.get(entityUuid);
+		if (serverEntity !== undefined) {
+			serverEntity.terminate();
 		}
 	}
 }
