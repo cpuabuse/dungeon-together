@@ -7,22 +7,20 @@
  * A universe with everything.
  */
 
-import { Area, AreaArgs } from "./area";
-import { CommsShard, CommsShardeArgs } from "../comms/comms-shard";
+import { CommsShard, CommsShardArgs } from "../comms/comms-shard";
+import { ServerGrid, ServerGridArgs } from "./server-grid";
 import { Uuid, getDefaultUuid } from "../common/uuid";
-import { mappaUuidUrlPath, urlPathSeparator } from "../common/defaults";
+import { gridUuidUrlPath, urlPathSeparator } from "../common/defaults";
 import { ClientConnection } from "../client/connection";
-import { MappaPath } from "../shared/comms/mappa";
+import { GridPath } from "../comms/comms-grid";
 import { ServerConnection } from "./connection";
-import { Serverable } from "./serverable";
 import { ServerProto } from "./server-proto";
-import { CommsShard } from "../comms/comms-shard";
 
 /**
  * Universe args.
  */
 export interface ServerShardArgs extends CommsShardArgs {
-	mappas: Map<Uuid, AreaArgs>;
+	grids: Map<Uuid, ServerGridArgs>;
 }
 
 /**
@@ -52,7 +50,7 @@ export class ServerShard extends ServerProto implements CommsShard {
 	/**
 	 * Constructor.
 	 */
-	public constructor({ shardeUuid, grids }: CommsShardArgs) {
+	public constructor({ shardUuid, grids }: CommsShardArgs) {
 		// ServerProto
 		super();
 
@@ -66,8 +64,8 @@ export class ServerShard extends ServerProto implements CommsShard {
 		setTimeout(() => {
 			this.addGrid({ ...this, cells: new Map(), gridUuid: this.defaultGridUuid });
 
-			grids.forEach(serverGrid => {
-				this.addGrid(serverGrid);
+			grids.forEach(grid => {
+				this.addGrid(grid);
 			});
 		});
 	}
@@ -100,12 +98,12 @@ export class ServerShard extends ServerProto implements CommsShard {
 	/**
 	 * Adds [[ServerGrid]].
 	 */
-	public addGrid(grid
+	public addGrid(grid: ServerGridArgs): void {
 		if (this.grids.has(grid.gridUuid)) {
 			// Clear the shard if it already exists
 			this.doRemoveGrid(grid);
 		}
-		this.mappas.set(mappa.mappaUuid, new Area(mappa));
+		this.grids.set(grid.gridUuid, new ServerGrid(grid));
 	}
 
 	/**
@@ -133,8 +131,8 @@ export class ServerShard extends ServerProto implements CommsShard {
 	 * Terminates `this`.
 	 */
 	public terminate(): void {
-		this.grids.forEach(function (serverGrid) {
-			serverGrid.terminate();
+		this.grids.forEach(function (grid) {
+			grid.terminate();
 		});
 	}
 
@@ -142,9 +140,9 @@ export class ServerShard extends ServerProto implements CommsShard {
 	 * Actual removes [[ServerCell]]
 	 */
 	private doRemoveGrid({ gridUuid }: GridPath): void {
-		let serverGrid: ServerArea | undefined = this.grids.get(gridUuid);
-		if (serverGrid !== undefined) {
-			serverGrid.terminate();
+		let grid: ServerGrid | undefined = this.grids.get(gridUuid);
+		if (grid !== undefined) {
+			grid.terminate();
 			this.grids.delete(gridUuid);
 		}
 	}

@@ -166,7 +166,7 @@ export abstract class ServerEntity extends ServerProto implements CommsEntity {
 	protected doSwap(entityPath: EntityPath): void {
 		// Get thing while nothing is changed yet
 		let targetEntity: ServerEntity = this.universe.getEntity(entityPath);
-		let targetCellPath: CellPath = { ...cellPath };
+		let targetCellPath: CellPath = { ...entityPath };
 
 		// Set target path
 		targetEntity.doMove(this);

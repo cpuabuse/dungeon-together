@@ -24,7 +24,7 @@ export interface ServerGridArgs extends CommsGridArgs {
 /**
  * The grid itself.
  */
-export class ServerGrid extends ServerProto implements ServerGrid {
+export class ServerGrid extends ServerProto implements CommsGrid {
 	/**
 	 * Default [[ServerEntity]] UUID.
 	 */
@@ -73,8 +73,8 @@ export class ServerGrid extends ServerProto implements ServerGrid {
 			});
 
 			// Create cells
-			cells.forEach(serverCell => {
-				this.addCell(serverCell);
+			cells.forEach(cell => {
+				this.addCell(cell);
 			});
 		});
 	}
@@ -83,7 +83,7 @@ export class ServerGrid extends ServerProto implements ServerGrid {
 	 * Adds [[ServerCell]].
 	 */
 	public addCell(cell: ServerCellArgs): void {
-		if (this.cells.has(cells.shardUuid)) {
+		if (this.cells.has(cell.shardUuid)) {
 			// Clear the shard if it already exists
 			this.doRemoveCell(cell);
 		}
@@ -115,8 +115,8 @@ export class ServerGrid extends ServerProto implements ServerGrid {
 	 * Terminates `this`.
 	 */
 	public terminate(): void {
-		this.cells.forEach(function (serverCell) {
-			serverCell.terminate();
+		this.cells.forEach(function (cell) {
+			cell.terminate();
 		});
 	}
 
@@ -124,9 +124,9 @@ export class ServerGrid extends ServerProto implements ServerGrid {
 	 * Actual removes [[ServerCell]]
 	 */
 	private doRemoveCell({ cellUuid }: CellPath): void {
-		let serverCell: ServerCell | undefined = this.cells.get(cellUuid);
-		if (serverCell !== undefined) {
-			serverCell.terminate();
+		let cell: ServerCell | undefined = this.cells.get(cellUuid);
+		if (cell !== undefined) {
+			cell.terminate();
 			this.cells.delete(cellUuid);
 		}
 	}
