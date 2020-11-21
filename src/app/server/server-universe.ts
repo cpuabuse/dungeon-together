@@ -7,18 +7,18 @@
  * Server Universe.
  */
 
-import { ServerShard, ShardArgs } from "./server-shard";
-import { defaultShardUuid, defaultKindUuid, defaultWorldUuid } from "../common/defaults";
-import { ServerGrid } from "./server-grid";
-import { ShardPath } from "../comms/comms-shard";
-import { Kind } from "./kind";
+import { DefaultEntity, ServerEntity } from "./server-entity";
+import { ServerShard, ServerShardArgs } from "./server-shard";
+import { defaultKindUuid, defaultShardUuid, defaultWorldUuid } from "../common/defaults";
 import { CellPath } from "../comms/comms-cell";
-import { GridPath } from "..comms/comms-grid";
-import { EntityPath } from "../comms/comms-entity";
-import { Place } from "./place";
 import { CommsUniverse } from "../comms/comms-universe";
+import { EntityPath } from "../comms/comms-entity";
+import { GridPath } from "../comms/comms-grid";
+import { Kind } from "./kind";
+import { ServerCell } from "./server-cell";
+import { ServerGrid } from "./server-grid";
 import { ServerProto } from "./server-proto";
-import { Thing, DefaultEntity } from "./thing";
+import { ShardPath } from "../comms/comms-shard";
 import { Uuid } from "../common/uuid";
 import { World } from "./world";
 
@@ -30,13 +30,13 @@ export interface ServerUniverseArgs {
 }
 
 /**
- * Server-side universe.
+ * Server-side shard.
  */
 export class ServerUniverse implements CommsUniverse {
 	/**
 	 * Shards.
 	 */
-	public readonly shards: Map<Uuid, Shard> = new Map();
+	public readonly shards: Map<Uuid, ServerShard> = new Map();
 
 	/**
 	 * Entity kinds.
@@ -59,7 +59,7 @@ export class ServerUniverse implements CommsUniverse {
 	}
 
 	/**
-	 * Add shard to universe.
+	 * Add shard to CommsUniverse.
 	 */
 	public addShard(shard: ServerShardArgs): void {
 		this.shards.set(shard.shardUuid, new ServerShard(shard));
@@ -115,7 +115,7 @@ export class ServerUniverse implements CommsUniverse {
 	 *
 	 * A shortcut function.
 	 */
-	public getCell(path: CellPath): Place {
+	public getCell(path: CellPath): ServerCell {
 		return this.getShard(path).getGrid(path).getCell(path);
 	}
 
@@ -133,7 +133,7 @@ export class ServerUniverse implements CommsUniverse {
 	 *
 	 * A shortcut function.
 	 */
-	public getEntity(path: EntityPath): Thing {
+	public getEntity(path: EntityPath): ServerEntity {
 		return this.getShard(path).getGrid(path).getCell(path).getEntity(path);
 	}
 
@@ -150,7 +150,7 @@ export class ServerUniverse implements CommsUniverse {
 	}
 
 	/**
-	 * Remove shard from universe.
+	 * Remove commsShard from CommmsUniverse.
 	 * @returns `true` on success, `false` on failure
 	 */
 	public removeShard(shard: ShardPath): void {
@@ -190,10 +190,10 @@ export class ServerUniverse implements CommsUniverse {
 	}
 
 	/**
-	 * Actually removes the shard.
+	 * Actually removes the commsShard.
 	 */
 	private doRemoveShard({ shardUuid }: ShardPath): void {
-		let shard: ClientShard | undefined = this.shards.get(shardUuid);
+		let shard: ServerShard | undefined = this.shards.get(shardUuid);
 		if (shard !== undefined) {
 			shard.terminate();
 			this.shards.delete(shardUuid);

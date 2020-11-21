@@ -204,7 +204,7 @@ export class ClientUniverse implements CommsUniverse {
  *
  * Timeouts in [[ClientUniverse]] should be executed first.
  */
-export async function InitClientUniverse(): Promise<void> {
+export async function initClientUniverse(): Promise<void> {
 	// Shards
 	(ClientProto.prototype.universe as ClientUniverse) = new ClientUniverse();
 	return new Promise(function (resolve) {
@@ -219,6 +219,6 @@ export async function InitClientUniverse(): Promise<void> {
  *
  * @returns Shards or default shards
  */
-export async function getShards(path: ShardPath): Promise<ClientShard> {
+export async function getShard(path: ShardPath): Promise<ClientShard> {
 	return ClientProto.prototype.universe.getShard(path);
 }

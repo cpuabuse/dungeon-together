@@ -155,8 +155,8 @@ export class ServerCell extends ServerProto implements CommsCell {
 			});
 
 			// Initialize entities
-			entities.forEach(serverEntity => {
-				this.addEntity(serverEntity);
+			entities.forEach(entity => {
+				this.addEntity(entity);
 			});
 		});
 	}
@@ -164,7 +164,7 @@ export class ServerCell extends ServerProto implements CommsCell {
 	/**
 	 * Adds [[ServerEntity]].
 	 */
-	public addEntity(serverEntity: ServerEntityArgs): void {
+	public addEntity(entity: ServerEntityArgs): void {
 		if (this.entities.has(entity.shardUuid)) {
 			// Clear the shard if it already exists
 			this.doRemoveEntity(entity);
@@ -182,10 +182,10 @@ export class ServerCell extends ServerProto implements CommsCell {
 	}
 
 	/**
-	 * Attach [[ServerEntity]] to [[Locus]].
+	 * Attach [[ServerEntity]] to [[CommsCell]].
 	 */
-	public attach(serverEntity: ServerEntity): void {
-		this.entities.set(serverEntity.entityUuid, serverEntity);
+	public attach(entity: ServerEntity): void {
+		this.entities.set(entity.entityUuid, entity);
 	}
 
 	/**
@@ -219,8 +219,8 @@ export class ServerCell extends ServerProto implements CommsCell {
 	 * Terminate `this`.
 	 */
 	public terminate(): void {
-		this.entities.forEach(serverEntity => {
-			this.doRemoveEntity(serverEntity);
+		this.entities.forEach(entity => {
+			this.doRemoveEntity(entity);
 		});
 	}
 
@@ -228,9 +228,9 @@ export class ServerCell extends ServerProto implements CommsCell {
 	 * Actually removes [[CommsEntity]].
 	 */
 	private doRemoveEntity({ entityUuid }: EntityPath): void {
-		let serverEntity: ServerEntity | undefined = this.entities.get(entityUuid);
-		if (serverEntity !== undefined) {
-			serverEntity.terminate();
+		let entity: ServerEntity | undefined = this.entities.get(entityUuid);
+		if (entity !== undefined) {
+			entity.terminate();
 		}
 	}
 }
