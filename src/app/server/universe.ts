@@ -7,18 +7,18 @@
  * Server Universe.
  */
 
-import { DefaultEntity, ServerEntity } from "./server-entity";
-import { ServerShard, ServerShardArgs } from "./server-shard";
+import { DefaultEntity, ServerEntity } from "./entity";
+import { ServerShard, ServerShardArgs } from "./shard";
 import { defaultKindUuid, defaultShardUuid, defaultWorldUuid } from "../common/defaults";
-import { CellPath } from "../comms/comms-cell";
-import { CommsUniverse } from "../comms/comms-universe";
-import { EntityPath } from "../comms/comms-entity";
-import { GridPath } from "../comms/comms-grid";
+import { CellPath } from "../comms/cell";
+import { CommsUniverse } from "../comms/universe";
+import { EntityPath } from "../comms/entity";
+import { GridPath } from "../comms/grid";
 import { Kind } from "./kind";
-import { ServerCell } from "./server-cell";
-import { ServerGrid } from "./server-grid";
-import { ServerProto } from "./server-proto";
-import { ShardPath } from "../comms/comms-shard";
+import { ServerCell } from "./cell";
+import { ServerGrid } from "./grid";
+import { ServerProto } from "./proto";
+import { ShardPath } from "../comms/shard";
 import { Uuid } from "../common/uuid";
 import { World } from "./world";
 

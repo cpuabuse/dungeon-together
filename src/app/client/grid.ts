@@ -7,12 +7,12 @@
  * Cells on screen.
  */
 
-import { CellPath, CommsCellArgs } from "../comms/comms-cell";
-import { CommsGrid, CommsGridArgs } from "../comms/comms-grid";
+import { CellPath, CommsCellArgs } from "../comms/cell";
+import { CommsGrid, CommsGridArgs } from "../comms/grid";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { cellUuidUrlPath, defaultCellVector, defaultWorldUuid, urlPathSeparator } from "../common/defaults";
-import { ClientCell } from "./client-cell";
-import { ClientProto } from "./client-proto";
+import { ClientCell } from "./cell";
+import { ClientProto } from "./proto";
 
 /**
  * Vector Array Object.

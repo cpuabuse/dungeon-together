@@ -7,7 +7,7 @@
  * Entity.
  */
 
-import { CellPath } from "./comms-cell";
+import { CellPath } from "./cell";
 import { Uuid } from "../common/uuid";
 
 /**

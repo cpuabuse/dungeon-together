@@ -7,7 +7,7 @@
  * Comms-proto, part of universe.
  */
 
-import { CommsUniverse } from "./comms-universe";
+import { CommsUniverse } from "./universe";
 
 /**
  * For objects existing as part of [[CommsUniverse]].

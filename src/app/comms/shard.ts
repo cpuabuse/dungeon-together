@@ -7,7 +7,7 @@
  * Shard.
  */
 
-import { CommsGrid, CommsGridArgs, GridPath } from "./comms-grid";
+import { CommsGrid, CommsGridArgs, GridPath } from "./grid";
 import { Uuid } from "../common/uuid";
 
 /**

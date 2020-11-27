@@ -7,8 +7,8 @@
  * Providing access to client instances.
  */
 
-import { ClientUniverse } from "./client-universe";
-import { CommsProto } from "../comms/comms-proto";
+import { ClientUniverse } from "./universe";
+import { CommsProto } from "../comms/proto";
 
 /**
  * Class that knows about canvases.

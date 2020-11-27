@@ -8,8 +8,8 @@
  */
 
 import { Application, Container, Matrix, Renderer, utils } from "pixi.js";
-import { CommsGridArgs, GridPath } from "../comms/comms-grid";
-import { CommsShard, CommsShardArgs } from "../comms/comms-shard";
+import { CommsGridArgs, GridPath } from "../comms/grid";
+import { CommsShard, CommsShardArgs } from "../comms/shard";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import {
 	defaultEntityHeight,
@@ -22,8 +22,8 @@ import {
 	urlPathSeparator
 } from "../common/defaults";
 import { ClientConnection } from "./connection";
-import { ClientGrid } from "./client-grid";
-import { ClientProto } from "./client-proto";
+import { ClientGrid } from "./grid";
+import { ClientProto } from "./proto";
 import { Mode } from "./mode";
 import { View } from "./view";
 

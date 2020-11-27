@@ -7,9 +7,9 @@
  * Renderable unit.
  */
 
-import { CommsEntity, CommsEntityArgs } from "../comms/comms-entity";
+import { CommsEntity, CommsEntityArgs } from "../comms/entity";
 import { AnimatedSprite } from "pixi.js";
-import { ClientProto } from "./client-proto";
+import { ClientProto } from "./proto";
 import { Uuid } from "../common/uuid";
 
 /**

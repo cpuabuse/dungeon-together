@@ -7,8 +7,8 @@
  * Providing access to server resources.
  */
 
-import { CommsProto } from "../comms/comms-proto";
-import { ServerUniverse } from "./server-universe";
+import { CommsProto } from "../comms/proto";
+import { ServerUniverse } from "./universe";
 
 /**
  * Class that knows about shards.

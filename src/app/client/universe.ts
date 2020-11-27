@@ -8,17 +8,17 @@
  */
 
 import { BaseTexture, Texture } from "pixi.js";
-import { CommsShardArgs, ShardPath } from "../comms/comms-shard";
+import { CommsShardArgs, ShardPath } from "../comms/shard";
 import { defaultModeUuid, defaultShardUuid } from "../common/defaults";
-import { CellPath } from "../comms/comms-cell";
-import { ClientCell } from "./client-cell";
-import { ClientEntity } from "./client-entity";
-import { ClientGrid } from "./client-grid";
-import { ClientProto } from "./client-proto";
-import { ClientShard } from "./client-shard";
-import { CommsUniverse } from "../comms/comms-universe";
-import { EntityPath } from "../comms/comms-entity";
-import { GridPath } from "../comms/comms-grid";
+import { CellPath } from "../comms/cell";
+import { ClientCell } from "./cell";
+import { ClientEntity } from "./entity";
+import { ClientGrid } from "./grid";
+import { ClientProto } from "./proto";
+import { ClientShard } from "./shard";
+import { CommsUniverse } from "../comms/universe";
+import { EntityPath } from "../comms/entity";
+import { GridPath } from "../comms/grid";
 import { Mode } from "./mode";
 import { Uuid } from "../common/uuid";
 

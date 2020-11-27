@@ -7,8 +7,8 @@
  * Cells making up the grid.
  */
 
-import { CellPath, CommsCell, CommsCellArgs } from "../comms/comms-cell";
-import { ServerEntity, ServerEntityArgs } from "./server-entity";
+import { CellPath, CommsCell, CommsCellArgs } from "../comms/cell";
+import { ServerEntity, ServerEntityArgs } from "./entity";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import {
 	defaultKindUuid,
@@ -18,8 +18,8 @@ import {
 	navAmount,
 	urlPathSeparator
 } from "../common/defaults";
-import { EntityPath } from "../comms/comms-entity";
-import { ServerProto } from "./server-proto";
+import { EntityPath } from "../comms/entity";
+import { ServerProto } from "./proto";
 
 /**
  * Navigation.

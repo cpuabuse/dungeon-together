@@ -7,7 +7,7 @@
  * Kinds.
  */
 
-import { ServerEntity } from "./server-entity";
+import { ServerEntity } from "./entity";
 
 /**
  * An interface like thing kind, only requiring certain kinds to be there.

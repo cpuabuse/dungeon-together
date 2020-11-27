@@ -5,7 +5,7 @@
 
 import { defaultServerUrl, defaultShardUuid } from "../common/defaults";
 import { ServerConnection } from "../server/connection";
-import { ServerUniverse } from "../server/server-universe";
+import { ServerUniverse } from "../server/universe";
 import { Uuid } from "../common/uuid";
 
 /**

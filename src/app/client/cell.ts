@@ -7,8 +7,8 @@
  * Squares on screen.
  */
 
-import { CommsCell, CommsCellArgs } from "../comms/comms-cell";
-import { CommsEntityArgs, EntityPath } from "../comms/comms-entity";
+import { CommsCell, CommsCellArgs } from "../comms/cell";
+import { CommsEntityArgs, EntityPath } from "../comms/entity";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import {
 	defaultKindUuid,
@@ -17,8 +17,8 @@ import {
 	entityUuidUrlPath,
 	urlPathSeparator
 } from "../common/defaults";
-import { ClientEntity } from "./client-entity";
-import { ClientProto } from "./client-proto";
+import { ClientEntity } from "./entity";
+import { ClientProto } from "./proto";
 
 /**
  * Square(Vector).

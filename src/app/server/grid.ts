@@ -7,12 +7,12 @@
  * Grid for the dungeons.
  */
 
-import { CommsGrid, CommsGridArgs } from "../comms/comms-grid";
-import { ServerCell, ServerCellArgs } from "./server-cell";
+import { CommsGrid, CommsGridArgs } from "../comms/grid";
+import { ServerCell, ServerCellArgs } from "./cell";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { cellUuidUrlPath, defaultCellVector, navAmount, urlPathSeparator } from "../common/defaults";
-import { CellPath } from "../comms/comms-cell";
-import { ServerProto } from "./server-proto";
+import { CellPath } from "../comms/cell";
+import { ServerProto } from "./proto";
 
 /**
  * Arguments for the [[ServerGrid]].

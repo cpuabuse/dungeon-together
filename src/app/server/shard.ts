@@ -7,14 +7,14 @@
  * A universe with everything.
  */
 
-import { CommsShard, CommsShardArgs } from "../comms/comms-shard";
-import { ServerGrid, ServerGridArgs } from "./server-grid";
+import { CommsShard, CommsShardArgs } from "../comms/shard";
+import { ServerGrid, ServerGridArgs } from "./grid";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { gridUuidUrlPath, urlPathSeparator } from "../common/defaults";
 import { ClientConnection } from "../client/connection";
-import { GridPath } from "../comms/comms-grid";
+import { GridPath } from "../comms/grid";
 import { ServerConnection } from "./connection";
-import { ServerProto } from "./server-proto";
+import { ServerProto } from "./proto";
 
 /**
  * Universe args.

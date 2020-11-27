@@ -7,10 +7,10 @@
  * Occupant of cells.
  */
 
-import { CommsEntity, CommsEntityArgs, EntityPath } from "../comms/comms-entity";
-import { CellPath } from "../comms/comms-cell";
-import { ServerCell } from "./server-cell";
-import { ServerProto } from "./server-proto";
+import { CommsEntity, CommsEntityArgs, EntityPath } from "../comms/entity";
+import { CellPath } from "../comms/cell";
+import { ServerCell } from "./cell";
+import { ServerProto } from "./proto";
 import { Uuid } from "../common/uuid";
 import { defaultModeUuid } from "../common/defaults";
 

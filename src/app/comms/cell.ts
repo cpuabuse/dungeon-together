@@ -7,8 +7,8 @@
  * Cell.
  */
 
-import { CommsEntity, CommsEntityArgs, EntityPath } from "./comms-entity";
-import { GridPath } from "./comms-grid";
+import { CommsEntity, CommsEntityArgs, EntityPath } from "./entity";
+import { GridPath } from "./grid";
 import { Uuid } from "../common/uuid";
 import { Vector } from "../common/vector";
 

@@ -7,8 +7,8 @@
  * Grid.
  */
 
-import { CellPath, CommsCell, CommsCellArgs } from "./comms-cell";
-import { ShardPath } from "./comms-shard";
+import { CellPath, CommsCell, CommsCellArgs } from "./cell";
+import { ShardPath } from "./shard";
 import { Uuid } from "../common/uuid";
 
 /**

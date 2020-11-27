@@ -7,10 +7,10 @@
  * Shared universe.
  */
 
-import { CellPath, CommsCell } from "./comms-cell";
-import { CommsEntity, EntityPath } from "./comms-entity";
-import { CommsGrid, GridPath } from "./comms-grid";
-import { CommsShard, CommsShardArgs, ShardPath } from "./comms-shard";
+import { CellPath, CommsCell } from "./cell";
+import { CommsEntity, EntityPath } from "./entity";
+import { CommsGrid, GridPath } from "./grid";
+import { CommsShard, CommsShardArgs, ShardPath } from "./shard";
 import { Uuid } from "../common/uuid";
 
 /**
