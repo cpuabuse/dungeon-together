@@ -9,7 +9,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 
 export default {
-	input: join(__dirname, "..", "..", "..", "..", "src", "app", "client.ts"),
+	input: join(__dirname, "..", "..", "..", "..", "src", "app", "standalone.ts"),
 	output: {
 		file: join(__dirname, "..", "..", "artifacts", "rollup", "standalone.js"),
 		format: "esm",

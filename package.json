@@ -10,6 +10,7 @@
 		"node": ">=13"
 	},
 	"scripts": {
+		"build:run:standalone:browser": "npm run build:stage:standalone",
 		"build": "npm run build:release & npm run build:stage & npm run build:test & npm run build:release:docs",
 		"build:release": "npm run build:release:client & npm run build:release:server & npm run build:release:server",
 		"build:release:client": "npm run build:release:rollup && rollup --config build/release/bin/rollup/release.client.js && mkdirp build/release/artifacts/terser && terser build/release/artifacts/rollup/client.js --compress --mangle --beautify --output build/release/artifacts/terser/client.js && mkdirp build/release/client && ncp build/release/artifacts/terser/client.js build/release/client/index.js",
