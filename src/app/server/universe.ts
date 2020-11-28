@@ -220,7 +220,7 @@ export class ServerUniverse implements CommsUniverse {
  *
  * Timeouts in [[ServerUniverse]] should be executed first.
  */
-export async function InitServer(): Promise<void> {
+export async function initUniverse(): Promise<void> {
 	// Shards
 	(ServerProto.prototype.universe as ServerUniverse) = new ServerUniverse();
 	return new Promise(function (resolve) {
