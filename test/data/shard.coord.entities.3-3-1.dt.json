@@ -1,0 +1,101 @@
+{
+	"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+	"grids": [
+		{
+			"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+			"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+			"cells": [
+				{
+					"x":1,
+					"y":1,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
+					"entities": [
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						},
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
+							"entityUuid": "27a73ed2-9b10-4d31-9bc2-1c54e5edc2ba",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						},
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
+							"entityUuid": "afe7b5f3-4dd3-4a68-8d18-0c47b8db2452",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						},
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
+							"entityUuid": "202283cc-6b0c-46fe-abe5-34e8e2c8d7c0",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						},
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
+							"entityUuid": "de9e0882-0557-42ce-bfdc-3168a73e269f",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						},
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
+							"entityUuid": "6fa26133-5f75-46f6-81d3-4950c4d7b1a8",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						},
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
+							"entityUuid": "95a920cc-054c-4145-8cba-490a7da070ca",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						},
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
+							"entityUuid": "7acd7f96-d0f8-4a62-8f45-8086e6050a4d",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						},
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
+							"entityUuid": "63230401-ea99-44b1-abcf-0484703fa4d7",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						}
+					]
+				}
+			]
+		}
+	]
+}
