@@ -146,7 +146,7 @@ export class ServerCell extends ServerProto implements CommsCell {
 						.getKind({
 							uuid: kindUuid
 						})
-						.typeOfThing.initialize({
+						.typeOfEntity.initialize({
 							...this,
 							kindUuid,
 							worldUuid

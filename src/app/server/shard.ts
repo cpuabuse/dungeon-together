@@ -50,7 +50,7 @@ export class ServerShard extends ServerProto implements CommsShard {
 	/**
 	 * Constructor.
 	 */
-	public constructor({ shardUuid, grids }: CommsShardArgs) {
+	public constructor({ shardUuid, grids }: ServerShardArgs) {
 		// ServerProto
 		super();
 

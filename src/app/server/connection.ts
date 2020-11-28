@@ -4,7 +4,7 @@
 */
 
 import { ClientConnection } from "../client/connection";
-import { Shard } from "./shard";
+import { ServerShard } from "./shard";
 import { Uuid } from "../common/uuid";
 
 /**
@@ -24,7 +24,7 @@ export interface ServerConnectionArgs {
 	/**
 	 * Shard.
 	 */
-	shard: Shard;
+	shard: ServerShard;
 	standalone?: boolean;
 }
 /**
@@ -39,7 +39,7 @@ export class ServerConnection {
 	/**
 	 * Shard.
 	 */
-	public shard: Shard;
+	public shard: ServerShard;
 
 	/**
 	 * Socket or client connection.

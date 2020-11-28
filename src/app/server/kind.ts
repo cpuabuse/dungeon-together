@@ -16,5 +16,5 @@ export interface Kind {
 	/**
 	 * Literally, kind class.
 	 */
-	typeOfThing: typeof ServerEntity;
+	typeOfEntity: typeof ServerEntity;
 }

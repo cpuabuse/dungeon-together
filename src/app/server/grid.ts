@@ -49,7 +49,7 @@ export class ServerGrid extends ServerProto implements CommsGrid {
 	 * Initializes the server grid.
 	 * @param worlds The default world will be ignored, as it is already present by default.
 	 */
-	public constructor({ shardUuid, cells, gridUuid }: CommsGridArgs) {
+	public constructor({ shardUuid, cells, gridUuid }: ServerGridArgs) {
 		// ServerProto
 		super();
 

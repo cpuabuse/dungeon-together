@@ -23,7 +23,7 @@ export interface CommsShardArgs extends ShardPath {
 /**
  * Interface as basis for class implementation.
  */
-export interface CommsShard extends CommsGridArgs {
+export interface CommsShard extends CommsShardArgs {
 	/**
 	 * Default [[Grid]] UUID.
 	 */
