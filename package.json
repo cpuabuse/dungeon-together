@@ -86,6 +86,7 @@
 		"typescript": "^3.9.7"
 	},
 	"dependencies": {
+		"axios": "^0.21.0",
 		"dungeoneer": "^2.1.5",
 		"pixi.js": "^5.3.3",
 		"uuid": "^7.0.3",

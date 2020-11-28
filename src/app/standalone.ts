@@ -14,8 +14,10 @@
  */
 
 import { getShard, initUniverse as initClientUniverse } from "./client/universe";
+import { ClientProto } from "./client/proto";
 import { ClientShard } from "./client/shard";
-import { defaultShardUuid } from "./common/defaults";
+import { CommsShardArgs } from "./comms/shard";
+import axios from "axios";
 import { initUniverse as initServerUniverse } from "./server/universe";
 
 /**
@@ -26,8 +28,15 @@ async function main(): Promise<void> {
 	await Promise.all([initClientUniverse(), initServerUniverse()]);
 
 	// Get defaults
-	let defaultShard: ClientShard = await getShard({ shardUuid: defaultShardUuid });
+	let shardData: object = await new Promise(function (resolve) {
+		axios.get("/test/data/shard.coord.3-3-1.dt.json").then(function (data) {
+			resolve(data.data);
+		});
+	});
 
+	ClientProto.prototype.universe.addShard(shardData as CommsShardArgs);
+
+	let defaultShard: ClientShard = await getShard({ shardUuid: "00584037-3ca6-4fb0-9178-50594152f3b7" });
 	// Attach canvas
 	defaultShard.attach(document.body);
 }
