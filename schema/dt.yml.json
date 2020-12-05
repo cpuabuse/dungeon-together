@@ -53,6 +53,8 @@
 			"additionalProperties": false,
 			"properties": {
 				"id": { "$ref": "#/definitions/uuid", "description": "ID path" },
+				"x": { "description": "X coordinate", "type": ["number"] },
+				"y": { "description": "Y coordinate", "type": ["number"] },
 				"entities": {
 					"description": "Array of entities",
 					"type": ["array", "null"],
