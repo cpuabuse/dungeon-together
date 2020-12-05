@@ -60,7 +60,8 @@
 					"type": ["array", "null"],
 					"items": { "$ref": "#/definitions/entity" }
 				}
-			}
+			},
+			"required": ["x", "y"]
 		},
 		"entity": {
 			"description": "Entity to generate",
