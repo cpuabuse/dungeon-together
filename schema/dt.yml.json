@@ -4,7 +4,7 @@
 	"title": "Dungeon Together schema",
 	"description": "A schema for generation of Dungeon Together shards",
 	"type": "object",
-	"required": ["data"],
+	"required": ["data", "type"],
 	"additionalProperties": false,
 	"definitions": {
 		"type": {
