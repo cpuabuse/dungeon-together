@@ -8,6 +8,7 @@
  */
 
 import { CommsEntity, CommsEntityArgs, EntityPath } from "./entity";
+import { CommsProto } from "./proto";
 import { GridPath } from "./grid";
 import { Uuid } from "../common/uuid";
 import { Vector } from "../common/vector";
@@ -30,7 +31,7 @@ export interface CommsCellArgs extends CellPath, Vector {
 /**
  * Cell implementable.
  */
-export interface CommsCell extends CommsCellArgs {
+export interface CommsCell extends CommsCellArgs, CommsProto {
 	/**
 	 * Default [[Entity]] UUID.
 	 */

@@ -1,0 +1,84 @@
+{
+	"$schema": "https://json-schema.org/draft/2019-09/schema#",
+	"$id": "https://cpuabuse.com/dt/schema/dt.yml.json",
+	"title": "Dungeon Together schema",
+	"description": "A schema for generation of Dungeon Together shards",
+	"type": "object",
+	"required": ["data"],
+	"additionalProperties": false,
+	"definitions": {
+		"type": {
+			"description": "Object type",
+			"type": ["string"],
+			"enum": ["shard", "grid", "cell", "entity"]
+		},
+		"data": {
+			"description": "Data to generate",
+			"oneOf": [
+				{ "$ref": "#/definitions/shard" },
+				{ "$ref": "#/definitions/grid" },
+				{ "$ref": "#/definitions/cell" },
+				{ "$ref": "#/definitions/entity" }
+			]
+		},
+		"shard": {
+			"description": "Shard to generate",
+			"type": ["object", "null"],
+			"additionalProperties": false,
+			"properties": {
+				"id": { "$ref": "#/definitions/uuid", "description": "ID path" },
+				"grids": {
+					"description": "Array of grids",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/definitions/grid" }
+				}
+			}
+		},
+		"grid": {
+			"description": "Grid to generate",
+			"type": ["object", "null"],
+			"additionalProperties": false,
+			"properties": {
+				"id": { "$ref": "#/definitions/uuid", "description": "ID path" },
+				"cells": {
+					"description": "Array of cells",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/definitions/cell" }
+				}
+			}
+		},
+		"cell": {
+			"description": "Cell to generate",
+			"type": ["object", "null"],
+			"additionalProperties": false,
+			"properties": {
+				"id": { "$ref": "#/definitions/uuid", "description": "ID path" },
+				"entities": {
+					"description": "Array of entities",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/definitions/entity" }
+				}
+			}
+		},
+		"entity": {
+			"description": "Entity to generate",
+			"type": ["object", "null"],
+			"additionalProperties": false,
+			"properties": {
+				"id": { "$ref": "#/definitions/uuid", "description": "ID path" },
+				"kind": { "$ref": "#/definitions/uuid", "description": "Kind path" },
+				"mode": { "$ref": "#/definitions/uuid", "description": "Mode path" },
+				"world": { "$ref": "#/definitions/uuid", "description": "World path" }
+			}
+		},
+		"uuid": {
+			"description": "URI path pattern",
+			"type": ["string", "null"],
+			"pattern": "^[/a-zA-Z0-9][/a-zA-Z0-9-]+$"
+		}
+	},
+	"properties": {
+		"type": { "$ref": "#/definitions/type" },
+		"data": { "$ref": "#/definitions/data" }
+	}
+}

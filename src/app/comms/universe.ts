@@ -14,7 +14,7 @@ import { CommsShard, CommsShardArgs, ShardPath } from "./shard";
 import { Uuid } from "../common/uuid";
 
 /**
- * Lets other objects become [[Poolable]].
+ * Lets other objects become [[CommsProto]].
  */
 export interface CommsUniverse {
 	/**

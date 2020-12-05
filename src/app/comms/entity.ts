@@ -8,6 +8,7 @@
  */
 
 import { CellPath } from "./cell";
+import { CommsProto } from "./proto";
 import { Uuid } from "../common/uuid";
 
 /**
@@ -33,7 +34,7 @@ export interface CommsEntityArgs extends EntityPath {
 /**
  * Implementable [[CommsEntityArgs]].
  */
-export interface CommsEntity extends CommsEntityArgs {
+export interface CommsEntity extends CommsEntityArgs, CommsProto {
 	/**
 	 * Terminates `this`.
 	 */

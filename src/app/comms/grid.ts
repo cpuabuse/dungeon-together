@@ -8,6 +8,7 @@
  */
 
 import { CellPath, CommsCell, CommsCellArgs } from "./cell";
+import { CommsProto } from "./proto";
 import { ShardPath } from "./shard";
 import { Uuid } from "../common/uuid";
 
@@ -24,7 +25,7 @@ export interface CommsGridArgs extends GridPath {
 /**
  * Implementable [[CommsGridArgs]].
  */
-export interface CommsGrid extends CommsGridArgs {
+export interface CommsGrid extends CommsGridArgs, CommsProto {
 	/**
 	 * Default [[Cell]] UUID.
 	 */

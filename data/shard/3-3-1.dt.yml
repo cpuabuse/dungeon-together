@@ -1,0 +1,7 @@
+type: shard
+data:
+  grids:
+    - cells:
+        - id: path/to/cell
+          entities:
+            - kind: path/to/resource

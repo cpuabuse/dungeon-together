@@ -13,7 +13,7 @@ import { Vector } from "./vector";
 /**
  * App namespace.
  */
-export const appUrl: string = "https://cpuabuse.com";
+export const appUrl: string = "https://cpuabuse.com/dt";
 
 /**
  * Default URL for a server.
@@ -41,7 +41,7 @@ export const shardUuidUrlPath: string = "shard";
 export const kindUuidUrlPath: string = "kind";
 
 /**
- * CommmsCell path identifier for UUID.
+ * CommsCell path identifier for UUID.
  */
 export const cellUuidUrlPath: string = "cell";
 

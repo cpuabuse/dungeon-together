@@ -14,6 +14,11 @@ import { CommsUniverse } from "./universe";
  */
 export interface CommsProto {
 	/**
+	 * Events.
+	 */
+	events: Array<Event>;
+
+	/**
 	 * Actual universe.
 	 */
 	universe: CommsUniverse;

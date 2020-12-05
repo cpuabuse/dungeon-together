@@ -1,8 +1,10 @@
 {
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"editor.insertSpaces": false,
-	"eslint.probe": [
-		"typescript"
-	],
-	"files.eol": "\n"
+	"eslint.probe": ["typescript"],
+	"files.eol": "\n",
+	"cSpell.words": ["comms", "cpuabuse"],
+	"yaml.schemas": {
+		"./schema/dt.yml.json": ["*.dt.yml"]
+	}
 }
