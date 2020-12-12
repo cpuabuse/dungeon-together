@@ -129,7 +129,7 @@ data:
           entities:
             - kind: wall
         - x: 0
-          y: 1
+          y: 2
           entities:
             - kind: wall
         - x: 1
@@ -137,77 +137,14 @@ data:
           entities:
             - kind: wall
         - x: 2
-          y: 1
-          entities:
-            - kind: wall
-        - x: 3
-          y: 1
-          entities:
-            - kind: floor
-            - kind: trap
-        - x: 4
-          y: 1
-          entities:
-            - kind: floor
-        - x: 5
-          y: 1
-          entities:
-            - kind: floor
-        - x: 6
-          y: 1
-          entities:
-            - kind: wall
-        - x: 7
-          y: 1
-          entities:
-            - kind: floor
-        - x: 8
-          y: 1
-          entities:
-            - kind: wall
-        - x: 9
-          y: 1
-          entities:
-            - kind: floor
-        - x: 10
-          y: 1
-          entities:
-            - kind: wall
-        - x: 11
-          y: 1
-          entities:
-            - kind: floor
-        - x: 12
-          y: 1
-          entities:
-            - kind: floor
-        - x: 13
-          y: 1
-          entities:
-            - kind: floor
-            - kind: trap
-        - x: 14
-          y: 1
-          entities:
-            - kind: wall
-        - x: 0
           y: 2
           entities:
             - kind: wall
-        - x: 1
-          y: 2
-          entities:
-            - kind: floor
-            - kind: treasure
-        - x: 2
-          y: 2
-          entities:
-            - kind: floor
-            - kind: trap
         - x: 3
           y: 2
           entities:
             - kind: floor
+            - kind: trap
         - x: 4
           y: 2
           entities:
@@ -216,7 +153,6 @@ data:
           y: 2
           entities:
             - kind: floor
-            - kind: trap
         - x: 6
           y: 2
           entities:
@@ -228,8 +164,7 @@ data:
         - x: 8
           y: 2
           entities:
-            - kind: floor
-            - kind: trap
+            - kind: wall
         - x: 9
           y: 2
           entities:
@@ -250,6 +185,7 @@ data:
           y: 2
           entities:
             - kind: floor
+            - kind: trap
         - x: 14
           y: 2
           entities:
@@ -267,69 +203,7 @@ data:
           y: 3
           entities:
             - kind: floor
-            - kind: trap
-        - x: 3
-          y: 2
-          entities:
-            - kind: floor
-        - x: 4
-          y: 2
-          entities:
-            - kind: floor
-        - x: 5
-          y: 2
-          entities:
-            - kind: floor
-            - kind: trap
-        - x: 6
-          y: 2
-          entities:
-            - kind: wall
-        - x: 7
-          y: 2
-          entities:
-            - kind: floor
-        - x: 8
-          y: 2
-          entities:
-            - kind: floor
-            - kind: trap
-        - x: 9
-          y: 2
-          entities:
-            - kind: floor
-        - x: 10
-          y: 2
-          entities:
-            - kind: wall
-        - x: 11
-          y: 2
-          entities:
-            - kind: floor
-        - x: 12
-          y: 2
-          entities:
-            - kind: floor
-        - x: 13
-          y: 2
-          entities:
-            - kind: floor
-        - x: 14
-          y: 2
-          entities:
-            - kind: wall
-        - x: 0
-          y: 3
-          entities:
-            - kind: wall
-        - x: 1
-          y: 3
-          entities:
-            - kind: wall
-        - x: 2
-          y: 3
-          entities:
-            - kind: wall
+            - kind: ennemy
         - x: 3
           y: 3
           entities:
@@ -342,11 +216,11 @@ data:
           y: 3
           entities:
             - kind: floor
+            - kind: ennemy
         - x: 6
           y: 3
           entities:
-            - kind: floor
-            - kind: door
+            - kind: wall
         - x: 7
           y: 3
           entities:
@@ -355,6 +229,7 @@ data:
           y: 3
           entities:
             - kind: floor
+            - kind: ennemy
         - x: 9
           y: 3
           entities:
@@ -366,16 +241,15 @@ data:
         - x: 11
           y: 3
           entities:
-            - kind: wall
+            - kind: floor
         - x: 12
           y: 3
           entities:
             - kind: floor
-            - kind: door
         - x: 13
           y: 3
           entities:
-            - kind: wall
+            - kind: floor
         - x: 14
           y: 3
           entities:
@@ -444,5 +318,646 @@ data:
             - kind: wall
         - x: 0
           y: 5
+          entities:
+            - kind: wall
+        - x: 1
+          y: 5
+          entities:
+            - kind: wall
+        - x: 2
+          y: 5
+          entities:
+            - kind: wall
+        - x: 3
+          y: 5
+          entities:
+            - kind: floor
+            - kind: trap
+        - x: 4
+          y: 5
+          entities:
+            - kind: wall
+        - x: 5
+          y: 5
+          entities:
+            - kind: wall
+        - x: 6
+          y: 5
+          entities:
+            - kind: wall
+        - x: 7
+          y: 5
+          entities:
+            - kind: floor
+            - kind: trap
+        - x: 8
+          y: 5
+          entities:
+            - kind: floor
+        - x: 9
+          y: 5
+          entities:
+            - kind: floor
+        - x: 10
+          y: 5
+          entities:
+            - kind: wall
+        - x: 11
+          y: 5
+          entities:
+            - kind: floor
+        - x: 12
+          y: 5
+          entities:
+            - kind: floor
+        - x: 13
+          y: 5
+          entities:
+            - kind: floor
+        - x: 14
+          y: 5
+          entities:
+            - kind: wall
+        - x: 0
+          y: 6
+          entities:
+            - kind: wall
+        - x: 1
+          y: 6
+          entities:
+            - kind: wall
+        - x: 2
+          y: 6
+          entities:
+            - kind: wall
+        - x: 3
+          y: 6
+          entities:
+            - kind: wall
+        - x: 4
+          y: 6
+          entities:
+            - kind: wall
+        - x: 5
+          y: 6
+          entities:
+            - kind: wall
+        - x: 6
+          y: 6
+          entities:
+            - kind: wall
+        - x: 7
+          y: 6
+          entities:
+            - kind: floor
+            - kind: ennemy
+        - x: 8
+          y: 6
+          entities:
+            - kind: floor
+        - x: 9
+          y: 6
+          entities:
+            - kind: floor
+        - x: 10
+          y: 6
+          entities:
+            - kind: wall
+        - x: 11
+          y: 6
+          entities:
+            - kind: floor
+            - kind: trap
+        - x: 12
+          y: 6
+          entities:
+            - kind: floor
+        - x: 13
+          y: 6
+          entities:
+            - kind: floor
+            - kind: trap
+        - x: 14
+          y: 6
+          entities:
+            - kind: wall
+        - x: 0
+          y: 7
+          entities:
+            - kind: floor
+            - kind: entry
+        - x: 1
+          y: 7
+          entities:
+            - kind: floor
+        - x: 2
+          y: 7
+          entities:
+            - kind: floor
+        - x: 3
+          y: 7
+          entities:
+            - kind: floor
+        - x: 4
+          y: 7
+          entities:
+            - kind: wall
+        - x: 5
+          y: 7
+          entities:
+            - kind: floor
+            - kind: trap
+        - x: 6
+          y: 7
+          entities:
+            - kind: wall
+        - x: 7
+          y: 7
+          entities:
+            - kind: floor
+        - x: 8
+          y: 7
+          entities:
+            - kind: floor
+            - kind: trap
+        - x: 9
+          y: 7
+          entities:
+            - kind: floor
+        - x: 10
+          y: 7
+          entities:
+            - kind: wall
+        - x: 11
+          y: 7
+          entities:
+            - kind: wall
+        - x: 12
+          y: 7
+          entities:
+            - kind: floor
+            - kind: door
+        - x: 13
+          y: 7
+          entities:
+            - kind: wall
+        - x: 14
+          y: 7
+          entities:
+            - kind: wall
+        - x: 0
+          y: 8
+          entities:
+            - kind: wall
+        - x: 1
+          y: 8
+          entities:
+            - kind: wall
+        - x: 2
+          y: 8
+          entities:
+            - kind: wall
+        - x: 3
+          y: 8
+          entities:
+            - kind: floor
+        - x: 4
+          y: 8
+          entities:
+            - kind: wall
+        - x: 5
+          y: 8
+          entities:
+            - kind: floor
+        - x: 6
+          y: 8
+          entities:
+            - kind: wall
+        - x: 7
+          y: 8
+          entities:
+            - kind: floor
+        - x: 8
+          y: 8
+          entities:
+            - kind: floor
+            - kind: ennemy
+        - x: 9
+          y: 8
+          entities:
+            - kind: floor
+        - x: 10
+          y: 8
+          entities:
+            - kind: wall
+        - x: 11
+          y: 8
+          entities:
+            - kind: floor
+        - x: 12
+          y: 8
+          entities:
+            - kind: floor
+        - x: 13
+          y: 8
+          entities:
+            - kind: floor
+        - x: 14
+          y: 8
+          entities:
+            - kind: wall
+        - x: 0
+          y: 9
+          entities:
+            - kind: wall
+        - x: 1
+          y: 9
+          entities:
+            - kind: wall
+        - x: 2
+          y: 9
+          entities:
+            - kind: floor
+            - kind: foor
+        - x: 3
+          y: 9
+          entities:
+            - kind: floor
+        - x: 4
+          y: 9
+          entities:
+            - kind: floor
+            - kind: door
+        - x: 5
+          y: 9
+          entities:
+            - kind: floor
+        - x: 6
+          y: 9
+          entities:
+            - kind: floor
+        - x: 7
+          y: 9
+          entities:
+            - kind: floor
+            - kind: door
+        - x: 8
+          y: 9
+          entities:
+            - kind: wall
+        - x: 9
+          y: 9
+          entities:
+            - kind: wall
+        - x: 10
+          y: 9
+          entities:
+            - kind: wall
+        - x: 11
+          y: 9
+          entities:
+            - kind: floor
+        - x: 12
+          y: 9
+          entities:
+            - kind: floor
+            - kind: ennemy
+        - x: 13
+          y: 9
+          entities:
+            - kind: door
+        - x: 14
+          y: 9
+          entities:
+            - kind: wall
+        - x: 0
+          y: 10
+          entities:
+            - kind: wall
+        - x: 1
+          y: 10
+          entities:
+            - kind: wall
+        - x: 2
+          y: 10
+          entities:
+            - kind: floor
+            - kind: ennemy
+        - x: 3
+          y: 10
+          entities:
+            - kind: wall
+        - x: 4
+          y: 10
+          entities:
+            - kind: wall
+        - x: 5
+          y: 10
+          entities:
+            - kind: wall
+        - x: 6
+          y: 10
+          entities:
+            - kind: floor
+            - kind: door
+        - x: 7
+          y: 10
+          entities:
+            - kind: wall
+        - x: 8
+          y: 10
+          entities:
+            - kind: floor
+            - kind: treasure
+        - x: 9
+          y: 10
+          entities:
+            - kind: wall
+        - x: 10
+          y: 10
+          entities:
+            - kind: floor
+        - x: 11
+          y: 10
+          entities:
+            - kind: floor
+        - x: 12
+          y: 10
+          entities:
+            - kind: wall
+        - x: 13
+          y: 10
+          entities:
+            - kind: wall
+        - x: 14
+          y: 10
+          entities:
+            - kind: wall
+        - x: 0
+          y: 11
+          entities:
+            - kind: wall
+        - x: 1
+          y: 11
+          entities:
+            - kind: wall
+        - x: 2
+          y: 11
+          entities:
+            - kind: floor
+            - kind: door
+        - x: 3
+          y: 11
+          entities:
+            - kind: wall
+        - x: 4
+          y: 11
+          entities:
+            - kind: floor
+            - kind: trap
+        - x: 5
+          y: 11
+          entities:
+            - kind: floor
+            - kind: ennemy
+        - x: 6
+          y: 11
+          entities:
+            - kind: floor
+        - x: 7
+          y: 11
+          entities:
+            - kind: wall
+        - x: 8
+          y: 11
+          entities:
+            - kind: floor
+        - x: 9
+          y: 11
+          entities:
+            - kind: floor
+            - kind: ennemy
+        - x: 10
+          y: 11
+          entities:
+            - kind: floor
+        - x: 11
+          y: 11
+          entities:
+            - kind: floor
+        - x: 12
+          y: 11
+          entities:
+            - kind: floor
+        - x: 13
+          y: 11
+          entities:
+            - kind: floor
+        - x: 14
+          y: 11
+          entities:
+            - kind: wall
+        - x: 0
+          y: 12
+          entities:
+            - kind: wall
+        - x: 1
+          y: 12
+          entities:
+            - kind: wall
+        - x: 2
+          y: 12
+          entities:
+            - kind: floor
+        - x: 3
+          y: 12
+          entities:
+            - kind: wall
+        - x: 4
+          y: 12
+          entities:
+            - kind: floor
+            - kind: treasure
+        - x: 5
+          y: 12
+          entities:
+            - kind: floor
+        - x: 6
+          y: 12
+          entities:
+            - kind: floor
+        - x: 7
+          y: 12
+          entities:
+            - kind: wall
+        - x: 8
+          y: 12
+          entities:
+            - kind: floor
+            - kind: ennemy
+        - x: 9
+          y: 12
+          entities:
+            - kind: floor
+        - x: 10
+          y: 12
+          entities:
+            - kind: floor
+        - x: 11
+          y: 12
+          entities:
+            - kind: floor
+        - x: 12
+          y: 12
+          entities:
+            - kind: wall
+        - x: 13
+          y: 12
+          entities:
+            - kind: floor
+        - x: 14
+          y: 12
+          entities:
+            - kind: wall
+        - x: 0
+          y: 13
+          entities:
+            - kind: wall
+        - x: 1
+          y: 13
+          entities:
+            - kind: floor
+            - kind: treasure
+        - x: 2
+          y: 13
+          entities:
+            - kind: floor
+            - kind: ennemy
+        - x: 0
+          y: 13
+          entities:
+            - kind: wall
+        - x: 1
+          y: 13
+          entities:
+            - kind: floor
+            - kind: treasure
+        - x: 2
+          y: 13
+          entities:
+            - kind: floor
+            - kind: ennemy
+        - x: 3
+          y: 13
+          entities:
+            - kind: wall
+        - x: 4
+          y: 13
+          entities:
+            - kind: floor
+            - kind: trap
+        - x: 5
+          y: 13
+          entities:
+            - kind: floor
+            - kind: ennemy
+        - x: 6
+          y: 13
+          entities:
+            - kind: floor
+        - x: 7
+          y: 13
+          entities:
+            - kind: wall
+        - x: 8
+          y: 13
+          entities:
+            - kind: floor
+            - kind: treasure
+        - x: 9
+          y: 13
+          entities:
+            - kind: floor
+            - kind: trap
+        - x: 10
+          y: 13
+          entities:
+            - kind: floor
+        - x: 11
+          y: 13
+          entities:
+            - kind: floor
+            - kind: exit
+        - x: 12
+          y: 13
+          entities:
+            - kind: wall
+        - x: 13
+          y: 13
+          entities:
+            - kind: floor
+            - kind: ennemy
+        - x: 14
+          y: 13
+          entities:
+            - kind: wall
+        - x: 0
+          y: 14
+          entities:
+            - kind: wall
+        - x: 1
+          y: 14
+          entities:
+            - kind: wall
+        - x: 2
+          y: 14
+          entities:
+            - kind: wall
+        - x: 3
+          y: 14
+          entities:
+            - kind: wall
+        - x: 4
+          y: 14
+          entities:
+            - kind: wall
+        - x: 5
+          y: 14
+          entities:
+            - kind: wall
+        - x: 6
+          y: 14
+          entities:
+            - kind: wall
+        - x: 7
+          y: 14
+          entities:
+            - kind: wall
+        - x: 8
+          y: 14
+          entities:
+            - kind: wall
+        - x: 9
+          y: 14
+          entities:
+            - kind: wall
+        - x: 10
+          y: 14
+          entities:
+            - kind: wall
+        - x: 11
+          y: 14
+          entities:
+            - kind: wall
+        - x: 12
+          y: 14
+          entities:
+            - kind: wall
+        - x: 13
+          y: 14
+          entities:
+            - kind: wall
+        - x: 14
+          y: 14
           entities:
             - kind: wall
