@@ -32,6 +32,13 @@ export interface CommsEntityArgs extends EntityPath {
 }
 
 /**
+ * Type for physical data exchange.
+ * Type is used as this is to be sent over internet.
+ * Only JSON compatible member types can be used.
+ */
+export type CommsEntityRaw = Omit<CommsEntityArgs, keyof CellPath>;
+
+/**
  * Implementable [[CommsEntityArgs]].
  */
 export interface CommsEntity extends CommsEntityArgs, CommsProto {

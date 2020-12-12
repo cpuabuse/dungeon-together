@@ -59,7 +59,7 @@
 		"@types/cli-progress": "^3.8.0",
 		"@types/js-yaml": "^3.12.5",
 		"@types/mocha": "^7.0.1",
-		"@types/node": "^13.13.33",
+		"@types/node": "^13.13.34",
 		"@types/uuid": "^7.0.4",
 		"@types/ws": "^7.4.0",
 		"@typescript-eslint/eslint-plugin": "^2.34.0",
@@ -73,7 +73,7 @@
 		"eslint-config-prettier": "^6.15.0",
 		"eslint-plugin-import": "^2.22.1",
 		"eslint-plugin-mocha": "^6.3.0",
-		"eslint-plugin-prettier": "^3.1.4",
+		"eslint-plugin-prettier": "^3.2.0",
 		"mkdirp": "^1.0.4",
 		"mocha": "^7.2.0",
 		"ncp": "^2.0.0",
@@ -89,9 +89,11 @@
 	"dependencies": {
 		"axios": "^0.21.0",
 		"dungeoneer": "^2.1.5",
+		"fp-ts": "^2.9.1",
+		"io-ts": "^2.2.13",
+		"js-yaml": "^3.14.0",
 		"pixi.js": "^5.3.3",
 		"uuid": "^7.0.3",
-		"ws": "^7.4.0",
-		"js-yaml": "^3.14.0"
+		"ws": "^7.4.1"
 	}
 }

@@ -7,7 +7,7 @@
  * Cell.
  */
 
-import { CommsEntity, CommsEntityArgs, EntityPath } from "./entity";
+import { CommsEntity, CommsEntityArgs, CommsEntityRaw, EntityPath } from "./entity";
 import { CommsProto } from "./proto";
 import { GridPath } from "./grid";
 import { Uuid } from "../common/uuid";
@@ -27,6 +27,15 @@ export interface CommsCellArgs extends CellPath, Vector {
 	 */
 	worlds: Set<Uuid>;
 }
+
+/**
+ * Type for physical data exchange.
+ * Type is used as this is to be sent over internet.
+ * Only JSON compatible member types can be used.
+ */
+export type CommsCellRaw = Omit<CommsCellArgs, "cells" | keyof GridPath> & {
+	entities: Array<CommsEntityRaw>;
+};
 
 /**
  * Cell implementable.

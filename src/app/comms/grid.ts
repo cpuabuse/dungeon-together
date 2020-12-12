@@ -7,7 +7,7 @@
  * Grid.
  */
 
-import { CellPath, CommsCell, CommsCellArgs } from "./cell";
+import { CellPath, CommsCell, CommsCellArgs, CommsCellRaw } from "./cell";
 import { CommsProto } from "./proto";
 import { ShardPath } from "./shard";
 import { Uuid } from "../common/uuid";
@@ -21,6 +21,15 @@ export interface CommsGridArgs extends GridPath {
 	 */
 	cells: Map<Uuid, CommsCellArgs>;
 }
+
+/**
+ * Type for physical data exchange.
+ * Type is used as this is to be sent over internet.
+ * Only JSON compatible member types can be used.
+ */
+export type CommsGridRaw = Omit<CommsGridArgs, "cells" | keyof ShardPath> & {
+	cells: Array<CommsCellRaw>;
+};
 
 /**
  * Implementable [[CommsGridArgs]].
