@@ -3,11 +3,11 @@ Copyright 2020 cpuabuse.com
 Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+import { CommsCellArgs, CommsCellRaw } from "../comms/cell";
+import { CommsEntityArgs, CommsEntityRaw } from "../comms/entity";
+import { CommsGridArgs, CommsGridRaw } from "../comms/grid";
 import { CommsShardArgs, CommsShardRaw, commsShardRawToArgs } from "../comms/shard";
-import { array as arrayType, string as stringType, type, TypeOf as typeOf, unknown as unknownType } from "io-ts";
-import { CommsCellArgs } from "../comms/cell";
-import { CommsEntityArgs } from "../comms/entity";
-import { CommsGridArgs } from "../comms/grid";
+import { array as arrayType, string as stringType, type, TypeOf as typeOf, union as unionType } from "io-ts";
 import { safeLoad } from "js-yaml";
 
 /**
@@ -44,7 +44,25 @@ const shardType = type({
 	grids: arrayType(gridType)
 });
 
-type Shard = typeOf<typeof shardType>;
+/**
+ * The shard from YAML.
+ */
+type YamlShard = typeOf<typeof shardType>;
+
+/**
+ * The grid from YAML.
+ */
+type YamlGrid = typeOf<typeof gridType>;
+
+/**
+ * The cell from YAML.
+ */
+type YamlCell = typeOf<typeof cellType>;
+
+/**
+ * The entity from YAML.
+ */
+type YamlEntity = typeOf<typeof entityType>;
 
 /**
  * Structured root object.
@@ -52,7 +70,7 @@ type Shard = typeOf<typeof shardType>;
 // Infer generic type
 // eslint-disable-next-line @typescript-eslint/typedef
 const rootType = type({
-	data: unknownType,
+	data: unionType([entityType, cellType, gridType, shardType]),
 	type: stringType
 });
 
@@ -95,25 +113,65 @@ export function compile(data: string): CommsShardArgs | CommsGridArgs | CommsCel
 				throw new Error("Type was not specified correctly");
 		}
 	} else {
-		throw new Error("YAML was not an object or did not contain type property");
+		throw new Error("YAML was malformed");
 	}
 }
 
 /**
  * Compiles a shard.
  */
-function compileShardArgs(shard: Shard): CommsShardArgs {
+function compileShardArgs(shard: YamlShard): CommsShardArgs {
 	return commsShardRawToArgs(compileShardRaw(shard));
 }
 
 /**
  * Compiles a raw shard.
  */
-function compileShardRaw(shard: Shard): CommsShardRaw {
+function compileShardRaw(shard: YamlShard): CommsShardRaw {
 	return {
 		grids: shard.grids.map(function (grid) {
-			return { cells: [], gridUuid: "abc" };
+			return compileGridRaw(grid);
 		}),
 		shardUuid: "abc"
+	};
+}
+
+/**
+ * Compiles a raw grid.
+ */
+function compileGridRaw(grid: YamlGrid): CommsGridRaw {
+	return {
+		cells: grid.cells.map(function (cell) {
+			return compileCellRaw(cell);
+		}),
+		gridUuid: "abc"
+	};
+}
+
+/**
+ * Compiles a raw cell.
+ */
+function compileCellRaw(cell: YamlCell): CommsCellRaw {
+	return {
+		cellUuid: "abc",
+		entities: cell.entities.map(function (entity) {
+			return compileEntityRaw(entity);
+		}),
+		worlds: new Array(),
+		x: 0,
+		y: 0,
+		z: 0
+	};
+}
+
+/**
+ * Compiles a raw entity.
+ */
+function compileEntityRaw(entity: YamlEntity): CommsEntityRaw {
+	return {
+		entityUuid: "abc",
+		kindUuid: "abc",
+		modeUuid: "abc",
+		worldUuid: "abc"
 	};
 }

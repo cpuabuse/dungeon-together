@@ -29,13 +29,22 @@ export interface CommsCellArgs extends CellPath, Vector {
 }
 
 /**
+ * Helper for [[CommsCellRaw]].
+ */
+type CommCellRawHelper<A, B> = (A & B) | A;
+
+/**
  * Type for physical data exchange.
  * Type is used as this is to be sent over internet.
  * Only JSON compatible member types can be used.
  */
-export type CommsCellRaw = Omit<CommsCellArgs, "cells" | keyof GridPath> & {
-	entities: Array<CommsEntityRaw>;
-};
+export type CommsCellRaw = CommCellRawHelper<
+	Omit<CommsCellArgs, "entities" | "worlds" | keyof GridPath | keyof Vector> & {
+		entities: Array<CommsEntityRaw>;
+		worlds?: Array<Uuid>;
+	},
+	Vector
+>;
 
 /**
  * Cell implementable.
