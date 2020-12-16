@@ -4,7 +4,7 @@
 */
 
 /**
- * An exclusive entity
+ * An exclusive entity.
  */
 
 import { InitializeArgs, Thing, ThingArgs } from "../thing";
