@@ -4,7 +4,7 @@
 */
 
 /**
- * Providing access to client instances.
+ * Providing access to client universe objects.
  */
 
 import { ClientUniverse } from "./universe";

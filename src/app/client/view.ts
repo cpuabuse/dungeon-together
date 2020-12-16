@@ -4,7 +4,7 @@
 */
 
 /**
- * The way we display things in screen.
+ * The way you display things in screen.
  */
 
 import { Matrix } from "pixi.js";

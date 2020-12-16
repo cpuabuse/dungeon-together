@@ -4,7 +4,7 @@
 */
 
 /**
- * A thing.
+ * An exclusive entity
  */
 
 import { InitializeArgs, Thing, ThingArgs } from "../thing";
@@ -44,7 +44,7 @@ export abstract class Exclusive extends Thing {
 		}
 
 		// Get current
-		let current: number = cell.occupants.filter(function(thing) {
+		let current: number = cell.occupants.filter(function (thing) {
 			return thing.kind === kind;
 		}).length;
 

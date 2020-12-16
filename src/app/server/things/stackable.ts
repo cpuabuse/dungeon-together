@@ -4,7 +4,7 @@
 */
 
 /**
- * A thing.
+ * Stackable entity.
  */
 
 import { Thing } from "../thing";

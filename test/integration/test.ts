@@ -4,7 +4,12 @@
 */
 
 /**
+ * Integration test.
+ */
+
+/**
  * Integration test main function.
+ * @returns Nothing
  */
 export function integrationTest(): void {
 	describe("integration", function () {

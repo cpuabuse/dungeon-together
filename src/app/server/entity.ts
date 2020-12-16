@@ -4,7 +4,7 @@
 */
 
 /**
- * Occupant of cells.
+ * Entity within cells.
  */
 
 import { CommsEntity, CommsEntityArgs, EntityPath } from "../comms/entity";

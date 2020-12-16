@@ -4,7 +4,7 @@
 */
 
 /**
- * Avatar/ player.
+ * Avatar/player.
  */
 
 import { Unit } from "../unit";

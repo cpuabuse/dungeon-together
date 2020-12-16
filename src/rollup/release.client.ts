@@ -3,6 +3,10 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+/**
+ * Rollup for release.
+ */
+
 import commonjs from "@rollup/plugin-commonjs";
 import { join } from "path";
 import resolve from "@rollup/plugin-node-resolve";

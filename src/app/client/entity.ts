@@ -4,7 +4,7 @@
 */
 
 /**
- * Renderable unit.
+ * Entity, that can be rendered.
  */
 
 import { CommsEntity, CommsEntityArgs } from "../comms/entity";

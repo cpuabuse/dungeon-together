@@ -4,7 +4,7 @@
 */
 
 /**
- * Client reality.
+ * Client universe.
  */
 
 import { BaseTexture, Texture } from "pixi.js";
