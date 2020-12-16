@@ -548,13 +548,13 @@ data:
           y: 7
           z: 0
           entities:
-            - kind: floor
-            - kind: entry
+            - kind: wall
         - x: 1
           y: 7
           z: 0
           entities:
             - kind: floor
+            - kind: door
         - x: 2
           y: 7
           z: 0
@@ -1092,7 +1092,6 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: exit
         - x: 12
           y: 13
           z: 0
