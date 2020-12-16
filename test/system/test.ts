@@ -4,7 +4,12 @@
 */
 
 /**
+ * System test.
+ */
+
+/**
  * System test main function.
+ * @returns Nothing.
  */
 export function systemTest(): void {
 	describe("system", function () {

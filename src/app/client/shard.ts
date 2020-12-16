@@ -4,7 +4,7 @@
 */
 
 /**
- * Displaying to screen.
+ * Displays server information to canvas.
  */
 
 import { Application, Container, Matrix, Renderer, utils } from "pixi.js";

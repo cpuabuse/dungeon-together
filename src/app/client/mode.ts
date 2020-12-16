@@ -4,7 +4,7 @@
 */
 
 /**
- * Modes.
+ * Definition of modes.
  */
 
 import { Texture } from "pixi.js";

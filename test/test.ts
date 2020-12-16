@@ -3,6 +3,10 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+/**
+ * Main test file.
+ */
+
 import { integrationTest } from "./integration/test";
 import { systemTest } from "./system/test";
 import { unitTest } from "./unit/test";

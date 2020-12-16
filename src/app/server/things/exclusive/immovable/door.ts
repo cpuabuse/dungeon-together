@@ -4,7 +4,7 @@
 */
 
 /**
- * Door.
+ * A door.
  */
 
 import { Immovable } from "../immovable";

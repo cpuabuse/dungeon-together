@@ -4,7 +4,12 @@
 */
 
 /**
+ * Unit test.
+ */
+
+/**
  * Unit test main function.
+ * @returns Nothing
  */
 export function unitTest(): void {
 	describe("unit", function () {

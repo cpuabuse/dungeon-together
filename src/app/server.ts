@@ -1,4 +1,8 @@
 /**
+ * Main file for a server.
+ */
+
+/**
  * @license ISC
  * ISC License (ISC)
  *
