@@ -20,3 +20,11 @@ A multiplayer WebGL HTML5 dungeon game
 ```bash
 git clone https://github.com/cpuabuse/dungeon-together --branch dev --recurse-submodules --remote-submodules
 ```
+
+### Build
+
+#### Standalone
+
+```bash
+npm run build:run:standalone:browser
+```

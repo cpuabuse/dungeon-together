@@ -7,8 +7,8 @@
 & $Paths.InstallDependencies
 
 # Test
-npm test; if (-not $?) { throw }
-npm run ts-test; if (-not $?) { throw }
+npm run build:test:standalone:node; if (-not $?) { throw }
+npm run run:test:standalone:node; if (-not $?) { throw }
 
 # Stop-Pipeline
 $Paths.StopPipeline

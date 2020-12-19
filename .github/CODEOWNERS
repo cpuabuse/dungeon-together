@@ -1,0 +1,5 @@
+* @cpuabuse/admin
+/data @cpuabuse/member
+/include @cpuabuse/member
+/src @cpuabuse/member
+/test @cpuabuse/member

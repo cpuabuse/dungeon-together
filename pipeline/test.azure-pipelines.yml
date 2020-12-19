@@ -1,0 +1,31 @@
+stages:
+  - stage: test
+    jobs:
+      - job: node
+        strategy:
+          matrix:
+            linux_14:
+              os: ubuntu-latest
+              node_version: 14.x
+            macos_14:
+              os: macOS-latest
+              node_version: 14.x
+            windows_14:
+              os: windows-latest
+              node_version: 14.x
+            linux_15:
+              os: ubuntu-latest
+              node_version: 15.x
+            macos_15:
+              os: macOS-latest
+              node_version: 15.x
+            windows_15:
+              os: windows-latest
+              node_version: 15.x
+        pool:
+          vmImage: $(os)
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(node_version)
+          - pwsh: script/pipeline/Test-Node.ps1

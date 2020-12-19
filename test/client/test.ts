@@ -11,7 +11,12 @@ import { integrationTest } from "./integration/test";
 import { systemTest } from "./system/test";
 import { unitTest } from "./unit/test";
 
-// Calling all tests
-unitTest();
-integrationTest();
-systemTest();
+/**
+ * Client test main function.
+ */
+export function clientTest(): void {
+	// Calling all tests
+	unitTest();
+	integrationTest();
+	systemTest();
+}

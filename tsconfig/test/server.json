@@ -3,6 +3,6 @@
 		"outDir": "../../build/test/test"
 	},
 	"extends": "./base.json",
-	"include": ["../../**/*"],
+	"include": ["../../test/server.ts"],
 	"exclude": ["../../build/**/*"]
 }

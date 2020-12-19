@@ -6,5 +6,8 @@
 	"cSpell.words": ["combinator", "comms", "cpuabuse"],
 	"yaml.schemas": {
 		"./schema/dt.yml.json": ["*.dt.yml"]
+	},
+	"files.associations": {
+		"*.azure-pipelines.yml": "azure-pipelines"
 	}
 }

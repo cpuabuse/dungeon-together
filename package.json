@@ -3,14 +3,19 @@
 	"version": "0.0.1",
 	"description": "A multiplayer WebGL HTML5 dungeon game",
 	"main": "build/server/index.js",
+	"type": "module",
 	"directories": {
 		"test": "test"
 	},
 	"engines": {
-		"node": ">=13"
+		"node": ">=14"
 	},
 	"scripts": {
+		"build:test:standalone:node": "tsc --project tsconfig/test/standalone.json",
 		"build:run:standalone:browser": "npm run build:stage:standalone",
+		"run:test:standalone:node": "mocha --experimental-specifier-resolution=node build/test/test/standalone.js",
+		"run:run:standalone:browser": "",
+		"separator": "",
 		"build": "npm run build:release & npm run build:stage & npm run build:test & npm run build:release:docs",
 		"build:release": "npm run build:release:client & npm run build:release:server & npm run build:release:server",
 		"build:release:client": "npm run build:release:rollup && rollup --config build/release/bin/rollup/release.client.js && mkdirp build/release/artifacts/terser && terser build/release/artifacts/rollup/client.js --compress --mangle --beautify --output build/release/artifacts/terser/client.js && mkdirp build/release/client && ncp build/release/artifacts/terser/client.js build/release/client/index.js",
@@ -84,7 +89,7 @@
 		"terser": "^4.8.0",
 		"ts-node": "^8.10.2",
 		"typedoc": "^0.16.11",
-		"typescript": "^3.9.7"
+		"typescript": "^4.1.3"
 	},
 	"dependencies": {
 		"axios": "^0.21.0",
