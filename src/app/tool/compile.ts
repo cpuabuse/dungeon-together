@@ -104,7 +104,9 @@ const rootType = type({
 	// eslint-disable-next-line @typescript-eslint/camelcase
 	base_url: stringType,
 	data: unionType([entityType, cellType, gridType, shardType]),
-	type: stringType
+	type: stringType,
+	// eslint-disable-next-line @typescript-eslint/camelcase
+	url_path: stringType
 });
 
 /**
