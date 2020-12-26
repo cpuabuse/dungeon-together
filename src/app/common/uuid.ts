@@ -7,7 +7,6 @@
  * Uuid interfaces.
  */
 
-import { URL } from "url";
 import { appUrl } from "./defaults";
 import { v5 } from "uuid";
 
