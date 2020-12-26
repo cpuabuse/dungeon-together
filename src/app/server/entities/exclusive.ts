@@ -7,16 +7,16 @@
  * An exclusive entity.
  */
 
-import { InitializeArgs, Thing, ThingArgs } from "../thing";
+import { InitializeArgs, ServerEntity, ServerEntityArgs } from "../entity";
 
 /**
  * A drawable thing occupying a cell.
  */
-export abstract class Exclusive extends Thing {
+export abstract class Exclusive extends ServerEntity {
 	/**
 	 * Exclusive constructor;
 	 */
-	public constructor({ kind, parent, world }: ThingArgs) {
+	public constructor({ kind, parent, world }: ServerEntityArgs) {
 		// Call superclass
 		super({ kind, parent, world });
 	}
