@@ -8,9 +8,8 @@ import { CommsEntityArgs, CommsEntityRaw } from "../comms/entity";
 import { CommsGridArgs, CommsGridRaw } from "../comms/grid";
 import { CommsShardArgs, CommsShardRaw, commsShardRawToArgs } from "../comms/shard";
 import { array as arrayType, string as stringType, type, TypeOf as typeOf, union as unionType } from "io-ts";
-import { safeLoad } from "js-yaml";
 import { getDefaultUuid } from "../common/uuid";
-import { URL } from "url";
+import { safeLoad } from "js-yaml";
 
 /**
  * Settings to be passed to parser.
@@ -46,7 +45,7 @@ const protocol: string = "https:";
  */
 // Infer generic type
 // eslint-disable-next-line @typescript-eslint/typedef
-const entityType = type({});
+const entityType = type({ kind: stringType });
 
 /**
  * Structured cell object.
@@ -186,7 +185,7 @@ function compileShardArgs(shard: YamlShard, settings: Settings): CommsShardArgs 
 function compileShardRaw(shard: YamlShard, settings: Settings): CommsShardRaw {
 	return {
 		grids: shard.grids.map(function (grid) {
-			return compileGridRaw(grid);
+			return compileGridRaw(grid, settings);
 		}),
 		shardUuid: getDefaultUuid({ base: settings.baseUrl, path: "abc" })
 	};
@@ -198,7 +197,7 @@ function compileShardRaw(shard: YamlShard, settings: Settings): CommsShardRaw {
 function compileGridRaw(grid: YamlGrid, settings: Settings): CommsGridRaw {
 	return {
 		cells: grid.cells.map(function (cell) {
-			return compileCellRaw(cell);
+			return compileCellRaw(cell, settings);
 		}),
 		gridUuid: "abc"
 	};
@@ -211,7 +210,7 @@ function compileCellRaw(cell: YamlCell, settings: Settings): CommsCellRaw {
 	return {
 		cellUuid: "abc",
 		entities: cell.entities.map(function (entity) {
-			return compileEntityRaw(entity);
+			return compileEntityRaw(entity, settings);
 		}),
 		worlds: new Array(),
 		x: 0,
