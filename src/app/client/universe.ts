@@ -52,6 +52,27 @@ export class ClientUniverse implements CommsUniverse {
 					new Texture(new BaseTexture("img/bunny-blue.svg"))
 				]
 			}
+		],
+		[
+			"treasure",
+			{
+				textures: [
+					new Texture(new BaseTexture("img/dungeontileset-ii/chest_full_open_anim_f0.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/chest_full_open_anim_f1.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/chest_full_open_anim_f2.png"))
+				]
+			}
+		],
+		[
+			"goblinIdle",
+			{
+				textures: [
+					new Texture(new BaseTexture("img/dungeontileset-ii/goblin_idle_anim_f0.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/goblin_idle_anim_f1.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/goblin_idle_anim_f2.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/goblin_idle_anim_f3.png"))
+				]
+			}
 		]
 	]);
 
