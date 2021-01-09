@@ -5,9 +5,17 @@ Licensed under the ISC License (https://opensource.org/licenses/ISC)
 
 import { CommsCellArgs, CommsCellRaw } from "../comms/cell";
 import { CommsEntityArgs, CommsEntityRaw } from "../comms/entity";
-import { CommsGridArgs, CommsGridRaw } from "../comms/grid";
+import { CommsGridArgs, CommsGridRaw, GridPath } from "../comms/grid";
 import { CommsShardArgs, CommsShardRaw, commsShardRawToArgs } from "../comms/shard";
-import { array as arrayType, string as stringType, type, TypeOf as typeOf, union as unionType } from "io-ts";
+import {
+	array as arrayType,
+	string as stringType,
+	type,
+	TypeOf as typeOf,
+	partial as partialType,
+	union as unionType,
+	intersection as intersectionType
+} from "io-ts";
 import { getDefaultUuid } from "../common/uuid";
 import { safeLoad } from "js-yaml";
 
@@ -41,6 +49,13 @@ const sep: string = "/";
 const protocol: string = "https:";
 
 /**
+ * Structured object that contains id.
+ */
+// Infer generic type
+// eslint-disable-next-line @typescript-eslint/typedef
+const idLikeType = partialType({ id: stringType });
+
+/**
  * Structured entity object.
  */
 // Infer generic type
@@ -70,9 +85,17 @@ const gridType = type({
  */
 // Infer generic type
 // eslint-disable-next-line @typescript-eslint/typedef
-const shardType = type({
-	grids: arrayType(gridType)
-});
+const shardType = intersectionType([
+	type({
+		grids: arrayType(gridType)
+	}),
+	idLikeType
+]);
+
+/**
+ * The ID-like from YAML.
+ */
+type YamlIdLike = typeOf<typeof idLikeType>;
 
 /**
  * The shard from YAML.
@@ -134,7 +157,7 @@ export function compile(data: string): CommsShardArgs | CommsGridArgs | CommsCel
 		// Settings from root
 		let settings: Settings = {
 			baseUrl,
-			defaultPath: defaultSystemPath,
+			defaultPath: defaultSystemPath === userPath ? defaultSecondarySystemPath : defaultSystemPath,
 			userPath
 		};
 
@@ -173,6 +196,22 @@ export function compile(data: string): CommsShardArgs | CommsGridArgs | CommsCel
 }
 
 /**
+ * Extracts path from ID-like.
+ */
+function idLikeToPath(idLike: YamlIdLike, settings: Settings): string {
+	return typeof idLike.id === "undefined" ? settings.defaultPath : settings.userPath + sep + idLike.id;
+}
+
+/**
+ * Create child settings.
+ */
+function createChildSettings(index: number, settings: Settings): Settings {
+	let childSettings: Settings = { ...settings };
+	childSettings.defaultPath += sep + index.toString();
+	return childSettings;
+}
+
+/**
  * Compiles a shard.
  */
 function compileShardArgs(shard: YamlShard, settings: Settings): CommsShardArgs {
@@ -184,10 +223,13 @@ function compileShardArgs(shard: YamlShard, settings: Settings): CommsShardArgs 
  */
 function compileShardRaw(shard: YamlShard, settings: Settings): CommsShardRaw {
 	return {
-		grids: shard.grids.map(function (grid) {
-			return compileGridRaw(grid, settings);
+		grids: shard.grids.map(function (grid, index) {
+			return compileGridRaw(grid, createChildSettings(index, settings));
 		}),
-		shardUuid: getDefaultUuid({ base: settings.baseUrl, path: "abc" })
+		shardUuid: getDefaultUuid({
+			base: settings.baseUrl,
+			path: idLikeToPath(shard, settings)
+		})
 	};
 }
 
