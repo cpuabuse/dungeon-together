@@ -203,6 +203,15 @@ function idLikeToPath(idLike: YamlIdLike, settings: Settings): string {
 }
 
 /**
+ * Create child settings.
+ */
+function createChildSettings(index: number, settings: Settings): Settings {
+	let childSettings: Settings = { ...settings };
+	childSettings.defaultPath += sep + index.toString();
+	return childSettings;
+}
+
+/**
  * Compiles a shard.
  */
 function compileShardArgs(shard: YamlShard, settings: Settings): CommsShardArgs {
@@ -214,9 +223,8 @@ function compileShardArgs(shard: YamlShard, settings: Settings): CommsShardArgs 
  */
 function compileShardRaw(shard: YamlShard, settings: Settings): CommsShardRaw {
 	return {
-		grids: shard.grids.map(function (grid) {
-			let gridSettings: Settings = { ...settings };
-			return compileGridRaw(grid, gridSettings);
+		grids: shard.grids.map(function (grid, index) {
+			return compileGridRaw(grid, createChildSettings(index, settings));
 		}),
 		shardUuid: getDefaultUuid({
 			base: settings.baseUrl,
