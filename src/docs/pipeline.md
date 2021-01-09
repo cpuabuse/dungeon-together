@@ -6,8 +6,9 @@
 
 Purpose | Description
 --: | ---
-run | Execution build
-test | Test build
+release | Build for release
+debug | Build for development
+test | Build for testing
 
 ### Types
 
