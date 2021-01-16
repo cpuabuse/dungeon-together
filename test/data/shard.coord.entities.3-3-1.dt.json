@@ -6,8 +6,8 @@
 			"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
 			"cells": [
 				{
-					"x":1,
-					"y":1,
+					"x": 1,
+					"y": 1,
 					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
 					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
 					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
@@ -18,79 +18,223 @@
 							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
 							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
 							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
-							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"modeUuid": "treasure",
 							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
-						},
+						}
+					]
+				},
+				{
+					"x": 2,
+					"y": 2,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a2",
+					"entities": [
 						{
 							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
 							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
-							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
-							"entityUuid": "27a73ed2-9b10-4d31-9bc2-1c54e5edc2ba",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a2",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400172",
 							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
-							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"modeUuid": "goblinIdle",
 							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
-						},
+						}
+					]
+				},
+				{
+					"x": 3,
+					"y": 3,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a3",
+					"entities": [
 						{
 							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
 							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
-							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
-							"entityUuid": "afe7b5f3-4dd3-4a68-8d18-0c47b8db2452",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a3",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
 							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
-							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"modeUuid": "spikeTrap",
 							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
-						},
+						}
+					]
+				},
+				{
+					"x": 4,
+					"y": 4,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a4",
+					"entities": [
 						{
 							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
 							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
-							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
-							"entityUuid": "202283cc-6b0c-46fe-abe5-34e8e2c8d7c0",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a4",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
 							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
-							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"modeUuid": "door",
 							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
-						},
+						}
+					]
+				},
+				{
+					"x": 5,
+					"y": 5,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a5",
+					"entities": [
 						{
 							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
 							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
-							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
-							"entityUuid": "de9e0882-0557-42ce-bfdc-3168a73e269f",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a5",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
 							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
-							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"modeUuid": "floor",
 							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
-						},
+						}
+					]
+				},
+				{
+					"x": 6,
+					"y": 6,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a6",
+					"entities": [
 						{
 							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
 							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
-							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
-							"entityUuid": "6fa26133-5f75-46f6-81d3-4950c4d7b1a8",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a6",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
 							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
-							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"modeUuid": "heart",
 							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
-						},
+						}
+					]
+				},
+				{
+					"x": 7,
+					"y": 7,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a7",
+					"entities": [
 						{
 							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
 							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
-							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
-							"entityUuid": "95a920cc-054c-4145-8cba-490a7da070ca",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a7",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
 							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
-							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"modeUuid": "wall",
 							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
-						},
+						}
+					]
+				},
+				{
+					"x": 8,
+					"y": 8,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a8",
+					"entities": [
 						{
 							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
 							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
-							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
-							"entityUuid": "7acd7f96-d0f8-4a62-8f45-8086e6050a4d",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a8",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
 							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
-							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"modeUuid": "treasureKnife",
 							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
-						},
+						}
+					]
+				},
+				{
+					"x": 9,
+					"y": 9,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a9",
+					"entities": [
 						{
 							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
 							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
-							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17aa",
-							"entityUuid": "63230401-ea99-44b1-abcf-0484703fa4d7",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a9",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
 							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
-							"modeUuid": "3341fc87-44ba-4b76-87a4-492f55c8e0c7",
+							"modeUuid": "treasureRustySword",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						}
+					]
+				},
+				{
+					"x": 10,
+					"y": 10,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a10",
+					"entities": [
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a10",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "holeTrap",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						}
+					]
+				},
+				{
+					"x": 11,
+					"y": 11,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a11",
+					"entities": [
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a11",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "lizardIdle",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						}
+					]
+				},
+				{
+					"x": 1,
+					"y": 2,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a15",
+					"entities": [
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a15",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "orcIdle",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						}
+					]
+				},
+				{
+					"x": 1,
+					"y": 3,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a16",
+					"entities": [
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a16",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "chestMimic",
 							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
 						}
 					]

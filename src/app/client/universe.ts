@@ -73,6 +73,123 @@ export class ClientUniverse implements CommsUniverse {
 					new Texture(new BaseTexture("img/dungeontileset-ii/goblin_idle_anim_f3.png"))
 				]
 			}
+		],
+		[
+			"spikeTrap",
+			{
+				textures: [
+					new Texture(new BaseTexture("img/dungeontileset-ii/floor_spikes_anim_f0.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/floor_spikes_anim_f1.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/floor_spikes_anim_f2.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/floor_spikes_anim_f3.png"))
+				]
+			}
+		],
+		[
+			"door",
+			{
+				textures: [
+					new Texture(new BaseTexture("img/dungeontileset-ii/doors_all.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/doors_frame_left.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/doors_frame_righ.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/doors_frame_top.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/doors_leaf_closed.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/doors_leaf_open.png"))
+				]
+			}
+		],
+		[
+			"floor",
+			{
+				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_1.png"))]
+			}
+		],
+		[
+			"heart",
+			{
+				textures: [
+					new Texture(new BaseTexture("img/dungeontileset-ii/ui_heart_full.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/ui_heart_half.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/ui_heart_empty.png"))
+				]
+			}
+		],
+		[
+			"wall",
+			{
+				textures: [
+					new Texture(new BaseTexture("img/dungeontileset-ii/wall_corner_bottom_left.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/wall_corner_bottom_right.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/wall_corner_front_left.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/wall_corner_front_right.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/wall_corner_left.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/wall_corner_right.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/wall_corner_top_left.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/wall_corner_top_right.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/wall_left.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/wall_mid.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/wall_right.png"))
+				]
+			}
+		],
+		[
+			"treasureKnife",
+			{
+				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/weapon_knife.png"))]
+			}
+		],
+		[
+			"treasureRustySword",
+			{
+				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/weapon_rusty_sword.png"))]
+			}
+		],
+		[
+			"holeTrap",
+			{
+				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/hole.png"))]
+			}
+		],
+		[
+			"lizardIdle",
+			{
+				textures: [
+					new Texture(new BaseTexture("img/dungeontileset-ii/lizard_f_hit_anim_f0.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/lizard_f_idle_anim_f0.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/lizard_f_idle_anim_f1.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/lizard_f_idle_anim_f2.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/lizard_f_idle_anim_f3.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/lizard_f_run_anim_f0.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/lizard_f_run_anim_f1.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/lizard_f_run_anim_f2.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/lizard_f_run_anim_f3.png"))
+				]
+			}
+		],
+		[
+			"orcIdle",
+			{
+				textures: [
+					new Texture(new BaseTexture("img/dungeontileset-ii/masked_orc_idle_anim_f0.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/masked_orc_idle_anim_f1.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/masked_orc_idle_anim_f2.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/masked_orc_idle_anim_f3.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/masked_orc_run_anim_f0.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/masked_orc_run_anim_f1.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/masked_orc_run_anim_f2.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/masked_orc_run_anim_f3.png"))
+				]
+			}
+		],
+		[
+			"chestMimic",
+			{
+				textures: [
+					new Texture(new BaseTexture("img/dungeontileset-ii/chest_mimic_open_anim_f0.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/chest_mimic_open_anim_f1.png")),
+					new Texture(new BaseTexture("img/dungeontileset-ii/chest_mimic_open_anim_f2.png"))
+				]
+			}
 		]
 	]);
 
