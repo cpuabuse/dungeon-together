@@ -64,9 +64,23 @@ export interface CommsGrid extends CommsGridArgs, CommsProto {
 /**
  * Way to get to grid.
  */
-export interface GridPath extends ShardPath {
+export interface GridPath {
 	/**
 	 * Grid uuid.
 	 */
 	gridUuid: Uuid;
+}
+
+/**
+ * Converts [[CommsGridRaw]] to [[CommsGridArgs]].
+ */
+export function commsGridRawToArgs(rawSource: CommsGridRaw): CommsGridArgs {
+	return { cells: new Map(), gridUuid: rawSource.gridUuid };
+}
+
+/**
+ * Converts [[CommsGridArgs]] to [[CommsGridRaw]].
+ */
+export function commsGridArgsToRaw(argsSource: CommsGridArgs): CommsGridRaw {
+	return { cells: new Array(), gridUuid: argsSource.gridUuid };
 }

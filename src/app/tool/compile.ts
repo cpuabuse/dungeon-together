@@ -5,16 +5,16 @@ Licensed under the ISC License (https://opensource.org/licenses/ISC)
 
 import { CommsCellArgs, CommsCellRaw } from "../comms/cell";
 import { CommsEntityArgs, CommsEntityRaw } from "../comms/entity";
-import { CommsGridArgs, CommsGridRaw, GridPath } from "../comms/grid";
+import { CommsGridArgs, CommsGridRaw, commsGridRawToArgs } from "../comms/grid";
 import { CommsShardArgs, CommsShardRaw, commsShardRawToArgs } from "../comms/shard";
 import {
 	array as arrayType,
+	intersection as intersectionType,
+	partial as partialType,
 	string as stringType,
 	type,
 	TypeOf as typeOf,
-	partial as partialType,
-	union as unionType,
-	intersection as intersectionType
+	union as unionType
 } from "io-ts";
 import { getDefaultUuid } from "../common/uuid";
 import { safeLoad } from "js-yaml";
@@ -76,9 +76,12 @@ const cellType = type({
  */
 // Infer generic type
 // eslint-disable-next-line @typescript-eslint/typedef
-const gridType = type({
-	cells: arrayType(cellType)
-});
+const gridType = intersectionType([
+	type({
+		cells: arrayType(cellType)
+	}),
+	idLikeType
+]);
 
 /**
  * Structured shard object.
@@ -166,25 +169,25 @@ export function compile(data: string): CommsShardArgs | CommsGridArgs | CommsCel
 			case "shard":
 				// Perform shard data check
 				if (shardType.is(safeLoadResult.data)) {
-					return compileShardArgs(safeLoadResult.data, settings);
+					return compileShardArgs(settings, safeLoadResult.data);
 				}
 				throw new Error("Shard did not pass type validation");
 			case "grid":
 				// Perform grid data check
-				if (shardType.is(safeLoadResult.data)) {
-					return compileShardArgs(safeLoadResult.data, settings);
+				if (gridType.is(safeLoadResult.data)) {
+					return compileGridArgs(settings, safeLoadResult.data);
 				}
 				throw new Error("Grid did not pass type validation");
 			case "cell":
 				// Perform cell data check
 				if (shardType.is(safeLoadResult.data)) {
-					return compileShardArgs(safeLoadResult.data, settings);
+					return compileShardArgs(settings, safeLoadResult.data);
 				}
 				throw new Error("Cell did not pass type validation");
 			case "entity":
 				// Perform entity data check
 				if (shardType.is(safeLoadResult.data)) {
-					return compileShardArgs(safeLoadResult.data, settings);
+					return compileShardArgs(settings, safeLoadResult.data);
 				}
 				throw new Error("Entity did not pass type validation");
 			default:
@@ -214,17 +217,17 @@ function createChildSettings(index: number, settings: Settings): Settings {
 /**
  * Compiles a shard.
  */
-function compileShardArgs(shard: YamlShard, settings: Settings): CommsShardArgs {
-	return commsShardRawToArgs(compileShardRaw(shard, settings));
+function compileShardArgs(settings: Settings, shard: YamlShard): CommsShardArgs {
+	return commsShardRawToArgs(compileShardRaw(settings, shard));
 }
 
 /**
  * Compiles a raw shard.
  */
-function compileShardRaw(shard: YamlShard, settings: Settings): CommsShardRaw {
+function compileShardRaw(settings: Settings, shard: YamlShard): CommsShardRaw {
 	return {
 		grids: shard.grids.map(function (grid, index) {
-			return compileGridRaw(grid, createChildSettings(index, settings));
+			return compileGridRaw(createChildSettings(index, settings), grid);
 		}),
 		shardUuid: getDefaultUuid({
 			base: settings.baseUrl,
@@ -234,25 +237,35 @@ function compileShardRaw(shard: YamlShard, settings: Settings): CommsShardRaw {
 }
 
 /**
+ * Compiles a grid.
+ */
+function compileGridArgs(settings: Settings, grid: YamlGrid): CommsGridArgs {
+	return commsGridRawToArgs(compileGridRaw(settings, grid));
+}
+
+/**
  * Compiles a raw grid.
  */
-function compileGridRaw(grid: YamlGrid, settings: Settings): CommsGridRaw {
+function compileGridRaw(settings: Settings, grid: YamlGrid): CommsGridRaw {
 	return {
-		cells: grid.cells.map(function (cell) {
-			return compileCellRaw(cell, settings);
+		cells: grid.cells.map(function (cell, index) {
+			return compileCellRaw(createChildSettings(index, settings), cell);
 		}),
-		gridUuid: "abc"
+		gridUuid: getDefaultUuid({
+			base: settings.baseUrl,
+			path: idLikeToPath(grid, settings)
+		})
 	};
 }
 
 /**
  * Compiles a raw cell.
  */
-function compileCellRaw(cell: YamlCell, settings: Settings): CommsCellRaw {
+function compileCellRaw(settings: Settings, cell: YamlCell): CommsCellRaw {
 	return {
 		cellUuid: "abc",
 		entities: cell.entities.map(function (entity) {
-			return compileEntityRaw(entity, settings);
+			return compileEntityRaw(settings, entity);
 		}),
 		worlds: new Array(),
 		x: 0,
@@ -264,7 +277,7 @@ function compileCellRaw(cell: YamlCell, settings: Settings): CommsCellRaw {
 /**
  * Compiles a raw entity.
  */
-function compileEntityRaw(entity: YamlEntity, settings: Settings): CommsEntityRaw {
+function compileEntityRaw(settings: Settings, entity: YamlEntity): CommsEntityRaw {
 	return {
 		entityUuid: "abc",
 		kindUuid: getDefaultUuid({ base: settings.baseUrl, path: entity.kind }),
