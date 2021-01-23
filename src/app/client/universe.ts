@@ -190,6 +190,54 @@ export class ClientUniverse implements CommsUniverse {
 					new Texture(new BaseTexture("img/dungeontileset-ii/chest_mimic_open_anim_f2.png"))
 				]
 			}
+		],
+		[
+			"playerPant",
+			{
+				textures: [new Texture(new BaseTexture("img/rltiles/player/leg/pants_short_brown.bmp"))]
+			}
+		],
+		[
+			"playerHead",
+			{
+				textures: [new Texture(new BaseTexture("img/rltiles/player/head/straw.bmp"))]
+			}
+		],
+		[
+			"playerHand",
+			{
+				textures: [new Texture(new BaseTexture("img/rltiles/player/hand1/axe_small.bmp"))]
+			}
+		],
+		[
+			"playerHand1",
+			{
+				textures: [new Texture(new BaseTexture("img/rltiles/player/hand2/torch.bmp"))]
+			}
+		],
+		[
+			"playerHair",
+			{
+				textures: [new Texture(new BaseTexture("img/rltiles/player/hair/short_white.bmp"))]
+			}
+		],
+		[
+			"playerBody",
+			{
+				textures: [new Texture(new BaseTexture("img/rltiles/player/body/shirt_vest.bmp"))]
+			}
+		],
+		[
+			"treasureBoots2",
+			{
+				textures: [new Texture(new BaseTexture("img/rltiles/item/armor/boots_blue1.bmp"))]
+			}
+		],
+		[
+			"treasureSword2",
+			{
+				textures: [new Texture(new BaseTexture("img/dungeontileset-ii//weapon_anime_sword.png"))]
+			}
 		]
 	]);
 

@@ -238,6 +238,150 @@
 							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
 						}
 					]
+				},
+				{
+					"x": 1,
+					"y": 4,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a17",
+					"entities": [
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a17",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "playerPant",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						}
+					]
+				},
+				{
+					"x": 1,
+					"y": 5,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a18",
+					"entities": [
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a18",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "playerHead",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						}
+					]
+				},
+				{
+					"x": 1,
+					"y": 6,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a19",
+					"entities": [
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a19",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "playerHand",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						}
+					]
+				},
+				{
+					"x": 1,
+					"y": 7,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a21",
+					"entities": [
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a21",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "playerHand1",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						}
+					]
+				},
+				{
+					"x": 1,
+					"y": 8,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a23",
+					"entities": [
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a23",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "playerHair",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						}
+					]
+				},
+				{
+					"x": 1,
+					"y": 9,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a25",
+					"entities": [
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a25",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "playerBody",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						}
+					]
+				},
+				{
+					"x": 1,
+					"y": 10,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a27",
+					"entities": [
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a27",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "treasureBoots2",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						}
+					]
+				},
+				{
+					"x": 4,
+					"y": 11,
+					"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+					"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+					"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a28",
+					"entities": [
+						{
+							"shardUuid": "00584037-3ca6-4fb0-9178-50594152f3b7",
+							"gridUuid": "8a54c5b3-f700-4365-b933-6e4e153ccc1b",
+							"cellUuid": "581503ef-82c2-456a-a350-ad67d0ec17a28",
+							"entityUuid": "9c915f97-b9c3-4150-b5ee-02abb1400173",
+							"kindUuid": "2c7e3033-4221-42ff-83eb-ca0593924e00",
+							"modeUuid": "treasureSword2",
+							"worldUuid": "4c94ada5-1493-4049-b4bf-a62dc9c57c5d"
+						}
+					]
 				}
 			]
 		}
