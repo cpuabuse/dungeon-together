@@ -89,9 +89,12 @@ const cellType = type({
  */
 // Infer generic type
 // eslint-disable-next-line @typescript-eslint/typedef
-const gridType = type({
-	cells: arrayType(cellType)
-});
+const gridType = intersectionType([
+	type({
+		cells: arrayType(cellType)
+	}),
+	idLikeType
+]);
 
 /**
  * Structured shard object.
@@ -241,7 +244,7 @@ function createChildSettings(index: number, settings: Settings): Settings {
  *
  * @param shard - Shard
  * @param settings - Settings
- * @returns shard args
+ * @returns Shard args
  */
 function compileShardArgs(shard: YamlShard, settings: Settings): CommsShardArgs {
 	return commsShardRawToArgs(compileShardRaw(shard, settings));
@@ -275,10 +278,13 @@ function compileShardRaw(shard: YamlShard, settings: Settings): CommsShardRaw {
  */
 function compileGridRaw(grid: YamlGrid, settings: Settings): CommsGridRaw {
 	return {
-		cells: grid.cells.map(function (cell) {
-			return compileCellRaw(cell, settings);
+		cells: grid.cells.map(function (cell, index) {
+			return compileCellRaw(cell, createChildSettings(index, settings));
 		}),
-		gridUuid: "abc"
+		gridUuid: getDefaultUuid({
+			base: settings.baseUrl,
+			path: idLikeToPath(grid, settings)
+		})
 	};
 }
 
