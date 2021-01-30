@@ -1,30 +1,43 @@
 /*
-Copyright 2020 cpuabuse.com
-Licensed under the ISC License (https://opensource.org/licenses/ISC)
+	Copyright 2021 cpuabuse.com
+	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
-import { CommsCellArgs, CommsCellRaw } from "../comms/cell";
-import { CommsEntityArgs, CommsEntityRaw } from "../comms/entity";
-import { CommsGridArgs, CommsGridRaw, GridPath } from "../comms/grid";
-import { CommsShardArgs, CommsShardRaw, commsShardRawToArgs } from "../comms/shard";
+/**
+ * @file The file header
+ */
+
 import {
 	array as arrayType,
+	intersection as intersectionType,
+	partial as partialType,
 	string as stringType,
 	type,
 	TypeOf as typeOf,
-	partial as partialType,
-	union as unionType,
-	intersection as intersectionType
+	union as unionType
 } from "io-ts";
-import { getDefaultUuid } from "../common/uuid";
 import { safeLoad } from "js-yaml";
+import { getDefaultUuid } from "../common/uuid";
+import { CommsCellArgs, CommsCellRaw } from "../comms/cell";
+import { CommsEntityArgs, CommsEntityRaw } from "../comms/entity";
+import { CommsGridArgs, CommsGridRaw } from "../comms/grid";
+import { CommsShardArgs, CommsShardRaw, commsShardRawToArgs } from "../comms/shard";
 
 /**
  * Settings to be passed to parser.
  */
 interface Settings {
+	/**
+	 *
+	 */
 	baseUrl: string;
+	/**
+	 *
+	 */
 	defaultPath: string;
+	/**
+	 *
+	 */
 	userPath: string;
 }
 
@@ -76,9 +89,12 @@ const cellType = type({
  */
 // Infer generic type
 // eslint-disable-next-line @typescript-eslint/typedef
-const gridType = type({
-	cells: arrayType(cellType)
-});
+const gridType = intersectionType([
+	type({
+		cells: arrayType(cellType)
+	}),
+	idLikeType
+]);
 
 /**
  * Structured shard object.
@@ -133,10 +149,14 @@ const rootType = type({
 
 /**
  * A function that will compile dt.yml file to JavaScript objects/JSON files.
- * @param filename Path to the file.
+ *
+ * @param filename - Path to the file.
+ * @param data - YAML string
+ * @returns Shard, grid, cell, or entity in args format
  */
 export function compile(data: string): CommsShardArgs | CommsGridArgs | CommsCellArgs | CommsEntityArgs {
 	// Load YAML
+	// eslint-disable-next-line @typescript-eslint/ban-types
 	let safeLoadResult: string | object | undefined = safeLoad(data);
 
 	// Perform root type check
@@ -197,6 +217,10 @@ export function compile(data: string): CommsShardArgs | CommsGridArgs | CommsCel
 
 /**
  * Extracts path from ID-like.
+ *
+ * @param idLike - ID like from YAML
+ * @param settings - Settings to be passed to parser
+ * @returns Path
  */
 function idLikeToPath(idLike: YamlIdLike, settings: Settings): string {
 	return typeof idLike.id === "undefined" ? settings.defaultPath : settings.userPath + sep + idLike.id;
@@ -204,6 +228,10 @@ function idLikeToPath(idLike: YamlIdLike, settings: Settings): string {
 
 /**
  * Create child settings.
+ *
+ * @param index - Index within the array
+ * @param settings - Settings
+ * @returns Child settings
  */
 function createChildSettings(index: number, settings: Settings): Settings {
 	let childSettings: Settings = { ...settings };
@@ -213,6 +241,10 @@ function createChildSettings(index: number, settings: Settings): Settings {
 
 /**
  * Compiles a shard.
+ *
+ * @param shard - Shard
+ * @param settings - Settings
+ * @returns Shard args
  */
 function compileShardArgs(shard: YamlShard, settings: Settings): CommsShardArgs {
 	return commsShardRawToArgs(compileShardRaw(shard, settings));
@@ -220,6 +252,10 @@ function compileShardArgs(shard: YamlShard, settings: Settings): CommsShardArgs 
 
 /**
  * Compiles a raw shard.
+ *
+ * @param shard - Shard
+ * @param settings - Settings
+ * @returns An object with grids and shardUuid
  */
 function compileShardRaw(shard: YamlShard, settings: Settings): CommsShardRaw {
 	return {
@@ -235,18 +271,29 @@ function compileShardRaw(shard: YamlShard, settings: Settings): CommsShardRaw {
 
 /**
  * Compiles a raw grid.
+ *
+ * @param grid - Grid
+ * @param settings - Settings
+ * @returns An object with cells and gridUuid
  */
 function compileGridRaw(grid: YamlGrid, settings: Settings): CommsGridRaw {
 	return {
-		cells: grid.cells.map(function (cell) {
-			return compileCellRaw(cell, settings);
+		cells: grid.cells.map(function (cell, index) {
+			return compileCellRaw(cell, createChildSettings(index, settings));
 		}),
-		gridUuid: "abc"
+		gridUuid: getDefaultUuid({
+			base: settings.baseUrl,
+			path: idLikeToPath(grid, settings)
+		})
 	};
 }
 
 /**
  * Compiles a raw cell.
+ *
+ * @param cell - Cell
+ * @param settings - Settings
+ * @returns An object with cellUuid, entities, and worlds as key values
  */
 function compileCellRaw(cell: YamlCell, settings: Settings): CommsCellRaw {
 	return {
@@ -263,6 +310,10 @@ function compileCellRaw(cell: YamlCell, settings: Settings): CommsCellRaw {
 
 /**
  * Compiles a raw entity.
+ *
+ * @param entity - Entity
+ * @param settings - Settings
+ * @returns An object wiht entityUuid, kindUuid, modeUuid, and worldUuid
  */
 function compileEntityRaw(entity: YamlEntity, settings: Settings): CommsEntityRaw {
 	return {
