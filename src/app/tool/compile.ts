@@ -10,6 +10,7 @@
 import {
 	array as arrayType,
 	intersection as intersectionType,
+	number as numberType,
 	partial as partialType,
 	string as stringType,
 	type,
@@ -73,16 +74,31 @@ const idLikeType = partialType({ id: stringType });
  */
 // Infer generic type
 // eslint-disable-next-line @typescript-eslint/typedef
-const entityType = type({ kind: stringType });
+const entityType = intersectionType([
+	partialType({
+		kind: stringType,
+		mode: stringType,
+		world: stringType
+	}),
+	idLikeType
+]);
 
 /**
  * Structured cell object.
  */
 // Infer generic type
 // eslint-disable-next-line @typescript-eslint/typedef
-const cellType = type({
-	entities: arrayType(entityType)
-});
+const cellType = intersectionType([
+	partialType({
+		entities: arrayType(entityType)
+	}),
+	type({
+		x: numberType,
+		y: numberType,
+		z: numberType
+	}),
+	idLikeType
+]);
 
 /**
  * Structured grid object.
@@ -90,7 +106,7 @@ const cellType = type({
 // Infer generic type
 // eslint-disable-next-line @typescript-eslint/typedef
 const gridType = intersectionType([
-	type({
+	partialType({
 		cells: arrayType(cellType)
 	}),
 	idLikeType
@@ -102,7 +118,7 @@ const gridType = intersectionType([
 // Infer generic type
 // eslint-disable-next-line @typescript-eslint/typedef
 const shardType = intersectionType([
-	type({
+	partialType({
 		grids: arrayType(gridType)
 	}),
 	idLikeType
@@ -259,9 +275,12 @@ function compileShardArgs(shard: YamlShard, settings: Settings): CommsShardArgs 
  */
 function compileShardRaw(shard: YamlShard, settings: Settings): CommsShardRaw {
 	return {
-		grids: shard.grids.map(function (grid, index) {
-			return compileGridRaw(grid, createChildSettings(index, settings));
-		}),
+		grids:
+			typeof shard.grids === "undefined"
+				? []
+				: shard.grids.map(function (grid, index) {
+						return compileGridRaw(grid, createChildSettings(index, settings));
+				  }),
 		shardUuid: getDefaultUuid({
 			base: settings.baseUrl,
 			path: idLikeToPath(shard, settings)
@@ -278,9 +297,12 @@ function compileShardRaw(shard: YamlShard, settings: Settings): CommsShardRaw {
  */
 function compileGridRaw(grid: YamlGrid, settings: Settings): CommsGridRaw {
 	return {
-		cells: grid.cells.map(function (cell, index) {
-			return compileCellRaw(cell, createChildSettings(index, settings));
-		}),
+		cells:
+			typeof grid.cells === "undefined"
+				? []
+				: grid.cells.map(function (cell, index) {
+						return compileCellRaw(cell, createChildSettings(index, settings));
+				  }),
 		gridUuid: getDefaultUuid({
 			base: settings.baseUrl,
 			path: idLikeToPath(grid, settings)
@@ -297,14 +319,20 @@ function compileGridRaw(grid: YamlGrid, settings: Settings): CommsGridRaw {
  */
 function compileCellRaw(cell: YamlCell, settings: Settings): CommsCellRaw {
 	return {
-		cellUuid: "abc",
-		entities: cell.entities.map(function (entity) {
-			return compileEntityRaw(entity, settings);
+		cellUuid: getDefaultUuid({
+			base: settings.baseUrl,
+			path: idLikeToPath(cell, settings)
 		}),
-		worlds: new Array(),
-		x: 0,
-		y: 0,
-		z: 0
+		entities:
+			typeof cell.entities === "undefined"
+				? []
+				: cell.entities.map(function (entity, index) {
+						return compileEntityRaw(entity, createChildSettings(index, settings));
+				  }),
+		worlds: [],
+		x: cell.x,
+		y: cell.y,
+		z: cell.z
 	};
 }
 
@@ -317,9 +345,15 @@ function compileCellRaw(cell: YamlCell, settings: Settings): CommsCellRaw {
  */
 function compileEntityRaw(entity: YamlEntity, settings: Settings): CommsEntityRaw {
 	return {
-		entityUuid: "abc",
-		kindUuid: getDefaultUuid({ base: settings.baseUrl, path: entity.kind }),
-		modeUuid: "abc",
-		worldUuid: "abc"
+		entityUuid: getDefaultUuid({
+			base: settings.baseUrl,
+			path: idLikeToPath(entity, settings)
+		}),
+		kindUuid: getDefaultUuid({ base: settings.baseUrl, path: "id-to-generate-the-kind" }),
+		modeUuid:
+			typeof entity.kind === "undefined"
+				? getDefaultUuid({ base: settings.baseUrl, path: "id-to-generate-the-mode" })
+				: entity.kind,
+		worldUuid: getDefaultUuid({ base: settings.baseUrl, path: "id-to-generate-the-world" })
 	};
 }
