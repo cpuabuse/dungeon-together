@@ -19,5 +19,9 @@ export default {
 		format: "esm",
 		name: "client"
 	},
-	plugins: [commonjs(), resolve({ browser: true, preferBuiltins: true }), typescript()]
+	plugins: [
+		commonjs({ namedExports: { "./node_modules/js-yaml/index.js": ["safeLoad"] } }),
+		resolve({ browser: true, preferBuiltins: true }),
+		typescript()
+	]
 };

@@ -20,5 +20,9 @@ export default {
 		name: "client",
 		sourcemap: "inline"
 	},
-	plugins: [commonjs(), resolve({ browser: true, preferBuiltins: true }), typescript()]
+	plugins: [
+		commonjs({ namedExports: { "./node_modules/js-yaml/index.js": ["safeLoad"] } }),
+		resolve({ browser: true, preferBuiltins: true }),
+		typescript()
+	]
 };
