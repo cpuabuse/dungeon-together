@@ -32,7 +32,7 @@ async function main(): Promise<void> {
 	// Get defaults
 	// Axios returns an object
 	// eslint-disable-next-line @typescript-eslint/ban-types
-	let shardData: object = compile(await axios.get("/data/shard/cave.dt.yml"));
+	let shardData: object = compile((await axios.get("/data/shard/cave.dt.yml")).data);
 
 	ClientProto.prototype.universe.addShard(shardData as CommsShardArgs);
 
