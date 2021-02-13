@@ -1,5 +1,5 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,10 +7,10 @@
  * Grid.
  */
 
-import { CellPath, CommsCell, CommsCellArgs, CommsCellRaw } from "./cell";
+import { Uuid } from "../common/uuid";
+import { CellPath, CommsCell, CommsCellArgs, CommsCellRaw, commsCellRawToArgs } from "./cell";
 import { CommsProto } from "./proto";
 import { ShardPath } from "./shard";
-import { Uuid } from "../common/uuid";
 
 /**
  * A grid-like.
@@ -28,6 +28,9 @@ export interface CommsGridArgs extends GridPath {
  * Only JSON compatible member types can be used.
  */
 export type CommsGridRaw = Omit<CommsGridArgs, "cells" | keyof ShardPath> & {
+	/**
+	 *
+	 */
 	cells: Array<CommsCellRaw>;
 };
 
@@ -69,4 +72,25 @@ export interface GridPath extends ShardPath {
 	 * Grid uuid.
 	 */
 	gridUuid: Uuid;
+}
+
+/**
+ * Converts [[CommsGridRaw]] to [[CommsGridArgs]].
+ *
+ * @param rawSource
+ * @param shardUuid
+ */
+export function commsGridRawToArgs(rawSource: CommsGridRaw, shardUuid: Uuid): CommsGridArgs {
+	return {
+		cells: new Map(
+			rawSource.cells.map(function (cell) {
+				return [
+					cell.cellUuid,
+					commsCellRawToArgs(cell, { cellUuid: cell.cellUuid, gridUuid: rawSource.gridUuid, shardUuid })
+				];
+			})
+		),
+		gridUuid: rawSource.gridUuid,
+		shardUuid
+	};
 }

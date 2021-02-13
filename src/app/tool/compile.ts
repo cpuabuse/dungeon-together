@@ -180,8 +180,8 @@ export function compile(data: string): CommsShardArgs | CommsGridArgs | CommsCel
 		// Perform check to make sure the URL is actually a URL
 		let baseUrl: string = safeLoadResult.base_url;
 		let url: URL = new URL(baseUrl);
-		if (encodeURIComponent(baseUrl) !== url.origin) {
-			throw new Error('Base URL is not in format "https://cpuabuse.com"');
+		if (url.href !== `${url.origin}/`) {
+			throw new Error('Base URL is not in format "https://cpuabuse.com" or "https://cpuabuse.com/"');
 		}
 		if (url.protocol !== protocol) {
 			throw new Error('The protocol for base URL is not "https"');
