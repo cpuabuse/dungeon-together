@@ -1,5 +1,5 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,9 +7,9 @@
  * Entity.
  */
 
+import { Uuid } from "../common/uuid";
 import { CellPath } from "./cell";
 import { CommsProto } from "./proto";
-import { Uuid } from "../common/uuid";
 
 /**
  * An object-like.
@@ -56,4 +56,15 @@ export interface EntityPath extends CellPath {
 	 * Cell uuid.
 	 */
 	entityUuid: Uuid;
+}
+
+/**
+ * @param rawSource
+ * @param path
+ */
+export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPath): CommsEntityArgs {
+	return {
+		...path,
+		...rawSource
+	};
 }

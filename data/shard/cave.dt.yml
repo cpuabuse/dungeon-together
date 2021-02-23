@@ -1,3 +1,5 @@
+base_url: https://dt.cpuabuse.com
+url_path: default
 type: shard
 data:
   grids:
@@ -165,6 +167,7 @@ data:
             - kind: wall
         - x: 1
           y: 2
+          z: 0
           entities:
             - kind: wall
         - x: 2
@@ -330,6 +333,7 @@ data:
             - kind: wall
         - x: 3
           y: 4
+          z: 0
           entities:
             - kind: floor
         - x: 4
@@ -1065,14 +1069,17 @@ data:
             - kind: ennemy
         - x: 6
           y: 13
+          z: 0
           entities:
             - kind: floor
         - x: 7
           y: 13
+          z: 0
           entities:
             - kind: wall
         - x: 8
           y: 13
+          z: 0
           entities:
             - kind: floor
             - kind: treasure
@@ -1346,6 +1353,7 @@ data:
             - kind: wall
         - x: 1
           y: 2
+          z: 1
           entities:
             - kind: floor
         - x: 2
@@ -1516,6 +1524,7 @@ data:
             - kind: enemy
         - x: 3
           y: 4
+          z: 1
           entities:
             - kind: floor
         - x: 4
@@ -2234,14 +2243,17 @@ data:
             - kind: floor
         - x: 6
           y: 13
+          z: 1
           entities:
             - kind: floor
         - x: 7
           y: 13
+          z: 1
           entities:
             - kind: floor
         - x: 8
           y: 13
+          z: 1
           entities:
             - kind: floor
         - x: 9

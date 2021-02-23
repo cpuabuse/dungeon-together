@@ -1,15 +1,19 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
+
+/**
+ * @file Comms shard definition
+ */
 
 /**
  * Shard.
  */
 
-import { CommsGrid, CommsGridArgs, CommsGridRaw, GridPath } from "./grid";
-import { CommsProto } from "./proto";
 import { Uuid } from "../common/uuid";
+import { CommsGrid, CommsGridArgs, CommsGridRaw, GridPath, commsGridRawToArgs } from "./grid";
+import { CommsProto } from "./proto";
 
 /**
  * Everything-like.
@@ -27,6 +31,9 @@ export interface CommsShardArgs extends ShardPath {
  * Only JSON compatible member types can be used.
  */
 export type CommsShardRaw = Omit<CommsShardArgs, "grids"> & {
+	/**
+	 *
+	 */
 	grids: Array<CommsGridRaw>;
 };
 
@@ -72,13 +79,24 @@ export interface ShardPath {
 
 /**
  * Converts [[CommsShardRaw]] to [[CommsShardArgs]].
+ *
+ * @param rawSource
  */
 export function commsShardRawToArgs(rawSource: CommsShardRaw): CommsShardArgs {
-	return { grids: new Map(), shardUuid: rawSource.shardUuid };
+	return {
+		grids: new Map(
+			rawSource.grids.map(function (grid) {
+				return [grid.gridUuid, commsGridRawToArgs(grid, rawSource.shardUuid)];
+			})
+		),
+		shardUuid: rawSource.shardUuid
+	};
 }
 
 /**
  * Converts [[CommsShardArgs]] to [[CommsShardRaw]].
+ *
+ * @param argsSource
  */
 export function commsShardArgsToRaw(argsSource: CommsShardArgs): CommsShardRaw {
 	return { grids: new Array(), shardUuid: argsSource.shardUuid };

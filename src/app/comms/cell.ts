@@ -1,5 +1,5 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,11 +7,11 @@
  * Cell.
  */
 
-import { CommsEntity, CommsEntityArgs, CommsEntityRaw, EntityPath } from "./entity";
-import { CommsProto } from "./proto";
-import { GridPath } from "./grid";
 import { Uuid } from "../common/uuid";
 import { Vector } from "../common/vector";
+import { CommsEntity, CommsEntityArgs, CommsEntityRaw, EntityPath, commsEntityRawToArgs } from "./entity";
+import { GridPath } from "./grid";
+import { CommsProto } from "./proto";
 
 /**
  * A location-like.
@@ -39,8 +39,14 @@ type CommCellRawHelper<A, B> = (A & B) | A;
  * Only JSON compatible member types can be used.
  */
 export type CommsCellRaw = CommCellRawHelper<
-	Omit<CommsCellArgs, "entities" | "worlds" | keyof GridPath | keyof Vector> & {
+	Omit<CommsCellArgs, "entities" | "worlds" | keyof GridPath> & {
+		/**
+		 *
+		 */
 		entities: Array<CommsEntityRaw>;
+		/**
+		 *
+		 */
 		worlds?: Array<Uuid>;
 	},
 	Vector
@@ -84,4 +90,34 @@ export interface CellPath extends GridPath {
 	 * Cell uuid.
 	 */
 	cellUuid: Uuid;
+}
+
+/**
+ * Converts [[CommsCellRaw]] to [[CommsCellArgs]].
+ *
+ * @param rawSource
+ * @param path
+ * @param rawSource
+ * @param path
+ */
+export function commsCellRawToArgs(rawSource: CommsCellRaw, path: CellPath): CommsCellArgs {
+	return {
+		...path,
+		cellUuid: rawSource.cellUuid,
+		entities: new Map(
+			rawSource.entities.map(function (entity) {
+				return [
+					entity.entityUuid,
+					commsEntityRawToArgs(entity, {
+						...path,
+						entityUuid: entity.entityUuid
+					})
+				];
+			})
+		),
+		worlds: new Set(rawSource.worlds),
+		x: rawSource.x,
+		y: rawSource.y,
+		z: rawSource.z
+	};
 }
