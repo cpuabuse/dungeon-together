@@ -26,8 +26,12 @@ import { compile } from "./tool/compile";
  * Entrypoint.
  */
 async function main(): Promise<void> {
+	let clientUniverseElement: HTMLElement | null = document.getElementById("client-universe");
 	// Init
-	await Promise.all([initClientUniverse(), initServerUniverse()]);
+	await Promise.all([
+		initClientUniverse(clientUniverseElement === null ? document.body : clientUniverseElement),
+		initServerUniverse()
+	]);
 
 	// Get defaults
 	// Axios returns an object

@@ -1,5 +1,5 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -8,19 +8,19 @@
  */
 
 import { BaseTexture, Texture } from "pixi.js";
-import { CommsShardArgs, ShardPath } from "../comms/shard";
 import { defaultModeUuid, defaultShardUuid } from "../common/defaults";
+import { Uuid } from "../common/uuid";
 import { CellPath } from "../comms/cell";
+import { EntityPath } from "../comms/entity";
+import { GridPath } from "../comms/grid";
+import { CommsShardArgs, ShardPath } from "../comms/shard";
+import { CommsUniverse } from "../comms/universe";
 import { ClientCell } from "./cell";
 import { ClientEntity } from "./entity";
 import { ClientGrid } from "./grid";
+import { Mode } from "./mode";
 import { ClientProto } from "./proto";
 import { ClientShard } from "./shard";
-import { CommsUniverse } from "../comms/universe";
-import { EntityPath } from "../comms/entity";
-import { GridPath } from "../comms/grid";
-import { Mode } from "./mode";
-import { Uuid } from "../common/uuid";
 
 /**
  * All instances in client.
@@ -104,8 +104,20 @@ export class ClientUniverse implements CommsUniverse {
 
 	/**
 	 * Constructor.
+	 * The constructor can never be called more than once, during the execution of the program.
+	 *
+	 * @param element
 	 */
-	public constructor() {
+	public constructor(element: HTMLElement) {
+		element.addEventListener("contextmenu", event => {
+			// Stops showing default context menu
+			event.preventDefault();
+
+			// Send events to the relevants shards
+			this.shards.forEach(function () {
+				alert("test");
+			});
+		});
 		setTimeout(() => {
 			this.addShard({ grids: new Map(), shardUuid: defaultShardUuid });
 		});
@@ -115,6 +127,8 @@ export class ClientUniverse implements CommsUniverse {
 	 * Add [[ClientShard]] to [[ClientUniverse]].
 	 *
 	 * Adds the modes from the shard.
+	 *
+	 * @param shard
 	 */
 	public addShard(shard: CommsShardArgs): void {
 		if (this.shards.has(shard.shardUuid)) {
@@ -191,7 +205,14 @@ export class ClientUniverse implements CommsUniverse {
 	 *
 	 * A shortcut function.
 	 */
-	public getMode({ uuid }: { uuid: Uuid }): Mode {
+	public getMode({
+		uuid
+	}: {
+		/**
+		 *
+		 */
+		uuid: Uuid;
+	}): Mode {
 		let mode: Mode | undefined = this.modes.get(uuid);
 		if (mode === undefined) {
 			// Default mode is always there
@@ -204,6 +225,8 @@ export class ClientUniverse implements CommsUniverse {
 	 * Get [[ClientCell]].
 	 *
 	 * A shortcut function.
+	 *
+	 * @param path
 	 */
 	public getCell(path: CellPath): ClientCell {
 		return this.getShard(path).getGrid(path).getCell(path);
@@ -213,6 +236,8 @@ export class ClientUniverse implements CommsUniverse {
 	 * Get [[ClientGrid]].
 	 *
 	 * A shortcut function.
+	 *
+	 * @param path
 	 */
 	public getGrid(path: GridPath): ClientGrid {
 		return this.getShard(path).getGrid(path);
@@ -222,6 +247,8 @@ export class ClientUniverse implements CommsUniverse {
 	 * Get [[ClientEntity]].
 	 *
 	 * A shortcut function.
+	 *
+	 * @param path
 	 */
 	public getEntity(path: EntityPath): ClientEntity {
 		return this.getShard(path).getGrid(path).getCell(path).getEntity(path);
@@ -231,6 +258,8 @@ export class ClientUniverse implements CommsUniverse {
 	 * Remove [[ClientShard]] from [[ClientUniverse]].
 	 *
 	 * Removes unused modes.
+	 *
+	 * @param path
 	 */
 	public removeShard(path: ShardPath): void {
 		// Never remove "defaultShardUuid"
@@ -245,10 +274,12 @@ export class ClientUniverse implements CommsUniverse {
  * Initialize the [[ClientUniverse]].
  *
  * Timeouts in [[ClientUniverse]] should be executed first.
+ *
+ * @param element
  */
-export async function initUniverse(): Promise<void> {
+export async function initUniverse(element: HTMLElement): Promise<void> {
 	// Shards
-	(ClientProto.prototype.universe as ClientUniverse) = new ClientUniverse();
+	ClientProto.prototype.universe = new ClientUniverse(element);
 	return new Promise(function (resolve) {
 		setTimeout(function () {
 			resolve();
@@ -259,6 +290,7 @@ export async function initUniverse(): Promise<void> {
 /**
  * Gets the [[ClientShard]].
  *
+ * @param path
  * @returns Shards or default shards
  */
 export async function getShard(path: ShardPath): Promise<ClientShard> {
