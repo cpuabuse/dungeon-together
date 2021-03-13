@@ -18,6 +18,7 @@ import { CommsUniverse } from "../comms/universe";
 import { ClientCell } from "./cell";
 import { ClientEntity } from "./entity";
 import { ClientGrid } from "./grid";
+import { rcSymbol } from "./input";
 import { Mode } from "./mode";
 import { ClientProto } from "./proto";
 import { ClientShard } from "./shard";
@@ -108,16 +109,8 @@ export class ClientUniverse implements CommsUniverse {
 	 *
 	 * @param element
 	 */
-	public constructor(element: HTMLElement) {
-		element.addEventListener("contextmenu", event => {
-			// Stops showing default context menu
-			event.preventDefault();
-
-			// Send events to the relevants shards
-			this.shards.forEach(function () {
-				alert("test");
-			});
-		});
+	public constructor() {
+		// Object initialization
 		setTimeout(() => {
 			this.addShard({ grids: new Map(), shardUuid: defaultShardUuid });
 		});
@@ -146,6 +139,18 @@ export class ClientUniverse implements CommsUniverse {
 		clientShard.modes.forEach((mode, uuid) => {
 			this.modes.set(uuid, mode);
 			modesIndex.push(uuid);
+		});
+
+		// JavaScript based events
+		ClientProto.prototype.element.addEventListener("contextmenu", event => {
+			// Stops showing default context menu
+			event.preventDefault();
+
+			// Send events to the relevants shards
+			clientShard.fireInput(rcSymbol, {
+				x: event.screenX,
+				y: event.screenY
+			});
 		});
 	}
 
@@ -279,7 +284,8 @@ export class ClientUniverse implements CommsUniverse {
  */
 export async function initUniverse(element: HTMLElement): Promise<void> {
 	// Shards
-	ClientProto.prototype.universe = new ClientUniverse(element);
+	ClientProto.prototype.element = element;
+	ClientProto.prototype.universe = new ClientUniverse();
 	return new Promise(function (resolve) {
 		setTimeout(function () {
 			resolve();

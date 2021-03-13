@@ -1,5 +1,5 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,8 +7,8 @@
  * Providing access to client universe objects.
  */
 
-import { ClientUniverse } from "./universe";
 import { CommsProto } from "../comms/proto";
+import { ClientUniverse } from "./universe";
 
 /**
  * Class that knows about canvases.
@@ -19,5 +19,13 @@ export class ClientProto {}
  * Overload commsProto class.
  */
 export interface ClientProto extends CommsProto {
-	readonly universe: ClientUniverse;
+	/**
+	 *
+	 */
+	universe: ClientUniverse;
+
+	/**
+	 *
+	 */
+	element: HTMLElement;
 }

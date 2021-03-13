@@ -37,13 +37,12 @@ async function main(): Promise<void> {
 	// Axios returns an object
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	let shardData: object = compile((await axios.get("/data/shard/cave.dt.yml")).data);
-	console.log(shardData);
 
 	ClientProto.prototype.universe.addShard(shardData as CommsShardArgs);
 
 	let defaultShard: ClientShard = await getShard({ shardUuid: (shardData as CommsShardArgs).shardUuid });
 	// Attach canvas
-	defaultShard.attach(document.body);
+	defaultShard.attach(clientUniverseElement === null ? document.body : clientUniverseElement);
 }
 
 // Call main

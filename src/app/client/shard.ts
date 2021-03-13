@@ -1,5 +1,5 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -8,9 +8,6 @@
  */
 
 import { Application, Container, Matrix, Renderer, utils } from "pixi.js";
-import { CommsGridArgs, GridPath } from "../comms/grid";
-import { CommsShard, CommsShardArgs } from "../comms/shard";
-import { Uuid, getDefaultUuid } from "../common/uuid";
 import {
 	defaultEntityHeight,
 	defaultEntityWidth,
@@ -21,10 +18,14 @@ import {
 	gridUuidUrlPath,
 	urlPathSeparator
 } from "../common/defaults";
+import { Uuid, getDefaultUuid } from "../common/uuid";
+import { CommsGridArgs, GridPath } from "../comms/grid";
+import { CommsShard, CommsShardArgs } from "../comms/shard";
 import { ClientConnection } from "./connection";
 import { ClientGrid } from "./grid";
-import { ClientProto } from "./proto";
+import { Input, InputInterface, rcSymbol } from "./input";
 import { Mode } from "./mode";
+import { ClientProto } from "./proto";
 import { View } from "./view";
 
 /**
@@ -90,6 +91,11 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	private isAttached: boolean = false;
 
 	/**
+	 * Input events.
+	 */
+	private input: Input = new Input();
+
+	/**
 	 * Constructor for a screen.
 	 */
 	public constructor({ shardUuid, grids }: CommsShardArgs) {
@@ -122,10 +128,17 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 				this.addGrid(grid);
 			});
 		});
+
+		// Add listeners for input
+		this.input.on(rcSymbol, inputInterface => {
+			alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
+		});
 	}
 
 	/**
 	 * Adds [[ClientGrid]].
+	 *
+	 * @param grid
 	 */
 	public addGrid(grid: CommsGridArgs): void {
 		if (this.grids.has(grid.shardUuid)) {
@@ -137,6 +150,8 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 
 	/**
 	 * Enables the rendering.
+	 *
+	 * @param renderer
 	 */
 	public addGridContainer(renderer: Renderer): void {
 		renderer.render(this.gridContainer);
@@ -145,6 +160,8 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	/**
 	 * Attach to HTML canvas.
 	 * Can only be attached once, and never detached.
+	 *
+	 * @param element
 	 */
 	public attach(element: HTMLElement): void {
 		// Performing once, as pixi library does not allow to detach
@@ -171,6 +188,16 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	}
 
 	/**
+	 * The function that fires the input received.
+	 *
+	 * @param inputSymbol - Input symbol received
+	 * @param inputInterface - Input event received
+	 */
+	public fireInput(inputSymbol: symbol, inputInterface: InputInterface) {
+		this.input.emit(inputSymbol, inputInterface);
+	}
+
+	/**
 	 * Get the modes from the server.
 	 */
 	public get modes(): Map<Uuid, Mode> {
@@ -179,7 +206,9 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 
 	/**
 	 * Removes the [[ClientGrid]]
+	 *
 	 * @param uuid UUID of the [[ClientGrid]]
+	 * @param path
 	 */
 	public removeGrid(path: GridPath): void {
 		if (path.gridUuid !== this.defaultGridUuid) {

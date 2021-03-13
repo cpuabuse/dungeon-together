@@ -7,7 +7,39 @@
  * @file File for handling user input.
  */
 
+import { EventEmitter } from "events";
+
 /**
- * A class representing a sequencies of users input, such as keyboard, mouse, touch.
+ * Identifier for the up movement input.
  */
-export class Input {}
+export const upSymbol: symbol = Symbol("up");
+
+/**
+ * Identifier for the up movement input.
+ */
+export const downSymbol: symbol = Symbol("down");
+
+/**
+ * Identifier for the up right-click input.
+ */
+export const rcSymbol: symbol = Symbol("right-click");
+
+/**
+ * An interface representing the input event.
+ */
+export interface InputInterface {
+	/**
+	 * Relative x position.
+	 */
+	x: number;
+
+	/**
+	 * Relative y position.
+	 */
+	y: number;
+}
+
+/**
+ * A class representing a sequence of user input, such as keyboard, mouse, touch.
+ */
+export class Input extends EventEmitter {}
