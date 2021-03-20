@@ -26,20 +26,23 @@ import { compile } from "./tool/compile";
  * Entrypoint.
  */
 async function main(): Promise<void> {
+	let clientUniverseElement: HTMLElement | null = document.getElementById("client-universe");
 	// Init
-	await Promise.all([initClientUniverse(), initServerUniverse()]);
+	await Promise.all([
+		initClientUniverse(clientUniverseElement === null ? document.body : clientUniverseElement),
+		initServerUniverse()
+	]);
 
 	// Get defaults
 	// Axios returns an object
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	let shardData: object = compile((await axios.get("/data/shard/cave.dt.yml")).data);
-	console.log(shardData);
 
 	ClientProto.prototype.universe.addShard(shardData as CommsShardArgs);
 
 	let defaultShard: ClientShard = await getShard({ shardUuid: (shardData as CommsShardArgs).shardUuid });
 	// Attach canvas
-	defaultShard.attach(document.body);
+	defaultShard.attach(clientUniverseElement === null ? document.body : clientUniverseElement);
 }
 
 // Call main
