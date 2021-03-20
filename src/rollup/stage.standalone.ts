@@ -23,7 +23,12 @@ export default {
 		sourcemap: "inline"
 	},
 	plugins: [
-		commonjs({ namedExports: { "./node_modules/js-yaml/index.js": ["safeLoad"] } }),
+		commonjs({
+			namedExports: {
+				"./node_modules/js-yaml/index.js": ["safeLoad"],
+				"./node_modules/mousetrap/mousetrap.js": ["bind"]
+			}
+		}),
 		resolve({ browser: true, preferBuiltins: true }),
 		globals(),
 		builtins(),

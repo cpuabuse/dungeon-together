@@ -65,6 +65,7 @@
 		"@types/cli-progress": "^3.8.0",
 		"@types/js-yaml": "^3.12.5",
 		"@types/mocha": "^7.0.1",
+		"@types/mousetrap": "^1.6.5",
 		"@types/node": "^13.13.34",
 		"@types/rollup-plugin-node-builtins": "^2.1.1",
 		"@types/rollup-plugin-node-globals": "^1.4.0",
@@ -106,6 +107,7 @@
 		"fp-ts": "^2.9.1",
 		"io-ts": "^2.2.13",
 		"js-yaml": "^3.14.0",
+		"mousetrap": "^1.6.5",
 		"pixi.js": "^5.3.3",
 		"uuid": "^7.0.3",
 		"ws": "^7.4.1"

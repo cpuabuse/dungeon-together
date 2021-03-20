@@ -7,6 +7,7 @@
  * Client universe.
  */
 
+import { bind } from "mousetrap";
 import { BaseTexture, Texture } from "pixi.js";
 import { defaultModeUuid, defaultShardUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
@@ -18,7 +19,7 @@ import { CommsUniverse } from "../comms/universe";
 import { ClientCell } from "./cell";
 import { ClientEntity } from "./entity";
 import { ClientGrid } from "./grid";
-import { rcSymbol } from "./input";
+import { rcSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
 import { ClientProto } from "./proto";
 import { ClientShard } from "./shard";
@@ -150,6 +151,16 @@ export class ClientUniverse implements CommsUniverse {
 			clientShard.fireInput(rcSymbol, {
 				x: event.screenX,
 				y: event.screenY
+			});
+		});
+
+		// Keyboard events
+		// We don't care about return
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+		bind("up", () => {
+			clientShard.fireInput(upSymbol, {
+				x: 0,
+				y: 0
 			});
 		});
 	}
