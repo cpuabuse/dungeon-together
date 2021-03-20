@@ -23,7 +23,7 @@ import { CommsGridArgs, GridPath } from "../comms/grid";
 import { CommsShard, CommsShardArgs } from "../comms/shard";
 import { ClientConnection } from "./connection";
 import { ClientGrid } from "./grid";
-import { Input, InputInterface, rcSymbol, upSymbol } from "./input";
+import { Input, InputInterface, downSymbol, rcSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
 import { ClientProto } from "./proto";
 import { View } from "./view";
@@ -136,6 +136,11 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 
 		// Add listeners for up input
 		this.input.on(upSymbol, inputInterface => {
+			alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
+		});
+
+		// Add listeners for down input
+		this.input.on(downSymbol, inputInterface => {
 			alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
 		});
 	}
