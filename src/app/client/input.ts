@@ -35,6 +35,11 @@ export const leftSymbol: symbol = Symbol("left");
 export const rcSymbol: symbol = Symbol("right-click");
 
 /**
+ * Identifier for the up middle-click input.
+ */
+export const mcSymbol: symbol = Symbol("middle-click");
+
+/**
  * An interface representing the input event.
  */
 export interface InputInterface {
