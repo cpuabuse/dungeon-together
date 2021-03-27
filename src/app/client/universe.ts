@@ -19,7 +19,7 @@ import { CommsUniverse } from "../comms/universe";
 import { ClientCell } from "./cell";
 import { ClientEntity } from "./entity";
 import { ClientGrid } from "./grid";
-import { downSymbol, rcSymbol, upSymbol } from "./input";
+import { downSymbol, leftSymbol, rcSymbol, rightSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
 import { ClientProto } from "./proto";
 import { ClientShard } from "./shard";
@@ -125,8 +125,8 @@ export class ClientUniverse implements CommsUniverse {
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
 				clientShard.fireInput(rcSymbol, {
-					x: event.screenX,
-					y: event.screenY
+					x: 0,
+					y: 0
 				});
 			});
 		});
@@ -175,6 +175,54 @@ export class ClientUniverse implements CommsUniverse {
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
 				clientShard.fireInput(downSymbol, {
+					x: 0,
+					y: 0
+				});
+			});
+		});
+		// We don't care about return
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+		bind("right", () => {
+			// Iterates through shards conditionally
+			this.shards.forEach(clientShard => {
+				// Send events to the relevant shards
+				clientShard.fireInput(rightSymbol, {
+					x: 0,
+					y: 0
+				});
+			});
+		});
+		// We don't care about return
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+		bind("d", () => {
+			// Iterates through shards conditionally
+			this.shards.forEach(clientShard => {
+				// Send events to the relevant shards
+				clientShard.fireInput(rightSymbol, {
+					x: 0,
+					y: 0
+				});
+			});
+		});
+		// We don't care about return
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+		bind("left", () => {
+			// Iterates through shards conditionally
+			this.shards.forEach(clientShard => {
+				// Send events to the relevant shards
+				clientShard.fireInput(leftSymbol, {
+					x: 0,
+					y: 0
+				});
+			});
+		});
+		// We don't care about return
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+		bind("a", () => {
+			// Iterates through shards conditionally
+			this.shards.forEach(clientShard => {
+				// Send events to the relevant shards
+				clientShard.fireInput(leftSymbol, {
 					x: 0,
 					y: 0
 				});
