@@ -20,9 +20,24 @@ export const upSymbol: symbol = Symbol("up");
 export const downSymbol: symbol = Symbol("down");
 
 /**
+ * Identifier for the righ movement input.
+ */
+export const rightSymbol: symbol = Symbol("right");
+
+/**
+ * Identifier for the left movement input.
+ */
+export const leftSymbol: symbol = Symbol("left");
+
+/**
  * Identifier for the up right-click input.
  */
 export const rcSymbol: symbol = Symbol("right-click");
+
+/**
+ * Identifier for the up middle-click input.
+ */
+export const mcSymbol: symbol = Symbol("middle-click");
 
 /**
  * An interface representing the input event.
