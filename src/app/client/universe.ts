@@ -7,6 +7,7 @@
  * Client universe.
  */
 
+import { Tap } from "hammerjs";
 import { bind } from "mousetrap";
 import { BaseTexture, Texture } from "pixi.js";
 import { defaultModeUuid, defaultShardUuid } from "../common/defaults";
@@ -19,7 +20,7 @@ import { CommsUniverse } from "../comms/universe";
 import { ClientCell } from "./cell";
 import { ClientEntity } from "./entity";
 import { ClientGrid } from "./grid";
-import { downSymbol, leftSymbol, mcSymbol, rcSymbol, rightSymbol, upSymbol } from "./input";
+import { downSymbol, leftSymbol, rcSymbol, rightSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
 import { ClientProto } from "./proto";
 import { ClientShard } from "./shard";
@@ -129,24 +130,6 @@ export class ClientUniverse implements CommsUniverse {
 					y: 0
 				});
 			});
-		});
-
-		// JavaScript based events
-		ClientProto.prototype.element.addEventListener("mousedown", event => {
-			// Stops showing default context menu
-			event.preventDefault();
-
-			// Check if the click is the middle button
-			if (event.button === 1) {
-				// Iterates through shards conditionally
-				this.shards.forEach(clientShard => {
-					// Send events to the relevant shards
-					clientShard.fireInput(mcSymbol, {
-						x: 10,
-						y: 10
-					});
-				});
-			}
 		});
 
 		// We don't care about return
