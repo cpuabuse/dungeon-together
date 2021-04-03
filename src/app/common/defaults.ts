@@ -1,5 +1,5 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -116,12 +116,12 @@ export const defaultEntityWidth: number = 50;
 /**
  * Minimum number of entity to fit in row in canvas.
  */
-export const defaultMinimumEntityInColumn: number = 12;
+export const defaultMinimumEntityInColumn: number = 15;
 
 /**
  * Minimum number of entities to fit in column in clientShard.
  */
-export const defaultMinimumEntityInRow: number = 12;
+export const defaultMinimumEntityInRow: number = 15;
 
 /**
  * Default vector for default cells.
@@ -129,6 +129,9 @@ export const defaultMinimumEntityInRow: number = 12;
 export const defaultCellVector: Vector = { x: 0, y: 0, z: 0 };
 
 // Current navigation
+/**
+ *
+ */
 let currentNav: number = 0;
 
 /**
