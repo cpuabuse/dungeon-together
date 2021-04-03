@@ -7,7 +7,6 @@
  * Client universe.
  */
 
-import { Tap } from "hammerjs";
 import { bind } from "mousetrap";
 import { BaseTexture, Texture } from "pixi.js";
 import { defaultModeUuid, defaultShardUuid } from "../common/defaults";
@@ -122,19 +121,6 @@ export class ClientUniverse implements CommsUniverse {
 			// Stops showing default context menu
 			event.preventDefault();
 
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(rcSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("shift+F10", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
