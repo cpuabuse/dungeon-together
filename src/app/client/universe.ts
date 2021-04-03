@@ -7,7 +7,7 @@
  * Client universe.
  */
 
-import { bind } from "mousetrap";
+import Mousetrap from "mousetrap";
 import { BaseTexture, Texture } from "pixi.js";
 import { defaultModeUuid, defaultShardUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
@@ -116,8 +116,11 @@ export class ClientUniverse implements CommsUniverse {
 			this.addShard({ grids: new Map(), shardUuid: defaultShardUuid });
 		});
 
+		// Identify DOM
+		let universeElement: HTMLElement = ClientProto.prototype.element;
+
 		// JavaScript based events
-		ClientProto.prototype.element.addEventListener("contextmenu", event => {
+		universeElement.addEventListener("contextmenu", event => {
 			// Stops showing default context menu
 			event.preventDefault();
 
@@ -132,9 +135,11 @@ export class ClientUniverse implements CommsUniverse {
 		});
 
 		// Keyboard events
+		// Prepare mousetrap instance
+		let mousetrap: Mousetrap.MousetrapInstance = new Mousetrap(universeElement);
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("up", () => {
+		mousetrap.bind("up", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -146,7 +151,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("w", () => {
+		mousetrap.bind("w", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -158,7 +163,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("down", () => {
+		mousetrap.bind("down", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -170,7 +175,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("s", () => {
+		mousetrap.bind("s", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -182,7 +187,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("right", () => {
+		mousetrap.bind("right", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -194,7 +199,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("d", () => {
+		mousetrap.bind("d", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -206,7 +211,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("left", () => {
+		mousetrap.bind("left", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -218,7 +223,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("a", () => {
+		mousetrap.bind("a", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
