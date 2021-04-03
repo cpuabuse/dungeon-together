@@ -253,7 +253,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 3
           y: 3
           z: 0
@@ -1275,13 +1275,13 @@ data:
           y: 1
           z: 1
           entities:
-            - kind: wall
+            - kind: floor
             - kind: treasure
         - x: 2
           y: 1
           z: 1
           entities:
-            - kind: wall
+            - kind: floor
             - kind: trap
         - x: 3
           y: 1
@@ -1836,7 +1836,7 @@ data:
           y: 8
           z: 1
           entities:
-            - kind: wall
+            - kind: floor
             - kind: trap
         - x: 5
           y: 8
