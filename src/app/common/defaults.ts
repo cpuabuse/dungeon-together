@@ -1,5 +1,5 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -129,6 +129,9 @@ export const defaultMinimumEntityInRow: number = 12;
 export const defaultCellVector: Vector = { x: 0, y: 0, z: 0 };
 
 // Current navigation
+/**
+ *
+ */
 let currentNav: number = 0;
 
 /**

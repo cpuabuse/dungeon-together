@@ -253,7 +253,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 3
           y: 3
           z: 0
@@ -269,7 +269,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 6
           y: 3
           z: 0
@@ -285,7 +285,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 9
           y: 3
           z: 0
@@ -510,7 +510,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 8
           y: 6
           z: 0
@@ -672,7 +672,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 9
           y: 8
           z: 0
@@ -771,7 +771,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 13
           y: 9
           z: 0
@@ -797,7 +797,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 3
           y: 10
           z: 0
@@ -892,7 +892,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 6
           y: 11
           z: 0
@@ -913,7 +913,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 10
           y: 11
           z: 0
@@ -985,7 +985,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 9
           y: 12
           z: 0
@@ -1032,7 +1032,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 0
           y: 13
           z: 0
@@ -1049,7 +1049,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 3
           y: 13
           z: 0
@@ -1066,7 +1066,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 6
           y: 13
           z: 0
@@ -1109,7 +1109,7 @@ data:
           z: 0
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 14
           y: 13
           z: 0
@@ -1275,13 +1275,13 @@ data:
           y: 1
           z: 1
           entities:
-            - kind: wall
+            - kind: floor
             - kind: treasure
         - x: 2
           y: 1
           z: 1
           entities:
-            - kind: wall
+            - kind: floor
             - kind: trap
         - x: 3
           y: 1
@@ -1836,7 +1836,7 @@ data:
           y: 8
           z: 1
           entities:
-            - kind: wall
+            - kind: floor
             - kind: trap
         - x: 5
           y: 8
@@ -1859,7 +1859,7 @@ data:
           z: 1
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 9
           y: 8
           z: 1
@@ -2224,7 +2224,7 @@ data:
           z: 1
           entities:
             - kind: floor
-            - kind: ennemy
+            - kind: enemy
         - x: 3
           y: 13
           z: 1
@@ -3139,7 +3139,7 @@ data:
           y: 9
           z: 2
           entities:
-            - kind: floor
+            - kind: wall
         - x: 0
           y: 10
           z: 2
@@ -3337,7 +3337,7 @@ data:
           y: 12
           z: 2
           entities:
-            - kind: wall
+            - kind: floor
         - x: 8
           y: 12
           z: 2

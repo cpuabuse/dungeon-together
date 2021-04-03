@@ -40,7 +40,9 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	public readonly app: Application = new Application({
 		antialias: true,
 		autoDensity: true,
-		transparent: true
+		height: 750,
+		transparent: true,
+		width: 750
 	});
 
 	/**
