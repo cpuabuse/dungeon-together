@@ -116,12 +116,12 @@ export const defaultEntityWidth: number = 50;
 /**
  * Minimum number of entity to fit in row in canvas.
  */
-export const defaultMinimumEntityInColumn: number = 15;
+export const defaultMinimumEntityInColumn: number = 12;
 
 /**
  * Minimum number of entities to fit in column in clientShard.
  */
-export const defaultMinimumEntityInRow: number = 15;
+export const defaultMinimumEntityInRow: number = 12;
 
 /**
  * Default vector for default cells.
