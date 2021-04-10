@@ -10,14 +10,36 @@
 /**
  * Client-server command interface.
  */
-export interface Message {
-	/**
-	 * Type of the message.
-	 */
-	type: string;
-
+export class Envelope {
 	/**
 	 * Message data.
 	 */
-	data: unknown;
+	private message: unknown;
+
+	/**
+	 * Type of the message.
+	 */
+	private type: string;
+
+	/**
+	 * Constructor for envelope.
+	 */
+	public constructor({
+		message,
+		type
+	}: {
+		/**
+		 * Message data to be set.
+		 */
+		message: unknown;
+
+		/**
+		 * Message type to be set.
+		 */
+		type: string;
+	}) {
+		// Initialize private properties
+		this.message = message;
+		this.type = type;
+	}
 }
