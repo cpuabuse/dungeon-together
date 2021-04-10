@@ -23,7 +23,7 @@ import { CommsGridArgs, GridPath } from "../comms/grid";
 import { CommsShard, CommsShardArgs } from "../comms/shard";
 import { ClientConnection } from "./connection";
 import { ClientGrid } from "./grid";
-import { Input, InputInterface, downSymbol, leftSymbol, mcSymbol, rcSymbol, rightSymbol, upSymbol } from "./input";
+import { Input, InputInterface, downSymbol, leftSymbol, rcSymbol, rightSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
 import { ClientProto } from "./proto";
 import { View } from "./view";
@@ -133,11 +133,6 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 
 		// Add listeners for righ-click input
 		this.input.on(rcSymbol, inputInterface => {
-			alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
-		});
-
-		// Add listeners for middleclick input
-		this.input.on(mcSymbol, inputInterface => {
 			alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
 		});
 

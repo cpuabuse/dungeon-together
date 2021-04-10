@@ -6,8 +6,9 @@
 /**
  * Client universe.
  */
-
-import { bind } from "mousetrap";
+import Hammer from "hammerjs";
+import type HammerManager from "hammerjs";
+import Mousetrap from "mousetrap";
 import { BaseTexture, Texture } from "pixi.js";
 import { defaultModeUuid, defaultShardUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
@@ -19,7 +20,7 @@ import { CommsUniverse } from "../comms/universe";
 import { ClientCell } from "./cell";
 import { ClientEntity } from "./entity";
 import { ClientGrid } from "./grid";
-import { downSymbol, leftSymbol, mcSymbol, rcSymbol, rightSymbol, upSymbol } from "./input";
+import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
 import { ClientProto } from "./proto";
 import { ClientShard } from "./shard";
@@ -116,42 +117,14 @@ export class ClientUniverse implements CommsUniverse {
 			this.addShard({ grids: new Map(), shardUuid: defaultShardUuid });
 		});
 
+		// Identify DOM
+		let universeElement: HTMLElement = ClientProto.prototype.element;
+
 		// JavaScript based events
-		ClientProto.prototype.element.addEventListener("contextmenu", event => {
+		universeElement.addEventListener("contextmenu", event => {
 			// Stops showing default context menu
 			event.preventDefault();
 
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(rcSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-
-		// JavaScript based events
-		ClientProto.prototype.element.addEventListener("mousedown", event => {
-			// Stops showing default context menu
-			event.preventDefault();
-
-			// Check if the click is the middle button
-			if (event.button === 1) {
-				// Iterates through shards conditionally
-				this.shards.forEach(clientShard => {
-					// Send events to the relevant shards
-					clientShard.fireInput(mcSymbol, {
-						x: 10,
-						y: 10
-					});
-				});
-			}
-		});
-
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("shift+F10", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -163,9 +136,11 @@ export class ClientUniverse implements CommsUniverse {
 		});
 
 		// Keyboard events
+		// Prepare mousetrap instance
+		let mousetrap: Mousetrap.MousetrapInstance = new Mousetrap(universeElement);
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("up", () => {
+		mousetrap.bind("up", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -177,7 +152,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("w", () => {
+		mousetrap.bind("w", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -189,7 +164,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("down", () => {
+		mousetrap.bind("down", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -201,7 +176,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("s", () => {
+		mousetrap.bind("s", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -213,7 +188,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("right", () => {
+		mousetrap.bind("right", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -225,7 +200,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("d", () => {
+		mousetrap.bind("d", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -237,7 +212,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("left", () => {
+		mousetrap.bind("left", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
@@ -249,11 +224,34 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		bind("a", () => {
+		mousetrap.bind("a", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
 				clientShard.fireInput(leftSymbol, {
+					x: 0,
+					y: 0
+				});
+			});
+		});
+
+		// Touch events
+		let hammer: HammerManager = new Hammer(universeElement);
+		hammer.on("tap", () => {
+			// Iterates through shards conditionally
+			this.shards.forEach(clientShard => {
+				// Send events to the relevant shards
+				clientShard.fireInput(lcSymbol, {
+					x: 0,
+					y: 0
+				});
+			});
+		});
+		hammer.on("press", () => {
+			// Iterates through shards conditionally
+			this.shards.forEach(clientShard => {
+				// Send events to the relevant shards
+				clientShard.fireInput(rcSymbol, {
 					x: 0,
 					y: 0
 				});
