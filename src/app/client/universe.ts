@@ -6,7 +6,8 @@
 /**
  * Client universe.
  */
-
+import Hammer from "hammerjs";
+import type HammerManager from "hammerjs";
 import Mousetrap from "mousetrap";
 import { BaseTexture, Texture } from "pixi.js";
 import { defaultModeUuid, defaultShardUuid } from "../common/defaults";
@@ -19,7 +20,7 @@ import { CommsUniverse } from "../comms/universe";
 import { ClientCell } from "./cell";
 import { ClientEntity } from "./entity";
 import { ClientGrid } from "./grid";
-import { downSymbol, leftSymbol, rcSymbol, rightSymbol, upSymbol } from "./input";
+import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
 import { ClientProto } from "./proto";
 import { ClientShard } from "./shard";
@@ -228,6 +229,29 @@ export class ClientUniverse implements CommsUniverse {
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
 				clientShard.fireInput(leftSymbol, {
+					x: 0,
+					y: 0
+				});
+			});
+		});
+
+		// Touch events
+		let hammer: HammerManager = new Hammer(universeElement);
+		hammer.on("tap", () => {
+			// Iterates through shards conditionally
+			this.shards.forEach(clientShard => {
+				// Send events to the relevant shards
+				clientShard.fireInput(lcSymbol, {
+					x: 0,
+					y: 0
+				});
+			});
+		});
+		hammer.on("press", () => {
+			// Iterates through shards conditionally
+			this.shards.forEach(clientShard => {
+				// Send events to the relevant shards
+				clientShard.fireInput(rcSymbol, {
 					x: 0,
 					y: 0
 				});
