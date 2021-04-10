@@ -1,24 +1,37 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+/**
+ * @file Client connection to server.
+ */
+
 import { defaultServerUrl, defaultShardUuid } from "../common/defaults";
+import { Uuid } from "../common/uuid";
+import { Message } from "../comms/connection";
 import { ServerConnection } from "../server/connection";
 import { ServerUniverse } from "../server/universe";
-import { Uuid } from "../common/uuid";
-
-/**
- * Client connection to server.
- */
 
 /**
  * Arguments for [[ClientConnection]].
  */
 export interface ClientConnectionArgs {
+	/**
+	 *
+	 */
 	canvasUuid: Uuid;
+	/**
+	 *
+	 */
 	shardUuid?: Uuid;
+	/**
+	 *
+	 */
 	standalone?: boolean;
+	/**
+	 *
+	 */
 	url?: string;
 }
 
@@ -55,3 +68,15 @@ export class ClientConnection {
 		}
 	}
 }
+
+/**
+ * Message to pass about the character movements.
+ *
+ * Using type as it would be sent over the internet.
+ */
+export type MovementMessage = Message & {
+	/**
+	 * Direction that the character will move.
+	 */
+	direction: "up" | "down" | "right" | "left" | "zup" | "zdown";
+};

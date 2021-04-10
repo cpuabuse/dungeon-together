@@ -1,4 +1,6 @@
-# Data conversion
+# Conversion
+
+## Data conversion
 
 ```mermaid
 flowchart LR
@@ -35,3 +37,7 @@ flowchart LR
 	%% Top-level relationships
 	client <-- Communication --> server
 ```
+
+## Communication
+
+The communication happens using the `Connection` class, using WebSocket. The server and client send `Message`.
