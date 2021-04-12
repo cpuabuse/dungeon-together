@@ -1,25 +1,28 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * A universe with everything.
+ * @file A universe with everything.
  */
 
-import { CommsShard, CommsShardArgs } from "../comms/shard";
-import { ServerGrid, ServerGridArgs } from "./grid";
-import { Uuid, getDefaultUuid } from "../common/uuid";
-import { gridUuidUrlPath, urlPathSeparator } from "../common/defaults";
 import { ClientConnection } from "../client/connection";
+import { gridUuidUrlPath, urlPathSeparator } from "../common/defaults";
+import { Uuid, getDefaultUuid } from "../common/uuid";
 import { GridPath } from "../comms/grid";
+import { CommsShard, CommsShardArgs } from "../comms/shard";
 import { ServerConnection } from "./connection";
+import { ServerGrid, ServerGridArgs } from "./grid";
 import { ServerProto } from "./proto";
 
 /**
  * Universe args.
  */
 export interface ServerShardArgs extends CommsShardArgs {
+	/**
+	 *
+	 */
 	grids: Map<Uuid, ServerGridArgs>;
 }
 
@@ -38,14 +41,14 @@ export class ServerShard extends ServerProto implements CommsShard {
 	public defaultGridUuid: Uuid;
 
 	/**
-	 * This UUID.
-	 */
-	public shardUuid: Uuid;
-
-	/**
 	 * Grids of the universe.
 	 */
 	public grids: Map<Uuid, ServerGrid> = new Map();
+
+	/**
+	 * This UUID.
+	 */
+	public shardUuid: Uuid;
 
 	/**
 	 * Constructor.
@@ -72,14 +75,25 @@ export class ServerShard extends ServerProto implements CommsShard {
 
 	/**
 	 * Add a connection.
+	 *
+	 * @returns [[serverConnection]], a connection to the server
 	 */
 	public addConnection({
 		canvasUuid,
 		connection,
 		standalone
 	}: {
+		/**
+		 *
+		 */
 		canvasUuid: Uuid;
+		/**
+		 *
+		 */
 		connection: WebSocket | ClientConnection;
+		/**
+		 *
+		 */
 		standalone?: boolean;
 	}): ServerConnection {
 		if (this.connection.has(canvasUuid)) {
@@ -97,6 +111,8 @@ export class ServerShard extends ServerProto implements CommsShard {
 
 	/**
 	 * Adds [[ServerGrid]].
+	 *
+	 * @param grid - Arguments for the [[ServerGrid]] constructor
 	 */
 	public addGrid(grid: ServerGridArgs): void {
 		if (this.grids.has(grid.gridUuid)) {
@@ -108,6 +124,8 @@ export class ServerShard extends ServerProto implements CommsShard {
 
 	/**
 	 * Gets [[ServerGrid]].
+	 *
+	 * @returns [[grid]], the grid itself
 	 */
 	public getGrid({ gridUuid }: GridPath): ServerGrid {
 		let grid: ServerGrid | undefined = this.grids.get(gridUuid);
@@ -120,6 +138,8 @@ export class ServerShard extends ServerProto implements CommsShard {
 
 	/**
 	 * Removes [[CommsGrid]].
+	 *
+	 * @param path - Path to grid
 	 */
 	public removeGrid(path: GridPath): void {
 		if (path.gridUuid !== this.defaultGridUuid) {

@@ -1,18 +1,18 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * Entity within cells.
+ * @file Entity within cells.
  */
 
-import { CommsEntity, CommsEntityArgs, EntityPath } from "../comms/entity";
+import { defaultModeUuid } from "../common/defaults";
+import { Uuid } from "../common/uuid";
 import { CellPath } from "../comms/cell";
+import { CommsEntity, CommsEntityArgs, EntityPath } from "../comms/entity";
 import { ServerCell } from "./cell";
 import { ServerProto } from "./proto";
-import { Uuid } from "../common/uuid";
-import { defaultModeUuid } from "../common/defaults";
 
 /**
  * Arguments for constructor of a server entity.
@@ -47,6 +47,21 @@ export interface ServerEntityArgs extends CommsEntityArgs {
  */
 export abstract class ServerEntity extends ServerProto implements CommsEntity {
 	/**
+	 * Cell occupied by the server entity.
+	 */
+	public cellUuid: Uuid;
+
+	/**
+	 * This UUID.
+	 */
+	public entityUuid: Uuid;
+
+	/**
+	 * Corresponding grid.
+	 */
+	public gridUuid: Uuid;
+
+	/**
 	 * Kind of this server entity in the world.
 	 */
 	public kindUuid: Uuid;
@@ -57,24 +72,9 @@ export abstract class ServerEntity extends ServerProto implements CommsEntity {
 	public modeUuid: string = defaultModeUuid;
 
 	/**
-	 * Cell occupied by the server entity.
-	 */
-	public cellUuid: Uuid;
-
-	/**
 	 * Universe this resides in.
 	 */
 	public shardUuid: Uuid;
-
-	/**
-	 * Corresponding grid.
-	 */
-	public gridUuid: Uuid;
-
-	/**
-	 * This UUID.
-	 */
-	public entityUuid: Uuid;
 
 	/**
 	 * World this is in.
@@ -122,6 +122,8 @@ export abstract class ServerEntity extends ServerProto implements CommsEntity {
 
 	/**
 	 * Move.
+	 *
+	 * @param cellPath - Path to cell
 	 */
 	public move(cellPath: CellPath): void {
 		this.performMove(cellPath);
@@ -129,6 +131,8 @@ export abstract class ServerEntity extends ServerProto implements CommsEntity {
 
 	/**
 	 * Move.
+	 *
+	 * @param entityPath - Path to entity
 	 */
 	public swap(entityPath: EntityPath): void {
 		let entity: ServerEntity = this.universe.getEntity(entityPath);
@@ -146,7 +150,16 @@ export abstract class ServerEntity extends ServerProto implements CommsEntity {
 	}
 
 	/**
+	 * Performs actual initialization.
+	 *
+	 * To be overridden by extending classes.
+	 */
+	protected abstract doInitialize(): void;
+
+	/**
 	 * Actually moves the server cell.
+	 *
+	 * @param cellPath - Path to cell
 	 */
 	protected doMove(cellPath: CellPath): void {
 		// Get server cell for accurate UUIDs
@@ -162,6 +175,8 @@ export abstract class ServerEntity extends ServerProto implements CommsEntity {
 
 	/**
 	 * Swaps cells with a target server entity.
+	 *
+	 * @param entityPath - Path to entity
 	 */
 	protected doSwap(entityPath: EntityPath): void {
 		// Get thing while nothing is changed yet
@@ -172,13 +187,6 @@ export abstract class ServerEntity extends ServerProto implements CommsEntity {
 		targetEntity.doMove(this);
 		this.doMove(targetCellPath);
 	}
-
-	/**
-	 * Performs actual initialization.
-	 *
-	 * To be overriden by extending classes.
-	 */
-	protected abstract doInitialize(): void;
 
 	/**
 	 * Performs necessary cleanup.
@@ -195,7 +203,7 @@ export abstract class ServerEntity extends ServerProto implements CommsEntity {
 	/**
 	 * Performs the swap of 2 [[ServerEntity]].
 	 *
-	 * To be overriden by extending classes.
+	 * To be overridden by extending classes.
 	 *
 	 * Should call [[doSwap]].
 	 */
@@ -212,7 +220,7 @@ export class DefaultEntity extends ServerEntity {
 	/**
 	 * Performs actual initialization.
 	 *
-	 * To be overriden by extending classes.
+	 * To be overridden by extending classes.
 	 */
 	protected doInitialize(): void {} // eslint-disable-line class-methods-use-this, @typescript-eslint/no-empty-function
 
@@ -224,6 +232,8 @@ export class DefaultEntity extends ServerEntity {
 
 	/**
 	 * Moves to another location.
+	 *
+	 * @param cellPath - Path to cell
 	 */
 	protected performMove(cellPath: CellPath): void {
 		this.doMove(cellPath);
@@ -232,7 +242,9 @@ export class DefaultEntity extends ServerEntity {
 	/**
 	 * Performs the swap of 2 [[ServerEntity]].
 	 *
-	 * To be overriden by extending classes.
+	 * To be overridden by extending classes.
+	 *
+	 * @param entityPath - Path to entity
 	 */
 	protected performSwap(entityPath: EntityPath): void {
 		this.doSwap(entityPath);

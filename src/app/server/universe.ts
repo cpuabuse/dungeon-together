@@ -1,31 +1,34 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * Server Universe.
+ * @file Server Universe.
  */
 
-import { DefaultEntity, ServerEntity } from "./entity";
-import { ServerShard, ServerShardArgs } from "./shard";
 import { defaultKindUuid, defaultShardUuid, defaultWorldUuid } from "../common/defaults";
+import { Uuid } from "../common/uuid";
 import { CellPath } from "../comms/cell";
-import { CommsUniverse } from "../comms/universe";
 import { EntityPath } from "../comms/entity";
 import { GridPath } from "../comms/grid";
-import { Kind } from "./kind";
-import { ServerCell } from "./cell";
-import { ServerGrid } from "./grid";
-import { ServerProto } from "./proto";
 import { ShardPath } from "../comms/shard";
-import { Uuid } from "../common/uuid";
+import { CommsUniverse } from "../comms/universe";
+import { ServerCell } from "./cell";
+import { DefaultEntity, ServerEntity } from "./entity";
+import { ServerGrid } from "./grid";
+import { Kind } from "./kind";
+import { ServerProto } from "./proto";
+import { ServerShard, ServerShardArgs } from "./shard";
 import { World } from "./world";
 
 /**
  * Arguments for a [[ServerUniverse]].
  */
 export interface ServerUniverseArgs {
+	/**
+	 *
+	 */
 	worlds: Map<Uuid, World>;
 }
 
@@ -59,34 +62,128 @@ export class ServerUniverse implements CommsUniverse {
 	}
 
 	/**
-	 * Add shard to CommsUniverse.
-	 */
-	public addShard(shard: ServerShardArgs): void {
-		this.shards.set(shard.shardUuid, new ServerShard(shard));
-	}
-
-	/**
 	 * Adds the kind.
 	 */
-	public addKind({ uuid, kind }: { uuid: Uuid; kind: Kind }): void {
+	public addKind({
+		uuid,
+		kind
+	}: {
+		/**
+		 *
+		 */
+		uuid: Uuid;
+		/**
+		 *
+		 */
+		/**
+		 *
+		 */
+		kind: Kind;
+	}): void {
 		if (uuid !== defaultKindUuid) {
 			this.doAddKind({ kind, uuid });
 		}
 	}
 
 	/**
+	 * Add shard to CommsUniverse.
+	 *
+	 * @param shard - Arguments for the [[ServerShard]]
+	 */
+	public addShard(shard: ServerShardArgs): void {
+		this.shards.set(shard.shardUuid, new ServerShard(shard));
+	}
+
+	/**
 	 * Adds the world.
 	 */
-	public addWorld({ uuid, world }: { uuid: Uuid; world: World }): void {
+	public addWorld({
+		uuid,
+		world
+	}: {
+		/**
+		 *
+		 */
+		uuid: Uuid;
+		/**
+		 *
+		 */
+		/**
+		 *
+		 */
+		world: World;
+	}): void {
 		if (uuid !== defaultWorldUuid) {
 			this.doAddWorld({ uuid, world });
 		}
 	}
 
 	/**
+	 * Get [[ServerCell]].
+	 *
+	 * A shortcut function.
+	 *
+	 * @param path - Path to cell
+	 *
+	 * @returns [[ServerCell]], the cell within the grid
+	 */
+	public getCell(path: CellPath): ServerCell {
+		return this.getShard(path).getGrid(path).getCell(path);
+	}
+
+	/**
+	 * Get [[ServerEntity]].
+	 *
+	 * A shortcut function.
+	 *
+	 * @param path - Path to entity
+	 *
+	 * @returns [[ServerEntity]], anything residing within a cell
+	 */
+	public getEntity(path: EntityPath): ServerEntity {
+		return this.getShard(path).getGrid(path).getCell(path).getEntity(path);
+	}
+
+	/**
+	 * Get [[ServerGrid]].
+	 *
+	 * A shortcut function.
+	 *
+	 * @param path - Path to grid
+	 *
+	 * @returns [[ServerGrid]], the grid itself
+	 */
+	public getGrid(path: GridPath): ServerGrid {
+		return this.getShard(path).getGrid(path);
+	}
+
+	/**
+	 * Gets the kind.
+	 *
+	 * @returns Kind
+	 */
+	public getKind({
+		uuid
+	}: {
+		/**
+		 *
+		 */
+		uuid: Uuid;
+	}): Kind {
+		let kind: Kind | undefined = this.kinds.get(uuid);
+		if (kind === undefined) {
+			// Default kind is always there
+			return this.kinds.get(defaultKindUuid) as Kind;
+		}
+		return kind;
+	}
+
+	/**
 	 * Get [[ServerShard]].
 	 *
 	 * A shortcut function.
+	 *
+	 * @returns [[shard]], a whole universe
 	 */
 	public getShard({ shardUuid }: ShardPath): ServerShard {
 		let shard: ServerShard | undefined = this.shards.get(shardUuid);
@@ -99,48 +196,18 @@ export class ServerUniverse implements CommsUniverse {
 	}
 
 	/**
-	 * Gets the kind.
-	 */
-	public getKind({ uuid }: { uuid: Uuid }): Kind {
-		let kind: Kind | undefined = this.kinds.get(uuid);
-		if (kind === undefined) {
-			// Default kind is always there
-			return this.kinds.get(defaultKindUuid) as Kind;
-		}
-		return kind;
-	}
-
-	/**
-	 * Get [[ServerCell]].
-	 *
-	 * A shortcut function.
-	 */
-	public getCell(path: CellPath): ServerCell {
-		return this.getShard(path).getGrid(path).getCell(path);
-	}
-
-	/**
-	 * Get [[ServerGrid]].
-	 *
-	 * A shortcut function.
-	 */
-	public getGrid(path: GridPath): ServerGrid {
-		return this.getShard(path).getGrid(path);
-	}
-
-	/**
-	 * Get [[ServerEntity]].
-	 *
-	 * A shortcut function.
-	 */
-	public getEntity(path: EntityPath): ServerEntity {
-		return this.getShard(path).getGrid(path).getCell(path).getEntity(path);
-	}
-
-	/**
 	 * Gets the world.
+	 *
+	 * @returns [[World]], whole world
 	 */
-	public getWorld({ uuid }: { uuid: Uuid }): World {
+	public getWorld({
+		uuid
+	}: {
+		/**
+		 *
+		 */
+		uuid: Uuid;
+	}): World {
 		let world: World | undefined = this.worlds.get(uuid);
 		if (world === undefined) {
 			// Default world is always there
@@ -150,7 +217,26 @@ export class ServerUniverse implements CommsUniverse {
 	}
 
 	/**
+	 * Removes the kind.
+	 */
+	public removeKind({
+		uuid
+	}: {
+		/**
+		 *
+		 */
+		uuid: Uuid;
+	}): void {
+		if (uuid !== defaultKindUuid) {
+			this.doRemoveKind({ uuid });
+		}
+	}
+
+	/**
 	 * Remove commsShard from CommmsUniverse.
+	 *
+	 * @param shard - Path to shard
+	 *
 	 * @returns `true` on success, `false` on failure
 	 */
 	public removeShard(shard: ShardPath): void {
@@ -158,18 +244,16 @@ export class ServerUniverse implements CommsUniverse {
 	}
 
 	/**
-	 * Removes the kind.
-	 */
-	public removeKind({ uuid }: { uuid: Uuid }): void {
-		if (uuid !== defaultKindUuid) {
-			this.doRemoveKind({ uuid });
-		}
-	}
-
-	/**
 	 * Removes the world.
 	 */
-	public removeWorld({ uuid }: { uuid: Uuid }): void {
+	public removeWorld({
+		uuid
+	}: {
+		/**
+		 *
+		 */
+		uuid: Uuid;
+	}): void {
 		if (uuid !== defaultWorldUuid) {
 			this.doRemoveWorld({ uuid });
 		}
@@ -178,15 +262,59 @@ export class ServerUniverse implements CommsUniverse {
 	/**
 	 * Adds the kind.
 	 */
-	private doAddKind({ kind, uuid }: { kind: Kind; uuid: Uuid }): void {
+	private doAddKind({
+		kind,
+		uuid
+	}: {
+		/**
+		 *
+		 */
+		kind: Kind;
+		/**
+		 *
+		 */
+		/**
+		 *
+		 */
+		uuid: Uuid;
+	}): void {
 		this.kinds.set(uuid, kind);
 	}
 
 	/**
 	 * Adds the world.
 	 */
-	private doAddWorld({ uuid, world }: { uuid: Uuid; world: World }): void {
+	private doAddWorld({
+		uuid,
+		world
+	}: {
+		/**
+		 *
+		 */
+		uuid: Uuid;
+		/**
+		 *
+		 */
+		/**
+		 *
+		 */
+		world: World;
+	}): void {
 		this.worlds.set(uuid, world);
+	}
+
+	/**
+	 * Removes the kind.
+	 */
+	private doRemoveKind({
+		uuid
+	}: {
+		/**
+		 *
+		 */
+		uuid: Uuid;
+	}): void {
+		this.kinds.delete(uuid);
 	}
 
 	/**
@@ -201,16 +329,16 @@ export class ServerUniverse implements CommsUniverse {
 	}
 
 	/**
-	 * Removes the kind.
-	 */
-	private doRemoveKind({ uuid }: { uuid: Uuid }): void {
-		this.kinds.delete(uuid);
-	}
-
-	/**
 	 * Removes the world.
 	 */
-	private doRemoveWorld({ uuid }: { uuid: Uuid }): void {
+	private doRemoveWorld({
+		uuid
+	}: {
+		/**
+		 *
+		 */
+		uuid: Uuid;
+	}): void {
 		this.worlds.delete(uuid);
 	}
 }
@@ -222,7 +350,7 @@ export class ServerUniverse implements CommsUniverse {
  */
 export async function initUniverse(): Promise<void> {
 	// Shards
-	(ServerProto.prototype.universe as ServerUniverse) = new ServerUniverse();
+	ServerProto.prototype.universe = new ServerUniverse();
 	return new Promise(function (resolve) {
 		setTimeout(function () {
 			resolve();
@@ -232,6 +360,8 @@ export async function initUniverse(): Promise<void> {
 
 /**
  * Gets the [[ServerShard]].
+ *
+ * @param path - Path to shard
  *
  * @returns Shard or default shard
  */
