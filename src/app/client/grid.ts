@@ -1,16 +1,16 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * Cells on screen.
+ * @file Cells on screen.
  */
 
+import { cellUuidUrlPath, defaultCellVector, defaultWorldUuid, urlPathSeparator } from "../common/defaults";
+import { Uuid, getDefaultUuid } from "../common/uuid";
 import { CellPath, CommsCellArgs } from "../comms/cell";
 import { CommsGrid, CommsGridArgs } from "../comms/grid";
-import { Uuid, getDefaultUuid } from "../common/uuid";
-import { cellUuidUrlPath, defaultCellVector, defaultWorldUuid, urlPathSeparator } from "../common/defaults";
 import { ClientCell } from "./cell";
 import { ClientProto } from "./proto";
 
@@ -19,24 +19,24 @@ import { ClientProto } from "./proto";
  */
 export class ClientGrid extends ClientProto implements CommsGrid {
 	/**
-	 * UUID for default [[ClientGrid]].
-	 */
-	public readonly defaultCellUuid: Uuid;
-
-	/**
-	 *  Shard path.
-	 */
-	public readonly shardUuid: Uuid;
-
-	/**
 	 * Locations.
 	 */
 	public readonly cells: Map<Uuid, ClientCell> = new Map();
 
 	/**
+	 * UUID for default [[ClientGrid]].
+	 */
+	public readonly defaultCellUuid: Uuid;
+
+	/**
 	 * This id.
 	 */
 	public readonly gridUuid: Uuid;
+
+	/**
+	 *  Shard path.
+	 */
+	public readonly shardUuid: Uuid;
 
 	/**
 	 * Constructor.
@@ -71,6 +71,8 @@ export class ClientGrid extends ClientProto implements CommsGrid {
 
 	/**
 	 * Adds [[CommsCell]].
+	 *
+	 * @param cell - Arguments for the [[ClientCell]] constructor
 	 */
 	public addCell(cell: CommsCellArgs): void {
 		if (this.cells.has(cell.shardUuid)) {
@@ -82,6 +84,8 @@ export class ClientGrid extends ClientProto implements CommsGrid {
 
 	/**
 	 * Shortcut to get the [[ClientCell]].
+	 *
+	 * @returns [[ClientCell]], a cell in the grid
 	 */
 	public getCell({ cellUuid }: CellPath): ClientCell {
 		let clientCell: ClientCell | undefined = this.cells.get(cellUuid);
@@ -91,7 +95,10 @@ export class ClientGrid extends ClientProto implements CommsGrid {
 
 	/**
 	 * Removes the [[ClientCell]]
-	 * @param uuid UUID of the [[ClientCell]]
+	 *
+	 * @param uuid - UUID of the [[ClientCell]]
+	 *
+	 * @param path - Path to cell
 	 */
 	public removeCell(path: CellPath): void {
 		if (path.cellUuid !== this.defaultCellUuid) {
