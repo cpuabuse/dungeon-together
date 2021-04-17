@@ -40,6 +40,11 @@ export const rcSymbol: symbol = Symbol("right-click");
 export const lcSymbol: symbol = Symbol("left-click");
 
 /**
+ * Identifier for the up scroll input.
+ */
+export const scrSymbol: symbol = Symbol("scroll");
+
+/**
  * An interface representing the input event.
  */
 export interface InputInterface {
