@@ -134,6 +134,19 @@ export class ClientUniverse implements CommsUniverse {
 				});
 			});
 		});
+		universeElement.addEventListener("click", event => {
+			// Stops showing default context menu
+			event.preventDefault();
+
+			// Iterates through shards conditionally
+			this.shards.forEach(clientShard => {
+				// Send events to the relevant shards
+				clientShard.fireInput(lcSymbol, {
+					x: 0,
+					y: 0
+				});
+			});
+		});
 
 		// Keyboard events
 		// Prepare mousetrap instance
