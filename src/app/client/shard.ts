@@ -4,7 +4,7 @@
 */
 
 /**
- * Displays server information to canvas.
+ * @file Displays server information to canvas.
  */
 
 import { Application, Container, Matrix, Renderer, utils } from "pixi.js";
@@ -61,11 +61,6 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	public readonly gridContainer: Container = new Container();
 
 	/**
-	 * This UUID.
-	 */
-	public readonly shardUuid: Uuid;
-
-	/**
 	 * Grids for the client shard.
 	 *
 	 * Should be treated as "readonly".
@@ -88,14 +83,19 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	public sceneWidth: number = defaultEntityWidth;
 
 	/**
-	 * Attached to HTML Canvas or not.
+	 * This UUID.
 	 */
-	private isAttached: boolean = false;
+	public readonly shardUuid: Uuid;
 
 	/**
 	 * Input events.
 	 */
 	private input: Input = new Input();
+
+	/**
+	 * Attached to HTML Canvas or not.
+	 */
+	private isAttached: boolean = false;
 
 	/**
 	 * Constructor for a screen.
@@ -131,7 +131,7 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 			});
 		});
 
-		// Add listeners for righ-click input
+		// Add listeners for right-click input
 		this.input.on(rcSymbol, inputInterface => {
 			alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
 		});
@@ -158,7 +158,7 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	/**
 	 * Adds [[ClientGrid]].
 	 *
-	 * @param grid
+	 * @param grid - Arguments for the [[ClientGrid]] constructor
 	 */
 	public addGrid(grid: CommsGridArgs): void {
 		if (this.grids.has(grid.shardUuid)) {
@@ -171,7 +171,7 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	/**
 	 * Enables the rendering.
 	 *
-	 * @param renderer
+	 * @param renderer - The renderer that will draw the scene and its contents
 	 */
 	public addGridContainer(renderer: Renderer): void {
 		renderer.render(this.gridContainer);
@@ -181,7 +181,7 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	 * Attach to HTML canvas.
 	 * Can only be attached once, and never detached.
 	 *
-	 * @param element
+	 * @param element - Any HTML element
 	 */
 	public attach(element: HTMLElement): void {
 		// Performing once, as pixi library does not allow to detach
@@ -198,7 +198,21 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	}
 
 	/**
+	 * The function that fires the input received.
+	 *
+	 * @param inputSymbol - Input symbol received
+	 *
+	 * @param inputInterface - Input event received
+	 *
+	 */
+	public fireInput(inputSymbol: symbol, inputInterface: InputInterface) {
+		this.input.emit(inputSymbol, inputInterface);
+	}
+
+	/**
 	 * Shortcut to get the [[ClientGrid]].
+	 *
+	 * @returns [[clientGrid]], a vector array object
 	 */
 	public getGrid({ gridUuid }: GridPath): ClientGrid {
 		let clientGrid: ClientGrid | undefined = this.grids.get(gridUuid);
@@ -208,17 +222,9 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	}
 
 	/**
-	 * The function that fires the input received.
-	 *
-	 * @param inputSymbol - Input symbol received
-	 * @param inputInterface - Input event received
-	 */
-	public fireInput(inputSymbol: symbol, inputInterface: InputInterface) {
-		this.input.emit(inputSymbol, inputInterface);
-	}
-
-	/**
 	 * Get the modes from the server.
+	 *
+	 * @returns A map containing uuid and modes
 	 */
 	public get modes(): Map<Uuid, Mode> {
 		return new Map();
@@ -227,8 +233,9 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	/**
 	 * Removes the [[ClientGrid]]
 	 *
-	 * @param uuid UUID of the [[ClientGrid]]
-	 * @param path
+	 * @param uuid - UUID of the [[ClientGrid]]
+	 *
+	 * @param path - Path to grid
 	 */
 	public removeGrid(path: GridPath): void {
 		if (path.gridUuid !== this.defaultGridUuid) {
@@ -257,7 +264,7 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 	}
 
 	/**
-	 * Set default scene dimentions.
+	 * Set default scene dimensions.
 	 */
 	private setScene(): void {
 		// Set defaults

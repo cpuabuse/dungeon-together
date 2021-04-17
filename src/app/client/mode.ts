@@ -1,10 +1,10 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * Definition of modes.
+ * @file Definition of modes.
  */
 
 import { Texture } from "pixi.js";
@@ -13,5 +13,8 @@ import { Texture } from "pixi.js";
  * Modes for the client.
  */
 export interface Mode {
+	/**
+	 *
+	 */
 	textures: Array<Texture>;
 }

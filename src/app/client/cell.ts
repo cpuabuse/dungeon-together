@@ -1,15 +1,12 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * Squares on screen.
+ * @file Squares on screen.
  */
 
-import { CommsCell, CommsCellArgs } from "../comms/cell";
-import { CommsEntityArgs, EntityPath } from "../comms/entity";
-import { Uuid, getDefaultUuid } from "../common/uuid";
 import {
 	defaultKindUuid,
 	defaultModeUuid,
@@ -17,6 +14,9 @@ import {
 	entityUuidUrlPath,
 	urlPathSeparator
 } from "../common/defaults";
+import { Uuid, getDefaultUuid } from "../common/uuid";
+import { CommsCell, CommsCellArgs } from "../comms/cell";
+import { CommsEntityArgs, EntityPath } from "../comms/entity";
 import { ClientEntity } from "./entity";
 import { ClientProto } from "./proto";
 
@@ -25,19 +25,19 @@ import { ClientProto } from "./proto";
  */
 export class ClientCell extends ClientProto implements CommsCell {
 	/**
+	 * This CommsCell UUID.
+	 */
+	public readonly cellUuid: Uuid;
+
+	/**
 	 * UUID for default [[ClientEntity]].
 	 */
 	public readonly defaultEntityUuid: Uuid;
 
 	/**
-	 * CommsShard path.
+	 * Contents of client-cell.
 	 */
-	public readonly shardUuid: Uuid;
-
-	/**
-	 * This CommsCell UUID.
-	 */
-	public readonly cellUuid: Uuid;
+	public readonly entities: Map<Uuid, ClientEntity> = new Map();
 
 	/**
 	 * This id.
@@ -45,9 +45,9 @@ export class ClientCell extends ClientProto implements CommsCell {
 	public readonly gridUuid: Uuid;
 
 	/**
-	 * Contents of client-cell.
+	 * CommsShard path.
 	 */
-	public readonly entities: Map<Uuid, ClientEntity> = new Map();
+	public readonly shardUuid: Uuid;
 
 	/**
 	 * Worlds of this.
@@ -111,6 +111,8 @@ export class ClientCell extends ClientProto implements CommsCell {
 
 	/**
 	 * Adds [[CommsEntity]].
+	 *
+	 * @param entity - Arguments for the [[ClientEntity]] constructor
 	 */
 	public addEntity(entity: CommsEntityArgs): void {
 		if (this.entities.has(entity.shardUuid)) {
@@ -123,6 +125,8 @@ export class ClientCell extends ClientProto implements CommsCell {
 
 	/**
 	 * Shortcut to get the [[ClientEntity]].
+	 *
+	 * @returns [[ClientEntity]], the smallest renderable
 	 */
 	public getEntity({ entityUuid }: EntityPath): ClientEntity {
 		let clientEntity: ClientEntity | undefined = this.entities.get(entityUuid);
@@ -134,6 +138,8 @@ export class ClientCell extends ClientProto implements CommsCell {
 	 * Actually remove the [[ClientEntity]] instance from "clientCell".
 	 *
 	 * Unlike other clientProtos, this function does not use "doRemoveEntity", because there is no default scene.
+	 *
+	 * @param path - Path to entity
 	 */
 	public removeEntity(path: EntityPath): void {
 		if (path.entityUuid !== this.defaultEntityUuid) {
