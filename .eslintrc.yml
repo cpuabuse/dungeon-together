@@ -1,1 +1,5 @@
 extends: "@cpuabuse"
+rules:
+  # Prevents using exports if a file has one or more tests in it
+  # Mocha will be compiled for browsers as well
+  mocha/no-exports: off

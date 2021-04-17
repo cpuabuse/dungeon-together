@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"outDir": "../../build/test/test"
+		"outDir": "../../build/test"
 	},
 	"extends": "./base.json",
 	"include": ["../../test/standalone.ts"],

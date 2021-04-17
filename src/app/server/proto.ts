@@ -20,7 +20,7 @@ export class ServerProto {}
  */
 export interface ServerProto extends CommsProto {
 	/**
-	 *
+	 * Server universe reference.
 	 */
-	readonly universe: ServerUniverse;
+	universe: ServerUniverse;
 }
