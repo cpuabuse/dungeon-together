@@ -1,15 +1,12 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * Cells making up the grid.
+ * @file Cells making up the grid.
  */
 
-import { CellPath, CommsCell, CommsCellArgs } from "../comms/cell";
-import { ServerEntity, ServerEntityArgs } from "./entity";
-import { Uuid, getDefaultUuid } from "../common/uuid";
 import {
 	defaultKindUuid,
 	defaultModeUuid,
@@ -18,7 +15,10 @@ import {
 	navAmount,
 	urlPathSeparator
 } from "../common/defaults";
+import { Uuid, getDefaultUuid } from "../common/uuid";
+import { CellPath, CommsCell, CommsCellArgs } from "../comms/cell";
 import { EntityPath } from "../comms/entity";
+import { ServerEntity, ServerEntityArgs } from "./entity";
 import { ServerProto } from "./proto";
 
 /**
@@ -30,7 +30,13 @@ export type Nav = Array<CellPath>;
  * Arguments for the [[ServerCell]] constructor.
  */
 export interface ServerCellArgs extends CommsCellArgs {
+	/**
+	 *
+	 */
 	nav: Nav;
+	/**
+	 *
+	 */
 	entities: Map<Uuid, ServerEntityArgs>;
 }
 
@@ -39,14 +45,19 @@ export interface ServerCellArgs extends CommsCellArgs {
  */
 export class ServerCell extends ServerProto implements CommsCell {
 	/**
+	 * Coordinates in grid. An id given during creation. Does not represent anything visually or logically.
+	 */
+	public readonly cellUuid: string;
+
+	/**
 	 * Default [[ServerEntity]] UUID.
 	 */
 	public defaultEntityUuid: Uuid;
 
 	/**
-	 * Parent universe.
+	 * Place entities.
 	 */
-	public readonly shardUuid: Uuid;
+	public readonly entities: Map<Uuid, ServerEntity> = new Map();
 
 	/**
 	 * CommsGrid path.
@@ -59,14 +70,9 @@ export class ServerCell extends ServerProto implements CommsCell {
 	public readonly nav: Nav = new Array(navAmount).fill(this);
 
 	/**
-	 * Place entities.
+	 * Parent universe.
 	 */
-	public readonly entities: Map<Uuid, ServerEntity> = new Map();
-
-	/**
-	 * Coordinates in grid. An id given during creation. Does not represent anything visually or logically.
-	 */
-	public readonly cellUuid: string;
+	public readonly shardUuid: Uuid;
 
 	/**
 	 * Indicates which world this cell is part of.
@@ -74,17 +80,17 @@ export class ServerCell extends ServerProto implements CommsCell {
 	public worlds: Set<Uuid>;
 
 	/**
-	 * X represention.
+	 * X representation.
 	 */
 	public x: number;
 
 	/**
-	 * Y represention.
+	 * Y representation.
 	 */
 	public y: number;
 
 	/**
-	 * Z represention.
+	 * Z representation.
 	 */
 	public z: number;
 
@@ -92,7 +98,8 @@ export class ServerCell extends ServerProto implements CommsCell {
 	 * Cell constructor.
 	 *
 	 * Creates nowhere by default.
-	 * @param nav Can be less than [[navAmount]], then `this.nav` will be filled with `this`, if longer than [[navAmount]], then extra values will be ignored
+	 *
+	 * @param nav - Can be less than [[navAmount]], then `this.nav` will be filled with `this`, if longer than [[navAmount]], then extra values will be ignored
 	 */
 	public constructor({ shardUuid, cellUuid, gridUuid, nav, entities, worlds, x, y, z }: ServerCellArgs) {
 		// ServerProto
@@ -136,6 +143,9 @@ export class ServerCell extends ServerProto implements CommsCell {
 				let {
 					kinds
 				}: {
+					/**
+					 *
+					 */
 					kinds: Set<Uuid>;
 				} = this.universe.getWorld({
 					uuid: worldUuid
@@ -163,6 +173,8 @@ export class ServerCell extends ServerProto implements CommsCell {
 
 	/**
 	 * Adds [[ServerEntity]].
+	 *
+	 * @param entity - Arguments for the [[ServerEntity]] constructor
 	 */
 	public addEntity(entity: ServerEntityArgs): void {
 		if (this.entities.has(entity.shardUuid)) {
@@ -183,6 +195,8 @@ export class ServerCell extends ServerProto implements CommsCell {
 
 	/**
 	 * Attach [[ServerEntity]] to [[CommsCell]].
+	 *
+	 * @param entity - [[ServerEntity]], anything that resides within a cell
 	 */
 	public attach(entity: ServerEntity): void {
 		this.entities.set(entity.entityUuid, entity);
@@ -199,6 +213,8 @@ export class ServerCell extends ServerProto implements CommsCell {
 
 	/**
 	 * Gets [[CommsEntity]].
+	 *
+	 * @returns [[entity]], anything that resides within a cell
 	 */
 	public getEntity({ entityUuid }: EntityPath): ServerEntity {
 		let entity: ServerEntity | undefined = this.entities.get(entityUuid);
@@ -208,6 +224,8 @@ export class ServerCell extends ServerProto implements CommsCell {
 
 	/**
 	 * Removes [[CommsEntity]].
+	 *
+	 * @param path - Path to entity
 	 */
 	public removeEntity(path: EntityPath): void {
 		if (path.entityUuid !== this.defaultEntityUuid) {

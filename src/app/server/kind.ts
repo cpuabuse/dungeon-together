@@ -1,10 +1,10 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * Kinds.
+ * @file Kinds.
  */
 
 import { ServerEntity } from "./entity";
