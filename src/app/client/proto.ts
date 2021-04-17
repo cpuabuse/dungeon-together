@@ -4,7 +4,7 @@
 */
 
 /**
- * Providing access to client universe objects.
+ * @file Providing access to client universe objects.
  */
 
 import { CommsProto } from "../comms/proto";

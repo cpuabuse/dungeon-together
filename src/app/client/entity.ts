@@ -1,35 +1,30 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * Entity, that can be rendered.
+ * @file Entity that can be rendered.
  */
 
-import { CommsEntity, CommsEntityArgs } from "../comms/entity";
 import { AnimatedSprite } from "pixi.js";
-import { ClientProto } from "./proto";
 import { Uuid } from "../common/uuid";
+import { CommsEntity, CommsEntityArgs } from "../comms/entity";
+import { ClientProto } from "./proto";
 
 /**
  * Render unit, representing the smallest renderable.
  */
 export class ClientEntity extends ClientProto implements CommsEntity {
 	/**
-	 * Shard.
-	 */
-	public shardUuid: Uuid;
-
-	/**
 	 * Parent location.
 	 */
 	public cellUuid: Uuid;
 
 	/**
-	 * Kind.
+	 * This.
 	 */
-	public kindUuid: Uuid;
+	public entityUuid: Uuid;
 
 	/**
 	 * Map.
@@ -37,14 +32,19 @@ export class ClientEntity extends ClientProto implements CommsEntity {
 	public gridUuid: Uuid;
 
 	/**
+	 * Kind.
+	 */
+	public kindUuid: Uuid;
+
+	/**
 	 * Mode.
 	 */
 	public modeUuid: Uuid;
 
 	/**
-	 * This.
+	 * Shard.
 	 */
-	public entityUuid: Uuid;
+	public shardUuid: Uuid;
 
 	/**
 	 * Animated sprite.
@@ -60,7 +60,7 @@ export class ClientEntity extends ClientProto implements CommsEntity {
 	 * Initializes RU.
 	 */
 	public constructor({ shardUuid, cellUuid, kindUuid, gridUuid, modeUuid, entityUuid, worldUuid }: CommsEntityArgs) {
-		// Call superconstructor
+		// Call super constructor
 		super();
 
 		// Assing members from interface
@@ -99,6 +99,13 @@ export class ClientEntity extends ClientProto implements CommsEntity {
 	}
 
 	/**
+	 * Render tick.
+	 */
+	private tick(): void {
+		this.updateCoordinates();
+	}
+
+	/**
 	 * Updates coordinates for render.
 	 */
 	private updateCoordinates(): void {
@@ -106,12 +113,5 @@ export class ClientEntity extends ClientProto implements CommsEntity {
 		this.sprite.y = this.universe.getShard(this).sceneHeight * this.universe.getCell(this).y;
 		this.sprite.height = this.universe.getShard(this).sceneWidth;
 		this.sprite.width = this.universe.getShard(this).sceneHeight;
-	}
-
-	/**
-	 * Render tick.
-	 */
-	private tick(): void {
-		this.updateCoordinates();
 	}
 }

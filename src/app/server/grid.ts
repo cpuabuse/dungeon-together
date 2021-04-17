@@ -1,23 +1,26 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * Grid for the dungeons.
+ * @file Grid for the dungeons.
  */
 
+import { cellUuidUrlPath, defaultCellVector, navAmount, urlPathSeparator } from "../common/defaults";
+import { Uuid, getDefaultUuid } from "../common/uuid";
+import { CellPath } from "../comms/cell";
 import { CommsGrid, CommsGridArgs } from "../comms/grid";
 import { ServerCell, ServerCellArgs } from "./cell";
-import { Uuid, getDefaultUuid } from "../common/uuid";
-import { cellUuidUrlPath, defaultCellVector, navAmount, urlPathSeparator } from "../common/defaults";
-import { CellPath } from "../comms/cell";
 import { ServerProto } from "./proto";
 
 /**
  * Arguments for the [[ServerGrid]].
  */
 export interface ServerGridArgs extends CommsGridArgs {
+	/**
+	 *
+	 */
 	cells: Map<Uuid, ServerCellArgs>;
 }
 
@@ -26,19 +29,14 @@ export interface ServerGridArgs extends CommsGridArgs {
  */
 export class ServerGrid extends ServerProto implements CommsGrid {
 	/**
-	 * Default [[ServerEntity]] UUID.
-	 */
-	public defaultCellUuid: Uuid;
-
-	/**
-	 * Parent universe.
-	 */
-	public readonly shardUuid: Uuid;
-
-	/**
 	 * Actual cells inside of the grid.
 	 */
 	public cells: Map<Uuid, ServerCell> = new Map();
+
+	/**
+	 * Default [[ServerEntity]] UUID.
+	 */
+	public defaultCellUuid: Uuid;
 
 	/**
 	 * Grid path.
@@ -46,8 +44,14 @@ export class ServerGrid extends ServerProto implements CommsGrid {
 	public readonly gridUuid: Uuid;
 
 	/**
+	 * Parent universe.
+	 */
+	public readonly shardUuid: Uuid;
+
+	/**
 	 * Initializes the server grid.
-	 * @param worlds The default world will be ignored, as it is already present by default.
+	 *
+	 * @param worlds - The default world will be ignored, as it is already present by default.
 	 */
 	public constructor({ shardUuid, cells, gridUuid }: ServerGridArgs) {
 		// ServerProto
@@ -81,6 +85,8 @@ export class ServerGrid extends ServerProto implements CommsGrid {
 
 	/**
 	 * Adds [[ServerCell]].
+	 *
+	 * @param cell - Arguments for the [[ServerCell]] constructor
 	 */
 	public addCell(cell: ServerCellArgs): void {
 		if (this.cells.has(cell.shardUuid)) {
@@ -92,6 +98,8 @@ export class ServerGrid extends ServerProto implements CommsGrid {
 
 	/**
 	 * Gets [[ServerCell]].
+	 *
+	 * @returns [[ServerCell]], the cell within the grid
 	 */
 	public getCell({ cellUuid }: CellPath): ServerCell {
 		let cell: ServerCell | undefined = this.cells.get(cellUuid);
@@ -104,6 +112,8 @@ export class ServerGrid extends ServerProto implements CommsGrid {
 
 	/**
 	 * Removes [[ServerCell]].
+	 *
+	 * @param path - Path to the cell
 	 */
 	public removeCell(path: CellPath): void {
 		if (path.cellUuid !== this.defaultCellUuid) {

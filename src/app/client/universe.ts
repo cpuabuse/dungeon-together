@@ -4,7 +4,7 @@
 */
 
 /**
- * Client universe.
+ * @file Client universe.
  */
 import Hammer from "hammerjs";
 import type HammerManager from "hammerjs";
@@ -32,16 +32,6 @@ import { ClientShard } from "./shard";
  * For same reason [[Client]] does not store "defaultInstanceUuid" inside.
  */
 export class ClientUniverse implements CommsUniverse {
-	/**
-	 * Client shards.
-	 *
-	 * Should be treated as "readonly". Use "addShard" and "removeShard" methods instead.
-	 * These methods are semantically different from similar of [[ClientShard]], etc., as they are providing respective methods for the [[ClientUniverse]] itself.
-	 *
-	 * The "getShard", "getGrid", etc., are semantically different from above.
-	 */
-	public readonly shards: Map<Uuid, ClientShard> = new Map();
-
 	/**
 	 * Modes.
 	 */
@@ -106,10 +96,20 @@ export class ClientUniverse implements CommsUniverse {
 	public modesIndex: Map<Uuid, Array<Uuid>> = new Map();
 
 	/**
+	 * Client shards.
+	 *
+	 * Should be treated as "readonly". Use "addShard" and "removeShard" methods instead.
+	 * These methods are semantically different from similar of [[ClientShard]], etc., as they are providing respective methods for the [[ClientUniverse]] itself.
+	 *
+	 * The "getShard", "getGrid", etc., are semantically different from above.
+	 */
+	public readonly shards: Map<Uuid, ClientShard> = new Map();
+
+	/**
 	 * Constructor.
 	 * The constructor can never be called more than once, during the execution of the program.
 	 *
-	 * @param element
+	 * @param element - HTML elements
 	 */
 	public constructor() {
 		// Object initialization
@@ -264,7 +264,7 @@ export class ClientUniverse implements CommsUniverse {
 	 *
 	 * Adds the modes from the shard.
 	 *
-	 * @param shard
+	 * @param shard - Arguments for the [[ClientShard]] constructor
 	 */
 	public addShard(shard: CommsShardArgs): void {
 		if (this.shards.has(shard.shardUuid)) {
@@ -322,24 +322,50 @@ export class ClientUniverse implements CommsUniverse {
 	}
 
 	/**
-	 * Get [[ClientShard]].
+	 * Get [[ClientCell]].
 	 *
 	 * A shortcut function.
+	 *
+	 * @param path - Path to cell
+	 *
+	 * @returns [[ ClientCell]]
 	 */
-	public getShard({ shardUuid }: ShardPath): ClientShard {
-		let clientShard: ClientShard | undefined = this.shards.get(shardUuid);
+	public getCell(path: CellPath): ClientCell {
+		return this.getShard(path).getGrid(path).getCell(path);
+	}
 
-		if (clientShard === undefined) {
-			// "defaultShardUuid" is always present, since it is initialized and cannot be removed or overwritten
-			return this.shards.get(defaultShardUuid) as ClientShard;
-		}
-		return clientShard;
+	/**
+	 * Get [[ClientEntity]].
+	 *
+	 * A shortcut function.
+	 *
+	 * @param path - Path to entity
+	 *
+	 * @returns [[ClientEntity]], the smallest renderable
+	 */
+	public getEntity(path: EntityPath): ClientEntity {
+		return this.getShard(path).getGrid(path).getCell(path).getEntity(path);
+	}
+
+	/**
+	 * Get [[ClientGrid]].
+	 *
+	 * A shortcut function.
+	 *
+	 * @param path - Path to grid
+	 *
+	 * @returns [[ ClientGrid]]
+	 */
+	public getGrid(path: GridPath): ClientGrid {
+		return this.getShard(path).getGrid(path);
 	}
 
 	/**
 	 * Get [[Mode]].
 	 *
 	 * A shortcut function.
+	 *
+	 * @returns Modes for client
 	 */
 	public getMode({
 		uuid
@@ -358,36 +384,20 @@ export class ClientUniverse implements CommsUniverse {
 	}
 
 	/**
-	 * Get [[ClientCell]].
+	 * Get [[ClientShard]].
 	 *
 	 * A shortcut function.
 	 *
-	 * @param path
+	 * @returns [[clientShard]], everything happening on the screen
 	 */
-	public getCell(path: CellPath): ClientCell {
-		return this.getShard(path).getGrid(path).getCell(path);
-	}
+	public getShard({ shardUuid }: ShardPath): ClientShard {
+		let clientShard: ClientShard | undefined = this.shards.get(shardUuid);
 
-	/**
-	 * Get [[ClientGrid]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @param path
-	 */
-	public getGrid(path: GridPath): ClientGrid {
-		return this.getShard(path).getGrid(path);
-	}
-
-	/**
-	 * Get [[ClientEntity]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @param path
-	 */
-	public getEntity(path: EntityPath): ClientEntity {
-		return this.getShard(path).getGrid(path).getCell(path).getEntity(path);
+		if (clientShard === undefined) {
+			// "defaultShardUuid" is always present, since it is initialized and cannot be removed or overwritten
+			return this.shards.get(defaultShardUuid) as ClientShard;
+		}
+		return clientShard;
 	}
 
 	/**
@@ -395,7 +405,7 @@ export class ClientUniverse implements CommsUniverse {
 	 *
 	 * Removes unused modes.
 	 *
-	 * @param path
+	 * @param path - Path to shard
 	 */
 	public removeShard(path: ShardPath): void {
 		// Never remove "defaultShardUuid"
@@ -411,7 +421,8 @@ export class ClientUniverse implements CommsUniverse {
  *
  * Timeouts in [[ClientUniverse]] should be executed first.
  *
- * @param element
+ * @param element - HTML elements
+ *
  */
 export async function initUniverse(element: HTMLElement): Promise<void> {
 	// Shards
@@ -427,7 +438,8 @@ export async function initUniverse(element: HTMLElement): Promise<void> {
 /**
  * Gets the [[ClientShard]].
  *
- * @param path
+ * @param path - Path to shard
+ *
  * @returns Shards or default shards
  */
 export async function getShard(path: ShardPath): Promise<ClientShard> {

@@ -1,10 +1,10 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * Providing access to server resources.
+ * @file Providing access to server resources.
  */
 
 import { CommsProto } from "../comms/proto";
@@ -19,5 +19,8 @@ export class ServerProto {}
  * Overload commsProto class.
  */
 export interface ServerProto extends CommsProto {
+	/**
+	 *
+	 */
 	readonly universe: ServerUniverse;
 }
