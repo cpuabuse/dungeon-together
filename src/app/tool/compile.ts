@@ -4,7 +4,7 @@
 */
 
 /**
- * @file The file header
+ * @file A tool that compiles YAML to JSON
  */
 
 import {
