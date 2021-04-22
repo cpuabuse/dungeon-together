@@ -20,7 +20,7 @@ import { CommsUniverse } from "../comms/universe";
 import { ClientCell } from "./cell";
 import { ClientEntity } from "./entity";
 import { ClientGrid } from "./grid";
-import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, upSymbol } from "./input";
+import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, scrSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
 import { ClientProto } from "./proto";
 import { ClientShard } from "./shard";
@@ -134,7 +134,19 @@ export class ClientUniverse implements CommsUniverse {
 				});
 			});
 		});
+		universeElement.addEventListener("click", event => {
+			// Stops showing default context menu
+			event.preventDefault();
 
+			// Iterates through shards conditionally
+			this.shards.forEach(clientShard => {
+				// Send events to the relevant shards
+				clientShard.fireInput(lcSymbol, {
+					x: 0,
+					y: 0
+				});
+			});
+		});
 		// Keyboard events
 		// Prepare mousetrap instance
 		let mousetrap: Mousetrap.MousetrapInstance = new Mousetrap(universeElement);
