@@ -7,9 +7,9 @@
  * @file Client connection to server.
  */
 
-import { TypeOf, literal as literalType, type, union as unionType } from "io-ts";
+import * as typing from "io-ts";
+import { MovementWord } from "../common/connection";
 import { defaultServerUrl, defaultShardUuid } from "../common/defaults";
-import { downWord, leftWord, rightWord, upWord, zDownWord, zUpWord } from "../common/defaults/movement";
 import { Uuid } from "../common/uuid";
 import { ServerConnection } from "../server/connection";
 import { ServerUniverse } from "../server/universe";
@@ -20,18 +20,20 @@ import { ServerUniverse } from "../server/universe";
  * To extract TypeScript types, we need to use `typeof`, which cannot be used on the values of the map, thus object is preferred.
  * Due to the fact that message type keys are created by developers, there will be no conflict with inherited properties.
  * Although, during processing of incoming messages, `messageTypeKeys` should be referenced to ensure the usage of own properties.
+ *
+ * Even though for union literals keyof is recommended in {@link https://github.com/gcanti/io-ts/blob/master/index.md#union-of-string-literals | io-ts documentation}, ignoring it to preserve meaning. {@link https://github.com/microsoft/TypeScript/issues/31268 | Pull request} should introduce enums instead.
  */
 // Infer generic type
 // eslint-disable-next-line @typescript-eslint/typedef
 export const messageTypes = {
-	movement: type({
-		direction: unionType([
-			literalType(upWord),
-			literalType(downWord),
-			literalType(rightWord),
-			literalType(leftWord),
-			literalType(zUpWord),
-			literalType(zDownWord)
+	movement: typing.type({
+		direction: typing.union([
+			typing.literal(MovementWord.Up),
+			typing.literal(MovementWord.Down),
+			typing.literal(MovementWord.Left),
+			typing.literal(MovementWord.Right),
+			typing.literal(MovementWord.ZUp),
+			typing.literal(MovementWord.ZDown)
 		])
 	})
 };
@@ -44,7 +46,7 @@ export type messageTypeKeys = keyof typeof messageTypes;
 /**
  * Message to pass about the character movements.
  */
-export type MovementMessage = TypeOf<typeof messageTypes.movement>;
+export type MovementMessage = typing.TypeOf<typeof messageTypes.movement>;
 
 /**
  * Arguments for [[ClientConnection]].
