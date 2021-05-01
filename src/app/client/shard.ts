@@ -175,7 +175,7 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 			this.grids.forEach(grid => {
 				grid.cells.forEach(cell => {
 					cell.entities.forEach(entity => {
-						entity.updateCoordinates();
+						// entity.updateCoordinates();
 					});
 				});
 			});
