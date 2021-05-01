@@ -42,7 +42,7 @@ export const lcSymbol: symbol = Symbol("left-click");
 /**
  * Identifier for the up scroll input.
  */
-export const scrSymbol: symbol = Symbol("scroll");
+export const scrollSymbol: symbol = Symbol("scroll");
 
 /**
  * An interface representing the input event.

@@ -22,7 +22,7 @@ import { ClientCell } from "./cell";
 import { ClientConnection } from "./connection";
 import { ClientEntity } from "./entity";
 import { ClientGrid } from "./grid";
-import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, upSymbol } from "./input";
+import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, scrollSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
 import { ClientProto } from "./proto";
 import { ClientShard } from "./shard";
@@ -92,7 +92,7 @@ export class ClientUniverse implements CommsUniverse {
 		[
 			"player",
 			{
-				textures: [new Texture(new BaseTexture("img/rltiles/dc-mon0/0man/human.bmp"))]
+				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/big_demon_idle_anim_f0.png"))]
 			}
 		]
 	]);
@@ -141,16 +141,18 @@ export class ClientUniverse implements CommsUniverse {
 				});
 			});
 		});
-		universeElement.addEventListener("click", event => {
-			// Stops showing default context menu
+
+		// Scroll does not work on mobile phone
+		universeElement.addEventListener("wheel", event => {
+			// Prevent zoom in HTML
 			event.preventDefault();
 
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
-				clientShard.fireInput(lcSymbol, {
+				clientShard.fireInput(scrollSymbol, {
 					x: 0,
-					y: 0
+					y: event.deltaY
 				});
 			});
 		});
@@ -256,6 +258,8 @@ export class ClientUniverse implements CommsUniverse {
 
 		// Touch events
 		let hammer: HammerManager = new Hammer(universeElement);
+
+		// Tap works both for the browser's mouseclick and the mobile tap
 		hammer.on("tap", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
@@ -266,11 +270,25 @@ export class ClientUniverse implements CommsUniverse {
 				});
 			});
 		});
+
+		// Press works only on mobile phone
 		hammer.on("press", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
 				// Send events to the relevant shards
 				clientShard.fireInput(rcSymbol, {
+					x: 0,
+					y: 0
+				});
+			});
+		});
+
+		// Pinch does not work on mousescroll
+		hammer.on("pinch", () => {
+			// Iterates through shards conditionally
+			this.shards.forEach(clientShard => {
+				// Send events to the relevant shards
+				clientShard.fireInput(scrollSymbol, {
 					x: 0,
 					y: 0
 				});
