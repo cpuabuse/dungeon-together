@@ -10,11 +10,13 @@
 import { defaultKindUuid, defaultShardUuid, defaultWorldUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
 import { CellPath } from "../comms/cell";
+import { CommsConnectionArgs } from "../comms/connection";
 import { EntityPath } from "../comms/entity";
 import { GridPath } from "../comms/grid";
 import { ShardPath } from "../comms/shard";
 import { CommsUniverse } from "../comms/universe";
 import { ServerCell } from "./cell";
+import { ServerConnection } from "./connection";
 import { DefaultEntity, ServerEntity } from "./entity";
 import { ServerGrid } from "./grid";
 import { Kind } from "./kind";
@@ -36,6 +38,11 @@ export interface ServerUniverseArgs {
  * Server-side shard.
  */
 export class ServerUniverse implements CommsUniverse {
+	/**
+	 * Collection of connections.
+	 */
+	public connections: Set<ServerConnection> = new Set();
+
 	/**
 	 * Shards.
 	 */
@@ -59,6 +66,18 @@ export class ServerUniverse implements CommsUniverse {
 			// Set default shard
 			this.addShard({ grids: new Map(), shardUuid: defaultShardUuid });
 		});
+	}
+
+	/**
+	 * Adds connection, which subsequently adds a shard.
+	 *
+	 * @param connectionArgs - Connection args
+	 * @returns - The connection added
+	 */
+	public addConnection(connectionArgs: CommsConnectionArgs): ServerConnection {
+		let connection: ServerConnection = new ServerConnection(connectionArgs);
+		this.connections.add(connection);
+		return connection;
 	}
 
 	/**

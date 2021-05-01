@@ -74,42 +74,6 @@ export class ServerShard extends ServerProto implements CommsShard {
 	}
 
 	/**
-	 * Add a connection.
-	 *
-	 * @returns [[serverConnection]], a connection to the server
-	 */
-	public addConnection({
-		canvasUuid,
-		connection,
-		standalone
-	}: {
-		/**
-		 *
-		 */
-		canvasUuid: Uuid;
-		/**
-		 *
-		 */
-		connection: WebSocket | ClientConnection;
-		/**
-		 *
-		 */
-		standalone?: boolean;
-	}): ServerConnection {
-		if (this.connection.has(canvasUuid)) {
-			(this.connection.get(canvasUuid) as ServerConnection).terminate();
-		}
-		let serverConnection: ServerConnection = new ServerConnection({
-			canvasUuid,
-			connection,
-			shard: this,
-			standalone
-		});
-		this.connection.set(canvasUuid, serverConnection);
-		return serverConnection;
-	}
-
-	/**
 	 * Adds [[ServerGrid]].
 	 *
 	 * @param grid - Arguments for the [[ServerGrid]] constructor

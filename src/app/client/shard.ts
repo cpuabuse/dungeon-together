@@ -21,7 +21,6 @@ import {
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { CommsGridArgs, GridPath } from "../comms/grid";
 import { CommsShard, CommsShardArgs } from "../comms/shard";
-import { ClientConnection } from "./connection";
 import { ClientGrid } from "./grid";
 import { Input, InputInterface, downSymbol, leftSymbol, rcSymbol, rightSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
@@ -44,11 +43,6 @@ export class ClientShard extends ClientProto implements CommsShard, View {
 		transparent: true,
 		width: 750
 	});
-
-	/**
-	 * Server connection.
-	 */
-	public connection: ClientConnection = new Object() as ClientConnection;
 
 	/**
 	 * UUID for default [[ClientGrid]].

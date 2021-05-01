@@ -1,5 +1,5 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,11 +7,12 @@
  * Shared universe.
  */
 
+import { Uuid } from "../common/uuid";
 import { CellPath, CommsCell } from "./cell";
+import { CommsConnection } from "./connection";
 import { CommsEntity, EntityPath } from "./entity";
 import { CommsGrid, GridPath } from "./grid";
 import { CommsShard, CommsShardArgs, ShardPath } from "./shard";
-import { Uuid } from "../common/uuid";
 
 /**
  * Lets other objects become [[CommsProto]].
@@ -23,7 +24,18 @@ export interface CommsUniverse {
 	shards: Map<Uuid, CommsShard>;
 
 	/**
+	 * Universe connections.
+	 */
+	connections: Set<CommsConnection>;
+
+	/**
+	 * Adds a connection
+	 */
+	addConnection(connectionArgs: CommsConnection): CommsConnection;
+
+	/**
 	 * Add shard to universe.
+	 *
 	 * @returns `true` on success, `false` on failure
 	 */
 	addShard(shard: CommsShardArgs): void;

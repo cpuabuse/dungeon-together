@@ -18,6 +18,9 @@ import axios from "axios";
 import { ClientProto } from "./client/proto";
 import { ClientShard } from "./client/shard";
 import { getShard, initUniverse as initClientUniverse } from "./client/universe";
+import { MessageTypeWord, vSocketMaxQueue } from "./common/defaults/connection";
+import { VStandaloneSocket } from "./common/vsocket";
+import { Envelope } from "./comms/connection";
 import { CommsShardArgs } from "./comms/shard";
 import { initUniverse as initServerUniverse } from "./server/universe";
 import { compile } from "./tool/compile";
@@ -33,16 +36,53 @@ async function main(): Promise<void> {
 		initServerUniverse()
 	]);
 
-	// Get defaults
+	// Compile
 	// Axios returns an object
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	let shardData: object = compile((await axios.get("/data/shard/cave.dt.yml")).data);
 
-	ClientProto.prototype.universe.addShard(shardData as CommsShardArgs);
+	// Sockets
+	let clientSocket: VStandaloneSocket = new VStandaloneSocket({
+		/**
+		 * Client callback.
+		 */
+		callback(): void {
+			let counter: number = 0;
+			while (counter++ < vSocketMaxQueue) {
+				let envelope: Envelope = clientSocket.readQueue();
+				let promise: Promise<ClientShard>;
 
-	let defaultShard: ClientShard = await getShard({ shardUuid: (shardData as CommsShardArgs).shardUuid });
-	// Attach canvas
-	defaultShard.attach(clientUniverseElement === null ? document.body : clientUniverseElement);
+				// Break
+				if (envelope.type === MessageTypeWord.Empty) break;
+
+				// Switch
+				switch (envelope.type) {
+					case MessageTypeWord.Sync:
+						console.log("Sync");
+						ClientProto.prototype.universe.addShard(envelope.message as CommsShardArgs);
+
+						// Attach canvas
+						promise = getShard({ shardUuid: (shardData as CommsShardArgs).shardUuid });
+						promise.then(
+							defaultShard => {
+								defaultShard.attach(clientUniverseElement === null ? document.body : clientUniverseElement);
+							},
+							() => {}
+						);
+						break;
+					default:
+				}
+			}
+		},
+		/**
+		 * Server callback.
+		 */
+		secondary(): void {
+			serverSocket.readQueue();
+		}
+	});
+	let serverSocket: VStandaloneSocket = clientSocket.target;
+	serverSocket.send({ message: shardData, type: MessageTypeWord.Sync });
 }
 
 // Call main

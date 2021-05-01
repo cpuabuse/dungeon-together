@@ -8,11 +8,11 @@
  */
 
 import * as typing from "io-ts";
-import { MovementWord } from "../common/connection";
-import { defaultServerUrl, defaultShardUuid } from "../common/defaults";
+import { MessageTypeWord, MovementWord } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
-import { ServerConnection } from "../server/connection";
-import { ServerUniverse } from "../server/universe";
+import { VSocket } from "../common/vsocket";
+import { CommsConnection, CommsConnectionArgs } from "../comms/connection";
+import { ClientProto } from "./proto";
 
 /**
  * Message type descriptions.
@@ -22,11 +22,13 @@ import { ServerUniverse } from "../server/universe";
  * Although, during processing of incoming messages, `messageTypeKeys` should be referenced to ensure the usage of own properties.
  *
  * Even though for union literals keyof is recommended in {@link https://github.com/gcanti/io-ts/blob/master/index.md#union-of-string-literals | io-ts documentation}, ignoring it to preserve meaning. {@link https://github.com/microsoft/TypeScript/issues/31268 | Pull request} should introduce enums instead.
+ *
+ * As of now impossible to implement type predicates on class members.
  */
 // Infer generic type
 // eslint-disable-next-line @typescript-eslint/typedef
 export const messageTypes = {
-	movement: typing.type({
+	[MessageTypeWord.Movement]: typing.type({
 		direction: typing.union([
 			typing.literal(MovementWord.Up),
 			typing.literal(MovementWord.Down),
@@ -46,60 +48,32 @@ export type messageTypeKeys = keyof typeof messageTypes;
 /**
  * Message to pass about the character movements.
  */
-export type MovementMessage = typing.TypeOf<typeof messageTypes.movement>;
-
-/**
- * Arguments for [[ClientConnection]].
- */
-export interface ClientConnectionArgs {
-	/**
-	 *
-	 */
-	canvasUuid: Uuid;
-	/**
-	 *
-	 */
-	shardUuid?: Uuid;
-	/**
-	 *
-	 */
-	standalone?: boolean;
-	/**
-	 *
-	 */
-	url?: string;
-}
+export type MovementMessage = typing.TypeOf<typeof messageTypes[MessageTypeWord.Movement]>;
 
 /**
  * Client connection.
  */
-export class ClientConnection {
+export class ClientConnection extends ClientProto implements CommsConnection {
 	/**
-	 * Socket abstraction.
+	 * Client UUIDs.
 	 */
-	public connection: WebSocket | ServerConnection;
+	public shardUuids: Set<Uuid> = new Set();
 
 	/**
-	 * Standalone or not.
+	 * The target, be it standalone, remote or absent.
 	 */
-	public standalone: boolean = false;
+	public socket: VSocket;
 
 	/**
 	 * Constructor.
+	 *
+	 * @param target - Socket
 	 */
-	public constructor({ canvasUuid, shardUuid, standalone, url }: ClientConnectionArgs) {
-		// Process standalone
-		if (standalone !== undefined) {
-			this.standalone = standalone;
-		}
+	public constructor({ socket }: CommsConnectionArgs) {
+		// Universe prototype
+		super();
 
-		// Set socket
-		if (standalone) {
-			this.connection = ServerUniverse.prototype
-				.getShard({ shardUuid: shardUuid === undefined ? defaultShardUuid : shardUuid })
-				.addConnection({ canvasUuid, connection: this, standalone });
-		} else {
-			this.connection = new WebSocket(url === undefined ? defaultServerUrl : url);
-		}
+		// Set this target
+		this.socket = socket;
 	}
 }

@@ -1,77 +1,37 @@
 /*
-	Copyright 2020 cpuabuse.com
+	Copyright 2021 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
-import { ClientConnection } from "../client/connection";
-import { ServerShard } from "./shard";
+/**
+ * @file Server connection to client.
+ */
+
 import { Uuid } from "../common/uuid";
+import { VSocket } from "../common/vsocket";
+import { CommsConnection, CommsConnectionArgs } from "../comms/connection";
 
-/**
- * Server connection to client.
- */
-
-/**
- * Arguments for connection.
- */
-export interface ServerConnectionArgs {
-	/**
-	 * Client UUID.
-	 */
-	canvasUuid: Uuid;
-
-	connection: WebSocket | ClientConnection;
-	/**
-	 * Shard.
-	 */
-	shard: ServerShard;
-	standalone?: boolean;
-}
 /**
  * Server connection.
  */
-export class ServerConnection {
+export class ServerConnection implements CommsConnection {
 	/**
-	 * Client UUID.
+	 * Server shards.
 	 */
-	public canvasUuid: Uuid;
+	public shardUuids: Set<Uuid> = new Set();
 
 	/**
-	 * Shard.
+	 * The target, be it standalone, remote or absent.
 	 */
-	public shard: ServerShard;
-
-	/**
-	 * Socket or client connection.
-	 */
-	public connection: WebSocket | ClientConnection;
-
-	/**
-	 * If this is a standalone connection.
-	 */
-	public standalone: boolean = false;
+	public socket: VSocket;
 
 	/**
 	 * Constructor.
+	 *
+	 * @param target - Socket
 	 */
-	public constructor({ canvasUuid, shard, connection, standalone }: ServerConnectionArgs) {
-		// Set standalone
-		if (standalone !== undefined) {
-			this.standalone = standalone;
-		}
-
-		// Set UUID
-		this.canvasUuid = canvasUuid;
-
-		// Set shard
-		this.shard = shard;
-
-		// Set socket
-		this.connection = connection;
+	public constructor({ socket }: CommsConnectionArgs) {
+		// Set this target
+		this.socket = socket;
 	}
-
-	/**
-	 * Terminates itself.
-	 */
-	public terminate(): void {}
 }

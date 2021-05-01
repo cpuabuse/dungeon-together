@@ -13,14 +13,16 @@ import { BaseTexture, Texture } from "pixi.js";
 import { defaultModeUuid, defaultShardUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
 import { CellPath } from "../comms/cell";
+import { CommsConnectionArgs } from "../comms/connection";
 import { EntityPath } from "../comms/entity";
 import { GridPath } from "../comms/grid";
 import { CommsShardArgs, ShardPath } from "../comms/shard";
 import { CommsUniverse } from "../comms/universe";
 import { ClientCell } from "./cell";
+import { ClientConnection } from "./connection";
 import { ClientEntity } from "./entity";
 import { ClientGrid } from "./grid";
-import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, scrSymbol, upSymbol } from "./input";
+import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
 import { ClientProto } from "./proto";
 import { ClientShard } from "./shard";
@@ -32,6 +34,11 @@ import { ClientShard } from "./shard";
  * For same reason [[Client]] does not store "defaultInstanceUuid" inside.
  */
 export class ClientUniverse implements CommsUniverse {
+	/**
+	 * Collection of connections.
+	 */
+	public connections: Set<ClientConnection> = new Set();
+
 	/**
 	 * Modes.
 	 */
@@ -269,6 +276,18 @@ export class ClientUniverse implements CommsUniverse {
 				});
 			});
 		});
+	}
+
+	/**
+	 * Adds connection, which subsequently adds a shard.
+	 *
+	 * @param connectionArgs - Connection args
+	 * @returns - The connection added
+	 */
+	public addConnection(connectionArgs: CommsConnectionArgs): ClientConnection {
+		let connection: ClientConnection = new ClientConnection(connectionArgs);
+		this.connections.add(connection);
+		return connection;
 	}
 
 	/**
