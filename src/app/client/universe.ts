@@ -92,7 +92,13 @@ export class ClientUniverse implements CommsUniverse {
 		[
 			"player",
 			{
-				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/big_demon_idle_anim_f0.png"))]
+				textures: [new Texture(new BaseTexture("img/rltiles/player/base/human_m.bmp"))]
+			}
+		],
+		[
+			"ladder",
+			{
+				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_ladder.png"))]
 			}
 		]
 	]);
