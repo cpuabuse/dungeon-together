@@ -9,7 +9,7 @@
  * Server WS and client Websocket classes to be added.
  */
 
-import EventEmitter from "events";
+import { EventEmitter } from "events";
 import { Envelope } from "../comms/connection";
 import { MessageTypeWord, vSocketMaxQueue } from "./defaults/connection";
 
