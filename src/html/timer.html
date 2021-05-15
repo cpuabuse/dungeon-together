@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>The HTML5 Herald</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+		<script>
+			let beginning = moment();
+			setInterval(() => {
+				document.getElementsByClassName("from-now")[0].innerText = beginning.fromNow();
+				document.getElementsByClassName("seconds")[0].innerText = moment().diff(beginning, "seconds");
+			}, 1000);
+		</script>
+	</head>
+	<body>
+		<div class="uptime">
+			<span class="from-now"></span>
+			<span class="seconds"></span>
+		</div>
+	</body>
+</html>
