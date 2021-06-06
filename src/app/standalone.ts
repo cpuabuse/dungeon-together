@@ -15,14 +15,13 @@
  */
 
 import axios from "axios";
-import { ClientProto } from "./client/proto";
 import { ClientShard } from "./client/shard";
-import { getShard, initUniverse as initClientUniverse } from "./client/universe";
+import { ClientUniverse, initUniverse as initClientUniverse } from "./client/universe";
 import { MessageTypeWord, vSocketMaxQueue } from "./common/defaults/connection";
 import { VStandaloneSocket } from "./common/vsocket";
 import { Envelope } from "./comms/connection";
 import { CommsShardArgs } from "./comms/shard";
-import { initUniverse as initServerUniverse } from "./server/universe";
+import { ServerUniverse, initUniverse as initServerUniverse } from "./server/universe";
 import { compile } from "./tool/compile";
 
 /**
@@ -30,11 +29,10 @@ import { compile } from "./tool/compile";
  */
 async function main(): Promise<void> {
 	let clientUniverseElement: HTMLElement | null = document.getElementById("client-universe");
-	// Init
-	await Promise.all([
-		initClientUniverse(clientUniverseElement === null ? document.body : clientUniverseElement),
-		initServerUniverse()
-	]);
+	let serverUniverse: ServerUniverse = await initServerUniverse();
+	let clientUniverse: ClientUniverse = await initClientUniverse(
+		clientUniverseElement === null ? document.body : clientUniverseElement
+	);
 
 	// Compile
 	// Axios returns an object
@@ -59,10 +57,10 @@ async function main(): Promise<void> {
 				switch (envelope.type) {
 					case MessageTypeWord.Sync:
 						console.log("Sync");
-						ClientProto.prototype.universe.addShard(envelope.message as CommsShardArgs);
+						clientUniverse.addShard(envelope.message as CommsShardArgs);
 
 						// Attach canvas
-						promise = getShard({ shardUuid: (shardData as CommsShardArgs).shardUuid });
+						promise = (async () => clientUniverse.getShard({ shardUuid: (shardData as CommsShardArgs).shardUuid }))();
 						promise.then(
 							defaultShard => {
 								defaultShard.attach(clientUniverseElement === null ? document.body : clientUniverseElement);
@@ -89,3 +87,7 @@ async function main(): Promise<void> {
 // Async entrypoint
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 main();
+
+// #ifset _DEBUG_ENABLED
+console.log("debug");
+// #endif

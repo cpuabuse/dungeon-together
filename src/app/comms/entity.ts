@@ -7,9 +7,9 @@
  * Entity.
  */
 
+import { ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import { CellPath } from "./cell";
-import { CommsProto } from "./proto";
 
 /**
  * An object-like.
@@ -39,9 +39,18 @@ export interface CommsEntityArgs extends EntityPath {
 export type CommsEntityRaw = Omit<CommsEntityArgs, keyof CellPath>;
 
 /**
+ * Typeof class for entities.
+ *
+ * It may be abstract.
+ */
+export type CoreEntityClass = ToAbstract<{
+	new (...args: any[]): CommsEntity;
+}>;
+
+/**
  * Implementable [[CommsEntityArgs]].
  */
-export interface CommsEntity extends CommsEntityArgs, CommsProto {
+export interface CommsEntity extends CommsEntityArgs {
 	/**
 	 * Terminates `this`.
 	 */

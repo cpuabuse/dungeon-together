@@ -18,8 +18,8 @@ import {
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { CellPath, CommsCell, CommsCellArgs } from "../comms/cell";
 import { EntityPath } from "../comms/entity";
-import { ServerEntity, ServerEntityArgs } from "./entity";
-import { ServerProto } from "./proto";
+import { ServerBaseClass } from "./base";
+import { ServerEntity, ServerEntityArgs, ServerEntityClassConcrete } from "./entity";
 
 /**
  * Navigation.
@@ -41,214 +41,243 @@ export interface ServerCellArgs extends CommsCellArgs {
 }
 
 /**
- * The cell within the grid.
+ * Generator for the server cell class.
+ *
+ * @returns Server cell class
  */
-export class ServerCell extends ServerProto implements CommsCell {
+// Force type inference to extract class type
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function ServerCellFactory({
+	Base
+}: {
 	/**
-	 * Coordinates in grid. An id given during creation. Does not represent anything visually or logically.
+	 * Server base.
 	 */
-	public readonly cellUuid: string;
-
+	Base: ServerBaseClass;
+}) {
 	/**
-	 * Default [[ServerEntity]] UUID.
+	 * The cell within the grid.
 	 */
-	public defaultEntityUuid: Uuid;
+	class ServerCell extends Base implements CommsCell {
+		/**
+		 * Coordinates in grid. An id given during creation. Does not represent anything visually or logically.
+		 */
+		public readonly cellUuid: string;
 
-	/**
-	 * Place entities.
-	 */
-	public readonly entities: Map<Uuid, ServerEntity> = new Map();
+		/**
+		 * Default [[ServerEntity]] UUID.
+		 */
+		public defaultEntityUuid: Uuid;
 
-	/**
-	 * CommsGrid path.
-	 */
-	public readonly gridUuid: Uuid;
+		/**
+		 * Place entities.
+		 */
+		public readonly entities: Map<Uuid, ServerEntity> = new Map();
 
-	/**
-	 * Navigation.
-	 */
-	public readonly nav: Nav = new Array(navAmount).fill(this);
+		/**
+		 * CommsGrid path.
+		 */
+		public readonly gridUuid: Uuid;
 
-	/**
-	 * Parent universe.
-	 */
-	public readonly shardUuid: Uuid;
+		/**
+		 * Navigation.
+		 */
+		public readonly nav: Nav = new Array(navAmount).fill(this);
 
-	/**
-	 * Indicates which world this cell is part of.
-	 */
-	public worlds: Set<Uuid>;
+		/**
+		 * Parent universe.
+		 */
+		public readonly shardUuid: Uuid;
 
-	/**
-	 * X representation.
-	 */
-	public x: number;
+		/**
+		 * Indicates which world this cell is part of.
+		 */
+		public worlds: Set<Uuid>;
 
-	/**
-	 * Y representation.
-	 */
-	public y: number;
+		/**
+		 * X representation.
+		 */
+		public x: number;
 
-	/**
-	 * Z representation.
-	 */
-	public z: number;
+		/**
+		 * Y representation.
+		 */
+		public y: number;
 
-	/**
-	 * Cell constructor.
-	 *
-	 * Creates nowhere by default.
-	 *
-	 * @param nav - Can be less than [[navAmount]], then `this.nav` will be filled with `this`, if longer than [[navAmount]], then extra values will be ignored
-	 */
-	public constructor({ shardUuid, cellUuid, gridUuid, nav, entities, worlds, x, y, z }: ServerCellArgs) {
-		// ServerProto
-		super();
+		/**
+		 * Z representation.
+		 */
+		public z: number;
 
-		// Set path
-		this.shardUuid = shardUuid;
-		this.gridUuid = gridUuid;
-		this.cellUuid = cellUuid;
+		/**
+		 * Cell constructor.
+		 *
+		 * Creates nowhere by default.
+		 *
+		 * @param nav - Can be less than [[navAmount]], then `this.nav` will be filled with `this`, if longer than [[navAmount]], then extra values will be ignored
+		 */
+		public constructor({ shardUuid, cellUuid, gridUuid, nav, entities, worlds, x, y, z }: ServerCellArgs) {
+			// ServerProto
+			super();
 
-		// Set coordinates
-		this.x = x;
-		this.y = y;
-		this.z = z;
+			// Set path
+			this.shardUuid = shardUuid;
+			this.gridUuid = gridUuid;
+			this.cellUuid = cellUuid;
 
-		// Set nav, but be gentle about the values we recieve
-		for (let i: number = 0; i < navAmount && i < nav.length; i++) {
-			this.nav[i] = nav[i];
-		}
+			// Set coordinates
+			this.x = x;
+			this.y = y;
+			this.z = z;
 
-		// Initialize "defaultEntityUuid"
-		this.defaultEntityUuid = getDefaultUuid({
-			path: `${entityUuidUrlPath}${urlPathSeparator}${this.cellUuid}`
-		});
+			// Set nav, but be gentle about the values we recieve
+			for (let i: number = 0; i < navAmount && i < nav.length; i++) {
+				this.nav[i] = nav[i];
+			}
 
-		// Set world; Generate a new object
-		this.worlds = new Set([...worlds, defaultWorldUuid]);
-
-		setTimeout(() => {
-			// Set default entity
-			this.addEntity({
-				...this,
-				entityUuid: this.defaultEntityUuid,
-				kindUuid: defaultKindUuid,
-				modeUuid: defaultModeUuid,
-				worldUuid: defaultWorldUuid
+			// Initialize "defaultEntityUuid"
+			this.defaultEntityUuid = getDefaultUuid({
+				path: `${entityUuidUrlPath}${urlPathSeparator}${this.cellUuid}`
 			});
 
-			// Initialize manifests
-			this.worlds.forEach(worldUuid => {
-				let {
-					kinds
-				}: {
-					/**
-					 *
-					 */
-					kinds: Set<Uuid>;
-				} = this.universe.getWorld({
-					uuid: worldUuid
+			// Set world; Generate a new object
+			this.worlds = new Set([...worlds, defaultWorldUuid]);
+
+			setTimeout(() => {
+				// Set default entity
+				this.addEntity({
+					...this,
+					entityUuid: this.defaultEntityUuid,
+					kindUuid: defaultKindUuid,
+					modeUuid: defaultModeUuid,
+					worldUuid: defaultWorldUuid
 				});
 
-				kinds.forEach(kindUuid => {
-					this.universe
-						.getKind({
-							uuid: kindUuid
-						})
-						.typeOfEntity.initialize({
-							...this,
-							kindUuid,
-							worldUuid
-						});
+				// Initialize manifests
+				this.worlds.forEach(worldUuid => {
+					let {
+						kinds
+					}: {
+						/**
+						 *
+						 */
+						kinds: Set<Uuid>;
+					} = this.universe.getWorld({
+						uuid: worldUuid
+					});
+
+					kinds.forEach(kindUuid => {
+						this.universe
+							.getKind({
+								uuid: kindUuid
+							})
+							.typeOfEntity.initialize({
+								...this,
+								kindUuid,
+								worldUuid
+							});
+					});
+				});
+
+				// Initialize entities
+				entities.forEach(entity => {
+					this.addEntity(entity);
 				});
 			});
+		}
 
-			// Initialize entities
-			entities.forEach(entity => {
-				this.addEntity(entity);
+		/**
+		 * Adds [[ServerEntity]].
+		 *
+		 * @param entity - Arguments for the [[ServerEntity]] constructor
+		 */
+		public addEntity(entity: ServerEntityArgs): void {
+			if (this.entities.has(entity.shardUuid)) {
+				// Clear the shard if it already exists
+				this.doRemoveEntity(entity);
+			}
+			let TypeOfEntity: ServerEntityClassConcrete = this.universe.getKind({ uuid: entity.kind }).typeOfEntity;
+
+			// The "TypeOfEntity" will be classes extending "ServerEntity", so abstract class should not be created
+			// @ts-ignore
+			new TypeOfEntity({
+				...entity,
+				cellUuid: this.cellUuid,
+				gridUuid: this.gridUuid,
+				shardUuid: this.shardUuid
+			}).initialize();
+		}
+
+		/**
+		 * Attach [[ServerEntity]] to [[CommsCell]].
+		 *
+		 * @param entity - [[ServerEntity]], anything that resides within a cell
+		 */
+		public attach(entity: ServerEntity): void {
+			this.entities.set(entity.entityUuid, entity);
+		}
+
+		/**
+		 * Detach [[ServerEntity]] from [[CommsCell]].
+		 */
+		public detach({ entityUuid }: ServerEntity): void {
+			if (this.entities.has(entityUuid)) {
+				this.entities.delete(entityUuid);
+			}
+		}
+
+		/**
+		 * Gets [[CommsEntity]].
+		 *
+		 * @returns [[entity]], anything that resides within a cell
+		 */
+		public getEntity({ entityUuid }: EntityPath): ServerEntity {
+			let entity: ServerEntity | undefined = this.entities.get(entityUuid);
+			// Default clientEntity is always there
+			return entity === undefined ? this.entities.get(this.defaultEntityUuid) : entity;
+		}
+
+		/**
+		 * Removes [[CommsEntity]].
+		 *
+		 * @param path - Path to entity
+		 */
+		public removeEntity(path: EntityPath): void {
+			if (path.entityUuid !== this.defaultEntityUuid) {
+				this.doRemoveEntity(path);
+			}
+		}
+
+		/**
+		 * Terminate `this`.
+		 */
+		public terminate(): void {
+			this.entities.forEach(entity => {
+				this.doRemoveEntity(entity);
 			});
-		});
-	}
-
-	/**
-	 * Adds [[ServerEntity]].
-	 *
-	 * @param entity - Arguments for the [[ServerEntity]] constructor
-	 */
-	public addEntity(entity: ServerEntityArgs): void {
-		if (this.entities.has(entity.shardUuid)) {
-			// Clear the shard if it already exists
-			this.doRemoveEntity(entity);
 		}
-		let TypeOfEntity: typeof ServerEntity = this.universe.getKind({ uuid: entity.kind }).typeOfEntity;
 
-		// The "TypeOfEntity" will be classes extending "ServerEntity", so abstract class should not be created
-		// @ts-ignore
-		new TypeOfEntity({
-			...entity,
-			cellUuid: this.cellUuid,
-			gridUuid: this.gridUuid,
-			shardUuid: this.shardUuid
-		}).initialize();
-	}
-
-	/**
-	 * Attach [[ServerEntity]] to [[CommsCell]].
-	 *
-	 * @param entity - [[ServerEntity]], anything that resides within a cell
-	 */
-	public attach(entity: ServerEntity): void {
-		this.entities.set(entity.entityUuid, entity);
-	}
-
-	/**
-	 * Detach [[ServerEntity]] from [[CommsCell]].
-	 */
-	public detach({ entityUuid }: ServerEntity): void {
-		if (this.entities.has(entityUuid)) {
-			this.entities.delete(entityUuid);
+		/**
+		 * Actually removes [[CommsEntity]].
+		 */
+		private doRemoveEntity({ entityUuid }: EntityPath): void {
+			let entity: ServerEntity | undefined = this.entities.get(entityUuid);
+			if (entity !== undefined) {
+				entity.terminate();
+			}
 		}
 	}
 
-	/**
-	 * Gets [[CommsEntity]].
-	 *
-	 * @returns [[entity]], anything that resides within a cell
-	 */
-	public getEntity({ entityUuid }: EntityPath): ServerEntity {
-		let entity: ServerEntity | undefined = this.entities.get(entityUuid);
-		// Default clientEntity is always there
-		return entity === undefined ? (this.entities.get(this.defaultEntityUuid) as ServerEntity) : entity;
-	}
-
-	/**
-	 * Removes [[CommsEntity]].
-	 *
-	 * @param path - Path to entity
-	 */
-	public removeEntity(path: EntityPath): void {
-		if (path.entityUuid !== this.defaultEntityUuid) {
-			this.doRemoveEntity(path);
-		}
-	}
-
-	/**
-	 * Terminate `this`.
-	 */
-	public terminate(): void {
-		this.entities.forEach(entity => {
-			this.doRemoveEntity(entity);
-		});
-	}
-
-	/**
-	 * Actually removes [[CommsEntity]].
-	 */
-	private doRemoveEntity({ entityUuid }: EntityPath): void {
-		let entity: ServerEntity | undefined = this.entities.get(entityUuid);
-		if (entity !== undefined) {
-			entity.terminate();
-		}
-	}
+	// Return class
+	return ServerCell;
 }
+
+/**
+ * Type of server shard class.
+ */
+export type ServerCellClass = ReturnType<typeof ServerCellFactory>;
+
+/**
+ * Instance type of server shard.
+ */
+export type ServerCell = InstanceType<ServerCellClass>;

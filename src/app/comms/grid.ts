@@ -9,7 +9,6 @@
 
 import { Uuid } from "../common/uuid";
 import { CellPath, CommsCell, CommsCellArgs, CommsCellRaw, commsCellRawToArgs } from "./cell";
-import { CommsProto } from "./proto";
 import { ShardPath } from "./shard";
 
 /**
@@ -35,9 +34,16 @@ export type CommsGridRaw = Omit<CommsGridArgs, "cells" | keyof ShardPath> & {
 };
 
 /**
+ * Typeof class for grids.
+ */
+export type CoreGridClass = {
+	new (...args: any[]): CommsGrid;
+};
+
+/**
  * Implementable [[CommsGridArgs]].
  */
-export interface CommsGrid extends CommsGridArgs, CommsProto {
+export interface CommsGrid extends CommsGridArgs {
 	/**
 	 * Default [[Cell]] UUID.
 	 */

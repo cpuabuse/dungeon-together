@@ -14,14 +14,20 @@ import { CommsConnectionArgs } from "../comms/connection";
 import { EntityPath } from "../comms/entity";
 import { GridPath } from "../comms/grid";
 import { ShardPath } from "../comms/shard";
-import { CommsUniverse } from "../comms/universe";
-import { ServerCell } from "./cell";
+import { CoreUniverse } from "../comms/universe";
+import { ServerBaseClass, ServerBaseFactory } from "./base";
+import { ServerCell, ServerCellClass, ServerCellFactory } from "./cell";
 import { ServerConnection } from "./connection";
-import { DefaultEntity, ServerEntity } from "./entity";
-import { ServerGrid } from "./grid";
+import {
+	DefaultServerEntityFactory,
+	ServerEntity,
+	ServerEntityClassConcrete,
+	ServerEntityClassOriginalAbstract,
+	ServerEntityFactory
+} from "./entity";
+import { ServerGrid, ServerGridClass, ServerGridFactory } from "./grid";
 import { Kind } from "./kind";
-import { ServerProto } from "./proto";
-import { ServerShard, ServerShardArgs } from "./shard";
+import { ServerShard, ServerShardArgs, ServerShardClass, ServerShardFactory } from "./shard";
 import { World } from "./world";
 
 /**
@@ -37,7 +43,27 @@ export interface ServerUniverseArgs {
 /**
  * Server-side shard.
  */
-export class ServerUniverse implements CommsUniverse {
+export class ServerUniverse extends CoreUniverse {
+	/**
+	 * A shard constructor.
+	 */
+	public readonly Cell: ServerCellClass;
+
+	/**
+	 * A shard constructor.
+	 */
+	public readonly Entity: ServerEntityClassOriginalAbstract;
+
+	/**
+	 * A shard constructor.
+	 */
+	public readonly Grid: ServerGridClass;
+
+	/**
+	 * A shard constructor.
+	 */
+	public readonly Shard: ServerShardClass;
+
 	/**
 	 * Collection of connections.
 	 */
@@ -49,9 +75,16 @@ export class ServerUniverse implements CommsUniverse {
 	public readonly shards: Map<Uuid, ServerShard> = new Map();
 
 	/**
-	 * Entity kinds.
+	 * Base class for server objects.
 	 */
-	private readonly kinds: Map<Uuid, Kind> = new Map([[defaultKindUuid, { typeOfEntity: DefaultEntity }]]);
+	protected readonly Base: ServerBaseClass;
+
+	/**
+	 * Entity kinds.
+	 *
+	 * Generate default factory once.
+	 */
+	private readonly kinds: Map<Uuid, Kind>;
 
 	/**
 	 * Game worlds.
@@ -62,6 +95,30 @@ export class ServerUniverse implements CommsUniverse {
 	 * Constructor.
 	 */
 	public constructor() {
+		// Call superclass
+		super();
+
+		// Generate base class
+		this.Base = ServerBaseFactory({ universe: this });
+
+		// Generate object classes
+		this.Shard = ServerShardFactory({ Base: this.Base });
+		this.Grid = ServerGridFactory({ Base: this.Base });
+		this.Cell = ServerCellFactory({ Base: this.Base });
+		this.Entity = ServerEntityFactory({ Base: this.Base });
+
+		// Set kinds
+		this.kinds = new Map([
+			[
+				defaultKindUuid,
+				{
+					typeOfEntity: DefaultServerEntityFactory({
+						Entity: this.Entity
+					})
+				}
+			]
+		]);
+
 		setTimeout(() => {
 			// Set default shard
 			this.addShard({ grids: new Map(), shardUuid: defaultShardUuid });
@@ -94,9 +151,6 @@ export class ServerUniverse implements CommsUniverse {
 		/**
 		 *
 		 */
-		/**
-		 *
-		 */
 		kind: Kind;
 	}): void {
 		if (uuid !== defaultKindUuid) {
@@ -110,7 +164,7 @@ export class ServerUniverse implements CommsUniverse {
 	 * @param shard - Arguments for the [[ServerShard]]
 	 */
 	public addShard(shard: ServerShardArgs): void {
-		this.shards.set(shard.shardUuid, new ServerShard(shard));
+		this.shards.set(shard.shardUuid, new this.Shard(shard));
 	}
 
 	/**
@@ -366,24 +420,17 @@ export class ServerUniverse implements CommsUniverse {
  * Initialize the [[ServerUniverse]].
  *
  * Timeouts in [[ServerUniverse]] should be executed first.
+ *
+ * @returns Promise, containing a universe
  */
-export async function initUniverse(): Promise<void> {
+export async function initUniverse(): Promise<ServerUniverse> {
 	// Shards
-	ServerProto.prototype.universe = new ServerUniverse();
-	return new Promise(function (resolve) {
+	let universe: ServerUniverse = new ServerUniverse();
+	// TS will infer the type of resolve parameter from generic
+	// eslint-disable-next-line @typescript-eslint/typedef
+	return new Promise<ServerUniverse>(function (resolve) {
 		setTimeout(function () {
-			resolve();
+			resolve(universe);
 		});
 	});
-}
-
-/**
- * Gets the [[ServerShard]].
- *
- * @param path - Path to shard
- *
- * @returns Shard or default shard
- */
-export async function getShard(path: ShardPath): Promise<ServerShard> {
-	return ServerProto.prototype.universe.getShard(path);
 }

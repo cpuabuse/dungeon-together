@@ -4,64 +4,73 @@
 */
 
 /**
- * Shared universe.
+ * @file Core universe.
  */
 
-import { Uuid } from "../common/uuid";
-import { CellPath, CommsCell } from "./cell";
-import { CommsConnection } from "./connection";
-import { CommsEntity, EntityPath } from "./entity";
-import { CommsGrid, GridPath } from "./grid";
-import { CommsShard, CommsShardArgs, ShardPath } from "./shard";
+import { CoreBaseClass } from "./base";
+import { CellPath, CommsCell, CoreCellClass } from "./cell";
+import { CommsEntity, CoreEntityClass, EntityPath } from "./entity";
+import { CommsGrid, CoreGridClass, GridPath } from "./grid";
+import { CommsShard, CommsShardArgs, CoreShardClass, ShardPath } from "./shard";
 
 /**
- * Lets other objects become [[CommsProto]].
+ * Core universe class.
  */
-export interface CommsUniverse {
+export abstract class CoreUniverse {
 	/**
-	 * Actual shards here.
+	 * Shard prototype.
 	 */
-	shards: Map<Uuid, CommsShard>;
+	public abstract readonly Cell: CoreCellClass;
 
 	/**
-	 * Universe connections.
+	 * Shard prototype.
 	 */
-	connections: Set<CommsConnection>;
+	public abstract readonly Entity: CoreEntityClass;
 
 	/**
-	 * Adds a connection
+	 * Shard prototype.
 	 */
-	addConnection(connectionArgs: CommsConnection): CommsConnection;
+	public abstract readonly Grid: CoreGridClass;
+
+	/**
+	 * Shard prototype.
+	 */
+	public abstract readonly Shard: CoreShardClass;
+
+	/**
+	 * Base object class.
+	 */
+	protected abstract readonly Base: CoreBaseClass;
 
 	/**
 	 * Add shard to universe.
 	 *
 	 * @returns `true` on success, `false` on failure
 	 */
-	addShard(shard: CommsShardArgs): void;
-
-	/**
-	 * Gets the shard.
-	 */
-	getShard(path: ShardPath): CommsShard;
+	public abstract addShard(shard: CommsShardArgs): void;
 
 	/**
 	 * Gets the [[CommsCell]].
 	 */
-	getCell(path: CellPath): CommsCell;
-
-	/**
-	 * Gets the grid.
-	 */
-	getGrid(path: GridPath): CommsGrid;
+	public abstract getCell(path: CellPath): CommsCell;
 
 	/**
 	 * Gets the [[CommsEntity]].
 	 */
-	getEntity(path: EntityPath): CommsEntity;
+	public abstract getEntity(path: EntityPath): CommsEntity;
+
+	/**
+	 * Gets the grid.
+	 */
+	public abstract getGrid(path: GridPath): CommsGrid;
+
+	/**
+	 * Gets the shard.
+	 */
+	public abstract getShard(path: ShardPath): CommsShard;
 
 	/**
 	 * Remove shard from universe.
 	 */
-	removeShard(CommsShard: ShardPath): void;
+	public abstract removeShard(CommsShard: ShardPath): void;
 }

@@ -3,7 +3,7 @@
 	"editor.insertSpaces": false,
 	"eslint.probe": ["typescript"],
 	"files.eol": "\n",
-	"cSpell.words": ["combinator", "comms", "cpuabuse"],
+	"cSpell.words": ["combinator", "comms", "cpuabuse", "vuex", "pixi"],
 	"yaml.schemas": {
 		"./schema/dt.yml.json": ["*.dt.yml"]
 	},

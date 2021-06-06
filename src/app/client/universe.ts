@@ -17,15 +17,15 @@ import { CommsConnectionArgs } from "../comms/connection";
 import { EntityPath } from "../comms/entity";
 import { GridPath } from "../comms/grid";
 import { CommsShardArgs, ShardPath } from "../comms/shard";
-import { CommsUniverse } from "../comms/universe";
-import { ClientCell } from "./cell";
+import { CoreUniverse } from "../comms/universe";
+import { ClientBaseClass, ClientBaseFactory } from "./base";
+import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
 import { ClientConnection } from "./connection";
-import { ClientEntity } from "./entity";
-import { ClientGrid } from "./grid";
+import { ClientEntity, ClientEntityClass, ClientEntityFactory } from "./entity";
+import { ClientGrid, ClientGridClass, ClientGridFactory } from "./grid";
 import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, scrollSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
-import { ClientProto } from "./proto";
-import { ClientShard } from "./shard";
+import { ClientShard, ClientShardClass, ClientShardFactory } from "./shard";
 
 /**
  * All instances in client.
@@ -33,7 +33,27 @@ import { ClientShard } from "./shard";
  * Termination of the client is impossible, because it is global.
  * For same reason [[Client]] does not store "defaultInstanceUuid" inside.
  */
-export class ClientUniverse implements CommsUniverse {
+export class ClientUniverse extends CoreUniverse {
+	/**
+	 * A shard constructor.
+	 */
+	public readonly Cell: ClientCellClass;
+
+	/**
+	 * A shard constructor.
+	 */
+	public readonly Entity: ClientEntityClass;
+
+	/**
+	 * A shard constructor.
+	 */
+	public readonly Grid: ClientGridClass;
+
+	/**
+	 * A shard constructor.
+	 */
+	public readonly Shard: ClientShardClass;
+
 	/**
 	 * Collection of connections.
 	 */
@@ -119,22 +139,43 @@ export class ClientUniverse implements CommsUniverse {
 	public readonly shards: Map<Uuid, ClientShard> = new Map();
 
 	/**
+	 * Base class for client objects.
+	 */
+	protected readonly Base: ClientBaseClass;
+
+	/**
 	 * Constructor.
 	 * The constructor can never be called more than once, during the execution of the program.
 	 *
 	 * @param element - HTML elements
 	 */
-	public constructor() {
+	public constructor({
+		element
+	}: {
+		/**
+		 * HTML element.
+		 */
+		element: HTMLElement;
+	}) {
+		// Call superclass
+		super();
+
+		// Generate base class
+		this.Base = ClientBaseFactory({ element, universe: this });
+
+		// Generate object classes
+		this.Shard = ClientShardFactory({ Base: this.Base });
+		this.Grid = ClientGridFactory({ Base: this.Base });
+		this.Cell = ClientCellFactory({ Base: this.Base });
+		this.Entity = ClientEntityFactory({ Base: this.Base });
+
 		// Object initialization
 		setTimeout(() => {
 			this.addShard({ grids: new Map(), shardUuid: defaultShardUuid });
 		});
 
-		// Identify DOM
-		let universeElement: HTMLElement = ClientProto.prototype.element;
-
 		// JavaScript based events
-		universeElement.addEventListener("contextmenu", event => {
+		element.addEventListener("contextmenu", event => {
 			// Stops showing default context menu
 			event.preventDefault();
 
@@ -149,7 +190,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 
 		// Scroll does not work on mobile phone
-		universeElement.addEventListener("wheel", event => {
+		element.addEventListener("wheel", event => {
 			// Prevent zoom in HTML
 			event.preventDefault();
 
@@ -164,7 +205,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 		// Keyboard events
 		// Prepare mousetrap instance
-		let mousetrap: Mousetrap.MousetrapInstance = new Mousetrap(universeElement);
+		let mousetrap: Mousetrap.MousetrapInstance = new Mousetrap(element);
 		// We don't care about return
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		mousetrap.bind("up", () => {
@@ -263,7 +304,7 @@ export class ClientUniverse implements CommsUniverse {
 		});
 
 		// Touch events
-		let hammer: HammerManager = new Hammer(universeElement);
+		let hammer: HammerManager = new Hammer(element);
 
 		// Tap works both for the browser's mouseclick and the mobile tap
 		hammer.on("tap", () => {
@@ -329,8 +370,8 @@ export class ClientUniverse implements CommsUniverse {
 
 		// Set the shard and reset modes index
 		let modesIndex: Array<Uuid> = new Array();
-		let clientShard: ClientShard = new ClientShard(shard);
-		this.shards.set(clientShard.shardUuid, new ClientShard(shard));
+		let clientShard: ClientShard = new this.Shard(shard);
+		this.shards.set(clientShard.shardUuid, new this.Shard(shard));
 		this.modesIndex.set(shard.shardUuid, modesIndex);
 
 		// Populate the universe modes
@@ -478,25 +519,16 @@ export class ClientUniverse implements CommsUniverse {
  *
  * @param element - HTML elements
  *
+ * @returns Promise, containing a universe
  */
-export async function initUniverse(element: HTMLElement): Promise<void> {
+export async function initUniverse(element: HTMLElement): Promise<ClientUniverse> {
 	// Shards
-	ClientProto.prototype.element = element;
-	ClientProto.prototype.universe = new ClientUniverse();
-	return new Promise(function (resolve) {
+	let universe: ClientUniverse = new ClientUniverse({ element });
+	// TS will infer the type of resolve parameter from generic
+	// eslint-disable-next-line @typescript-eslint/typedef
+	return new Promise<ClientUniverse>(function (resolve) {
 		setTimeout(function () {
-			resolve();
+			resolve(universe);
 		});
 	});
-}
-
-/**
- * Gets the [[ClientShard]].
- *
- * @param path - Path to shard
- *
- * @returns Shards or default shards
- */
-export async function getShard(path: ShardPath): Promise<ClientShard> {
-	return ClientProto.prototype.universe.getShard(path);
 }

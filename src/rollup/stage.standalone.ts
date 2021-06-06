@@ -11,6 +11,7 @@ import { join } from "path";
 import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
+import jscc from "rollup-plugin-jscc";
 import builtins from "rollup-plugin-node-builtins";
 import globals from "rollup-plugin-node-globals";
 
@@ -23,6 +24,9 @@ export default {
 		sourcemap: "inline"
 	},
 	plugins: [
+		jscc({
+			values: { _DEBUG_ENABLED: null }
+		}),
 		commonjs({
 			namedExports: {
 				"./node_modules/js-yaml/index.js": ["safeLoad"],

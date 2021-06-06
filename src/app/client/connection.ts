@@ -12,7 +12,6 @@ import { MessageTypeWord, MovementWord } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { VSocket } from "../common/vsocket";
 import { CommsConnection, CommsConnectionArgs } from "../comms/connection";
-import { ClientProto } from "./proto";
 
 /**
  * Message type descriptions.
@@ -53,7 +52,7 @@ export type MovementMessage = typing.TypeOf<typeof messageTypes[MessageTypeWord.
 /**
  * Client connection.
  */
-export class ClientConnection extends ClientProto implements CommsConnection {
+export class ClientConnection implements CommsConnection {
 	/**
 	 * Client UUIDs.
 	 */
@@ -70,9 +69,6 @@ export class ClientConnection extends ClientProto implements CommsConnection {
 	 * @param target - Socket
 	 */
 	public constructor({ socket }: CommsConnectionArgs) {
-		// Universe prototype
-		super();
-
 		// Set this target
 		this.socket = socket;
 	}

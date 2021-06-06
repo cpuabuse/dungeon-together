@@ -90,3 +90,11 @@ classDiagram
 	ServerCell -- ClientCell : Cell
 	ServerEntity -- ClientEntity : Entity
 ```
+
+## Initialization
+
+Because the static abstract methods do not exist in TS, CoreUniverse static methods will be defined through the interface, since client/server implementation of these methods differ.
+
+1. Create `CoreUniverse` class
+1. Create client/server universe class
+1. Create `CoreProto` with client/server universe class

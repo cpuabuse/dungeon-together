@@ -11,118 +11,147 @@ import { cellUuidUrlPath, defaultCellVector, defaultWorldUuid, urlPathSeparator 
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { CellPath, CommsCellArgs } from "../comms/cell";
 import { CommsGrid, CommsGridArgs } from "../comms/grid";
+import { ClientBaseClass } from "./base";
 import { ClientCell } from "./cell";
-import { ClientProto } from "./proto";
 
 /**
- * Vector Array Object.
+ * Generator for the client grid class.
+ *
+ * @returns Client grid class
  */
-export class ClientGrid extends ClientProto implements CommsGrid {
+// Force type inference to extract class type
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function ClientGridFactory({
+	Base
+}: {
 	/**
-	 * Locations.
+	 * Client base.
 	 */
-	public readonly cells: Map<Uuid, ClientCell> = new Map();
-
+	Base: ClientBaseClass;
+}) {
 	/**
-	 * UUID for default [[ClientGrid]].
+	 * Vector Array Object.
 	 */
-	public readonly defaultCellUuid: Uuid;
+	class ClientGrid extends Base implements CommsGrid {
+		/**
+		 * Locations.
+		 */
+		public readonly cells: Map<Uuid, ClientCell> = new Map();
 
-	/**
-	 * This id.
-	 */
-	public readonly gridUuid: Uuid;
+		/**
+		 * UUID for default [[ClientGrid]].
+		 */
+		public readonly defaultCellUuid: Uuid;
 
-	/**
-	 *  Shard path.
-	 */
-	public readonly shardUuid: Uuid;
+		/**
+		 * This id.
+		 */
+		public readonly gridUuid: Uuid;
 
-	/**
-	 * Constructor.
-	 */
-	public constructor({ shardUuid, cells, gridUuid }: CommsGridArgs) {
-		super();
+		/**
+		 *  Shard path.
+		 */
+		public readonly shardUuid: Uuid;
 
-		// Assign path
-		this.shardUuid = shardUuid;
-		this.gridUuid = gridUuid;
+		/**
+		 * Constructor.
+		 */
+		public constructor({ shardUuid, cells, gridUuid }: CommsGridArgs) {
+			super();
 
-		// Set default Uuid
-		this.shardUuid = shardUuid;
-		this.defaultCellUuid = getDefaultUuid({ path: `${cellUuidUrlPath}${urlPathSeparator}${this.gridUuid}` });
+			// Assign path
+			this.shardUuid = shardUuid;
+			this.gridUuid = gridUuid;
 
-		setTimeout(() => {
-			// Set default cell
-			this.addCell({
-				// Take path from this
-				...this,
-				cellUuid: this.defaultCellUuid,
-				entities: new Map(),
-				worlds: new Set([defaultWorldUuid]),
-				...defaultCellVector
+			// Set default Uuid
+			this.shardUuid = shardUuid;
+			this.defaultCellUuid = getDefaultUuid({ path: `${cellUuidUrlPath}${urlPathSeparator}${this.gridUuid}` });
+
+			setTimeout(() => {
+				// Set default cell
+				this.addCell({
+					// Take path from this
+					...this,
+					cellUuid: this.defaultCellUuid,
+					entities: new Map(),
+					worlds: new Set([defaultWorldUuid]),
+					...defaultCellVector
+				});
+
+				cells.forEach(cell => {
+					this.addCell(cell);
+				});
 			});
+		}
 
-			cells.forEach(cell => {
-				this.addCell(cell);
+		/**
+		 * Adds [[CommsCell]].
+		 *
+		 * @param cell - Arguments for the [[ClientCell]] constructor
+		 */
+		public addCell(cell: CommsCellArgs): void {
+			if (this.cells.has(cell.shardUuid)) {
+				// Clear the shard if it already exists
+				this.doRemoveCell(cell);
+			}
+			this.cells.set(cell.cellUuid, new this.universe.Cell(cell));
+		}
+
+		/**
+		 * Shortcut to get the [[ClientCell]].
+		 *
+		 * @returns [[ClientCell]], a cell in the grid
+		 */
+		public getCell({ cellUuid }: CellPath): ClientCell {
+			let clientCell: ClientCell | undefined = this.cells.get(cellUuid);
+			// Default client cell is always there
+			return clientCell === undefined ? (this.cells.get(this.defaultCellUuid) as ClientCell) : clientCell;
+		}
+
+		/**
+		 * Removes the [[ClientCell]]
+		 *
+		 * @param uuid - UUID of the [[ClientCell]]
+		 *
+		 * @param path - Path to cell
+		 */
+		public removeCell(path: CellPath): void {
+			if (path.cellUuid !== this.defaultCellUuid) {
+				this.doRemoveCell(path);
+			}
+		}
+
+		/**
+		 * Performs the necessary cleanup when removed.
+		 */
+		public terminate(): void {
+			this.cells.forEach(clientCell => {
+				this.doRemoveCell(clientCell);
 			});
-		});
-	}
-
-	/**
-	 * Adds [[CommsCell]].
-	 *
-	 * @param cell - Arguments for the [[ClientCell]] constructor
-	 */
-	public addCell(cell: CommsCellArgs): void {
-		if (this.cells.has(cell.shardUuid)) {
-			// Clear the shard if it already exists
-			this.doRemoveCell(cell);
 		}
-		this.cells.set(cell.cellUuid, new ClientCell(cell));
-	}
 
-	/**
-	 * Shortcut to get the [[ClientCell]].
-	 *
-	 * @returns [[ClientCell]], a cell in the grid
-	 */
-	public getCell({ cellUuid }: CellPath): ClientCell {
-		let clientCell: ClientCell | undefined = this.cells.get(cellUuid);
-		// Default client cell is always there
-		return clientCell === undefined ? (this.cells.get(this.defaultCellUuid) as ClientCell) : clientCell;
-	}
-
-	/**
-	 * Removes the [[ClientCell]]
-	 *
-	 * @param uuid - UUID of the [[ClientCell]]
-	 *
-	 * @param path - Path to cell
-	 */
-	public removeCell(path: CellPath): void {
-		if (path.cellUuid !== this.defaultCellUuid) {
-			this.doRemoveCell(path);
+		/**
+		 * Actually remove the [[ClientCell]] instance from "cells".
+		 */
+		private doRemoveCell({ cellUuid }: CellPath): void {
+			let cell: ClientCell | undefined = this.cells.get(cellUuid);
+			if (cell !== undefined) {
+				cell.terminate();
+				this.cells.delete(cellUuid);
+			}
 		}
 	}
 
-	/**
-	 * Performs the necessary cleanup when removed.
-	 */
-	public terminate(): void {
-		this.cells.forEach(clientCell => {
-			this.doRemoveCell(clientCell);
-		});
-	}
-
-	/**
-	 * Actually remove the [[ClientCell]] instance from "cells".
-	 */
-	private doRemoveCell({ cellUuid }: CellPath): void {
-		let cell: ClientCell | undefined = this.cells.get(cellUuid);
-		if (cell !== undefined) {
-			cell.terminate();
-			this.cells.delete(cellUuid);
-		}
-	}
+	// Return the class
+	return ClientGrid;
 }
+
+/**
+ * Type of client grid class.
+ */
+export type ClientGridClass = ReturnType<typeof ClientGridFactory>;
+
+/**
+ * Instance type of client grid.
+ */
+export type ClientGrid = InstanceType<ClientGridClass>;

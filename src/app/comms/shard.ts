@@ -12,8 +12,8 @@
  */
 
 import { Uuid } from "../common/uuid";
+import { CoreBase } from "./base";
 import { CommsGrid, CommsGridArgs, CommsGridRaw, GridPath, commsGridRawToArgs } from "./grid";
-import { CommsProto } from "./proto";
 
 /**
  * Everything-like.
@@ -38,9 +38,16 @@ export type CommsShardRaw = Omit<CommsShardArgs, "grids"> & {
 };
 
 /**
+ * Typeof class for shards.
+ */
+export type CoreShardClass = {
+	new (...args: any[]): CommsShard;
+};
+
+/**
  * Interface as basis for class implementation.
  */
-export interface CommsShard extends CommsShardArgs, CommsProto {
+export interface CommsShard extends CommsShardArgs, CoreBase {
 	/**
 	 * Default [[Grid]] UUID.
 	 */

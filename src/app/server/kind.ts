@@ -7,7 +7,7 @@
  * @file Kinds.
  */
 
-import { ServerEntity } from "./entity";
+import { ServerEntityClassConcrete } from "./entity";
 
 /**
  * An interface like thing kind, only requiring certain kinds to be there.
@@ -16,5 +16,5 @@ export interface Kind {
 	/**
 	 * Literally, kind class.
 	 */
-	typeOfEntity: typeof ServerEntity;
+	typeOfEntity: ServerEntityClassConcrete;
 }

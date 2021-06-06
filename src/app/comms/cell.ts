@@ -11,7 +11,6 @@ import { Uuid } from "../common/uuid";
 import { Vector } from "../common/vector";
 import { CommsEntity, CommsEntityArgs, CommsEntityRaw, EntityPath, commsEntityRawToArgs } from "./entity";
 import { GridPath } from "./grid";
-import { CommsProto } from "./proto";
 
 /**
  * A location-like.
@@ -53,9 +52,19 @@ export type CommsCellRaw = CommCellRawHelper<
 >;
 
 /**
+ * Typeof class for cells.
+ */
+export type CoreCellClass = {
+	/**
+	 *
+	 */
+	new (...args: any[]): CommsCell;
+};
+
+/**
  * Cell implementable.
  */
-export interface CommsCell extends CommsCellArgs, CommsProto {
+export interface CommsCell extends CommsCellArgs {
 	/**
 	 * Default [[Entity]] UUID.
 	 */
