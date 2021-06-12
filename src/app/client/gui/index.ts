@@ -47,13 +47,22 @@ export type ThisVueStore = {
  */
 export const UniverseComponent: Component = defineComponent({
 	/**
+	 * Update timer every second.
+	 */
+	created() {
+		setInterval(() => {
+			this.$data.what = (this as unknown as ThisVueStore).$store.state.universe.application.state.upTime;
+		}, 1000);
+	},
+
+	/**
 	 * Vue data.
 	 *
 	 * @returns Universe data
 	 */
 	data() {
 		return {
-			what: "world"
+			what: 0
 		};
 	}
 });
