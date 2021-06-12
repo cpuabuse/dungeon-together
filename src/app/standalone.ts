@@ -16,12 +16,13 @@
 
 import axios from "axios";
 import { ClientShard } from "./client/shard";
-import { ClientUniverse, initUniverse as initClientUniverse } from "./client/universe";
+import { ClientUniverse } from "./client/universe";
 import { MessageTypeWord, vSocketMaxQueue } from "./common/defaults/connection";
 import { VStandaloneSocket } from "./common/vsocket";
+import { Application } from "./comms/application";
 import { Envelope } from "./comms/connection";
 import { CommsShardArgs } from "./comms/shard";
-import { ServerUniverse, initUniverse as initServerUniverse } from "./server/universe";
+import { ServerUniverse } from "./server/universe";
 import { compile } from "./tool/compile";
 
 /**
@@ -29,10 +30,12 @@ import { compile } from "./tool/compile";
  */
 async function main(): Promise<void> {
 	let clientUniverseElement: HTMLElement | null = document.getElementById("client-universe");
-	let serverUniverse: ServerUniverse = await initServerUniverse();
-	let clientUniverse: ClientUniverse = await initClientUniverse(
-		clientUniverseElement === null ? document.body : clientUniverseElement
-	);
+	let application: Application = new Application();
+	let serverUniverse: ServerUniverse = await application.addUniverse({ Universe: ServerUniverse });
+	let clientUniverse: ClientUniverse = await application.addUniverse({
+		Universe: ClientUniverse,
+		args: { element: clientUniverseElement === null ? document.body : clientUniverseElement }
+	});
 
 	// Compile
 	// Axios returns an object

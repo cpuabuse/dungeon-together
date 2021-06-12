@@ -7,6 +7,8 @@
  * @file Core universe.
  */
 
+import { FromAbstract } from "../common/utility-types";
+import { Application } from "./application";
 import { CoreBaseClass } from "./base";
 import { CellPath, CommsCell, CoreCellClass } from "./cell";
 import { CommsEntity, CoreEntityClass, EntityPath } from "./entity";
@@ -38,9 +40,28 @@ export abstract class CoreUniverse {
 	public abstract readonly Shard: CoreShardClass;
 
 	/**
+	 * Application.
+	 */
+	public application: Application;
+
+	/**
 	 * Base object class.
 	 */
 	protected abstract readonly Base: CoreBaseClass;
+
+	/**
+	 * Constructs the universe core.
+	 */
+	protected constructor({
+		application
+	}: {
+		/**
+		 * App this is added to.
+		 */
+		application: Application;
+	}) {
+		this.application = application;
+	}
 
 	/**
 	 * Add shard to universe.
@@ -73,4 +94,26 @@ export abstract class CoreUniverse {
 	 * Remove shard from universe.
 	 */
 	public abstract removeShard(CommsShard: ShardPath): void;
+}
+
+/**
+ * Classes extending core universe to have the constructor signature.
+ */
+export interface CoreUniverseArgs {
+	/**
+	 * App with state.
+	 */
+	application: Application;
+}
+
+/**
+ * Original abstract class type for core universe.
+ */
+export type CoreUniverseClassOriginalAbstract = typeof CoreUniverse;
+
+/**
+ * Class type for classes extending core universe.
+ */
+export interface CoreUniverseClassStatic<U extends CoreUniverse = CoreUniverse> {
+	new (args: any): U;
 }

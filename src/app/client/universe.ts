@@ -10,22 +10,37 @@ import Hammer from "hammerjs";
 import type HammerManager from "hammerjs";
 import Mousetrap from "mousetrap";
 import { BaseTexture, Texture } from "pixi.js";
+import { App, createApp } from "vue";
+import { createStore } from "vuex";
 import { defaultModeUuid, defaultShardUuid } from "../common/defaults";
+import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import { CellPath } from "../comms/cell";
 import { CommsConnectionArgs } from "../comms/connection";
 import { EntityPath } from "../comms/entity";
 import { GridPath } from "../comms/grid";
 import { CommsShardArgs, ShardPath } from "../comms/shard";
-import { CoreUniverse } from "../comms/universe";
+import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassStatic } from "../comms/universe";
 import { ClientBaseClass, ClientBaseFactory } from "./base";
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
 import { ClientConnection } from "./connection";
 import { ClientEntity, ClientEntityClass, ClientEntityFactory } from "./entity";
 import { ClientGrid, ClientGridClass, ClientGridFactory } from "./grid";
+import { UniverseComponent, UniverseState } from "./gui";
+import { Theme } from "./gui/themes";
 import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, scrollSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
 import { ClientShard, ClientShardClass, ClientShardFactory } from "./shard";
+
+/**
+ * Constructor args for client universe.
+ */
+export interface ClientUniverseArgs extends CoreUniverseArgs {
+	/**
+	 * HTML element.
+	 */
+	element: HTMLElement;
+}
 
 /**
  * All instances in client.
@@ -33,7 +48,10 @@ import { ClientShard, ClientShardClass, ClientShardFactory } from "./shard";
  * Termination of the client is impossible, because it is global.
  * For same reason [[Client]] does not store "defaultInstanceUuid" inside.
  */
-export class ClientUniverse extends CoreUniverse {
+export class ClientUniverse
+	extends CoreUniverse
+	implements StaticImplements<CoreUniverseClassStatic, typeof ClientUniverse>
+{
 	/**
 	 * A shard constructor.
 	 */
@@ -53,6 +71,11 @@ export class ClientUniverse extends CoreUniverse {
 	 * A shard constructor.
 	 */
 	public readonly Shard: ClientShardClass;
+
+	/**
+	 * Vue.
+	 */
+	public readonly vue: App;
 
 	/**
 	 * Collection of connections.
@@ -149,16 +172,9 @@ export class ClientUniverse extends CoreUniverse {
 	 *
 	 * @param element - HTML elements
 	 */
-	public constructor({
-		element
-	}: {
-		/**
-		 * HTML element.
-		 */
-		element: HTMLElement;
-	}) {
+	public constructor({ application, element }: ClientUniverseArgs) {
 		// Call superclass
-		super();
+		super({ application });
 
 		// Generate base class
 		this.Base = ClientBaseFactory({ element, universe: this });
@@ -169,9 +185,23 @@ export class ClientUniverse extends CoreUniverse {
 		this.Cell = ClientCellFactory({ Base: this.Base });
 		this.Entity = ClientEntityFactory({ Base: this.Base });
 
+		// Create vue
+		this.vue = createApp(UniverseComponent);
+
 		// Object initialization
 		setTimeout(() => {
 			this.addShard({ grids: new Map(), shardUuid: defaultShardUuid });
+
+			// Init vue after initialization
+			this.vue.use(createStore<UniverseState>({ state: { theme: Theme.Dark, universe: this } }));
+
+			// Mount vue
+			let vueElement: HTMLElement = document.createElement("div");
+			vueElement.innerHTML = `<div>Hello: {{ what }}</div>`.trim();
+			this.vue.mount(vueElement);
+
+			// Display vue
+			element.after(vueElement);
 		});
 
 		// JavaScript based events
@@ -510,25 +540,4 @@ export class ClientUniverse extends CoreUniverse {
 		}
 		this.doRemoveShard(path);
 	}
-}
-
-/**
- * Initialize the [[ClientUniverse]].
- *
- * Timeouts in [[ClientUniverse]] should be executed first.
- *
- * @param element - HTML elements
- *
- * @returns Promise, containing a universe
- */
-export async function initUniverse(element: HTMLElement): Promise<ClientUniverse> {
-	// Shards
-	let universe: ClientUniverse = new ClientUniverse({ element });
-	// TS will infer the type of resolve parameter from generic
-	// eslint-disable-next-line @typescript-eslint/typedef
-	return new Promise<ClientUniverse>(function (resolve) {
-		setTimeout(function () {
-			resolve(universe);
-		});
-	});
 }

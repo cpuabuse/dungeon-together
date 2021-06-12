@@ -8,20 +8,20 @@
  */
 
 import { defaultKindUuid, defaultShardUuid, defaultWorldUuid } from "../common/defaults";
+import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import { CellPath } from "../comms/cell";
 import { CommsConnectionArgs } from "../comms/connection";
 import { EntityPath } from "../comms/entity";
 import { GridPath } from "../comms/grid";
 import { ShardPath } from "../comms/shard";
-import { CoreUniverse } from "../comms/universe";
+import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassStatic } from "../comms/universe";
 import { ServerBaseClass, ServerBaseFactory } from "./base";
 import { ServerCell, ServerCellClass, ServerCellFactory } from "./cell";
 import { ServerConnection } from "./connection";
 import {
 	DefaultServerEntityFactory,
 	ServerEntity,
-	ServerEntityClassConcrete,
 	ServerEntityClassOriginalAbstract,
 	ServerEntityFactory
 } from "./entity";
@@ -31,19 +31,17 @@ import { ServerShard, ServerShardArgs, ServerShardClass, ServerShardFactory } fr
 import { World } from "./world";
 
 /**
- * Arguments for a [[ServerUniverse]].
+ * Constructor args for server universe.
  */
-export interface ServerUniverseArgs {
-	/**
-	 *
-	 */
-	worlds: Map<Uuid, World>;
-}
+export type ServerUniverseArgs = CoreUniverseArgs;
 
 /**
  * Server-side shard.
  */
-export class ServerUniverse extends CoreUniverse {
+export class ServerUniverse
+	extends CoreUniverse
+	implements StaticImplements<CoreUniverseClassStatic, typeof ServerUniverse>
+{
 	/**
 	 * A shard constructor.
 	 */
@@ -94,9 +92,9 @@ export class ServerUniverse extends CoreUniverse {
 	/**
 	 * Constructor.
 	 */
-	public constructor() {
+	public constructor({ application }: ServerUniverseArgs) {
 		// Call superclass
-		super();
+		super({ application });
 
 		// Generate base class
 		this.Base = ServerBaseFactory({ universe: this });
@@ -414,23 +412,4 @@ export class ServerUniverse extends CoreUniverse {
 	}): void {
 		this.worlds.delete(uuid);
 	}
-}
-
-/**
- * Initialize the [[ServerUniverse]].
- *
- * Timeouts in [[ServerUniverse]] should be executed first.
- *
- * @returns Promise, containing a universe
- */
-export async function initUniverse(): Promise<ServerUniverse> {
-	// Shards
-	let universe: ServerUniverse = new ServerUniverse();
-	// TS will infer the type of resolve parameter from generic
-	// eslint-disable-next-line @typescript-eslint/typedef
-	return new Promise<ServerUniverse>(function (resolve) {
-		setTimeout(function () {
-			resolve(universe);
-		});
-	});
 }
