@@ -15,7 +15,6 @@ import typescript from "@rollup/plugin-typescript";
 import jscc from "rollup-plugin-jscc";
 import builtins from "rollup-plugin-node-builtins";
 import globals from "rollup-plugin-node-globals";
-import vue from "rollup-plugin-vue";
 
 export default {
 	input: join(__dirname, "..", "..", "..", "..", "src", "app", "standalone.ts"),
