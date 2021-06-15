@@ -21,12 +21,13 @@ import { EntityPath } from "../comms/entity";
 import { GridPath } from "../comms/grid";
 import { CommsShardArgs, ShardPath } from "../comms/shard";
 import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassStatic } from "../comms/universe";
+import UniverseComponent from "../vue/test.vue";
 import { ClientBaseClass, ClientBaseFactory } from "./base";
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
 import { ClientConnection } from "./connection";
 import { ClientEntity, ClientEntityClass, ClientEntityFactory } from "./entity";
 import { ClientGrid, ClientGridClass, ClientGridFactory } from "./grid";
-import { UniverseComponent, UniverseState } from "./gui";
+import { UniverseState } from "./gui";
 import { Theme } from "./gui/themes";
 import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, scrollSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
@@ -197,7 +198,6 @@ export class ClientUniverse
 
 			// Mount vue
 			let vueElement: HTMLElement = document.createElement("div");
-			vueElement.innerHTML = `<div>Hello: {{ what }}</div>`.trim();
 			this.vue.mount(vueElement);
 
 			// Display vue
