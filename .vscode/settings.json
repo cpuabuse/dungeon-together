@@ -1,7 +1,6 @@
 {
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"editor.insertSpaces": false,
-	"eslint.probe": ["typescript"],
 	"files.eol": "\n",
 	"cSpell.words": [
 		"builtins",
@@ -19,5 +18,6 @@
 	},
 	"files.associations": {
 		"*.azure-pipelines.yml": "azure-pipelines"
-	}
+	},
+	"eslint.probe": ["typescript", "html", "vue"]
 }
