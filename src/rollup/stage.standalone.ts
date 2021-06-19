@@ -4,14 +4,20 @@
 */
 
 /**
- * Rollup for standalone.
+ * @file Standalone compilation
  */
+
+// This is file for compilation
+/* eslint-disable import/no-extraneous-dependencies */
 
 import { join } from "path";
 import alias from "@rollup/plugin-alias";
+import buble from "@rollup/plugin-buble";
 import commonjs from "@rollup/plugin-commonjs";
+import inject from "@rollup/plugin-inject";
 import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
+import { Plugin, RollupOptions } from "rollup";
 import jscc from "rollup-plugin-jscc";
 import builtins from "rollup-plugin-node-builtins";
 import globals from "rollup-plugin-node-globals";
@@ -19,7 +25,10 @@ import postcss from "rollup-plugin-postcss";
 import typescript from "rollup-plugin-typescript2";
 import vue from "rollup-plugin-vue";
 
-export default {
+/**
+ * Rollup options.
+ */
+const options: RollupOptions = {
 	input: join(__dirname, "..", "..", "..", "..", "src", "app", "standalone.ts"),
 	output: {
 		file: join(__dirname, "..", "..", "artifacts", "rollup", "standalone.js"),
@@ -33,6 +42,15 @@ export default {
 
 		// To process vue
 		vue(),
+
+		// Transpile jsx to vue
+		buble({
+			include: ["**/*.tsx"],
+			jsx: "vueJsxPragma"
+		}),
+
+		// Inject jsx transpilation dependencies
+		inject({ vueJsxPragma: ["Vue", "h"] }),
 
 		// To process css files
 		postcss(),
@@ -54,10 +72,12 @@ export default {
 		resolve({ browser: true, preferBuiltins: true }),
 
 		// For builtins plugin
-		globals(),
+		// Casting due to definition conflicts
+		globals() as Plugin,
 
 		// For things like http
-		builtins(),
+		// Casting due to definition conflicts
+		builtins() as Plugin,
 
 		// For debug compilation
 		jscc({
@@ -69,3 +89,5 @@ export default {
 		json()
 	]
 };
+
+export default options;

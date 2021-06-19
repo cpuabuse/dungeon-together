@@ -21,7 +21,7 @@ import { EntityPath } from "../comms/entity";
 import { GridPath } from "../comms/grid";
 import { CommsShardArgs, ShardPath } from "../comms/shard";
 import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassStatic } from "../comms/universe";
-import UniverseComponent from "../vue/test.vue";
+import UniverseComponent from "../vue/universe.vue";
 import { ClientBaseClass, ClientBaseFactory } from "./base";
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
 import { ClientConnection } from "./connection";

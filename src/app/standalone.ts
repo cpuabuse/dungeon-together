@@ -25,6 +25,10 @@ import { CommsShardArgs } from "./comms/shard";
 import { ServerUniverse } from "./server/universe";
 import { compile } from "./tool/compile";
 
+// Injection
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap";
+
 /**
  * Entrypoint.
  */

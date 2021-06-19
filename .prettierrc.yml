@@ -11,5 +11,5 @@ printWidth: 120
 trailingComma: none
 
 # Indent lines with tabs instead of spaces.
-# It is personal preferece of developer to set tab width in IDE.
+# It is personal preference of developer to set tab width in IDE.
 useTabs: true

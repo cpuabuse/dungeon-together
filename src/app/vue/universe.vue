@@ -1,15 +1,19 @@
 <template>
-	<div class="test">Hello: {{ what }}</div>
+	<div class="universe">Hello: {{ what }}</div>
+	<tsxtest />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { ThisVueStore } from "../client/gui";
+import tsxTestComponent from "./tsx/test.vue";
 
 /**
  * Root component.
  */
 export default defineComponent({
+	components: { tsxtest: tsxTestComponent },
+
 	/**
 	 * Update timer every second.
 	 */
@@ -33,7 +37,7 @@ export default defineComponent({
 </script>
 
 <style lang="css">
-.test {
+.universe {
 	color: red;
 }
 </style>
