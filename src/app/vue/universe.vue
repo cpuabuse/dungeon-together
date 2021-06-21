@@ -1,18 +1,20 @@
 <template>
 	<div class="universe">Hello: {{ what }}</div>
 	<tsxtest />
+	<statealert />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { ThisVueStore } from "../client/gui";
+import stateAlertComponent from "./state-alert.vue";
 import tsxTestComponent from "./tsx/test.vue";
 
 /**
  * Root component.
  */
 export default defineComponent({
-	components: { tsxtest: tsxTestComponent },
+	components: { statealert: stateAlertComponent, tsxtest: tsxTestComponent },
 
 	/**
 	 * Update timer every second.
