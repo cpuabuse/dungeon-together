@@ -66,11 +66,6 @@ export default defineComponent({
 			level: AlertLevel;
 
 			/**
-			 * The message to be displayed.
-			 */
-			message: string;
-
-			/**
 			 * Styles for alerts.
 			 */
 			styles: {
@@ -88,7 +83,6 @@ export default defineComponent({
 			};
 		} = {
 			level: AlertLevel.Failure,
-			message: "My customized value",
 			styles: {
 				[AlertLevel.Information]: {
 					alertClass: AlertClass.Primary,
@@ -106,6 +100,13 @@ export default defineComponent({
 		};
 
 		return data;
+	},
+
+	props: {
+		/**
+		 * The message to be displayed.
+		 */
+		message: { default: "Information/Warning/Failure", type: String }
 	}
 });
 </script>

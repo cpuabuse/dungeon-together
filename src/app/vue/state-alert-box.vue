@@ -1,5 +1,5 @@
 <template>
-	<statealert v-for="(alert, index) in alerts" :key="index" />
+	<statealert v-for="(alert, index) in alerts" :key="index" :message="alert" />
 </template>
 
 <script lang="ts">
