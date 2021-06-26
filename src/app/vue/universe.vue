@@ -2,11 +2,13 @@
 	<div class="universe">Hello: {{ what }}</div>
 	<tsxtest />
 	<statealertbox />
+	<debug />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { ThisVueStore } from "../client/gui";
+import debugComponent from "./debug.vue";
 import stateAlertBoxComponent from "./state-alert-box.vue";
 import tsxTestComponent from "./tsx/test.vue";
 
@@ -14,7 +16,7 @@ import tsxTestComponent from "./tsx/test.vue";
  * Root component.
  */
 export default defineComponent({
-	components: { statealertbox: stateAlertBoxComponent, tsxtest: tsxTestComponent },
+	components: { debug: debugComponent, statealertbox: stateAlertBoxComponent, tsxtest: tsxTestComponent },
 
 	/**
 	 * Update timer every second.
