@@ -1,9 +1,10 @@
 <template>
-	<statealert v-for="(alert, index) in alerts" :key="index" :message="alert" />
+	<statealert v-for="(alert, index) in alerts" :key="index" :message="alert.message" :level="alert.level" />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { AlertLevel } from "../client/gui/severity";
 import stateAlertComponent from "./state-alert.vue";
 
 export default defineComponent({
@@ -19,9 +20,23 @@ export default defineComponent({
 			/**
 			 * Information about alerts inside the box.
 			 */
-			alerts: Array<string>;
+			alerts: Array<{
+				/**
+				 * Message to be passed.
+				 */
+				message: string;
+
+				/**
+				 * Warninglevel to be passed.
+				 */
+				level: AlertLevel;
+			}>;
 		} = {
-			alerts: ["a", "b", "c"]
+			alerts: [
+				{ level: AlertLevel.Information, message: "Information text" },
+				{ level: AlertLevel.Warning, message: "Warning text" },
+				{ level: AlertLevel.Failure, message: "Failure text" }
+			]
 		};
 
 		return result;

@@ -1,7 +1,7 @@
 <!--State alert component is informing the user while the state of the game is altered-->
 
 <template>
-	<div class="alert alert-primary d-flex align-items-center" role="alert">
+	<div class="alert d-flex align-items-center" role="alert" :class="alertClass">
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			width="24"
@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { PropType, defineComponent } from "vue";
 import { AlertLevel } from "../client/gui/severity";
 
 /**
@@ -38,6 +38,15 @@ export default defineComponent({
 	 * @returns - Computed object
 	 */
 	computed: {
+		/**
+		 * Identifies class attribute for bootstrap alert "div".
+		 *
+		 * @returns - Alert class
+		 */
+		alertClass(): string {
+			return this.styles[this.level].alertClass;
+		},
+
 		/**
 		 * Constructs SVG path for an alert.
 		 *
@@ -61,11 +70,6 @@ export default defineComponent({
 
 		let data: {
 			/**
-			 * Alert level for the message.
-			 */
-			level: AlertLevel;
-
-			/**
 			 * Styles for alerts.
 			 */
 			styles: {
@@ -82,7 +86,6 @@ export default defineComponent({
 				};
 			};
 		} = {
-			level: AlertLevel.Failure,
 			styles: {
 				[AlertLevel.Information]: {
 					alertClass: AlertClass.Primary,
@@ -104,9 +107,14 @@ export default defineComponent({
 
 	props: {
 		/**
+		 * Alert level for the message.
+		 */
+		level: { default: AlertLevel.Information, type: String as PropType<AlertLevel> },
+
+		/**
 		 * The message to be displayed.
 		 */
-		message: { default: "Information/Warning/Failure", type: String }
+		message: { required: true, type: String }
 	}
 });
 </script>

@@ -19,5 +19,6 @@
 	"files.associations": {
 		"*.azure-pipelines.yml": "azure-pipelines"
 	},
-	"eslint.probe": ["typescript", "html", "vue"]
+	"eslint.probe": ["typescript", "html", "vue"],
+	"vetur.validation.templateProps": true
 }
