@@ -4,8 +4,10 @@
 */
 
 /**
- * @file Client universe.
+ * @file Client universe
  */
+
+import vueHljs from "@highlightjs/vue-plugin";
 import Hammer from "hammerjs";
 import type HammerManager from "hammerjs";
 import Mousetrap from "mousetrap";
@@ -32,6 +34,9 @@ import { Theme } from "./gui/themes";
 import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, scrollSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
 import { ClientShard, ClientShardClass, ClientShardFactory } from "./shard";
+
+// Static init
+import "./gui/static-init";
 
 /**
  * Constructor args for client universe.
@@ -195,6 +200,7 @@ export class ClientUniverse
 
 			// Init vue after initialization
 			this.vue.use(createStore<UniverseState>({ state: { theme: Theme.Dark, universe: this } }));
+			this.vue.use(vueHljs);
 
 			// Mount vue
 			let vueElement: HTMLElement = document.createElement("div");
