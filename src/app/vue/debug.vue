@@ -162,4 +162,9 @@ export default defineComponent({
 #ui-debug .card + .card {
 	margin-top: 1rem;
 }
+
+/* Fixing code blocks */
+pre {
+	margin: 0;
+}
 </style>

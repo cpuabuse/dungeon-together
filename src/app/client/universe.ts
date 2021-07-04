@@ -4,8 +4,9 @@
 */
 
 /**
- * @file Client universe.
+ * @file Client universe
  */
+
 import vueHljs from "@highlightjs/vue-plugin";
 import Hammer from "hammerjs";
 import type HammerManager from "hammerjs";
@@ -34,9 +35,8 @@ import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, scrollSymbol, 
 import { Mode } from "./mode";
 import { ClientShard, ClientShardClass, ClientShardFactory } from "./shard";
 
-// Bootstrap JavaScript
-import "highlight.js/lib/common";
-import "highlight.js/styles/default.css";
+// Static init
+import "./gui/static-init";
 
 /**
  * Constructor args for client universe.
