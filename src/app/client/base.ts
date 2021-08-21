@@ -45,7 +45,7 @@ export function ClientBaseFactory({
 		/**
 		 * Universe container.
 		 */
-		element: HTMLElement;
+		universeElement: HTMLElement;
 	}
 
 	/**
@@ -57,7 +57,7 @@ export function ClientBaseFactory({
 
 	// Assign prototype
 	ClientBase.prototype.universe = universe;
-	ClientBase.prototype.element = element;
+	ClientBase.prototype.universeElement = element;
 
 	return ClientBase;
 }

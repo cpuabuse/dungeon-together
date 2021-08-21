@@ -4,6 +4,10 @@
 */
 
 /**
+ * @file Standalone entrypoint.
+ */
+
+/**
  * @license ISC
  * ISC License (ISC)
  *
@@ -15,13 +19,12 @@
  */
 
 import axios from "axios";
-import { ClientShard } from "./client/shard";
+import { queueProcessCallback as clientQueueProcessCallback } from "./client/connection";
 import { ClientUniverse } from "./client/universe";
-import { MessageTypeWord, vSocketMaxQueue } from "./common/defaults/connection";
+import { MessageTypeWord } from "./common/defaults/connection";
 import { VStandaloneSocket } from "./common/vsocket";
 import { Application } from "./comms/application";
 import { Envelope } from "./comms/connection";
-import { CommsShardArgs } from "./comms/shard";
 import { ServerUniverse } from "./server/universe";
 import { compile } from "./tool/compile";
 
@@ -33,8 +36,13 @@ import "bootstrap";
  * Entrypoint.
  */
 async function main(): Promise<void> {
+	// Get the element to attach the universe
 	let clientUniverseElement: HTMLElement | null = document.getElementById("client-universe");
+
+	// Define the application to use
 	let application: Application = new Application();
+
+	// Generate universes/prototype chains
 	let serverUniverse: ServerUniverse = await application.addUniverse({ Universe: ServerUniverse });
 	let clientUniverse: ClientUniverse = await application.addUniverse({
 		Universe: ClientUniverse,
@@ -46,48 +54,36 @@ async function main(): Promise<void> {
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	let shardData: object = compile((await axios.get("/data/shard/cave.dt.yml")).data);
 
+	/**
+	 * Dummy sync function.
+	 */
+	function sync(): void {
+		// Do nothing
+	}
+
+	/**
+	 * Dummy server callback.
+	 *
+	 * @returns `true`
+	 */
+	function serverQueueProcessCallback(): boolean {
+		return true;
+	}
+
 	// Sockets
-	let clientSocket: VStandaloneSocket = new VStandaloneSocket({
-		/**
-		 * Client callback.
-		 */
-		callback(): void {
-			let counter: number = 0;
-			while (counter++ < vSocketMaxQueue) {
-				let envelope: Envelope = clientSocket.readQueue();
-				let promise: Promise<ClientShard>;
-
-				// Break
-				if (envelope.type === MessageTypeWord.Empty) break;
-
-				// Switch
-				switch (envelope.type) {
-					case MessageTypeWord.Sync:
-						console.log("Sync");
-						clientUniverse.addShard(envelope.message as CommsShardArgs);
-
-						// Attach canvas
-						promise = (async () => clientUniverse.getShard({ shardUuid: (shardData as CommsShardArgs).shardUuid }))();
-						promise.then(
-							defaultShard => {
-								defaultShard.attach(clientUniverseElement === null ? document.body : clientUniverseElement);
-							},
-							() => {}
-						);
-						break;
-					default:
-				}
-			}
+	let clientSocket: VStandaloneSocket<ClientUniverse, ServerUniverse> = new VStandaloneSocket({
+		primary: {
+			callback: clientQueueProcessCallback,
+			sync,
+			universe: clientUniverse
 		},
-		/**
-		 * Server callback.
-		 */
-		secondary(): void {
-			serverSocket.readQueue();
-		}
+		secondary: { callback: serverQueueProcessCallback, sync, universe: serverUniverse }
 	});
-	let serverSocket: VStandaloneSocket = clientSocket.target;
-	serverSocket.send({ message: shardData, type: MessageTypeWord.Sync });
+
+	let serverSocket: VStandaloneSocket<ServerUniverse, ClientUniverse> = clientSocket.target;
+	let envelope: Envelope = new Envelope();
+	envelope.messages.push({ body: shardData, type: MessageTypeWord.Sync });
+	serverSocket.send({ envelope });
 }
 
 // Call main

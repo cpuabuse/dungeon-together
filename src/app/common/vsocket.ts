@@ -9,87 +9,335 @@
  * Server WS and client Websocket classes to be added.
  */
 
-import { EventEmitter } from "events";
-import { Envelope } from "../comms/connection";
-import { MessageTypeWord, vSocketMaxQueue } from "./defaults/connection";
+import { LogLevel, processLog } from "../client/error";
+import { Envelope, Message } from "../comms/connection";
+import { CoreUniverse } from "../comms/universe";
+import { MessageTypeWord, vSocketMaxQueue, vSocketProcessStackLimit } from "./defaults/connection";
+import { ErroringReturn } from "./error";
+
+/**
+ * Type for callback function to sockets.
+ *
+ * To be used internally.
+ */
+export type ProcessCallback<C extends SocketProcessBase> = (this: C) => boolean;
+
+/**
+ * Converts a process callback to a process callback with `this` set to subclass, so that it can be used in "this" type-safe super constructor.
+ */
+type ToSubclassProcessCallback<
+	F extends ProcessCallback<any>,
+	C extends SocketProcessBase
+> = ThisParameterType<F> extends C ? ProcessCallback<C> : never;
+
+/**
+ * The process return typ with set `this`.
+ */
+export type ProcessCallbackParameters<C extends SocketProcessBase> = Parameters<ProcessCallback<C>>;
 
 /**
  * Symbol to use for subscription.
  */
-const subscribeWord: symbol = Symbol("subscribe");
+const processQueueWord: symbol = Symbol("process-queue");
 
 /**
- * Virtual socket abstraction.
+ * Process for socket to process.
+ *
+ * Used in {@link SocketProcessBase}, and ensures, that callback is invoked with appropriate `this`.
  */
-export abstract class VSocket {
+interface SocketProcessBaseProcess {
 	/**
-	 * Event emitter.
+	 * Number of times process was unsuccessfully executed in a tick-tock linear recursion.
+	 *
+	 * Execution should suspend if limit reached.
 	 */
-	private emitter: EventEmitter = new EventEmitter();
+	stackLength: number;
 
 	/**
-	 * Queue to use for this socket.
+	 * Callback for process.
 	 */
-	private queue: Array<Envelope> = new Array() as Array<Envelope>;
+	callback: ProcessCallback<SocketProcessBase>;
+}
+
+/**
+ * Args for tick-tock process of socket.
+ */
+interface SocketProcessBaseTickTockArgs {
+	/**
+	 * Process symbol.
+	 */
+	word: symbol;
+}
+
+/**
+ * Arguments for single socket.
+ */
+interface VStandaloneSocketSingleArgs<C extends CoreUniverse, CP extends CoreUniverse, CS extends CoreUniverse> {
+	/**
+	 * Callback to call in superclass.
+	 */
+	callback: ProcessCallback<VStandaloneSocket<CP, CS>>;
+
+	/**
+	 * Resync function.
+	 */
+	sync: VSocket<C>["sync"];
+
+	/**
+	 * Universe to initialize socket with.
+	 */
+	universe: C;
+}
+
+/**
+ * Combined arguments for the socket constructor.
+ */
+interface VStandaloneSocketArgs<CP extends CoreUniverse, CS extends CoreUniverse> {
+	/**
+	 * Arguments for this socket.
+	 */
+	primary: VStandaloneSocketSingleArgs<CP, CP, CS>;
+
+	/**
+	 * Secondary argument.
+	 */
+	secondary: VStandaloneSocket<CS, CP> | VStandaloneSocketSingleArgs<CS, CS, CP>;
+}
+
+/**
+ * Helper class for {@link VSocket} for logical separation.
+ */
+class SocketProcessBase {
+	/**
+	 * Corresponds for processing callbacks.
+	 */
+	private processes: Map<symbol, SocketProcessBaseProcess> = new Map();
 
 	/**
 	 * Public constructor.
 	 *
 	 * @param callback - Callback to call on queue updates
 	 */
-	public constructor(callback?: () => void) {
+	public constructor({
+		callback
+	}: {
+		/**
+		 * Optional callback.
+		 */
+		callback: ProcessCallback<SocketProcessBase>;
+	}) {
 		// Subscribe to event
 		if (typeof callback !== "undefined") {
-			this.emitter.addListener(subscribeWord, callback);
+			this.addProcess({ callback, word: processQueueWord });
 		}
+	}
+
+	/**
+	 * Adds the process to socket.
+	 */
+	public addProcess({
+		word,
+		callback
+	}: {
+		/**
+		 * Subscription word.
+		 */
+		word: symbol;
+
+		/**
+		 * Subscription callback.
+		 */
+		callback: ProcessCallback<SocketProcessBase>;
+	}): void {
+		this.processes.set(word, { callback, stackLength: 0 });
+	}
+
+	/**
+	 * To be invoked via event emitter.
+	 */
+	public tick({ word }: SocketProcessBaseTickTockArgs): void {
+		let process: ErroringReturn<SocketProcessBaseProcess> = this.getProcess({ word });
+		if (process.isErrored) {
+			// Process undefined
+			processLog({ level: LogLevel.Warning, ...process });
+		} else if (process.value.stackLength === 0) {
+			if (process.value.callback.call(this) === false) {
+				process.value.stackLength = 1;
+				// Purpose of this call is to be delayed till next event cycle
+				// eslint-disable-next-line @typescript-eslint/no-floating-promises
+				this.tock({ word }).then(result => {
+					if (result.isErrored) {
+						// Tock error
+						processLog({ level: LogLevel.Warning, ...result });
+					}
+				});
+			}
+		}
+	}
+
+	/**
+	 * Wrapper to synchronously process.
+	 *
+	 * @throws {@link TypeError}
+	 * Throws, if the process does not exist.
+	 *
+	 * @returns Result of process
+	 */
+	protected getProcess({ word }: SocketProcessBaseTickTockArgs): ErroringReturn<SocketProcessBaseProcess> {
+		let process: SocketProcessBaseProcess | undefined = this.processes.get(word);
+		if (typeof process === "undefined")
+			return { error: new TypeError(`Process "${word.toString()}" does not exist`), isErrored: true };
+		return { isErrored: false, value: process };
+	}
+
+	/**
+	 * To be invoked as a function.
+	 *
+	 * @throws {@link TypeError}
+	 * Throws, if the process does not exist.
+	 *
+	 * @returns Error, if errored
+	 */
+	// Purpose of this method is to be delayed till next event cycle
+	// eslint-disable-next-line @typescript-eslint/require-await
+	private async tock({ word }: SocketProcessBaseTickTockArgs): Promise<ErroringReturn> {
+		// Get result of the process
+		let process: SocketProcessBaseProcess | undefined = this.processes.get(word);
+
+		// Process, if process not found
+		if (typeof process === "undefined")
+			return { error: new TypeError(`Process "${word.toString()}" does not exist`), isErrored: true };
+
+		// Process stack overflow
+		if (process.stackLength < vSocketProcessStackLimit) {
+			if (process.callback.call(this)) {
+				process.stackLength = 0;
+
+				// Return success
+				return { isErrored: false };
+			}
+			process.stackLength++;
+
+			// Will rethrow
+			return this.tock({ word });
+		}
+		// Reset stack count
+		process.stackLength = 0;
+
+		// Throw that maximum stack is reached
+		return {
+			error: new Error(
+				`Process "${word.toString()}" stopped execution due to stack overflow; amount of times process was executed recursively: ${
+					process.stackLength
+				}; process stack limit: ${vSocketProcessStackLimit}`
+			),
+			isErrored: true
+		};
+	}
+}
+
+/**
+ * Virtual socket abstraction.
+ *
+ * Emitter dispatches `tick()`; `tick()` performs processing, if `tock()` is not queued, otherwise `tick()` calls `tock()` asynchronously; `tock()` will requeue itself, if the process is not finished, while counting stack depth.
+ */
+export abstract class VSocket<C extends CoreUniverse> extends SocketProcessBase {
+	/**
+	 * Universe socket.
+	 */
+	public universe: C;
+
+	/**
+	 * Queue to use for this socket.
+	 */
+	private queue: Array<Message> = new Array() as Array<Message>;
+
+	/**
+	 * Public constructor.
+	 *
+	 * @param callback - Callback to call on queue updates
+	 */
+	public constructor({
+		callback,
+		universe
+	}: {
+		/**
+		 * Optional callback.
+		 */
+		callback: ProcessCallback<VSocket<C>>;
+
+		/**
+		 * Universe to initialize socket with.
+		 */
+		universe: C;
+	}) {
+		super({ callback: callback as ToSubclassProcessCallback<typeof callback, SocketProcessBase> });
+		this.universe = universe;
 	}
 
 	/**
 	 * Reads from the queue.
 	 *
-	 * @returns Envelope
+	 * @returns Message
 	 */
-	public readQueue(): Envelope {
+	public readQueue(): Message {
 		// Pop
-		let envelope: Envelope | undefined = this.queue.pop();
+		let message: Message | undefined = this.queue.shift();
 
 		// Return if array empty
-		if (typeof envelope === "undefined") {
-			return new Envelope({ message: null, type: MessageTypeWord.Empty });
+		if (typeof message === "undefined") {
+			return new Message({ body: null, type: MessageTypeWord.Empty });
 		}
 
 		// Return if we could pop
-		return envelope;
+		return message;
 	}
 
 	/**
 	 * Send an envelope.
 	 */
-	public abstract send(envelope: Envelope): void;
+	public abstract send({
+		envelope
+	}: {
+		/**
+		 * Envelope to send.
+		 */
+		envelope: Envelope;
+	}): void;
+
+	/**
+	 * Starts/signals for resynchronization.
+	 */
+	protected abstract sync(): void;
 
 	/**
 	 * Adds to the queue.
 	 *
-	 * @param envelope - Envelope to add
+	 * @param message - Message to add
 	 */
-	protected writeQueue(envelope: Envelope): void {
+	protected writeQueue(message: Message): void {
 		if (this.queue.length < vSocketMaxQueue) {
-			this.queue.push(envelope);
+			this.queue.push(message);
+		} else {
+			processLog({ error: new Error("Queue limit reached"), level: LogLevel.Warning });
+			this.sync();
 		}
-
-		// Notify
-		this.emitter.emit(subscribeWord);
 	}
 }
 
 /**
  * A class emulating Websocket for standalone connections.
  */
-export class VStandaloneSocket extends VSocket {
+export class VStandaloneSocket<CP extends CoreUniverse, CS extends CoreUniverse = CoreUniverse> extends VSocket<CP> {
 	/**
 	 * A client-server corresponding socket.
 	 */
-	public target: VStandaloneSocket;
+	public target: VStandaloneSocket<CS, CP>;
+
+	/**
+	 * Function to resync if failure occurs.
+	 */
+	protected sync: () => void;
 
 	/**
 	 * Public constructor.
@@ -97,27 +345,21 @@ export class VStandaloneSocket extends VSocket {
 	 * @param callback - Callback for superclass subscription
 	 * @param target - The target to communicate with
 	 */
-	public constructor({
-		callback,
-		secondary
-	}: {
-		/**
-		 * Callback to call in superclass.
-		 */
-		callback: () => void;
-		/**
-		 * Secondary argument.
-		 */
-		secondary: VStandaloneSocket | (() => void);
-	}) {
+	public constructor({ primary, secondary }: VStandaloneSocketArgs<CP, CS>) {
 		// Call super
-		super(callback);
+		super({
+			callback: primary.callback as ToSubclassProcessCallback<typeof primary.callback, VSocket<CP>>,
+			universe: primary.universe
+		});
+
+		// Set sync
+		this.sync = primary.sync;
 
 		// Assign target
 		this.target =
 			secondary instanceof VStandaloneSocket
 				? secondary
-				: new VStandaloneSocket({ callback: secondary, secondary: this });
+				: new VStandaloneSocket<CS, CP>({ primary: secondary, secondary: this });
 	}
 
 	/**
@@ -125,7 +367,22 @@ export class VStandaloneSocket extends VSocket {
 	 *
 	 * @param envelope - Envelope to send
 	 */
-	public send(envelope: Envelope): void {
-		this.target.writeQueue(envelope);
+	public send({
+		envelope
+	}: {
+		/**
+		 * Envelope to send.
+		 */
+		envelope: Envelope;
+	}): void {
+		/*
+			From https://262.ecma-international.org/6.0/#sec-array.prototype.foreach it states:
+			"forEach calls callbackfn once for each element present in the array, in ascending order"
+		*/
+		envelope.messages.forEach(message => {
+			this.target.writeQueue(message);
+		});
+
+		this.target.tick({ word: processQueueWord });
 	}
 }

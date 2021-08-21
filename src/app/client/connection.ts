@@ -8,10 +8,14 @@
  */
 
 import * as typing from "io-ts";
-import { MessageTypeWord, MovementWord } from "../common/defaults/connection";
+import { MessageTypeWord, MovementWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
-import { VSocket } from "../common/vsocket";
-import { CommsConnection, CommsConnectionArgs } from "../comms/connection";
+import { ProcessCallback, VSocket } from "../common/vsocket";
+import { CommsConnection, CommsConnectionArgs, Message } from "../comms/connection";
+import { CommsShardArgs } from "../comms/shard";
+import { CoreUniverse } from "../comms/universe";
+import { LogLevel, processLog } from "./error";
+import { ClientUniverse } from "./universe";
 
 /**
  * Message type descriptions.
@@ -61,7 +65,7 @@ export class ClientConnection implements CommsConnection {
 	/**
 	 * The target, be it standalone, remote or absent.
 	 */
-	public socket: VSocket;
+	public socket: VSocket<CoreUniverse>;
 
 	/**
 	 * Constructor.
@@ -73,3 +77,38 @@ export class ClientConnection implements CommsConnection {
 		this.socket = socket;
 	}
 }
+
+/**
+ * Queue process callback for socket.
+ *
+ * @returns `true` if the callback was processed, `false` if additional processing is required
+ */
+export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = function () {
+	// Message reading loop
+	let counter: number = 0;
+	while (counter++ < vSocketMaxDequeue) {
+		// Get message
+		const message: Message = this.readQueue();
+
+		// Switch message type
+		switch (message.type) {
+			// Queue is empty
+			case MessageTypeWord.Empty:
+				return true;
+
+			// Sync command
+			case MessageTypeWord.Sync:
+				processLog({ error: new Error(`Synchronization started`), level: LogLevel.Info });
+				this.universe.addShard(message.body as CommsShardArgs);
+				this.universe.getShard(message.body as CommsShardArgs).attach();
+				break;
+
+			// Continue loop on default
+			default:
+				processLog({ error: new Error(`Unknown message type: "${message.type}"`), level: LogLevel.Info });
+		}
+	}
+
+	// Return
+	return false;
+};

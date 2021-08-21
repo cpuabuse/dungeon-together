@@ -10,6 +10,7 @@
 import { MessageTypeWord } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { VSocket } from "../common/vsocket";
+import { CoreUniverse } from "./universe";
 
 /**
  * Args for connection constructor.
@@ -18,7 +19,7 @@ export interface CommsConnectionArgs {
 	/**
 	 * Actual connection.
 	 */
-	socket: VSocket;
+	socket: VSocket<CoreUniverse>;
 }
 
 /**
@@ -34,11 +35,11 @@ export interface CommsConnection extends CommsConnectionArgs {
 /**
  * Client-server command interface.
  */
-export class Envelope {
+export class Message {
 	/**
 	 * Message data.
 	 */
-	public message: unknown;
+	public body: unknown;
 
 	/**
 	 * Type of the message.
@@ -46,16 +47,16 @@ export class Envelope {
 	public type: MessageTypeWord;
 
 	/**
-	 * Constructor for envelope.
+	 * Constructor for message.
 	 */
 	public constructor({
-		message,
+		body,
 		type
 	}: {
 		/**
 		 * Message data to be set.
 		 */
-		message: unknown;
+		body: unknown;
 
 		/**
 		 * Message type to be set.
@@ -63,7 +64,17 @@ export class Envelope {
 		type: MessageTypeWord;
 	}) {
 		// Initialize private properties
-		this.message = message;
+		this.body = body;
 		this.type = type;
 	}
+}
+
+/**
+ * Envelope, a single transaction.
+ */
+export class Envelope {
+	/**
+	 * Message array.
+	 */
+	public messages: Array<Message> = new Array<Message>();
 }

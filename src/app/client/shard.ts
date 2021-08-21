@@ -105,6 +105,11 @@ export function ClientShardFactory({
 		public sceneWidth: number = defaultEntityWidth;
 
 		/**
+		 * Element for shard container.
+		 */
+		public shardElement: HTMLElement | null = null;
+
+		/**
 		 * This UUID.
 		 */
 		public readonly shardUuid: Uuid;
@@ -228,9 +233,10 @@ export function ClientShardFactory({
 		 *
 		 * @param element - Any HTML element
 		 */
-		public attach(element: HTMLElement): void {
+		public attach(): void {
 			// Performing once, as pixi library does not allow to detach
 			if (!this.isAttached) {
+				let element: HTMLElement = this.universeElement;
 				this.isAttached = true;
 				element.addEventListener("resize", () => {
 					this.app.renderer.resize(element.offsetWidth, element.offsetHeight);

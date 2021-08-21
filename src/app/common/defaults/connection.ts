@@ -25,15 +25,23 @@ export enum MovementWord {
  * Enum representing different types of messages.
  */
 export enum MessageTypeWord {
-	Empty,
-	Sync,
-	Movement
+	Empty = "empty",
+	Sync = "sync",
+	Movement = "movement"
 }
 
 /**
  * Maximum length of envelope queue.
  */
 export const vSocketMaxQueue: number = 100;
+
+/**
+ * How many recursive calls permitted within socket's tick-tock cycle.
+ *
+ * Represents how many times the process can be executed within stack.
+ * For `tock()` to work, needs to be not less than 2.
+ */
+export const vSocketProcessStackLimit: number = 100;
 
 /**
  * How many envelopes should be dequeued at a time.
