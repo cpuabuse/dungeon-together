@@ -10,6 +10,7 @@
 import { Uuid } from "../common/uuid";
 import { VSocket } from "../common/vsocket";
 import { CommsConnection, CommsConnectionArgs } from "../comms/connection";
+import { CoreUniverse } from "../comms/universe";
 
 /**
  * Server connection.
@@ -23,7 +24,7 @@ export class ServerConnection implements CommsConnection {
 	/**
 	 * The target, be it standalone, remote or absent.
 	 */
-	public socket: VSocket;
+	public socket: VSocket<CoreUniverse>;
 
 	/**
 	 * Constructor.

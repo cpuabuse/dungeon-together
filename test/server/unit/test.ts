@@ -8,24 +8,30 @@
  */
 
 import { ok } from "assert";
-import { ServerProto } from "../../../src/app/server/proto";
-import { ServerUniverse, initUniverse } from "../../../src/app/server/universe";
+import { Application } from "../../../src/app/comms/application";
+import { ServerUniverse } from "../../../src/app/server/universe";
 
 /**
  * Performs unit tests.
  */
 export function unitTest(): void {
 	// Test if {@link initUniverse} returns a universe during initialization.
-	describe("initUniverse()", function () {
+	describe("serverUniverse", function () {
+		let serverUniverse: ServerUniverse;
+
 		// The describe function will execute only after the before function is done
 		before(async function () {
-			await initUniverse();
+			// Define the application to use
+			let application: Application = new Application();
+
+			// Generate universes/prototype chains
+			serverUniverse = await application.addUniverse({ Universe: ServerUniverse });
 		});
 
 		describe("universe prototype", function () {
 			// Initialization test
 			it(`should create a universe of class "ServerUniverse"`, function () {
-				ok(ServerProto.prototype.universe instanceof ServerUniverse);
+				ok(serverUniverse instanceof ServerUniverse);
 			});
 		});
 	});
