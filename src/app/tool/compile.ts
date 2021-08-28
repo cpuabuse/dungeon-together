@@ -17,7 +17,7 @@ import {
 	TypeOf as typeOf,
 	union as unionType
 } from "io-ts";
-import { safeLoad } from "js-yaml";
+import jsyaml from "js-yaml";
 import { getDefaultUuid } from "../common/uuid";
 import { CommsCellArgs, CommsCellRaw } from "../comms/cell";
 import { CommsEntityArgs, CommsEntityRaw } from "../comms/entity";
@@ -173,7 +173,7 @@ const rootType = type({
 export function compile(data: string): CommsShardArgs | CommsGridArgs | CommsCellArgs | CommsEntityArgs {
 	// Load YAML
 	// eslint-disable-next-line @typescript-eslint/ban-types
-	let safeLoadResult: string | object | undefined = safeLoad(data);
+	let safeLoadResult: string | object | undefined = jsyaml.safeLoad(data);
 
 	// Perform root type check
 	if (rootType.is(safeLoadResult)) {

@@ -62,10 +62,7 @@ const options: RollupOptions = {
 
 		// To resolve some libraries correctly
 		commonjs({
-			namedExports: {
-				"./node_modules/js-yaml/index.js": ["safeLoad"],
-				"./node_modules/mousetrap/mousetrap.js": ["bind"]
-			}
+			namedExports: {}
 		}),
 
 		// Compile for browser
