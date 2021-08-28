@@ -11,7 +11,7 @@ import * as typing from "io-ts";
 import { MessageTypeWord, MovementWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { ProcessCallback, VSocket } from "../common/vsocket";
-import { CommsConnection, CommsConnectionArgs, Message } from "../comms/connection";
+import { CommsConnection, CommsConnectionArgs, Envelope, Message } from "../comms/connection";
 import { CommsShardArgs } from "../comms/shard";
 import { CoreUniverse } from "../comms/universe";
 import { LogLevel, processLog } from "./error";
@@ -79,11 +79,24 @@ export class ClientConnection implements CommsConnection {
 }
 
 /**
+ * Callback for sync.
+ *
+ * @param this - Socket
+ * @returns Promise with `true`
+ */
+export const initProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = async function () {
+	await this.send({ envelope: new Envelope({ messages: [{ body: null, type: MessageTypeWord.Sync }] }) });
+	return true;
+};
+
+/**
  * Queue process callback for socket.
  *
  * @returns `true` if the callback was processed, `false` if additional processing is required
  */
-export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = function () {
+// Has to be async to work with VSocket
+// eslint-disable-next-line @typescript-eslint/require-await
+export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = async function () {
 	// Message reading loop
 	let counter: number = 0;
 	while (counter++ < vSocketMaxDequeue) {

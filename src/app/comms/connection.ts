@@ -77,4 +77,22 @@ export class Envelope {
 	 * Message array.
 	 */
 	public messages: Array<Message> = new Array<Message>();
+
+	/**
+	 * Constructor for envelope.
+	 */
+	public constructor({
+		messages
+	}: {
+		/**
+		 * Optional messages to be set.
+		 */
+		messages?: Array<Message>;
+	}) {
+		if (typeof messages !== "undefined") {
+			messages.forEach(message => {
+				this.messages.push(message);
+			});
+		}
+	}
 }

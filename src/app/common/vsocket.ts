@@ -20,18 +20,22 @@ import { ErroringReturn } from "./error";
  *
  * To be used internally.
  */
-export type ProcessCallback<C extends SocketProcessBase> = (this: C) => boolean;
+export type ProcessCallback<C extends SocketProcessBase> = (this: C) => Promise<boolean>;
 
 /**
- * Converts a process callback to a process callback with `this` set to subclass, so that it can be used in "this" type-safe super constructor.
+ * Converts a process callback to a process callback with `this` set to superclass.
+ * This macro validates, that `this` of provided callback extends the subclass and subsequently a superclass.
+ * Although, the callback itself might operate with `this` set to subclass.
+ * Since it is to be used only from subclass, it can operate that way.
+ * So, the process callback can be used with "this" type-safe super constructor/method.
  */
-type ToSubclassProcessCallback<
+export type ToSuperclassProcessCallback<
 	F extends ProcessCallback<any>,
 	C extends SocketProcessBase
-> = ThisParameterType<F> extends C ? ProcessCallback<C> : never;
+> = ThisParameterType<F> extends C ? ProcessCallback<C> : unknown;
 
 /**
- * The process return typ with set `this`.
+ * The process return type with set `this`.
  */
 export type ProcessCallbackParameters<C extends SocketProcessBase> = Parameters<ProcessCallback<C>>;
 
@@ -39,6 +43,11 @@ export type ProcessCallbackParameters<C extends SocketProcessBase> = Parameters<
  * Symbol to use for subscription.
  */
 const processQueueWord: symbol = Symbol("process-queue");
+
+/**
+ * Symbol to use for subscription.
+ */
+export const processInitWord: symbol = Symbol("queue-manager");
 
 /**
  * Process for socket to process.
@@ -107,7 +116,7 @@ interface VStandaloneSocketArgs<CP extends CoreUniverse, CS extends CoreUniverse
 /**
  * Helper class for {@link VSocket} for logical separation.
  */
-class SocketProcessBase {
+export class SocketProcessBase {
 	/**
 	 * Corresponds for processing callbacks.
 	 */
@@ -155,13 +164,13 @@ class SocketProcessBase {
 	/**
 	 * To be invoked via event emitter.
 	 */
-	public tick({ word }: SocketProcessBaseTickTockArgs): void {
+	public async tick({ word }: SocketProcessBaseTickTockArgs): Promise<void> {
 		let process: ErroringReturn<SocketProcessBaseProcess> = this.getProcess({ word });
 		if (process.isErrored) {
 			// Process undefined
 			processLog({ level: LogLevel.Warning, ...process });
 		} else if (process.value.stackLength === 0) {
-			if (process.value.callback.call(this) === false) {
+			if ((await process.value.callback.call(this)) === false) {
 				process.value.stackLength = 1;
 				// Purpose of this call is to be delayed till next event cycle
 				// eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -210,7 +219,7 @@ class SocketProcessBase {
 
 		// Process stack overflow
 		if (process.stackLength < vSocketProcessStackLimit) {
-			if (process.callback.call(this)) {
+			if (await process.callback.call(this)) {
 				process.stackLength = 0;
 
 				// Return success
@@ -271,7 +280,7 @@ export abstract class VSocket<C extends CoreUniverse> extends SocketProcessBase 
 		 */
 		universe: C;
 	}) {
-		super({ callback: callback as ToSubclassProcessCallback<typeof callback, SocketProcessBase> });
+		super({ callback: callback as ToSuperclassProcessCallback<typeof callback, SocketProcessBase> });
 		this.universe = universe;
 	}
 
@@ -303,7 +312,7 @@ export abstract class VSocket<C extends CoreUniverse> extends SocketProcessBase 
 		 * Envelope to send.
 		 */
 		envelope: Envelope;
-	}): void;
+	}): Promise<void>;
 
 	/**
 	 * Starts/signals for resynchronization.
@@ -348,7 +357,7 @@ export class VStandaloneSocket<CP extends CoreUniverse, CS extends CoreUniverse 
 	public constructor({ primary, secondary }: VStandaloneSocketArgs<CP, CS>) {
 		// Call super
 		super({
-			callback: primary.callback as ToSubclassProcessCallback<typeof primary.callback, VSocket<CP>>,
+			callback: primary.callback as ToSuperclassProcessCallback<typeof primary.callback, VSocket<CP>>,
 			universe: primary.universe
 		});
 
@@ -367,14 +376,14 @@ export class VStandaloneSocket<CP extends CoreUniverse, CS extends CoreUniverse 
 	 *
 	 * @param envelope - Envelope to send
 	 */
-	public send({
+	public async send({
 		envelope
 	}: {
 		/**
 		 * Envelope to send.
 		 */
 		envelope: Envelope;
-	}): void {
+	}): Promise<void> {
 		/*
 			From https://262.ecma-international.org/6.0/#sec-array.prototype.foreach it states:
 			"forEach calls callbackfn once for each element present in the array, in ascending order"
@@ -383,6 +392,6 @@ export class VStandaloneSocket<CP extends CoreUniverse, CS extends CoreUniverse 
 			this.target.writeQueue(message);
 		});
 
-		this.target.tick({ word: processQueueWord });
+		await this.target.tick({ word: processQueueWord });
 	}
 }
