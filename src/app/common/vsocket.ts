@@ -28,6 +28,8 @@ export type ProcessCallback<C extends SocketProcessBase> = (this: C) => Promise<
  * Although, the callback itself might operate with `this` set to subclass.
  * Since it is to be used only from subclass, it can operate that way.
  * So, the process callback can be used with "this" type-safe super constructor/method.
+ *
+ * Produce `unknown` otherwise, so the result cannot be assigned.
  */
 export type ToSuperclassProcessCallback<
 	F extends ProcessCallback<any>,
