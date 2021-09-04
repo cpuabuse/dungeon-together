@@ -27,6 +27,9 @@ export enum MovementWord {
 export enum MessageTypeWord {
 	Empty = "empty",
 	Sync = "sync",
+	/**
+	 * Client sends information about the movement of a character.
+	 */
 	Movement = "movement"
 }
 

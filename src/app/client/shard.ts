@@ -19,6 +19,7 @@ import {
 	urlPathSeparator
 } from "../common/defaults";
 import { Uuid, getDefaultUuid } from "../common/uuid";
+import { VSocket } from "../common/vsocket";
 import { CommsGridArgs, GridPath } from "../comms/grid";
 import { CommsShard, CommsShardArgs } from "../comms/shard";
 import { ClientBaseClass } from "./base";
@@ -35,6 +36,7 @@ import {
 	upSymbol
 } from "./input";
 import { Mode } from "./mode";
+import { ClientUniverse } from "./universe";
 import { View } from "./view";
 
 /**
@@ -113,6 +115,11 @@ export function ClientShardFactory({
 		 * This UUID.
 		 */
 		public readonly shardUuid: Uuid;
+
+		/**
+		 * An array of sockets.
+		 */
+		protected sockets: Array<VSocket<ClientUniverse>> = new Array() as Array<VSocket<ClientUniverse>>;
 
 		/**
 		 * Input events.
@@ -225,6 +232,39 @@ export function ClientShardFactory({
 		 */
 		public addGridContainer(renderer: Renderer): void {
 			renderer.render(this.gridContainer);
+		}
+
+		/**
+		 * Adds socket if does not exist.
+		 */
+		public addSocket({
+			socket
+		}: {
+			/**
+			 * Client socket to add.
+			 */
+			socket: VSocket<ClientUniverse>;
+		}): void {
+			if (!this.sockets.includes(socket)) {
+				this.sockets.push(socket);
+			}
+		}
+
+		/**
+		 * Removes socket.
+		 */
+		public removeSocket({
+			socket
+		}: {
+			/**
+			 * Client socket to remove.
+			 */
+			socket: VSocket<ClientUniverse>;
+		}): void {
+			let socketIndex: number = this.sockets.indexOf(socket);
+			if (socketIndex > -1) {
+				this.sockets.splice(socketIndex, 1);
+			}
 		}
 
 		/**
