@@ -7,6 +7,7 @@
  * @file Client connection to server.
  */
 
+import { Socket } from "dgram";
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { ProcessCallback, VSocket } from "../common/vsocket";
@@ -14,6 +15,7 @@ import { CommsConnection, CommsConnectionArgs, Envelope, Message } from "../comm
 import { CommsShardArgs } from "../comms/shard";
 import { CoreUniverse } from "../comms/universe";
 import { LogLevel, processLog } from "./error";
+import { ClientShard } from "./shard";
 import { ClientUniverse } from "./universe";
 
 /**
@@ -66,6 +68,9 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 		// Get message
 		const message: Message = this.readQueue();
 
+		// Shard
+		let shard: ClientShard;
+
 		// Switch message type
 		switch (message.type) {
 			// Queue is empty
@@ -76,7 +81,9 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 			case MessageTypeWord.Sync:
 				processLog({ error: new Error(`Synchronization started`), level: LogLevel.Info });
 				this.universe.addShard(message.body as CommsShardArgs);
-				this.universe.getShard(message.body as CommsShardArgs).attach();
+				shard = this.universe.getShard(message.body as CommsShardArgs);
+				shard.addSocket({ socket: this });
+				shard.attach();
 				break;
 
 			// Continue loop on default
