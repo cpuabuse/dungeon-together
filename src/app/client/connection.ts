@@ -85,6 +85,10 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 				shard.attach();
 				break;
 
+			// Update command
+			case MessageTypeWord.Update:
+				break;
+
 			// Continue loop on default
 			default:
 				processLog({ error: new Error(`Unknown message type: "${message.type}"`), level: LogLevel.Info });

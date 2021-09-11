@@ -30,7 +30,12 @@ export enum MessageTypeWord {
 	/**
 	 * Client sends information about the movement of a character.
 	 */
-	Movement = "movement"
+	Movement = "movement",
+
+	/**
+	 * Update shard in the client, sent from server.
+	 */
+	Update = "update"
 }
 
 /**

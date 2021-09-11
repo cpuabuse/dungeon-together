@@ -172,6 +172,21 @@ export function ClientCellFactory({
 		}
 
 		/**
+		 * Updates the cell's entities.
+		 *
+		 * Eventually, when the entity is not in the arguments but is present in this cell, it should be either made invisible, or sent to a separate world.
+		 */
+		public update({ shardUuid, cellUuid, gridUuid, entities, x, y, z }: CommsCellArgs): void {
+			// Rewrite coordinates
+			this.x = x;
+			this.y = y;
+			this.z = z;
+
+			// Move entities here
+			entities.forEach(entity => {});
+		}
+
+		/**
 		 * Actually removes the entity.
 		 */
 		private doRemoveEntity({ entityUuid }: EntityPath): void {

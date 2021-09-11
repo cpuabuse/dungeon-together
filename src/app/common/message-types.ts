@@ -43,6 +43,10 @@ export const messageType = typing.union([
 			])
 		}),
 		type: typing.literal(MessageTypeWord.Movement)
+	}),
+	typing.type({
+		body: typing.null,
+		type: typing.literal(MessageTypeWord.Update)
 	})
 ]);
 
