@@ -7,7 +7,6 @@
  * @file Client connection to server.
  */
 
-import { Socket } from "dgram";
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { ProcessCallback, VSocket } from "../common/vsocket";

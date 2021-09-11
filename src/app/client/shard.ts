@@ -18,8 +18,10 @@ import {
 	gridUuidUrlPath,
 	urlPathSeparator
 } from "../common/defaults";
+import { MessageTypeWord, MovementWord } from "../common/defaults/connection";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { VSocket } from "../common/vsocket";
+import { Envelope } from "../comms/connection";
 import { CommsGridArgs, GridPath } from "../comms/grid";
 import { CommsShard, CommsShardArgs } from "../comms/shard";
 import { ClientBaseClass } from "./base";
@@ -176,8 +178,19 @@ export function ClientShardFactory({
 			});
 
 			// Add listeners for up input
-			this.input.on(upSymbol, inputInterface => {
-				alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
+			// Async callback for event emitter
+			// eslint-disable-next-line @typescript-eslint/no-misused-promises
+			this.input.on(upSymbol, async inputInterface => {
+				// Even though when array is empty an envelope will not be used, in those situations performance is irrelevant, at least on the client side
+				let envelope: Envelope = new Envelope({
+					messages: [
+						{
+							body: { direction: MovementWord.Up },
+							type: MessageTypeWord.Movement
+						}
+					]
+				});
+				await Promise.all(this.sockets.map(socket => socket.send({ envelope })));
 			});
 
 			// Add listeners for down input
