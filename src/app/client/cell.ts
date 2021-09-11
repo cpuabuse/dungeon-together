@@ -7,6 +7,7 @@
  * @file Squares on screen.
  */
 
+import { boolean } from "fp-ts";
 import {
 	defaultKindUuid,
 	defaultModeUuid,
@@ -136,6 +137,28 @@ export function ClientCellFactory({
 			}
 			// It does not perform the check for "entityUuid" because there is no default
 			this.entities.set(entity.entityUuid, new this.universe.Entity(entity));
+		}
+
+		/**
+		 * Attach {@link ClientEntity} to {@link ClientCell}.
+		 *
+		 * @param entity - {@link ClientEntity}, anything that resides within a cell
+		 */
+		public attach(entity: ClientEntity): void {
+			this.entities.set(entity.entityUuid, entity);
+		}
+
+		/**
+		 * Detach {@link ClientEntity} from {@link ClientCell}.
+		 *
+		 * @returns If deletion was successfull or not
+		 */
+		public detach({ entityUuid }: ClientEntity): boolean {
+			if (this.entities.has(entityUuid)) {
+				this.entities.delete(entityUuid);
+				return true;
+			}
+			return false;
 		}
 
 		/**
