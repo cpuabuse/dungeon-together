@@ -17,6 +17,7 @@ import { createStore } from "vuex";
 import { defaultModeUuid, defaultShardUuid } from "../common/defaults";
 import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
+import { UuidSearch } from "../common/uuid-search";
 import { CellPath } from "../comms/cell";
 import { CommsConnectionArgs } from "../comms/connection";
 import { EntityPath } from "../comms/entity";
@@ -56,7 +57,7 @@ export interface ClientUniverseArgs extends CoreUniverseArgs {
  */
 export class ClientUniverse
 	extends CoreUniverse
-	implements StaticImplements<CoreUniverseClassStatic, typeof ClientUniverse>
+	implements StaticImplements<CoreUniverseClassStatic, typeof ClientUniverse>, UuidSearch
 {
 	/**
 	 * A shard constructor.
@@ -79,14 +80,24 @@ export class ClientUniverse
 	public readonly Shard: ClientShardClass;
 
 	/**
-	 * Vue.
+	 * Cells index.
 	 */
-	public readonly vue: App;
+	public readonly cellsIndex: Map<Uuid, ClientCell> = new Map();
 
 	/**
 	 * Collection of connections.
 	 */
 	public connections: Set<ClientConnection> = new Set();
+
+	/**
+	 * Entities index.
+	 */
+	public readonly entitiesIndex: Map<Uuid, ClientEntity> = new Map();
+
+	/**
+	 * Grids index.
+	 */
+	public readonly gridsIndex: Map<Uuid, ClientGrid> = new Map();
 
 	/**
 	 * Modes.
@@ -166,6 +177,16 @@ export class ClientUniverse
 	 * The "getShard", "getGrid", etc., are semantically different from above.
 	 */
 	public readonly shards: Map<Uuid, ClientShard> = new Map();
+
+	/**
+	 * Shards index.
+	 */
+	public readonly shardsIndex: Map<Uuid, ClientShard> = new Map();
+
+	/**
+	 * Vue.
+	 */
+	public readonly vue: App;
 
 	/**
 	 * Base class for client objects.

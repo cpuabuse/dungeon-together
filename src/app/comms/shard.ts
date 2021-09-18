@@ -12,7 +12,6 @@
  */
 
 import { Uuid } from "../common/uuid";
-import { CoreBase } from "./base";
 import { CommsGrid, CommsGridArgs, CommsGridRaw, GridPath, commsGridRawToArgs } from "./grid";
 
 /**
@@ -73,6 +72,11 @@ export interface CommsShard extends CommsShardArgs {
 	 */
 	terminate(): void;
 }
+
+/**
+ * Core shard.
+ */
+export type CoreShard = CommsShard;
 
 /**
  * Way to get to shard.

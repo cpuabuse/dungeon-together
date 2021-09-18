@@ -4,7 +4,7 @@
 */
 
 /**
- * @file Displays server information to canvas.
+ * @file Displays server information to canvas
  */
 
 import { Application, Container, Matrix, Renderer, utils } from "pixi.js";

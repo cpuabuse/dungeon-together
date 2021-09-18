@@ -71,6 +71,11 @@ export interface CommsGrid extends CommsGridArgs {
 }
 
 /**
+ * Core grid.
+ */
+export type CoreGrid = CommsGrid;
+
+/**
  * Way to get to grid.
  */
 export interface GridPath extends ShardPath {

@@ -93,6 +93,11 @@ export interface CommsCell extends CommsCellArgs {
 }
 
 /**
+ * Core cell.
+ */
+export type CoreCell = CommsCell;
+
+/**
  * Factory for core cell.
  *
  * @see {@link CoreBaseClassNonRecursive} for usage
