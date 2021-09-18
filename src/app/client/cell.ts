@@ -140,28 +140,6 @@ export function ClientCellFactory({
 		}
 
 		/**
-		 * Attach {@link ClientEntity} to {@link ClientCell}.
-		 *
-		 * @param entity - {@link ClientEntity}, anything that resides within a cell
-		 */
-		public attach(entity: ClientEntity): void {
-			this.entities.set(entity.entityUuid, entity);
-		}
-
-		/**
-		 * Detach {@link ClientEntity} from {@link ClientCell}.
-		 *
-		 * @returns If deletion was successfull or not
-		 */
-		public detach({ entityUuid }: ClientEntity): boolean {
-			if (this.entities.has(entityUuid)) {
-				this.entities.delete(entityUuid);
-				return true;
-			}
-			return false;
-		}
-
-		/**
 		 * Shortcut to get the [[ClientEntity]].
 		 *
 		 * @returns [[ClientEntity]], the smallest renderable

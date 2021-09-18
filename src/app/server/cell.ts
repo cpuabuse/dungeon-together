@@ -209,24 +209,6 @@ export function ServerCellFactory({
 		}
 
 		/**
-		 * Attach [[ServerEntity]] to [[CommsCell]].
-		 *
-		 * @param entity - [[ServerEntity]], anything that resides within a cell
-		 */
-		public attach(entity: ServerEntity): void {
-			this.entities.set(entity.entityUuid, entity);
-		}
-
-		/**
-		 * Detach [[ServerEntity]] from [[CommsCell]].
-		 */
-		public detach({ entityUuid }: ServerEntity): void {
-			if (this.entities.has(entityUuid)) {
-				this.entities.delete(entityUuid);
-			}
-		}
-
-		/**
 		 * Gets [[CommsEntity]].
 		 *
 		 * @returns [[entity]], anything that resides within a cell

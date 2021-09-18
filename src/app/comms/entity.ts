@@ -58,6 +58,11 @@ export interface CommsEntity extends CommsEntityArgs {
 }
 
 /**
+ * Core entity type.
+ */
+export type CoreEntity = CommsEntity;
+
+/**
  * Path to an entity.
  */
 export interface EntityPath extends CellPath {
