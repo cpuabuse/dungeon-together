@@ -9,8 +9,7 @@
 
 import { Uuid } from "../common/uuid";
 import { Vector } from "../common/vector";
-import { CoreBase, CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
-
+import { CoreBase, CoreBaseClassNonRecursive } from "./base";
 import { CommsEntity, CommsEntityArgs, CommsEntityRaw, CoreEntity, EntityPath, commsEntityRawToArgs } from "./entity";
 import { GridPath } from "./grid";
 
@@ -96,7 +95,7 @@ export interface CommsCell extends CommsCellArgs {
 /**
  * Factory for core cell.
  *
- * As explained in non-recursive-core-base interface, generic `C` must be extending core base, even though explicit constraint is vague.
+ * @see {@link CoreBaseClassNonRecursive} for usage
  *
  * @returns Cell class
  */
@@ -111,11 +110,19 @@ export function CoreCellFactory<C extends CoreBaseClassNonRecursive>({
 	Base: C;
 }) {
 	/**
+	 * Add back the manually verified information about base from argument, extending core base.
+	 *
+	 * @see {@link CoreBaseClassNonRecursive} for reasons of interface merging
+	 */
+	// eslint-disable-next-line no-redeclare, @typescript-eslint/no-empty-interface
+	interface Base extends CoreBase {}
+
+	/**
 	 * Core cell base class.
 	 */
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare
-	abstract class CoreCell extends (Base as CoreBaseClass) {
+	abstract class CoreCell extends Base {
 		abstract readonly entities: Map<Uuid, CoreEntity>;
 
 		/**

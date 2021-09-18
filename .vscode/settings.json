@@ -13,7 +13,8 @@
 		"pixi",
 		"tock",
 		"destructure",
-		"destructured"
+		"destructured",
+		"sgce"
 	],
 	"yaml.schemas": {
 		"./schema/dt.yml.json": ["*.dt.yml"]
