@@ -4,11 +4,13 @@
 */
 
 /**
- * Cell.
+ * @file Cell.
  */
 
 import { Uuid } from "../common/uuid";
 import { Vector } from "../common/vector";
+import { CoreBaseClassNonRecursive } from "./base";
+
 import { CommsEntity, CommsEntityArgs, CommsEntityRaw, EntityPath, commsEntityRawToArgs } from "./entity";
 import { GridPath } from "./grid";
 
@@ -89,6 +91,29 @@ export interface CommsCell extends CommsCellArgs {
 	 * Terminates `this`.
 	 */
 	terminate(): void;
+}
+
+/**
+ * Factory for core cell.
+ *
+ * @returns Cell class
+ */
+// Force type inference to extract class type
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function CoreCellFactory<C extends CoreBaseClassNonRecursive>({
+	Base
+}: {
+	/**
+	 * Client base.
+	 */
+	Base: C;
+}) {
+	/**
+	 * Core cell base class.
+	 */
+	abstract class CoreCell extends Base {}
+
+	return CoreCell;
 }
 
 /**

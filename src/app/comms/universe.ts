@@ -7,7 +7,6 @@
  * @file Core universe.
  */
 
-import { FromAbstract } from "../common/utility-types";
 import { Application } from "./application";
 import { CoreBaseClass } from "./base";
 import { CellPath, CommsCell, CoreCellClass } from "./cell";

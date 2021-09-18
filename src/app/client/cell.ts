@@ -16,7 +16,7 @@ import {
 	urlPathSeparator
 } from "../common/defaults";
 import { Uuid, getDefaultUuid } from "../common/uuid";
-import { CommsCell, CommsCellArgs } from "../comms/cell";
+import { CommsCell, CommsCellArgs, CoreCellFactory } from "../comms/cell";
 import { CommsEntityArgs, EntityPath } from "../comms/entity";
 import { ClientBaseClass } from "./base";
 import { ClientEntity } from "./entity";
@@ -39,7 +39,7 @@ export function ClientCellFactory({
 	/**
 	 * Square(Vector).
 	 */
-	class ClientCell extends Base implements CommsCell {
+	class ClientCell extends CoreCellFactory({ Base }) implements CommsCell {
 		/**
 		 * This CommsCell UUID.
 		 */

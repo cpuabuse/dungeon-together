@@ -10,18 +10,35 @@
 import { CoreUniverse } from "./universe";
 
 /**
- * Class type for core base.
+ * Non-recursive minimal outline for base instance.
  */
-export interface CoreBaseClass {
-	new (...args: any[]): {
-		/**
-		 * A universe instance.
-		 */
-		universe: CoreUniverse;
-	};
+export interface CoreBaseNonRecursive {
+	/**
+	 * A universe instance.
+	 */
+	universe: any;
 }
 
 /**
  * To merge with base prototype implementation.
  */
-export type CoreBase = InstanceType<CoreBaseClass>;
+export interface CoreBase extends CoreBaseNonRecursive {
+	/**
+	 * A universe instance.
+	 */
+	universe: CoreUniverse;
+}
+
+/**
+ * Non-recursive class type for core base.
+ */
+export interface CoreBaseClassNonRecursive {
+	new (...args: any[]): CoreBaseNonRecursive;
+}
+
+/**
+ * Class type for core base.
+ */
+export interface CoreBaseClass extends CoreBaseClassNonRecursive {
+	new (...args: any[]): CoreBase;
+}

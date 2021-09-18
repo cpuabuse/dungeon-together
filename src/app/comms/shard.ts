@@ -47,7 +47,7 @@ export type CoreShardClass = {
 /**
  * Interface as basis for class implementation.
  */
-export interface CommsShard extends CommsShardArgs, CoreBase {
+export interface CommsShard extends CommsShardArgs {
 	/**
 	 * Default [[Grid]] UUID.
 	 */
