@@ -223,6 +223,9 @@ export function ClientShardFactory({
 					});
 				});
 			});
+
+			// Index this
+			this.universe.shardsIndex.set(this.shardUuid, this);
 		}
 
 		/**
@@ -354,6 +357,9 @@ export function ClientShardFactory({
 			this.grids.forEach(grid => {
 				this.doRemoveGrid(grid);
 			});
+
+			// Update index
+			this.universe.shardsIndex.delete(this.shardUuid);
 		}
 
 		/**

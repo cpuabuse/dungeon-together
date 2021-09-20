@@ -82,6 +82,9 @@ export function ClientGridFactory({
 					this.addCell(cell);
 				});
 			});
+
+			// Entry to the universe's index
+			this.universe.gridsIndex.set(this.gridUuid, this);
 		}
 
 		/**
@@ -128,6 +131,9 @@ export function ClientGridFactory({
 			this.cells.forEach(clientCell => {
 				this.doRemoveCell(clientCell);
 			});
+
+			// Unset the index
+			this.universe.gridsIndex.delete(this.gridUuid);
 		}
 
 		/**

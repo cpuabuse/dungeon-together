@@ -123,6 +123,9 @@ export function ClientCellFactory({
 					this.entities.set(entity.entityUuid, new this.universe.Entity(entity));
 				});
 			});
+
+			// Add to universe's index
+			this.universe.cellsIndex.set(this.cellUuid, this);
 		}
 
 		/**
@@ -170,6 +173,9 @@ export function ClientCellFactory({
 			this.entities.forEach(clientEntity => {
 				this.removeEntity(clientEntity);
 			});
+
+			// Remove index
+			this.universe.cellsIndex.delete(this.cellUuid);
 		}
 
 		/**

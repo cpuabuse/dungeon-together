@@ -103,6 +103,9 @@ export function ClientEntityFactory({
 
 			// Start
 			this.sprite.play();
+
+			// Index
+			this.universe.entitiesIndex.set(this.entityUuid, this);
 		}
 
 		/**
@@ -113,6 +116,9 @@ export function ClientEntityFactory({
 			this.sprite.stop();
 			this.universe.getShard(this).app.ticker.remove(this.tick, this);
 			this.universe.getShard(this).gridContainer.removeChild(this.sprite);
+
+			// Remove from index
+			this.universe.entitiesIndex.delete(this.entityUuid);
 		}
 
 		/**
