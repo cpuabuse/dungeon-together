@@ -14,16 +14,16 @@ import Mousetrap from "mousetrap";
 import { BaseTexture, Texture } from "pixi.js";
 import { App, createApp } from "vue";
 import { createStore } from "vuex";
-import { defaultModeUuid, defaultShardUuid } from "../common/defaults";
+import { defaultCellUuid, defaultGridUuid, defaultModeUuid, defaultShardUuid } from "../common/defaults";
 import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
-import { UuidSearch } from "../common/uuid-search";
+import { CoreUniverseUuidSearchFactory } from "../common/uuid-search";
 import { CellPath } from "../comms/cell";
 import { CommsConnectionArgs } from "../comms/connection";
 import { EntityPath } from "../comms/entity";
 import { GridPath } from "../comms/grid";
 import { CommsShardArgs, ShardPath } from "../comms/shard";
-import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassStatic } from "../comms/universe";
+import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassConcreteStatic } from "../comms/universe";
 import UniverseComponent from "../vue/universe.vue";
 import { ClientBaseClass, ClientBaseFactory } from "./base";
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
@@ -50,14 +50,21 @@ export interface ClientUniverseArgs extends CoreUniverseArgs {
 }
 
 /**
+ * Base type for client universe.
+ */
+// Inference to preserve type information
+// eslint-disable-next-line @typescript-eslint/typedef
+const ClientUniverseBase = CoreUniverseUuidSearchFactory({ Base: CoreUniverse });
+
+/**
  * All instances in client.
  *
  * Termination of the client is impossible, because it is global.
  * For same reason [[Client]] does not store "defaultInstanceUuid" inside.
  */
 export class ClientUniverse
-	extends CoreUniverse
-	implements StaticImplements<CoreUniverseClassStatic, typeof ClientUniverse>, UuidSearch
+	extends ClientUniverseBase
+	implements StaticImplements<CoreUniverseClassConcreteStatic, typeof ClientUniverse>
 {
 	/**
 	 * A shard constructor.
@@ -88,6 +95,11 @@ export class ClientUniverse
 	 * Collection of connections.
 	 */
 	public connections: Set<ClientConnection> = new Set();
+
+	/**
+	 * Default entity path for indexing
+	 */
+	public defaultEntityPath: EntityPath;
 
 	/**
 	 * Entities index.
@@ -211,6 +223,18 @@ export class ClientUniverse
 		this.Grid = ClientGridFactory({ Base: this.Base });
 		this.Cell = ClientCellFactory({ Base: this.Base });
 		this.Entity = ClientEntityFactory({ Base: this.Base });
+
+		// Get defaults UUIDs
+		let shardUuid: Uuid = defaultShardUuid;
+		let gridUuid: Uuid = defaultGridUuid;
+		let cellUuid: Uuid = defaultCellUuid;
+		let entityUuid: Uuid = this.Cell.getDefaultEntityUuid({ cellUuid });
+		this.defaultEntityPath = {
+			cellUuid,
+			entityUuid,
+			gridUuid,
+			shardUuid
+		};
 
 		// Create vue
 		this.vue = createApp(UniverseComponent);

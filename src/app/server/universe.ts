@@ -15,7 +15,7 @@ import { CommsConnectionArgs } from "../comms/connection";
 import { EntityPath } from "../comms/entity";
 import { GridPath } from "../comms/grid";
 import { ShardPath } from "../comms/shard";
-import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassStatic } from "../comms/universe";
+import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassConcreteStatic } from "../comms/universe";
 import { ServerBaseClass, ServerBaseFactory } from "./base";
 import { ServerCell, ServerCellClass, ServerCellFactory } from "./cell";
 import { ServerConnection } from "./connection";
@@ -40,7 +40,7 @@ export type ServerUniverseArgs = CoreUniverseArgs;
  */
 export class ServerUniverse
 	extends CoreUniverse
-	implements StaticImplements<CoreUniverseClassStatic, typeof ServerUniverse>
+	implements StaticImplements<CoreUniverseClassConcreteStatic, typeof ServerUniverse>
 {
 	/**
 	 * A shard constructor.

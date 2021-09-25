@@ -73,6 +73,27 @@ export const defaultShardUuid: Uuid = getDefaultUuid({
 });
 
 /**
+ * Default grid UUID.
+ */
+export const defaultGridUuid: Uuid = getDefaultUuid({
+	path: `${gridUuidUrlPath}${urlPathSeparator}${defaultUuidUrlKeyword}`
+});
+
+/**
+ * Default cell UUID.
+ */
+export const defaultCellUuid: Uuid = getDefaultUuid({
+	path: `${cellUuidUrlPath}${urlPathSeparator}${defaultUuidUrlKeyword}`
+});
+
+/**
+ * Default entity UUID.
+ */
+export const defaultEntityUuid: Uuid = getDefaultUuid({
+	path: `${entityUuidUrlPath}${urlPathSeparator}${defaultUuidUrlKeyword}`
+});
+
+/**
  * Default kind UUID.
  */
 export const defaultKindUuid: Uuid = getDefaultUuid({

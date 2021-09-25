@@ -7,7 +7,8 @@
  * @file Cell.
  */
 
-import { Uuid } from "../common/uuid";
+import { entityUuidUrlPath, urlPathSeparator } from "../common/defaults";
+import { Uuid, getDefaultUuid } from "../common/uuid";
 import { Vector } from "../common/vector";
 import { CoreBase, CoreBaseClassNonRecursive } from "./base";
 import { CommsEntity, CommsEntityArgs, CommsEntityRaw, CoreEntity, EntityPath, commsEntityRawToArgs } from "./entity";
@@ -128,7 +129,21 @@ export function CoreCellFactory<C extends CoreBaseClassNonRecursive>({
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare
 	abstract class CoreCell extends Base {
+		/**
+		 * Entities.
+		 */
 		abstract readonly entities: Map<Uuid, CoreEntity>;
+
+		/**
+		 * Gets default entity UUID.
+		 *
+		 * @returns Default entity UUID
+		 */
+		public static getDefaultEntityUuid({ cellUuid }: Pick<CellPath, "cellUuid">): Uuid {
+			return getDefaultUuid({
+				path: `${entityUuidUrlPath}${urlPathSeparator}${cellUuid}`
+			});
+		}
 
 		/**
 		 * Attach {@link CoreEntity} to {@link CoreCell}.

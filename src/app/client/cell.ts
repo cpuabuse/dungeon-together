@@ -7,15 +7,8 @@
  * @file Squares on screen.
  */
 
-import { boolean } from "fp-ts";
-import {
-	defaultKindUuid,
-	defaultModeUuid,
-	defaultWorldUuid,
-	entityUuidUrlPath,
-	urlPathSeparator
-} from "../common/defaults";
-import { Uuid, getDefaultUuid } from "../common/uuid";
+import { defaultKindUuid, defaultModeUuid, defaultWorldUuid } from "../common/defaults";
+import { Uuid } from "../common/uuid";
 import { CommsCell, CommsCellArgs, CoreCellFactory } from "../comms/cell";
 import { CommsEntityArgs, EntityPath } from "../comms/entity";
 import { ClientBaseClass } from "./base";
@@ -103,9 +96,7 @@ export function ClientCellFactory({
 
 			// Set default Uuid
 			this.shardUuid = shardUuid;
-			this.defaultEntityUuid = getDefaultUuid({
-				path: `${entityUuidUrlPath}${urlPathSeparator}${this.cellUuid}`
-			});
+			this.defaultEntityUuid = ClientCell.getDefaultEntityUuid(this);
 
 			setTimeout(() => {
 				// Populate with default [[ClientEntity]]
@@ -183,14 +174,16 @@ export function ClientCellFactory({
 		 *
 		 * Eventually, when the entity is not in the arguments but is present in this cell, it should be either made invisible, or sent to a separate world.
 		 */
-		public update({ shardUuid, cellUuid, gridUuid, entities, x, y, z }: CommsCellArgs): void {
+		public update({ entities, x, y, z }: CommsCellArgs): void {
 			// Rewrite coordinates
 			this.x = x;
 			this.y = y;
 			this.z = z;
 
 			// Move entities here
-			entities.forEach(entity => {});
+			[...entities.keys()].forEach(entityUuid => {
+				const entity: ClientEntity = this.universe.getEntityByUuid({ entityUuid });
+			});
 		}
 
 		/**

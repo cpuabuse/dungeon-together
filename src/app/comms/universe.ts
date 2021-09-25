@@ -16,6 +16,8 @@ import { CommsShard, CommsShardArgs, CoreShardClass, ShardPath } from "./shard";
 
 /**
  * Core universe class.
+ *
+ * Must remain statically typed, without use of mixins, for appropriate type recursions.
  */
 export abstract class CoreUniverse {
 	/**
@@ -51,7 +53,7 @@ export abstract class CoreUniverse {
 	/**
 	 * Constructs the universe core.
 	 */
-	protected constructor({
+	public constructor({
 		application
 	}: {
 		/**
@@ -113,6 +115,11 @@ export type CoreUniverseClassOriginalAbstract = typeof CoreUniverse;
 /**
  * Class type for classes extending core universe.
  */
-export interface CoreUniverseClassStatic<U extends CoreUniverse = CoreUniverse> {
-	new (args: any): U;
+export interface CoreUniverseClassConcreteStatic<U extends CoreUniverse = CoreUniverse> {
+	new (...args: any[]): U;
 }
+
+/**
+ * Class type for abstract classes, like {@link CoreUniverse}, to be used in mixin to generate the final core universe functionality.
+ */
+export type CoreUniverseClassAbstractStatic<U extends CoreUniverse = CoreUniverse> = abstract new (...args: any[]) => U;
