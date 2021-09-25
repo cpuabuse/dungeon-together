@@ -10,7 +10,7 @@
 import { entityUuidUrlPath, urlPathSeparator } from "../common/defaults";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { Vector } from "../common/vector";
-import { CoreBase, CoreBaseClassNonRecursive } from "./base";
+import { CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
 import { CommsEntity, CommsEntityArgs, CommsEntityRaw, CoreEntity, EntityPath, commsEntityRawToArgs } from "./entity";
 import { GridPath } from "./grid";
 
@@ -120,7 +120,7 @@ export function CoreCellFactory<C extends CoreBaseClassNonRecursive>({
 	 */
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare
-	abstract class CoreCell extends (Base as C & CoreBase) {
+	abstract class CoreCell extends (Base as CoreBaseClass & C) {
 		/**
 		 * Entities.
 		 */
