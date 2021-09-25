@@ -9,7 +9,7 @@
 
 import { DestructureParameters } from "../common/utility-types";
 import { CoreState } from "./state";
-import { CoreUniverse, CoreUniverseClassStatic } from "./universe";
+import { CoreUniverse, CoreUniverseClassConcreteStatic } from "./universe";
 
 /**
  * An application, to be extended.
@@ -30,7 +30,7 @@ export class Application {
 	 *
 	 * @returns Created universe
 	 */
-	public async addUniverse<C extends CoreUniverseClassStatic<InstanceType<C>>>({
+	public async addUniverse<C extends CoreUniverseClassConcreteStatic<InstanceType<C>>>({
 		args,
 		Universe
 	}: keyof DestructureParameters<C> extends "application"

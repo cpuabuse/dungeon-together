@@ -96,7 +96,7 @@ export interface CommsCell extends CommsCellArgs {
 /**
  * Core cell.
  */
-export type CoreCell = CommsCell;
+export type CoreCell = CommsCell & InstanceType<ReturnType<typeof CoreCellFactory>>;
 
 /**
  * Factory for core cell.
@@ -107,7 +107,7 @@ export type CoreCell = CommsCell;
  */
 // Force type inference to extract class type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function CoreCellFactory<C extends CoreBaseClassNonRecursive>({
+export function CoreCellFactory<C extends CoreBaseClassNonRecursive = CoreBaseClass>({
 	Base
 }: {
 	/**
@@ -120,7 +120,7 @@ export function CoreCellFactory<C extends CoreBaseClassNonRecursive>({
 	 */
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare
-	abstract class CoreCell extends (Base as CoreBaseClass & C) {
+	abstract class CoreCell extends Base {
 		/**
 		 * Entities.
 		 */

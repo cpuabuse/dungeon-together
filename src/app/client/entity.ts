@@ -10,7 +10,7 @@
 import { AnimatedSprite } from "pixi.js";
 import { Uuid } from "../common/uuid";
 import { CellPath } from "../comms/cell";
-import { CommsEntity, CommsEntityArgs } from "../comms/entity";
+import { CommsEntity, CommsEntityArgs, CoreEntityClassFactory } from "../comms/entity";
 import { ClientBaseClass } from "./base";
 import { ClientCell } from "./cell";
 
@@ -32,7 +32,7 @@ export function ClientEntityFactory({
 	/**
 	 * Render unit, representing the smallest renderable.
 	 */
-	class ClientEntity extends Base implements CommsEntity {
+	class ClientEntity extends CoreEntityClassFactory({ Base }) implements CommsEntity {
 		/**
 		 * Parent location.
 		 */
@@ -119,28 +119,6 @@ export function ClientEntityFactory({
 
 			// Remove from index
 			this.universe.entitiesIndex.delete(this.entityUuid);
-		}
-
-		/**
-		 * Move entity to a different cell.
-		 *
-		 * @param cellPath - Path to the target cell
-		 *
-		 * @returns If successful or not
-		 */
-		protected doMove(cellPath: CellPath): boolean {
-			// Locate target cell
-			let targetCell: ClientCell = this.universe.getCell(cellPath);
-
-			// Reattach
-			if (targetCell.detach(this)) {
-				this.shardUuid = targetCell.shardUuid;
-				this.gridUuid = targetCell.gridUuid;
-				this.cellUuid = targetCell.cellUuid;
-				targetCell.attach(this);
-				return true;
-			}
-			return false;
 		}
 
 		/**

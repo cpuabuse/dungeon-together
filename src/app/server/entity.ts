@@ -11,7 +11,7 @@ import { defaultModeUuid } from "../common/defaults";
 import { FromAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import { CellPath } from "../comms/cell";
-import { CommsEntity, CommsEntityArgs, EntityPath } from "../comms/entity";
+import { CommsEntity, CommsEntityArgs, CoreEntityClassFactory, EntityPath } from "../comms/entity";
 import { ServerBaseClass } from "./base";
 import { ServerCell } from "./cell";
 
@@ -61,7 +61,7 @@ export function ServerEntityFactory({
 	 *
 	 * // TODO: Add ways to create a thing
 	 */
-	abstract class ServerEntity extends Base implements CommsEntity {
+	abstract class ServerEntity extends CoreEntityClassFactory({ Base }) implements CommsEntity {
 		/**
 		 * Cell occupied by the server entity.
 		 */
@@ -134,15 +134,6 @@ export function ServerEntityFactory({
 		public initialize(): void {
 			this.doInitialize();
 			this.universe.getCell(this).attach(this);
-		}
-
-		/**
-		 * Move.
-		 *
-		 * @param cellPath - Path to cell
-		 */
-		public move(cellPath: CellPath): void {
-			this.performMove(cellPath);
 		}
 
 		/**

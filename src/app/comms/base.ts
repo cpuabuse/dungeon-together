@@ -42,7 +42,7 @@ export interface CoreBase extends CoreBaseNonRecursive {
 /**
  * Non-recursive class type for core base.
  *
- * When used in factories as `C extends CoreBaseClassNonRecursive`, generic `C` must be extending {@link CoreBase}, even though `C` is only vaguely constrained by {@link CoreBaseClassNonRecursive}, the {@link CoreBase} information should be inserted by interface merging within the factory.
+ * When used in factories as `C extends CoreBaseClassNonRecursive`, generic `C` must be extending {@link CoreBase}, even though `C` is only vaguely constrained by {@link CoreBaseClassNonRecursive}, the {@link CoreBase} information should be inserted by casting, when necessary.
  *
  * @see {@link CoreBaseNonRecursive} for more details
  */

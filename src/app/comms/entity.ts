@@ -9,7 +9,8 @@
 
 import { ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
-import { CellPath } from "./cell";
+import { CoreBase, CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
+import { CellPath, CoreCell } from "./cell";
 
 /**
  * An object-like.
@@ -70,6 +71,94 @@ export interface EntityPath extends CellPath {
 	 * Cell uuid.
 	 */
 	entityUuid: Uuid;
+}
+
+/**
+ * Core entity class factory.
+ *
+ * @see {@link CoreBaseClassNonRecursive} for usage
+ *
+ * @returns Core entity class
+ */
+// Forcing inference
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function CoreEntityClassFactory<C extends CoreBaseClassNonRecursive = CoreBaseClass>({
+	Base
+}: {
+	/**
+	 * Base to extend.
+	 */
+	Base: C;
+}) {
+	/**
+	 * Core entity.
+	 */
+	abstract class CoreEntity extends Base {
+		/**
+		 * Cell UUID.
+		 */
+		public abstract cellUuid: Uuid;
+
+		/**
+		 * Entity UUID.
+		 */
+		public abstract entityUuid: Uuid;
+
+		/**
+		 * Grid UUID.
+		 */
+		public abstract gridUuid: Uuid;
+
+		/**
+		 * Kind of entity.
+		 */
+		public abstract kindUuid: Uuid;
+
+		/**
+		 * Mode of the entity.
+		 */
+		public abstract modeUuid: Uuid;
+
+		/**
+		 * Shard UUID.
+		 */
+		public abstract shardUuid: Uuid;
+
+		/**
+		 * World in which entity resides.
+		 */
+		public abstract worldUuid: Uuid;
+
+		/**
+		 * Terminate.
+		 */
+		public abstract terminate(): void;
+
+		/**
+		 * Move entity to a different cell.
+		 *
+		 * @param cellPath - Path to the target cell
+		 *
+		 * @returns If successful or not
+		 */
+		protected move(cellPath: CellPath): boolean {
+			// Locate cells
+			let sourceCell: CoreCell = (this as CoreBase).universe.getCell(this);
+			let targetCell: CoreCell = (this as CoreBase).universe.getCell(cellPath);
+
+			// Reattach
+			if (sourceCell.detach(this)) {
+				this.shardUuid = targetCell.shardUuid;
+				this.gridUuid = targetCell.gridUuid;
+				this.cellUuid = targetCell.cellUuid;
+				targetCell.attach(this);
+				return true;
+			}
+			return false;
+		}
+	}
+
+	return CoreEntity;
 }
 
 /**

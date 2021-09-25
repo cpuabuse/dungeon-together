@@ -9,7 +9,7 @@
 
 import { Application } from "./application";
 import { CoreBaseClass } from "./base";
-import { CellPath, CommsCell, CoreCellClass } from "./cell";
+import { CellPath, CommsCell, CoreCell, CoreCellClass } from "./cell";
 import { CommsEntity, CoreEntityClass, EntityPath } from "./entity";
 import { CommsGrid, CoreGridClass, GridPath } from "./grid";
 import { CommsShard, CommsShardArgs, CoreShardClass, ShardPath } from "./shard";
@@ -74,7 +74,7 @@ export abstract class CoreUniverse {
 	/**
 	 * Gets the [[CommsCell]].
 	 */
-	public abstract getCell(path: CellPath): CommsCell;
+	public abstract getCell(path: CellPath): CoreCell;
 
 	/**
 	 * Gets the [[CommsEntity]].
