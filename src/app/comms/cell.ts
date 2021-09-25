@@ -116,19 +116,11 @@ export function CoreCellFactory<C extends CoreBaseClassNonRecursive>({
 	Base: C;
 }) {
 	/**
-	 * Add back the manually verified information about base from argument, extending core base.
-	 *
-	 * @see {@link CoreBaseClassNonRecursive} for reasons of interface merging
-	 */
-	// eslint-disable-next-line no-redeclare, @typescript-eslint/no-empty-interface
-	interface Base extends CoreBase {}
-
-	/**
 	 * Core cell base class.
 	 */
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare
-	abstract class CoreCell extends Base {
+	abstract class CoreCell extends (Base as C & CoreBase) {
 		/**
 		 * Entities.
 		 */
