@@ -183,6 +183,7 @@ export function ClientCellFactory({
 			// Move entities here
 			[...entities.keys()].forEach(entityUuid => {
 				const entity: ClientEntity = this.universe.getEntityByUuid({ entityUuid });
+				entity.move(this);
 			});
 		}
 

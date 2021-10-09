@@ -13,6 +13,7 @@ import { CellPath } from "../comms/cell";
 import { CommsEntity, CommsEntityArgs, CoreEntityClassFactory } from "../comms/entity";
 import { ClientBaseClass } from "./base";
 import { ClientCell } from "./cell";
+import { LogLevel, processLog } from "./error";
 
 /**
  * Generator for the client entity class.
@@ -106,6 +107,28 @@ export function ClientEntityFactory({
 
 			// Index
 			this.universe.entitiesIndex.set(this.entityUuid, this);
+		}
+
+		/**
+		 * Moves the entity and updates the display.
+		 *
+		 * @param cell - Target cell.
+		 *
+		 * @returns `true` as it handles super class errors
+		 */
+		public move(cell: ClientCell): true {
+			if (super.move(cell)) {
+				this.updateCoordinates();
+			} else {
+				processLog({
+					error: new Error(
+						`Failed to move entity "${this.entityUuid}" from cell "${this.cellUuid}" to cell "${cell.cellUuid}"`
+					),
+					level: LogLevel.Warning
+				});
+			}
+
+			return true;
 		}
 
 		/**
