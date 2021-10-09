@@ -363,6 +363,15 @@ export function ClientShardFactory({
 		}
 
 		/**
+		 * Updates shard.
+		 */
+		public update({ grids }: CommsShardArgs): void {
+			grids.forEach(grid => {
+				this.getGrid(grid).update(grid);
+			});
+		}
+
+		/**
 		 * Actually remove the [[ClientGrid]] shard from "grids".
 		 */
 		private doRemoveGrid({ gridUuid }: GridPath): void {

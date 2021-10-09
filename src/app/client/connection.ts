@@ -11,7 +11,7 @@ import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connectio
 import { Uuid } from "../common/uuid";
 import { ProcessCallback, VSocket } from "../common/vsocket";
 import { CommsConnection, CommsConnectionArgs, Envelope, Message } from "../comms/connection";
-import { CommsShardArgs } from "../comms/shard";
+import { CommsShardArgs, CommsShardRaw, commsShardRawToArgs } from "../comms/shard";
 import { CoreUniverse } from "../comms/universe";
 import { LogLevel, processLog } from "./error";
 import { ClientShard } from "./shard";
@@ -69,6 +69,7 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 
 		// Shard
 		let shard: ClientShard;
+		let shardArgs: CommsShardArgs;
 
 		// Switch message type
 		switch (message.type) {
@@ -87,6 +88,9 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 
 			// Update command
 			case MessageTypeWord.Update:
+				processLog({ error: new Error(`Update started`), level: LogLevel.Info });
+				shardArgs = commsShardRawToArgs(message.body as CommsShardRaw);
+				this.universe.getShard(shardArgs).update(shardArgs);
 				break;
 
 			// Continue loop on default

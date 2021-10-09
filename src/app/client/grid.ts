@@ -137,6 +137,15 @@ export function ClientGridFactory({
 		}
 
 		/**
+		 * Updates grid.
+		 */
+		public update({ cells }: CommsGridArgs): void {
+			cells.forEach(cell => {
+				this.getCell(cell).update(cell);
+			});
+		}
+
+		/**
 		 * Actually remove the [[ClientCell]] instance from "cells".
 		 */
 		private doRemoveCell({ cellUuid }: CellPath): void {
