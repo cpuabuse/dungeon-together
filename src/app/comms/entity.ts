@@ -130,31 +130,40 @@ export function CoreEntityClassFactory<C extends CoreBaseClassNonRecursive = Cor
 		public abstract worldUuid: Uuid;
 
 		/**
-		 * Terminate.
-		 */
-		public abstract terminate(): void;
-
-		/**
 		 * Move entity to a different cell.
 		 *
 		 * @param cellPath - Path to the target cell
 		 *
 		 * @returns If successful or not
 		 */
-		protected move(cellPath: CellPath): boolean {
+		public move(cellPath: CellPath): boolean {
 			// Locate cells
 			let sourceCell: CoreCell = (this as CoreBase).universe.getCell(this);
 			let targetCell: CoreCell = (this as CoreBase).universe.getCell(cellPath);
 
 			// Reattach
 			if (sourceCell.detach(this)) {
-				this.shardUuid = targetCell.shardUuid;
-				this.gridUuid = targetCell.gridUuid;
-				this.cellUuid = targetCell.cellUuid;
-				targetCell.attach(this);
+				this.doMove(targetCell);
 				return true;
 			}
 			return false;
+		}
+
+		/**
+		 * Terminate.
+		 */
+		public abstract terminate(): void;
+
+		/**
+		 * Perform move to a cell unconditionally, without detaching.
+		 *
+		 * @param cell - Target cell
+		 */
+		protected doMove(cell: CoreCell): void {
+			this.shardUuid = cell.shardUuid;
+			this.gridUuid = cell.gridUuid;
+			this.cellUuid = cell.cellUuid;
+			cell.attach(this);
 		}
 	}
 

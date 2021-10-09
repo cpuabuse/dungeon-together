@@ -12,13 +12,12 @@ import { CoreUniverse } from "./universe";
 /**
  * Non-recursive minimal outline for base instance.
  *
- * Client/server SGCE classes, extend core base.
- * Core base contains core universe, which contains core SGCE classes, which extend core base. This is a primary recursion.
+ * SGCE classes, extend base, which contains SGCE classes. This is a primary recursion.
  *
  * When the client/server SGCE extend class, produced by core SGCE base factory, the generic constrains of that factory (e.g. `C extends CoreBaseClassNonRecursive`), would create an additional recursive loop, if {@link CoreBaseNonRecursive} was recursive (which would not be resolved by the compiler).
  * Thus, {@link CoreBaseNonRecursive}'s universe is `unknown`, so that only recursion that happens, is the primary recursion.
  *
- * Summary - Core factory generic parameter can extend only non-recursive base. {@link CoreBaseNonRecursive} provides at least  some type constraints.
+ * Summary - Core factory generic parameter can extend only non-recursive base. {@link CoreBaseNonRecursive} provides at least some type constraints.
  */
 export interface CoreBaseNonRecursive {
 	/**
