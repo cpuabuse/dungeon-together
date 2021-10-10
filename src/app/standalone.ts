@@ -24,7 +24,7 @@ import {
 } from "./client/connection";
 import { ClientUniverse } from "./client/universe";
 import { SocketProcessBase, ToSuperclassProcessCallback, VStandaloneSocket, processInitWord } from "./common/vsocket";
-import { Application } from "./comms/application";
+import { Application } from "./core/application";
 import { queueProcessCallback as serverQueueProcessCallback } from "./server/connection";
 import { ServerUniverse } from "./server/universe";
 

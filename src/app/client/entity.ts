@@ -9,8 +9,8 @@
 
 import { AnimatedSprite } from "pixi.js";
 import { Uuid } from "../common/uuid";
-import { CellPath } from "../comms/cell";
-import { CommsEntity, CommsEntityArgs, CoreEntityClassFactory } from "../comms/entity";
+import { CellPath } from "../core/cell";
+import { CommsEntity, CommsEntityArgs, CoreEntityClassFactory } from "../core/entity";
 import { ClientBaseClass } from "./base";
 import { ClientCell } from "./cell";
 import { LogLevel, processLog } from "./error";

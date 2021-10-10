@@ -9,8 +9,8 @@
 
 import { defaultKindUuid, defaultModeUuid, defaultWorldUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
-import { CommsCell, CommsCellArgs, CoreCellFactory } from "../comms/cell";
-import { CommsEntityArgs, EntityPath } from "../comms/entity";
+import { CommsCell, CommsCellArgs, CoreCellFactory } from "../core/cell";
+import { CommsEntityArgs, EntityPath } from "../core/entity";
 import { ClientBaseClass } from "./base";
 import { ClientEntity } from "./entity";
 

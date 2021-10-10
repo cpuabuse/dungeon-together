@@ -18,12 +18,12 @@ import { defaultCellUuid, defaultGridUuid, defaultModeUuid, defaultShardUuid } f
 import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import { CoreUniverseUuidSearchFactory } from "../common/uuid-search";
-import { CellPath } from "../comms/cell";
-import { CommsConnectionArgs } from "../comms/connection";
-import { EntityPath } from "../comms/entity";
-import { GridPath } from "../comms/grid";
-import { CommsShardArgs, ShardPath } from "../comms/shard";
-import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassConcreteStatic } from "../comms/universe";
+import { CellPath } from "../core/cell";
+import { CommsConnectionArgs } from "../core/connection";
+import { EntityPath } from "../core/entity";
+import { GridPath } from "../core/grid";
+import { CommsShardArgs, ShardPath } from "../core/shard";
+import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassConcreteStatic } from "../core/universe";
 import UniverseComponent from "../vue/universe.vue";
 import { ClientBaseClass, ClientBaseFactory } from "./base";
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";

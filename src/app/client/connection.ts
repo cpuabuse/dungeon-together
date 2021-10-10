@@ -10,9 +10,9 @@
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { ProcessCallback, VSocket } from "../common/vsocket";
-import { CommsConnection, CommsConnectionArgs, Envelope, Message } from "../comms/connection";
-import { CommsShardArgs, CommsShardRaw, commsShardRawToArgs } from "../comms/shard";
-import { CoreUniverse } from "../comms/universe";
+import { CommsConnection, CommsConnectionArgs, Envelope, Message } from "../core/connection";
+import { CommsShardArgs, CommsShardRaw, commsShardRawToArgs } from "../core/shard";
+import { CoreUniverse } from "../core/universe";
 import { LogLevel, processLog } from "./error";
 import { ClientShard } from "./shard";
 import { ClientUniverse } from "./universe";

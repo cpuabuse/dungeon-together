@@ -19,10 +19,10 @@ import {
 } from "io-ts";
 import jsyaml from "js-yaml";
 import { getDefaultUuid } from "../common/uuid";
-import { CommsCellArgs, CommsCellRaw } from "../comms/cell";
-import { CommsEntityArgs, CommsEntityRaw } from "../comms/entity";
-import { CommsGridArgs, CommsGridRaw } from "../comms/grid";
-import { CommsShardArgs, CommsShardRaw, commsShardRawToArgs } from "../comms/shard";
+import { CommsCellArgs, CommsCellRaw } from "../core/cell";
+import { CommsEntityArgs, CommsEntityRaw } from "../core/entity";
+import { CommsGridArgs, CommsGridRaw } from "../core/grid";
+import { CommsShardArgs, CommsShardRaw, commsShardRawToArgs } from "../core/shard";
 
 /**
  * Settings to be passed to parser.

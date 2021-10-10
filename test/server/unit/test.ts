@@ -8,7 +8,7 @@
  */
 
 import { ok } from "assert";
-import { Application } from "../../../src/app/comms/application";
+import { Application } from "../../../src/app/core/application";
 import { ServerUniverse } from "../../../src/app/server/universe";
 
 /**

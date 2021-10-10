@@ -21,9 +21,9 @@ import {
 import { MessageTypeWord, MovementWord } from "../common/defaults/connection";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { VSocket } from "../common/vsocket";
-import { Envelope } from "../comms/connection";
-import { CommsGridArgs, GridPath } from "../comms/grid";
-import { CommsShard, CommsShardArgs } from "../comms/shard";
+import { Envelope } from "../core/connection";
+import { CommsGridArgs, GridPath } from "../core/grid";
+import { CommsShard, CommsShardArgs } from "../core/shard";
 import { ClientBaseClass } from "./base";
 import { ClientGrid } from "./grid";
 import {

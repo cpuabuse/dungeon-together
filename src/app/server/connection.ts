@@ -12,8 +12,8 @@ import { LogLevel, processLog } from "../client/error";
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { ProcessCallback, VSocket } from "../common/vsocket";
-import { CommsConnection, CommsConnectionArgs, Envelope, Message } from "../comms/connection";
-import { CoreUniverse } from "../comms/universe";
+import { CommsConnection, CommsConnectionArgs, Envelope, Message } from "../core/connection";
+import { CoreUniverse } from "../core/universe";
 import { compile } from "../tool/compile";
 import { ServerUniverse } from "./universe";
 

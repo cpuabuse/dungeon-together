@@ -7,7 +7,7 @@
  * @file Base object prototype for client
  */
 
-import { CoreBase } from "../comms/base";
+import { CoreBase } from "../core/base";
 import { ClientUniverse } from "./universe";
 
 /**

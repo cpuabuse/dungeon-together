@@ -7,7 +7,7 @@
  * @file Base object prototype for server
  */
 
-import { CoreBase } from "../comms/base";
+import { CoreBase } from "../core/base";
 import { ServerUniverse } from "./universe";
 
 /**

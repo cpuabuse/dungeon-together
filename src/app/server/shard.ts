@@ -9,9 +9,9 @@
 
 import { gridUuidUrlPath, urlPathSeparator } from "../common/defaults";
 import { Uuid, getDefaultUuid } from "../common/uuid";
-import { GridPath } from "../comms/grid";
-import { CommsShard, CommsShardArgs } from "../comms/shard";
-import { CoreUniverse } from "../comms/universe";
+import { GridPath } from "../core/grid";
+import { CommsShard, CommsShardArgs } from "../core/shard";
+import { CoreUniverse } from "../core/universe";
 import { ServerBaseClass } from "./base";
 import { ServerConnection } from "./connection";
 import { ServerGrid, ServerGridArgs } from "./grid";

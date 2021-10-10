@@ -7,7 +7,7 @@
  * @file Generic arguments option definition.
  */
 
-import { ArgsOptionsImplements } from "../comms/args";
+import { ArgsOptionsImplements } from "../core/args";
 
 /**
  * Args options for server.

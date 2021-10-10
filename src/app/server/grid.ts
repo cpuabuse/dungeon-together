@@ -9,8 +9,8 @@
 
 import { cellUuidUrlPath, defaultCellVector, navAmount, urlPathSeparator } from "../common/defaults";
 import { Uuid, getDefaultUuid } from "../common/uuid";
-import { CellPath } from "../comms/cell";
-import { CommsGrid, CommsGridArgs } from "../comms/grid";
+import { CellPath } from "../core/cell";
+import { CommsGrid, CommsGridArgs } from "../core/grid";
 import { ServerBaseClass } from "./base";
 import { ServerCell, ServerCellArgs } from "./cell";
 

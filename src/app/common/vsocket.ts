@@ -10,8 +10,8 @@
  */
 
 import { LogLevel, processLog } from "../client/error";
-import { Envelope, Message } from "../comms/connection";
-import { CoreUniverse } from "../comms/universe";
+import { Envelope, Message } from "../core/connection";
+import { CoreUniverse } from "../core/universe";
 import { MessageTypeWord, vSocketMaxQueue, vSocketProcessStackLimit } from "./defaults/connection";
 import { ErroringReturn } from "./error";
 

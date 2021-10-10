@@ -10,12 +10,12 @@
 import { defaultKindUuid, defaultShardUuid, defaultWorldUuid } from "../common/defaults";
 import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
-import { CellPath } from "../comms/cell";
-import { CommsConnectionArgs } from "../comms/connection";
-import { EntityPath } from "../comms/entity";
-import { GridPath } from "../comms/grid";
-import { ShardPath } from "../comms/shard";
-import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassConcreteStatic } from "../comms/universe";
+import { CellPath } from "../core/cell";
+import { CommsConnectionArgs } from "../core/connection";
+import { EntityPath } from "../core/entity";
+import { GridPath } from "../core/grid";
+import { ShardPath } from "../core/shard";
+import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassConcreteStatic } from "../core/universe";
 import { ServerBaseClass, ServerBaseFactory } from "./base";
 import { ServerCell, ServerCellClass, ServerCellFactory } from "./cell";
 import { ServerConnection } from "./connection";

@@ -7,11 +7,11 @@
  * @file UUID search functionality
  */
 
-import { CoreCell } from "../comms/cell";
-import { CoreEntity, EntityPath } from "../comms/entity";
-import { CoreGrid } from "../comms/grid";
-import { CoreShard } from "../comms/shard";
-import { CoreUniverseClassAbstractStatic } from "../comms/universe";
+import { CoreCell } from "../core/cell";
+import { CoreEntity, EntityPath } from "../core/entity";
+import { CoreGrid } from "../core/grid";
+import { CoreShard } from "../core/shard";
+import { CoreUniverseClassAbstractStatic } from "../core/universe";
 import { Uuid } from "./uuid";
 
 /**

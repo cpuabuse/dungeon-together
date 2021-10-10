@@ -16,8 +16,8 @@ import {
 	urlPathSeparator
 } from "../common/defaults";
 import { Uuid, getDefaultUuid } from "../common/uuid";
-import { CellPath, CommsCell, CommsCellArgs, CoreCellFactory } from "../comms/cell";
-import { EntityPath } from "../comms/entity";
+import { CellPath, CommsCell, CommsCellArgs, CoreCellFactory } from "../core/cell";
+import { EntityPath } from "../core/entity";
 import { ServerBaseClass } from "./base";
 import { ServerEntity, ServerEntityArgs, ServerEntityClassConcrete } from "./entity";
 
