@@ -7,10 +7,10 @@
  * @file Cell.
  */
 
-import { entityUuidUrlPath, urlPathSeparator } from "../common/defaults";
+import { defaultGridUuid, defaultShardUuid, entityUuidUrlPath, urlPathSeparator } from "../common/defaults";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { Vector } from "../common/vector";
-import { CoreArgsIds, CoreArgsOptionsUnion } from "./args";
+import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptionsUnion } from "./args";
 import { CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
 import {
 	CommsEntity,
@@ -19,7 +19,8 @@ import {
 	CoreEntity,
 	CoreEntityArgs,
 	EntityPath,
-	commsEntityRawToArgs
+	commsEntityRawToArgs,
+	coreEntityArgsConvert
 } from "./entity";
 import { GridPath } from "./grid";
 
@@ -65,6 +66,8 @@ export type CommsCellRaw = CommCellRawHelper<
 
 /**
  * Core cell args.
+ *
+ * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
 export type CoreCellArgs<O extends CoreArgsOptionsUnion> = (O[CoreArgsIds.Path] extends true ? CellPath : CellOwnPath) &
 	(O[CoreArgsIds.Vector] extends true ? Vector : unknown) & {
@@ -232,4 +235,150 @@ export function commsCellRawToArgs(rawSource: CommsCellRaw, path: CellPath): Com
 		y: rawSource.y,
 		z: rawSource.z
 	};
+}
+
+/**
+ * Convert cell args between options.
+ *
+ * Has to strictly follow {@link CoreCellArgs}.
+ *
+ * @returns Converted cell args
+ */
+export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends CoreArgsOptionsUnion>({
+	cell,
+	sourceOptions,
+	targetOptions
+}: {
+	/**
+	 * Core cell args.
+	 */
+	cell: CoreCellArgs<S>;
+
+	/**
+	 * Option for the source.
+	 */
+	sourceOptions: S;
+
+	/**
+	 * Option for the target.
+	 */
+	targetOptions: T;
+}): CoreCellArgs<T> {
+	// Define source and result, with minimal options
+	const sourceCell: CoreCellArgs<S> = cell;
+	const sourceCellAs: Record<string, any> = sourceCell;
+	// Cannot assign to conditional type without casting
+	let targetCell: CoreCellArgs<T> = {
+		cellUuid: sourceCell.cellUuid
+	} as CoreCellArgs<T>;
+	let targetCellAs: Record<string, any> = targetCell;
+
+	// Path
+	if (targetOptions[CoreArgsIds.Path] === true) {
+		/**
+		 * Core cell args with path.
+		 */
+		type CoreCellArgsWithPath = CoreCellArgs<CoreArgsIdsToOptions<CoreArgsIds.Path>>;
+		let targetCellWithPath: CoreCellArgsWithPath = targetCellAs as CoreCellArgsWithPath;
+
+		if (sourceOptions[CoreArgsIds.Path] === true) {
+			// Source to target
+			const sourceCellWithPath: CoreCellArgsWithPath = sourceCellAs as CoreCellArgsWithPath;
+			targetCellWithPath.shardUuid = sourceCellWithPath.shardUuid;
+			targetCellWithPath.gridUuid = sourceCellWithPath.gridUuid;
+		} else {
+			// Default to target
+			targetCellWithPath.shardUuid = defaultShardUuid;
+			targetCellWithPath.gridUuid = defaultGridUuid;
+		}
+	}
+
+	// Vector
+	if (targetOptions[CoreArgsIds.Vector] === true) {
+		/**
+		 * Core cell args with vector.
+		 */
+		type CoreCellArgsWithVector = CoreCellArgs<CoreArgsIdsToOptions<CoreArgsIds.Vector>>;
+		let targetCellWithVector: CoreCellArgsWithVector = targetCellAs as CoreCellArgsWithVector;
+
+		if (sourceOptions[CoreArgsIds.Vector] === true) {
+			// Source to target
+			const sourceCellWithVector: CoreCellArgsWithVector = sourceCellAs as CoreCellArgsWithVector;
+			targetCellWithVector.x = sourceCellWithVector.x;
+			targetCellWithVector.y = sourceCellWithVector.y;
+			targetCellWithVector.z = sourceCellWithVector.z;
+		} else {
+			// Default to target
+			targetCellWithVector.x = 0;
+			targetCellWithVector.y = 0;
+			targetCellWithVector.z = 0;
+		}
+	}
+
+	/**
+	 * Core cell args with map.
+	 */
+	type CoreCellArgsWithMap = CoreCellArgs<CoreArgsIdsToOptions<CoreArgsIds.Map>>;
+
+	/**
+	 * Core cell args without map.
+	 */
+	type CoreCellArgsWithoutMap = CoreCellArgs<CoreArgsIdsToOptions<never>>;
+
+	// Map
+	if (targetOptions[CoreArgsIds.Map] === true) {
+		let targetCellWithMap: CoreCellArgsWithMap = targetCellAs as CoreCellArgsWithMap;
+
+		if (sourceOptions[CoreArgsIds.Map] === true) {
+			// Map to map
+			const sourceCellWithMap: CoreCellArgsWithMap = sourceCellAs as CoreCellArgsWithMap;
+
+			// Entities
+			targetCellWithMap.entities = new Map(
+				// Argument types correctly inferred from "Array.from()", probably eslint bug
+				// eslint-disable-next-line @typescript-eslint/typedef
+				Array.from(sourceCellWithMap.entities, ([uuid, entityWithMap]) =>
+					// Revert back to original type, so that can be used on generics with "S" and "T" types
+					[uuid, coreEntityArgsConvert({ entity: entityWithMap as CoreEntityArgs<S>, sourceOptions, targetOptions })]
+				)
+			);
+		} else {
+			// Array/set to map
+			const sourceCellWithoutMap: CoreCellArgsWithoutMap = sourceCellAs as CoreCellArgsWithoutMap;
+
+			// Entities
+			targetCellWithMap.entities = new Map(
+				sourceCellWithoutMap.entities.map(entityWithoutMap => [
+					entityWithoutMap.entityUuid,
+					// Revert back to original type, so that can be used on generics with "S" and "T" types
+					coreEntityArgsConvert({ entity: entityWithoutMap as CoreEntityArgs<S>, sourceOptions, targetOptions })
+				])
+			);
+		}
+	} else {
+		let targetCellWithoutMap: CoreCellArgsWithoutMap = sourceCellAs as CoreCellArgsWithoutMap;
+
+		if (sourceOptions[CoreArgsIds.Map] === true) {
+			// Map to array/set
+			const sourceCellWithMap: CoreCellArgsWithMap = sourceCellAs as CoreCellArgsWithMap;
+
+			// Entities
+			// Argument types correctly inferred from "Array.from()", and UUID is unused, probably eslint bug
+			// eslint-disable-next-line @typescript-eslint/typedef, @typescript-eslint/no-unused-vars
+			targetCellWithoutMap.entities = Array.from(sourceCellWithMap.entities, ([uuid, entityWithMap]) =>
+				// Revert back to original type, so that can be used on generics with "S" and "T" types
+				coreEntityArgsConvert({ entity: entityWithMap as CoreEntityArgs<S>, sourceOptions, targetOptions })
+			);
+		} else {
+			// Array/set to array/set
+			const sourceCellWithoutMap: CoreCellArgsWithoutMap = sourceCellAs as CoreCellArgsWithoutMap;
+
+			// Entities
+			targetCellWithoutMap.entities = sourceCellWithoutMap.entities.map(entityWithoutMap =>
+				coreEntityArgsConvert({ entity: entityWithoutMap as CoreEntityArgs<S>, sourceOptions, targetOptions })
+			);
+		}
+	}
+	// Return
+	return targetCell;
 }
