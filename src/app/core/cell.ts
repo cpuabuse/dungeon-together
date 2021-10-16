@@ -10,8 +10,17 @@
 import { entityUuidUrlPath, urlPathSeparator } from "../common/defaults";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { Vector } from "../common/vector";
+import { CoreArgsIds, CoreArgsOptionsUnion } from "./args";
 import { CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
-import { CommsEntity, CommsEntityArgs, CommsEntityRaw, CoreEntity, EntityPath, commsEntityRawToArgs } from "./entity";
+import {
+	CommsEntity,
+	CommsEntityArgs,
+	CommsEntityRaw,
+	CoreEntity,
+	CoreEntityArgs,
+	EntityPath,
+	commsEntityRawToArgs
+} from "./entity";
 import { GridPath } from "./grid";
 
 /**
@@ -24,7 +33,7 @@ export interface CommsCellArgs extends CellPath, Vector {
 	entities: Map<Uuid, CommsEntityArgs>;
 
 	/**
-	 * Worlds
+	 * Worlds.
 	 */
 	worlds: Set<Uuid>;
 }
@@ -45,6 +54,7 @@ export type CommsCellRaw = CommCellRawHelper<
 		 *
 		 */
 		entities: Array<CommsEntityRaw>;
+
 		/**
 		 *
 		 */
@@ -52,6 +62,22 @@ export type CommsCellRaw = CommCellRawHelper<
 	},
 	Vector
 >;
+
+/**
+ * Core cell args.
+ */
+export type CoreCellArgs<O extends CoreArgsOptionsUnion> = (O[CoreArgsIds.Path] extends true ? CellPath : CellOwnPath) &
+	(O[CoreArgsIds.Vector] extends true ? Vector : unknown) & {
+		/**
+		 * Array of entities.
+		 */
+		entities: O[CoreArgsIds.Map] extends true ? Map<Uuid, CoreEntityArgs<O>> : Array<CoreEntityArgs<O>>;
+
+		/**
+		 * Worlds.
+		 */
+		worlds: O[CoreArgsIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
+	};
 
 /**
  * Typeof class for cells.
@@ -164,14 +190,19 @@ export function CoreCellFactory<C extends CoreBaseClassNonRecursive = CoreBaseCl
 }
 
 /**
- * Way to get to cell.
+ * Cell own path.
  */
-export interface CellPath extends GridPath {
+export interface CellOwnPath extends GridPath {
 	/**
 	 * Cell uuid.
 	 */
 	cellUuid: Uuid;
 }
+
+/**
+ * Way to get to cell.
+ */
+export interface CellPath extends GridPath, CellOwnPath {}
 
 /**
  * Converts [[CommsCellRaw]] to [[CommsCellArgs]].

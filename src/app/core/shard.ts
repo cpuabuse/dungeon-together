@@ -12,7 +12,8 @@
  */
 
 import { Uuid } from "../common/uuid";
-import { CommsGrid, CommsGridArgs, CommsGridRaw, GridPath, commsGridRawToArgs } from "./grid";
+import { CoreArgsIds, CoreArgsOptionsUnion } from "./args";
+import { CommsGrid, CommsGridArgs, CommsGridRaw, CoreGridArgs, GridPath, commsGridRawToArgs } from "./grid";
 
 /**
  * Everything-like.
@@ -34,6 +35,18 @@ export type CommsShardRaw = Omit<CommsShardArgs, "grids"> & {
 	 *
 	 */
 	grids: Array<CommsGridRaw>;
+};
+
+/**
+ * Core shard args.
+ */
+export type CoreShardArgs<O extends CoreArgsOptionsUnion> = (O[CoreArgsIds.Path] extends true
+	? ShardPath
+	: ShardOwnPath) & {
+	/**
+	 * Grids.
+	 */
+	grids: O[CoreArgsIds.Map] extends true ? Map<Uuid, CoreGridArgs<O>> : Array<CoreGridArgs<O>>;
 };
 
 /**
@@ -81,12 +94,17 @@ export type CoreShard = CommsShard;
 /**
  * Way to get to shard.
  */
-export interface ShardPath {
+export interface ShardOwnPath {
 	/**
 	 * Shard uuid.
 	 */
 	shardUuid: Uuid;
 }
+
+/**
+ * Way to get to shard.
+ */
+export type ShardPath = ShardOwnPath;
 
 /**
  * Converts [[CommsShardRaw]] to [[CommsShardArgs]].

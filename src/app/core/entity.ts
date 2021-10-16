@@ -7,8 +7,10 @@
  * Entity.
  */
 
+import { defaultCellUuid, defaultGridUuid, defaultShardUuid } from "../common/defaults";
 import { ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
+import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsMinimalOptions, CoreArgsOptionsUnion } from "./args";
 import { CoreBase, CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
 import { CellPath, CoreCell } from "./cell";
 
@@ -40,6 +42,32 @@ export interface CommsEntityArgs extends EntityPath {
 export type CommsEntityRaw = Omit<CommsEntityArgs, keyof CellPath>;
 
 /**
+ * Core entity.
+ *
+ * If any changes are made, they should be reflected in {@link coreArgsConvert}.
+ */
+export type CoreEntityArgs<O extends CoreArgsOptionsUnion> = (O[CoreArgsIds.Path] extends true
+	? EntityPath
+	: EntityOwnPath) & {
+	/**
+	 * Mode of the entity.
+	 */
+	modeUuid: Uuid;
+
+	/**
+	 * World in which entity resides.
+	 */
+	worldUuid: Uuid;
+} & (O[CoreArgsIds.Kind] extends true
+		? {
+				/**
+				 * Kind of entity.
+				 */
+				kindUuid: Uuid;
+		  }
+		: unknown);
+
+/**
  * Typeof class for entities.
  *
  * It may be abstract.
@@ -64,14 +92,19 @@ export interface CommsEntity extends CommsEntityArgs {
 export type CoreEntity = CommsEntity;
 
 /**
- * Path to an entity.
+ * Path to an entity only.
  */
-export interface EntityPath extends CellPath {
+export interface EntityOwnPath {
 	/**
 	 * Cell uuid.
 	 */
 	entityUuid: Uuid;
 }
+
+/**
+ * Path to an entity.
+ */
+export interface EntityPath extends CellPath, EntityOwnPath {}
 
 /**
  * Core entity class factory.

@@ -8,7 +8,8 @@
  */
 
 import { Uuid } from "../common/uuid";
-import { CellPath, CommsCell, CommsCellArgs, CommsCellRaw, commsCellRawToArgs } from "./cell";
+import { CoreArgsIds, CoreArgsOptionsUnion } from "./args";
+import { CellPath, CommsCell, CommsCellArgs, CommsCellRaw, CoreCellArgs, commsCellRawToArgs } from "./cell";
 import { ShardPath } from "./shard";
 
 /**
@@ -31,6 +32,18 @@ export type CommsGridRaw = Omit<CommsGridArgs, "cells" | keyof ShardPath> & {
 	 *
 	 */
 	cells: Array<CommsCellRaw>;
+};
+
+/**
+ * Core grid args.
+ */
+export type CoreGridArgs<O extends CoreArgsOptionsUnion> = (O[CoreArgsIds.Path] extends true
+	? GridPath
+	: GridOwnPath) & {
+	/**
+	 * Locations within the grid.
+	 */
+	cells: O[CoreArgsIds.Map] extends true ? Map<Uuid, CoreCellArgs<O>> : Array<CoreCellArgs<O>>;
 };
 
 /**
@@ -76,14 +89,19 @@ export interface CommsGrid extends CommsGridArgs {
 export type CoreGrid = CommsGrid;
 
 /**
- * Way to get to grid.
+ * Grid's own path.
  */
-export interface GridPath extends ShardPath {
+export interface GridOwnPath {
 	/**
 	 * Grid uuid.
 	 */
 	gridUuid: Uuid;
 }
+
+/**
+ * Way to get to grid.
+ */
+export interface GridPath extends ShardPath, GridOwnPath {}
 
 /**
  * Converts [[CommsGridRaw]] to [[CommsGridArgs]].

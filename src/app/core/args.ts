@@ -8,31 +8,73 @@
  */
 
 /**
- * Generates interface with boolean constraint.
+ * Identifiers for option strings.
  */
-type ToBooleanProperties<T extends string> = {
-	[K in T]: boolean;
+export enum CoreArgsIds {
+	/**
+	 * Navigation.
+	 */
+	Nav = "nav",
+
+	/**
+	 * Vector.
+	 */
+	Vector = "vector",
+
+	/**
+	 * Path.
+	 */
+	Path = "path",
+
+	/**
+	 * Kind.
+	 */
+	Kind = "kind",
+
+	/**
+	 * To use maps or arrays.
+	 */
+	Map = "map"
+}
+
+/**
+ * Generate strict option type for the given ids.
+ */
+export type CoreArgsIdsToOptions<I extends CoreArgsIds> = {
+	[K in CoreArgsIds]: K extends I ? true : false;
 };
 
 /**
- * Args options generic type constraints.
- *
- * `nav` is for navigation.
- *
- * @example
- * ```typescript
- * interface Options extends CoreArgsOptionsImplements<Options> {
- *   // ...
- * }
- * ```
+ * Minimal possible args options configuration.
  */
-export type CoreArgsOptions = ToBooleanProperties<"nav">;
+export type CoreArgsMinimalOptions = CoreArgsIdsToOptions<never>;
 
 /**
- * Implementation constraint for args options.
- * 1. In `O extends CoreArgsOptions`, `O` has all the properties of `CoreArgsOptions`, as boolean
- * 1. In `CoreArgsOptions[K] extends O[K] ? never : O[K]`, `never` will be produced if `O[K]` is boolean, which will not be extended in `interface Options extends CoreArgsOptionsImplements<Options>`
+ * All the option possibilities.
+ *
+ * Not to be used for actual variables, to be used for generic argument constraints instead.
  */
-export type ArgsOptionsImplements<O extends CoreArgsOptions> = {
-	[K in keyof CoreArgsOptions]: CoreArgsOptions[K] extends O[K] ? never : O[K];
+export type CoreArgsOptionsUnion = {
+	[K in CoreArgsIds]: boolean;
 };
+
+/**
+ * Function to generate a options objects, and corresponding types.
+ *
+ * @returns Options object
+ */
+export function coreArgsIdsToOptions<I extends CoreArgsIds>({
+	idsSet
+}: {
+	/**
+	 * Set of core args ids.
+	 */
+	idsSet: Set<I>;
+}): CoreArgsIdsToOptions<I> {
+	// Interpreting set as a set of "CoreArgsIds", to be able to call it's methods with "CoreArgsIds", rather than just generic argument type
+	const set: Set<CoreArgsIds> = idsSet;
+	return Object.values(CoreArgsIds).reduce(
+		(result, id) => ({ ...result, [id]: set.has(id) }),
+		{} as CoreArgsIdsToOptions<I>
+	);
+}

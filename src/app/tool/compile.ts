@@ -19,6 +19,7 @@ import {
 } from "io-ts";
 import jsyaml from "js-yaml";
 import { getDefaultUuid } from "../common/uuid";
+import { CoreArgsIds, coreArgsIdsToOptions } from "../core/args";
 import { CommsCellArgs, CommsCellRaw } from "../core/cell";
 import { CommsEntityArgs, CommsEntityRaw } from "../core/entity";
 import { CommsGridArgs, CommsGridRaw } from "../core/grid";
@@ -41,6 +42,15 @@ interface Settings {
 	 */
 	userPath: string;
 }
+
+/**
+ * Args options for compilation output.
+ */
+// Infer to save lines
+// eslint-disable-next-line @typescript-eslint/typedef
+export const compileArgsOptions = coreArgsIdsToOptions({
+	idsSet: new Set([CoreArgsIds.Kind, CoreArgsIds.Path, CoreArgsIds.Vector] as const)
+});
 
 /**
  * Default URL path to the uuid generator.
@@ -341,7 +351,7 @@ function compileCellRaw(cell: YamlCell, settings: Settings): CommsCellRaw {
  *
  * @param entity - Entity
  * @param settings - Settings
- * @returns An object wiht entityUuid, kindUuid, modeUuid, and worldUuid
+ * @returns An object with entityUuid, kindUuid, modeUuid, and worldUuid
  */
 function compileEntityRaw(entity: YamlEntity, settings: Settings): CommsEntityRaw {
 	return {

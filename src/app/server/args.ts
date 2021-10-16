@@ -7,14 +7,13 @@
  * @file Generic arguments option definition.
  */
 
-import { ArgsOptionsImplements } from "../core/args";
+import { CoreArgsIds, coreArgsIdsToOptions } from "../core/args";
 
 /**
  * Args options for server.
  */
-export interface ServerArgsOptions extends ArgsOptionsImplements<ServerArgsOptions> {
-	/**
-	 * Navigation.
-	 */
-	nav: true;
-}
+// Infer for to save lines
+// eslint-disable-next-line @typescript-eslint/typedef
+export const serverSystemArgsOptions = coreArgsIdsToOptions({
+	idsSet: new Set([CoreArgsIds.Nav, CoreArgsIds.Kind, CoreArgsIds.Path, CoreArgsIds.Map, CoreArgsIds.Vector] as const)
+});
