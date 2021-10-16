@@ -7,10 +7,11 @@
  * Entity.
  */
 
-import { defaultCellUuid, defaultGridUuid, defaultShardUuid } from "../common/defaults";
+import { boolean } from "fp-ts";
+import { defaultCellUuid, defaultGridUuid, defaultKindUuid, defaultShardUuid } from "../common/defaults";
 import { ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
-import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsMinimalOptions, CoreArgsOptionsUnion } from "./args";
+import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptionsUnion } from "./args";
 import { CoreBase, CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
 import { CellPath, CoreCell } from "./cell";
 
@@ -212,4 +213,79 @@ export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPath
 		...path,
 		...rawSource
 	};
+}
+
+/**
+ * Converts entity args between options.
+ *
+ * Has to strictly follow {@link CoreEntityArgs}.
+ *
+ * @returns Target args entity
+ */
+export function coreEntityArgsConvert<S extends CoreArgsOptionsUnion, T extends CoreArgsOptionsUnion>({
+	entity,
+	sourceOptions,
+	targetOptions
+}: {
+	/**
+	 * Source options.
+	 */
+	sourceOptions: S;
+
+	/**
+	 * Target options.
+	 */
+	targetOptions: T;
+
+	/**
+	 * Target source entity.
+	 */
+	entity: CoreEntityArgs<S>;
+}): CoreEntityArgs<T> {
+	// Define source and result, with minimal options
+	const sourceEntity: CoreEntityArgs<S> = entity;
+	const sourceEntityAs: Record<string, any> = sourceEntity;
+	// Cannot assign to conditional type without casting
+	let targetEntity: CoreEntityArgs<T> = {
+		entityUuid: sourceEntity.entityUuid,
+		modeUuid: sourceEntity.modeUuid,
+		worldUuid: sourceEntity.worldUuid
+	} as CoreEntityArgs<T>;
+	let targetEntityAs: Record<string, any> = targetEntity;
+
+	// Path
+	if (targetOptions[CoreArgsIds.Path] === true) {
+		/**
+		 * Entity with path.
+		 */
+		type EntityWithPath = CoreEntityArgs<CoreArgsIdsToOptions<CoreArgsIds.Path>>;
+		let targetEntityWithPath: EntityWithPath = targetEntityAs as EntityWithPath;
+		if (sourceOptions[CoreArgsIds.Path] === true) {
+			const sourceEntityWithPath: EntityWithPath = sourceEntityAs as EntityWithPath;
+			targetEntityWithPath.shardUuid = sourceEntityWithPath.shardUuid;
+			targetEntityWithPath.gridUuid = sourceEntityWithPath.gridUuid;
+			targetEntityWithPath.cellUuid = sourceEntityWithPath.cellUuid;
+		} else {
+			targetEntityWithPath.shardUuid = defaultShardUuid;
+			targetEntityWithPath.gridUuid = defaultGridUuid;
+			targetEntityWithPath.cellUuid = defaultCellUuid;
+		}
+	}
+
+	// Kind
+	if (targetOptions[CoreArgsIds.Kind] === true) {
+		/**
+		 * Entity with kind.
+		 */
+		type EntityWithKind = CoreEntityArgs<CoreArgsIdsToOptions<CoreArgsIds.Kind>>;
+		let targetEntityWithKind: EntityWithKind = targetEntityAs as EntityWithKind;
+		if (sourceOptions[CoreArgsIds.Kind] === true) {
+			targetEntityWithKind.kindUuid = (sourceEntityAs as EntityWithKind).kindUuid;
+		} else {
+			targetEntityWithKind.kindUuid = defaultKindUuid;
+		}
+	}
+
+	// Return
+	return targetEntity;
 }

@@ -45,11 +45,6 @@ export type CoreArgsIdsToOptions<I extends CoreArgsIds> = {
 };
 
 /**
- * Minimal possible args options configuration.
- */
-export type CoreArgsMinimalOptions = CoreArgsIdsToOptions<never>;
-
-/**
  * All the option possibilities.
  *
  * Not to be used for actual variables, to be used for generic argument constraints instead.
