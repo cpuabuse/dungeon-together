@@ -329,6 +329,9 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 	if (targetOptions[CoreArgsIds.Map] === true) {
 		let targetCellWithMap: CoreCellArgsWithMap = targetCellAs as CoreCellArgsWithMap;
 
+		// Worlds
+		targetCellWithMap.worlds = new Set(sourceCell.worlds);
+
 		if (sourceOptions[CoreArgsIds.Map] === true) {
 			// Map to map
 			const sourceCellWithMap: CoreCellArgsWithMap = sourceCellAs as CoreCellArgsWithMap;
@@ -343,7 +346,7 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 				)
 			);
 		} else {
-			// Array/set to map
+			// Array to map
 			const sourceCellWithoutMap: CoreCellArgsWithoutMap = sourceCellAs as CoreCellArgsWithoutMap;
 
 			// Entities
@@ -358,8 +361,11 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 	} else {
 		let targetCellWithoutMap: CoreCellArgsWithoutMap = sourceCellAs as CoreCellArgsWithoutMap;
 
+		// Worlds
+		targetCellWithoutMap.worlds = Array.from(sourceCell.worlds);
+
 		if (sourceOptions[CoreArgsIds.Map] === true) {
-			// Map to array/set
+			// Map to array
 			const sourceCellWithMap: CoreCellArgsWithMap = sourceCellAs as CoreCellArgsWithMap;
 
 			// Entities
@@ -370,7 +376,7 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 				coreEntityArgsConvert({ entity: entityWithMap as CoreEntityArgs<S>, sourceOptions, targetOptions })
 			);
 		} else {
-			// Array/set to array/set
+			// Array to array
 			const sourceCellWithoutMap: CoreCellArgsWithoutMap = sourceCellAs as CoreCellArgsWithoutMap;
 
 			// Entities
