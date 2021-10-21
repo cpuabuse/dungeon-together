@@ -7,7 +7,6 @@
  * Entity.
  */
 
-import { boolean } from "fp-ts";
 import { defaultCellUuid, defaultGridUuid, defaultKindUuid, defaultShardUuid } from "../common/defaults";
 import { ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";

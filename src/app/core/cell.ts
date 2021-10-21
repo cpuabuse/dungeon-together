@@ -316,14 +316,24 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 	}
 
 	/**
+	 * Core cell args options with map.
+	 */
+	type CoreCellArgsOptionsWithMap = CoreArgsIdsToOptions<CoreArgsIds.Map>;
+
+	/**
+	 * Core cell args options without map.
+	 */
+	type CoreCellArgsOptionsWithoutMap = CoreArgsIdsToOptions<never>;
+
+	/**
 	 * Core cell args with map.
 	 */
-	type CoreCellArgsWithMap = CoreCellArgs<CoreArgsIdsToOptions<CoreArgsIds.Map>>;
+	type CoreCellArgsWithMap = CoreCellArgs<CoreCellArgsOptionsWithMap>;
 
 	/**
 	 * Core cell args without map.
 	 */
-	type CoreCellArgsWithoutMap = CoreCellArgs<CoreArgsIdsToOptions<never>>;
+	type CoreCellArgsWithoutMap = CoreCellArgs<CoreCellArgsOptionsWithoutMap>;
 
 	// Map
 	if (targetOptions[CoreArgsIds.Map] === true) {
@@ -340,10 +350,16 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 			targetCellWithMap.entities = new Map(
 				// Argument types correctly inferred from "Array.from()", probably eslint bug
 				// eslint-disable-next-line @typescript-eslint/typedef
-				Array.from(sourceCellWithMap.entities, ([uuid, entityWithMap]) =>
-					// Revert back to original type, so that can be used on generics with "S" and "T" types
-					[uuid, coreEntityArgsConvert({ entity: entityWithMap as CoreEntityArgs<S>, sourceOptions, targetOptions })]
-				)
+				Array.from(sourceCellWithMap.entities, ([uuid, entity]) => [
+					uuid,
+					coreEntityArgsConvert({
+						entity,
+						// Cast to expected type
+						sourceOptions: sourceOptions as CoreCellArgsOptionsWithMap,
+						// Cast to expected type
+						targetOptions: targetOptions as CoreCellArgsOptionsWithMap
+					})
+				])
 			);
 		} else {
 			// Array to map
@@ -351,10 +367,15 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 
 			// Entities
 			targetCellWithMap.entities = new Map(
-				sourceCellWithoutMap.entities.map(entityWithoutMap => [
-					entityWithoutMap.entityUuid,
-					// Revert back to original type, so that can be used on generics with "S" and "T" types
-					coreEntityArgsConvert({ entity: entityWithoutMap as CoreEntityArgs<S>, sourceOptions, targetOptions })
+				sourceCellWithoutMap.entities.map(entity => [
+					entity.entityUuid,
+					coreEntityArgsConvert({
+						entity,
+						// Cast to expected type
+						sourceOptions: sourceOptions as CoreCellArgsOptionsWithoutMap,
+						// Cast to expected type
+						targetOptions: targetOptions as CoreCellArgsOptionsWithMap
+					})
 				])
 			);
 		}
@@ -369,19 +390,34 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 			const sourceCellWithMap: CoreCellArgsWithMap = sourceCellAs as CoreCellArgsWithMap;
 
 			// Entities
-			// Argument types correctly inferred from "Array.from()", and UUID is unused, probably eslint bug
-			// eslint-disable-next-line @typescript-eslint/typedef, @typescript-eslint/no-unused-vars
-			targetCellWithoutMap.entities = Array.from(sourceCellWithMap.entities, ([uuid, entityWithMap]) =>
-				// Revert back to original type, so that can be used on generics with "S" and "T" types
-				coreEntityArgsConvert({ entity: entityWithMap as CoreEntityArgs<S>, sourceOptions, targetOptions })
+			targetCellWithoutMap.entities = Array.from(
+				sourceCellWithMap.entities,
+				// Argument types correctly inferred from "Array.from()", probably eslint bug, and UUID is unused
+				// eslint-disable-next-line @typescript-eslint/typedef, @typescript-eslint/no-unused-vars
+				([uuid, entity]) =>
+					// Set to actual type
+					coreEntityArgsConvert({
+						entity,
+						// Cast to expected type
+						sourceOptions: sourceOptions as CoreCellArgsOptionsWithMap,
+						// Cast to expected type
+						targetOptions: targetOptions as CoreCellArgsOptionsWithoutMap
+					})
 			);
 		} else {
 			// Array to array
 			const sourceCellWithoutMap: CoreCellArgsWithoutMap = sourceCellAs as CoreCellArgsWithoutMap;
 
 			// Entities
-			targetCellWithoutMap.entities = sourceCellWithoutMap.entities.map(entityWithoutMap =>
-				coreEntityArgsConvert({ entity: entityWithoutMap as CoreEntityArgs<S>, sourceOptions, targetOptions })
+			targetCellWithoutMap.entities = sourceCellWithoutMap.entities.map(entity =>
+				// Set to actual type
+				coreEntityArgsConvert({
+					entity,
+					// Cast to expected type
+					sourceOptions: sourceOptions as CoreCellArgsOptionsWithoutMap,
+					// Cast to expected type
+					targetOptions: targetOptions as CoreCellArgsOptionsWithoutMap
+				})
 			);
 		}
 	}
