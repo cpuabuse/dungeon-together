@@ -11,9 +11,18 @@
  * Shard.
  */
 
+import { defaultShardUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
-import { CoreArgsIds, CoreArgsOptionsUnion } from "./args";
-import { CommsGrid, CommsGridArgs, CommsGridRaw, CoreGridArgs, GridPath, commsGridRawToArgs } from "./grid";
+import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptionsUnion } from "./args";
+import {
+	CommsGrid,
+	CommsGridArgs,
+	CommsGridRaw,
+	CoreGridArgs,
+	GridPath,
+	commsGridRawToArgs,
+	coreGridArgsConvert
+} from "./grid";
 
 /**
  * Everything-like.
@@ -129,4 +138,157 @@ export function commsShardRawToArgs(rawSource: CommsShardRaw): CommsShardArgs {
  */
 export function commsShardArgsToRaw(argsSource: CommsShardArgs): CommsShardRaw {
 	return { grids: new Array(), shardUuid: argsSource.shardUuid };
+}
+
+/**
+ * Convert shard args between options.
+ *
+ * Has to strictly follow {@link CoreShardArgs}.
+ *
+ * @returns Converted shard args
+ */
+export function coreShardArgsConvert<S extends CoreArgsOptionsUnion, T extends CoreArgsOptionsUnion>({
+	shard,
+	sourceOptions,
+	targetOptions
+}: {
+	/**
+	 * Core shard args.
+	 */
+	shard: CoreShardArgs<S>;
+
+	/**
+	 * Option for the source.
+	 */
+	sourceOptions: S;
+
+	/**
+	 * Option for the target.
+	 */
+	targetOptions: T;
+}): CoreShardArgs<T> {
+	// Define source and result, with minimal options
+	const sourceShard: CoreShardArgs<S> = shard;
+	const sourceShardAs: Record<string, any> = sourceShard;
+	// Cannot assign to conditional type without casting
+	let targetShard: CoreShardArgs<T> = {
+		shardUuid: sourceShard.shardUuid
+	} as CoreShardArgs<T>;
+	let targetShardAs: Record<string, any> = targetShard;
+
+	// Path
+	if (targetOptions[CoreArgsIds.Path] === true) {
+		/**
+		 * Core shard args with path.
+		 */
+		type CoreShardArgsWithPath = CoreShardArgs<CoreArgsIdsToOptions<CoreArgsIds.Path>>;
+		let targetShardWithPath: CoreShardArgsWithPath = targetShardAs as CoreShardArgsWithPath;
+
+		if (sourceOptions[CoreArgsIds.Path] === true) {
+			// Source to target
+			targetShardWithPath.shardUuid = (sourceShardAs as CoreShardArgsWithPath).shardUuid;
+		} else {
+			// Default to target
+			targetShardWithPath.shardUuid = defaultShardUuid;
+		}
+	}
+
+	/**
+	 * Core shard args options with map.
+	 */
+	type CoreShardArgsOptionsWithMap = CoreArgsIdsToOptions<CoreArgsIds.Map>;
+
+	/**
+	 * Core shard args options without map.
+	 */
+	type CoreShardArgsOptionsWithoutMap = CoreArgsIdsToOptions<never>;
+
+	/**
+	 * Core shard args with map.
+	 */
+	type CoreShardArgsWithMap = CoreShardArgs<CoreShardArgsOptionsWithMap>;
+
+	/**
+	 * Core shard args without map.
+	 */
+	type CoreShardArgsWithoutMap = CoreShardArgs<CoreShardArgsOptionsWithoutMap>;
+
+	// Map
+	if (targetOptions[CoreArgsIds.Map] === true) {
+		let targetShardWithMap: CoreShardArgsWithMap = targetShardAs as CoreShardArgsWithMap;
+
+		if (sourceOptions[CoreArgsIds.Map] === true) {
+			// Map to map
+			const sourceShardWithMap: CoreShardArgsWithMap = sourceShardAs as CoreShardArgsWithMap;
+
+			// Cells
+			targetShardWithMap.grids = new Map(
+				// Argument types correctly inferred from "Array.from()", probably eslint bug
+				// eslint-disable-next-line @typescript-eslint/typedef
+				Array.from(sourceShardWithMap.grids, ([uuid, grid]) => [
+					uuid,
+					coreGridArgsConvert({
+						grid,
+						// Cast to expected type
+						sourceOptions: sourceOptions as CoreShardArgsOptionsWithMap,
+						// Cast to expected type
+						targetOptions: targetOptions as CoreShardArgsOptionsWithMap
+					})
+				])
+			);
+		} else {
+			// Array to map
+			const sourceShardWithoutMap: CoreShardArgsWithoutMap = sourceShardAs;
+
+			// Grids
+			targetShardWithMap.grids = new Map(
+				sourceShardWithoutMap.grids.map(grid => [
+					grid.gridUuid,
+					coreGridArgsConvert({
+						grid,
+						// Cast to expected type
+						sourceOptions: sourceOptions as CoreShardArgsOptionsWithoutMap,
+						// Cast to expected type
+						targetOptions: targetOptions as CoreShardArgsOptionsWithMap
+					})
+				])
+			);
+		}
+	} else {
+		let targetShardWithoutMap: CoreShardArgsWithoutMap = sourceShardAs;
+
+		if (sourceOptions[CoreArgsIds.Map] === true) {
+			// Map to array
+			const sourceShardWithMap: CoreShardArgsWithMap = sourceShardAs;
+
+			// Grids
+			targetShardWithoutMap.grids = Array.from(
+				sourceShardWithMap.grids,
+				// Argument types correctly inferred from "Array.from()", and UUID is unused, probably eslint bug
+				// eslint-disable-next-line @typescript-eslint/typedef, @typescript-eslint/no-unused-vars
+				([uuid, grid]) =>
+					// Set to actual type
+					coreGridArgsConvert({
+						grid,
+						sourceOptions: sourceOptions as CoreShardArgsOptionsWithMap,
+						targetOptions: targetOptions as CoreShardArgsOptionsWithoutMap
+					})
+			);
+		} else {
+			// Array to array
+			const sourceShardWithoutMap: CoreShardArgsWithoutMap = sourceShardAs;
+
+			// Cells
+			targetShardWithoutMap.grids = sourceShardWithoutMap.grids.map(grid =>
+				// Set to actual type
+				coreGridArgsConvert({
+					grid,
+					sourceOptions: sourceOptions as CoreShardArgsOptionsWithoutMap,
+					targetOptions: targetOptions as CoreShardArgsOptionsWithoutMap
+				})
+			);
+		}
+	}
+	// Return
+	return targetShard;
 }
