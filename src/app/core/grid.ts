@@ -136,9 +136,9 @@ export function commsGridRawToArgs(rawSource: CommsGridRaw, shardUuid: Uuid): Co
 /**
  * Convert grid args between options.
  *
- * Has to strictly follow {@link CoreCellArgs}.
+ * Has to strictly follow {@link CoreGridArgs}.
  *
- * @returns Converted cell args
+ * @returns Converted grid args
  */
 export function coreGridArgsConvert<S extends CoreArgsOptionsUnion, T extends CoreArgsOptionsUnion>({
 	grid,

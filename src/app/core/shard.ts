@@ -11,9 +11,18 @@
  * Shard.
  */
 
+import { defaultShardUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
-import { CoreArgsIds, CoreArgsOptionsUnion } from "./args";
-import { CommsGrid, CommsGridArgs, CommsGridRaw, CoreGridArgs, GridPath, commsGridRawToArgs } from "./grid";
+import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptionsUnion } from "./args";
+import {
+	CommsGrid,
+	CommsGridArgs,
+	CommsGridRaw,
+	CoreGridArgs,
+	GridPath,
+	commsGridRawToArgs,
+	coreGridArgsConvert
+} from "./grid";
 
 /**
  * Everything-like.
@@ -129,4 +138,132 @@ export function commsShardRawToArgs(rawSource: CommsShardRaw): CommsShardArgs {
  */
 export function commsShardArgsToRaw(argsSource: CommsShardArgs): CommsShardRaw {
 	return { grids: new Array(), shardUuid: argsSource.shardUuid };
+}
+
+/**
+ * Convert shard args between options.
+ *
+ * Has to strictly follow {@link CoreShardArgs}.
+ *
+ * @returns Converted shard args
+ */
+export function coreShardArgsConvert<S extends CoreArgsOptionsUnion, T extends CoreArgsOptionsUnion>({
+	shard,
+	sourceOptions,
+	targetOptions
+}: {
+	/**
+	 * Core shard args.
+	 */
+	shard: CoreShardArgs<S>;
+
+	/**
+	 * Option for the source.
+	 */
+	sourceOptions: S;
+
+	/**
+	 * Option for the target.
+	 */
+	targetOptions: T;
+}): CoreShardArgs<T> {
+	// Define source and result, with minimal options
+	const sourceShard: CoreShardArgs<S> = shard;
+	const sourceShardAs: Record<string, any> = sourceShard;
+	// Cannot assign to conditional type without casting
+	let targetShard: CoreShardArgs<T> = {
+		shardUuid: sourceShard.shardUuid
+	} as CoreShardArgs<T>;
+	let targetShardAs: Record<string, any> = targetShard;
+
+	/**
+	 * Core shard args options with map.
+	 */
+	type CoreShardArgsOptionsWithMap = CoreArgsIdsToOptions<CoreArgsIds.Map>;
+
+	/**
+	 * Core shard args options without map.
+	 */
+	type CoreShardArgsOptionsWithoutMap = CoreArgsIdsToOptions<never>;
+
+	/**
+	 * Core shard args with map.
+	 */
+	type CoreShardArgsWithMap = CoreShardArgs<CoreShardArgsOptionsWithMap>;
+
+	/**
+	 * Core shard args without map.
+	 */
+	type CoreShardArgsWithoutMap = CoreShardArgs<CoreShardArgsOptionsWithoutMap>;
+
+	// Map
+	if (targetOptions[CoreArgsIds.Map] === true) {
+		let targetShardWithMap: CoreShardArgsWithMap = targetShardAs as CoreShardArgsWithMap;
+
+		if (sourceOptions[CoreArgsIds.Map] === true) {
+			// Map to map
+			// Cells
+			targetShardWithMap.grids = new Map(
+				// Argument types correctly inferred from "Array.from()", probably eslint bug
+				// eslint-disable-next-line @typescript-eslint/typedef
+				Array.from((sourceShardAs as CoreShardArgsWithMap).grids, ([uuid, grid]) => [
+					uuid,
+					coreGridArgsConvert({
+						grid,
+						// Cast to expected type
+						sourceOptions: sourceOptions as CoreShardArgsOptionsWithMap,
+						// Cast to expected type
+						targetOptions: targetOptions as CoreShardArgsOptionsWithMap
+					})
+				])
+			);
+		} else {
+			// Array to map
+			// Grids
+			targetShardWithMap.grids = new Map(
+				(sourceShardAs as CoreShardArgsWithoutMap).grids.map(grid => [
+					grid.gridUuid,
+					coreGridArgsConvert({
+						grid,
+						// Cast to expected type
+						sourceOptions: sourceOptions as CoreShardArgsOptionsWithoutMap,
+						// Cast to expected type
+						targetOptions: targetOptions as CoreShardArgsOptionsWithMap
+					})
+				])
+			);
+		}
+	} else {
+		let targetShardWithoutMap: CoreShardArgsWithoutMap = targetShardAs as CoreShardArgsWithoutMap;
+
+		if (sourceOptions[CoreArgsIds.Map] === true) {
+			// Map to array
+			// Grids
+			targetShardWithoutMap.grids = Array.from(
+				(sourceShardAs as CoreShardArgsWithMap).grids,
+				// Argument types correctly inferred from "Array.from()", and UUID is unused, probably eslint bug
+				// eslint-disable-next-line @typescript-eslint/typedef, @typescript-eslint/no-unused-vars
+				([uuid, grid]) =>
+					// Set to actual type
+					coreGridArgsConvert({
+						grid,
+						sourceOptions: sourceOptions as CoreShardArgsOptionsWithMap,
+						targetOptions: targetOptions as CoreShardArgsOptionsWithoutMap
+					})
+			);
+		} else {
+			// Array to array
+			// Cells
+			targetShardWithoutMap.grids = (sourceShardAs as CoreShardArgsWithoutMap).grids.map(grid =>
+				// Set to actual type
+				coreGridArgsConvert({
+					grid,
+					sourceOptions: sourceOptions as CoreShardArgsOptionsWithoutMap,
+					targetOptions: targetOptions as CoreShardArgsOptionsWithoutMap
+				})
+			);
+		}
+	}
+	// Return
+	return targetShard;
 }
