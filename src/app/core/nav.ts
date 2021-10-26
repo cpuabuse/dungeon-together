@@ -3,43 +3,149 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+/**
+ * @file Navigation
+ *
+ * Ways to address, encode and decode navigation identifiers for adjacent cells.
+ *
+ * In a binary number, each digit will be reserved for a direction of particular coordinate change. While the absence of both will be represented by zero. Thus, there are three possible states per direction, per trit.
+ * For the purposes of simplicity when defining values of potential direction combinations, this way of representation was chosen, so that `leftTop == left | top` is true. So there are two bits(digits) per trit.
+ */
+
 import { Vector } from "../common/vector";
 
 /**
- * @file Navigation
+ * Amount of bits reserved per coordinates.
  */
+const tritShiftAmount: number = 2;
 
 /**
- *
+ * A single bit, representing increase or decrease in coordinate.
  */
-const tritShiftAmount: number = 3;
+const coordinateBorder: number = 0x1;
 
 /**
- *
+ * Keys of {@link Vector}.
  */
-const xTritBase: number = 0x1;
+enum VectorDimensions {
+	X = "x",
+	Y = "y",
+	Z = "z"
+}
 
 /**
- *
+ * Amount of bits needed for coordinate border to be shifted left, so that dimension specific border is produced.
  */
-const yTritBase: number = 0x1 << tritShiftAmount;
+enum TritCoordinateShiftAmounts {
+	Increase = 1,
+	Decrease = 0
+}
 
 /**
- *
+ * Representation of change in coordinate encoded in a trit.
  */
-// Manually setting the value
-// eslint-disable-next-line no-magic-numbers
-const zTritBase: number = 0x1 << (tritShiftAmount * 2);
+enum CoordinateChanges {
+	Decrease = -1,
+	Neutral = 0,
+	Increase = 1
+}
 
 /**
- *
+ * A type for a main object containing encoding and decoding information, for conversion between navigation values and coordinate change.
  */
-const tritCoordinateDecrease: number = 1;
+type VectorCodecInfo = {
+	[K in VectorDimensions]: {
+		/**
+		 * Mask required to extract dimension trit.
+		 */
+		mask: number;
+
+		/**
+		 * Shift required to produce dimension trit border.
+		 */
+		shift: {
+			[C in TritCoordinateShiftAmounts]: number;
+		};
+
+		/**
+		 * Decoded coordinate change on masked value.
+		 */
+		maskedCoordinateChange: Map<number, CoordinateChanges>;
+	};
+};
 
 /**
- *
+ * Main object containing all necessary information for conversion between navigation and corresponding coordinate change.
  */
-const tritCoordinateIncrease: number = 2;
+const vectorCodecInfo: VectorCodecInfo = (function ({
+	dimensions
+}: {
+	/**
+	 * Dimensions to be generated.
+	 */
+	dimensions: Set<VectorDimensions>;
+}): VectorCodecInfo {
+	return Array.from(dimensions).reduce((info, dimensionKey, index) => {
+		// Initial variables
+		let border: number = coordinateBorder << (tritShiftAmount * index);
+		let decreaseBit: number = border << TritCoordinateShiftAmounts.Decrease;
+		let increaseBit: number = border << TritCoordinateShiftAmounts.Increase;
+
+		// Empty mask
+		let mask: number = 0x0;
+
+		// Populate mask
+		for (let i: number = 0; i < tritShiftAmount; i++) {
+			mask |= border << i;
+		}
+
+		// Separate variable for explicit type check
+		let dimensionValue: VectorCodecInfo[VectorDimensions] = {
+			mask,
+			maskedCoordinateChange: new Map([
+				[decreaseBit, CoordinateChanges.Decrease],
+				// "0x0" represents neutral value
+				[0x0, CoordinateChanges.Neutral],
+				[increaseBit, CoordinateChanges.Increase]
+			]),
+			shift: {
+				[TritCoordinateShiftAmounts.Decrease]: decreaseBit,
+				[TritCoordinateShiftAmounts.Increase]: increaseBit
+			}
+		};
+
+		return {
+			...info,
+			[dimensionKey]: dimensionValue
+		};
+	}, {} as VectorCodecInfo);
+})({
+	dimensions: new Set(Object.values(VectorDimensions))
+});
+
+/**
+ * Unconditionally produces value responsible for specific change in a specific dimension.
+ *
+ * @returns Dimension bit
+ */
+function getDimensionBit({
+	dimensionKey,
+	shiftAmount
+}: {
+	/**
+	 * A key to be used to access a dimension in codec.
+	 */
+	dimensionKey: VectorDimensions;
+
+	/**
+	 * Shift amount representing direction.
+	 */
+	shiftAmount: TritCoordinateShiftAmounts;
+}): number {
+	let dimensionBit: number | undefined = vectorCodecInfo[dimensionKey].maskedCoordinateChange.get(shiftAmount);
+
+	return dimensionBit === undefined ? CoordinateChanges.Neutral : dimensionBit;
+}
 
 /**
  * Human understandable cell navigation.
@@ -48,32 +154,50 @@ export enum Nav {
 	/**
 	 * Left movement.
 	 */
-	Left = xTritBase << tritCoordinateDecrease,
+	Left = getDimensionBit({
+		dimensionKey: VectorDimensions.X,
+		shiftAmount: TritCoordinateShiftAmounts.Decrease
+	}),
 
 	/**
 	 * Right movement.
 	 */
-	Right = xTritBase << tritCoordinateIncrease,
+	Right = getDimensionBit({
+		dimensionKey: VectorDimensions.X,
+		shiftAmount: TritCoordinateShiftAmounts.Increase
+	}),
 
 	/**
 	 * Up movement.
 	 */
-	YUp = yTritBase << tritCoordinateDecrease,
+	YUp = getDimensionBit({
+		dimensionKey: VectorDimensions.Y,
+		shiftAmount: TritCoordinateShiftAmounts.Decrease
+	}),
 
 	/**
 	 * Down movement.
 	 */
-	YDown = yTritBase << tritCoordinateIncrease,
+	YDown = getDimensionBit({
+		dimensionKey: VectorDimensions.Y,
+		shiftAmount: TritCoordinateShiftAmounts.Increase
+	}),
 
 	/**
 	 * Vertical down movement.
 	 */
-	ZDown = zTritBase << tritCoordinateDecrease,
+	ZUp = getDimensionBit({
+		dimensionKey: VectorDimensions.Z,
+		shiftAmount: TritCoordinateShiftAmounts.Decrease
+	}),
 
 	/**
 	 * Vertical up movement.
 	 */
-	ZUp = zTritBase << tritCoordinateIncrease,
+	ZDown = getDimensionBit({
+		dimensionKey: VectorDimensions.Z,
+		shiftAmount: TritCoordinateShiftAmounts.Increase
+	}),
 
 	/**
 	 * Down-left movement.
@@ -172,16 +296,38 @@ export enum Nav {
 }
 
 /**
- *
+ * A value type to which {@link navIndex} maps to.
+ * Also acts as a constraint for compatibility with {@link Vector}.
  */
-export const navIndex: Map<Nav, Vector> = new Map(
+type NavIndexValue = Vector extends {
+	[K in VectorDimensions]: CoordinateChanges;
+}
+	? {
+			[K in VectorDimensions]: CoordinateChanges;
+	  }
+	: never;
+
+/**
+ * Index representing relationship between {@link Nav} and {@link Vector} coordinate change.
+ */
+export const navIndex: Map<
+	Nav,
+	// A constraint making sure return value is compatible with vector
+	NavIndexValue
+> = new Map(
 	// Typescript inserts string as union as return value of "values", unnecessarily
-	(Object.values(Nav) as Array<Nav>).map(direction => [
-		direction,
-		{
-			x: 0,
-			y: 0,
-			z: 0
-		}
+	(Object.values(Nav) as Array<Nav>).map(nav => [
+		nav,
+		Object.values(VectorDimensions).reduce((result, dimension) => {
+			// Explicitly verifying type
+			let dimensionValue: NavIndexValue[VectorDimensions] | undefined = vectorCodecInfo[
+				dimension
+			].maskedCoordinateChange.get(nav & vectorCodecInfo[dimension].mask);
+
+			return {
+				...result,
+				[dimension]: dimensionValue === undefined ? CoordinateChanges.Neutral : dimensionValue
+			};
+		}, {} as NavIndexValue)
 	])
 );
