@@ -9,7 +9,7 @@
 
 import { defaultShardUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
-import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptionsUnion } from "./args";
+import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "./args";
 import {
 	CellPath,
 	CommsCell,
@@ -46,7 +46,7 @@ export type CommsGridRaw = Omit<CommsGridArgs, "cells" | keyof ShardPath> & {
 /**
  * Core grid args.
  */
-export type CoreGridArgs<O extends CoreArgsOptionsUnion> = (O[CoreArgsIds.Path] extends true
+export type CoreGridArgs<O extends CoreArgsOptionsUnion = CoreArgsOptions> = (O[CoreArgsIds.Path] extends true
 	? GridPath
 	: GridOwnPath) & {
 	/**
@@ -194,7 +194,7 @@ export function coreGridArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 	/**
 	 * Core grid args options without map.
 	 */
-	type CoreGridArgsOptionsWithoutMap = CoreArgsIdsToOptions<never>;
+	type CoreGridArgsOptionsWithoutMap = CoreArgsOptions;
 
 	/**
 	 * Core grid args with map.

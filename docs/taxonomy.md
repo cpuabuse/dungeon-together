@@ -1,4 +1,4 @@
 # Taxonomy
 
-SGCEs
+Universe objects
 : Shard, grid, cell, entity classes/instances

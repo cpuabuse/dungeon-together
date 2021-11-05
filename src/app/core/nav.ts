@@ -149,6 +149,9 @@ function getDimensionBit({
 
 /**
  * Human understandable cell navigation.
+ *
+ * For z coordinate, the highest point from the perspective of the user(e.g. the sky) is zero.
+ * So the descent from the perspective of the user, is an increase in z coordinate.
  */
 export enum Nav {
 	/**
@@ -184,7 +187,7 @@ export enum Nav {
 	}),
 
 	/**
-	 * Vertical down movement.
+	 * Vertical up movement.
 	 */
 	ZUp = getDimensionBit({
 		dimensionKey: VectorDimensions.Z,
@@ -192,7 +195,7 @@ export enum Nav {
 	}),
 
 	/**
-	 * Vertical up movement.
+	 * Vertical down movement.
 	 */
 	ZDown = getDimensionBit({
 		dimensionKey: VectorDimensions.Z,

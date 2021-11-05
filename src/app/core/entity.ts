@@ -10,7 +10,7 @@
 import { defaultCellUuid, defaultGridUuid, defaultKindUuid, defaultShardUuid } from "../common/defaults";
 import { ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
-import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptionsUnion } from "./args";
+import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "./args";
 import { CoreBase, CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
 import { CellPath, CoreCell } from "./cell";
 
@@ -46,7 +46,7 @@ export type CommsEntityRaw = Omit<CommsEntityArgs, keyof CellPath>;
  *
  * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
-export type CoreEntityArgs<O extends CoreArgsOptionsUnion> = (O[CoreArgsIds.Path] extends true
+export type CoreEntityArgs<O extends CoreArgsOptionsUnion = CoreArgsOptions> = (O[CoreArgsIds.Path] extends true
 	? EntityPath
 	: EntityOwnPath) & {
 	/**

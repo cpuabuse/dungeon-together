@@ -45,6 +45,13 @@ export type CoreArgsIdsToOptions<I extends CoreArgsIds> = {
 };
 
 /**
+ * Options on which core operates.
+ *
+ * To be used as a type for actual variables.
+ */
+export type CoreArgsOptions = CoreArgsIdsToOptions<never>;
+
+/**
  * All the option possibilities.
  *
  * Not to be used for actual variables, to be used for generic argument constraints instead.

@@ -4,13 +4,13 @@
 */
 
 /**
- * @file Cell.
+ * @file Cell
  */
 
 import { defaultGridUuid, defaultShardUuid, entityUuidUrlPath, urlPathSeparator } from "../common/defaults";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { Vector } from "../common/vector";
-import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptionsUnion } from "./args";
+import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "./args";
 import { CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
 import {
 	CommsEntity,
@@ -69,7 +69,9 @@ export type CommsCellRaw = CommCellRawHelper<
  *
  * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
-export type CoreCellArgs<O extends CoreArgsOptionsUnion> = (O[CoreArgsIds.Path] extends true ? CellPath : CellOwnPath) &
+export type CoreCellArgs<O extends CoreArgsOptionsUnion = CoreArgsOptions> = (O[CoreArgsIds.Path] extends true
+	? CellPath
+	: CellOwnPath) &
 	(O[CoreArgsIds.Vector] extends true ? Vector : unknown) & {
 		/**
 		 * Array of entities.
@@ -146,10 +148,37 @@ export function CoreCellFactory<C extends CoreBaseClassNonRecursive = CoreBaseCl
 }) {
 	/**
 	 * Core cell base class.
+	 *
+	 * @see CoreUniverseObjectInherit for more details
 	 */
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare
 	abstract class CoreCell extends Base {
+		/**
+		 * Default entity UUID.
+		 */
+		public abstract defaultEntityUuid: Uuid;
+
+		/**
+		 * Adds [[Entity]].
+		 */
+		addEntity(entity: CommsEntityArgs): void;
+
+		/**
+		 * Gets [[Entity]].
+		 */
+		getEntity(path: EntityPath): CommsEntity;
+
+		/**
+		 * Removes [[Entity]].
+		 */
+		removeEntity(path: EntityPath): void;
+
+		/**
+		 * Terminates `this`.
+		 */
+		terminate(): void;
+
 		/**
 		 * Entities.
 		 */
@@ -323,7 +352,7 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 	/**
 	 * Core cell args options without map.
 	 */
-	type CoreCellArgsOptionsWithoutMap = CoreArgsIdsToOptions<never>;
+	type CoreCellArgsOptionsWithoutMap = CoreArgsOptions;
 
 	/**
 	 * Core cell args with map.
