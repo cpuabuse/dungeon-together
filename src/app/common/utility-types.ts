@@ -26,12 +26,16 @@ export type ToAbstract<C extends new (...args: any[]) => any> = C extends new (.
 /**
  * Converts an abstract class to non-abstract version.
  */
-export type FromAbstract<C extends abstract new (...args: any) => any> = C & (new (...args: any) => any);
+export type FromAbstract<C extends abstract new (...args: any[]) => any> = C extends abstract new (
+	...args: infer A
+) => infer R
+	? Omit<C, "new"> & (new (...args: A) => R)
+	: never;
 
 /**
  * Destructured params from constructor.
  */
-export type DestructureParameters<C extends new (args: any) => any> = ConstructorParameters<C>[0];
+export type DestructureParameters<C extends new (...args: any[]) => any> = ConstructorParameters<C>[0];
 
 /**
  * Typescript safe way of determining if property exists.
