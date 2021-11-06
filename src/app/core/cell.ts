@@ -18,11 +18,15 @@ import {
 	CommsEntityRaw,
 	CoreEntity,
 	CoreEntityArgs,
+	CoreEntityClass,
 	EntityPath,
 	commsEntityRawToArgs,
 	coreEntityArgsConvert
 } from "./entity";
 import { GridPath } from "./grid";
+// Type used only for documentation
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { CoreUniverseObjectsInherit } from "./universe-objects";
 
 /**
  * A location-like.
@@ -138,51 +142,63 @@ export type CoreCell = CommsCell & InstanceType<ReturnType<typeof CoreCellFactor
  */
 // Force type inference to extract class type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function CoreCellFactory<C extends CoreBaseClassNonRecursive = CoreBaseClass>({
+export function CoreCellFactory<
+	C extends CoreBaseClassNonRecursive = CoreBaseClass,
+	O extends CoreArgsOptionsUnion = CoreArgsOptions
+>({
 	Base
 }: {
 	/**
 	 * Client base.
 	 */
 	Base: C;
+
+	/**
+	 * Options.
+	 */
+	options: O;
 }) {
+	/**
+	 * Entity type extracted from base class.
+	 */
+	type Entity = C extends {
+		/**
+		 * Universe.
+		 */
+		universe: {
+			/**
+			 * Entity class.
+			 */
+			Entity: infer T;
+		};
+	}
+		? T extends CoreEntityClass
+			? InstanceType<T>
+			: CoreEntity
+		: CoreEntity;
+
 	/**
 	 * Core cell base class.
 	 *
-	 * @see CoreUniverseObjectInherit for more details
+	 * @see CoreUniverseObjectsInherit for more details
 	 */
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare
 	abstract class CoreCell extends Base {
+		/**
+		 * Default entity.
+		 */
+		public abstract defaultEntity: Entity;
+
 		/**
 		 * Default entity UUID.
 		 */
 		public abstract defaultEntityUuid: Uuid;
 
 		/**
-		 * Adds [[Entity]].
-		 */
-		addEntity(entity: CommsEntityArgs): void;
-
-		/**
-		 * Gets [[Entity]].
-		 */
-		getEntity(path: EntityPath): CommsEntity;
-
-		/**
-		 * Removes [[Entity]].
-		 */
-		removeEntity(path: EntityPath): void;
-
-		/**
-		 * Terminates `this`.
-		 */
-		terminate(): void;
-
-		/**
 		 * Entities.
 		 */
-		abstract readonly entities: Map<Uuid, CoreEntity>;
+		abstract readonly entities: Map<Uuid, Entity>;
 
 		/**
 		 * Gets default entity UUID.
@@ -196,11 +212,18 @@ export function CoreCellFactory<C extends CoreBaseClassNonRecursive = CoreBaseCl
 		}
 
 		/**
+		 * Adds entity.
+		 *
+		 * @param entity - Entity to add
+		 */
+		public abstract addEntity(entity: CoreEntityArgs<O>): void;
+
+		/**
 		 * Attach {@link CoreEntity} to {@link CoreCell}.
 		 *
 		 * @param entity - {@link CoreEntity}, anything that resides within a cell
 		 */
-		public attach(entity: CoreEntity): void {
+		public attach(entity: Entity): void {
 			this.entities.set(entity.entityUuid, entity);
 		}
 
@@ -216,6 +239,26 @@ export function CoreCellFactory<C extends CoreBaseClassNonRecursive = CoreBaseCl
 			}
 			return false;
 		}
+
+		/**
+		 * Gets entity.
+		 *
+		 * @returns Entity
+		 */
+		public getEntity({ entityUuid }: EntityPath): Entity {
+			let entity: Entity | undefined = this.entities.get(entityUuid);
+			return entity === undefined ? this.defaultEntity : entity;
+		}
+
+		/**
+		 * Removes entity.
+		 */
+		public abstract removeEntity(path: EntityPath): void;
+
+		/**
+		 * Terminates `this`.
+		 */
+		public abstract terminate(): void;
 	}
 
 	return CoreCell;

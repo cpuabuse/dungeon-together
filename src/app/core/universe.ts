@@ -9,7 +9,7 @@
 
 import { Application } from "./application";
 import { CoreBaseClass } from "./base";
-import { CellPath, CommsCell, CoreCell, CoreCellClass } from "./cell";
+import { CellPath, CoreCell, CoreCellClass } from "./cell";
 import { CommsEntity, CoreEntityClass, EntityPath } from "./entity";
 import { CommsGrid, CoreGridClass, GridPath } from "./grid";
 import { CommsShard, CommsShardArgs, CoreShardClass, ShardPath } from "./shard";
@@ -121,5 +121,6 @@ export interface CoreUniverseClassConcreteStatic<U extends CoreUniverse = CoreUn
 
 /**
  * Class type for abstract classes, like {@link CoreUniverse}, to be used in mixin to generate the final core universe functionality.
+ * In this type, arguments are `any`.
  */
 export type CoreUniverseClassAbstractStatic<U extends CoreUniverse = CoreUniverse> = abstract new (...args: any[]) => U;
