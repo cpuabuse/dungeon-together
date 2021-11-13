@@ -11,7 +11,6 @@
  * Shard.
  */
 
-import { defaultShardUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
 import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "./args";
 import {
@@ -23,6 +22,11 @@ import {
 	commsGridRawToArgs,
 	coreGridArgsConvert
 } from "./grid";
+
+/**
+ * Word referring to a shard.
+ */
+export type CoreShardWord = "Shard";
 
 /**
  * Everything-like.

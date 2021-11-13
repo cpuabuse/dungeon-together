@@ -22,6 +22,11 @@ import {
 import { ShardPath } from "./shard";
 
 /**
+ * Word referring to a grid.
+ */
+export type CoreGridWord = "Grid";
+
+/**
  * A grid-like.
  */
 export interface CommsGridArgs extends GridPath {

@@ -15,6 +15,11 @@ import { CoreBase, CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
 import { CellPath, CoreCell } from "./cell";
 
 /**
+ * Word referring to entity.
+ */
+export type CoreEntityWord = "Entity";
+
+/**
  * An object-like.
  */
 export interface CommsEntityArgs extends EntityPath {

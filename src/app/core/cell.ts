@@ -26,7 +26,12 @@ import {
 import { GridPath } from "./grid";
 // Type used only for documentation
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { CoreUniverseObjectsInherit } from "./universe-objects";
+import { CoreUniverseObjectInherit } from "./universe-objects";
+
+/**
+ * Word referring to a cell.
+ */
+export type CoreCellWord = "Cell";
 
 /**
  * A location-like.
@@ -180,7 +185,7 @@ export function CoreCellFactory<
 	/**
 	 * Core cell base class.
 	 *
-	 * @see CoreUniverseObjectsInherit for more details
+	 * @see CoreUniverseObjectInherit for more details
 	 */
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare

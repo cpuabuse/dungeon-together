@@ -15,9 +15,4 @@
  * @remarks
  * This is for documentation purposes only.
  */
-export type CoreUniverseObjectsInherit = never;
-
-/**
- * Names for classes in the universe.
- */
-export type CoreUniverseObjectsClassIds = "Shard" | "Grid" | "Cell" | "Entity";
+export type CoreUniverseObjectInherit = never;
