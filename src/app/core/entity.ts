@@ -7,12 +7,20 @@
  * Entity.
  */
 
-import { defaultCellUuid, defaultGridUuid, defaultKindUuid, defaultShardUuid } from "../common/defaults";
+import {
+	defaultCellUuid,
+	defaultGridUuid,
+	defaultKindUuid,
+	defaultShardUuid,
+	entityUuidUrlPath,
+	urlPathSeparator
+} from "../common/defaults";
 import { ToAbstract } from "../common/utility-types";
-import { Uuid } from "../common/uuid";
+import { Uuid, getDefaultUuid } from "../common/uuid";
 import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "./args";
 import { CoreBase, CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
 import { CellPath, CoreCell } from "./cell";
+import { CoreUniverseObject } from "./universe-objects";
 
 /**
  * Word referring to entity.
@@ -95,6 +103,82 @@ export interface CommsEntity extends CommsEntityArgs {
  * Core entity type.
  */
 export type CoreEntity = CommsEntity;
+
+/**
+ * Factory for core entity.
+ */
+// Force type inference to extract class type
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function CoreEntityFactory<
+	C extends CoreBaseClassNonRecursive = CoreBaseClass,
+	O extends CoreArgsOptionsUnion = CoreArgsOptions
+>({
+	Base
+}: {
+	/**
+	 * Client base.
+	 */
+	Base: C;
+
+	/**
+	 * Options.
+	 */
+	options: O;
+}) {
+	/**
+	 * Entity type extracted from entity class.
+	 */
+	type Entity = C extends {
+		/**
+		 * Universe.
+		 */
+		universe: {
+			/**
+			 * Entity class.
+			 */
+			Entity: infer T;
+		};
+	}
+		? T extends CoreEntityClass
+			? InstanceType<T>
+			: CoreEntity
+		: CoreEntity;
+
+	/**
+	 * Core entity base class.
+	 *
+	 * @see CoreUniverseObjectInherit for more details
+	 */
+	// Merging interfaces
+	// eslint-disable-next-line no-redeclare
+	abstract class CoreEntity extends Base implements CoreUniverseObject<CoreEntityWord> {
+		/**
+		 * Default entity.
+		 */
+		public abstract defaultEntity: Entity;
+
+		/**
+		 * Default entity UUID.
+		 */
+		public abstract defaultEntityUuid: Uuid;
+
+		/**
+		 * Entities.
+		 */
+		abstract readonly entities: Map<Uuid, Entity>;
+
+		/**
+		 * Gets default entity UUID.
+		 *
+		 * @returns Default entity UUID
+		 */
+		public static getDefaultEntityUuid({ entityUuid }: EntityOwnPath): Uuid {
+			return getDefaultUuid({
+				path: `${entityUuidUrlPath}${urlPathSeparator}${entityUuid}`
+			});
+		}
+	}
+}
 
 /**
  * Path to an entity only.
