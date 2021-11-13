@@ -11,7 +11,6 @@ import { CoreCellWord } from "../cell";
 import { CoreEntityWord } from "../entity";
 import { CoreGridWord } from "../grid";
 import { CoreShardWord } from "../shard";
-import { CoreUniverseObjectPath } from "./path";
 
 /**
  * Names for the universe objects.
@@ -25,20 +24,15 @@ export type CoreUniverseObjectCrud<T extends CoreUniverseObjectWords> = {
 	/**
 	 * Add a new universe object.
 	 */
-	[K in T as `add${Capitalize<K>}`]: (arg: {
-		/**
-		 * Universe object to add.
-		 */
-		[A in K as Lowercase<A>]: unknown;
-	}) => void;
+	[K in T as `add${Capitalize<K>}`]: (...args: any[]) => void;
 } & {
 	/**
 	 * Get a universe object.
 	 */
-	[K in T as `get${Capitalize<K>}`]: (arg: CoreUniverseObjectPath) => unknown;
+	[K in T as `get${Capitalize<K>}`]: (...args: any[]) => unknown;
 } & {
 	/**
 	 * Remove a universe object.
 	 */
-	[K in T as `remove${Capitalize<K>}`]: (arg: CoreUniverseObjectPath) => void;
+	[K in T as `remove${Capitalize<K>}`]: (...arg: any[]) => void;
 };

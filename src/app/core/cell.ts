@@ -19,6 +19,7 @@ import {
 	CoreEntity,
 	CoreEntityArgs,
 	CoreEntityClass,
+	CoreEntityWord,
 	EntityPath,
 	commsEntityRawToArgs,
 	coreEntityArgsConvert
@@ -26,7 +27,7 @@ import {
 import { GridPath } from "./grid";
 // Type used only for documentation
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { CoreUniverseObjectInherit } from "./universe-objects";
+import { CoreUniverseObject, CoreUniverseObjectInherit } from "./universe-objects";
 
 /**
  * Word referring to a cell.
@@ -189,7 +190,7 @@ export function CoreCellFactory<
 	 */
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare
-	abstract class CoreCell extends Base {
+	abstract class CoreCell extends Base implements CoreUniverseObject<CoreEntityWord> {
 		/**
 		 * Default entity.
 		 */

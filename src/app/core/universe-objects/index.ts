@@ -7,6 +7,8 @@
  * @file Universe objects
  */
 
+import { CoreUniverseObjectCrud, CoreUniverseObjectWords } from "./crud";
+
 /**
  * Default UUIDs are to be set by client/server universe objects, since they might be dependant on implementation. In core abstract class these members are abstract. Also, static method in a core abstract class should provide a default UUID.
  *
@@ -16,3 +18,8 @@
  * This is for documentation purposes only.
  */
 export type CoreUniverseObjectInherit = never;
+
+/**
+ * Core universe object constraints.
+ */
+export type CoreUniverseObject<T extends CoreUniverseObjectWords> = CoreUniverseObjectCrud<T>;
