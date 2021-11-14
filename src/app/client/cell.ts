@@ -9,7 +9,7 @@
 
 import { defaultKindUuid, defaultModeUuid, defaultWorldUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
-import { CommsCell, CommsCellArgs, CoreCellFactory } from "../core/cell";
+import { CommsCell, CommsCellArgs, CoreCellClassFactory } from "../core/cell";
 import { CommsEntityArgs, EntityPath } from "../core/entity";
 import { ClientBaseClass } from "./base";
 import { ClientEntity } from "./entity";
@@ -32,7 +32,7 @@ export function ClientCellFactory({
 	/**
 	 * Square(Vector).
 	 */
-	class ClientCell extends CoreCellFactory({ Base }) implements CommsCell {
+	class ClientCell extends CoreCellClassFactory({ Base }) implements CommsCell {
 		/**
 		 * This CommsCell UUID.
 		 */

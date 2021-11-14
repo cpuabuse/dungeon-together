@@ -16,7 +16,7 @@ import {
 	urlPathSeparator
 } from "../common/defaults";
 import { Uuid, getDefaultUuid } from "../common/uuid";
-import { CellPath, CommsCell, CommsCellArgs, CoreCellFactory } from "../core/cell";
+import { CellPath, CommsCell, CommsCellArgs, CoreCellClassFactory } from "../core/cell";
 import { EntityPath } from "../core/entity";
 import { ServerBaseClass } from "./base";
 import { ServerEntity, ServerEntityArgs, ServerEntityClassConcrete } from "./entity";
@@ -58,7 +58,7 @@ export function ServerCellFactory({
 	/**
 	 * The cell within the grid.
 	 */
-	class ServerCell extends CoreCellFactory({ Base }) implements CommsCell {
+	class ServerCell extends CoreCellClassFactory({ Base }) implements CommsCell {
 		/**
 		 * Coordinates in grid. An id given during creation. Does not represent anything visually or logically.
 		 */
