@@ -25,9 +25,12 @@ import {
 	coreEntityArgsConvert
 } from "./entity";
 import { GridPath } from "./grid";
-// Type used only for documentation
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { CoreUniverseObject, CoreUniverseObjectInherit } from "./universe-objects";
+import {
+	CoreUniverseObject,
+	// Type used only for documentation
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	CoreUniverseObjectInherit
+} from "./universe-objects";
 
 /**
  * Word referring to a cell.

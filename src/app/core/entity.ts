@@ -20,7 +20,12 @@ import { Uuid, getDefaultUuid } from "../common/uuid";
 import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "./args";
 import { CoreBase, CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
 import { CellPath, CoreCell } from "./cell";
-import { CoreUniverseObject } from "./universe-objects";
+import {
+	CoreUniverseObject,
+	// Type used only for documentation
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	CoreUniverseObjectInherit
+} from "./universe-objects";
 
 /**
  * Word referring to entity.
@@ -105,15 +110,35 @@ export interface CommsEntity extends CommsEntityArgs {
 export type CoreEntity = CommsEntity;
 
 /**
- * Factory for core entity.
+ * Path to an entity only.
  */
-// Force type inference to extract class type
+export interface EntityOwnPath {
+	/**
+	 * Cell uuid.
+	 */
+	entityUuid: Uuid;
+}
+
+/**
+ * Path to an entity.
+ */
+export interface EntityPath extends CellPath, EntityOwnPath {}
+
+/**
+ * Core entity class factory.
+ *
+ * @see {@link CoreBaseClassNonRecursive} for usage
+ *
+ * @returns Core entity class
+ */
+// Forcing inference
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function CoreEntityFactory<
+export function CoreEntityClassFactory<
 	C extends CoreBaseClassNonRecursive = CoreBaseClass,
 	O extends CoreArgsOptionsUnion = CoreArgsOptions
 >({
-	Base
+	Base,
+	options
 }: {
 	/**
 	 * Client base.
@@ -145,13 +170,16 @@ export function CoreEntityFactory<
 		: CoreEntity;
 
 	/**
-	 * Core entity base class.
+	 * Core entity.
 	 *
 	 * @see CoreUniverseObjectInherit for more details
 	 */
-	// Merging interfaces
-	// eslint-disable-next-line no-redeclare
 	abstract class CoreEntity extends Base implements CoreUniverseObject<CoreEntityWord> {
+		/**
+		 * Cell UUID.
+		 */
+		public abstract cellUuid: Uuid;
+
 		/**
 		 * Default entity.
 		 */
@@ -161,65 +189,6 @@ export function CoreEntityFactory<
 		 * Default entity UUID.
 		 */
 		public abstract defaultEntityUuid: Uuid;
-
-		/**
-		 * Entities.
-		 */
-		abstract readonly entities: Map<Uuid, Entity>;
-
-		/**
-		 * Gets default entity UUID.
-		 *
-		 * @returns Default entity UUID
-		 */
-		public static getDefaultEntityUuid({ entityUuid }: EntityOwnPath): Uuid {
-			return getDefaultUuid({
-				path: `${entityUuidUrlPath}${urlPathSeparator}${entityUuid}`
-			});
-		}
-	}
-}
-
-/**
- * Path to an entity only.
- */
-export interface EntityOwnPath {
-	/**
-	 * Cell uuid.
-	 */
-	entityUuid: Uuid;
-}
-
-/**
- * Path to an entity.
- */
-export interface EntityPath extends CellPath, EntityOwnPath {}
-
-/**
- * Core entity class factory.
- *
- * @see {@link CoreBaseClassNonRecursive} for usage
- *
- * @returns Core entity class
- */
-// Forcing inference
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function CoreEntityClassFactory<C extends CoreBaseClassNonRecursive = CoreBaseClass>({
-	Base
-}: {
-	/**
-	 * Base to extend.
-	 */
-	Base: C;
-}) {
-	/**
-	 * Core entity.
-	 */
-	abstract class CoreEntity extends Base {
-		/**
-		 * Cell UUID.
-		 */
-		public abstract cellUuid: Uuid;
 
 		/**
 		 * Entity UUID.
@@ -250,6 +219,17 @@ export function CoreEntityClassFactory<C extends CoreBaseClassNonRecursive = Cor
 		 * World in which entity resides.
 		 */
 		public abstract worldUuid: Uuid;
+
+		/**
+		 * Gets default entity UUID.
+		 *
+		 * @returns Default entity UUID
+		 */
+		public static getDefaultEntityUuid({ entityUuid }: EntityOwnPath): Uuid {
+			return getDefaultUuid({
+				path: `${entityUuidUrlPath}${urlPathSeparator}${entityUuid}`
+			});
+		}
 
 		/**
 		 * Move entity to a different cell.
