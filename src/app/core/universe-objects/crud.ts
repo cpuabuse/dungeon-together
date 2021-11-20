@@ -7,32 +7,103 @@
  * @file CRUD operations for the universe objects
  */
 
-import { CoreCellWord } from "../cell";
-import { CoreEntityWord } from "../entity";
-import { CoreGridWord } from "../grid";
-import { CoreShardWord } from "../shard";
+import { Uuid } from "../../common/uuid";
+import { CoreArgsIds, CoreArgsOptions, CoreArgsOptionsUnion } from "../args";
+import { CoreUniverseObjectIds, CoreUniverseObjectWords, coreUniverseObjectWords } from "./words";
 
 /**
- * Names for the universe objects.
+ * This factory is not for universe objects themselves, but is for usage/implementation of CRUD of the universe objects, within the target class.
+ * Hence, no generic class constructor constraint.
  */
-export type CoreUniverseObjectWords = CoreShardWord | CoreGridWord | CoreCellWord | CoreEntityWord;
+// Force type inference to extract class type
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function CoreUniverseObjectContainerCrudFactory<
+	C extends abstract new (...args: any[]) => any,
+	I extends CoreUniverseObjectIds,
+	O extends CoreArgsOptionsUnion = CoreArgsOptions
+>({
+	Base,
+	universeObjectId,
+	options
+}: {
+	/**
+	 *
+	 */
+	Base: C;
 
-/**
- * CRUD concepts for universe objects.
- */
-export type CoreUniverseObjectCrud<T extends CoreUniverseObjectWords> = {
 	/**
-	 * Add a new universe object.
+	 *
 	 */
-	[K in T as `add${Capitalize<K>}`]: (...args: any[]) => void;
-} & {
+	universeObjectId: I;
+
 	/**
-	 * Get a universe object.
+	 *
 	 */
-	[K in T as `get${Capitalize<K>}`]: (...args: any[]) => unknown;
-} & {
+	options: O;
+}) {
+	const singularLowercaseWord = coreUniverseObjectWords[universeObjectId].singularLowercaseWord as const;
+	const pluralLowercaseWord = coreUniverseObjectWords[universeObjectId].pluralLowercaseWord as const;
+	const {
+		singularCapitalizedWord
+	}: {
+		/**
+		 *
+		 */
+		singularCapitalizedWord: typeof coreUniverseObjectWords[I]["singularCapitalizedWord"];
+	} = coreUniverseObjectWords[universeObjectId];
+
 	/**
-	 * Remove a universe object.
+	 * Computed properties of CRUD concept for universe objects.
 	 */
-	[K in T as `remove${Capitalize<K>}`]: (...arg: any[]) => void;
-};
+	type CoreUniverseObjectCrudComputed = {
+		/**
+		 * Add a new universe object.
+		 */
+		[K in "" as `add${CoreUniverseObjectWords[I]["singularCapitalizedWord"]}`]: (...args: any[]) => void;
+	};
+
+	/**
+	 *
+	 */
+	const mUniverseObjects: string = pluralLowercaseWord;
+
+	/**
+	 *
+	 */
+	const mAddUniverseObject: string = `add${singularCapitalizedWord}`;
+
+	/**
+	 *
+	 */
+	type UniverseObject = any;
+
+	/**
+	 *
+	 */
+	abstract class CoreUniverseObjectContainerCrud extends Base {
+		/**
+		 *
+		 */
+		public [mUniverseObjects]: O[CoreArgsIds.Map] extends true ? Map<Uuid, UniverseObject> : Array<UniverseObject>;
+
+		/**
+		 * @param {...any} args
+		 */
+		public constructor(...args: any[]) {
+			super();
+
+			this[mAddUniverseObject] = this.mAddUniverseObject;
+		}
+
+		/**
+		 * @param universeObject
+		 */
+		private mAddUniverseObject(universeObject: UniverseObject): void {}
+	}
+
+	// Generic computed property is not preserved in class type, so manually injecting, by extracting signature from class
+	return CoreUniverseObjectContainerCrud as unknown as typeof CoreUniverseObjectContainerCrud &
+		(new (...args: any[]) => {
+			[K in `add${typeof singularCapitalizedWord}`]: CoreUniverseObjectContainerCrud["mAddUniverseObject"];
+		});
+}
