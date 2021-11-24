@@ -14,6 +14,7 @@ import { CoreShardWord } from "../shard";
 
 /**
  * Identifiers for a universe objects' members.
+ * Should be in singular lowercase form.
  */
 export enum CoreUniverseObjectIds {
 	Shard = "shard",
@@ -90,8 +91,8 @@ export const coreUniverseObjectWords = Object.values(CoreUniverseObjectIds).redu
 			 * Text to capitalize.
 			 */
 			text: string;
-		}): Capitalize<Lowercase<T>> {
-			return `${[...text][0].toUpperCase()}${text.slice(1).toLowerCase()}` as Capitalize<Lowercase<T>>;
+		}): Capitalize<T> {
+			return `${[...text][0].toUpperCase()}${text.slice(1)}` as Capitalize<T>;
 		}
 
 		return {
@@ -109,7 +110,7 @@ export const coreUniverseObjectWords = Object.values(CoreUniverseObjectIds).redu
 			/**
 			 * Lowercase singular form of the word.
 			 */
-			singularLowercaseWord: Lowercase<typeof universeObjectSingularWords[K]>;
+			singularLowercaseWord: typeof universeObjectSingularWords[K];
 
 			/**
 			 * Capitalized singular form of the word.
@@ -119,12 +120,12 @@ export const coreUniverseObjectWords = Object.values(CoreUniverseObjectIds).redu
 			/**
 			 * Lowercase plural form of the word.
 			 */
-			pluralLowercaseWord: Lowercase<typeof universeObjectPluralWords[K]>;
+			pluralLowercaseWord: typeof universeObjectPluralWords[K];
 
 			/**
 			 * Capitalized plural form of the word.
 			 */
-			pluralUppercaseWord: Capitalize<Lowercase<typeof universeObjectPluralWords[K]>>;
+			pluralUppercaseWord: Capitalize<typeof universeObjectPluralWords[K]>;
 		};
 	}
 );

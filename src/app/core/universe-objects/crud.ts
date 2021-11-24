@@ -8,7 +8,13 @@
  */
 
 import { Uuid } from "../../common/uuid";
-import { CoreArgsIds, CoreArgsOptions, CoreArgsOptionsUnion } from "../args";
+import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "../args";
+import {
+	CoreUniverseObjectArgs,
+	CoreUniverseObjectArgsContainer,
+	CoreUniverseObjectArgsContainerMemberUniverseObjects,
+	CoreUniverseObjectContainerArgs
+} from "./args";
 import { CoreUniverseObjectIds, CoreUniverseObjectWords, coreUniverseObjectWords } from "./words";
 
 /**
@@ -53,16 +59,6 @@ export function CoreUniverseObjectContainerCrudFactory<
 	} = coreUniverseObjectWords[universeObjectId];
 
 	/**
-	 * Computed properties of CRUD concept for universe objects.
-	 */
-	type CoreUniverseObjectCrudComputed = {
-		/**
-		 * Add a new universe object.
-		 */
-		[K in "" as `add${CoreUniverseObjectWords[I]["singularCapitalizedWord"]}`]: (...args: any[]) => void;
-	};
-
-	/**
 	 *
 	 */
 	const mUniverseObjects: string = pluralLowercaseWord;
@@ -78,7 +74,16 @@ export function CoreUniverseObjectContainerCrudFactory<
 	type UniverseObject = any;
 
 	/**
-	 *
+	 * Universe object container args with a map.
+	 */
+	type CoreUniverseObjectArgsWithMap = CoreUniverseObjectArgsContainerMemberUniverseObjects<
+		I,
+		CoreArgsIdsToOptions<CoreArgsIds.Map>,
+		CoreUniverseObjectArgs<I>
+	>;
+
+	/**
+	 * Methods assigned from in the constructor are accessible from subclasses.
 	 */
 	abstract class CoreUniverseObjectContainerCrud extends Base {
 		/**
@@ -96,14 +101,28 @@ export function CoreUniverseObjectContainerCrudFactory<
 		}
 
 		/**
+		 *
+		 */
+		private universeObjects: O[CoreArgsIds.Map] extends true ? Map<Uuid, UniverseObject> : Array<UniverseObject>;
+
+		/**
 		 * @param universeObject
 		 */
-		private mAddUniverseObject(universeObject: UniverseObject): void {}
+		private addUniverseObjectWithoutMap(universeObject: UniverseObject): void {
+			this.mAddUniverseObject;
+		}
+
+		/**
+		 * @param universeObject
+		 */
+		private mAddUniverseObjectWithMap(universeObject: CoreUniverseObjectArgs<I>): void {
+			(this.universeObjects as CoreUniverseObjectArgsWithMap).set(universeObject[universeObjectId], universeObject);
+		}
 	}
 
 	// Generic computed property is not preserved in class type, so manually injecting, by extracting signature from class
 	return CoreUniverseObjectContainerCrud as unknown as typeof CoreUniverseObjectContainerCrud &
 		(new (...args: any[]) => {
-			[K in `add${typeof singularCapitalizedWord}`]: CoreUniverseObjectContainerCrud["mAddUniverseObject"];
+			[K in `add${typeof singularCapitalizedWord}` as K]: CoreUniverseObjectContainerCrud["mAddUniverseObject"];
 		});
 }

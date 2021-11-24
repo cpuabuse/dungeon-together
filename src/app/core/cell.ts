@@ -31,6 +31,8 @@ import {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	CoreUniverseObjectInherit
 } from "./universe-objects";
+import { CoreUniverseObjectArgsContainer } from "./universe-objects/args";
+import { CoreUniverseObjectIds } from "./universe-objects/words";
 
 /**
  * Word referring to a cell.
@@ -82,15 +84,13 @@ export type CommsCellRaw = CommCellRawHelper<
  *
  * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
-export type CoreCellArgs<O extends CoreArgsOptionsUnion = CoreArgsOptions> = (O[CoreArgsIds.Path] extends true
-	? CellPath
-	: CellOwnPath) &
+export type CoreCellArgs<O extends CoreArgsOptionsUnion = CoreArgsOptions> = CoreUniverseObjectArgsContainer<
+	CoreUniverseObjectIds.Entity,
+	O,
+	CoreEntityArgs<O>
+> &
+	(O[CoreArgsIds.Path] extends true ? CellPath : CellOwnPath) &
 	(O[CoreArgsIds.Vector] extends true ? Vector : unknown) & {
-		/**
-		 * Array of entities.
-		 */
-		entities: O[CoreArgsIds.Map] extends true ? Map<Uuid, CoreEntityArgs<O>> : Array<CoreEntityArgs<O>>;
-
 		/**
 		 * Worlds.
 		 */

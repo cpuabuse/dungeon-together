@@ -8,10 +8,11 @@
  */
 
 import { Uuid } from "../../common/uuid";
+import { CoreUniverseObjectIds, CoreUniverseObjectWords } from "./words";
 
 /**
  * Universe object path constraint.
  */
-export type CoreUniverseObjectPath = {
-	[key: string]: Uuid;
+export type CoreUniverseObjectPath<I extends CoreUniverseObjectIds> = {
+	[K in `${CoreUniverseObjectWords[I]["singularLowercaseWord"]}Uuid` as K]: Uuid;
 };
