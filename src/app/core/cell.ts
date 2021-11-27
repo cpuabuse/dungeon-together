@@ -86,8 +86,7 @@ export type CommsCellRaw = CommCellRawHelper<
  */
 export type CoreCellArgs<O extends CoreArgsOptionsUnion = CoreArgsOptions> = CoreUniverseObjectArgsContainer<
 	CoreUniverseObjectIds.Entity,
-	O,
-	CoreEntityArgs<O>
+	O
 > &
 	(O[CoreArgsIds.Path] extends true ? CellPath : CellOwnPath) &
 	(O[CoreArgsIds.Vector] extends true ? Vector : unknown) & {

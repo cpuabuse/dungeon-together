@@ -7,19 +7,22 @@
  * @file CRUD operations for the universe objects
  */
 
+import { TypeOf } from "io-ts";
 import { Uuid } from "../../common/uuid";
 import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "../args";
 import {
 	CoreUniverseObjectArgs,
-	CoreUniverseObjectArgsContainer,
 	CoreUniverseObjectArgsContainerMemberUniverseObjects,
-	CoreUniverseObjectContainerArgs
+	CoreUniverseObjectArgsIndex
 } from "./args";
-import { CoreUniverseObjectIds, CoreUniverseObjectWords, coreUniverseObjectWords } from "./words";
+import { coreUniverseObjectIdToPathUuidPropertyName } from "./path";
+import { CoreUniverseObjectIds, coreUniverseObjectWords } from "./words";
 
 /**
  * This factory is not for universe objects themselves, but is for usage/implementation of CRUD of the universe objects, within the target class.
  * Hence, no generic class constructor constraint.
+ *
+ * @returns Universe object class.
  */
 // Force type inference to extract class type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -47,76 +50,87 @@ export function CoreUniverseObjectContainerCrudFactory<
 	 */
 	options: O;
 }) {
-	const singularLowercaseWord = coreUniverseObjectWords[universeObjectId].singularLowercaseWord as const;
-	const pluralLowercaseWord = coreUniverseObjectWords[universeObjectId].pluralLowercaseWord as const;
 	const {
+		pluralLowercaseWord,
 		singularCapitalizedWord
 	}: {
 		/**
-		 *
+		 * The plural lowercase word for the universe object.
+		 */
+		pluralLowercaseWord: typeof coreUniverseObjectWords[I]["pluralLowercaseWord"];
+
+		/**
+		 * The singular capitalized word for the universe object.
 		 */
 		singularCapitalizedWord: typeof coreUniverseObjectWords[I]["singularCapitalizedWord"];
 	} = coreUniverseObjectWords[universeObjectId];
 
 	/**
-	 *
+	 * Name of universe objects member.
 	 */
 	const mUniverseObjects: string = pluralLowercaseWord;
 
 	/**
-	 *
+	 * Name of add universe object function.
 	 */
 	const mAddUniverseObject: string = `add${singularCapitalizedWord}`;
 
 	/**
-	 *
-	 */
-	type UniverseObject = any;
-
-	/**
 	 * Universe object container args with a map.
 	 */
-	type CoreUniverseObjectArgsWithMap = CoreUniverseObjectArgsContainerMemberUniverseObjects<
+	type UniverseObjectsWithMap = CoreUniverseObjectArgsContainerMemberUniverseObjects<
 		I,
-		CoreArgsIdsToOptions<CoreArgsIds.Map>,
-		CoreUniverseObjectArgs<I>
+		CoreArgsIdsToOptions<CoreArgsIds.Map>
 	>;
+
+	/**
+	 * Universe object container args without a map.
+	 */
+	type UniverseObjectsWithoutMap = CoreUniverseObjectArgsContainerMemberUniverseObjects<I, CoreArgsIdsToOptions<never>>;
 
 	/**
 	 * Methods assigned from in the constructor are accessible from subclasses.
 	 */
 	abstract class CoreUniverseObjectContainerCrud extends Base {
 		/**
-		 *
+		 * Universe objects.
 		 */
-		public [mUniverseObjects]: O[CoreArgsIds.Map] extends true ? Map<Uuid, UniverseObject> : Array<UniverseObject>;
+		// Member type can not be inferred from generics
+		private universeObjects: CoreUniverseObjectArgsContainerMemberUniverseObjects<I, O> = (options.map === true
+			? new Map()
+			: new Array()) as CoreUniverseObjectArgsContainerMemberUniverseObjects<I, O>;
 
 		/**
-		 * @param {...any} args
+		 * Constructor.
+		 *
+		 * @param args - Mixin empty arguments
 		 */
+		// Constructor argument must be of specific type
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		public constructor(...args: any[]) {
 			super();
-
-			this[mAddUniverseObject] = this.mAddUniverseObject;
 		}
 
 		/**
+		 * A function adding a universe object to the container, without the map.
 		 *
+		 * @param universeObject - The universe object to add
 		 */
-		private universeObjects: O[CoreArgsIds.Map] extends true ? Map<Uuid, UniverseObject> : Array<UniverseObject>;
-
-		/**
-		 * @param universeObject
-		 */
-		private addUniverseObjectWithoutMap(universeObject: UniverseObject): void {
+		private addUniverseObjectWithoutMap(universeObject: CoreUniverseObjectArgs<I>): void {
 			this.mAddUniverseObject;
 		}
 
 		/**
 		 * @param universeObject
 		 */
-		private mAddUniverseObjectWithMap(universeObject: CoreUniverseObjectArgs<I>): void {
-			(this.universeObjects as CoreUniverseObjectArgsWithMap).set(universeObject[universeObjectId], universeObject);
+		private mAddUniverseObjectWithMap(
+			universeObject: CoreUniverseObjectArgsIndex<CoreArgsIdsToOptions<CoreArgsIds.Map>>[I]
+		): void {
+			(this.universeObjects as UniverseObjectsWithMap).set(
+				universeObject[coreUniverseObjectIdToPathUuidPropertyName({ universeObjectId })],
+				universeObject
+			);
+			this.universeObjects as UniverseObjectsWithMap;
 		}
 	}
 
