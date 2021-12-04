@@ -62,14 +62,20 @@ export type CoreUniverseObjectArgsIndex<
 	: never;
 
 /**
- * The type of the universe objects property in universe object args container.
+ * The type of the universe objects property in universe object args container with map.
  */
-export type CoreUniverseObjectArgsContainerMemberUniverseObjects<
+export type CoreUniverseObjectArgsContainerMemberUniverseObjectsWithMap<
 	I extends CoreUniverseObjectIds,
 	O extends CoreArgsOptionsUnion
-> = O[CoreArgsIds.Map] extends true
-	? Map<Uuid, CoreUniverseObjectArgsIndex<I, O>>
-	: Array<CoreUniverseObjectArgsIndex<I, O>>;
+> = Map<Uuid, CoreUniverseObjectArgsIndex<I, O>>;
+
+/**
+ * The type of the universe objects property in universe object args container without map.
+ */
+export type CoreUniverseObjectArgsContainerMemberUniverseObjectsWithoutMap<
+	I extends CoreUniverseObjectIds,
+	O extends CoreArgsOptionsUnion
+> = Array<CoreUniverseObjectArgsIndex<I, O>>;
 
 /**
  * Core universe object container args.
@@ -78,8 +84,7 @@ export type CoreUniverseObjectArgsContainer<I extends CoreUniverseObjectIds, O e
 	/**
 	 * Child universe objects.
 	 */
-	[K in CoreUniverseObjectWords[I]["pluralLowercaseWord"] as K]: CoreUniverseObjectArgsContainerMemberUniverseObjects<
-		I,
-		O
-	>;
+	[K in CoreUniverseObjectWords[I]["pluralLowercaseWord"] as K]: O[CoreArgsIds.Map] extends true
+		? CoreUniverseObjectArgsContainerMemberUniverseObjectsWithMap<I, O>
+		: CoreUniverseObjectArgsContainerMemberUniverseObjectsWithoutMap<I, O>;
 };

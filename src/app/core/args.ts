@@ -55,9 +55,11 @@ export type CoreArgsOptions = CoreArgsIdsToOptions<never>;
  * All the option possibilities.
  *
  * Not to be used for actual variables, to be used for generic argument constraints instead.
+ *
+ * Argument `T` represents a predefined ID that is true, and `F`, respectively false. Same IDs cannot be given to both T and F.
  */
-export type CoreArgsOptionsUnion = {
-	[K in CoreArgsIds]: boolean;
+export type CoreArgsOptionsUnion<T extends CoreArgsIds = never, F extends Exclude<CoreArgsIds, T> = never> = {
+	[K in CoreArgsIds]: K extends T ? true : K extends F ? false : boolean;
 };
 
 /**
