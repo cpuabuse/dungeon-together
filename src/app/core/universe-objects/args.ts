@@ -4,7 +4,7 @@
 */
 
 import { Uuid } from "../../common/uuid";
-import { CoreArgsIds, CoreArgsOptions, CoreArgsOptionsUnion } from "../args";
+import { CoreArgsIds, CoreArgsOptionsUnion } from "../args";
 import { CoreCellArgs } from "../cell";
 import { CoreEntityArgs } from "../entity";
 import { CoreGridArgs } from "../grid";
@@ -18,33 +18,48 @@ import { CoreUniverseObjectIds, CoreUniverseObjectWords } from "./words";
 
 /**
  * Generic outline of how universe objects args should look like.
- * Type to check exhaustiveness.
  */
-type CoreUniverseObjectArgsIndexDefinitions<
-	T extends {
-		[K in CoreUniverseObjectIds as K]: CoreUniverseObjectPath<K> & Record<string, any>;
-	}
-> = T;
+type CoreUniverseObjectArgs<
+	I extends CoreUniverseObjectIds,
+	// Will be used in the future
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	O extends CoreArgsOptionsUnion
+> = CoreUniverseObjectPath<I>;
 
 /**
  * A non-exhaustive type indexing IDs to args.
  */
 type CoreUniverseObjectArgsIndexNonExhaustive<O extends CoreArgsOptionsUnion> = {
-	[K in CoreUniverseObjectIds.Shard as K]: CoreShardArgs<O>;
-} & {
-	[K in CoreUniverseObjectIds.Grid as K]: CoreGridArgs<O>;
-} & {
-	[K in CoreUniverseObjectIds.Cell as K]: CoreCellArgs<O>;
-} & {
-	[K in CoreUniverseObjectIds.Entity as K]: CoreEntityArgs<O>;
+	/**
+	 * Core shard args.
+	 */
+	[CoreUniverseObjectIds.Shard]: CoreShardArgs<O>;
+
+	/**
+	 * Core grid args.
+	 */
+	[CoreUniverseObjectIds.Grid]: CoreGridArgs<O>;
+
+	/**
+	 * Core cell args.
+	 */
+	[CoreUniverseObjectIds.Cell]: CoreCellArgs<O>;
+
+	/**
+	 * Core entity args.
+	 */
+	[CoreUniverseObjectIds.Entity]: CoreEntityArgs<O>;
 };
 
 /**
  *  Exhaustive type indexing IDs to args.
  */
-export type CoreUniverseObjectArgsIndex<O extends CoreArgsOptionsUnion> = CoreUniverseObjectArgsIndexDefinitions<
-	CoreUniverseObjectArgsIndexNonExhaustive<O>
->;
+export type CoreUniverseObjectArgsIndex<
+	I extends CoreUniverseObjectIds,
+	O extends CoreArgsOptionsUnion
+> = CoreUniverseObjectArgsIndexNonExhaustive<O>[I] extends CoreUniverseObjectArgs<I, O>
+	? CoreUniverseObjectArgsIndexNonExhaustive<O>[I]
+	: never;
 
 /**
  * The type of the universe objects property in universe object args container.
@@ -53,8 +68,8 @@ export type CoreUniverseObjectArgsContainerMemberUniverseObjects<
 	I extends CoreUniverseObjectIds,
 	O extends CoreArgsOptionsUnion
 > = O[CoreArgsIds.Map] extends true
-	? Map<Uuid, CoreUniverseObjectArgsIndex<O>[I]>
-	: Array<CoreUniverseObjectArgsIndex<O>[I]>;
+	? Map<Uuid, CoreUniverseObjectArgsIndex<I, O>>
+	: Array<CoreUniverseObjectArgsIndex<I, O>>;
 
 /**
  * Core universe object container args.

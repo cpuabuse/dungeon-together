@@ -26,7 +26,7 @@ export enum CoreUniverseObjectIds {
 /**
  * Generic constraint for exhaustiveness of universe object IDs.
  */
-type CoreUniverseObjectWordDefinitions<
+type CoreUniverseObjectWordsDefinition<
 	T extends {
 		[K in CoreUniverseObjectIds]: string;
 	}
@@ -49,7 +49,7 @@ const universeObjectSingularWordsNonExhaustive = {
 /**
  * Words used for singular forms of universe objects.
  */
-const universeObjectSingularWords: CoreUniverseObjectWordDefinitions<typeof universeObjectSingularWordsNonExhaustive> =
+const universeObjectSingularWords: CoreUniverseObjectWordsDefinition<typeof universeObjectSingularWordsNonExhaustive> =
 	universeObjectSingularWordsNonExhaustive;
 
 /**
@@ -69,7 +69,7 @@ const universeObjectPluralWordsNonExhaustive = {
 /**
  * Words used for plural forms of universe objects.
  */
-const universeObjectPluralWords: CoreUniverseObjectWordDefinitions<typeof universeObjectPluralWordsNonExhaustive> =
+const universeObjectPluralWords: CoreUniverseObjectWordsDefinition<typeof universeObjectPluralWordsNonExhaustive> =
 	universeObjectPluralWordsNonExhaustive;
 
 /**

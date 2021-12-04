@@ -124,7 +124,7 @@ export function CoreUniverseObjectContainerCrudFactory<
 		 * @param universeObject
 		 */
 		private mAddUniverseObjectWithMap(
-			universeObject: CoreUniverseObjectArgsIndex<CoreArgsIdsToOptions<CoreArgsIds.Map>>[I]
+			universeObject: CoreUniverseObjectArgsIndex<I, CoreArgsIdsToOptions<CoreArgsIds.Map>>
 		): void {
 			(this.universeObjects as UniverseObjectsWithMap).set(
 				universeObject[coreUniverseObjectIdToPathUuidPropertyName({ universeObjectId })],
