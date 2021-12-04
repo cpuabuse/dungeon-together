@@ -52,15 +52,21 @@ export type CoreArgsIdsToOptions<I extends CoreArgsIds> = {
 export type CoreArgsOptions = CoreArgsIdsToOptions<never>;
 
 /**
- * All the option possibilities.
- *
- * Not to be used for actual variables, to be used for generic argument constraints instead.
+ * Constrained generic argument constraint for options.
+ * Not to be used for actual variables.
+ * Not to be used directly as a generic constraint, only to be used in a separate type alias, so that TS engine processes the options properly.
  *
  * Argument `T` represents a predefined ID that is true, and `F`, respectively false. Same IDs cannot be given to both T and F.
  */
-export type CoreArgsOptionsUnion<T extends CoreArgsIds = never, F extends Exclude<CoreArgsIds, T> = never> = {
+export type CoreArgsOptionsUnionGenerate<T extends CoreArgsIds = never, F extends Exclude<CoreArgsIds, T> = never> = {
 	[K in CoreArgsIds]: K extends T ? true : K extends F ? false : boolean;
 };
+
+/**
+ * Generic argument constraint for any kind of options.
+ * Not to be used for actual variables.
+ */
+export type CoreArgsOptionsUnion = CoreArgsOptionsUnionGenerate<never, never>;
 
 /**
  * Function to generate a options objects, and corresponding types.

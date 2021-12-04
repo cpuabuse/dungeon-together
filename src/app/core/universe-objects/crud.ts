@@ -7,7 +7,7 @@
  * @file CRUD operations for the universe objects
  */
 
-import { CoreArgsIds, CoreArgsOptionsUnion } from "../args";
+import { CoreArgsIds, CoreArgsOptionsUnionGenerate } from "../args";
 import { CoreUniverseObjectArgsContainerMemberUniverseObjectsWithMap, CoreUniverseObjectArgsIndex } from "./args";
 import { coreUniverseObjectIdToPathUuidPropertyName } from "./path";
 import { CoreUniverseObjectIds, CoreUniverseObjectWords, coreUniverseObjectWords } from "./words";
@@ -15,7 +15,7 @@ import { CoreUniverseObjectIds, CoreUniverseObjectWords, coreUniverseObjectWords
 /**
  * Args options constraint for core universe objects.
  */
-type CoreUniverseObjectContainerArgsOptionsUnion = CoreArgsOptionsUnion<CoreArgsIds.Map>;
+type CoreUniverseObjectContainerArgsOptionsUnion = CoreArgsOptionsUnionGenerate<CoreArgsIds.Map>;
 
 /**
  * This factory is not for universe objects themselves, but is for usage/implementation of CRUD of the universe objects, within the target class.
@@ -122,9 +122,10 @@ export function CoreUniverseObjectContainerCrudFactory<
 	return CoreUniverseObjectContainerCrud as unknown as typeof CoreUniverseObjectContainerCrud &
 		(new (...args: any[]) => {
 			[K in typeof mUniverseObjects as K]: CoreUniverseObjectContainerCrud["universeObjects"];
-		} & {
-			[K in typeof mAddUniverseObject as K]: O[CoreArgsIds.Map] extends true
-				? CoreUniverseObjectContainerCrud["addUniverseObjectWithMap"]
-				: CoreUniverseObjectContainerCrud["addUniverseObjectWithoutMap"];
-		});
+		} &
+			{
+				[K in typeof mAddUniverseObject as K]: O[CoreArgsIds.Map] extends true
+					? CoreUniverseObjectContainerCrud["addUniverseObjectWithMap"]
+					: CoreUniverseObjectContainerCrud["addUniverseObjectWithoutMap"];
+			});
 }
