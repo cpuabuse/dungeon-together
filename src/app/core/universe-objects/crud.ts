@@ -7,14 +7,8 @@
  * @file CRUD operations for the universe objects
  */
 
-import { TypeOf } from "io-ts";
-import { Uuid } from "../../common/uuid";
 import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "../args";
-import {
-	CoreUniverseObjectArgs,
-	CoreUniverseObjectArgsContainerMemberUniverseObjects,
-	CoreUniverseObjectArgsIndex
-} from "./args";
+import { CoreUniverseObjectArgsContainerMemberUniverseObjects, CoreUniverseObjectArgsIndex } from "./args";
 import { coreUniverseObjectIdToPathUuidPropertyName } from "./path";
 import { CoreUniverseObjectIds, coreUniverseObjectWords } from "./words";
 
@@ -36,17 +30,17 @@ export function CoreUniverseObjectContainerCrudFactory<
 	options
 }: {
 	/**
-	 *
+	 * Base class.
 	 */
 	Base: C;
 
 	/**
-	 *
+	 * Universe object ID.
 	 */
 	universeObjectId: I;
 
 	/**
-	 *
+	 * Args options.
 	 */
 	options: O;
 }) {
@@ -68,12 +62,16 @@ export function CoreUniverseObjectContainerCrudFactory<
 	/**
 	 * Name of universe objects member.
 	 */
-	const mUniverseObjects: string = pluralLowercaseWord;
+	// Need to extract type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const mUniverseObjects = `${pluralLowercaseWord}` as const;
 
 	/**
 	 * Name of add universe object function.
 	 */
-	const mAddUniverseObject: string = `add${singularCapitalizedWord}`;
+	// Need to extract type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const mAddUniverseObject = `add${singularCapitalizedWord}` as const;
 
 	/**
 	 * Universe object container args with a map.
@@ -109,6 +107,27 @@ export function CoreUniverseObjectContainerCrudFactory<
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		public constructor(...args: any[]) {
 			super();
+
+			// Assign public computed members
+			this[mUniverseObjects as string] = this.universeObjects;
+			this[mAddUniverseObject as string] =
+				// This determination is required
+				// eslint-disable-next-line @typescript-eslint/unbound-method
+				options.map === true ? this.addUniverseObjectWithMap : this.addUniverseObjectWithoutMap;
+		}
+
+		/**
+		 * Add universe object with the map option.
+		 *
+		 * @param universeObject - Universe object to add
+		 */
+		private addUniverseObjectWithMap(
+			universeObject: CoreUniverseObjectArgsIndex<I, CoreArgsIdsToOptions<CoreArgsIds.Map>>
+		): void {
+			(this.universeObjects as UniverseObjectsWithMap).set(
+				universeObject[coreUniverseObjectIdToPathUuidPropertyName({ universeObjectId })],
+				universeObject
+			);
 		}
 
 		/**
@@ -116,27 +135,21 @@ export function CoreUniverseObjectContainerCrudFactory<
 		 *
 		 * @param universeObject - The universe object to add
 		 */
-		private addUniverseObjectWithoutMap(universeObject: CoreUniverseObjectArgs<I>): void {
-			this.mAddUniverseObject;
-		}
-
-		/**
-		 * @param universeObject
-		 */
-		private mAddUniverseObjectWithMap(
-			universeObject: CoreUniverseObjectArgsIndex<I, CoreArgsIdsToOptions<CoreArgsIds.Map>>
+		private addUniverseObjectWithoutMap(
+			universeObject: CoreUniverseObjectArgsIndex<I, CoreArgsIdsToOptions<never>>
 		): void {
-			(this.universeObjects as UniverseObjectsWithMap).set(
-				universeObject[coreUniverseObjectIdToPathUuidPropertyName({ universeObjectId })],
-				universeObject
-			);
-			this.universeObjects as UniverseObjectsWithMap;
+			(this.universeObjects as UniverseObjectsWithoutMap).push(universeObject);
 		}
 	}
 
 	// Generic computed property is not preserved in class type, so manually injecting, by extracting signature from class
 	return CoreUniverseObjectContainerCrud as unknown as typeof CoreUniverseObjectContainerCrud &
 		(new (...args: any[]) => {
-			[K in `add${typeof singularCapitalizedWord}` as K]: CoreUniverseObjectContainerCrud["mAddUniverseObject"];
-		});
+			[K in typeof mUniverseObjects as K]: CoreUniverseObjectContainerCrud["universeObjects"];
+		} &
+			{
+				[K in typeof mAddUniverseObject as K]: O[CoreArgsIds.Map] extends true
+					? CoreUniverseObjectContainerCrud["addUniverseObjectWithMap"]
+					: CoreUniverseObjectContainerCrud["addUniverseObjectWithoutMap"];
+			});
 }
