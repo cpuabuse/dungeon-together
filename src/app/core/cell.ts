@@ -11,28 +11,27 @@ import { defaultGridUuid, defaultShardUuid, entityUuidUrlPath, urlPathSeparator 
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { Vector } from "../common/vector";
 import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "./args";
-import { CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
+import { CoreBaseClassNonRecursive } from "./base";
 import {
 	CommsEntity,
 	CommsEntityArgs,
 	CommsEntityRaw,
 	CoreEntity,
-	CoreEntityArgs,
 	CoreEntityClass,
-	CoreEntityWord,
 	EntityPath,
 	commsEntityRawToArgs,
 	coreEntityArgsConvert
 } from "./entity";
 import { GridPath } from "./grid";
 import {
-	CoreUniverseObject,
+	CoreUniverseObjectArgsContainer,
+	CoreUniverseObjectArgsOptionsUnion,
+	CoreUniverseObjectContainerFactory,
+	CoreUniverseObjectIds,
 	// Type used only for documentation
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	CoreUniverseObjectInherit
 } from "./universe-objects";
-import { CoreUniverseObjectArgsContainer } from "./universe-objects/args";
-import { CoreUniverseObjectIds } from "./universe-objects/words";
 
 /**
  * Word referring to a cell.
@@ -151,10 +150,11 @@ export type CoreCell = CommsCell & InstanceType<ReturnType<typeof CoreCellClassF
 // Force type inference to extract class type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreCellClassFactory<
-	C extends CoreBaseClassNonRecursive = CoreBaseClass,
-	O extends CoreArgsOptionsUnion = CoreArgsOptions
+	C extends CoreBaseClassNonRecursive,
+	O extends CoreUniverseObjectArgsOptionsUnion
 >({
-	Base
+	Base,
+	options
 }: {
 	/**
 	 * Client base.
@@ -192,7 +192,11 @@ export function CoreCellClassFactory<
 	 */
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare
-	abstract class CoreCell extends Base implements CoreUniverseObject<CoreEntityWord> {
+	abstract class CoreCell extends CoreUniverseObjectContainerFactory<C, CoreUniverseObjectIds.Entity, O, Entity>({
+		Base,
+		options,
+		universeObjectId: CoreUniverseObjectIds.Entity
+	}) {
 		/**
 		 * Default entity.
 		 */
@@ -204,11 +208,6 @@ export function CoreCellClassFactory<
 		public abstract defaultEntityUuid: Uuid;
 
 		/**
-		 * Entities.
-		 */
-		abstract readonly entities: Map<Uuid, Entity>;
-
-		/**
 		 * Gets default entity UUID.
 		 *
 		 * @returns Default entity UUID
@@ -218,13 +217,6 @@ export function CoreCellClassFactory<
 				path: `${entityUuidUrlPath}${urlPathSeparator}${cellUuid}`
 			});
 		}
-
-		/**
-		 * Adds entity.
-		 *
-		 * @param entity - Entity to add
-		 */
-		public abstract addEntity(entity: CoreEntityArgs<O>): void;
 
 		/**
 		 * Attach {@link CoreEntity} to {@link CoreCell}.

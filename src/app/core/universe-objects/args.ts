@@ -4,7 +4,7 @@
 */
 
 import { Uuid } from "../../common/uuid";
-import { CoreArgsIds, CoreArgsOptionsUnion } from "../args";
+import { CoreArgsIds, CoreArgsOptionsUnion, CoreArgsOptionsUnionGenerate } from "../args";
 import { CoreCellArgs } from "../cell";
 import { CoreEntityArgs } from "../entity";
 import { CoreGridArgs } from "../grid";
@@ -15,6 +15,11 @@ import { CoreUniverseObjectIds, CoreUniverseObjectWords } from "./words";
 /**
  * @file Core args
  */
+
+/**
+ * Args options constraint for core universe objects.
+ */
+export type CoreUniverseObjectArgsOptionsUnion = CoreArgsOptionsUnionGenerate<CoreArgsIds.Map>;
 
 /**
  * Generic outline of how universe objects args should look like.
