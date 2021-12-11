@@ -78,32 +78,50 @@ export function CoreUniverseObjectContainerFactory<
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const nameAddUniverseObject = `add${singularCapitalizedWord}` as const;
 
-	/**
-	 * Universe objects.
-	 */
-	const mUniverseObjects: Map<Uuid, A> = new Map() as Map<Uuid, A>;
+	// Inferring for final type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const members = {
+		addUniverseObject: {
+			name: nameAddUniverseObject,
+			/**
+			 * Add universe object with the map option.
+			 *
+			 * @param this - Universe object container
+			 * @param universeObject - Universe object to add
+			 */
+			value(this: CoreUniverseObjectContainerInstance, universeObject: A): void {
+				this[nameUniverseObjects].set(
+					universeObject[coreUniverseObjectIdToPathUuidPropertyName({ universeObjectId })],
+					universeObject
+				);
+			}
+		},
+		/**
+		 * Name of universe objects member.
+		 */
+		// Need to extract type
+		// eslint-disable-next-line @typescript-eslint/typedef
+		universeObjects: {
+			name: nameUniverseObjects,
+			value: new Map<Uuid, A>()
+		}
+	};
 
 	/**
-	 * Add universe object with the map option.
-	 *
-	 * @param this - Universe object container
-	 * @param universeObject - Universe object to add
+	 * Type of members.
 	 */
-	function mAddUniverseObject(this: CoreUniverseObjectContainerInstance, universeObject: A): void {
-		this[nameUniverseObjects].set(
-			universeObject[coreUniverseObjectIdToPathUuidPropertyName({ universeObjectId })],
-			universeObject
-		);
-	}
+	type Members = typeof members;
 
 	/**
 	 * Instance type for class.
+	 *
+	 * Keys are manually set to dodge circular type dependencies.
 	 */
 	type CoreUniverseObjectContainerInstance = {
-		[K in typeof nameUniverseObjects as K]: typeof mUniverseObjects;
+		[K in typeof nameAddUniverseObject as K]: Members["addUniverseObject"]["value"];
 	} &
 		{
-			[K in typeof nameAddUniverseObject as K]: typeof mAddUniverseObject;
+			[K in typeof nameUniverseObjects as K]: Members["universeObjects"]["value"];
 		};
 
 	/**
@@ -116,13 +134,10 @@ export function CoreUniverseObjectContainerFactory<
 	 */
 	abstract class CoreUniverseObjectContainer extends Base {}
 
-	let CoreUniverseObjectContainerPrototype: Record<string, unknown> = CoreUniverseObjectContainer.prototype as Record<
-		string,
-		unknown
-	>;
-
-	CoreUniverseObjectContainerPrototype[nameUniverseObjects] = mUniverseObjects;
-	CoreUniverseObjectContainerPrototype[nameAddUniverseObject] = mAddUniverseObject;
+	// Set prototype
+	Object.values(members).forEach(member => {
+		(CoreUniverseObjectContainer.prototype as Record<string, unknown>)[member.name] = member.value;
+	});
 
 	/**
 	 * Class type for return injection.
