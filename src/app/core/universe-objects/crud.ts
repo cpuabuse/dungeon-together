@@ -7,8 +7,13 @@
  * @file CRUD operations for the universe objects
  */
 
+import { Uuid } from "../../common/uuid";
 import { CoreArgsIds, CoreArgsOptionsUnionGenerate } from "../args";
-import { CoreUniverseObjectArgsContainerMemberUniverseObjectsWithMap, CoreUniverseObjectArgsIndex } from "./args";
+import {
+	CoreUniverseObjectArgsContainer,
+	CoreUniverseObjectArgsContainerMemberUniverseObjectsWithMap,
+	CoreUniverseObjectArgsIndex
+} from "./args";
 import { coreUniverseObjectIdToPathUuidPropertyName } from "./path";
 import { CoreUniverseObjectIds, CoreUniverseObjectWords, coreUniverseObjectWords } from "./words";
 
@@ -26,6 +31,7 @@ type CoreUniverseObjectContainerArgsOptionsUnion = CoreArgsOptionsUnionGenerate<
 // Force type inference to extract class type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreUniverseObjectContainerCrudFactory<
+	A extends CoreUniverseObjectArgsIndex<I, O>,
 	C extends abstract new (...args: any[]) => any,
 	I extends CoreUniverseObjectIds,
 	O extends CoreUniverseObjectContainerArgsOptionsUnion
@@ -85,8 +91,7 @@ export function CoreUniverseObjectContainerCrudFactory<
 		 * Universe objects.
 		 */
 		// Casting a map
-		private universeObjects: CoreUniverseObjectArgsContainerMemberUniverseObjectsWithMap<I, O> =
-			new Map() as CoreUniverseObjectArgsContainerMemberUniverseObjectsWithMap<I, O>;
+		private universeObjects: Map<Uuid, A> = new Map() as Map<Uuid, A>;
 
 		/**
 		 * Constructor.
@@ -102,7 +107,7 @@ export function CoreUniverseObjectContainerCrudFactory<
 			this[mUniverseObjects as string] = this.universeObjects;
 			// This determination is required
 			// eslint-disable-next-line @typescript-eslint/unbound-method
-			this[mAddUniverseObject as string] = this.addUniverseObjectWithMap;
+			this[mAddUniverseObject as string] = this.addUniverseObject;
 		}
 
 		/**
@@ -110,7 +115,7 @@ export function CoreUniverseObjectContainerCrudFactory<
 		 *
 		 * @param universeObject - Universe object to add
 		 */
-		private addUniverseObjectWithMap(universeObject: CoreUniverseObjectArgsIndex<I, O>): void {
+		private addUniverseObject(universeObject: A): void {
 			this.universeObjects.set(
 				universeObject[coreUniverseObjectIdToPathUuidPropertyName({ universeObjectId })],
 				universeObject
@@ -119,13 +124,17 @@ export function CoreUniverseObjectContainerCrudFactory<
 	}
 
 	// Generic computed property is not preserved in class type, so manually injecting, by extracting signature from class
-	return CoreUniverseObjectContainerCrud as unknown as typeof CoreUniverseObjectContainerCrud &
-		(new (...args: any[]) => {
-			[K in typeof mUniverseObjects as K]: CoreUniverseObjectContainerCrud["universeObjects"];
-		} &
-			{
-				[K in typeof mAddUniverseObject as K]: O[CoreArgsIds.Map] extends true
-					? CoreUniverseObjectContainerCrud["addUniverseObjectWithMap"]
-					: CoreUniverseObjectContainerCrud["addUniverseObjectWithoutMap"];
-			});
+	// Conditionally checking if class is appropriately extending args container
+	return CoreUniverseObjectContainerCrud as unknown as typeof CoreUniverseObjectContainerCrud extends CoreUniverseObjectArgsContainer<
+		I,
+		O
+	>
+		? typeof CoreUniverseObjectContainerCrud &
+				(new (...args: any[]) => {
+					[K in typeof mUniverseObjects as K]: CoreUniverseObjectContainerCrud["universeObjects"];
+				} &
+					{
+						[K in typeof mAddUniverseObject as K]: CoreUniverseObjectContainerCrud["addUniverseObject"];
+					})
+		: never;
 }
