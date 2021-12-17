@@ -17,7 +17,6 @@ import {
 	CommsEntityArgs,
 	CommsEntityRaw,
 	CoreEntity,
-	CoreEntityClass,
 	EntityPath,
 	commsEntityRawToArgs,
 	coreEntityArgsConvert
@@ -32,6 +31,7 @@ import {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	CoreUniverseObjectInherit
 } from "./universe-objects";
+import { CoreUniverseObjectArgsIndex, CoreUniverseObjectArgsIndexAccess } from "./universe-objects/args";
 
 /**
  * Word referring to a cell.
@@ -151,6 +151,7 @@ export type CoreCell = CommsCell & InstanceType<ReturnType<typeof CoreCellClassF
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreCellClassFactory<
 	C extends CoreBaseClassNonRecursive,
+	N extends CoreUniverseObjectArgsIndex<O>,
 	O extends CoreUniverseObjectArgsOptionsUnion
 >({
 	Base,
@@ -167,23 +168,9 @@ export function CoreCellClassFactory<
 	options: O;
 }) {
 	/**
-	 * Entity type extracted from base class.
+	 * Entity type extracted from args index.
 	 */
-	type Entity = C extends {
-		/**
-		 * Universe.
-		 */
-		universe: {
-			/**
-			 * Entity class.
-			 */
-			Entity: infer T;
-		};
-	}
-		? T extends CoreEntityClass
-			? InstanceType<T>
-			: CoreEntity
-		: CoreEntity;
+	type Entity = CoreUniverseObjectArgsIndexAccess<N, CoreUniverseObjectIds.Entity, O>;
 
 	/**
 	 * Core cell base class.
@@ -192,7 +179,7 @@ export function CoreCellClassFactory<
 	 */
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare
-	abstract class CoreCell extends CoreUniverseObjectContainerFactory<C, CoreUniverseObjectIds.Entity, O, Entity>({
+	abstract class CoreCell extends CoreUniverseObjectContainerFactory<C, N, CoreUniverseObjectIds.Entity, O>({
 		Base,
 		options,
 		universeObjectId: CoreUniverseObjectIds.Entity

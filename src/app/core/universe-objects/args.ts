@@ -3,6 +3,10 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+/**
+ * @file Core args
+ */
+
 import { Uuid } from "../../common/uuid";
 import { CoreArgsIds, CoreArgsOptionsUnion, CoreArgsOptionsUnionGenerate } from "../args";
 import { CoreCellArgs } from "../cell";
@@ -11,10 +15,6 @@ import { CoreGridArgs } from "../grid";
 import { CoreShardArgs } from "../shard";
 import { CoreUniverseObjectPath } from "./path";
 import { CoreUniverseObjectIds, CoreUniverseObjectWords } from "./words";
-
-/**
- * @file Core args
- */
 
 /**
  * Args options constraint for core universe objects.
@@ -32,9 +32,13 @@ type CoreUniverseObjectArgs<
 > = CoreUniverseObjectPath<I>;
 
 /**
- * A non-exhaustive type indexing IDs to args.
+ * A non-exhaustive constraint for args index (type indexing IDs to args).
+ *
+ * @remarks
+ * To be used in generic type args, and to define indexes.
+ * Use {@link CoreUniverseObjectArgsIndexAccess} to access the args.
  */
-type CoreUniverseObjectArgsIndexNonExhaustive<O extends CoreArgsOptionsUnion> = {
+export type CoreUniverseObjectArgsIndex<O extends CoreArgsOptionsUnion> = {
 	/**
 	 * Core shard args.
 	 */
@@ -57,14 +61,15 @@ type CoreUniverseObjectArgsIndexNonExhaustive<O extends CoreArgsOptionsUnion> = 
 };
 
 /**
- *  Exhaustive type indexing IDs to args.
+ * A type safe way to extract IDs from index, especially within a generic type.
+ * Performs index exhaustiveness check, and args type constraint check.
+ * Asserts that args are args.
  */
-export type CoreUniverseObjectArgsIndex<
+export type CoreUniverseObjectArgsIndexAccess<
+	N extends CoreUniverseObjectArgsIndex<O>,
 	I extends CoreUniverseObjectIds,
 	O extends CoreArgsOptionsUnion
-> = CoreUniverseObjectArgsIndexNonExhaustive<O>[I] extends CoreUniverseObjectArgs<I, O>
-	? CoreUniverseObjectArgsIndexNonExhaustive<O>[I]
-	: never;
+> = N[I] extends CoreUniverseObjectArgs<I, O> ? N[I] : never;
 
 /**
  * The type of the universe objects property in universe object args container with map.
@@ -72,7 +77,7 @@ export type CoreUniverseObjectArgsIndex<
 export type CoreUniverseObjectArgsContainerMemberUniverseObjectsWithMap<
 	I extends CoreUniverseObjectIds,
 	O extends CoreArgsOptionsUnion
-> = Map<Uuid, CoreUniverseObjectArgsIndex<I, O>>;
+> = Map<Uuid, CoreUniverseObjectArgsIndexAccess<CoreUniverseObjectArgsIndex<O>, I, O>>;
 
 /**
  * The type of the universe objects property in universe object args container without map.
@@ -80,7 +85,7 @@ export type CoreUniverseObjectArgsContainerMemberUniverseObjectsWithMap<
 export type CoreUniverseObjectArgsContainerMemberUniverseObjectsWithoutMap<
 	I extends CoreUniverseObjectIds,
 	O extends CoreArgsOptionsUnion
-> = Array<CoreUniverseObjectArgsIndex<I, O>>;
+> = Array<CoreUniverseObjectArgsIndexAccess<CoreUniverseObjectArgsIndex<O>, I, O>>;
 
 /**
  * Core universe object container args.

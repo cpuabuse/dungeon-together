@@ -8,7 +8,11 @@
  */
 
 import { Uuid } from "../../common/uuid";
-import { CoreUniverseObjectArgsContainer, CoreUniverseObjectArgsIndex } from "./args";
+import {
+	CoreUniverseObjectArgsContainer,
+	CoreUniverseObjectArgsIndex,
+	CoreUniverseObjectArgsIndexAccess
+} from "./args";
 import { coreUniverseObjectIdToPathUuidPropertyName } from "./path";
 import { CoreUniverseObjectIds, CoreUniverseObjectWords, coreUniverseObjectWords } from "./words";
 import { CoreUniverseObjectArgsOptionsUnion } from ".";
@@ -24,9 +28,9 @@ import { CoreUniverseObjectArgsOptionsUnion } from ".";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreUniverseObjectContainerFactory<
 	C extends abstract new (...args: any[]) => any,
+	N extends CoreUniverseObjectArgsIndex<O>,
 	I extends CoreUniverseObjectIds,
-	O extends CoreUniverseObjectArgsOptionsUnion,
-	A extends CoreUniverseObjectArgsIndex<I, O>
+	O extends CoreUniverseObjectArgsOptionsUnion
 >({
 	Base,
 	universeObjectId,
@@ -65,6 +69,11 @@ export function CoreUniverseObjectContainerFactory<
 	} = coreUniverseObjectWords[universeObjectId];
 
 	/**
+	 * Extracting args type from index.
+	 */
+	type Args = CoreUniverseObjectArgsIndexAccess<N, I, O>;
+
+	/**
 	 * Name of universe objects member.
 	 */
 	// Need to extract type
@@ -89,7 +98,7 @@ export function CoreUniverseObjectContainerFactory<
 			 * @param this - Universe object container
 			 * @param universeObject - Universe object to add
 			 */
-			value(this: CoreUniverseObjectContainerInstance, universeObject: A): void {
+			value(this: CoreUniverseObjectContainerInstance, universeObject: Args): void {
 				this[nameUniverseObjects].set(
 					universeObject[coreUniverseObjectIdToPathUuidPropertyName({ universeObjectId })],
 					universeObject
@@ -103,7 +112,7 @@ export function CoreUniverseObjectContainerFactory<
 		// eslint-disable-next-line @typescript-eslint/typedef
 		universeObjects: {
 			name: nameUniverseObjects,
-			value: new Map<Uuid, A>()
+			value: new Map<Uuid, Args>()
 		}
 	};
 
