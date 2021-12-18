@@ -24,14 +24,15 @@ import {
 import { GridPath } from "./grid";
 import {
 	CoreUniverseObjectArgsContainer,
+	CoreUniverseObjectArgsIndex,
+	CoreUniverseObjectArgsIndexAccess,
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectContainerFactory,
 	CoreUniverseObjectIds,
 	// Type used only for documentation
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	CoreUniverseObjectInherit
-} from "./universe-objects";
-import { CoreUniverseObjectArgsIndex, CoreUniverseObjectArgsIndexAccess } from "./universe-objects/args";
+} from "./universe-object";
 
 /**
  * Word referring to a cell.

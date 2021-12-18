@@ -25,7 +25,7 @@ import {
 	// Type used only for documentation
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	CoreUniverseObjectInherit
-} from "./universe-objects";
+} from "./universe-object";
 
 /**
  * Word referring to entity.

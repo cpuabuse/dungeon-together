@@ -8,14 +8,10 @@
  */
 
 import { Uuid } from "../../common/uuid";
-import {
-	CoreUniverseObjectArgsContainer,
-	CoreUniverseObjectArgsIndex,
-	CoreUniverseObjectArgsIndexAccess
-} from "./args";
+import { CoreUniverseObjectArgsContainer } from "./args";
 import { coreUniverseObjectIdToPathUuidPropertyName } from "./path";
 import { CoreUniverseObjectIds, CoreUniverseObjectWords, coreUniverseObjectWords } from "./words";
-import { CoreUniverseObjectArgsOptionsUnion } from ".";
+import { CoreUniverseObjectArgsIndex, CoreUniverseObjectArgsIndexAccess, CoreUniverseObjectArgsOptionsUnion } from ".";
 
 /**
  * Factory for core universe object class.

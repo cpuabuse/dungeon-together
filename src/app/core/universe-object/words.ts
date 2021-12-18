@@ -7,11 +7,6 @@
  * @file Words and constraints for universe objects
  */
 
-import { CoreCellWord } from "../cell";
-import { CoreEntityWord } from "../entity";
-import { CoreGridWord } from "../grid";
-import { CoreShardWord } from "../shard";
-
 /**
  * Identifiers for a universe objects' members.
  * Should be in singular lowercase form.

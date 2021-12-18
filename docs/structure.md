@@ -29,3 +29,7 @@ Project root
 ├───test # Test files
 └───tsconfig # TS build configuration
 ```
+
+## Source tree structure
+
+`app` contents to be separated into folders, by software meaning. Each respective folder, would either contain files, or folders for directory imports.
