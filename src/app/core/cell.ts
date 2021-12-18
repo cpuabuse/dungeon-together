@@ -11,6 +11,7 @@ import { defaultGridUuid, defaultShardUuid, entityUuidUrlPath, urlPathSeparator 
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { Vector } from "../common/vector";
 import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "./args";
+import { CoreUniverseObjectArgsIndex, CoreUniverseObjectArgsIndexAccess } from "./args-index";
 import { CoreBaseClassNonRecursive } from "./base";
 import {
 	CommsEntity,
@@ -24,8 +25,6 @@ import {
 import { GridPath } from "./grid";
 import {
 	CoreUniverseObjectArgsContainer,
-	CoreUniverseObjectArgsIndex,
-	CoreUniverseObjectArgsIndexAccess,
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectContainerFactory,
 	CoreUniverseObjectIds,
