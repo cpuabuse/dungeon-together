@@ -13,7 +13,7 @@ import { CoreUniverseObjectIds, CoreUniverseObjectWords, coreUniverseObjectWords
 /**
  * A type for the property name of path UUID.
  */
-type CoreUniverseObjectPathUuidPropertyName<I extends CoreUniverseObjectIds> =
+export type CoreUniverseObjectPathUuidPropertyName<I extends CoreUniverseObjectIds> =
 	`${CoreUniverseObjectWords[I]["singularLowercaseWord"]}Uuid`;
 
 /**

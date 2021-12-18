@@ -232,10 +232,10 @@ export function CoreCellClassFactory<
 		 *
 		 * @returns Entity
 		 */
-		public getEntity({ entityUuid }: EntityPath): Entity {
-			let entity: Entity | undefined = this.entities.get(entityUuid);
+		public getEntity: ({ entityUuid }: EntityPath) => Entity = ({ entityUuid }: EntityPath): Entity => {
+			let entity: Entity | undefined = super.getEntity({ entityUuid });
 			return entity === undefined ? this.defaultEntity : entity;
-		}
+		};
 
 		/**
 		 * Removes entity.

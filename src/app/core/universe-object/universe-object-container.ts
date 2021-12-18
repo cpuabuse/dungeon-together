@@ -10,7 +10,11 @@
 import { Uuid } from "../../common/uuid";
 import { CoreUniverseObjectArgsIndex, CoreUniverseObjectArgsIndexAccess } from "../args-index";
 import { CoreUniverseObjectArgsContainer } from "./args";
-import { coreUniverseObjectIdToPathUuidPropertyName } from "./path";
+import {
+	CoreUniverseObjectPath,
+	CoreUniverseObjectPathUuidPropertyName,
+	coreUniverseObjectIdToPathUuidPropertyName
+} from "./path";
 import { CoreUniverseObjectIds, CoreUniverseObjectWords, coreUniverseObjectWords } from "./words";
 import { CoreUniverseObjectArgsOptionsUnion } from ".";
 
@@ -33,7 +37,9 @@ export function CoreUniverseObjectContainerFactory<
 	universeObjectId,
 	// Potentially to be used in the future
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	options
+	options,
+	isUniverse,
+	universePropertyName
 }: {
 	/**
 	 * Base class.
@@ -50,6 +56,11 @@ export function CoreUniverseObjectContainerFactory<
 	 */
 	options: O;
 }) {
+	/**
+	 * Extracting args type from index.
+	 */
+	type Args = CoreUniverseObjectArgsIndexAccess<N, I, O>;
+
 	const {
 		pluralLowercaseWord,
 		singularCapitalizedWord
@@ -66,11 +77,6 @@ export function CoreUniverseObjectContainerFactory<
 	} = coreUniverseObjectWords[universeObjectId];
 
 	/**
-	 * Extracting args type from index.
-	 */
-	type Args = CoreUniverseObjectArgsIndexAccess<N, I, O>;
-
-	/**
 	 * Name of universe objects member.
 	 */
 	// Need to extract type
@@ -84,6 +90,20 @@ export function CoreUniverseObjectContainerFactory<
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const nameAddUniverseObject = `add${singularCapitalizedWord}` as const;
 
+	/**
+	 * Name of get universe object function.
+	 */
+	// Need to extract type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const nameGetUniverseObject = `get${singularCapitalizedWord}` as const;
+
+	/**
+	 * UUID property name within a path.
+	 */
+	const pathUuidPropertyName: CoreUniverseObjectPathUuidPropertyName<I> = coreUniverseObjectIdToPathUuidPropertyName({
+		universeObjectId
+	});
+
 	// Inferring for final type
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const members = {
@@ -96,17 +116,23 @@ export function CoreUniverseObjectContainerFactory<
 			 * @param universeObject - Universe object to add
 			 */
 			value(this: CoreUniverseObjectContainerInstance, universeObject: Args): void {
-				this[nameUniverseObjects].set(
-					universeObject[coreUniverseObjectIdToPathUuidPropertyName({ universeObjectId })],
-					universeObject
-				);
+				this[nameUniverseObjects].set(universeObject[pathUuidPropertyName], universeObject);
 			}
 		},
-		/**
-		 * Name of universe objects member.
-		 */
-		// Need to extract type
-		// eslint-disable-next-line @typescript-eslint/typedef
+		getUniverseObject: {
+			name: nameGetUniverseObject,
+			/**
+			 * Get universe object.
+			 *
+			 * @param this - Universe object container
+			 * @param path - Path to search for
+			 * @returns Universe object
+			 */
+			value(this: CoreUniverseObjectContainerInstance, path: CoreUniverseObjectPath<I>): Args | undefined {
+				let universeObject: Args | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
+				return universeObject;
+			}
+		},
 		universeObjects: {
 			name: nameUniverseObjects,
 			value: new Map<Uuid, Args>()
@@ -125,10 +151,11 @@ export function CoreUniverseObjectContainerFactory<
 	 */
 	type CoreUniverseObjectContainerInstance = {
 		[K in typeof nameAddUniverseObject as K]: Members["addUniverseObject"]["value"];
-	} &
-		{
-			[K in typeof nameUniverseObjects as K]: Members["universeObjects"]["value"];
-		};
+	} & {
+		[K in typeof nameGetUniverseObject as K]: Members["getUniverseObject"]["value"];
+	} & {
+		[K in typeof nameUniverseObjects as K]: Members["universeObjects"]["value"];
+	};
 
 	/**
 	 * Prototype chain will be changed to add new methods, and injected with type information.
@@ -137,6 +164,8 @@ export function CoreUniverseObjectContainerFactory<
 	 * The injection for non-static properties can be only done as properties, not methods. Thus, for overrides, classes extending this would have to use assignment of functions to properties, instead of defining methods directly.
 	 *
 	 * To ensure proper inheritance, assignment of members is done via prototype.
+	 *
+	 * Currently, dynamic generic abstract properties are impossible to define.
 	 */
 	abstract class CoreUniverseObjectContainer extends Base {}
 
