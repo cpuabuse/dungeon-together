@@ -19,9 +19,28 @@ import { CoreUniverseObjectIds, CoreUniverseObjectWords, coreUniverseObjectWords
 import { CoreUniverseObjectArgsOptionsUnion } from ".";
 
 /**
+ * Abstract part ot the class from {@link CoreUniverseObjectContainerFactory}.
+ */
+export type CoreUniverseObjectContainerImplements<
+	N extends CoreUniverseObjectArgsIndex<O>,
+	I extends CoreUniverseObjectIds,
+	O extends CoreUniverseObjectArgsOptionsUnion
+> = {
+	[K in CoreUniverseObjectWords[I]["singularCapitalizedWord"] as `default${K}`]: CoreUniverseObjectArgsIndexAccess<
+		N,
+		I,
+		O
+	>;
+	// Included to remove ts errors since `C` is not used.
+};
+
+/**
  * Factory for core universe object class.
  *
  * Args generic parameters cannot be replaced with index, since universe object information will not be extracted from index, as ID information will be lost, if not passed to an index from within this function.
+ *
+ * @remarks
+ * Classes extending this must implement {@link CoreUniverseObjectContainerImplements}. Should be implemented anywhere in the chain, including up to first concrete class once. For simplicity, the first class to extends this should implement {@link CoreUniverseObjectContainerImplements}.
  *
  * @returns Universe object class
  */
@@ -37,9 +56,7 @@ export function CoreUniverseObjectContainerFactory<
 	universeObjectId,
 	// Potentially to be used in the future
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	options,
-	isUniverse,
-	universePropertyName
+	options
 }: {
 	/**
 	 * Base class.
@@ -61,83 +78,10 @@ export function CoreUniverseObjectContainerFactory<
 	 */
 	type Args = CoreUniverseObjectArgsIndexAccess<N, I, O>;
 
-	const {
-		pluralLowercaseWord,
-		singularCapitalizedWord
-	}: {
-		/**
-		 * The plural lowercase word for the universe object.
-		 */
-		pluralLowercaseWord: CoreUniverseObjectWords[I]["pluralLowercaseWord"];
-
-		/**
-		 * The singular capitalized word for the universe object.
-		 */
-		singularCapitalizedWord: CoreUniverseObjectWords[I]["singularCapitalizedWord"];
-	} = coreUniverseObjectWords[universeObjectId];
-
 	/**
-	 * Name of universe objects member.
+	 * Abstract bits of the class to be implemented in extending classes.
 	 */
-	// Need to extract type
-	// eslint-disable-next-line @typescript-eslint/typedef
-	const nameUniverseObjects = `${pluralLowercaseWord}` as const;
-
-	/**
-	 * Name of add universe object function.
-	 */
-	// Need to extract type
-	// eslint-disable-next-line @typescript-eslint/typedef
-	const nameAddUniverseObject = `add${singularCapitalizedWord}` as const;
-
-	/**
-	 * Name of get universe object function.
-	 */
-	// Need to extract type
-	// eslint-disable-next-line @typescript-eslint/typedef
-	const nameGetUniverseObject = `get${singularCapitalizedWord}` as const;
-
-	/**
-	 * UUID property name within a path.
-	 */
-	const pathUuidPropertyName: CoreUniverseObjectPathUuidPropertyName<I> = coreUniverseObjectIdToPathUuidPropertyName({
-		universeObjectId
-	});
-
-	// Inferring for final type
-	// eslint-disable-next-line @typescript-eslint/typedef
-	const members = {
-		addUniverseObject: {
-			name: nameAddUniverseObject,
-			/**
-			 * Add universe object with the map option.
-			 *
-			 * @param this - Universe object container
-			 * @param universeObject - Universe object to add
-			 */
-			value(this: CoreUniverseObjectContainerInstance, universeObject: Args): void {
-				this[nameUniverseObjects].set(universeObject[pathUuidPropertyName], universeObject);
-			}
-		},
-		getUniverseObject: {
-			name: nameGetUniverseObject,
-			/**
-			 * Get universe object.
-			 *
-			 * @param this - Universe object container
-			 * @param path - Path to search for
-			 * @returns Universe object
-			 */
-			value(this: CoreUniverseObjectContainerInstance, path: CoreUniverseObjectPath<I>): Args | undefined {
-				let universeObject: Args | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
-				return universeObject;
-			}
-		},
-		universeObjects: {
-			name: nameUniverseObjects,
-			value: new Map<Uuid, Args>()
-		}
-	};
+	type CoreUniverseObjectContainerAbstract = CoreUniverseObjectContainerImplements<N, I, O>;
 
 	/**
 	 * Type of members.
@@ -155,6 +99,98 @@ export function CoreUniverseObjectContainerFactory<
 		[K in typeof nameGetUniverseObject as K]: Members["getUniverseObject"]["value"];
 	} & {
 		[K in typeof nameUniverseObjects as K]: Members["universeObjects"]["value"];
+	};
+
+	/**
+	 * Instance for this inside of class methods, that include abstract members from {@link CoreUniverseObjectContainerAbstract}.
+	 */
+	type CoreUniverseObjectContainerThisInstance = CoreUniverseObjectContainerInstance &
+		CoreUniverseObjectContainerAbstract;
+
+	const {
+		pluralLowercaseWord,
+		singularCapitalizedWord
+	}: {
+		/**
+		 * The plural lowercase word for the universe object.
+		 */
+		pluralLowercaseWord: CoreUniverseObjectWords[I]["pluralLowercaseWord"];
+
+		/**
+		 * The singular capitalized word for the universe object.
+		 */
+		singularCapitalizedWord: CoreUniverseObjectWords[I]["singularCapitalizedWord"];
+	} = coreUniverseObjectWords[universeObjectId];
+
+	/**
+	 * Name of add universe object function.
+	 */
+	// Need to extract type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const nameAddUniverseObject = `add${singularCapitalizedWord}` as const;
+
+	/**
+	 * Name of get universe object function.
+	 */
+	// Need to extract type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const nameGetUniverseObject = `get${singularCapitalizedWord}` as const;
+
+	/**
+	 * Name of universe objects member.
+	 */
+	// Need to extract type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const nameUniverseObjects = `${pluralLowercaseWord}` as const;
+
+	/**
+	 * Name of default universe object.
+	 */
+	// Need to extract type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const nameAbstractDefaultUniverseObject = `default${singularCapitalizedWord}` as const;
+
+	/**
+	 * UUID property name within a path.
+	 */
+	const pathUuidPropertyName: CoreUniverseObjectPathUuidPropertyName<I> = coreUniverseObjectIdToPathUuidPropertyName({
+		universeObjectId
+	});
+
+	// There are implicit constraints of how the const should be structured, but will implicitly be type checked during usage.
+	// Inferring for final type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const members = {
+		addUniverseObject: {
+			name: nameAddUniverseObject,
+			/**
+			 * Add universe object with the map option.
+			 *
+			 * @param this - Universe object container
+			 * @param universeObject - Universe object to add
+			 */
+			value(this: CoreUniverseObjectContainerThisInstance, universeObject: Args): void {
+				this[nameUniverseObjects].set(universeObject[pathUuidPropertyName], universeObject);
+			}
+		},
+		getUniverseObject: {
+			name: nameGetUniverseObject,
+			/**
+			 * Get universe object.
+			 *
+			 * @param this - Universe object container
+			 * @param path - Path to search for
+			 * @returns Universe object
+			 */
+			value(this: CoreUniverseObjectContainerThisInstance, path: CoreUniverseObjectPath<I>): Args {
+				let universeObject: Args | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
+				return universeObject === undefined ? this[nameAbstractDefaultUniverseObject] : universeObject;
+			}
+		},
+		universeObjects: {
+			name: nameUniverseObjects,
+			value: new Map<Uuid, Args>()
+		}
 	};
 
 	/**

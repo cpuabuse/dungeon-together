@@ -27,6 +27,7 @@ import {
 	CoreUniverseObjectArgsContainer,
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectContainerFactory,
+	CoreUniverseObjectContainerImplements,
 	CoreUniverseObjectIds,
 	// Type used only for documentation
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -179,11 +180,14 @@ export function CoreCellClassFactory<
 	 */
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare
-	abstract class CoreCell extends CoreUniverseObjectContainerFactory<C, N, CoreUniverseObjectIds.Entity, O>({
-		Base,
-		options,
-		universeObjectId: CoreUniverseObjectIds.Entity
-	}) {
+	abstract class CoreCell
+		extends CoreUniverseObjectContainerFactory<C, N, CoreUniverseObjectIds.Entity, O>({
+			Base,
+			options,
+			universeObjectId: CoreUniverseObjectIds.Entity
+		})
+		implements CoreUniverseObjectContainerImplements<N, CoreUniverseObjectIds.Entity, O>
+	{
 		/**
 		 * Default entity.
 		 */
@@ -226,16 +230,6 @@ export function CoreCellClassFactory<
 			}
 			return false;
 		}
-
-		/**
-		 * Gets entity.
-		 *
-		 * @returns Entity
-		 */
-		public getEntity: ({ entityUuid }: EntityPath) => Entity = ({ entityUuid }: EntityPath): Entity => {
-			let entity: Entity | undefined = super.getEntity({ entityUuid });
-			return entity === undefined ? this.defaultEntity : entity;
-		};
 
 		/**
 		 * Removes entity.

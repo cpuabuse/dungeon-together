@@ -8,7 +8,7 @@
  */
 
 // Re-export
-export { CoreUniverseObjectContainerFactory } from "./universe-object-container";
+export { CoreUniverseObjectContainerFactory, CoreUniverseObjectContainerImplements } from "./universe-object-container";
 export { CoreUniverseObjectIds } from "./words";
 export { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectArgsContainer, CoreUniverseObjectArgs } from "./args";
 
