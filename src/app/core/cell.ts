@@ -11,28 +11,28 @@ import { defaultGridUuid, defaultShardUuid, entityUuidUrlPath, urlPathSeparator 
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { Vector } from "../common/vector";
 import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "./args";
-import { CoreUniverseObjectArgsIndex, CoreUniverseObjectArgsIndexAccess } from "./args-index";
+import { CoreArgsContainer } from "./args/args";
 import { CoreBaseClassNonRecursive } from "./base";
 import {
 	CommsEntity,
 	CommsEntityArgs,
 	CommsEntityRaw,
 	CoreEntity,
+	CoreEntityArgs,
 	EntityPath,
 	commsEntityRawToArgs,
 	coreEntityArgsConvert
 } from "./entity";
 import { GridPath } from "./grid";
 import {
-	CoreUniverseObjectArgsContainer,
 	CoreUniverseObjectArgsOptionsUnion,
-	CoreUniverseObjectContainerFactory,
 	CoreUniverseObjectContainerImplements,
 	CoreUniverseObjectIds,
 	// Type used only for documentation
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	CoreUniverseObjectInherit
 } from "./universe-object";
+import { CoreUniverseObject, CoreUniverseObjectFactory } from "./universe-object/universe-object";
 
 /**
  * Word referring to a cell.
@@ -84,7 +84,8 @@ export type CommsCellRaw = CommCellRawHelper<
  *
  * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
-export type CoreCellArgs<O extends CoreArgsOptionsUnion = CoreArgsOptions> = CoreUniverseObjectArgsContainer<
+export type CoreCellArgs<O extends CoreArgsOptionsUnion = CoreArgsOptions> = CoreArgsContainer<
+	CoreEntityArgs<O>,
 	CoreUniverseObjectIds.Entity,
 	O
 > &
@@ -152,8 +153,8 @@ export type CoreCell = CommsCell & InstanceType<ReturnType<typeof CoreCellClassF
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreCellClassFactory<
 	C extends CoreBaseClassNonRecursive,
-	N extends CoreUniverseObjectArgsIndex<O>,
-	O extends CoreUniverseObjectArgsOptionsUnion
+	O extends CoreUniverseObjectArgsOptionsUnion,
+	N extends CoreUniverseObject<CoreUniverseObjectIds.Entity, O>
 >({
 	Base,
 	options
@@ -169,11 +170,6 @@ export function CoreCellClassFactory<
 	options: O;
 }) {
 	/**
-	 * Entity type extracted from args index.
-	 */
-	type Entity = CoreUniverseObjectArgsIndexAccess<N, CoreUniverseObjectIds.Entity, O>;
-
-	/**
 	 * Core cell base class.
 	 *
 	 * @see CoreUniverseObjectInherit for more details
@@ -181,17 +177,18 @@ export function CoreCellClassFactory<
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare
 	abstract class CoreCell
-		extends CoreUniverseObjectContainerFactory<C, N, CoreUniverseObjectIds.Entity, O>({
+		extends CoreUniverseObjectFactory<C, CoreUniverseObjectIds.Cell, O, N, CoreUniverseObjectIds.Entity>({
 			Base,
+			childUniverseObjectId: CoreUniverseObjectIds.Entity,
 			options,
-			universeObjectId: CoreUniverseObjectIds.Entity
+			universeObjectId: CoreUniverseObjectIds.Cell
 		})
 		implements CoreUniverseObjectContainerImplements<N, CoreUniverseObjectIds.Entity, O>
 	{
 		/**
 		 * Default entity.
 		 */
-		public abstract defaultEntity: Entity;
+		public abstract defaultEntity: N;
 
 		/**
 		 * Default entity UUID.
@@ -214,7 +211,7 @@ export function CoreCellClassFactory<
 		 *
 		 * @param entity - {@link CoreEntity}, anything that resides within a cell
 		 */
-		public attach(entity: Entity): void {
+		public attach(entity: N): void {
 			this.entities.set(entity.entityUuid, entity);
 		}
 
@@ -230,11 +227,6 @@ export function CoreCellClassFactory<
 			}
 			return false;
 		}
-
-		/**
-		 * Removes entity.
-		 */
-		public abstract removeEntity(path: EntityPath): void;
 
 		/**
 		 * Terminates `this`.

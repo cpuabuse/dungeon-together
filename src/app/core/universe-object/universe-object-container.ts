@@ -8,13 +8,13 @@
  */
 
 import { Uuid } from "../../common/uuid";
-import { CoreUniverseObjectArgsIndex, CoreUniverseObjectArgsIndexAccess } from "../args-index";
 import { CoreUniverseObjectArgsContainer } from "./args";
 import {
 	CoreUniverseObjectPath,
 	CoreUniverseObjectPathUuidPropertyName,
 	coreUniverseObjectIdToPathUuidPropertyName
 } from "./path";
+import { CoreUniverseObject } from "./universe-object";
 import { CoreUniverseObjectIds, CoreUniverseObjectWords, coreUniverseObjectWords } from "./words";
 import { CoreUniverseObjectArgsOptionsUnion } from ".";
 
@@ -22,15 +22,11 @@ import { CoreUniverseObjectArgsOptionsUnion } from ".";
  * Abstract part ot the class from {@link CoreUniverseObjectContainerFactory}.
  */
 export type CoreUniverseObjectContainerImplements<
-	N extends CoreUniverseObjectArgsIndex<O>,
+	U extends CoreUniverseObject<I, O>,
 	I extends CoreUniverseObjectIds,
 	O extends CoreUniverseObjectArgsOptionsUnion
 > = {
-	[K in CoreUniverseObjectWords[I]["singularCapitalizedWord"] as `default${K}`]: CoreUniverseObjectArgsIndexAccess<
-		N,
-		I,
-		O
-	>;
+	[K in CoreUniverseObjectWords[I]["singularCapitalizedWord"] as `default${K}`]: U;
 	// Included to remove ts errors since `C` is not used.
 };
 
@@ -47,8 +43,10 @@ export type CoreUniverseObjectContainerImplements<
 // Force type inference to extract class type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreUniverseObjectContainerFactory<
-	C extends abstract new (...args: any[]) => any,
-	N extends CoreUniverseObjectArgsIndex<O>,
+	// "{}" is needed exactly, to preserve instance type and to be able to extend
+	// eslint-disable-next-line @typescript-eslint/ban-types
+	C extends abstract new (...args: any[]) => {},
+	U extends CoreUniverseObject<I, O>,
 	I extends CoreUniverseObjectIds,
 	O extends CoreUniverseObjectArgsOptionsUnion
 >({
@@ -76,12 +74,7 @@ export function CoreUniverseObjectContainerFactory<
 	/**
 	 * Extracting args type from index.
 	 */
-	type Args = CoreUniverseObjectArgsIndexAccess<N, I, O>;
-
-	/**
-	 * Abstract bits of the class to be implemented in extending classes.
-	 */
-	type CoreUniverseObjectContainerAbstract = CoreUniverseObjectContainerImplements<N, I, O>;
+	type UniverseObject = U;
 
 	/**
 	 * Type of members.
@@ -98,14 +91,16 @@ export function CoreUniverseObjectContainerFactory<
 	} & {
 		[K in typeof nameGetUniverseObject as K]: Members["getUniverseObject"]["value"];
 	} & {
+		[K in typeof nameRemoveUniverseObject as K]: Members["removeUniverseObject"]["value"];
+	} & {
 		[K in typeof nameUniverseObjects as K]: Members["universeObjects"]["value"];
 	};
 
 	/**
 	 * Instance for this inside of class methods, that include abstract members from {@link CoreUniverseObjectContainerAbstract}.
 	 */
-	type CoreUniverseObjectContainerThisInstance = CoreUniverseObjectContainerInstance &
-		CoreUniverseObjectContainerAbstract;
+	type CoreUniverseObjectContainerAbstractThis = CoreUniverseObjectContainerInstance &
+		CoreUniverseObjectContainerImplements<U, I, O>;
 
 	const {
 		pluralLowercaseWord,
@@ -137,6 +132,13 @@ export function CoreUniverseObjectContainerFactory<
 	const nameGetUniverseObject = `get${singularCapitalizedWord}` as const;
 
 	/**
+	 * Name of remove universe object function.
+	 */
+	// Need to extract type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const nameRemoveUniverseObject = `remove${singularCapitalizedWord}` as const;
+
+	/**
 	 * Name of universe objects member.
 	 */
 	// Need to extract type
@@ -157,7 +159,13 @@ export function CoreUniverseObjectContainerFactory<
 		universeObjectId
 	});
 
-	// There are implicit constraints of how the const should be structured, but will implicitly be type checked during usage.
+	/**
+	 * Members of class.
+	 *
+	 * @remarks
+	 * - There are implicit constraints of how the const should be structured, but will implicitly be type checked during usage
+	 * - Cannot use abstract as `this`, as it will mismatch when `super` is called
+	 */
 	// Inferring for final type
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const members = {
@@ -169,7 +177,7 @@ export function CoreUniverseObjectContainerFactory<
 			 * @param this - Universe object container
 			 * @param universeObject - Universe object to add
 			 */
-			value(this: CoreUniverseObjectContainerThisInstance, universeObject: Args): void {
+			value(this: CoreUniverseObjectContainerInstance, universeObject: UniverseObject): void {
 				this[nameUniverseObjects].set(universeObject[pathUuidPropertyName], universeObject);
 			}
 		},
@@ -182,14 +190,28 @@ export function CoreUniverseObjectContainerFactory<
 			 * @param path - Path to search for
 			 * @returns Universe object
 			 */
-			value(this: CoreUniverseObjectContainerThisInstance, path: CoreUniverseObjectPath<I>): Args {
-				let universeObject: Args | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
-				return universeObject === undefined ? this[nameAbstractDefaultUniverseObject] : universeObject;
+			value(this: CoreUniverseObjectContainerInstance, path: CoreUniverseObjectPath<I>): UniverseObject {
+				let universeObject: UniverseObject | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
+				return universeObject === undefined
+					? (this as CoreUniverseObjectContainerAbstractThis)[nameAbstractDefaultUniverseObject]
+					: universeObject;
+			}
+		},
+		removeUniverseObject: {
+			name: nameRemoveUniverseObject,
+			/**
+			 * Removes the child object.
+			 *
+			 * @param this - Universe object container
+			 * @param path - Path to search for
+			 */
+			value(this: CoreUniverseObjectContainerInstance, path: CoreUniverseObjectPath<I>): void {
+				this[nameUniverseObjects].delete(path[pathUuidPropertyName]);
 			}
 		},
 		universeObjects: {
 			name: nameUniverseObjects,
-			value: new Map<Uuid, Args>()
+			value: new Map<Uuid, UniverseObject>()
 		}
 	};
 

@@ -10,6 +10,7 @@
 import { Uuid } from "../../common/uuid";
 import { CoreArgsIds, CoreArgsOptionsUnion, CoreArgsOptionsUnionGenerate } from "../args";
 import { CoreUniverseObjectArgsIndex, CoreUniverseObjectArgsIndexAccess } from "../args-index";
+import { CoreArgs, CoreArgsContainer } from "../args/args";
 
 import { CoreUniverseObjectPath } from "./path";
 import { CoreUniverseObjectIds, CoreUniverseObjectWords } from "./words";
@@ -35,7 +36,7 @@ export type CoreUniverseObjectArgs<
 export type CoreUniverseObjectArgsContainerMemberUniverseObjectsWithMap<
 	I extends CoreUniverseObjectIds,
 	O extends CoreArgsOptionsUnion
-> = Map<Uuid, CoreUniverseObjectArgsIndexAccess<CoreUniverseObjectArgsIndex<O>, I, O>>;
+> = Map<Uuid, CoreArgs<I, O>>;
 
 /**
  * The type of the universe objects property in universe object args container without map.
@@ -43,7 +44,7 @@ export type CoreUniverseObjectArgsContainerMemberUniverseObjectsWithMap<
 export type CoreUniverseObjectArgsContainerMemberUniverseObjectsWithoutMap<
 	I extends CoreUniverseObjectIds,
 	O extends CoreArgsOptionsUnion
-> = Array<CoreUniverseObjectArgsIndexAccess<CoreUniverseObjectArgsIndex<O>, I, O>>;
+> = Array<CoreArgs<I, O>>;
 
 /**
  * Core universe object container args.
