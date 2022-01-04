@@ -22,7 +22,10 @@ export enum CoreArgOptionIds {
 	Vector = "vector",
 
 	/**
-	 * Path.
+	 * Use paths or not.
+	 *
+	 * - `true`: Use paths
+	 * - `false`: Use ids
 	 */
 	Path = "path",
 
@@ -34,15 +37,7 @@ export enum CoreArgOptionIds {
 	/**
 	 * To use maps or arrays.
 	 */
-	Map = "map",
-
-	/**
-	 * To generate a new UUID for children or not.
-	 *
-	 * - `false`: Use the UUID provided
-	 * - `true`: Generate a new UUID from data
-	 */
-	UUID = "uuid"
+	Map = "map"
 }
 
 /**

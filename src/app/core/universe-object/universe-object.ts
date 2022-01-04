@@ -7,17 +7,27 @@
  * @file Outlines how universe object should like
  */
 
-import { CoreArg, CoreArgIds, CoreArgObjectWords, coreArgIdToPathUuidPropertyName, coreArgObjectWords } from "../arg";
+import {
+	CoreArg,
+	CoreArgIds,
+	CoreArgObjectWords,
+	CoreArgWithPath,
+	coreArgIdToPathUuidPropertyName,
+	coreArgObjectWords
+} from "../arg";
 import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectContainerFactory } from ".";
 
 /**
  * Own instance of a universe object, that has to be implemented within {@link CoreUniverseObjectContainerFactory}.
+ *
+ * @remarks
+ * For type verification, properties should be defined manually.
  */
 type CoreUniverseObjectInjectionInstance<I extends CoreArgIds, O extends CoreUniverseObjectArgsOptionsUnion> = {
 	[K in typeof coreArgObjectWords[I]["singularCapitalizedWord"] as `terminate${K}`]: (
 		this: CoreUniverseObjectInjectionInstance<I, O>
 	) => void;
-} & CoreArg<I, O>;
+} & CoreArgWithPath<I>;
 
 /**
  * Universe object instance minimal constraint.

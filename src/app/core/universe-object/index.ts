@@ -8,7 +8,7 @@
  */
 
 // Re-export
-export * from "./universe-object-container";
+export * from "./universe-objects-container";
 export * from "./options";
 export * from "./universe-object";
 

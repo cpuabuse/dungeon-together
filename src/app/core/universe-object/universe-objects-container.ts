@@ -8,12 +8,12 @@
  */
 
 import {
+	CoreArg,
 	CoreArgIds,
 	CoreArgObjectWords,
-	CoreArgPath,
 	CoreArgPathUuidPropertyName,
 	CoreArgsContainer,
-	CoreArgsContainerMemberArgsWithMap,
+	CoreArgsWithMapContainer,
 	coreArgIdToPathUuidPropertyName,
 	coreArgObjectWords
 } from "../arg";
@@ -76,9 +76,9 @@ export function CoreUniverseObjectContainerFactory<
 	 * Members and their types.
 	 */
 	type Members = {
-		[K in keyof typeof members["methods"]]: typeof members["methods"][K]["value"];
+		[K in keyof typeof members["assign"]]: typeof members["assign"][K]["value"];
 	} & {
-		[K in keyof typeof members["properties"]]: ReturnType<typeof members["properties"][K]["value"]>;
+		[K in keyof typeof members["generate"]]: ReturnType<typeof members["generate"][K]["value"]>;
 	};
 
 	/**
@@ -186,7 +186,7 @@ export function CoreUniverseObjectContainerFactory<
 	// Inferring for final type
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const members = {
-		methods: {
+		assign: {
 			addUniverseObject: {
 				name: nameAddUniverseObject,
 				/**
@@ -208,7 +208,7 @@ export function CoreUniverseObjectContainerFactory<
 				 * @param path - Path to search for
 				 * @returns Universe object
 				 */
-				value(this: ThisInstance, path: CoreArgPath<I>): U {
+				value(this: ThisInstance, path: CoreArg<I, O>): U {
 					let universeObject: U | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
 					return universeObject === undefined
 						? (this as AbstractInstance)[nameAbstractDefaultUniverseObject]
@@ -223,12 +223,12 @@ export function CoreUniverseObjectContainerFactory<
 				 * @param this - Universe object container
 				 * @param path - Path to search for
 				 */
-				value(this: ThisInstance, path: CoreArgPath<I>): void {
+				value(this: ThisInstance, path: CoreArg<I, O>): void {
 					this[nameUniverseObjects].delete(path[pathUuidPropertyName]);
 				}
 			}
 		},
-		properties: {
+		generate: {
 			universeObjects: {
 				name: nameUniverseObjects,
 				/**
@@ -236,7 +236,7 @@ export function CoreUniverseObjectContainerFactory<
 				 *
 				 * @returns Map of universe objects
 				 */
-				value: (): CoreArgsContainerMemberArgsWithMap<U, I, O> => new Map()
+				value: (): CoreArgsWithMapContainer<U, I, O> => new Map()
 			}
 		}
 	};
@@ -262,14 +262,14 @@ export function CoreUniverseObjectContainerFactory<
 			super(args);
 
 			// Assign properties
-			Object.values(members.properties).forEach(property => {
+			Object.values(members.generate).forEach(property => {
 				(this as Record<string, unknown>)[property.name] = property.value();
 			});
 		}
 	}
 
 	// Set prototype
-	Object.values(members.methods).forEach(method => {
+	Object.values(members.assign).forEach(method => {
 		(UniverseObjectContainer.prototype as Record<string, unknown>)[method.name] = method.value;
 	});
 

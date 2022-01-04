@@ -12,4 +12,6 @@ import { CoreArgOptionIds, CoreArgOptionsUnionGenerate } from "../arg";
 /**
  * Args options constraint for core universe objects.
  */
-export type CoreUniverseObjectArgsOptionsUnion = CoreArgOptionsUnionGenerate<CoreArgOptionIds.Map>;
+export type CoreUniverseObjectArgsOptionsUnion = CoreArgOptionsUnionGenerate<
+	CoreArgOptionIds.Map | CoreArgOptionIds.Path
+>;
