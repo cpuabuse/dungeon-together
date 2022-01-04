@@ -1,15 +1,15 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * Grid.
+ * @file Grid
  */
 
 import { defaultShardUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
-import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "./args";
+import { CoreArgOptionIds, CoreArgOptionIdsToOptions, CoreArgOptions, CoreArgOptionsUnion } from "./arg/options";
 import {
 	CellPath,
 	CommsCell,
@@ -51,13 +51,13 @@ export type CommsGridRaw = Omit<CommsGridArgs, "cells" | keyof ShardPath> & {
 /**
  * Core grid args.
  */
-export type CoreGridArgs<O extends CoreArgsOptionsUnion = CoreArgsOptions> = (O[CoreArgsIds.Path] extends true
+export type CoreGridArgs<O extends CoreArgOptionsUnion = CoreArgOptions> = (O[CoreArgOptionIds.Path] extends true
 	? GridPath
 	: GridOwnPath) & {
 	/**
 	 * Locations within the grid.
 	 */
-	cells: O[CoreArgsIds.Map] extends true ? Map<Uuid, CoreCellArgs<O>> : Array<CoreCellArgs<O>>;
+	cells: O[CoreArgOptionIds.Map] extends true ? Map<Uuid, CoreCellArgs<O>> : Array<CoreCellArgs<O>>;
 };
 
 /**
@@ -145,7 +145,7 @@ export function commsGridRawToArgs(rawSource: CommsGridRaw, shardUuid: Uuid): Co
  *
  * @returns Converted grid args
  */
-export function coreGridArgsConvert<S extends CoreArgsOptionsUnion, T extends CoreArgsOptionsUnion>({
+export function coreGridArgsConvert<S extends CoreArgOptionsUnion, T extends CoreArgOptionsUnion>({
 	grid,
 	sourceOptions,
 	targetOptions
@@ -175,14 +175,14 @@ export function coreGridArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 	let targetGridAs: Record<string, any> = targetGrid;
 
 	// Path
-	if (targetOptions[CoreArgsIds.Path] === true) {
+	if (targetOptions[CoreArgOptionIds.Path] === true) {
 		/**
 		 * Core grid args with path.
 		 */
-		type CoreGridArgsWithPath = CoreGridArgs<CoreArgsIdsToOptions<CoreArgsIds.Path>>;
+		type CoreGridArgsWithPath = CoreGridArgs<CoreArgOptionIdsToOptions<CoreArgOptionIds.Path>>;
 		let targetGridWithPath: CoreGridArgsWithPath = targetGridAs as CoreGridArgsWithPath;
 
-		if (sourceOptions[CoreArgsIds.Path] === true) {
+		if (sourceOptions[CoreArgOptionIds.Path] === true) {
 			// Source to target
 			targetGridWithPath.shardUuid = (sourceGridAs as CoreGridArgsWithPath).shardUuid;
 		} else {
@@ -194,12 +194,12 @@ export function coreGridArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 	/**
 	 * Core grid args options with map.
 	 */
-	type CoreGridArgsOptionsWithMap = CoreArgsIdsToOptions<CoreArgsIds.Map>;
+	type CoreGridArgsOptionsWithMap = CoreArgOptionIdsToOptions<CoreArgOptionIds.Map>;
 
 	/**
 	 * Core grid args options without map.
 	 */
-	type CoreGridArgsOptionsWithoutMap = CoreArgsOptions;
+	type CoreGridArgsOptionsWithoutMap = CoreArgOptions;
 
 	/**
 	 * Core grid args with map.
@@ -212,10 +212,10 @@ export function coreGridArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 	type CoreGridArgsWithoutMap = CoreGridArgs<CoreGridArgsOptionsWithoutMap>;
 
 	// Map
-	if (targetOptions[CoreArgsIds.Map] === true) {
+	if (targetOptions[CoreArgOptionIds.Map] === true) {
 		let targetGridWithMap: CoreGridArgsWithMap = targetGridAs as CoreGridArgsWithMap;
 
-		if (sourceOptions[CoreArgsIds.Map] === true) {
+		if (sourceOptions[CoreArgOptionIds.Map] === true) {
 			// Map to map
 			const sourceGridWithMap: CoreGridArgsWithMap = sourceGridAs as CoreGridArgsWithMap;
 
@@ -255,7 +255,7 @@ export function coreGridArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 	} else {
 		let targetGridWithoutMap: CoreGridArgsWithoutMap = sourceGridAs as CoreGridArgsWithoutMap;
 
-		if (sourceOptions[CoreArgsIds.Map] === true) {
+		if (sourceOptions[CoreArgOptionIds.Map] === true) {
 			// Map to array
 			const sourceGridWithMap: CoreGridArgsWithMap = sourceGridAs as CoreGridArgsWithMap;
 

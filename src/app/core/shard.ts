@@ -12,7 +12,7 @@
  */
 
 import { Uuid } from "../common/uuid";
-import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "./args";
+import { CoreArgOptionIds, CoreArgOptionIdsToOptions, CoreArgOptions, CoreArgOptionsUnion } from "./arg/options";
 import {
 	CommsGrid,
 	CommsGridArgs,
@@ -53,13 +53,13 @@ export type CommsShardRaw = Omit<CommsShardArgs, "grids"> & {
 /**
  * Core shard args.
  */
-export type CoreShardArgs<O extends CoreArgsOptionsUnion = CoreArgsOptions> = (O[CoreArgsIds.Path] extends true
+export type CoreShardArgs<O extends CoreArgOptionsUnion = CoreArgOptions> = (O[CoreArgOptionIds.Path] extends true
 	? ShardPath
 	: ShardOwnPath) & {
 	/**
 	 * Grids.
 	 */
-	grids: O[CoreArgsIds.Map] extends true ? Map<Uuid, CoreGridArgs<O>> : Array<CoreGridArgs<O>>;
+	grids: O[CoreArgOptionIds.Map] extends true ? Map<Uuid, CoreGridArgs<O>> : Array<CoreGridArgs<O>>;
 };
 
 /**
@@ -151,7 +151,7 @@ export function commsShardArgsToRaw(argsSource: CommsShardArgs): CommsShardRaw {
  *
  * @returns Converted shard args
  */
-export function coreShardArgsConvert<S extends CoreArgsOptionsUnion, T extends CoreArgsOptionsUnion>({
+export function coreShardArgsConvert<S extends CoreArgOptionsUnion, T extends CoreArgOptionsUnion>({
 	shard,
 	sourceOptions,
 	targetOptions
@@ -183,12 +183,12 @@ export function coreShardArgsConvert<S extends CoreArgsOptionsUnion, T extends C
 	/**
 	 * Core shard args options with map.
 	 */
-	type CoreShardArgsOptionsWithMap = CoreArgsIdsToOptions<CoreArgsIds.Map>;
+	type CoreShardArgsOptionsWithMap = CoreArgOptionIdsToOptions<CoreArgOptionIds.Map>;
 
 	/**
 	 * Core shard args options without map.
 	 */
-	type CoreShardArgsOptionsWithoutMap = CoreArgsOptions;
+	type CoreShardArgsOptionsWithoutMap = CoreArgOptions;
 
 	/**
 	 * Core shard args with map.
@@ -201,10 +201,10 @@ export function coreShardArgsConvert<S extends CoreArgsOptionsUnion, T extends C
 	type CoreShardArgsWithoutMap = CoreShardArgs<CoreShardArgsOptionsWithoutMap>;
 
 	// Map
-	if (targetOptions[CoreArgsIds.Map] === true) {
+	if (targetOptions[CoreArgOptionIds.Map] === true) {
 		let targetShardWithMap: CoreShardArgsWithMap = targetShardAs as CoreShardArgsWithMap;
 
-		if (sourceOptions[CoreArgsIds.Map] === true) {
+		if (sourceOptions[CoreArgOptionIds.Map] === true) {
 			// Map to map
 			// Cells
 			targetShardWithMap.grids = new Map(
@@ -240,7 +240,7 @@ export function coreShardArgsConvert<S extends CoreArgsOptionsUnion, T extends C
 	} else {
 		let targetShardWithoutMap: CoreShardArgsWithoutMap = targetShardAs as CoreShardArgsWithoutMap;
 
-		if (sourceOptions[CoreArgsIds.Map] === true) {
+		if (sourceOptions[CoreArgOptionIds.Map] === true) {
 			// Map to array
 			// Grids
 			targetShardWithoutMap.grids = Array.from(

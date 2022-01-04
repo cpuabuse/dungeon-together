@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -8,9 +8,9 @@
  */
 
 // Re-export
-export { CoreUniverseObjectContainerFactory, CoreUniverseObjectContainerImplements } from "./universe-object-container";
-export { CoreUniverseObjectIds } from "./words";
-export { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectArgsContainer, CoreUniverseObjectArgs } from "./args";
+export * from "./universe-object-container";
+export * from "./options";
+export * from "./universe-object";
 
 /**
  * Default UUIDs are to be set by client/server universe objects, since they might be dependant on implementation. In core abstract class these members are abstract. Also, static method in a core abstract class should provide a default UUID.

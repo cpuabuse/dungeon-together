@@ -17,7 +17,7 @@ import {
 } from "../common/defaults";
 import { ToAbstract } from "../common/utility-types";
 import { Uuid, getDefaultUuid } from "../common/uuid";
-import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "./args";
+import { CoreArgOptionIds, CoreArgOptionIdsToOptions, CoreArgOptions, CoreArgOptionsUnion } from "./arg/options";
 import { CoreBase, CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
 import { CellPath, CoreCell } from "./cell";
 import {
@@ -64,7 +64,7 @@ export type CommsEntityRaw = Omit<CommsEntityArgs, keyof CellPath>;
  *
  * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
-export type CoreEntityArgs<O extends CoreArgsOptionsUnion = CoreArgsOptions> = (O[CoreArgsIds.Path] extends true
+export type CoreEntityArgs<O extends CoreArgOptionsUnion = CoreArgOptions> = (O[CoreArgOptionIds.Path] extends true
 	? EntityPath
 	: EntityOwnPath) & {
 	/**
@@ -76,7 +76,7 @@ export type CoreEntityArgs<O extends CoreArgsOptionsUnion = CoreArgsOptions> = (
 	 * World in which entity resides.
 	 */
 	worldUuid: Uuid;
-} & (O[CoreArgsIds.Kind] extends true
+} & (O[CoreArgOptionIds.Kind] extends true
 		? {
 				/**
 				 * Kind of entity.
@@ -135,7 +135,7 @@ export interface EntityPath extends CellPath, EntityOwnPath {}
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreEntityClassFactory<
 	C extends CoreBaseClassNonRecursive = CoreBaseClass,
-	O extends CoreArgsOptionsUnion = CoreArgsOptions
+	O extends CoreArgOptionsUnion = CoreArgOptions
 >({
 	Base,
 	options
@@ -290,7 +290,7 @@ export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPath
  *
  * @returns Target args entity
  */
-export function coreEntityArgsConvert<S extends CoreArgsOptionsUnion, T extends CoreArgsOptionsUnion>({
+export function coreEntityArgsConvert<S extends CoreArgOptionsUnion, T extends CoreArgOptionsUnion>({
 	entity,
 	sourceOptions,
 	targetOptions
@@ -322,13 +322,13 @@ export function coreEntityArgsConvert<S extends CoreArgsOptionsUnion, T extends 
 	let targetEntityAs: Record<string, any> = targetEntity;
 
 	// Path
-	if (targetOptions[CoreArgsIds.Path] === true) {
+	if (targetOptions[CoreArgOptionIds.Path] === true) {
 		/**
 		 * Entity with path.
 		 */
-		type EntityWithPath = CoreEntityArgs<CoreArgsIdsToOptions<CoreArgsIds.Path>>;
+		type EntityWithPath = CoreEntityArgs<CoreArgOptionIdsToOptions<CoreArgOptionIds.Path>>;
 		let targetEntityWithPath: EntityWithPath = targetEntityAs as EntityWithPath;
-		if (sourceOptions[CoreArgsIds.Path] === true) {
+		if (sourceOptions[CoreArgOptionIds.Path] === true) {
 			const sourceEntityWithPath: EntityWithPath = sourceEntityAs as EntityWithPath;
 			targetEntityWithPath.shardUuid = sourceEntityWithPath.shardUuid;
 			targetEntityWithPath.gridUuid = sourceEntityWithPath.gridUuid;
@@ -341,13 +341,13 @@ export function coreEntityArgsConvert<S extends CoreArgsOptionsUnion, T extends 
 	}
 
 	// Kind
-	if (targetOptions[CoreArgsIds.Kind] === true) {
+	if (targetOptions[CoreArgOptionIds.Kind] === true) {
 		/**
 		 * Entity with kind.
 		 */
-		type EntityWithKind = CoreEntityArgs<CoreArgsIdsToOptions<CoreArgsIds.Kind>>;
+		type EntityWithKind = CoreEntityArgs<CoreArgOptionIdsToOptions<CoreArgOptionIds.Kind>>;
 		let targetEntityWithKind: EntityWithKind = targetEntityAs as EntityWithKind;
-		if (sourceOptions[CoreArgsIds.Kind] === true) {
+		if (sourceOptions[CoreArgOptionIds.Kind] === true) {
 			targetEntityWithKind.kindUuid = (sourceEntityAs as EntityWithKind).kindUuid;
 		} else {
 			targetEntityWithKind.kindUuid = defaultKindUuid;

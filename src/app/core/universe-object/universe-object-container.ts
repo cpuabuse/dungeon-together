@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,26 +7,27 @@
  * @file Universe object common definitions
  */
 
-import { Uuid } from "../../common/uuid";
-import { CoreUniverseObjectArgsContainer } from "./args";
 import {
-	CoreUniverseObjectPath,
-	CoreUniverseObjectPathUuidPropertyName,
-	coreUniverseObjectIdToPathUuidPropertyName
-} from "./path";
-import { CoreUniverseObject } from "./universe-object";
-import { CoreUniverseObjectIds, CoreUniverseObjectWords, coreUniverseObjectWords } from "./words";
-import { CoreUniverseObjectArgsOptionsUnion } from ".";
+	CoreArgIds,
+	CoreArgObjectWords,
+	CoreArgPath,
+	CoreArgPathUuidPropertyName,
+	CoreArgsContainer,
+	CoreArgsContainerMemberArgsWithMap,
+	coreArgIdToPathUuidPropertyName,
+	coreArgObjectWords
+} from "../arg";
+import { CoreUniverseObject, CoreUniverseObjectArgsOptionsUnion } from ".";
 
 /**
  * Abstract part ot the class from {@link CoreUniverseObjectContainerFactory}.
  */
 export type CoreUniverseObjectContainerImplements<
 	U extends CoreUniverseObject<I, O>,
-	I extends CoreUniverseObjectIds,
+	I extends CoreArgIds,
 	O extends CoreUniverseObjectArgsOptionsUnion
 > = {
-	[K in CoreUniverseObjectWords[I]["singularCapitalizedWord"] as `default${K}`]: U;
+	[K in CoreArgObjectWords[I]["singularCapitalizedWord"] as `default${K}`]: U;
 	// Included to remove ts errors since `C` is not used.
 };
 
@@ -47,7 +48,7 @@ export function CoreUniverseObjectContainerFactory<
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	C extends abstract new (...args: any[]) => {},
 	U extends CoreUniverseObject<I, O>,
-	I extends CoreUniverseObjectIds,
+	I extends CoreArgIds,
 	O extends CoreUniverseObjectArgsOptionsUnion
 >({
 	Base,
@@ -72,35 +73,51 @@ export function CoreUniverseObjectContainerFactory<
 	options: O;
 }) {
 	/**
-	 * Extracting args type from index.
+	 * Members and their types.
 	 */
-	type UniverseObject = U;
-
-	/**
-	 * Type of members.
-	 */
-	type Members = typeof members;
-
-	/**
-	 * Instance type for class.
-	 *
-	 * Keys are manually set to dodge circular type dependencies.
-	 */
-	type CoreUniverseObjectContainerInstance = {
-		[K in typeof nameAddUniverseObject as K]: Members["addUniverseObject"]["value"];
+	type Members = {
+		[K in keyof typeof members["methods"]]: typeof members["methods"][K]["value"];
 	} & {
-		[K in typeof nameGetUniverseObject as K]: Members["getUniverseObject"]["value"];
-	} & {
-		[K in typeof nameRemoveUniverseObject as K]: Members["removeUniverseObject"]["value"];
-	} & {
-		[K in typeof nameUniverseObjects as K]: Members["universeObjects"]["value"];
+		[K in keyof typeof members["properties"]]: ReturnType<typeof members["properties"][K]["value"]>;
 	};
+
+	/**
+	 * Injection for instance type for class.
+	 *
+	 * Generic computed property is not preserved in class type, so manually injecting, by extracting signature from class
+	 *
+	 * @remarks
+	 * - Made of properties and methods
+	 * - Keys are manually set to dodge circular type dependencies
+	 */
+	type InjectionInstance = {
+		[K in typeof nameUniverseObjects as K]: Members["universeObjects"];
+	} & {
+		[K in typeof nameAddUniverseObject as K]: Members["addUniverseObject"];
+	} & {
+		[K in typeof nameGetUniverseObject as K]: Members["getUniverseObject"];
+	} & {
+		[K in typeof nameRemoveUniverseObject as K]: Members["removeUniverseObject"];
+	};
+
+	/**
+	 * "This" for class methods.
+	 */
+	type ThisInstance = InjectionInstance & UniverseObjectContainer;
 
 	/**
 	 * Instance for this inside of class methods, that include abstract members from {@link CoreUniverseObjectContainerAbstract}.
 	 */
-	type CoreUniverseObjectContainerAbstractThis = CoreUniverseObjectContainerInstance &
-		CoreUniverseObjectContainerImplements<U, I, O>;
+	type AbstractInstance = ThisInstance & CoreUniverseObjectContainerImplements<U, I, O>;
+
+	/**
+	 * Class type for return injection.
+	 *
+	 * Conditionally checking if class is appropriately extending arg container to make sure injected class type is properly implemented
+	 */
+	type ReturnClass = AbstractInstance extends CoreArgsContainer<U, I, O>
+		? typeof UniverseObjectContainer & (abstract new (...args: any[]) => ThisInstance)
+		: never;
 
 	const {
 		pluralLowercaseWord,
@@ -109,13 +126,13 @@ export function CoreUniverseObjectContainerFactory<
 		/**
 		 * The plural lowercase word for the universe object.
 		 */
-		pluralLowercaseWord: CoreUniverseObjectWords[I]["pluralLowercaseWord"];
+		pluralLowercaseWord: CoreArgObjectWords[I]["pluralLowercaseWord"];
 
 		/**
 		 * The singular capitalized word for the universe object.
 		 */
-		singularCapitalizedWord: CoreUniverseObjectWords[I]["singularCapitalizedWord"];
-	} = coreUniverseObjectWords[universeObjectId];
+		singularCapitalizedWord: CoreArgObjectWords[I]["singularCapitalizedWord"];
+	} = coreArgObjectWords[universeObjectId];
 
 	/**
 	 * Name of add universe object function.
@@ -155,7 +172,7 @@ export function CoreUniverseObjectContainerFactory<
 	/**
 	 * UUID property name within a path.
 	 */
-	const pathUuidPropertyName: CoreUniverseObjectPathUuidPropertyName<I> = coreUniverseObjectIdToPathUuidPropertyName({
+	const pathUuidPropertyName: CoreArgPathUuidPropertyName<I> = coreArgIdToPathUuidPropertyName({
 		universeObjectId
 	});
 
@@ -169,49 +186,58 @@ export function CoreUniverseObjectContainerFactory<
 	// Inferring for final type
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const members = {
-		addUniverseObject: {
-			name: nameAddUniverseObject,
-			/**
-			 * Add universe object with the map option.
-			 *
-			 * @param this - Universe object container
-			 * @param universeObject - Universe object to add
-			 */
-			value(this: CoreUniverseObjectContainerInstance, universeObject: UniverseObject): void {
-				this[nameUniverseObjects].set(universeObject[pathUuidPropertyName], universeObject);
+		methods: {
+			addUniverseObject: {
+				name: nameAddUniverseObject,
+				/**
+				 * Add universe object with the map option.
+				 *
+				 * @param this - Universe object container
+				 * @param universeObject - Universe object to add
+				 */
+				value(this: ThisInstance, universeObject: U): void {
+					this[nameUniverseObjects].set(universeObject[pathUuidPropertyName], universeObject);
+				}
+			},
+			getUniverseObject: {
+				name: nameGetUniverseObject,
+				/**
+				 * Get universe object.
+				 *
+				 * @param this - Universe object container
+				 * @param path - Path to search for
+				 * @returns Universe object
+				 */
+				value(this: ThisInstance, path: CoreArgPath<I>): U {
+					let universeObject: U | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
+					return universeObject === undefined
+						? (this as AbstractInstance)[nameAbstractDefaultUniverseObject]
+						: universeObject;
+				}
+			},
+			removeUniverseObject: {
+				name: nameRemoveUniverseObject,
+				/**
+				 * Removes the child object.
+				 *
+				 * @param this - Universe object container
+				 * @param path - Path to search for
+				 */
+				value(this: ThisInstance, path: CoreArgPath<I>): void {
+					this[nameUniverseObjects].delete(path[pathUuidPropertyName]);
+				}
 			}
 		},
-		getUniverseObject: {
-			name: nameGetUniverseObject,
-			/**
-			 * Get universe object.
-			 *
-			 * @param this - Universe object container
-			 * @param path - Path to search for
-			 * @returns Universe object
-			 */
-			value(this: CoreUniverseObjectContainerInstance, path: CoreUniverseObjectPath<I>): UniverseObject {
-				let universeObject: UniverseObject | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
-				return universeObject === undefined
-					? (this as CoreUniverseObjectContainerAbstractThis)[nameAbstractDefaultUniverseObject]
-					: universeObject;
+		properties: {
+			universeObjects: {
+				name: nameUniverseObjects,
+				/**
+				 * Function generating a new map of universe objects.
+				 *
+				 * @returns Map of universe objects
+				 */
+				value: (): CoreArgsContainerMemberArgsWithMap<U, I, O> => new Map()
 			}
-		},
-		removeUniverseObject: {
-			name: nameRemoveUniverseObject,
-			/**
-			 * Removes the child object.
-			 *
-			 * @param this - Universe object container
-			 * @param path - Path to search for
-			 */
-			value(this: CoreUniverseObjectContainerInstance, path: CoreUniverseObjectPath<I>): void {
-				this[nameUniverseObjects].delete(path[pathUuidPropertyName]);
-			}
-		},
-		universeObjects: {
-			name: nameUniverseObjects,
-			value: new Map<Uuid, UniverseObject>()
 		}
 	};
 
@@ -225,25 +251,28 @@ export function CoreUniverseObjectContainerFactory<
 	 *
 	 * Currently, dynamic generic abstract properties are impossible to define.
 	 */
-	abstract class CoreUniverseObjectContainer extends Base {}
+	abstract class UniverseObjectContainer extends Base {
+		/**
+		 * Public constructor.
+		 *
+		 * @param args - Mixin args
+		 */
+		public constructor(...args: any[]) {
+			// Call super constructor
+			super(args);
+
+			// Assign properties
+			Object.values(members.properties).forEach(property => {
+				(this as Record<string, unknown>)[property.name] = property.value();
+			});
+		}
+	}
 
 	// Set prototype
-	Object.values(members).forEach(member => {
-		(CoreUniverseObjectContainer.prototype as Record<string, unknown>)[member.name] = member.value;
+	Object.values(members.methods).forEach(method => {
+		(UniverseObjectContainer.prototype as Record<string, unknown>)[method.name] = method.value;
 	});
 
-	/**
-	 * Class type for return injection.
-	 */
-	type CoreUniverseObjectContainerInstanceClass = typeof CoreUniverseObjectContainer &
-		(abstract new (...args: any[]) => CoreUniverseObjectContainerInstance);
-
-	// Generic computed property is not preserved in class type, so manually injecting, by extracting signature from class
-	// Conditionally checking if class is appropriately extending args container
-	return CoreUniverseObjectContainer as CoreUniverseObjectContainerInstance extends CoreUniverseObjectArgsContainer<
-		I,
-		O
-	>
-		? CoreUniverseObjectContainerInstanceClass
-		: never;
+	// Return
+	return UniverseObjectContainer as ReturnClass;
 }

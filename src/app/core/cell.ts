@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -10,8 +10,15 @@
 import { defaultGridUuid, defaultShardUuid, entityUuidUrlPath, urlPathSeparator } from "../common/defaults";
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { Vector } from "../common/vector";
-import { CoreArgsIds, CoreArgsIdsToOptions, CoreArgsOptions, CoreArgsOptionsUnion } from "./args";
-import { CoreArgsContainer } from "./args/args";
+import {
+	CoreArgIds,
+	CoreArgOptionIds,
+	CoreArgOptionIdsToOptions,
+	CoreArgOptionsUnion,
+	CoreArgOptionsWithMap,
+	CoreArgOptionsWithoutMap,
+	CoreArgsContainer
+} from "./arg";
 import { CoreBaseClassNonRecursive } from "./base";
 import {
 	CommsEntity,
@@ -25,19 +32,14 @@ import {
 } from "./entity";
 import { GridPath } from "./grid";
 import {
+	CoreUniverseObject,
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectContainerImplements,
-	CoreUniverseObjectIds,
+	CoreUniverseObjectFactory,
 	// Type used only for documentation
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	CoreUniverseObjectInherit
 } from "./universe-object";
-import { CoreUniverseObject, CoreUniverseObjectFactory } from "./universe-object/universe-object";
-
-/**
- * Word referring to a cell.
- */
-export type CoreCellWord = "Cell";
 
 /**
  * A location-like.
@@ -84,17 +86,13 @@ export type CommsCellRaw = CommCellRawHelper<
  *
  * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
-export type CoreCellArgs<O extends CoreArgsOptionsUnion = CoreArgsOptions> = CoreArgsContainer<
-	CoreEntityArgs<O>,
-	CoreUniverseObjectIds.Entity,
-	O
-> &
-	(O[CoreArgsIds.Path] extends true ? CellPath : CellOwnPath) &
-	(O[CoreArgsIds.Vector] extends true ? Vector : unknown) & {
+export type CoreCellArgs<O extends CoreArgOptionsUnion> = CoreArgsContainer<CoreEntityArgs<O>, CoreArgIds.Entity, O> &
+	(O[CoreArgOptionIds.Path] extends true ? CellPath : CellOwnPath) &
+	(O[CoreArgOptionIds.Vector] extends true ? Vector : unknown) & {
 		/**
 		 * Worlds.
 		 */
-		worlds: O[CoreArgsIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
+		worlds: O[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
 	};
 
 /**
@@ -154,7 +152,7 @@ export type CoreCell = CommsCell & InstanceType<ReturnType<typeof CoreCellClassF
 export function CoreCellClassFactory<
 	C extends CoreBaseClassNonRecursive,
 	O extends CoreUniverseObjectArgsOptionsUnion,
-	N extends CoreUniverseObject<CoreUniverseObjectIds.Entity, O>
+	N extends CoreUniverseObject<CoreArgIds.Entity, O>
 >({
 	Base,
 	options
@@ -177,13 +175,13 @@ export function CoreCellClassFactory<
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare
 	abstract class CoreCell
-		extends CoreUniverseObjectFactory<C, CoreUniverseObjectIds.Cell, O, N, CoreUniverseObjectIds.Entity>({
+		extends CoreUniverseObjectFactory<C, CoreArgIds.Cell, O, N, CoreArgIds.Entity>({
 			Base,
-			childUniverseObjectId: CoreUniverseObjectIds.Entity,
+			childUniverseObjectId: CoreArgIds.Entity,
 			options,
-			universeObjectId: CoreUniverseObjectIds.Cell
+			universeObjectId: CoreArgIds.Cell
 		})
-		implements CoreUniverseObjectContainerImplements<N, CoreUniverseObjectIds.Entity, O>
+		implements CoreUniverseObjectContainerImplements<N, CoreArgIds.Entity, O>
 	{
 		/**
 		 * Default entity.
@@ -289,7 +287,7 @@ export function commsCellRawToArgs(rawSource: CommsCellRaw, path: CellPath): Com
  *
  * @returns Converted cell args
  */
-export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends CoreArgsOptionsUnion>({
+export function coreCellArgsConvert<S extends CoreArgOptionsUnion, T extends CoreArgOptionsUnion>({
 	cell,
 	sourceOptions,
 	targetOptions
@@ -319,14 +317,14 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 	let targetCellAs: Record<string, any> = targetCell;
 
 	// Path
-	if (targetOptions[CoreArgsIds.Path] === true) {
+	if (targetOptions[CoreArgOptionIds.Path] === true) {
 		/**
 		 * Core cell args with path.
 		 */
-		type CoreCellArgsWithPath = CoreCellArgs<CoreArgsIdsToOptions<CoreArgsIds.Path>>;
+		type CoreCellArgsWithPath = CoreCellArgs<CoreArgOptionIdsToOptions<CoreArgOptionIds.Path>>;
 		let targetCellWithPath: CoreCellArgsWithPath = targetCellAs as CoreCellArgsWithPath;
 
-		if (sourceOptions[CoreArgsIds.Path] === true) {
+		if (sourceOptions[CoreArgOptionIds.Path] === true) {
 			// Source to target
 			const sourceCellWithPath: CoreCellArgsWithPath = sourceCellAs as CoreCellArgsWithPath;
 			targetCellWithPath.shardUuid = sourceCellWithPath.shardUuid;
@@ -339,14 +337,14 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 	}
 
 	// Vector
-	if (targetOptions[CoreArgsIds.Vector] === true) {
+	if (targetOptions[CoreArgOptionIds.Vector] === true) {
 		/**
 		 * Core cell args with vector.
 		 */
-		type CoreCellArgsWithVector = CoreCellArgs<CoreArgsIdsToOptions<CoreArgsIds.Vector>>;
+		type CoreCellArgsWithVector = CoreCellArgs<CoreArgOptionIdsToOptions<CoreArgOptionIds.Vector>>;
 		let targetCellWithVector: CoreCellArgsWithVector = targetCellAs as CoreCellArgsWithVector;
 
-		if (sourceOptions[CoreArgsIds.Vector] === true) {
+		if (sourceOptions[CoreArgOptionIds.Vector] === true) {
 			// Source to target
 			const sourceCellWithVector: CoreCellArgsWithVector = sourceCellAs as CoreCellArgsWithVector;
 			targetCellWithVector.x = sourceCellWithVector.x;
@@ -361,33 +359,23 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 	}
 
 	/**
-	 * Core cell args options with map.
-	 */
-	type CoreCellArgsOptionsWithMap = CoreArgsIdsToOptions<CoreArgsIds.Map>;
-
-	/**
-	 * Core cell args options without map.
-	 */
-	type CoreCellArgsOptionsWithoutMap = CoreArgsOptions;
-
-	/**
 	 * Core cell args with map.
 	 */
-	type CoreCellArgsWithMap = CoreCellArgs<CoreCellArgsOptionsWithMap>;
+	type CoreCellArgsWithMap = CoreCellArgs<CoreArgOptionsWithMap>;
 
 	/**
 	 * Core cell args without map.
 	 */
-	type CoreCellArgsWithoutMap = CoreCellArgs<CoreCellArgsOptionsWithoutMap>;
+	type CoreCellArgsWithoutMap = CoreCellArgs<CoreArgOptionsWithoutMap>;
 
 	// Map
-	if (targetOptions[CoreArgsIds.Map] === true) {
+	if (targetOptions[CoreArgOptionIds.Map] === true) {
 		let targetCellWithMap: CoreCellArgsWithMap = targetCellAs as CoreCellArgsWithMap;
 
 		// Worlds
 		targetCellWithMap.worlds = new Set(sourceCell.worlds);
 
-		if (sourceOptions[CoreArgsIds.Map] === true) {
+		if (sourceOptions[CoreArgOptionIds.Map] === true) {
 			// Map to map
 			const sourceCellWithMap: CoreCellArgsWithMap = sourceCellAs as CoreCellArgsWithMap;
 
@@ -400,9 +388,9 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 					coreEntityArgsConvert({
 						entity,
 						// Cast to expected type
-						sourceOptions: sourceOptions as CoreCellArgsOptionsWithMap,
+						sourceOptions: sourceOptions as CoreArgOptionsWithMap,
 						// Cast to expected type
-						targetOptions: targetOptions as CoreCellArgsOptionsWithMap
+						targetOptions: targetOptions as CoreArgOptionsWithMap
 					})
 				])
 			);
@@ -417,9 +405,9 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 					coreEntityArgsConvert({
 						entity,
 						// Cast to expected type
-						sourceOptions: sourceOptions as CoreCellArgsOptionsWithoutMap,
+						sourceOptions: sourceOptions as CoreArgOptionsWithoutMap,
 						// Cast to expected type
-						targetOptions: targetOptions as CoreCellArgsOptionsWithMap
+						targetOptions: targetOptions as CoreArgOptionsWithMap
 					})
 				])
 			);
@@ -430,7 +418,7 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 		// Worlds
 		targetCellWithoutMap.worlds = Array.from(sourceCell.worlds);
 
-		if (sourceOptions[CoreArgsIds.Map] === true) {
+		if (sourceOptions[CoreArgOptionIds.Map] === true) {
 			// Map to array
 			const sourceCellWithMap: CoreCellArgsWithMap = sourceCellAs as CoreCellArgsWithMap;
 
@@ -444,9 +432,9 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 					coreEntityArgsConvert({
 						entity,
 						// Cast to expected type
-						sourceOptions: sourceOptions as CoreCellArgsOptionsWithMap,
+						sourceOptions: sourceOptions as CoreArgOptionsWithMap,
 						// Cast to expected type
-						targetOptions: targetOptions as CoreCellArgsOptionsWithoutMap
+						targetOptions: targetOptions as CoreArgOptionsWithoutMap
 					})
 			);
 		} else {
@@ -459,9 +447,9 @@ export function coreCellArgsConvert<S extends CoreArgsOptionsUnion, T extends Co
 				coreEntityArgsConvert({
 					entity,
 					// Cast to expected type
-					sourceOptions: sourceOptions as CoreCellArgsOptionsWithoutMap,
+					sourceOptions: sourceOptions as CoreArgOptionsWithoutMap,
 					// Cast to expected type
-					targetOptions: targetOptions as CoreCellArgsOptionsWithoutMap
+					targetOptions: targetOptions as CoreArgOptionsWithoutMap
 				})
 			);
 		}

@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -19,7 +19,7 @@ import {
 } from "io-ts";
 import jsyaml from "js-yaml";
 import { getDefaultUuid } from "../common/uuid";
-import { CoreArgsIds, coreArgsIdsToOptions } from "../core/args";
+import { CoreArgsOptionIds, coreArgsOptionIdsToOptions } from "../core/arg";
 import { CommsCellArgs, CommsCellRaw } from "../core/cell";
 import { CommsEntityArgs, CommsEntityRaw } from "../core/entity";
 import { CommsGridArgs, CommsGridRaw } from "../core/grid";
@@ -48,8 +48,8 @@ interface Settings {
  */
 // Infer to save lines
 // eslint-disable-next-line @typescript-eslint/typedef
-export const compileArgsOptions = coreArgsIdsToOptions({
-	idsSet: new Set([CoreArgsIds.Kind, CoreArgsIds.Path, CoreArgsIds.Vector] as const)
+export const compileArgsOptions = coreArgsOptionIdsToOptions({
+	idsSet: new Set([CoreArgsOptionIds.Kind, CoreArgsOptionIds.Path, CoreArgsOptionIds.Vector] as const)
 });
 
 /**
