@@ -7,27 +7,97 @@
  * @file Outlines how universe object should like
  */
 
+import { Uuid } from "../../common/uuid";
 import {
 	CoreArg,
 	CoreArgIds,
 	CoreArgObjectWords,
-	CoreArgWithPath,
+	CoreArgPathUuidPropertyName,
 	coreArgIdToPathUuidPropertyName,
 	coreArgObjectWords
 } from "../arg";
 import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectContainerFactory } from ".";
 
 /**
+ * Names used to access members.
+ */
+type Names<I extends CoreArgIds> = {
+	/**
+	 * Terminate universe object function.
+	 */
+	terminateUniverseObject: `terminate${CoreArgObjectWords[I]["singularCapitalizedWord"]}`;
+
+	/**
+	 * Universe object path.
+	 */
+	universeObjectUuid: CoreArgPathUuidPropertyName<I>;
+};
+
+/**
+ * Type to be used to declare member vars.
+ */
+type ConstMembers<I extends CoreArgIds, O extends CoreUniverseObjectArgsOptionsUnion> = {
+	/**
+	 * Generate in constructor.
+	 */
+	generate: {
+		/**
+		 * Terminate function.
+		 */
+		terminateUniverseObject: {
+			/**
+			 * Terminate function name.
+			 */
+			name: Names<I>["terminateUniverseObject"];
+
+			/**
+			 * Terminate function body.
+			 */
+			value: (arg: CoreArg<I, O>) => (this: CoreUniverseObjectInjectionInstance<I, O>) => void;
+		};
+
+		/**
+		 * Path property.
+		 */
+		universeObjectUuid: {
+			/**
+			 * Path property name.
+			 */
+			name: Names<I>["universeObjectUuid"];
+
+			/**
+			 * Path property value.
+			 */
+			value: (arg: CoreArg<I, O>) => Uuid;
+		};
+	};
+};
+
+/**
+ * Types for members of instance.
+ */
+type Members<I extends CoreArgIds, O extends CoreUniverseObjectArgsOptionsUnion> = {
+	[K in keyof ConstMembers<I, O>["generate"]]: ReturnType<ConstMembers<I, O>["generate"][K]["value"]>;
+};
+
+/**
  * Own instance of a universe object, that has to be implemented within {@link CoreUniverseObjectContainerFactory}.
  *
  * @remarks
- * For type verification, properties should be defined manually.
+ * Types extracted from a type which is verified within factory.
  */
-type CoreUniverseObjectInjectionInstance<I extends CoreArgIds, O extends CoreUniverseObjectArgsOptionsUnion> = {
-	[K in typeof coreArgObjectWords[I]["singularCapitalizedWord"] as `terminate${K}`]: (
-		this: CoreUniverseObjectInjectionInstance<I, O>
-	) => void;
-} & CoreArgWithPath<I>;
+type CoreUniverseObjectInjectionInstance<
+	I extends CoreArgIds,
+	O extends CoreUniverseObjectArgsOptionsUnion,
+	// A variable; Do not use
+	N extends Names<I> = Names<I>,
+	// A variable; Do not use
+	M extends Members<I, O> = Members<I, O>
+> = {
+	[K in N["terminateUniverseObject"] as K]: M["terminateUniverseObject"];
+} & {
+	[K in N["universeObjectUuid"] as K]: M["universeObjectUuid"];
+};
 
 /**
  * Universe object instance minimal constraint.
@@ -172,9 +242,14 @@ export function CoreUniverseObjectFactory<
 	type AbstractInstance = ThisInstance;
 
 	/**
+	 * Parameter for member generation function.
+	 */
+	type MemberGenerateParameter = CoreArg<I, O>;
+
+	/**
 	 * Parameters for class constructor.
 	 */
-	type ConstructorParameters = [CoreArg<I, O>, ...any[]];
+	type ConstructorParameters = [MemberGenerateParameter, ...any[]];
 
 	/**
 	 * Return class type.
@@ -190,6 +265,44 @@ export function CoreUniverseObjectFactory<
 	 * This type, if container.
 	 */
 	type ContainerInstance = InstanceType<ContainerClass>;
+
+	/**
+	 * Members to work on to initialize instance.
+	 */
+	const members: ConstMembers<I, O> = {
+		generate: {
+			terminateUniverseObject: {
+				name: nameParentTerminateUniverseObject,
+				/**
+				 * Terminate universe object function.
+				 *
+				 * @returns Terminate universe object function
+				 */
+				value: () =>
+					childUniverseObjectId === null
+						? function (this: ThisInstance): void {
+								// Nothing, debug info can be added later
+						  }
+						: function (this: ThisInstance): void {
+								(this as ContainerInstance)[nameParentUniverseObjects].forEach(universeObject => {
+									universeObject[nameChildTerminateUniverseObject]();
+								});
+						  }
+			},
+			universeObjectUuid: {
+				name: nameParentUniverseObjectUuid,
+				/**
+				 *	Universe object UUID.
+				 *
+				 * @param arg - CoreArg given to constructor
+				 * @returns UUID of the universe object
+				 */
+				value: (arg: MemberGenerateParameter) => {
+					return arg[nameParentUniverseObjectUuid];
+				}
+			}
+		}
+	};
 
 	/**
 	 * Overall base class to be used, with potentially lost type information.
@@ -217,26 +330,12 @@ export function CoreUniverseObjectFactory<
 			// Call super constructor
 			super(args);
 
-			// Assign UUID
-			// Can't cast to `this` directly
-			//
-			(this as Record<string, unknown>)[nameParentUniverseObjectUuid] = arg[
-				nameParentUniverseObjectUuid
-			] as ThisInstance[typeof nameParentUniverseObjectUuid];
+			// Assign properties
+			Object.values(members.generate).forEach(property => {
+				(this as Record<string, unknown>)[property.name] = property.value(arg);
+			});
 		}
 	}
-
-	// Set prototype
-	(UniverseObject.prototype as Record<string, unknown>)[nameParentTerminateUniverseObject] =
-		childUniverseObjectId === null
-			? function (this: ThisInstance): void {
-					// Nothing, debug info can be added later
-			  }
-			: function (this: ThisInstance): void {
-					(this as ContainerInstance)[nameParentUniverseObjects].forEach(universeObject => {
-						universeObject[nameChildTerminateUniverseObject]();
-					});
-			  };
 
 	// Return
 	// Conditionally checking if class is appropriately extending arg container to make sure injected class type is properly implemented
