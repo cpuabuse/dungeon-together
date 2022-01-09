@@ -10,6 +10,15 @@ Grid | A collection of cells | CommsGrid | ServerGrid | ClientGrid
 Cell | A collection of entities | CommsCell | ServerCell | ClientCell
 Entity | The smallest game unit | CommsEntity | ServerEntity | ClientEntity
 
+## General hierarchy
+
+```mermaid
+	graph TB
+		core[Core] --> universe_object[UniverseObject] --> arg[Arg]
+		server[Server] --> core
+		client[Client] --> core
+```
+
 ## Classes
 
 ```mermaid
@@ -129,4 +138,71 @@ classDiagram
 	ServerEntity -- ClientEntity : Entity
 ```
 
-# Pool classes
+## Core infrastructure
+
+Grid, shard and core args omitted for simplicity.
+
+```mermaid
+classDiagram
+	%% Arg
+	class ArgWithPath{
+		<<interface>>
+		+Uuid argUuid
+	}
+
+	class ArgWithoutPath{
+		<<interface>>
+		+string id
+	}
+
+	class Arg{
+		<<interface>>
+	}
+
+	ArgWithPath "1" <|-- "0..1" Arg : extends if with path
+	ArgWithoutPath "1" <|-- "0..1" Arg : extends if without path
+
+	%% Universe Object
+	class UniverseObject{
+		<<abstract>>
+		+void terminateUniverseObject()
+	}
+
+	%% Universe Object Container
+	class UniverseObjectContainer{
+		<<abstract>>
+		+void addUniverseObject(universeObject: UniverseObject)
+		+void removeUniverseObject(arg: ArgWithPath)
+		+void getUniverseObject(arg: ArgWithPath)
+	}
+
+	class UniverseObjectContainerImplements{
+		<<interface>>
+		+UUID defaultUniverseObjectUuid
+	}
+
+	Arg <|-- UniverseObject : extends with path
+	UniverseObjectContainer <..> UniverseObjectContainerImplements
+	UniverseObjectContainer <|-- UniverseObject : extends if contains
+	UniverseObjectContainer "1" o-- "1..*" UniverseObject : contains
+	ArgWithPath <.. UniverseObjectContainer : use
+	UniverseObject <.. UniverseObjectContainer : use
+
+	%% Core
+	class CoreCell{
+		<<abstract>>
+		+UUID defaultUniverseObjectUuid
+	}
+
+	%% Core
+	class CoreEntity{
+		<<abstract>>
+		+UUID defaultUniverseObjectUuid
+	}
+
+	UniverseObject <|-- CoreCell : extends, containing entity
+	UniverseObjectContainerImplements <|.. CoreCell : implements
+	UniverseObject <|-- CoreEntity : extends
+	UniverseObjectContainerImplements <|.. CoreEntity : implements
+	CoreCell "1" o-- "0..*" CoreEntity : contains
+```

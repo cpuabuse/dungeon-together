@@ -8,7 +8,14 @@
  */
 
 import { Uuid } from "../../common/uuid";
-import { CoreArgIds, CoreArgObjectWords, CoreArgOptionIds, CoreArgOptionsUnionGenerate, coreArgObjectWords } from ".";
+import {
+	CoreArgIds,
+	CoreArgObjectWords,
+	CoreArgOptionIds,
+	CoreArgOptionIdsToOptions,
+	CoreArgOptionsUnionGenerate,
+	coreArgObjectWords
+} from ".";
 
 /**
  * A type for the property name of path UUID.
@@ -33,28 +40,13 @@ export type CoreArgWithoutPath = {
 };
 
 /**
- * Metadata for core arg without path option.
+ * Universe object path constraint, with required ID.
  */
-export type CoreArgWithoutPathMeta = {
+export type CoreArgWithoutPathDefined = CoreArgWithoutPath & {
 	/**
-	 * Path settings.
+	 * Required id of arg.
 	 */
-	[CoreArgOptionIds.Path]: {
-		/**
-		 * Base URL.
-		 */
-		baseUrl: string;
-
-		/**
-		 * Default path.
-		 */
-		defaultPath: string;
-
-		/**
-		 * User defined path.
-		 */
-		userPath: string;
-	};
+	id: string;
 };
 
 /**
@@ -75,6 +67,28 @@ export function coreArgIdToPathUuidPropertyName<I extends CoreArgIds>({
 }
 
 /**
+ * Options with path.
+ */
+export type CoreArgOptionsWithPath = CoreArgOptionIdsToOptions<CoreArgOptionIds.Path>;
+
+/**
+ * Options with path.
+ */
+export type CoreArgOptionsWithPathExtended = CoreArgOptionIdsToOptions<
+	CoreArgOptionIds.Path | CoreArgOptionIds.PathExtended
+>;
+
+/**
+ * Options with path.
+ */
+export type CoreArgOptionsWithoutPath = CoreArgOptionIdsToOptions<never>;
+
+/**
  * Core arg options with map.
  */
-export type CoreArgOptionsWithPathUnion = CoreArgOptionsUnionGenerate<CoreArgOptionIds.Map>;
+export type CoreArgOptionsWithPathUnion = CoreArgOptionsUnionGenerate<CoreArgOptionIds.Path>;
+
+/**
+ * Core arg options with map.
+ */
+export type CoreArgOptionsWithoutPathUnion = CoreArgOptionsUnionGenerate<never, CoreArgOptionIds.Path>;

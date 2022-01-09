@@ -9,8 +9,8 @@ import {
 	CoreArgObjectWords,
 	CoreArgOptionIds,
 	CoreArgOptionsUnion,
-	CoreArgsWithMapContainer,
-	CoreArgsWithoutMapContainer
+	CoreArgsWithMapContainerArg,
+	CoreArgsWithoutMapContainerArg
 } from ".";
 
 /**
@@ -31,6 +31,6 @@ export type CoreArgsContainer<
 	 * Child universe objects.
 	 */
 	[K in CoreArgObjectWords[I]["pluralLowercaseWord"] as K]: O[CoreArgOptionIds.Map] extends true
-		? CoreArgsWithMapContainer<U, I, O>
-		: CoreArgsWithoutMapContainer<U, I, O>;
+		? CoreArgsWithMapContainerArg<U, I, O>
+		: CoreArgsWithoutMapContainerArg<U, I, O>;
 };

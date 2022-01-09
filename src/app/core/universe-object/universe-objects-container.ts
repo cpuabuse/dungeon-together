@@ -13,7 +13,7 @@ import {
 	CoreArgObjectWords,
 	CoreArgPathUuidPropertyName,
 	CoreArgsContainer,
-	CoreArgsWithMapContainer,
+	CoreArgsWithMapContainerArg,
 	coreArgIdToPathUuidPropertyName,
 	coreArgObjectWords
 } from "../arg";
@@ -236,7 +236,7 @@ export function CoreUniverseObjectContainerFactory<
 				 *
 				 * @returns Map of universe objects
 				 */
-				value: (): CoreArgsWithMapContainer<U, I, O> => new Map()
+				value: (): CoreArgsWithMapContainerArg<U, I, O> => new Map()
 			}
 		}
 	};

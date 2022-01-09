@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -13,7 +13,7 @@ import { Vector } from "./vector";
 /**
  * App namespace.
  */
-export const appUrl: string = "https://cpuabuse.com/dt";
+export const appUrl: URL = new URL("https://cpuabuse.com/dt");
 
 /**
  * Default URL for a server.

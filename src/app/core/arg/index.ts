@@ -15,3 +15,4 @@ export * from "./options";
 export * from "./path";
 export * from "./words";
 export * from "./map";
+export * from "./convert";

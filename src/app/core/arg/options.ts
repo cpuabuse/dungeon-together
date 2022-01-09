@@ -4,7 +4,7 @@
 */
 
 /**
- * @file Generic arguments option definition.
+ * @file Generic arguments option definition
  */
 
 /**
@@ -28,6 +28,11 @@ export enum CoreArgOptionIds {
 	 * - `false`: Use ids
 	 */
 	Path = "path",
+
+	/**
+	 * Use parent paths or not.
+	 */
+	PathExtended = "pathEx",
 
 	/**
 	 * Kind.
@@ -87,13 +92,3 @@ export function coreArgOptionIdsToOptions<I extends CoreArgOptionIds>({
 		{} as CoreArgOptionIdsToOptions<I>
 	);
 }
-
-/**
- * Core arg options with map.
- */
-export type CoreArgOptionsWithMap = CoreArgOptionIdsToOptions<CoreArgOptionIds.Map>;
-
-/**
- * Core arg options without map.
- */
-export type CoreArgOptionsWithoutMap = CoreArgOptionIdsToOptions<never>;
