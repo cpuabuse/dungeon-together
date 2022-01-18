@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -8,7 +8,7 @@
  */
 
 /**
- * Returns the instance type of `I` and makes sure `C` extends `I`
+ * Returns the instance type of `I` and makes sure `C` extends `I`.
  */
 // `C extends I` to show which properties are missing in errors
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -40,13 +40,10 @@ export type DestructureParameters<C extends new (...args: any[]) => any> = Const
 /**
  * Typescript safe way of determining if property exists.
  *
- * Explicit casting of prop type to string literal is required.
- *
- * Cannot destructure - {@link https://github.com/microsoft/TypeScript/issues/41173}
+ * Cannot destructure - {@link https://github.com/microsoft/TypeScript/issues/41173}.
  *
  * @param obj - Target object
  * @param prop - Property name
- *
  * @example
  * ```
  * let obj = {
@@ -55,25 +52,29 @@ export type DestructureParameters<C extends new (...args: any[]) => any> = Const
  * 	value: string;
  * };
  *
- * if (hasOwnProperty(obj, "value" as const)) {
+ * if (hasOwnProperty(obj, "value")) {
  * 	// ...
  * }
  * ```
- *
  * @returns Has own property or not
  */
-export function hasOwnProperty<P extends string>(
+export function hasOwnProperty<K extends string, P>(
 	/**
 	 * Object to check.
 	 */
 	// We actually expect a wide range of types
 	// eslint-disable-next-line @typescript-eslint/ban-types
-	obj: {},
+	obj: {
+		/**
+		 *
+		 */
+		[E in K]?: P;
+	},
 
 	/**
 	 * Property of string literal type.
 	 */
-	prop: P
-): obj is { [K in P]: any } {
+	prop: K
+): obj is { [E in K]: P } {
 	return Object.prototype.hasOwnProperty.call(obj, prop);
 }

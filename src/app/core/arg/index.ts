@@ -16,3 +16,4 @@ export * from "./path";
 export * from "./words";
 export * from "./map";
 export * from "./convert";
+export * from "./convert-path";

@@ -9,10 +9,13 @@
 
 import { Uuid } from "../../common/uuid";
 import {
+	CoreArgComplexOptionPathIds,
+	CoreArgComplexOptionSymbolIndex,
 	CoreArgIds,
 	CoreArgObjectWords,
 	CoreArgOptionIds,
-	CoreArgOptionIdsToOptions,
+	CoreArgOptionsGenerate,
+	CoreArgOptionsUnion,
 	CoreArgOptionsUnionGenerate,
 	coreArgObjectWords
 } from ".";
@@ -23,16 +26,16 @@ import {
 export type CoreArgPathUuidPropertyName<I extends CoreArgIds> = `${CoreArgObjectWords[I]["singularLowercaseWord"]}Uuid`;
 
 /**
- * Universe object path constraint.
+ * Generates UUIDs in core arg.
  */
-export type CoreArgWithPath<I extends CoreArgIds> = {
+export type CoreArgPathOwnOrExtended<I extends CoreArgIds> = {
 	[K in CoreArgPathUuidPropertyName<I> as K]: Uuid;
 };
 
 /**
  * Universe object path constraint.
  */
-export type CoreArgWithoutPath = {
+export type CoreArgPathId = {
 	/**
 	 * Optional id of arg.
 	 */
@@ -40,14 +43,15 @@ export type CoreArgWithoutPath = {
 };
 
 /**
- * Universe object path constraint, with required ID.
+ * Path part of core arg.
  */
-export type CoreArgWithoutPathDefined = CoreArgWithoutPath & {
-	/**
-	 * Required id of arg.
-	 */
-	id: string;
-};
+export type CoreArgPath<
+	I extends CoreArgIds,
+	O extends CoreArgOptionsUnion,
+	P extends CoreArgIds = never
+> = (O extends CoreArgOptionsPathIdUnion ? CoreArgPathId : unknown) &
+	(O extends CoreArgOptionsPathOwnUnion ? CoreArgPathOwnOrExtended<I> : unknown) &
+	(O extends CoreArgOptionsExtendedUnion ? CoreArgPathOwnOrExtended<I | P> : unknown);
 
 /**
  * Generate a name for path property.
@@ -55,40 +59,65 @@ export type CoreArgWithoutPathDefined = CoreArgWithoutPath & {
  * @returns The name of the path property
  */
 export function coreArgIdToPathUuidPropertyName<I extends CoreArgIds>({
-	universeObjectId
+	id: argId
 }: {
 	/**
 	 * ID of the universe object.
 	 */
-	universeObjectId: I;
+	id: I;
 }): CoreArgPathUuidPropertyName<I> {
 	// Casting to remove union
-	return `${coreArgObjectWords[universeObjectId].singularLowercaseWord}Uuid` as CoreArgPathUuidPropertyName<I>;
+	return `${coreArgObjectWords[argId].singularLowercaseWord}Uuid` as CoreArgPathUuidPropertyName<I>;
 }
 
 /**
  * Options with path.
  */
-export type CoreArgOptionsWithPath = CoreArgOptionIdsToOptions<CoreArgOptionIds.Path>;
-
-/**
- * Options with path.
- */
-export type CoreArgOptionsWithPathExtended = CoreArgOptionIdsToOptions<
-	CoreArgOptionIds.Path | CoreArgOptionIds.PathExtended
+export type CoreArgOptionsPathOwn = CoreArgOptionsGenerate<
+	never,
+	CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
 >;
 
 /**
  * Options with path.
  */
-export type CoreArgOptionsWithoutPath = CoreArgOptionIdsToOptions<never>;
+export type CoreArgOptionsPathExtended = CoreArgOptionsUnionGenerate<
+	never,
+	never,
+	CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
+>;
+
+/**
+ * Options with path.
+ */
+export type CoreArgOptionsPathId = CoreArgOptionsGenerate<
+	never,
+	CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
+>;
+
+/**
+ * Core arg options with own path.
+ */
+export type CoreArgOptionsPathOwnUnion = CoreArgOptionsUnionGenerate<
+	never,
+	never,
+	CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
+>;
+
+/**
+ * Core arg options with extended path.
+ */
+export type CoreArgOptionsExtendedUnion = CoreArgOptionsUnionGenerate<
+	never,
+	never,
+	CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
+>;
 
 /**
  * Core arg options with map.
  */
-export type CoreArgOptionsWithPathUnion = CoreArgOptionsUnionGenerate<CoreArgOptionIds.Path>;
-
-/**
- * Core arg options with map.
- */
-export type CoreArgOptionsWithoutPathUnion = CoreArgOptionsUnionGenerate<never, CoreArgOptionIds.Path>;
+export type CoreArgOptionsPathIdUnion = CoreArgOptionsUnionGenerate<
+	never,
+	never,
+	CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
+>;

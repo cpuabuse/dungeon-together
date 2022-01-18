@@ -15,6 +15,11 @@
 export const separator = "/" as const;
 
 /**
- * Type for a path.
+ * Type for a URL.
  */
-export type Path = string;
+export type UrlPath = string;
+
+/**
+ * Origin for URL.
+ */
+export type UrlOrigin = URL;

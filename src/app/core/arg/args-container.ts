@@ -3,6 +3,10 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+/**
+ * @file Args container
+ */
+
 import {
 	CoreArg,
 	CoreArgIds,
@@ -14,11 +18,9 @@ import {
 } from ".";
 
 /**
- * @file Args container
- */
-
-/**
  * Definition of core args container.
+ *
+ * Container receives info on parent via `U`.
  */
 export type CoreArgsContainer<
 	U extends CoreArg<I, O>,

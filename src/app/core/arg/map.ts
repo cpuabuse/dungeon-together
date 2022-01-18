@@ -3,12 +3,12 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
-import { Uuid } from "../../common/uuid";
-import { CoreArg, CoreArgIds, CoreArgOptionIds, CoreArgOptionIdsToOptions, CoreArgOptionsUnion } from ".";
-
 /**
  * @file Working with arg map
  */
+
+import { Uuid } from "../../common/uuid";
+import { CoreArg, CoreArgIds, CoreArgOptionIds, CoreArgOptionsGenerate, CoreArgOptionsUnion } from ".";
 
 /**
  * The type of the universe objects property in universe object args container with map.
@@ -31,9 +31,9 @@ export type CoreArgsWithoutMapContainerArg<
 /**
  * Core arg options with map.
  */
-export type CoreArgOptionsWithMap = CoreArgOptionIdsToOptions<CoreArgOptionIds.Map>;
+export type CoreArgOptionsWithMap = CoreArgOptionsGenerate<CoreArgOptionIds.Map>;
 
 /**
  * Core arg options without map.
  */
-export type CoreArgOptionsWithoutMap = CoreArgOptionIdsToOptions<never>;
+export type CoreArgOptionsWithoutMap = CoreArgOptionsGenerate<never>;
