@@ -27,14 +27,15 @@ import {
 /**
  * Populates path for conversion.
  *
- * @example
- *
+ * @example Creating parent arg IDs
  * ```typescript
  * const argIds = [CoreArgIds.Shard] as const;
  * const parameters = { parentArgIds: new Set(argIds) };
  * // ...
  * coreArgConvertPopulatePath(options);
  * ```
+ *
+ * @param param - Destructured parameter
  * @returns The populated path
  */
 // The exhaustiveness of the switch is not picked up by eslint

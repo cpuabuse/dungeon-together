@@ -11,8 +11,8 @@ import {
 	CoreArg,
 	CoreArgIds,
 	CoreArgObjectWords,
-	CoreArgOptionIds,
 	CoreArgOptionsUnion,
+	CoreArgOptionsWithMapUnion,
 	CoreArgsWithMapContainerArg,
 	CoreArgsWithoutMapContainerArg
 } from ".";
@@ -20,19 +20,21 @@ import {
 /**
  * Definition of core args container.
  *
- * Container receives info on parent via `U`.
+ * @typeParam Arg - Arg to contain
+ * @typeParam ChildId - ID of the universe object
+ * @typeParam Options - Options for the universe object
+ * @typeParam ParentIds - Parent IDs of the universe object
  */
 export type CoreArgsContainer<
-	U extends CoreArg<I, O>,
-	I extends CoreArgIds,
-	// Will be used in the future
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	O extends CoreArgOptionsUnion
+	Arg extends CoreArg<ChildId, Options, ParentIds>,
+	ChildId extends CoreArgIds,
+	Options extends CoreArgOptionsUnion,
+	ParentIds extends CoreArgIds = never
 > = {
 	/**
 	 * Child universe objects.
 	 */
-	[K in CoreArgObjectWords[I]["pluralLowercaseWord"] as K]: O[CoreArgOptionIds.Map] extends true
-		? CoreArgsWithMapContainerArg<U, I, O>
-		: CoreArgsWithoutMapContainerArg<U, I, O>;
+	[K in CoreArgObjectWords[ChildId]["pluralLowercaseWord"] as K]: Options extends CoreArgOptionsWithMapUnion
+		? CoreArgsWithMapContainerArg<Arg, ChildId, Options, ParentIds>
+		: CoreArgsWithoutMapContainerArg<Arg, ChildId, Options, ParentIds>;
 };

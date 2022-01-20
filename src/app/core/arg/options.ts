@@ -155,14 +155,14 @@ export type CoreArgOptionsGenerate<I extends CoreArgSimpleOptionIds, S extends C
  * Not to be used for actual variables.
  * Not to be used directly as a generic constraint, only to be used in a separate type alias, so that TS engine processes the options properly.
  *
- * Argument `T` represents a predefined ID that is true, and `F`, respectively false. Same IDs cannot be given to both T and F.
+ * Argument `I` represents a predefined ID that is true, and `D`, respectively false. Same IDs cannot be given to both `I` and `D`.
  */
 export type CoreArgOptionsUnionGenerate<
 	I extends CoreArgSimpleOptionIds = never,
-	F extends Exclude<CoreArgSimpleOptionIds, I> = never,
+	D extends Exclude<CoreArgSimpleOptionIds, I> = never,
 	S extends CoreArgComplexOptionSymbols = never
 > = {
-	[K in CoreArgSimpleOptionIds]: K extends I ? true : K extends F ? false : boolean;
+	[K in CoreArgSimpleOptionIds]: K extends I ? true : K extends D ? false : boolean;
 } & {
 	// Disable distribution on `I` via tuple
 	[K in CoreArgComplexOptionIds]: CoreArgComplexOptionValues[K] & ([S] extends [never] ? unknown : S);

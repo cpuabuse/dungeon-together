@@ -24,5 +24,9 @@
 		"*.azure-pipelines.yml": "azure-pipelines"
 	},
 	"eslint.probe": ["typescript", "html", "vue"],
-	"vetur.validation.templateProps": true
+	"vetur.validation.templateProps": true,
+	"editor.semanticTokenColorCustomizations": {
+		"enabled": true,
+		"rules": { "typeParameter": "#22AA22" }
+	}
 }

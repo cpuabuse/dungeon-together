@@ -49,13 +49,14 @@ export type CoreArgPath<
 	I extends CoreArgIds,
 	O extends CoreArgOptionsUnion,
 	P extends CoreArgIds = never
-> = (O extends CoreArgOptionsPathIdUnion ? CoreArgPathId : unknown) &
-	(O extends CoreArgOptionsPathOwnUnion ? CoreArgPathOwnOrExtended<I> : unknown) &
-	(O extends CoreArgOptionsExtendedUnion ? CoreArgPathOwnOrExtended<I | P> : unknown);
+> = O extends CoreArgOptionsPathIdUnion
+	? CoreArgPathId
+	: CoreArgPathOwnOrExtended<I | (O extends CoreArgOptionsExtendedUnion ? P : never)>;
 
 /**
  * Generate a name for path property.
  *
+ * @param param
  * @returns The name of the path property
  */
 export function coreArgIdToPathUuidPropertyName<I extends CoreArgIds>({
@@ -120,4 +121,14 @@ export type CoreArgOptionsPathIdUnion = CoreArgOptionsUnionGenerate<
 	never,
 	never,
 	CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
+>;
+
+/**
+ * Core arg options with map.
+ */
+export type CoreArgOptionsPathOwnOrExtendedUnion = CoreArgOptionsUnionGenerate<
+	never,
+	never,
+	| CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
+	| CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
 >;

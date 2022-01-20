@@ -7,11 +7,19 @@
  * @file Core args
  */
 
-import { CoreArgOptionIds, CoreArgOptionsUnionGenerate } from "../arg";
+import {
+	CoreArgComplexOptionPathIds,
+	CoreArgComplexOptionSymbolIndex,
+	CoreArgOptionIds,
+	CoreArgOptionsUnionGenerate
+} from "../arg";
 
 /**
  * Args options constraint for core universe objects.
  */
 export type CoreUniverseObjectArgsOptionsUnion = CoreArgOptionsUnionGenerate<
-	CoreArgOptionIds.Map | CoreArgOptionIds.Path
+	CoreArgOptionIds.Map,
+	never,
+	| CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
+	| CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
 >;

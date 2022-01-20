@@ -59,7 +59,7 @@
 	},
 	"homepage": "https://github.com/cpuabuse/dungeon-together#readme",
 	"devDependencies": {
-		"@cpuabuse/eslint-config": "^0.0.40",
+		"@cpuabuse/eslint-config": "^0.0.42",
 		"@interactjs/types": "^1.10.11",
 		"@istanbuljs/nyc-config-typescript": "^1.0.2",
 		"@rollup/plugin-alias": "^3.1.9",
