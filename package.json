@@ -11,8 +11,10 @@
 		"node": ">=14"
 	},
 	"scripts": {
+		"build:test:core:node": "tsc --project tsconfig/test/core.json",
 		"build:test:standalone:node": "tsc --project tsconfig/test/standalone.json",
 		"build:run:standalone:browser": "npm run build:stage:standalone",
+		"run:test:core:node": "mocha --experimental-specifier-resolution=node build/test/test/core.js",
 		"run:test:standalone:node": "mocha --experimental-specifier-resolution=node build/test/test/standalone.js",
 		"run:run:standalone:browser": "",
 		"separator": "",

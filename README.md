@@ -28,3 +28,12 @@ git clone https://github.com/cpuabuse/dungeon-together --branch dev --recurse-su
 ```bash
 npm run build:run:standalone:browser
 ```
+
+### Test
+
+#### Core
+
+```
+npm run build:test:core:node
+npm run run:test:core:node
+```
