@@ -25,6 +25,15 @@ import {
  * Unit tests function.
  */
 export function unitTest(): void {
+	/**
+	 * Generate a test for `it`.
+	 *
+	 * @returns Function to be run by `it`.
+	 */
+	function pathConvertTest<>({ sourceArgPath, meta, expected, sourceOptions, targetOptions }: {}): () => void {
+		return function () {};
+	}
+
 	// Test will run on cell because it has both children and parents
 	describe("coreArgPathConvert()", function () {
 		/**
