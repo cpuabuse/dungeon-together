@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -10,15 +10,15 @@
 import { defaultModeUuid } from "../common/defaults";
 import { FromAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
-import { CellPath } from "../core/cell";
-import { CommsEntity, CommsEntityArgs, CoreEntityClassFactory, EntityPath } from "../core/entity";
+import { CellPathExtended } from "../core/cell";
+import { CommsEntity, CommsEntityArgs, CoreEntityClassFactory, EntityPathExtended } from "../core/entity";
 import { ServerBaseClass } from "./base";
 import { ServerCell } from "./cell";
 
 /**
  * Arguments for constructor of a server entity.
  */
-export interface InitializeArgs extends CellPath {
+export interface InitializeArgs extends CellPathExtended {
 	/**
 	 * Kind of server entity in world.
 	 */
@@ -40,6 +40,7 @@ export interface ServerEntityArgs extends CommsEntityArgs {
 /**
  * Generator for the server entity class.
  *
+ * @param param
  * @returns Server entity class
  */
 // Force type inference to extract class type
@@ -99,6 +100,8 @@ export function ServerEntityFactory({
 
 		/**
 		 * Constructor.
+		 *
+		 * @param param
 		 */
 		public constructor({ shardUuid, kindUuid, cellUuid, gridUuid, entityUuid, worldUuid }: ServerEntityArgs) {
 			// ServerProto
@@ -141,7 +144,7 @@ export function ServerEntityFactory({
 		 *
 		 * @param entityPath - Path to entity
 		 */
-		public swap(entityPath: EntityPath): void {
+		public swap(entityPath: EntityPathExtended): void {
 			let entity: ServerEntity = this.universe.getEntity(entityPath);
 			if (entity.kindUuid === this.kindUuid && entity.worldUuid === this.worldUuid) {
 				this.performSwap(entityPath);
@@ -168,7 +171,7 @@ export function ServerEntityFactory({
 		 *
 		 * @param cellPath - Path to cell
 		 */
-		protected doMove(cellPath: CellPath): void {
+		protected doMove(cellPath: CellPathExtended): void {
 			// Get server cell for accurate UUIDs
 			let cell: ServerCell = this.universe.getCell(cellPath);
 
@@ -185,10 +188,10 @@ export function ServerEntityFactory({
 		 *
 		 * @param entityPath - Path to entity
 		 */
-		protected doSwap(entityPath: EntityPath): void {
+		protected doSwap(entityPath: EntityPathExtended): void {
 			// Get thing while nothing is changed yet
 			let targetEntity: ServerEntity = this.universe.getEntity(entityPath);
-			let targetCellPath: CellPath = { ...entityPath };
+			let targetCellPath: CellPathExtended = { ...entityPath };
 
 			// Set target path
 			targetEntity.doMove(this);
@@ -205,7 +208,7 @@ export function ServerEntityFactory({
 		 *
 		 * Should call [[doMove]].
 		 */
-		protected abstract performMove(cellPath: CellPath): void;
+		protected abstract performMove(cellPath: CellPathExtended): void;
 
 		/**
 		 * Performs the swap of 2 [[ServerEntity]].
@@ -214,7 +217,7 @@ export function ServerEntityFactory({
 		 *
 		 * Should call [[doSwap]].
 		 */
-		protected abstract performSwap(entityPath: EntityPath): void;
+		protected abstract performSwap(entityPath: EntityPathExtended): void;
 	}
 
 	// Return class
@@ -239,6 +242,7 @@ export type ServerEntity = InstanceType<ServerEntityClassConcrete>;
 /**
  * Generator for the server default entity class.
  *
+ * @param param
  * @returns Default server entity class
  */
 export function DefaultServerEntityFactory({
@@ -274,7 +278,7 @@ export function DefaultServerEntityFactory({
 		 *
 		 * @param cellPath - Path to cell
 		 */
-		protected performMove(cellPath: CellPath): void {
+		protected performMove(cellPath: CellPathExtended): void {
 			this.doMove(cellPath);
 		}
 
@@ -285,7 +289,7 @@ export function DefaultServerEntityFactory({
 		 *
 		 * @param entityPath - Path to entity
 		 */
-		protected performSwap(entityPath: EntityPath): void {
+		protected performSwap(entityPath: EntityPathExtended): void {
 			this.doSwap(entityPath);
 		}
 	}

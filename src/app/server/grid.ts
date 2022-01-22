@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -9,7 +9,7 @@
 
 import { cellUuidUrlPath, defaultCellVector, navAmount, urlPathSeparator } from "../common/defaults";
 import { Uuid, getDefaultUuid } from "../common/uuid";
-import { CellPath } from "../core/cell";
+import { CellPathExtended } from "../core/cell";
 import { CommsGrid, CommsGridArgs } from "../core/grid";
 import { ServerBaseClass } from "./base";
 import { ServerCell, ServerCellArgs } from "./cell";
@@ -27,6 +27,7 @@ export interface ServerGridArgs extends CommsGridArgs {
 /**
  * Generator for the server grid class.
  *
+ * @param param
  * @returns Server grid class
  */
 // Force type inference to extract class type
@@ -114,9 +115,10 @@ export function ServerGridFactory({
 		/**
 		 * Gets [[ServerCell]].
 		 *
+		 * @param param
 		 * @returns [[ServerCell]], the cell within the grid
 		 */
-		public getCell({ cellUuid }: CellPath): ServerCell {
+		public getCell({ cellUuid }: CellPathExtended): ServerCell {
 			let cell: ServerCell | undefined = this.cells.get(cellUuid);
 			if (cell === undefined) {
 				// The default is always preserved
@@ -130,7 +132,7 @@ export function ServerGridFactory({
 		 *
 		 * @param path - Path to the cell
 		 */
-		public removeCell(path: CellPath): void {
+		public removeCell(path: CellPathExtended): void {
 			if (path.cellUuid !== this.defaultCellUuid) {
 				this.doRemoveCell(path);
 			}
@@ -147,8 +149,10 @@ export function ServerGridFactory({
 
 		/**
 		 * Actual removes [[ServerCell]]
+		 *
+		 * @param param
 		 */
-		private doRemoveCell({ cellUuid }: CellPath): void {
+		private doRemoveCell({ cellUuid }: CellPathExtended): void {
 			let cell: ServerCell | undefined = this.cells.get(cellUuid);
 			if (cell !== undefined) {
 				cell.terminate();

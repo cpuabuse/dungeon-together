@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -10,9 +10,9 @@
 import { defaultKindUuid, defaultShardUuid, defaultWorldUuid } from "../common/defaults";
 import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
-import { CellPath } from "../core/cell";
+import { CellPathExtended } from "../core/cell";
 import { CommsConnectionArgs } from "../core/connection";
-import { EntityPath } from "../core/entity";
+import { EntityPathExtended } from "../core/entity";
 import { GridPath } from "../core/grid";
 import { ShardPath } from "../core/shard";
 import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassConcreteStatic } from "../core/universe";
@@ -91,6 +91,8 @@ export class ServerUniverse
 
 	/**
 	 * Constructor.
+	 *
+	 * @param param
 	 */
 	public constructor({ application }: ServerUniverseArgs) {
 		// Call superclass
@@ -137,6 +139,8 @@ export class ServerUniverse
 
 	/**
 	 * Adds the kind.
+	 *
+	 * @param param
 	 */
 	public addKind({
 		uuid,
@@ -167,6 +171,8 @@ export class ServerUniverse
 
 	/**
 	 * Adds the world.
+	 *
+	 * @param param
 	 */
 	public addWorld({
 		uuid,
@@ -195,10 +201,9 @@ export class ServerUniverse
 	 * A shortcut function.
 	 *
 	 * @param path - Path to cell
-	 *
 	 * @returns [[ServerCell]], the cell within the grid
 	 */
-	public getCell(path: CellPath): ServerCell {
+	public getCell(path: CellPathExtended): ServerCell {
 		return this.getShard(path).getGrid(path).getCell(path);
 	}
 
@@ -208,10 +213,9 @@ export class ServerUniverse
 	 * A shortcut function.
 	 *
 	 * @param path - Path to entity
-	 *
 	 * @returns [[ServerEntity]], anything residing within a cell
 	 */
-	public getEntity(path: EntityPath): ServerEntity {
+	public getEntity(path: EntityPathExtended): ServerEntity {
 		return this.getShard(path).getGrid(path).getCell(path).getEntity(path);
 	}
 
@@ -221,7 +225,6 @@ export class ServerUniverse
 	 * A shortcut function.
 	 *
 	 * @param path - Path to grid
-	 *
 	 * @returns [[ServerGrid]], the grid itself
 	 */
 	public getGrid(path: GridPath): ServerGrid {
@@ -231,6 +234,7 @@ export class ServerUniverse
 	/**
 	 * Gets the kind.
 	 *
+	 * @param param
 	 * @returns Kind
 	 */
 	public getKind({
@@ -254,6 +258,7 @@ export class ServerUniverse
 	 *
 	 * A shortcut function.
 	 *
+	 * @param param
 	 * @returns [[shard]], a whole universe
 	 */
 	public getShard({ shardUuid }: ShardPath): ServerShard {
@@ -269,6 +274,7 @@ export class ServerUniverse
 	/**
 	 * Gets the world.
 	 *
+	 * @param param
 	 * @returns [[World]], whole world
 	 */
 	public getWorld({
@@ -289,6 +295,8 @@ export class ServerUniverse
 
 	/**
 	 * Removes the kind.
+	 *
+	 * @param param
 	 */
 	public removeKind({
 		uuid
@@ -307,7 +315,6 @@ export class ServerUniverse
 	 * Remove commsShard from CommmsUniverse.
 	 *
 	 * @param shard - Path to shard
-	 *
 	 * @returns `true` on success, `false` on failure
 	 */
 	public removeShard(shard: ShardPath): void {
@@ -316,6 +323,8 @@ export class ServerUniverse
 
 	/**
 	 * Removes the world.
+	 *
+	 * @param param
 	 */
 	public removeWorld({
 		uuid
@@ -332,6 +341,8 @@ export class ServerUniverse
 
 	/**
 	 * Adds the kind.
+	 *
+	 * @param param
 	 */
 	private doAddKind({
 		kind,
@@ -354,6 +365,8 @@ export class ServerUniverse
 
 	/**
 	 * Adds the world.
+	 *
+	 * @param param
 	 */
 	private doAddWorld({
 		uuid,
@@ -376,6 +389,8 @@ export class ServerUniverse
 
 	/**
 	 * Removes the kind.
+	 *
+	 * @param param
 	 */
 	private doRemoveKind({
 		uuid
@@ -390,6 +405,8 @@ export class ServerUniverse
 
 	/**
 	 * Actually removes the commsShard.
+	 *
+	 * @param param
 	 */
 	private doRemoveShard({ shardUuid }: ShardPath): void {
 		let shard: ServerShard | undefined = this.shards.get(shardUuid);
@@ -401,6 +418,8 @@ export class ServerUniverse
 
 	/**
 	 * Removes the world.
+	 *
+	 * @param param
 	 */
 	private doRemoveWorld({
 		uuid

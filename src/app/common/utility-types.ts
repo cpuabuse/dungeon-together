@@ -56,6 +56,7 @@ export type DestructureParameters<C extends new (...args: any[]) => any> = Const
  * 	// ...
  * }
  * ```
+ *
  * @returns Has own property or not
  */
 export function hasOwnProperty<K extends string, P>(
@@ -78,3 +79,13 @@ export function hasOwnProperty<K extends string, P>(
 ): obj is { [E in K]: P } {
 	return Object.prototype.hasOwnProperty.call(obj, prop);
 }
+
+/**
+ * Creates a type conditionally.
+ *
+ * If condition is true, returns the type, otherwise returns partial with undefined properties.
+ */
+export type MaybeDefined<
+	DefinedCondition extends boolean,
+	T extends Record<string, any>
+> = DefinedCondition extends true ? T : Partial<T> & Record<string, never>;

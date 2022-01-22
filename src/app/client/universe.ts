@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -18,9 +18,9 @@ import { defaultCellUuid, defaultGridUuid, defaultModeUuid, defaultShardUuid } f
 import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import { CoreUniverseUuidSearchFactory } from "../common/uuid-search";
-import { CellPath } from "../core/cell";
+import { CellPathExtended } from "../core/cell";
 import { CommsConnectionArgs } from "../core/connection";
-import { EntityPath } from "../core/entity";
+import { EntityPathExtended } from "../core/entity";
 import { GridPath } from "../core/grid";
 import { CommsShardArgs, ShardPath } from "../core/shard";
 import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassConcreteStatic } from "../core/universe";
@@ -99,7 +99,7 @@ export class ClientUniverse
 	/**
 	 * Default entity path for indexing
 	 */
-	public defaultEntityPath: EntityPath;
+	public defaultEntityPath: EntityPathExtended;
 
 	/**
 	 * Entities index.
@@ -466,6 +466,8 @@ export class ClientUniverse
 	 * Remove [[ClientShard]] from [[ClientUniverse]].
 	 *
 	 * Removes unused modes.
+	 *
+	 * @param param
 	 */
 	public doRemoveShard({ shardUuid }: ShardPath): void {
 		// Checks if there is something to delete in the first place; Then within all the modes associated with the uuid of the shard to delete, we check that they are not within an array made up from all the other mode associations from "modesIndex" to other shards; And if there is no match, then we delete the mode; Finally we delete the shard and the "modesIndex" entry
@@ -504,10 +506,9 @@ export class ClientUniverse
 	 * A shortcut function.
 	 *
 	 * @param path - Path to cell
-	 *
 	 * @returns [[ ClientCell]]
 	 */
-	public getCell(path: CellPath): ClientCell {
+	public getCell(path: CellPathExtended): ClientCell {
 		return this.getShard(path).getGrid(path).getCell(path);
 	}
 
@@ -517,10 +518,9 @@ export class ClientUniverse
 	 * A shortcut function.
 	 *
 	 * @param path - Path to entity
-	 *
 	 * @returns [[ClientEntity]], the smallest renderable
 	 */
-	public getEntity(path: EntityPath): ClientEntity {
+	public getEntity(path: EntityPathExtended): ClientEntity {
 		return this.getShard(path).getGrid(path).getCell(path).getEntity(path);
 	}
 
@@ -530,7 +530,6 @@ export class ClientUniverse
 	 * A shortcut function.
 	 *
 	 * @param path - Path to grid
-	 *
 	 * @returns [[ ClientGrid]]
 	 */
 	public getGrid(path: GridPath): ClientGrid {
@@ -542,6 +541,7 @@ export class ClientUniverse
 	 *
 	 * A shortcut function.
 	 *
+	 * @param param
 	 * @returns Modes for client
 	 */
 	public getMode({
@@ -565,6 +565,7 @@ export class ClientUniverse
 	 *
 	 * A shortcut function.
 	 *
+	 * @param param
 	 * @returns [[clientShard]], everything happening on the screen
 	 */
 	public getShard({ shardUuid }: ShardPath): ClientShard {

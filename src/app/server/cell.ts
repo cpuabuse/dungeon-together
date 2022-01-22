@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -16,15 +16,15 @@ import {
 	urlPathSeparator
 } from "../common/defaults";
 import { Uuid, getDefaultUuid } from "../common/uuid";
-import { CellPath, CommsCell, CommsCellArgs, CoreCellClassFactory } from "../core/cell";
-import { EntityPath } from "../core/entity";
+import { CellPathExtended, CommsCell, CommsCellArgs, CoreCellClassFactory } from "../core/cell";
+import { EntityPathExtended } from "../core/entity";
 import { ServerBaseClass } from "./base";
 import { ServerEntity, ServerEntityArgs, ServerEntityClassConcrete } from "./entity";
 
 /**
  * Navigation.
  */
-export type Nav = Array<CellPath>;
+export type Nav = Array<CellPathExtended>;
 
 /**
  * Arguments for the [[ServerCell]] constructor.
@@ -43,6 +43,7 @@ export interface ServerCellArgs extends CommsCellArgs {
 /**
  * Generator for the server cell class.
  *
+ * @param param
  * @returns Server cell class
  */
 // Force type inference to extract class type
@@ -211,9 +212,10 @@ export function ServerCellFactory({
 		/**
 		 * Gets [[CommsEntity]].
 		 *
+		 * @param param
 		 * @returns [[entity]], anything that resides within a cell
 		 */
-		public getEntity({ entityUuid }: EntityPath): ServerEntity {
+		public getEntity({ entityUuid }: EntityPathExtended): ServerEntity {
 			let entity: ServerEntity | undefined = this.entities.get(entityUuid);
 			// Default clientEntity is always there
 			return entity === undefined ? this.entities.get(this.defaultEntityUuid) : entity;
@@ -224,7 +226,7 @@ export function ServerCellFactory({
 		 *
 		 * @param path - Path to entity
 		 */
-		public removeEntity(path: EntityPath): void {
+		public removeEntity(path: EntityPathExtended): void {
 			if (path.entityUuid !== this.defaultEntityUuid) {
 				this.doRemoveEntity(path);
 			}
@@ -241,8 +243,10 @@ export function ServerCellFactory({
 
 		/**
 		 * Actually removes [[CommsEntity]].
+		 *
+		 * @param param
 		 */
-		private doRemoveEntity({ entityUuid }: EntityPath): void {
+		private doRemoveEntity({ entityUuid }: EntityPathExtended): void {
 			let entity: ServerEntity | undefined = this.entities.get(entityUuid);
 			if (entity !== undefined) {
 				entity.terminate();

@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -9,7 +9,7 @@
 
 import { AnimatedSprite } from "pixi.js";
 import { Uuid } from "../common/uuid";
-import { CellPath } from "../core/cell";
+import { CellPathExtended } from "../core/cell";
 import { CommsEntity, CommsEntityArgs, CoreEntityClassFactory } from "../core/entity";
 import { ClientBaseClass } from "./base";
 import { ClientCell } from "./cell";
@@ -18,6 +18,7 @@ import { LogLevel, processLog } from "./error";
 /**
  * Generator for the client entity class.
  *
+ * @param param
  * @returns Client entity class
  */
 // Force type inference to extract class type
@@ -76,6 +77,8 @@ export function ClientEntityFactory({
 
 		/**
 		 * Initializes RU.
+		 *
+		 * @param param
 		 */
 		public constructor({ shardUuid, cellUuid, kindUuid, gridUuid, modeUuid, entityUuid, worldUuid }: CommsEntityArgs) {
 			// Call super constructor
@@ -113,7 +116,6 @@ export function ClientEntityFactory({
 		 * Moves the entity and updates the display.
 		 *
 		 * @param cell - Target cell.
-		 *
 		 * @returns `true` as it handles super class errors
 		 */
 		public move(cell: ClientCell): true {

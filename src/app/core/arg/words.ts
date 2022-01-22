@@ -66,6 +66,7 @@ export const coreArgObjectWords = Object.values(CoreArgIds).reduce(
 		/**
 		 * Makes string capitalized.
 		 *
+		 * @param param - Destructured parameter
 		 * @returns Capitalized string
 		 */
 		function toCapitalized<T extends string>({

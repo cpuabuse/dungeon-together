@@ -44,6 +44,10 @@ export type CoreArgPathId = {
 
 /**
  * Path part of core arg.
+ *
+ * @remarks
+ *
+ * Is not an intersection for appropriate type inference.
  */
 export type CoreArgPath<
 	I extends CoreArgIds,

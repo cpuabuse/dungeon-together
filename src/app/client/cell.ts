@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -10,13 +10,14 @@
 import { defaultKindUuid, defaultModeUuid, defaultWorldUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
 import { CommsCell, CommsCellArgs, CoreCellClassFactory } from "../core/cell";
-import { CommsEntityArgs, EntityPath } from "../core/entity";
+import { CommsEntityArgs, EntityPathExtended } from "../core/entity";
 import { ClientBaseClass } from "./base";
 import { ClientEntity } from "./entity";
 
 /**
  * Generator for the client cell class.
  *
+ * @param param
  * @returns Client cell class
  */
 // Force type inference to extract class type
@@ -80,6 +81,8 @@ export function ClientCellFactory({
 
 		/**
 		 * Constructs square.
+		 *
+		 * @param param
 		 */
 		public constructor({ shardUuid, cellUuid, gridUuid, entities, x, y, z }: CommsCellArgs) {
 			super();
@@ -136,9 +139,10 @@ export function ClientCellFactory({
 		/**
 		 * Shortcut to get the [[ClientEntity]].
 		 *
+		 * @param param
 		 * @returns [[ClientEntity]], the smallest renderable
 		 */
-		public getEntity({ entityUuid }: EntityPath): ClientEntity {
+		public getEntity({ entityUuid }: EntityPathExtended): ClientEntity {
 			let clientEntity: ClientEntity | undefined = this.entities.get(entityUuid);
 			// Default scene is always there
 			return clientEntity === undefined ? (this.entities.get(this.defaultEntityUuid) as ClientEntity) : clientEntity;
@@ -151,7 +155,7 @@ export function ClientCellFactory({
 		 *
 		 * @param path - Path to entity
 		 */
-		public removeEntity(path: EntityPath): void {
+		public removeEntity(path: EntityPathExtended): void {
 			if (path.entityUuid !== this.defaultEntityUuid) {
 				this.doRemoveEntity(path);
 			}
@@ -173,6 +177,8 @@ export function ClientCellFactory({
 		 * Updates the cell's entities.
 		 *
 		 * Eventually, when the entity is not in the arguments but is present in this cell, it should be either made invisible, or sent to a separate world.
+		 *
+		 * @param param
 		 */
 		public update({ entities, x, y, z }: CommsCellArgs): void {
 			// Rewrite coordinates
@@ -189,8 +195,10 @@ export function ClientCellFactory({
 
 		/**
 		 * Actually removes the entity.
+		 *
+		 * @param param
 		 */
-		private doRemoveEntity({ entityUuid }: EntityPath): void {
+		private doRemoveEntity({ entityUuid }: EntityPathExtended): void {
 			let clientEntity: ClientEntity | undefined = this.entities.get(entityUuid);
 			if (clientEntity !== undefined) {
 				clientEntity.terminate();

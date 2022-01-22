@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -9,8 +9,8 @@
 
 import { Application } from "./application";
 import { CoreBaseClass } from "./base";
-import { CellPath, CoreCell, CoreCellClass } from "./cell";
-import { CommsEntity, CoreEntityClass, EntityPath } from "./entity";
+import { CellPathExtended, CoreCell, CoreCellClass } from "./cell";
+import { CommsEntity, CoreEntityClass, EntityPathExtended } from "./entity";
 import { CommsGrid, CoreGridClass, GridPath } from "./grid";
 import { CommsShard, CommsShardArgs, CoreShardClass, ShardPath } from "./shard";
 
@@ -52,6 +52,8 @@ export abstract class CoreUniverse {
 
 	/**
 	 * Constructs the universe core.
+	 *
+	 * @param param
 	 */
 	public constructor({
 		application
@@ -74,12 +76,12 @@ export abstract class CoreUniverse {
 	/**
 	 * Gets the [[CommsCell]].
 	 */
-	public abstract getCell(path: CellPath): CoreCell;
+	public abstract getCell(path: CellPathExtended): CoreCell;
 
 	/**
 	 * Gets the [[CommsEntity]].
 	 */
-	public abstract getEntity(path: EntityPath): CommsEntity;
+	public abstract getEntity(path: EntityPathExtended): CommsEntity;
 
 	/**
 	 * Gets the grid.

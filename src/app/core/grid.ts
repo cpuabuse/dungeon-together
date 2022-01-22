@@ -9,13 +9,13 @@
 
 import { defaultShardUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
-import { CoreArgOptionIds, CoreArgOptionIdsToOptions, CoreArgOptions, CoreArgOptionsUnion } from "./arg/options";
+import { CoreArgOptionIds, CoreArgOptions, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
 import {
-	CellPath,
+	CellPathExtended,
 	CommsCell,
 	CommsCellArgs,
 	CommsCellRaw,
-	CoreCellArgs,
+	CoreCellArg,
 	commsCellRawToArgs,
 	coreCellArgsConvert
 } from "./cell";
@@ -57,7 +57,7 @@ export type CoreGridArgs<O extends CoreArgOptionsUnion = CoreArgOptions> = (O[Co
 	/**
 	 * Locations within the grid.
 	 */
-	cells: O[CoreArgOptionIds.Map] extends true ? Map<Uuid, CoreCellArgs<O>> : Array<CoreCellArgs<O>>;
+	cells: O[CoreArgOptionIds.Map] extends true ? Map<Uuid, CoreCellArg<O>> : Array<CoreCellArg<O>>;
 };
 
 /**
@@ -84,12 +84,12 @@ export interface CommsGrid extends CommsGridArgs {
 	/**
 	 * Gets [[CommsCell]].
 	 */
-	getCell(path: CellPath): CommsCell;
+	getCell(path: CellPathExtended): CommsCell;
 
 	/**
 	 * Removes [[CommsCell]].
 	 */
-	removeCell(path: CellPath): void;
+	removeCell(path: CellPathExtended): void;
 
 	/**
 	 * Terminates `this`.
@@ -143,6 +143,7 @@ export function commsGridRawToArgs(rawSource: CommsGridRaw, shardUuid: Uuid): Co
  *
  * Has to strictly follow {@link CoreGridArgs}.
  *
+ * @param param
  * @returns Converted grid args
  */
 export function coreGridArgsConvert<S extends CoreArgOptionsUnion, T extends CoreArgOptionsUnion>({
@@ -179,7 +180,7 @@ export function coreGridArgsConvert<S extends CoreArgOptionsUnion, T extends Cor
 		/**
 		 * Core grid args with path.
 		 */
-		type CoreGridArgsWithPath = CoreGridArgs<CoreArgOptionIdsToOptions<CoreArgOptionIds.Path>>;
+		type CoreGridArgsWithPath = CoreGridArgs<CoreArgOptionsGenerate<CoreArgOptionIds.Path>>;
 		let targetGridWithPath: CoreGridArgsWithPath = targetGridAs as CoreGridArgsWithPath;
 
 		if (sourceOptions[CoreArgOptionIds.Path] === true) {
@@ -194,7 +195,7 @@ export function coreGridArgsConvert<S extends CoreArgOptionsUnion, T extends Cor
 	/**
 	 * Core grid args options with map.
 	 */
-	type CoreGridArgsOptionsWithMap = CoreArgOptionIdsToOptions<CoreArgOptionIds.Map>;
+	type CoreGridArgsOptionsWithMap = CoreArgOptionsGenerate<CoreArgOptionIds.Map>;
 
 	/**
 	 * Core grid args options without map.

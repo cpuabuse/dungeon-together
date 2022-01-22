@@ -292,7 +292,7 @@ function compileShardRaw(shard: YamlShard, settings: Settings): CommsShardRaw {
 						return compileGridRaw(grid, createChildSettings(index, settings));
 				  }),
 		shardUuid: getDefaultUuid({
-			base: settings.baseUrl,
+			origin: settings.baseUrl,
 			path: idLikeToPath(shard, settings)
 		})
 	};
@@ -314,7 +314,7 @@ function compileGridRaw(grid: YamlGrid, settings: Settings): CommsGridRaw {
 						return compileCellRaw(cell, createChildSettings(index, settings));
 				  }),
 		gridUuid: getDefaultUuid({
-			base: settings.baseUrl,
+			origin: settings.baseUrl,
 			path: idLikeToPath(grid, settings)
 		})
 	};
@@ -330,7 +330,7 @@ function compileGridRaw(grid: YamlGrid, settings: Settings): CommsGridRaw {
 function compileCellRaw(cell: YamlCell, settings: Settings): CommsCellRaw {
 	return {
 		cellUuid: getDefaultUuid({
-			base: settings.baseUrl,
+			origin: settings.baseUrl,
 			path: idLikeToPath(cell, settings)
 		}),
 		entities:
@@ -356,14 +356,14 @@ function compileCellRaw(cell: YamlCell, settings: Settings): CommsCellRaw {
 function compileEntityRaw(entity: YamlEntity, settings: Settings): CommsEntityRaw {
 	return {
 		entityUuid: getDefaultUuid({
-			base: settings.baseUrl,
+			origin: settings.baseUrl,
 			path: idLikeToPath(entity, settings)
 		}),
-		kindUuid: getDefaultUuid({ base: settings.baseUrl, path: "id-to-generate-the-kind" }),
+		kindUuid: getDefaultUuid({ origin: settings.baseUrl, path: "id-to-generate-the-kind" }),
 		modeUuid:
 			typeof entity.kind === "undefined"
-				? getDefaultUuid({ base: settings.baseUrl, path: "id-to-generate-the-mode" })
+				? getDefaultUuid({ origin: settings.baseUrl, path: "id-to-generate-the-mode" })
 				: entity.kind,
-		worldUuid: getDefaultUuid({ base: settings.baseUrl, path: "id-to-generate-the-world" })
+		worldUuid: getDefaultUuid({ origin: settings.baseUrl, path: "id-to-generate-the-world" })
 	};
 }

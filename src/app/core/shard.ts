@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -12,7 +12,7 @@
  */
 
 import { Uuid } from "../common/uuid";
-import { CoreArgOptionIds, CoreArgOptionIdsToOptions, CoreArgOptions, CoreArgOptionsUnion } from "./arg/options";
+import { CoreArgOptionIds, CoreArgOptions, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
 import {
 	CommsGrid,
 	CommsGridArgs,
@@ -183,7 +183,7 @@ export function coreShardArgsConvert<S extends CoreArgOptionsUnion, T extends Co
 	/**
 	 * Core shard args options with map.
 	 */
-	type CoreShardArgsOptionsWithMap = CoreArgOptionIdsToOptions<CoreArgOptionIds.Map>;
+	type CoreShardArgsOptionsWithMap = CoreArgOptionsGenerate<CoreArgOptionIds.Map>;
 
 	/**
 	 * Core shard args options without map.

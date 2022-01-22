@@ -11,13 +11,18 @@ import { defaultGridUuid, defaultShardUuid, entityUuidUrlPath, urlPathSeparator 
 import { Uuid, getDefaultUuid } from "../common/uuid";
 import { Vector } from "../common/vector";
 import {
+	CoreArg,
 	CoreArgIds,
+	CoreArgMeta,
 	CoreArgOptionIds,
-	CoreArgOptionIdsToOptions,
+	CoreArgOptionsPathExtended,
+	CoreArgOptionsPathOwn,
 	CoreArgOptionsUnion,
 	CoreArgOptionsWithMap,
 	CoreArgOptionsWithoutMap,
-	CoreArgsContainer
+	CoreArgPath,
+	CoreArgsContainer,
+	coreArgPathConvert
 } from "./arg";
 import { CoreBaseClassNonRecursive } from "./base";
 import {
@@ -25,8 +30,9 @@ import {
 	CommsEntityArgs,
 	CommsEntityRaw,
 	CoreEntity,
+	CoreEntityArgParentIds,
 	CoreEntityArgs,
-	EntityPath,
+	EntityPathExtended,
 	commsEntityRawToArgs,
 	coreEntityArgsConvert
 } from "./entity";
@@ -41,10 +47,11 @@ import {
 	CoreUniverseObjectInherit
 } from "./universe-object";
 
+// #region To be removed
 /**
  * A location-like.
  */
-export interface CommsCellArgs extends CellPath, Vector {
+export interface CommsCellArgs extends CellPathExtended, Vector {
 	/**
 	 * Array of entities.
 	 */
@@ -82,20 +89,6 @@ export type CommsCellRaw = CommCellRawHelper<
 >;
 
 /**
- * Core cell args.
- *
- * If any changes are made, they should be reflected in {@link coreArgsConvert}.
- */
-export type CoreCellArgs<O extends CoreArgOptionsUnion> = CoreArgsContainer<CoreEntityArgs<O>, CoreArgIds.Entity, O> &
-	(O[CoreArgOptionIds.Path] extends true ? CellPath : CellOwnPath) &
-	(O[CoreArgOptionIds.Vector] extends true ? Vector : unknown) & {
-		/**
-		 * Worlds.
-		 */
-		worlds: O[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
-	};
-
-/**
  * Typeof class for cells.
  */
 export type CoreCellClass = {
@@ -122,12 +115,12 @@ export interface CommsCell extends CommsCellArgs {
 	/**
 	 * Gets [[Entity]].
 	 */
-	getEntity(path: EntityPath): CommsEntity;
+	getEntity(path: EntityPathExtended): CommsEntity;
 
 	/**
 	 * Removes [[Entity]].
 	 */
-	removeEntity(path: EntityPath): void;
+	removeEntity(path: EntityPathExtended): void;
 
 	/**
 	 * Terminates `this`.
@@ -141,116 +134,6 @@ export interface CommsCell extends CommsCellArgs {
 export type CoreCell = CommsCell & InstanceType<ReturnType<typeof CoreCellClassFactory>>;
 
 /**
- * Factory for core cell.
- *
- * @see {@link CoreBaseClassNonRecursive} for usage
- *
- * @returns Cell class
- */
-// Force type inference to extract class type
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function CoreCellClassFactory<
-	C extends CoreBaseClassNonRecursive,
-	O extends CoreUniverseObjectArgsOptionsUnion,
-	N extends CoreUniverseObject<CoreArgIds.Entity, O>
->({
-	Base,
-	options
-}: {
-	/**
-	 * Client base.
-	 */
-	Base: C;
-
-	/**
-	 * Options.
-	 */
-	options: O;
-}) {
-	/**
-	 * Core cell base class.
-	 *
-	 * @see CoreUniverseObjectInherit for more details
-	 */
-	// Merging interfaces
-	// eslint-disable-next-line no-redeclare
-	abstract class CoreCell
-		extends CoreUniverseObjectFactory<C, CoreArgIds.Cell, O, N, CoreArgIds.Entity>({
-			Base,
-			childUniverseObjectId: CoreArgIds.Entity,
-			options,
-			universeObjectId: CoreArgIds.Cell
-		})
-		implements CoreUniverseObjectContainerImplements<N, CoreArgIds.Entity, O>
-	{
-		/**
-		 * Default entity.
-		 */
-		public abstract defaultEntity: N;
-
-		/**
-		 * Default entity UUID.
-		 */
-		public abstract defaultEntityUuid: Uuid;
-
-		/**
-		 * Gets default entity UUID.
-		 *
-		 * @returns Default entity UUID
-		 */
-		public static getDefaultEntityUuid({ cellUuid }: Pick<CellPath, "cellUuid">): Uuid {
-			return getDefaultUuid({
-				path: `${entityUuidUrlPath}${urlPathSeparator}${cellUuid}`
-			});
-		}
-
-		/**
-		 * Attach {@link CoreEntity} to {@link CoreCell}.
-		 *
-		 * @param entity - {@link CoreEntity}, anything that resides within a cell
-		 */
-		public attach(entity: N): void {
-			this.entities.set(entity.entityUuid, entity);
-		}
-
-		/**
-		 * Detach {@link CoreEntity} from {@link CoreCell}.
-		 *
-		 * @returns If deletion was successful or not
-		 */
-		public detach({ entityUuid }: CoreEntity): boolean {
-			if (this.entities.has(entityUuid)) {
-				this.entities.delete(entityUuid);
-				return true;
-			}
-			return false;
-		}
-
-		/**
-		 * Terminates `this`.
-		 */
-		public abstract terminate(): void;
-	}
-
-	return CoreCell;
-}
-
-/**
- * Cell own path.
- */
-export interface CellOwnPath extends GridPath {
-	/**
-	 * Cell uuid.
-	 */
-	cellUuid: Uuid;
-}
-
-/**
- * Way to get to cell.
- */
-export interface CellPath extends GridPath, CellOwnPath {}
-
-/**
  * Converts [[CommsCellRaw]] to [[CommsCellArgs]].
  *
  * @param rawSource
@@ -258,7 +141,7 @@ export interface CellPath extends GridPath, CellOwnPath {}
  * @param rawSource
  * @param path
  */
-export function commsCellRawToArgs(rawSource: CommsCellRaw, path: CellPath): CommsCellArgs {
+export function commsCellRawToArgs(rawSource: CommsCellRaw, path: CellPathExtended): CommsCellArgs {
 	return {
 		...path,
 		cellUuid: rawSource.cellUuid,
@@ -281,72 +164,244 @@ export function commsCellRawToArgs(rawSource: CommsCellRaw, path: CellPath): Com
 }
 
 /**
+ *
+ */
+const coreCellArgsIndex: [CoreArgIds.Cell, CoreArgIds.Grid, CoreArgIds.Shard] = [
+	CoreArgIds.Cell,
+	CoreArgIds.Grid,
+	CoreArgIds.Shard
+];
+
+/**
+ * Index type for core cell args.
+ */
+type CoreCellArgsIndex = typeof coreCellArgsIndex;
+
+/**
+ * Cell own path.
+ */
+export type CellPathOwn = CoreArgPath<CoreArgIds.Cell, CoreArgOptionsPathOwn, CoreCellArgParentIds>;
+
+/**
+ * Way to get to cell.
+ */
+export type CellPathExtended = CoreArgPath<CoreArgIds.Cell, CoreArgOptionsPathExtended, CoreCellArgParentIds>;
+// #endregion
+
+// #region Core cell arg
+/**
+ * IDs of parents of {@link CoreCellArg}.
+ */
+export type CoreCellArgParentIds = typeof coreCellArgParentIds[number];
+
+/**
+ * Tuple with core cell arg parent IDS.
+ */
+// Infer type from `as const` assertion
+// eslint-disable-next-line @typescript-eslint/typedef
+const coreCellArgParentIds = [CoreArgIds.Shard, CoreArgIds.Grid, CoreArgIds.Entity] as const;
+
+/**
+ * Unique set with parent ID's for core cell arg.
+ */
+export const coreCellArgParentIdSet: Set<CoreCellArgParentIds> = new Set(coreCellArgParentIds);
+
+/**
+ * Core cell args.
+ *
+ * If any changes are made, they should be reflected in {@link coreArgsConvert}.
+ */
+export type CoreCellArg<O extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Cell, O, CoreCellArgParentIds> &
+	CoreArgsContainer<CoreEntityArgs<O>, CoreArgIds.Entity, O, CoreEntityArgParentIds> &
+	(O[CoreArgOptionIds.Vector] extends true ? Vector : unknown) & {
+		/**
+		 * Worlds.
+		 */
+		worlds: O[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
+	};
+// #endregion
+
+/**
+ * Factory for core cell.
+ *
+ * @param param - Destructure parameter
+ * @see {@link CoreBaseClassNonRecursive} for usage
+ * @returns Cell class
+ */
+// Force type inference to extract class type
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function CoreCellClassFactory<
+	BaseClass extends CoreBaseClassNonRecursive,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	Entity extends CoreUniverseObject<CoreArgIds.Entity, Options, CoreEntityArgParentIds>
+>({
+	Base,
+	options
+}: {
+	/**
+	 * Client base.
+	 */
+	Base: BaseClass;
+
+	/**
+	 * Options.
+	 */
+	options: Options;
+}) {
+	// Infer the new base for type safe return
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const NewBase = CoreUniverseObjectFactory<
+		BaseClass,
+		CoreArgIds.Cell,
+		Options,
+		Entity,
+		CoreArgIds.Entity,
+		CoreCellArgParentIds
+	>({
+		Base,
+		childId: CoreArgIds.Entity,
+		grandparentIds: coreCellArgParentIdSet,
+		options,
+		parentId: CoreArgIds.Cell
+	});
+
+	/**
+	 * New class to re-inject.
+	 */
+	type NewClass = typeof NewBase & typeof CoreCell;
+
+	/**
+	 * New instance type to use as `this`.
+	 */
+	type NewInstance = InstanceType<NewClass>;
+
+	/**
+	 * Core cell base class.
+	 *
+	 * @see CoreUniverseObjectInherit for more details
+	 */
+	// Merging interfaces
+	// eslint-disable-next-line no-redeclare
+	abstract class CoreCell
+		extends (NewBase as abstract new (...args: any[]) => any)
+		implements CoreUniverseObjectContainerImplements<Entity, CoreArgIds.Entity, Options, CoreEntityArgParentIds>
+	{
+		/**
+		 * Default entity.
+		 */
+		public abstract defaultEntity: Entity;
+
+		/**
+		 * Default entity UUID.
+		 */
+		public abstract defaultEntityUuid: Uuid;
+
+		/**
+		 * Gets default entity UUID.
+		 *
+		 * @param param - Destructure parameter
+		 * @returns Default entity UUID
+		 */
+		public static getDefaultEntityUuid({ cellUuid }: Pick<CellPathExtended, "cellUuid">): Uuid {
+			return getDefaultUuid({
+				path: `${entityUuidUrlPath}${urlPathSeparator}${cellUuid}`
+			});
+		}
+
+		/**
+		 * Attach {@link CoreEntity} to {@link CoreCell}.
+		 *
+		 * @param this - This will match when called with static options
+		 * @param entity - {@link CoreEntity}, anything that resides within a cell
+		 */
+		public attach(this: NewInstance, entity: Entity): void {
+			this.entities.set(entity.entityUuid, entity);
+		}
+
+		/**
+		 * Detach {@link CoreEntity} from {@link CoreCell}.
+		 *
+		 * @param this  - This will match when called with static options
+		 * @param param - Destructure parameter
+		 * @returns If deletion was successful or not
+		 */
+		public detach(this: NewInstance, { entityUuid }: CoreEntity): boolean {
+			if (this.entities.has(entityUuid)) {
+				this.entities.delete(entityUuid);
+				return true;
+			}
+			return false;
+		}
+	}
+
+	// Have to re-inject dynamic bits from generic parents
+	return CoreCell as NewClass;
+}
+
+/**
  * Convert cell args between options.
  *
- * Has to strictly follow {@link CoreCellArgs}.
+ * Has to strictly follow {@link CoreCellArg}.
  *
+ * @param param - Destructured parameter
  * @returns Converted cell args
  */
-export function coreCellArgsConvert<S extends CoreArgOptionsUnion, T extends CoreArgOptionsUnion>({
+export function coreCellArgsConvert<
+	SourceOptions extends CoreArgOptionsUnion,
+	TargetOptions extends CoreArgOptionsUnion
+>({
 	cell,
 	sourceOptions,
-	targetOptions
+	targetOptions,
+	meta
 }: {
 	/**
 	 * Core cell args.
 	 */
-	cell: CoreCellArgs<S>;
+	cell: CoreCellArg<SourceOptions>;
 
 	/**
 	 * Option for the source.
 	 */
-	sourceOptions: S;
+	sourceOptions: SourceOptions;
 
 	/**
 	 * Option for the target.
 	 */
-	targetOptions: T;
-}): CoreCellArgs<T> {
-	// Define source and result, with minimal options
-	const sourceCell: CoreCellArgs<S> = cell;
-	const sourceCellAs: Record<string, any> = sourceCell;
+	targetOptions: TargetOptions;
+
+	/**
+	 * Meta.
+	 */
+	meta: CoreArgMeta<CoreArgIds.Cell, SourceOptions, TargetOptions, CoreCellArgParentIds>;
+}): CoreCellArg<TargetOptions> {
 	// Cannot assign to conditional type without casting
-	let targetCell: CoreCellArgs<T> = {
-		cellUuid: sourceCell.cellUuid
-	} as CoreCellArgs<T>;
-	let targetCellAs: Record<string, any> = targetCell;
+	let targetCell: CoreCellArg<TargetOptions> = {} as CoreCellArg<TargetOptions>;
 
-	// Path
-	if (targetOptions[CoreArgOptionIds.Path] === true) {
-		/**
-		 * Core cell args with path.
-		 */
-		type CoreCellArgsWithPath = CoreCellArgs<CoreArgOptionIdsToOptions<CoreArgOptionIds.Path>>;
-		let targetCellWithPath: CoreCellArgsWithPath = targetCellAs as CoreCellArgsWithPath;
-
-		if (sourceOptions[CoreArgOptionIds.Path] === true) {
-			// Source to target
-			const sourceCellWithPath: CoreCellArgsWithPath = sourceCellAs as CoreCellArgsWithPath;
-			targetCellWithPath.shardUuid = sourceCellWithPath.shardUuid;
-			targetCellWithPath.gridUuid = sourceCellWithPath.gridUuid;
-		} else {
-			// Default to target
-			targetCellWithPath.shardUuid = defaultShardUuid;
-			targetCellWithPath.gridUuid = defaultGridUuid;
-		}
-	}
+	// Assign the path
+	Object.assign(
+		targetCell,
+		coreArgPathConvert({
+			childId: CoreArgIds.Cell,
+			meta,
+			parentIds: coreCellArgParentIdSet,
+			sourceChildArg: cell,
+			sourceOptions,
+			targetOptions
+		})
+	);
 
 	// Vector
 	if (targetOptions[CoreArgOptionIds.Vector] === true) {
 		/**
 		 * Core cell args with vector.
 		 */
-		type CoreCellArgsWithVector = CoreCellArgs<CoreArgOptionIdsToOptions<CoreArgOptionIds.Vector>>;
-		let targetCellWithVector: CoreCellArgsWithVector = targetCellAs as CoreCellArgsWithVector;
+		type CoreCellArgsWithVector = CoreCellArg<CoreArgOptionsGenerate<CoreArgOptionIds.Vector>>;
+		let targetCellWithVector: CoreCellArgsWithVector = emptyTargetCell as CoreCellArgsWithVector;
 
 		if (sourceOptions[CoreArgOptionIds.Vector] === true) {
 			// Source to target
-			const sourceCellWithVector: CoreCellArgsWithVector = sourceCellAs as CoreCellArgsWithVector;
+			const sourceCellWithVector: CoreCellArgsWithVector = cell as Record<string, any> as CoreCellArgsWithVector;
 			targetCellWithVector.x = sourceCellWithVector.x;
 			targetCellWithVector.y = sourceCellWithVector.y;
 			targetCellWithVector.z = sourceCellWithVector.z;
@@ -361,23 +416,23 @@ export function coreCellArgsConvert<S extends CoreArgOptionsUnion, T extends Cor
 	/**
 	 * Core cell args with map.
 	 */
-	type CoreCellArgsWithMap = CoreCellArgs<CoreArgOptionsWithMap>;
+	type CoreCellArgsWithMap = CoreCellArg<CoreArgOptionsWithMap>;
 
 	/**
 	 * Core cell args without map.
 	 */
-	type CoreCellArgsWithoutMap = CoreCellArgs<CoreArgOptionsWithoutMap>;
+	type CoreCellArgsWithoutMap = CoreCellArg<CoreArgOptionsWithoutMap>;
 
 	// Map
 	if (targetOptions[CoreArgOptionIds.Map] === true) {
-		let targetCellWithMap: CoreCellArgsWithMap = targetCellAs as CoreCellArgsWithMap;
+		let targetCellWithMap: CoreCellArgsWithMap = emptyTargetCell as CoreCellArgsWithMap;
 
 		// Worlds
-		targetCellWithMap.worlds = new Set(sourceCell.worlds);
+		targetCellWithMap.worlds = new Set(cell.worlds);
 
 		if (sourceOptions[CoreArgOptionIds.Map] === true) {
 			// Map to map
-			const sourceCellWithMap: CoreCellArgsWithMap = sourceCellAs as CoreCellArgsWithMap;
+			const sourceCellWithMap: CoreCellArgsWithMap = cell as CoreCellArgsWithMap;
 
 			// Entities
 			targetCellWithMap.entities = new Map(
@@ -396,7 +451,7 @@ export function coreCellArgsConvert<S extends CoreArgOptionsUnion, T extends Cor
 			);
 		} else {
 			// Array to map
-			const sourceCellWithoutMap: CoreCellArgsWithoutMap = sourceCellAs as CoreCellArgsWithoutMap;
+			const sourceCellWithoutMap: CoreCellArgsWithoutMap = cell as CoreCellArgsWithoutMap;
 
 			// Entities
 			targetCellWithMap.entities = new Map(
@@ -413,14 +468,14 @@ export function coreCellArgsConvert<S extends CoreArgOptionsUnion, T extends Cor
 			);
 		}
 	} else {
-		let targetCellWithoutMap: CoreCellArgsWithoutMap = sourceCellAs as CoreCellArgsWithoutMap;
+		let targetCellWithoutMap: CoreCellArgsWithoutMap = cell as CoreCellArgsWithoutMap;
 
 		// Worlds
-		targetCellWithoutMap.worlds = Array.from(sourceCell.worlds);
+		targetCellWithoutMap.worlds = Array.from(cell.worlds);
 
 		if (sourceOptions[CoreArgOptionIds.Map] === true) {
 			// Map to array
-			const sourceCellWithMap: CoreCellArgsWithMap = sourceCellAs as CoreCellArgsWithMap;
+			const sourceCellWithMap: CoreCellArgsWithMap = cell as CoreCellArgsWithMap;
 
 			// Entities
 			targetCellWithoutMap.entities = Array.from(
@@ -439,7 +494,7 @@ export function coreCellArgsConvert<S extends CoreArgOptionsUnion, T extends Cor
 			);
 		} else {
 			// Array to array
-			const sourceCellWithoutMap: CoreCellArgsWithoutMap = sourceCellAs as CoreCellArgsWithoutMap;
+			const sourceCellWithoutMap: CoreCellArgsWithoutMap = cell as CoreCellArgsWithoutMap;
 
 			// Entities
 			targetCellWithoutMap.entities = sourceCellWithoutMap.entities.map(entity =>
@@ -455,5 +510,5 @@ export function coreCellArgsConvert<S extends CoreArgOptionsUnion, T extends Cor
 		}
 	}
 	// Return
-	return targetCell;
+	return emptyTargetCell as CoreCellArg<TargetOptions>;
 }

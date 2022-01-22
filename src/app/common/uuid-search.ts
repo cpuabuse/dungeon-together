@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -8,7 +8,7 @@
  */
 
 import { CoreCell } from "../core/cell";
-import { CoreEntity, EntityPath } from "../core/entity";
+import { CoreEntity, EntityPathExtended } from "../core/entity";
 import { CoreGrid } from "../core/grid";
 import { CoreShard } from "../core/shard";
 import { CoreUniverseClassAbstractStatic } from "../core/universe";
@@ -17,6 +17,7 @@ import { Uuid } from "./uuid";
 /**
  * Ability to search by UUID in a universe.
  *
+ * @param param
  * @returns Generated class
  */
 // Factory needs inference
@@ -41,7 +42,7 @@ export function CoreUniverseUuidSearchFactory<C extends CoreUniverseClassAbstrac
 		/**
 		 * Indexed path to a default entity.
 		 */
-		public abstract defaultEntityPath: EntityPath;
+		public abstract defaultEntityPath: EntityPathExtended;
 
 		/**
 		 * Indexing for entities.
@@ -61,6 +62,7 @@ export function CoreUniverseUuidSearchFactory<C extends CoreUniverseClassAbstrac
 		/**
 		 * Gets a cell by UUID.
 		 *
+		 * @param param
 		 * @returns The cell, or default cell if not found
 		 */
 		public getCellByUuid({
@@ -85,6 +87,7 @@ export function CoreUniverseUuidSearchFactory<C extends CoreUniverseClassAbstrac
 		/**
 		 * Gets a entity by UUID.
 		 *
+		 * @param param
 		 * @returns The cell, or default cell if not found
 		 */
 		public getEntityByUuid({
@@ -109,6 +112,7 @@ export function CoreUniverseUuidSearchFactory<C extends CoreUniverseClassAbstrac
 		/**
 		 * Gets a grid by UUID.
 		 *
+		 * @param param
 		 * @returns The grid, or default grid if not found
 		 */
 		public getGridByUuid({
@@ -133,6 +137,7 @@ export function CoreUniverseUuidSearchFactory<C extends CoreUniverseClassAbstrac
 		/**
 		 * Gets a shard by UUID.
 		 *
+		 * @param param
 		 * @returns The shard, or default shard if not found
 		 */
 		public getShardByUuid({

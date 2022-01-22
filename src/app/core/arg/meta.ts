@@ -8,6 +8,7 @@
  */
 
 import { UrlOrigin, UrlPath, separator } from "../../common/url";
+import { MaybeDefined } from "../../common/utility-types";
 import {
 	CoreArg,
 	CoreArgComplexOptionPathIds,
@@ -29,45 +30,50 @@ import {
 /**
  * Metadata for arg.
  *
+ * @remarks
+ *
+ * Intersecting with `Record<string, never>` for future compatibility, enforces an object.
+ *
  * @typeParam ChildId - ID of a child
  * @typeParam SourceOptions - Options for the source
  * @typeParam TargetOptions - Options for the target
  * @typeParam ParentIds - IDs for the parents; optional
  */
-export type CoreArgMetaExists<
+export type CoreArgMeta<
 	ChildId extends CoreArgIds,
 	SourceOptions extends CoreArgOptionsUnion,
 	TargetOptions extends CoreArgOptionsUnion,
 	ParentIds extends CoreArgIds = never
-> = (SourceOptions extends CoreArgOptionsPathIdUnion
-	? TargetOptions extends CoreArgOptionsPathOwnUnion | CoreArgOptionsExtendedUnion
-		? {
-				/**
-				 * URL paths.
-				 *
-				 * When extended contains parent paths.
-				 */
-				paths: {
-					[K in ChildId | (TargetOptions extends CoreArgOptionsExtendedUnion ? ParentIds : never)]: UrlPath;
-				};
+> = Record<string, never> &
+	(SourceOptions extends CoreArgOptionsPathIdUnion
+		? TargetOptions extends CoreArgOptionsPathOwnUnion | CoreArgOptionsExtendedUnion
+			? {
+					/**
+					 * URL paths.
+					 *
+					 * When extended contains parent paths.
+					 */
+					paths: {
+						[K in ChildId | (TargetOptions extends CoreArgOptionsExtendedUnion ? ParentIds : never)]: UrlPath;
+					};
 
-				/**
-				 * Base URL.
-				 */
-				origin: UrlOrigin;
+					/**
+					 * Base URL.
+					 */
+					origin: UrlOrigin;
 
-				/**
-				 * Namespace used for ID generated paths, when ID is defined.
-				 */
-				userNamespace: UrlPath;
+					/**
+					 * Namespace used for ID generated paths, when ID is defined.
+					 */
+					userNamespace: UrlPath;
 
-				/**
-				 * Namespace used for system generated paths, when ID is undefined.
-				 */
-				systemNamespace: UrlPath;
-		  }
-		: unknown
-	: unknown) &
+					/**
+					 * Namespace used for system generated paths, when ID is undefined.
+					 */
+					systemNamespace: UrlPath;
+			  }
+			: unknown
+		: unknown) &
 	(SourceOptions extends CoreArgOptionsPathOwnUnion
 		? TargetOptions extends CoreArgOptionsExtendedUnion
 			? {
@@ -80,48 +86,6 @@ export type CoreArgMetaExists<
 			  }
 			: unknown
 		: unknown);
-
-/**
- * Destructured parameter for meta.
- *
- * @typeParam ChildId - ID of a child
- * @typeParam SourceOptions - Options for the source
- * @typeParam TargetOptions - Options for the target
- * @typeParam ParentIds - IDs for the parents; optional
- * @typeParam Key - Key of the meta in destructured parameter
- */
-export type CoreArgMetaDestructuredParameter<
-	ChildId extends CoreArgIds,
-	SourceOptions extends CoreArgOptionsUnion,
-	TargetOptions extends CoreArgOptionsUnion,
-	ParentIds extends CoreArgIds = never,
-	Key extends string = "meta"
-> =
-	| unknown
-	| (never extends CoreArgMeta<ChildId, SourceOptions, TargetOptions, ParentIds>
-			? {
-					[E in Key]?: never;
-			  }
-			: {
-					[E in Key]: CoreArgMeta<ChildId, SourceOptions, TargetOptions, ParentIds>;
-			  });
-
-/**
- * Metadata for arg.
- *
- * @typeParam ChildId - ID of a child
- * @typeParam SourceOptions - Options for the source
- * @typeParam TargetOptions - Options for the target
- * @typeParam ParentIds - IDs for the parents; optional
- */
-export type CoreArgMeta<
-	ChildId extends CoreArgIds,
-	SourceOptions extends CoreArgOptionsUnion,
-	TargetOptions extends CoreArgOptionsUnion,
-	ParentIds extends CoreArgIds = never
-> = unknown extends CoreArgMetaExists<ChildId, SourceOptions, TargetOptions, ParentIds>
-	? undefined
-	: CoreArgMetaExists<ChildId, SourceOptions, TargetOptions, ParentIds>;
 
 /**
  * Extracts path from ID-like.
@@ -174,61 +138,90 @@ export function coreArgChildMetaGenerate<
 	 * Meta.
 	 */
 	meta: CoreArgMeta<ParentId, SourceOptions, TargetOptions, GrandparentIds>;
+	// In case `ParentId` is never, will be evaluated to `never` if not a tuple
+} & MaybeDefined<
+	[ParentId] extends [never] ? false : true,
+	{
+		/**
+		 * Current id.
+		 *
+		 * @remarks
+		 * Used as discriminator.
+		 */
+		parentArgId: ParentId;
+
+		/**
+		 * Parent source arg.
+		 */
+		sourceParentArg: CoreArg<ParentId, SourceOptions, GrandparentIds>;
+	}
+>): CoreArgMeta<ChildId, SourceOptions, TargetOptions, ParentId | GrandparentIds> {
+	/**
+	 * Return type alias.
+	 */
+	type ReturnType = CoreArgMeta<ChildId, SourceOptions, TargetOptions, ParentId | GrandparentIds>;
 
 	/**
-	 * Current id.
+	 * Options in case the path is common.
+	 *
+	 * Generation is same for both extended and own, so using an extended type subset.
 	 */
-	parentArgId?: ParentId;
+	type ParentMetaPathIdToExtended = CoreArgMeta<
+		ParentId,
+		CoreArgOptionsPathId,
+		CoreArgOptionsPathExtended,
+		GrandparentIds
+	>;
 
 	/**
-	 * Parent source arg.
+	 * Options in case the path is common.
+	 *
+	 * Generation is same for both extended and own, so using an extended type subset.
 	 */
-	sourceParentArg?: ParentId extends never ? never : CoreArg<ParentId, SourceOptions, GrandparentIds>;
-}): CoreArgMeta<ChildId, SourceOptions, TargetOptions, ParentId | GrandparentIds> {
+	type MetaWithPathOwnToExtended = CoreArgMeta<
+		ParentId,
+		CoreArgOptionsPathOwn,
+		CoreArgOptionsPathExtended,
+		GrandparentIds
+	>;
+
+	/**
+	 * Arg in case the path is common.
+	 */
+	type ParentArgPathId = CoreArg<ParentId, CoreArgOptionsPathId, GrandparentIds>;
+
+	/**
+	 * Arg in case the path is common.
+	 */
+	type ParentArgPathOwn = CoreArg<ParentId, CoreArgOptionsPathOwn, GrandparentIds>;
+
 	// #region Id to own or extended
 	if (sourceOptions.path === coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]) {
-		/**
-		 * Options in case the path is common.
-		 *
-		 * Generation is same for both extended and own, so using an extended type subset.
-		 */
-		type ParentMetaPathIdToExtended = CoreArgMeta<
-			ParentId,
-			CoreArgOptionsPathId,
-			CoreArgOptionsPathExtended,
-			GrandparentIds
-		>;
-
-		/**
-		 * Arg in case the path is common.
-		 */
-		type ParentArgPathId = CoreArg<ParentId, CoreArgOptionsPathId, GrandparentIds>;
-
+		// Casting, since no overlaps
 		// Infer for simplicity
 		// eslint-disable-next-line @typescript-eslint/typedef
-		let { paths, ...rest } = meta as ParentMetaPathIdToExtended;
+		let { paths, ...rest } = meta as unknown as ParentMetaPathIdToExtended;
+		let path: string;
+
+		if (typeof parentArgId === "undefined") {
+			path = `${(meta as unknown as ParentMetaPathIdToExtended).systemNamespace}${separator}${index}`;
+		} else if (typeof (sourceParentArg as ParentArgPathId).id === "undefined") {
+			path = `${paths[parentArgId]}${separator}${index}`;
+		} else {
+			path = `${(meta as unknown as ParentMetaPathIdToExtended).userNamespace}${separator}${
+				(sourceParentArg as ParentArgPathId).id as UrlPath
+			}`;
+		}
 
 		// New meta; `paths` is an object, but it is destructured, thus the original meta data is not modified
 		return {
 			...rest,
 			paths: {
 				...paths,
-				...{
-					[childArgId]:
-						typeof (sourceParentArg as ParentArgPathId).id !== "undefined"
-							? // `as CommonPath` removes the undefined from `id`
-							  `${(meta as ParentMetaPathIdToExtended).userNamespace}${separator}${
-									(sourceParentArg as ParentArgPathId).id as UrlPath
-							  }`
-							: `${
-									typeof parentArgId === "undefined"
-										? (meta as ParentMetaPathIdToExtended).systemNamespace
-										: // Have to cast source arg id to `I`, since generic information is lost when optional or undefined
-										  (meta as ParentMetaPathIdToExtended).paths[parentArgId]
-							  }${separator}${index}`
-				}
+				[childArgId]: path
 			}
-		} as CoreArgMeta<ChildId, SourceOptions, TargetOptions, ParentId | GrandparentIds>;
+			// Casting, since no overlaps with return type
+		} as unknown as ReturnType;
 	}
 	// #endregion
 
@@ -239,7 +232,8 @@ export function coreArgChildMetaGenerate<
 	) {
 		// If no parent, return what is given
 		if (typeof parentArgId === "undefined") {
-			return { ...(meta as MetaWithPathOwnToExtended) } as CoreArgMeta<
+			// Casting, since no overlaps
+			return { ...(meta as unknown as MetaWithPathOwnToExtended) } as unknown as CoreArgMeta<
 				ChildId,
 				SourceOptions,
 				TargetOptions,
@@ -247,26 +241,10 @@ export function coreArgChildMetaGenerate<
 			>;
 		}
 
-		/**
-		 * Options in case the path is common.
-		 *
-		 * Generation is same for both extended and own, so using an extended type subset.
-		 */
-		type MetaWithPathOwnToExtended = CoreArgMeta<
-			ParentId,
-			CoreArgOptionsPathOwn,
-			CoreArgOptionsPathExtended,
-			GrandparentIds
-		>;
-
-		/**
-		 * Arg in case the path is common.
-		 */
-		type ParentArgPathOwn = CoreArg<ParentId, CoreArgOptionsPathOwn, GrandparentIds>;
-
+		// Casting, since no overlaps
 		// Infer for simplicity
 		// eslint-disable-next-line @typescript-eslint/typedef
-		const { parentArgPath, ...rest } = meta as MetaWithPathOwnToExtended;
+		const { parentArgPath, ...rest } = meta as unknown as MetaWithPathOwnToExtended;
 
 		// UUID property name
 		const parentArgUuidPropertyName: CoreArgPathUuidPropertyName<ChildId> = coreArgIdToPathUuidPropertyName({
@@ -280,10 +258,11 @@ export function coreArgChildMetaGenerate<
 				...parentArgPath,
 				...{ [parentArgUuidPropertyName]: (sourceParentArg as ParentArgPathOwn)[parentArgUuidPropertyName] }
 			}
-		} as CoreArgMeta<ChildId, SourceOptions, TargetOptions, ParentId | GrandparentIds>;
+			// Casting, since no overlaps with return type
+		} as unknown as ReturnType;
 	}
 	// #endregion
 
-	// Return undefined in cases arf should be empty
-	return undefined as CoreArgMeta<ChildId, SourceOptions, TargetOptions, ParentId | GrandparentIds>;
+	// Return same what received
+	return { ...(meta as Record<string, unknown>) } as ReturnType;
 }

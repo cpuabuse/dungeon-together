@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -17,9 +17,10 @@ import {
 } from "../common/defaults";
 import { ToAbstract } from "../common/utility-types";
 import { Uuid, getDefaultUuid } from "../common/uuid";
-import { CoreArgOptionIds, CoreArgOptionIdsToOptions, CoreArgOptions, CoreArgOptionsUnion } from "./arg/options";
+import { CoreArg, CoreArgIds, CoreArgOptionsPathExtended, CoreArgOptionsPathOwn, CoreArgPath } from "./arg";
+import { CoreArgOptionIds, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
 import { CoreBase, CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
-import { CellPath, CoreCell } from "./cell";
+import { CellPathExtended, CoreCell, CoreCellArgParentIds } from "./cell";
 import {
 	CoreUniverseObject,
 	// Type used only for documentation
@@ -27,6 +28,7 @@ import {
 	CoreUniverseObjectInherit
 } from "./universe-object";
 
+// #region To be removed
 /**
  * Word referring to entity.
  */
@@ -35,7 +37,7 @@ export type CoreEntityWord = "Entity";
 /**
  * An object-like.
  */
-export interface CommsEntityArgs extends EntityPath {
+export interface CommsEntityArgs extends EntityPathExtended {
 	/**
 	 * Kind of entity.
 	 */
@@ -57,33 +59,7 @@ export interface CommsEntityArgs extends EntityPath {
  * Type is used as this is to be sent over internet.
  * Only JSON compatible member types can be used.
  */
-export type CommsEntityRaw = Omit<CommsEntityArgs, keyof CellPath>;
-
-/**
- * Core entity.
- *
- * If any changes are made, they should be reflected in {@link coreArgsConvert}.
- */
-export type CoreEntityArgs<O extends CoreArgOptionsUnion = CoreArgOptions> = (O[CoreArgOptionIds.Path] extends true
-	? EntityPath
-	: EntityOwnPath) & {
-	/**
-	 * Mode of the entity.
-	 */
-	modeUuid: Uuid;
-
-	/**
-	 * World in which entity resides.
-	 */
-	worldUuid: Uuid;
-} & (O[CoreArgOptionIds.Kind] extends true
-		? {
-				/**
-				 * Kind of entity.
-				 */
-				kindUuid: Uuid;
-		  }
-		: unknown);
+export type CommsEntityRaw = Omit<CommsEntityArgs, keyof CellPathExtended>;
 
 /**
  * Typeof class for entities.
@@ -108,27 +84,52 @@ export interface CommsEntity extends CommsEntityArgs {
  * Core entity type.
  */
 export type CoreEntity = CommsEntity;
+// #endregion
+
+/**
+ * {@link CoreEntityArgs} parent IDs.
+ */
+export type CoreEntityArgParentIds = CoreCellArgParentIds | CoreArgIds.Cell;
 
 /**
  * Path to an entity only.
  */
-export interface EntityOwnPath {
-	/**
-	 * Cell uuid.
-	 */
-	entityUuid: Uuid;
-}
+export type EntityPathOwn = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPathOwn, CoreEntityArgParentIds>;
 
 /**
  * Path to an entity.
  */
-export interface EntityPath extends CellPath, EntityOwnPath {}
+export type EntityPathExtended = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPathExtended, CoreEntityArgParentIds>;
+
+/**
+ * Core entity.
+ *
+ * If any changes are made, they should be reflected in {@link coreArgsConvert}.
+ */
+export type CoreEntityArgs<O extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Entity, O, CoreEntityArgParentIds> & {
+	/**
+	 * Mode of the entity.
+	 */
+	modeUuid: Uuid;
+
+	/**
+	 * World in which entity resides.
+	 */
+	worldUuid: Uuid;
+} & (O[CoreArgOptionIds.Kind] extends true
+		? {
+				/**
+				 * Kind of entity.
+				 */
+				kindUuid: Uuid;
+		  }
+		: unknown);
 
 /**
  * Core entity class factory.
  *
+ * @param param
  * @see {@link CoreBaseClassNonRecursive} for usage
- *
  * @returns Core entity class
  */
 // Forcing inference
@@ -223,9 +224,10 @@ export function CoreEntityClassFactory<
 		/**
 		 * Gets default entity UUID.
 		 *
+		 * @param param
 		 * @returns Default entity UUID
 		 */
-		public static getDefaultEntityUuid({ entityUuid }: EntityOwnPath): Uuid {
+		public static getDefaultEntityUuid({ entityUuid }: EntityPathOwn): Uuid {
 			return getDefaultUuid({
 				path: `${entityUuidUrlPath}${urlPathSeparator}${entityUuid}`
 			});
@@ -235,10 +237,9 @@ export function CoreEntityClassFactory<
 		 * Move entity to a different cell.
 		 *
 		 * @param cellPath - Path to the target cell
-		 *
 		 * @returns If successful or not
 		 */
-		public move(cellPath: CellPath): boolean {
+		public move(cellPath: CellPathExtended): boolean {
 			// Locate cells
 			let sourceCell: CoreCell = (this as CoreBase).universe.getCell(this);
 			let targetCell: CoreCell = (this as CoreBase).universe.getCell(cellPath);
@@ -276,7 +277,7 @@ export function CoreEntityClassFactory<
  * @param rawSource
  * @param path
  */
-export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPath): CommsEntityArgs {
+export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPathExtended): CommsEntityArgs {
 	return {
 		...path,
 		...rawSource
@@ -288,6 +289,7 @@ export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPath
  *
  * Has to strictly follow {@link CoreEntityArgs}.
  *
+ * @param param
  * @returns Target args entity
  */
 export function coreEntityArgsConvert<S extends CoreArgOptionsUnion, T extends CoreArgOptionsUnion>({
@@ -326,7 +328,7 @@ export function coreEntityArgsConvert<S extends CoreArgOptionsUnion, T extends C
 		/**
 		 * Entity with path.
 		 */
-		type EntityWithPath = CoreEntityArgs<CoreArgOptionIdsToOptions<CoreArgOptionIds.Path>>;
+		type EntityWithPath = CoreEntityArgs<CoreArgOptionsGenerate<CoreArgOptionIds.Path>>;
 		let targetEntityWithPath: EntityWithPath = targetEntityAs as EntityWithPath;
 		if (sourceOptions[CoreArgOptionIds.Path] === true) {
 			const sourceEntityWithPath: EntityWithPath = sourceEntityAs as EntityWithPath;
@@ -345,7 +347,7 @@ export function coreEntityArgsConvert<S extends CoreArgOptionsUnion, T extends C
 		/**
 		 * Entity with kind.
 		 */
-		type EntityWithKind = CoreEntityArgs<CoreArgOptionIdsToOptions<CoreArgOptionIds.Kind>>;
+		type EntityWithKind = CoreEntityArgs<CoreArgOptionsGenerate<CoreArgOptionIds.Kind>>;
 		let targetEntityWithKind: EntityWithKind = targetEntityAs as EntityWithKind;
 		if (sourceOptions[CoreArgOptionIds.Kind] === true) {
 			targetEntityWithKind.kindUuid = (sourceEntityAs as EntityWithKind).kindUuid;
