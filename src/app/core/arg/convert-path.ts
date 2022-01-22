@@ -7,6 +7,7 @@
  * @file Path conversion.
  */
 
+import { hasOwnProperty } from "../../common/utility-types";
 import { getDefaultUuid } from "../../common/uuid";
 import {
 	CoreArg,
@@ -52,8 +53,8 @@ export function coreArgPathConvert<
 	T extends CoreArgOptionsUnion,
 	P extends CoreArgIds
 >({
-	childId,
-	sourceChildArg,
+	id,
+	sourceArgPath,
 	parentIds,
 	sourceOptions,
 	targetOptions,
@@ -62,7 +63,7 @@ export function coreArgPathConvert<
 	/**
 	 * Target arg ID.
 	 */
-	childId: I;
+	id: I;
 
 	/**
 	 * Arg index.
@@ -74,7 +75,7 @@ export function coreArgPathConvert<
 	/**
 	 * Core cell args.
 	 */
-	sourceChildArg: CoreArgPath<I, S, P>;
+	sourceArgPath: CoreArgPath<I, S, P>;
 
 	/**
 	 * Option for the source.
@@ -103,8 +104,6 @@ export function coreArgPathConvert<
 
 	/**
 	 * Arg with path when own.
-	 *
-	 * @param TestAbc - Aa dff.
 	 */
 	type ChildArgPathExtended = CoreArg<I, CoreArgOptionsPathOwn, P>;
 
@@ -129,22 +128,24 @@ export function coreArgPathConvert<
 			switch (targetOptions[CoreArgOptionIds.Path]) {
 				// ID to ID
 				case coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]:
-					return { id: (sourceChildArg as ChildArgPathId).id } as CoreArgPath<I, T, P>;
+					return (
+						hasOwnProperty(sourceArgPath as ChildArgPathId, "id") ? { id: (sourceArgPath as ChildArgPathId).id } : {}
+					) as CoreArgPath<I, T, P>;
 
 				// ID to own
 				case coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]:
 					return {
-						[coreArgIdToPathUuidPropertyName({ id: childId })]: getDefaultUuid({
+						[coreArgIdToPathUuidPropertyName({ id })]: getDefaultUuid({
 							// Casting, since no overlaps
 							origin: (meta as unknown as MetaPathIdToOwn).origin,
 							// Casting, since no overlaps
-							path: (meta as unknown as MetaPathIdToOwn).paths[childId]
+							path: (meta as unknown as MetaPathIdToOwn).paths[id]
 						})
 					} as CoreArgPath<I, T, P>;
 
 				// ID to extended
 				case coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]:
-					return [childId, ...parentIds].reduce(
+					return [id, ...parentIds].reduce(
 						(result, id) => ({
 							...result,
 							[coreArgIdToPathUuidPropertyName({ id })]: getDefaultUuid({
@@ -166,24 +167,24 @@ export function coreArgPathConvert<
 				// Own to ID
 				case coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]:
 					return {
-						id: (sourceChildArg as ChildArgPathOwn)[coreArgIdToPathUuidPropertyName({ id: childId })]
+						id: (sourceArgPath as ChildArgPathOwn)[coreArgIdToPathUuidPropertyName({ id })]
 					} as CoreArgPath<I, T, P>;
 
 				// Own to own
 				case coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]: {
-					const uuidPropertyName: CoreArgPathUuidPropertyName<I> = coreArgIdToPathUuidPropertyName({ id: childId });
+					const uuidPropertyName: CoreArgPathUuidPropertyName<I> = coreArgIdToPathUuidPropertyName({ id });
 					return {
-						[uuidPropertyName]: (sourceChildArg as ChildArgPathOwn)[uuidPropertyName]
+						[uuidPropertyName]: (sourceArgPath as ChildArgPathOwn)[uuidPropertyName]
 					} as CoreArgPath<I, T, P>;
 				}
 
 				// Own to extended
 				case coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]: {
-					const uuidPropertyName: CoreArgPathUuidPropertyName<I> = coreArgIdToPathUuidPropertyName({ id: childId });
+					const uuidPropertyName: CoreArgPathUuidPropertyName<I> = coreArgIdToPathUuidPropertyName({ id });
 					return {
 						// Casting, since no overlaps
 						...(meta as unknown as MetaPathOwnToExtended).parentArgPath,
-						[uuidPropertyName]: (sourceChildArg as ChildArgPathOwn)[uuidPropertyName]
+						[uuidPropertyName]: (sourceArgPath as ChildArgPathOwn)[uuidPropertyName]
 					} as CoreArgPath<I, T, P>;
 				}
 
@@ -196,24 +197,24 @@ export function coreArgPathConvert<
 				// Extended to ID
 				case coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]:
 					return {
-						id: (sourceChildArg as ChildArgPathExtended)[coreArgIdToPathUuidPropertyName({ id: childId })]
+						id: (sourceArgPath as ChildArgPathExtended)[coreArgIdToPathUuidPropertyName({ id })]
 					} as CoreArgPath<I, T, P>;
 
 				// Extended to own
 				case coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]: {
-					const uuidPropertyName: CoreArgPathUuidPropertyName<I> = coreArgIdToPathUuidPropertyName({ id: childId });
+					const uuidPropertyName: CoreArgPathUuidPropertyName<I> = coreArgIdToPathUuidPropertyName({ id });
 					return {
-						[uuidPropertyName]: (sourceChildArg as ChildArgPathExtended)[uuidPropertyName]
+						[uuidPropertyName]: (sourceArgPath as ChildArgPathExtended)[uuidPropertyName]
 					} as CoreArgPath<I, T, P>;
 				}
 
 				// Extended to extended
 				case coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]:
-					return [childId, ...parentIds].reduce((result, id) => {
+					return [id, ...parentIds].reduce((result, id) => {
 						const uuidPropertyName: CoreArgPathUuidPropertyName<typeof id> = coreArgIdToPathUuidPropertyName({
 							id
 						});
-						return { ...result, [uuidPropertyName]: (sourceChildArg as ChildArgPathExtended)[uuidPropertyName] };
+						return { ...result, [uuidPropertyName]: (sourceArgPath as ChildArgPathExtended)[uuidPropertyName] };
 					}, {} as ChildArgPathExtended) as CoreArgPath<I, T, P>;
 
 				// No default

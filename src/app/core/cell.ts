@@ -382,10 +382,10 @@ export function coreCellArgsConvert<
 	Object.assign(
 		targetCell,
 		coreArgPathConvert({
-			childId: CoreArgIds.Cell,
+			id: CoreArgIds.Cell,
 			meta,
 			parentIds: coreCellArgParentIdSet,
-			sourceChildArg: cell,
+			sourceArgPath: cell,
 			sourceOptions,
 			targetOptions
 		})
