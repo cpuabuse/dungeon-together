@@ -8,13 +8,15 @@
  */
 
 import { deepStrictEqual } from "assert";
+import { UrlPath } from "../../../src/app/common/url";
 import {
 	CoreArgComplexOptionPathIds,
-	CoreArgComplexOptionSymbolIndex,
 	CoreArgIds,
 	CoreArgMeta,
 	CoreArgOptionIds,
-	CoreArgOptionsGenerate,
+	CoreArgOptionsPathExtended,
+	CoreArgOptionsPathId,
+	CoreArgOptionsPathOwn,
 	CoreArgPath,
 	coreArgComplexOptionSymbolIndex,
 	coreArgOptionIdsToOptions,
@@ -26,61 +28,146 @@ import {
  */
 export function unitTest(): void {
 	/**
+	 * Base parameter for convert test.
+	 */
+	type BaseParam<Id extends CoreArgIds, ParentIds extends CoreArgIds = never> = {
+		/**
+		 * Arg ID.
+		 */
+		id: Id;
+
+		/**
+		 * Parents of arg.
+		 */
+		parentIds: Set<ParentIds>;
+	};
+
+	/**
 	 * Generate a test for `it`.
 	 *
+	 * @param param - Destructed parameter
 	 * @returns Function to be run by `it`.
 	 */
-	function pathConvertTest<>({ sourceArgPath, meta, expected, sourceOptions, targetOptions }: {}): () => void {
-		return function () {};
-	}
-
-	// Test will run on cell because it has both children and parents
-	describe("coreArgPathConvert()", function () {
+	function pathConvertTest<
+		Id extends CoreArgIds,
+		SourceOptions extends CoreArgOptionsPathId | CoreArgOptionsPathOwn | CoreArgOptionsPathExtended,
+		TargetOptions extends CoreArgOptionsPathId | CoreArgOptionsPathOwn | CoreArgOptionsPathExtended,
+		ParentIds extends CoreArgIds = never
+	>({
+		expected,
+		id,
+		meta,
+		parentIds,
+		sourceArgPath,
+		sourceOptions,
+		targetOptions
+	}: {
 		/**
-		 * Options used for path with ID.
+		 * Expected result.
 		 */
-		type OptionsPathId = CoreArgOptionsGenerate<
-			never,
-			CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
-		>;
+		expected: CoreArgPath<Id, TargetOptions, ParentIds>;
 
-		let optionsPathId: OptionsPathId;
-		let cellBaseParam: {
-			/**
-			 * Cell ID.
-			 */
-			id: CoreArgIds.Cell;
+		/**
+		 * Meta.
+		 */
+		meta: CoreArgMeta<Id, SourceOptions, TargetOptions, ParentIds>;
 
-			/**
-			 * Parents of a cell.
-			 */
-			parentIds: Set<CoreArgIds.Shard | CoreArgIds.Grid>;
-		};
+		/**
+		 * Source path.
+		 */
+		sourceArgPath: CoreArgPath<Id, SourceOptions, ParentIds>;
 
-		before(function () {
-			optionsPathId = coreArgOptionIdsToOptions({
-				idSet: new Set(),
-				symbolSet: new Set([coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]])
-			});
-			cellBaseParam = {
-				id: CoreArgIds.Cell,
-				parentIds: new Set([CoreArgIds.Shard, CoreArgIds.Grid])
-			};
-		});
+		/**
+		 * Source options.
+		 */
+		sourceOptions: SourceOptions;
 
-		it("should convert from ID to ID, when its empty", function () {
-			let sourceArgPath: CoreArgPath<CoreArgIds.Cell, OptionsPathId, CoreArgIds.Shard | CoreArgIds.Grid> = {};
-			let meta: CoreArgMeta<CoreArgIds.Cell, OptionsPathId, OptionsPathId, CoreArgIds.Shard | CoreArgIds.Grid> = {};
-			let expected: CoreArgPath<CoreArgIds.Cell, OptionsPathId, CoreArgIds.Grid> = {};
+		/**
+		 * Target options.
+		 */
+		targetOptions: TargetOptions;
+	} & BaseParam<Id, ParentIds>): () => void {
+		return function () {
 			deepStrictEqual(
 				coreArgPathConvert({
-					...cellBaseParam,
+					id,
 					meta,
+					parentIds,
 					sourceArgPath,
-					sourceOptions: optionsPathId,
-					targetOptions: optionsPathId
+					sourceOptions,
+					targetOptions
 				}),
 				expected
+			);
+		};
+	}
+
+	const defaultId: UrlPath = "test/id";
+
+	const cellBaseParam: BaseParam<CoreArgIds.Cell, CoreArgIds.Shard | CoreArgIds.Grid> = {
+		id: CoreArgIds.Cell,
+		parentIds: new Set([CoreArgIds.Shard, CoreArgIds.Grid])
+	};
+
+	const shardBaseParam: BaseParam<CoreArgIds.Shard> = {
+		id: CoreArgIds.Shard,
+		parentIds: new Set()
+	};
+
+	const optionsPathId: CoreArgOptionsPathId = coreArgOptionIdsToOptions({
+		idSet: new Set(),
+		symbolSet: new Set([coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]])
+	});
+
+	// Tests will run for cell because it has both children and parents; when extended path is involved, test should be run for shard as well, as it has no parents; when ID to ID conversion is made, test should be run for shards as well, as it is very simple
+	describe("coreArgPathConvert()", function () {
+		describe("ID to ID", function () {
+			it(
+				"should convert cell path, when ID is undefined",
+				pathConvertTest({
+					...cellBaseParam,
+					expected: {},
+					meta: {},
+					sourceArgPath: {},
+					sourceOptions: optionsPathId,
+					targetOptions: optionsPathId
+				})
+			);
+
+			it(
+				"should convert cell path, when ID is defined",
+				pathConvertTest({
+					...cellBaseParam,
+					expected: { id: defaultId },
+					meta: {},
+					sourceArgPath: { id: defaultId },
+					sourceOptions: optionsPathId,
+					targetOptions: optionsPathId
+				})
+			);
+
+			it(
+				"should convert shard path, when ID is undefined",
+				pathConvertTest({
+					...shardBaseParam,
+					expected: {},
+					meta: {},
+					sourceArgPath: {},
+					sourceOptions: optionsPathId,
+					targetOptions: optionsPathId
+				})
+			);
+
+			it(
+				"should convert shard path, when ID is defined",
+				pathConvertTest({
+					...shardBaseParam,
+					expected: { id: defaultId },
+					meta: {},
+					sourceArgPath: { id: defaultId },
+					sourceOptions: optionsPathId,
+					targetOptions: optionsPathId
+				})
 			);
 		});
 	});
