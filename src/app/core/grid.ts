@@ -227,7 +227,7 @@ export function coreGridArgsConvert<S extends CoreArgOptionsUnion, T extends Cor
 				Array.from(sourceGridWithMap.cells, ([uuid, cell]) => [
 					uuid,
 					coreCellArgsConvert({
-						cell,
+						sourceCell: cell,
 						// Cast to expected type
 						sourceOptions: sourceOptions as CoreGridArgsOptionsWithMap,
 						// Cast to expected type
@@ -244,7 +244,7 @@ export function coreGridArgsConvert<S extends CoreArgOptionsUnion, T extends Cor
 				sourceGridWithoutMap.cells.map(cell => [
 					cell.cellUuid,
 					coreCellArgsConvert({
-						cell,
+						sourceCell: cell,
 						// Cast to expected type
 						sourceOptions: sourceOptions as CoreGridArgsOptionsWithoutMap,
 						// Cast to expected type
@@ -268,7 +268,7 @@ export function coreGridArgsConvert<S extends CoreArgOptionsUnion, T extends Cor
 				([uuid, cell]) =>
 					// Set to actual type
 					coreCellArgsConvert({
-						cell,
+						sourceCell: cell,
 						sourceOptions: sourceOptions as CoreGridArgsOptionsWithMap,
 						targetOptions: targetOptions as CoreGridArgsOptionsWithoutMap
 					})
@@ -281,7 +281,7 @@ export function coreGridArgsConvert<S extends CoreArgOptionsUnion, T extends Cor
 			targetGridWithoutMap.cells = sourceGridWithoutMap.cells.map(cell =>
 				// Set to actual type
 				coreCellArgsConvert({
-					cell,
+					sourceCell: cell,
 					sourceOptions: sourceOptions as CoreGridArgsOptionsWithoutMap,
 					targetOptions: targetOptions as CoreGridArgsOptionsWithoutMap
 				})
