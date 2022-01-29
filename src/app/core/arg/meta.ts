@@ -44,7 +44,7 @@ export type CoreArgMeta<
 	SourceOptions extends CoreArgOptionsUnion,
 	TargetOptions extends CoreArgOptionsUnion,
 	ParentIds extends CoreArgIds = never
-> = Record<string, never> &
+> = Record<string, unknown> &
 	(SourceOptions extends CoreArgOptionsPathIdUnion
 		? TargetOptions extends CoreArgOptionsPathOwnUnion | CoreArgOptionsExtendedUnion
 			? {
