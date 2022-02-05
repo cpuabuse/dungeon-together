@@ -367,5 +367,19 @@ export function unitTest(): void {
 				});
 			});
 		});
+
+		describe("own to own", function () {
+			it(
+				"should convert cell path",
+				pathConvertTest({
+					...cellBaseParam,
+					expected: { cellUuid: defaultCellUuid },
+					meta: {},
+					sourceArgPath: { cellUuid: defaultCellUuid },
+					sourceOptions: optionsPathOwn,
+					targetOptions: optionsPathOwn
+				})
+			);
+		});
 	});
 }
