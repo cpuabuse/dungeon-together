@@ -148,193 +148,203 @@ export function unitTest(): void {
 	// Tests will run for cell because it has both children and parents; when extended path is involved, test should be run for shard as well, as it has no parents; when ID to ID conversion is made, test should be run for shards as well, as it is very simple
 	describe("coreArgPathConvert()", function () {
 		describe("ID to ID", function () {
-			it(
-				"should convert cell path, when ID is undefined",
-				pathConvertTest({
-					...cellBaseParam,
-					expected: {},
-					meta: {},
-					sourceArgPath: {},
-					sourceOptions: optionsPathId,
-					targetOptions: optionsPathId
-				})
-			);
+			describe("cell", function () {
+				it(
+					"should convert path, when ID is undefined",
+					pathConvertTest({
+						...cellBaseParam,
+						expected: {},
+						meta: {},
+						sourceArgPath: {},
+						sourceOptions: optionsPathId,
+						targetOptions: optionsPathId
+					})
+				);
 
-			it(
-				"should convert cell path, when ID is defined",
-				pathConvertTest({
-					...cellBaseParam,
-					expected: { id: defaultId },
-					meta: {},
-					sourceArgPath: { id: defaultId },
-					sourceOptions: optionsPathId,
-					targetOptions: optionsPathId
-				})
-			);
+				it(
+					"should convert path, when ID is defined",
+					pathConvertTest({
+						...cellBaseParam,
+						expected: { id: defaultId },
+						meta: {},
+						sourceArgPath: { id: defaultId },
+						sourceOptions: optionsPathId,
+						targetOptions: optionsPathId
+					})
+				);
+			});
 
-			it(
-				"should convert shard path, when ID is undefined",
-				pathConvertTest({
-					...shardBaseParam,
-					expected: {},
-					meta: {},
-					sourceArgPath: {},
-					sourceOptions: optionsPathId,
-					targetOptions: optionsPathId
-				})
-			);
+			describe("shard", function () {
+				it(
+					"should convert path, when ID is undefined",
+					pathConvertTest({
+						...shardBaseParam,
+						expected: {},
+						meta: {},
+						sourceArgPath: {},
+						sourceOptions: optionsPathId,
+						targetOptions: optionsPathId
+					})
+				);
 
-			it(
-				"should convert shard path, when ID is defined",
-				pathConvertTest({
-					...shardBaseParam,
-					expected: { id: defaultId },
-					meta: {},
-					sourceArgPath: { id: defaultId },
-					sourceOptions: optionsPathId,
-					targetOptions: optionsPathId
-				})
-			);
+				it(
+					"should convert path, when ID is defined",
+					pathConvertTest({
+						...shardBaseParam,
+						expected: { id: defaultId },
+						meta: {},
+						sourceArgPath: { id: defaultId },
+						sourceOptions: optionsPathId,
+						targetOptions: optionsPathId
+					})
+				);
+			});
 		});
 
 		describe("ID to own", function () {
-			it(
-				"should convert cell path, when ID is undefined",
-				pathConvertTest({
-					...cellBaseParam,
-					expected: {
-						cellUuid: getDefaultUuid({
-							origin: defaultOrigin,
-							path: defaultCellPath
-						})
-					},
-					meta: {
-						origin: defaultOrigin,
-						paths: {
-							[CoreArgIds.Cell]: defaultCellPath
+			describe("cell", function () {
+				it(
+					"should convert path, when ID is undefined",
+					pathConvertTest({
+						...cellBaseParam,
+						expected: {
+							cellUuid: getDefaultUuid({
+								origin: defaultOrigin,
+								path: defaultCellPath
+							})
 						},
-						systemNamespace: defaultSystemNameSpace,
-						userNamespace: defaultUserNameSpace
-					},
-					sourceArgPath: {},
-					sourceOptions: optionsPathId,
-					targetOptions: optionsPathOwn
-				})
-			);
+						meta: {
+							origin: defaultOrigin,
+							paths: {
+								[CoreArgIds.Cell]: defaultCellPath
+							},
+							systemNamespace: defaultSystemNameSpace,
+							userNamespace: defaultUserNameSpace
+						},
+						sourceArgPath: {},
+						sourceOptions: optionsPathId,
+						targetOptions: optionsPathOwn
+					})
+				);
 
-			it(
-				"should convert cell path, when ID is defined",
-				pathConvertTest({
-					...cellBaseParam,
-					expected: {
-						cellUuid: getDefaultUuid({
-							origin: defaultOrigin,
-							path: defaultCellPath
-						})
-					},
-					meta: {
-						origin: defaultOrigin,
-						paths: {
-							[CoreArgIds.Cell]: defaultCellPath
+				it(
+					"should convert path, when ID is defined",
+					pathConvertTest({
+						...cellBaseParam,
+						expected: {
+							cellUuid: getDefaultUuid({
+								origin: defaultOrigin,
+								path: defaultCellPath
+							})
 						},
-						systemNamespace: defaultSystemNameSpace,
-						userNamespace: defaultUserNameSpace
-					},
-					sourceArgPath: { id: defaultId },
-					sourceOptions: optionsPathId,
-					targetOptions: optionsPathOwn
-				})
-			);
+						meta: {
+							origin: defaultOrigin,
+							paths: {
+								[CoreArgIds.Cell]: defaultCellPath
+							},
+							systemNamespace: defaultSystemNameSpace,
+							userNamespace: defaultUserNameSpace
+						},
+						sourceArgPath: { id: defaultId },
+						sourceOptions: optionsPathId,
+						targetOptions: optionsPathOwn
+					})
+				);
+			});
 		});
 
 		describe("ID to extended", function () {
-			it(
-				"should convert cell path, when ID is undefined",
-				pathConvertTest({
-					...cellBaseParam,
-					expected: {
-						cellUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultCellPath }),
-						gridUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultGridPath }),
-						shardUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultShardPath })
-					},
-					meta: {
-						origin: defaultOrigin,
-						paths: {
-							[CoreArgIds.Cell]: defaultCellPath,
-							[CoreArgIds.Grid]: defaultGridPath,
-							[CoreArgIds.Shard]: defaultShardPath
+			describe("cell", function () {
+				it(
+					"should convert path, when ID is undefined",
+					pathConvertTest({
+						...cellBaseParam,
+						expected: {
+							cellUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultCellPath }),
+							gridUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultGridPath }),
+							shardUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultShardPath })
 						},
-						systemNamespace: defaultSystemNameSpace,
-						userNamespace: defaultUserNameSpace
-					},
-					sourceArgPath: {},
-					sourceOptions: optionsPathId,
-					targetOptions: optionsPathExtended
-				})
-			);
+						meta: {
+							origin: defaultOrigin,
+							paths: {
+								[CoreArgIds.Cell]: defaultCellPath,
+								[CoreArgIds.Grid]: defaultGridPath,
+								[CoreArgIds.Shard]: defaultShardPath
+							},
+							systemNamespace: defaultSystemNameSpace,
+							userNamespace: defaultUserNameSpace
+						},
+						sourceArgPath: {},
+						sourceOptions: optionsPathId,
+						targetOptions: optionsPathExtended
+					})
+				);
 
-			it(
-				"should convert cell path, when ID is defined",
-				pathConvertTest({
-					...cellBaseParam,
-					expected: {
-						cellUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultCellPath }),
-						gridUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultGridPath }),
-						shardUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultShardPath })
-					},
-					meta: {
-						origin: defaultOrigin,
-						paths: {
-							[CoreArgIds.Cell]: defaultCellPath,
-							[CoreArgIds.Grid]: defaultGridPath,
-							[CoreArgIds.Shard]: defaultShardPath
+				it(
+					"should convert path, when ID is defined",
+					pathConvertTest({
+						...cellBaseParam,
+						expected: {
+							cellUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultCellPath }),
+							gridUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultGridPath }),
+							shardUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultShardPath })
 						},
-						systemNamespace: defaultSystemNameSpace,
-						userNamespace: defaultUserNameSpace
-					},
-					sourceArgPath: { id: defaultId },
-					sourceOptions: optionsPathId,
-					targetOptions: optionsPathExtended
-				})
-			);
-
-			it("should convert shard path, when ID is undefined", function () {
-				pathConvertTest({
-					...shardBaseParam,
-					expected: {
-						shardUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultShardPath })
-					},
-					meta: {
-						origin: defaultOrigin,
-						paths: {
-							[CoreArgIds.Shard]: defaultShardPath
+						meta: {
+							origin: defaultOrigin,
+							paths: {
+								[CoreArgIds.Cell]: defaultCellPath,
+								[CoreArgIds.Grid]: defaultGridPath,
+								[CoreArgIds.Shard]: defaultShardPath
+							},
+							systemNamespace: defaultSystemNameSpace,
+							userNamespace: defaultUserNameSpace
 						},
-						systemNamespace: defaultSystemNameSpace,
-						userNamespace: defaultUserNameSpace
-					},
-					sourceArgPath: {},
-					sourceOptions: optionsPathId,
-					targetOptions: optionsPathExtended
-				});
+						sourceArgPath: { id: defaultId },
+						sourceOptions: optionsPathId,
+						targetOptions: optionsPathExtended
+					})
+				);
 			});
 
-			it("should convert shard path, when ID is defined", function () {
-				pathConvertTest({
-					...shardBaseParam,
-					expected: {
-						shardUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultShardPath })
-					},
-					meta: {
-						origin: defaultOrigin,
-						paths: {
-							[CoreArgIds.Shard]: defaultShardPath
+			describe("shard", function () {
+				it("should convert path, when ID is undefined", function () {
+					pathConvertTest({
+						...shardBaseParam,
+						expected: {
+							shardUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultShardPath })
 						},
-						systemNamespace: defaultSystemNameSpace,
-						userNamespace: defaultUserNameSpace
-					},
-					sourceArgPath: { id: defaultId },
-					sourceOptions: optionsPathId,
-					targetOptions: optionsPathExtended
+						meta: {
+							origin: defaultOrigin,
+							paths: {
+								[CoreArgIds.Shard]: defaultShardPath
+							},
+							systemNamespace: defaultSystemNameSpace,
+							userNamespace: defaultUserNameSpace
+						},
+						sourceArgPath: {},
+						sourceOptions: optionsPathId,
+						targetOptions: optionsPathExtended
+					});
+				});
+
+				it("should convert path, when ID is defined", function () {
+					pathConvertTest({
+						...shardBaseParam,
+						expected: {
+							shardUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultShardPath })
+						},
+						meta: {
+							origin: defaultOrigin,
+							paths: {
+								[CoreArgIds.Shard]: defaultShardPath
+							},
+							systemNamespace: defaultSystemNameSpace,
+							userNamespace: defaultUserNameSpace
+						},
+						sourceArgPath: { id: defaultId },
+						sourceOptions: optionsPathId,
+						targetOptions: optionsPathExtended
+					});
 				});
 			});
 		});
@@ -369,17 +379,19 @@ export function unitTest(): void {
 		});
 
 		describe("own to own", function () {
-			it(
-				"should convert cell path",
-				pathConvertTest({
-					...cellBaseParam,
-					expected: { cellUuid: defaultCellUuid },
-					meta: {},
-					sourceArgPath: { cellUuid: defaultCellUuid },
-					sourceOptions: optionsPathOwn,
-					targetOptions: optionsPathOwn
-				})
-			);
+			describe("cell", function () {
+				it(
+					"should convert path",
+					pathConvertTest({
+						...cellBaseParam,
+						expected: { cellUuid: defaultCellUuid },
+						meta: {},
+						sourceArgPath: { cellUuid: defaultCellUuid },
+						sourceOptions: optionsPathOwn,
+						targetOptions: optionsPathOwn
+					})
+				);
+			});
 		});
 	});
 }
