@@ -120,6 +120,14 @@ export function unitTest(): void {
 	const defaultShardPath: UrlPath = `${defaultSystemNameSpace}/universe-objects/0`;
 	const defaultGridPath: UrlPath = `${defaultShardPath}/0`;
 	const defaultCellPath: UrlPath = `${defaultGridPath}/0`;
+	const defaultShardUuid: Uuid = getDefaultUuid({
+		origin: defaultOrigin,
+		path: defaultShardPath
+	});
+	const defaultGridUuid: Uuid = getDefaultUuid({
+		origin: defaultOrigin,
+		path: defaultGridPath
+	});
 	const defaultCellUuid: Uuid = getDefaultUuid({
 		origin: defaultOrigin,
 		path: defaultCellPath
@@ -389,6 +397,40 @@ export function unitTest(): void {
 						sourceArgPath: { cellUuid: defaultCellUuid },
 						sourceOptions: optionsPathOwn,
 						targetOptions: optionsPathOwn
+					})
+				);
+			});
+		});
+
+		describe("own to extended", function () {
+			describe("cell", function () {
+				it(
+					"should convert path",
+					pathConvertTest({
+						...cellBaseParam,
+						expected: { cellUuid: defaultCellUuid, gridUuid: defaultGridUuid, shardUuid: defaultShardUuid },
+						meta: {
+							parentArgPath: { gridUuid: defaultGridUuid, shardUuid: defaultShardUuid }
+						},
+						sourceArgPath: { cellUuid: defaultCellUuid },
+						sourceOptions: optionsPathOwn,
+						targetOptions: optionsPathExtended
+					})
+				);
+			});
+
+			describe("shard", function () {
+				it(
+					"should convert path",
+					pathConvertTest({
+						...shardBaseParam,
+						expected: { shardUuid: defaultShardUuid },
+						meta: {
+							parentArgPath: {}
+						},
+						sourceArgPath: { shardUuid: defaultShardUuid },
+						sourceOptions: optionsPathOwn,
+						targetOptions: optionsPathExtended
 					})
 				);
 			});
