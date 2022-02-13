@@ -113,6 +113,82 @@ export function unitTest(): void {
 		};
 	}
 
+	/**
+	 * Return type of {@link pathConvertToIdTests}.
+	 */
+	type PathConvertToIdTests = {
+		[K in "contain" | "str" | "empty"]: [string, () => void];
+	};
+
+	/**
+	 * Creates tests for conversion of UUID to ID.
+	 *
+	 * @param param - Destructured parameter
+	 * @returns Tests
+	 */
+	function pathConvertToIdTests<
+		Id extends CoreArgIds,
+		SourceOptions extends CoreArgOptionsPathId | CoreArgOptionsPathOwn | CoreArgOptionsPathExtended,
+		ParentIds extends CoreArgIds = never
+	>({
+		id,
+		parentIds,
+		sourceArgPath,
+		sourceOptions
+	}: {
+		/**
+		 * Source path.
+		 */
+		sourceArgPath: CoreArgPath<Id, SourceOptions, ParentIds>;
+
+		/**
+		 * Source options.
+		 */
+		sourceOptions: SourceOptions;
+	} & BaseParam<Id, ParentIds>): PathConvertToIdTests {
+		let result: CoreArgPath<Id, CoreArgOptionsPathId, ParentIds> = coreArgPathConvert({
+			id,
+			meta: {},
+			parentIds,
+			sourceArgPath,
+			sourceOptions,
+			targetOptions: optionsPathId
+		});
+
+		return {
+			/**
+			 * Test to contain ID.
+			 */
+			contain: [
+				"should contain ID",
+				function (): void {
+					ok(hasOwnProperty(result, "id"));
+				}
+			],
+
+			/**
+			 * Test for ID to be string.
+			 */
+			empty: [
+				"ID should be string",
+				function (): void {
+					ok(typeof result.id === "string");
+				}
+			],
+
+			/**
+			 * Test for ID not to be empty.
+			 */
+			str: [
+				"ID should not be empty",
+				function (): void {
+					// Fails on no property, if not, works as a predicate for chained comparison; Ambiguity is OK because in the end flow does not really matter, since Mocha will fail, if anything
+					ok(hasOwnProperty(result, "id") && result.id.length > 0);
+				}
+			]
+		};
+	}
+
 	const defaultSystemNameSpace: UrlPath = "system";
 	const defaultUserNameSpace: UrlPath = "user";
 	const defaultOrigin: UrlOrigin = new URL("https://example.com/dt");
@@ -152,6 +228,40 @@ export function unitTest(): void {
 		idSet: new Set(),
 		symbolSet: new Set([coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]])
 	});
+
+	// Tests
+	const ownToIdTests: PathConvertToIdTests = pathConvertToIdTests({
+		...cellBaseParam,
+		sourceArgPath: { cellUuid: defaultCellUuid },
+		sourceOptions: optionsPathOwn
+	});
+	const extendedToIdTests: {
+		/**
+		 * Cell.
+		 */
+		cell: PathConvertToIdTests;
+
+		/**
+		 * Shard.
+		 */
+		shard: PathConvertToIdTests;
+	} = {
+		cell: pathConvertToIdTests({
+			...cellBaseParam,
+			sourceArgPath: {
+				cellUuid: defaultCellUuid,
+				gridUuid: defaultGridUuid,
+				shardUuid: defaultShardUuid
+			},
+			sourceOptions: optionsPathExtended
+		}),
+
+		shard: pathConvertToIdTests({
+			...shardBaseParam,
+			sourceArgPath: { shardUuid: defaultShardUuid },
+			sourceOptions: optionsPathExtended
+		})
+	};
 
 	// Tests will run for cell because it has both children and parents; when extended path is involved, test should be run for shard as well, as it has no parents; when ID to ID conversion is made, test should be run for shards as well, as it is very simple
 	describe("coreArgPathConvert()", function () {
@@ -359,30 +469,9 @@ export function unitTest(): void {
 
 		describe("own to ID", function () {
 			describe("cell", function () {
-				let result: CoreArgPath<CoreArgIds.Cell, CoreArgOptionsPathId, CoreArgIds.Shard | CoreArgIds.Grid>;
-
-				before(function () {
-					result = coreArgPathConvert({
-						...cellBaseParam,
-						meta: {},
-						sourceArgPath: { cellUuid: defaultCellUuid },
-						sourceOptions: optionsPathOwn,
-						targetOptions: optionsPathId
-					});
-				});
-
-				it("should contain ID", function () {
-					ok(hasOwnProperty(result, "id"));
-				});
-
-				it("ID should be string", function () {
-					ok(typeof result.id === "string");
-				});
-
-				it("ID should not be empty", function () {
-					// Fails on no property, if not, works as a predicate for chained comparison; Ambiguity is OK because in the end flow does not really matter, since Mocha will fail, if anything
-					ok(hasOwnProperty(result, "id") && result.id.length > 0);
-				});
+				it(...ownToIdTests.contain);
+				it(...ownToIdTests.str);
+				it(...ownToIdTests.empty);
 			});
 		});
 
@@ -430,6 +519,80 @@ export function unitTest(): void {
 						},
 						sourceArgPath: { shardUuid: defaultShardUuid },
 						sourceOptions: optionsPathOwn,
+						targetOptions: optionsPathExtended
+					})
+				);
+			});
+		});
+
+		describe("extended to ID", function () {
+			describe("cell", function () {
+				it(...extendedToIdTests.cell.contain);
+				it(...extendedToIdTests.cell.str);
+				it(...extendedToIdTests.cell.empty);
+			});
+
+			describe("shard", function () {
+				it(...extendedToIdTests.shard.contain);
+				it(...extendedToIdTests.shard.str);
+				it(...extendedToIdTests.shard.empty);
+			});
+		});
+
+		describe("extended to own", function () {
+			describe("cell", function () {
+				it(
+					"should convert path",
+					pathConvertTest({
+						...cellBaseParam,
+						expected: { cellUuid: defaultCellUuid },
+						meta: {},
+						sourceArgPath: { cellUuid: defaultCellUuid, gridUuid: defaultGridUuid, shardUuid: defaultShardUuid },
+						sourceOptions: optionsPathExtended,
+						targetOptions: optionsPathOwn
+					})
+				);
+			});
+
+			describe("shard", function () {
+				it(
+					"should convert path",
+					pathConvertTest({
+						...shardBaseParam,
+						expected: { shardUuid: defaultShardUuid },
+						meta: {},
+						sourceArgPath: { shardUuid: defaultShardUuid },
+						sourceOptions: optionsPathExtended,
+						targetOptions: optionsPathOwn
+					})
+				);
+			});
+		});
+
+		describe("extended to extended", function () {
+			describe("cell", function () {
+				it(
+					"should convert path",
+					pathConvertTest({
+						...cellBaseParam,
+						expected: { cellUuid: defaultCellUuid, gridUuid: defaultGridUuid, shardUuid: defaultShardUuid },
+						meta: {},
+						sourceArgPath: { cellUuid: defaultCellUuid, gridUuid: defaultGridUuid, shardUuid: defaultShardUuid },
+						sourceOptions: optionsPathExtended,
+						targetOptions: optionsPathExtended
+					})
+				);
+			});
+
+			describe("shard", function () {
+				it(
+					"should convert path",
+					pathConvertTest({
+						...shardBaseParam,
+						expected: { shardUuid: defaultShardUuid },
+						meta: {},
+						sourceArgPath: { shardUuid: defaultShardUuid },
+						sourceOptions: optionsPathExtended,
 						targetOptions: optionsPathExtended
 					})
 				);
