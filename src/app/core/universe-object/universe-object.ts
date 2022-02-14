@@ -7,59 +7,201 @@
  * @file Outlines how universe object should like
  */
 
-import { ComputedClassExtract } from "../../common/computed-class";
-import { Uuid } from "../../common/uuid";
+import {
+	ComputedClassClassConstraint,
+	ComputedClassClassImplements,
+	ComputedClassData,
+	ComputedClassDataExtends,
+	ComputedClassExtractClass,
+	ComputedClassExtractInstance,
+	ComputedClassInfo,
+	ComputedClassInstanceConstraint,
+	ComputedClassMembers,
+	ComputedClassWords
+} from "../../common/computed-class";
+import { urlPathSeparator } from "../../common/defaults";
+import { AbstractConstructor, MaybeDefined, StaticImplements } from "../../common/utility-types";
+import { Uuid, getDefaultUuid } from "../../common/uuid";
 import {
 	CoreArg,
 	CoreArgComplexOptionPathIds,
 	CoreArgIds,
 	CoreArgObjectWords,
 	CoreArgOptionIds,
-	CoreArgOptionsPathExtended,
+	CoreArgOptionsPathExtendedUnion,
+	CoreArgOptionsPathOwn,
+	CoreArgPath,
 	CoreArgPathUuidPropertyName,
 	coreArgComplexOptionSymbolIndex,
 	coreArgIdToPathUuidPropertyName,
 	coreArgObjectWords
 } from "../arg";
-import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectContainerFactory } from ".";
+import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveInstance, CoreBaseNonRecursiveStatic } from "../base";
+import {
+	CoreUniverseObjectArgsOptionsUnion,
+	CoreUniverseObjectContainer,
+	CoreUniverseObjectContainerClass,
+	CoreUniverseObjectContainerClassConstraintDataExtends,
+	CoreUniverseObjectContainerFactory
+} from ".";
 
-// #region Members
 /**
- * Type to be used to declare member vars.
+ * Class constraint data.
+ *
+ * @remarks
+ * As extending is conditional, {@link CoreUniverseObjectContainerClassConstraintDataExtends} is used granularly. Otherwise, inference would not work appropriately. What this class was supposed to be populating, it's subclasses should instead.
  */
-type InjectMembers<
-	I extends CoreArgIds,
-	O extends CoreUniverseObjectArgsOptionsUnion,
-	ParentIds extends CoreArgIds = never
-> = {
-	[K in `terminate${CoreArgObjectWords[I]["singularCapitalizedWord"]}`]: (
-		this: ConcreteInstance<I, O, ParentIds>
-	) => void;
-};
-// #endregion
+type CoreUniverseObjectClassConstraintData<
+	Id extends CoreArgIds,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	ParentIds extends CoreArgIds = never,
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds | Id> = never,
+	ChildId extends CoreArgIds = never
+> = ComputedClassData<{
+	/**
+	 * Instance, containing only injected concrete methods.
+	 */
+	[ComputedClassWords.Instance]: ComputedClassMembers & {
+		/**
+		 * Base.
+		 */
+		[ComputedClassWords.Base]: [ChildId] extends [never]
+			? CoreBaseNonRecursiveInstance
+			: CoreUniverseObjectContainerClassConstraintDataExtends<
+					ChildUniverseObject,
+					ChildId,
+					Options,
+					ParentIds | Id
+			  >[ComputedClassWords.Instance][ComputedClassWords.Base];
 
-// #region Classes
+		/**
+		 * Externally generated.
+		 */
+		[ComputedClassWords.Inject]: {
+			[K in `terminate${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: () => void;
+		} & CoreArg<Id, Options, ParentIds>;
+
+		/**
+		 * Base.
+		 */
+		[ComputedClassWords.Implement]: [ChildId] extends [never]
+			? object
+			: CoreUniverseObjectContainerClassConstraintDataExtends<
+					ChildUniverseObject,
+					ChildId,
+					Options,
+					ParentIds | Id
+			  >[ComputedClassWords.Instance][ComputedClassWords.Populate];
+	};
+
+	/**
+	 * Class, containing only inherited abstract methods.
+	 */
+	[ComputedClassWords.Static]: ComputedClassMembers & {
+		/**
+		 * Base.
+		 */
+		[ComputedClassWords.Base]: [ChildId] extends [never]
+			? CoreBaseNonRecursiveStatic
+			: CoreUniverseObjectContainerClassConstraintDataExtends<
+					ChildUniverseObject,
+					ChildId,
+					Options,
+					ParentIds | Id
+			  >[ComputedClassWords.Static][ComputedClassWords.Base];
+
+		/**
+		 * Externally generated.
+		 */
+		[ComputedClassWords.Inject]: [ChildId] extends [never]
+			? object
+			: {
+					[K in `getDefault${CoreArgObjectWords[ChildId]["singularCapitalizedWord"]}Uuid`]: (
+						path: CoreArgPath<Id, CoreArgOptionsPathOwn, ParentIds>
+					) => Uuid;
+			  };
+
+		/**
+		 * Base.
+		 */
+		[ComputedClassWords.Implement]: [ChildId] extends [never]
+			? object
+			: CoreUniverseObjectContainerClassConstraintDataExtends<
+					ChildUniverseObject,
+					ChildId,
+					Options,
+					ParentIds | Id
+			  >[ComputedClassWords.Static][ComputedClassWords.Populate];
+	};
+}>;
+
 /**
- * Use as `this`.
+ * Class constraint data to be used by extending computed classes.
  */
-export type ConcreteInstance<
-	I extends CoreArgIds,
-	O extends CoreUniverseObjectArgsOptionsUnion,
-	ParentIds extends CoreArgIds = never
-> = CoreArg<I, O, ParentIds> & InjectMembers<I, O, ParentIds>;
+export type CoreUniverseObjectClassConstraintDataExtends<
+	Id extends CoreArgIds,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	ParentIds extends CoreArgIds = never,
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds | Id> = never,
+	ChildId extends CoreArgIds = never
+> = ComputedClassDataExtends<
+	CoreUniverseObjectClassConstraintData<Id, Options, ParentIds, ChildUniverseObject, ChildId>
+>;
 
 /**
  * Universe object instance minimal constraint.
  */
 export type CoreUniverseObject<
-	I extends CoreArgIds,
-	O extends CoreUniverseObjectArgsOptionsUnion,
-	ParentIds extends CoreArgIds = never
-> = ConcreteInstance<I, O, ParentIds>;
-// #endregion
+	Id extends CoreArgIds,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	ParentIds extends CoreArgIds = never,
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds | Id> = never,
+	ChildId extends CoreArgIds = never
+> = ComputedClassInstanceConstraint<
+	CoreUniverseObjectClassConstraintData<Id, Options, ParentIds, ChildUniverseObject, ChildId>
+>;
+
+/**
+ * Universe object class minimal constraint.
+ *
+ * @remarks
+ * Inherits non recursive core base from constructor returning {@link CoreUniverseObject}.
+ *
+ * Constructor arguments are empty, so that `extends` on this will work.
+ */
+export type CoreUniverseObjectClass<
+	Id extends CoreArgIds,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	ParentIds extends CoreArgIds = never,
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds | Id> = never,
+	ChildId extends CoreArgIds = never
+> = ComputedClassClassConstraint<
+	CoreUniverseObjectClassConstraintData<Id, Options, ParentIds, ChildUniverseObject, ChildId>
+>;
+
+/**
+ * Abstract part ot the class from {@link CoreUniverseObjectFactory}.
+ *
+ * @typeParam ChildUniverseObject - Universe object to contain
+ * @typeParam ChildId - ID of the universe object
+ * @typeParam Options - Options for the universe object
+ * @typeParam ParentIds - Parent IDs of the universe object
+ */
+export type CoreUniverseObjectClassImplements<
+	Id extends CoreArgIds,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	ParentIds extends CoreArgIds = never,
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds | Id> = never,
+	ChildId extends CoreArgIds = never
+> = ComputedClassClassImplements<
+	CoreUniverseObjectClassConstraintData<Id, Options, ParentIds, ChildUniverseObject, ChildId>
+>;
 
 /**
  * Factory for core universe object class.
+ *
+ * @remarks
+ * Use first constructor overload only.
  *
  * @param param - Destructured parameter
  * @returns - Core universe object class
@@ -67,20 +209,18 @@ export type CoreUniverseObject<
 // Force type inference to extract class type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreUniverseObjectFactory<
-	// "{}" is needed exactly, to preserve instance type and to be able to extend
-	// eslint-disable-next-line @typescript-eslint/ban-types
-	BaseClass extends new (...args: any[]) => {},
-	ParentId extends CoreArgIds,
+	BaseClass extends CoreBaseClassNonRecursive,
+	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentId | GrandparentIds> = never,
-	ChildId extends CoreArgIds = never,
-	GrandparentIds extends CoreArgIds = never
+	ParentIds extends CoreArgIds = never,
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds | Id> = never,
+	ChildId extends CoreArgIds = never
 >({
 	Base,
-	parentId,
+	id,
 	options,
 	childId,
-	grandparentIds
+	parentIds
 }: {
 	/**
 	 * Base class.
@@ -90,30 +230,111 @@ export function CoreUniverseObjectFactory<
 	/**
 	 * Universe object ID.
 	 */
-	parentId: ParentId;
+	id: Id;
 
 	/**
 	 * Arg index.
 	 *
 	 * Set must contain all elements of type `GrandparentIds`.
 	 */
-	grandparentIds: Set<GrandparentIds>;
+	parentIds: Set<ParentIds>;
 
 	/**
 	 * Args options.
 	 */
 	options: Options;
+} & MaybeDefined<
+	[ChildId] extends [never] ? false : true,
+	{
+		/**
+		 * Whether this is a container or not.
+		 */
+		childId: ChildId;
+	}
+>) {
+	/**
+	 * Is a container or not.
+	 *
+	 * To be used as a type discriminant for container.
+	 */
+	type IsContainer = [ChildId] extends [never] ? false : true;
 
 	/**
-	 * Whether this is a container or not.
+	 * Base class type in case of container.
 	 */
-	childId: ChildId extends never ? null : ChildId;
-}) {
+	type ContainerBase = Exclude<typeof childData, null>["ContainerBase"];
+
+	/**
+	 * Type of the container class, no matter if it's a container or not.
+	 */
+	type ContainerInstance = CoreUniverseObjectContainer<ChildUniverseObject, ChildId, Options, ParentIds | Id>;
+
+	/**
+	 * Base constructor parameters to extend.
+	 */
+	type BaseConstructorParams = ConstructorParameters<[ChildId] extends [never] ? BaseClass : ContainerBase>;
+
+	/**
+	 * Parameters for class constructor.
+	 */
+	type ConstructorParams = [CoreArg<Id, Options, ParentIds>, ...BaseConstructorParams];
+
+	/**
+	 * Actual class info.
+	 */
+	type ActualClassInfo = ComputedClassInfo<
+		CoreUniverseObjectClassConstraintData<Id, Options, ParentIds, ChildUniverseObject, ChildId>,
+		ComputedClassData<{
+			/**
+			 * Instance.
+			 */
+			[ComputedClassWords.Instance]: ComputedClassMembers & {
+				/**
+				 * Base.
+				 */
+				[ComputedClassWords.Base]: IsContainer extends true ? InstanceType<ContainerBase> : InstanceType<BaseClass>;
+
+				/**
+				 * Inject.
+				 */
+				[ComputedClassWords.Inject]: ComputedClassExtractInstance<typeof members, [MemberGenerateParameter]>;
+
+				/**
+				 * Populate.
+				 */
+				[ComputedClassWords.Populate]: UniverseObject;
+			};
+
+			/**
+			 * Static.
+			 */
+			[ComputedClassWords.Static]: ComputedClassMembers & {
+				/**
+				 * Base.
+				 */
+				[ComputedClassWords.Base]: IsContainer extends true ? ContainerBase : BaseClass;
+
+				/**
+				 * Inject.
+				 */
+				[ComputedClassWords.Inject]: IsContainer extends true
+					? ComputedClassExtractClass<Pick<Exclude<typeof childData, null>, "staticAssign">>
+					: object;
+
+				/**
+				 * Populate.
+				 */
+				[ComputedClassWords.Populate]: typeof UniverseObject;
+			};
+		}>,
+		ConstructorParams
+	>;
+
 	/**
 	 * Part of members object responsible for extended path.
 	 */
 	type ExtendedPathMembers = {
-		[K in Options extends CoreArgOptionsPathExtended ? GrandparentIds : never as `universeObjectUuidExtended${K}`]: {
+		[K in Options extends CoreArgOptionsPathExtendedUnion ? ParentIds : never as `universeObjectUuidExtended${K}`]: {
 			/**
 			 * Extended path UUID property name.
 			 */
@@ -127,125 +348,138 @@ export function CoreUniverseObjectFactory<
 	};
 
 	/**
-	 * Is a container or not.
-	 */
-	type IsContainer = ChildId extends never ? false : true;
-
-	/**
-	 * Type of the container class, no matter if it's a container or not.
-	 */
-	type ContainerClass = Exclude<typeof containerBase, null>;
-
-	/**
 	 * Instance type of universe object.
 	 */
-	type ThisInstance = ConcreteInstance<ParentId, Options, GrandparentIds>;
+	type ThisInstanceConcrete = ActualClassInfo[ComputedClassWords.ThisInstanceConcrete];
 
 	/**
-	 * This type, if container.
+	 * Type of `this` in static methods.
+	 *
+	 * @remarks
+	 * Contains information about base.
 	 */
-	type ContainerInstance = InstanceType<ContainerClass>;
+	type ThisStaticConcrete = ActualClassInfo[ComputedClassWords.ThisStaticConcrete];
 
 	/**
 	 * Parameter for member generation function.
 	 */
-	type MemberGenerateParameter = CoreArg<ParentId, Options, GrandparentIds>;
-
-	/**
-	 * Parameters for class constructor.
-	 */
-	type ConstructorParameters = [MemberGenerateParameter, ...any[]];
+	type MemberGenerateParameter = ConstructorParams[0];
 
 	/**
 	 * Return class type.
 	 */
-	type ReturnClass = ComputedClassExtract<typeof members, ConstructorParameters> extends ConcreteInstance<
-		ParentId,
-		Options,
-		GrandparentIds
-	>
-		? (IsContainer extends true ? ContainerClass : typeof ParentUniverseObject) &
-				(abstract new (...args: any[]) => ComputedClassExtract<typeof members, ConstructorParameters>)
-		: never;
+	// Condition to be able to access static portion of members, if it was dependent on generic parameters
+	type ReturnClass = ActualClassInfo[ComputedClassWords.ClassReturn];
 
-	// Inferring for final type
-	const parentWords: {
+	/**
+	 * Information needed for child.
+	 *
+	 * To be used as a value discriminant for container.
+	 */
+	// Need to extract type
+	// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/typedef
+	const childData = (() => {
+		if (typeof childId === "undefined") return null;
+
+		// Words to be used for child, if not child, then null
+		const childWords: {
+			/**
+			 * The plural lowercase word for the universe object.
+			 */
+			pluralLowercaseWord: CoreArgObjectWords[ChildId]["pluralLowercaseWord"];
+
+			/**
+			 * The singular capitalized word for the universe object.
+			 */
+			singularCapitalizedWord: CoreArgObjectWords[ChildId]["singularCapitalizedWord"];
+		} = coreArgObjectWords[childId];
+		/* eslint-disable @typescript-eslint/typedef */
+		const nameTerminateChildUniverseObject = `terminate${childWords.singularCapitalizedWord}` as const; // Name of remove universe object function, if child is present, otherwise null
+		const nameStaticGetDefaultChildUniverseObjectUuid = `getDefault${childWords.singularCapitalizedWord}Uuid` as const; // Name of universe object UUID
+		const nameChildUniverseObjects = `${childWords.pluralLowercaseWord}` as const; // Name of universe objects member
+		/* eslint-enable @typescript-eslint/typedef */
+
 		/**
-		 * The plural lowercase word for the universe object.
+		 * Union removes container base type information, so new base was split into two, including this.
 		 */
-		pluralLowercaseWord: CoreArgObjectWords[ParentId]["pluralLowercaseWord"];
+		// Need to extract type
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const ContainerBase = CoreUniverseObjectContainerFactory<
+			BaseClass,
+			ChildUniverseObject,
+			ChildId,
+			Options,
+			ParentIds | Id
+		>({
+			Base,
+			// Overriding conditional type - removing "null"
+			id: childId,
+			options
+		});
 
-		/**
-		 * The singular capitalized word for the universe object.
-		 */
-		singularCapitalizedWord: CoreArgObjectWords[ParentId]["singularCapitalizedWord"];
-	} = coreArgObjectWords[parentId];
+		return {
+			// Base class in case of container
+			ContainerBase,
 
-	// Inferring for final type
-	const childWords: {
-		/**
-		 * The plural lowercase word for the universe object.
-		 */
-		pluralLowercaseWord: CoreArgObjectWords[ChildId]["pluralLowercaseWord"];
+			// Static optional method
+			staticAssign: {
+				getDefaultUniverseObjectUuid: {
+					name: nameStaticGetDefaultChildUniverseObjectUuid,
 
-		/**
-		 * The singular capitalized word for the universe object.
-		 */
-		singularCapitalizedWord: CoreArgObjectWords[ChildId]["singularCapitalizedWord"];
-	} = coreArgObjectWords[childId];
-
-	/**
-	 * Name of remove universe object function.
-	 */
-	// Need to extract type
-	// eslint-disable-next-line @typescript-eslint/typedef
-	const nameParentTerminateUniverseObject = `terminate${parentWords.singularCapitalizedWord}` as const;
-
-	/**
-	 * Name of universe object UUID.
-	 */
-	// Need to extract type
-	// eslint-disable-next-line @typescript-eslint/typedef
-	const nameParentUniverseObjectUuid = coreArgIdToPathUuidPropertyName({ id: parentId });
-
-	/**
-	 * Name of universe objects member.
-	 */
-	// Need to extract type
-	// eslint-disable-next-line @typescript-eslint/typedef
-	const nameParentUniverseObjects = `${parentWords.pluralLowercaseWord}` as const;
-
-	/**
-	 * Name of remove universe object function.
-	 */
-	// Need to extract type
-	// eslint-disable-next-line @typescript-eslint/typedef
-	const nameChildTerminateUniverseObject = `terminate${childWords.singularCapitalizedWord}` as const;
-
-	/**
-	 * Union removes container base type information, so new base was split into two, including this.
-	 */
-	// Need to extract type
-	// eslint-disable-next-line @typescript-eslint/typedef
-	const containerBase =
-		childId === null
-			? null
-			: CoreUniverseObjectContainerFactory<BaseClass, ChildUniverseObject, ChildId, Options, ParentId | GrandparentIds>(
-					{
-						Base,
-						options,
-						// Overriding conditional type - removing "null"
-						universeObjectId: childId as ChildId
+					/**
+					 * Get default universe object UUID.
+					 *
+					 * @param this - Type of class
+					 * @param path - Universe object own path
+					 * @returns Default universe object UUID
+					 */
+					value(this: ThisStaticConcrete, path: CoreArgPath<Id, CoreArgOptionsPathOwn, ParentIds>): Uuid {
+						return getDefaultUuid({
+							path: `${universeObjectsUuidPath}${urlPathSeparator}${path[nameUniverseObjectUuid]}`
+						});
 					}
-			  );
+				}
+			},
+
+			/**
+			 * Terminates children of universe object.
+			 *
+			 * @param this - Core universe object instance
+			 */
+			terminateUniverseObject(this: ThisInstanceConcrete): void {
+				(this as ContainerInstance)[nameChildUniverseObjects].forEach(universeObject => {
+					universeObject[nameTerminateChildUniverseObject]();
+				});
+			}
+		};
+	})();
+
+	// Inferring for final type
+	const words: {
+		/**
+		 * The plural lowercase word for the universe object.
+		 */
+		pluralLowercaseWord: CoreArgObjectWords[Id]["pluralLowercaseWord"];
+
+		/**
+		 * The singular capitalized word for the universe object.
+		 */
+		singularCapitalizedWord: CoreArgObjectWords[Id]["singularCapitalizedWord"];
+	} = coreArgObjectWords[id];
+
+	/* eslint-disable @typescript-eslint/typedef */
+	const nameTerminateUniverseObject = `terminate${words.singularCapitalizedWord}` as const; // Name of remove universe object function
+	const nameUniverseObjectUuid = coreArgIdToPathUuidPropertyName({ id }); // Name of universe object UUID
+	const universeObjectsUuidPath = `pluralLowercaseWord` as const; // Name of universe object UUID
+	/* eslint-enable @typescript-eslint/typedef */
 
 	let extendedPathMembers: ExtendedPathMembers =
 		options.path === coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
-			? [...grandparentIds].reduce((result, id) => {
-					let uuidPropertyName: CoreArgPathUuidPropertyName<typeof id> = coreArgIdToPathUuidPropertyName({ id });
+			? [...parentIds].reduce((result, i) => {
+					let uuidPropertyName: CoreArgPathUuidPropertyName<typeof i> = coreArgIdToPathUuidPropertyName({ id: i });
 					return {
 						...result,
-						[`universeObjectUuidExtended${id}`]: {
+						[`universeObjectUuidExtended${i}`]: {
 							name: uuidPropertyName,
 
 							/**
@@ -268,30 +502,25 @@ export function CoreUniverseObjectFactory<
 	// Infer for type checks
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const members = {
-		// Dummy
-		assign: {},
-
 		generate: {
 			terminateUniverseObject: {
-				name: nameParentTerminateUniverseObject,
+				name: nameTerminateUniverseObject,
 				/**
 				 * Terminate universe object function.
 				 *
 				 * @returns Terminate universe object function
 				 */
-				value: (): ((this: ThisInstance) => void) =>
-					childId === null
-						? function (this: ThisInstance): void {
+				value: (): ((this: ThisInstanceConcrete) => void) =>
+					childData === null
+						? function (this: ThisInstanceConcrete): void {
 								// Nothing, debug info can be added later
 						  }
-						: function (this: ThisInstance): void {
-								(this as ContainerInstance)[nameParentUniverseObjects].forEach(universeObject => {
-									universeObject[nameChildTerminateUniverseObject]();
-								});
-						  }
+						: // The method is conditional
+						  // eslint-disable-next-line @typescript-eslint/unbound-method
+						  childData.terminateUniverseObject
 			},
 			universeObjectUuid: {
-				name: nameParentUniverseObjectUuid,
+				name: nameUniverseObjectUuid,
 				/**
 				 *	Universe object UUID.
 				 *
@@ -299,17 +528,33 @@ export function CoreUniverseObjectFactory<
 				 * @returns UUID of the universe object
 				 */
 				value: (arg: MemberGenerateParameter): Uuid => {
-					return arg[nameParentUniverseObjectUuid];
+					return arg[nameUniverseObjectUuid];
 				}
 			},
 			...extendedPathMembers
+		},
+		staticAssign: {
+			...(childData === null ? {} : childData.staticAssign)
 		}
 	};
 
 	/**
 	 * Overall base class to be used, with potentially lost type information.
+	 *
+	 * Uses `BaseParameters` as we know the final superclass constructor parameters to be that no matter what.
+	 *
+	 * @remarks
+	 * Abstract, as it might extend container, which is abstract.
 	 */
-	const newBase: BaseClass = containerBase === null ? Base : containerBase;
+	const newBase: AbstractConstructor<BaseConstructorParams> =
+		childData === null
+			? Base
+			: (childData.ContainerBase as CoreUniverseObjectContainerClass<
+					ChildUniverseObject,
+					ChildId,
+					Options,
+					ParentIds | Id
+			  >);
 
 	/**
 	 * Actual class for core universe object.
@@ -317,7 +562,10 @@ export function CoreUniverseObjectFactory<
 	 * @remarks
 	 * Impossible to directly extend generic factory with unknown member names.
 	 */
-	abstract class ParentUniverseObject extends newBase {
+	abstract class UniverseObject
+		extends newBase
+		implements StaticImplements<ActualClassInfo[ComputedClassWords.ClassImplements], typeof UniverseObject>
+	{
 		/**
 		 * Public constructor.
 		 *
@@ -325,11 +573,11 @@ export function CoreUniverseObjectFactory<
 		 * @remarks
 		 * When assigning to members, value is cast for extra type safety.
 		 */
-		public constructor(...args: any[]) {
-			const arg: CoreArg<ParentId, Options, GrandparentIds> = (args as ConstructorParameters)[0];
+		public constructor(...args: ConstructorParams) {
+			const [arg, ...baseParams]: ConstructorParams = args;
 
 			// Call super constructor
-			super(args);
+			super(...baseParams);
 
 			// Assign properties
 			Object.values(members.generate).forEach(property => {
@@ -338,7 +586,16 @@ export function CoreUniverseObjectFactory<
 		}
 	}
 
+	// No prototype setting, as `members` does not have `assign`
+	// Set static
+	Object.values(members.staticAssign).forEach(method => {
+		// Casting, since do not overlap, to inject
+		// Unbound methods have to be used
+		// eslint-disable-next-line @typescript-eslint/unbound-method
+		(UniverseObject as unknown as Record<string, unknown>)[method.name] = method.value;
+	});
+
 	// Return
 	// Conditionally checking if class is appropriately extending arg container to make sure injected class type is properly implemented
-	return ParentUniverseObject as ReturnClass;
+	return UniverseObject as ReturnClass;
 }

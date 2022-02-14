@@ -8,27 +8,33 @@
  */
 
 import { Application } from "./application";
+import { CoreArgIds, CoreArgPath } from "./arg";
 import { CoreBaseClass } from "./base";
-import { CellPathExtended, CoreCell, CoreCellClass } from "./cell";
+import { CoreCellArgParentIds, CoreCellClass } from "./cell";
 import { CommsEntity, CoreEntityClass, EntityPathExtended } from "./entity";
 import { CommsGrid, CoreGridClass, GridPath } from "./grid";
 import { CommsShard, CommsShardArgs, CoreShardClass, ShardPath } from "./shard";
+import { CoreUniverseObjectArgsOptionsUnion } from "./universe-object";
 
 /**
  * Core universe class.
  *
  * Must remain statically typed, without use of mixins, for appropriate type recursions.
  */
-export abstract class CoreUniverse {
+export abstract class CoreUniverse<
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	CellClass extends CoreCellClass<Options> = CoreCellClass<Options>,
+	EntityClass extends CoreEntityClass<Options> = CoreEntityClass<Options>
+> {
 	/**
 	 * Shard prototype.
 	 */
-	public abstract readonly Cell: CoreCellClass;
+	public abstract readonly Cell: CellClass;
 
 	/**
 	 * Shard prototype.
 	 */
-	public abstract readonly Entity: CoreEntityClass;
+	public abstract readonly Entity: EntityClass;
 
 	/**
 	 * Shard prototype.
@@ -48,7 +54,7 @@ export abstract class CoreUniverse {
 	/**
 	 * Base object class.
 	 */
-	protected abstract readonly Base: CoreBaseClass;
+	protected abstract readonly Base: CoreBaseClass<Options>;
 
 	/**
 	 * Constructs the universe core.
@@ -76,7 +82,7 @@ export abstract class CoreUniverse {
 	/**
 	 * Gets the [[CommsCell]].
 	 */
-	public abstract getCell(path: CellPathExtended): CoreCell;
+	public abstract getCell(path: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>): InstanceType<CellClass>;
 
 	/**
 	 * Gets the [[CommsEntity]].

@@ -17,6 +17,10 @@ export * from "./universe-object";
  *
  * The universe object classes are to be abstract at core level, and concrete in client/server, so that client/server has more freedom in operating them. E.g. entity can be abstract class in server, with multiple concrete classes extending it, and client using a concrete entity class for all kinds of entities.
  *
+ * The member type inference is done for verification that exported types match actual output of the class factory function, as such no verification is done for the static class members, as no class type is exported.
+ *
+ * Universe object factory needs to work with special logic for maintaining base constructor information, while container does not, as it can extend base class directly.
+ *
  * @remarks
  * This is for documentation purposes only.
  */

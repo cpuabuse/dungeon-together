@@ -7,8 +7,16 @@
  * @file Cell
  */
 
-import { entityUuidUrlPath, urlPathSeparator } from "../common/defaults";
-import { Uuid, getDefaultUuid } from "../common/uuid";
+import {
+	ComputedClassClassConstraint,
+	ComputedClassData,
+	ComputedClassInfo,
+	ComputedClassInstanceConstraint,
+	ComputedClassMembers,
+	ComputedClassWords
+} from "../common/computed-class";
+import { AbstractConstructor, StaticImplements, StaticMembers } from "../common/utility-types";
+import { Uuid } from "../common/uuid";
 import { Vector } from "../common/vector";
 import {
 	CoreArg,
@@ -34,14 +42,14 @@ import {
 	CoreEntityArgParentIds,
 	CoreEntityArgs,
 	EntityPathExtended,
+	EntityPathOwn,
 	commsEntityRawToArgs,
 	coreEntityArgsConvert
 } from "./entity";
 import { GridPath } from "./grid";
 import {
-	CoreUniverseObject,
 	CoreUniverseObjectArgsOptionsUnion,
-	CoreUniverseObjectContainerImplements,
+	CoreUniverseObjectClassConstraintDataExtends,
 	CoreUniverseObjectFactory,
 	// Type used only for documentation
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -77,27 +85,17 @@ type CommCellRawHelper<A, B> = (A & B) | A;
 export type CommsCellRaw = CommCellRawHelper<
 	Omit<CommsCellArgs, "entities" | "worlds" | keyof GridPath> & {
 		/**
-		 *
+		 * Entities.
 		 */
 		entities: Array<CommsEntityRaw>;
 
 		/**
-		 *
+		 * Worlds.
 		 */
 		worlds?: Array<Uuid>;
 	},
 	Vector
 >;
-
-/**
- * Typeof class for cells.
- */
-export type CoreCellClass = {
-	/**
-	 *
-	 */
-	new (...args: any[]): CommsCell;
-};
 
 /**
  * Cell implementable.
@@ -130,24 +128,18 @@ export interface CommsCell extends CommsCellArgs {
 }
 
 /**
- * Core cell.
- */
-export type CoreCell = CommsCell & InstanceType<ReturnType<typeof CoreCellClassFactory>>;
-
-/**
  * Converts [[CommsCellRaw]] to [[CommsCellArgs]].
  *
- * @param rawSource
- * @param path
- * @param rawSource
- * @param path
+ * @param rawSource - Raw source
+ * @param path - Path
+ * @returns Result of conversion
  */
 export function commsCellRawToArgs(rawSource: CommsCellRaw, path: CellPathExtended): CommsCellArgs {
 	return {
 		...path,
 		cellUuid: rawSource.cellUuid,
 		entities: new Map(
-			rawSource.entities.map(function (entity) {
+			rawSource.entities.map(entity => {
 				return [
 					entity.entityUuid,
 					commsEntityRawToArgs(entity, {
@@ -163,49 +155,12 @@ export function commsCellRawToArgs(rawSource: CommsCellRaw, path: CellPathExtend
 		z: rawSource.z
 	};
 }
-
-/**
- *
- */
-const coreCellArgsIndex: [CoreArgIds.Cell, CoreArgIds.Grid, CoreArgIds.Shard] = [
-	CoreArgIds.Cell,
-	CoreArgIds.Grid,
-	CoreArgIds.Shard
-];
-
-/**
- * Index type for core cell args.
- */
-type CoreCellArgsIndex = typeof coreCellArgsIndex;
-
-/**
- * Cell own path.
- */
-export type CellPathOwn = CoreArgPath<CoreArgIds.Cell, CoreArgOptionsPathOwn, CoreCellArgParentIds>;
-
-/**
- * Way to get to cell.
- */
-export type CellPathExtended = CoreArgPath<CoreArgIds.Cell, CoreArgOptionsPathExtended, CoreCellArgParentIds>;
 // #endregion
 
-// #region Core cell arg
 /**
  * IDs of parents of {@link CoreCellArg}.
  */
 export type CoreCellArgParentIds = typeof coreCellArgParentIds[number];
-
-/**
- * Tuple with core cell arg parent IDS.
- */
-// Infer type from `as const` assertion
-// eslint-disable-next-line @typescript-eslint/typedef
-const coreCellArgParentIds = [CoreArgIds.Shard, CoreArgIds.Grid, CoreArgIds.Entity] as const;
-
-/**
- * Unique set with parent ID's for core cell arg.
- */
-export const coreCellArgParentIdSet: Set<CoreCellArgParentIds> = new Set(coreCellArgParentIds);
 
 /**
  * Core cell args.
@@ -220,7 +175,84 @@ export type CoreCellArg<O extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Cell
 		 */
 		worlds: O[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
 	};
-// #endregion
+
+/**
+ * Cell own path.
+ */
+export type CellPathOwn = CoreArgPath<CoreArgIds.Cell, CoreArgOptionsPathOwn, CoreCellArgParentIds>;
+
+/**
+ * Way to get to cell.
+ */
+export type CellPathExtended = CoreArgPath<CoreArgIds.Cell, CoreArgOptionsPathExtended, CoreCellArgParentIds>;
+
+/**
+ * Class data for core cell.
+ */
+type CoreCellClassConstraintData<
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	Entity extends CoreEntity<Options>
+> = CoreUniverseObjectClassConstraintDataExtends<
+	CoreArgIds.Cell,
+	Options,
+	CoreCellArgParentIds,
+	Entity,
+	CoreArgIds.Entity
+> &
+	ComputedClassData<{
+		/**
+		 * Instance.
+		 */
+		[ComputedClassWords.Instance]: ComputedClassMembers & {
+			/**
+			 * Populate.
+			 */
+			[ComputedClassWords.Populate]: {
+				/**
+				 * Attaches entity.
+				 */
+				attachEntity(entity: Entity): void;
+
+				/**
+				 * Detaches entity.
+				 */
+				detachEntity({ entityUuid }: EntityPathOwn): boolean;
+			};
+		};
+
+		/**
+		 * Static.
+		 */
+		[ComputedClassWords.Static]: ComputedClassMembers;
+	}>;
+
+/**
+ * Core cell.
+ */
+export type CoreCell<
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	Entity extends CoreEntity<Options> = CoreEntity<Options>
+> = ComputedClassInstanceConstraint<CoreCellClassConstraintData<Options, Entity>>;
+
+/**
+ * Core cell class.
+ */
+export type CoreCellClass<
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	Entity extends CoreEntity<Options> = CoreEntity<Options>
+> = ComputedClassClassConstraint<CoreCellClassConstraintData<Options, Entity>>;
+
+/**
+ * Tuple with core cell arg parent IDS.
+ */
+// Infer type from `as const` assertion
+// eslint-disable-next-line @typescript-eslint/typedef
+const coreCellArgParentIds = [CoreArgIds.Shard, CoreArgIds.Grid] as const;
+
+/**
+ * Unique set with parent ID's for core cell arg.
+ */
+export const coreCellArgParentIdSet: Set<CoreCellArgParentIds> = new Set(coreCellArgParentIds);
 
 /**
  * Factory for core cell.
@@ -234,7 +266,7 @@ export type CoreCellArg<O extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Cell
 export function CoreCellClassFactory<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Entity extends CoreUniverseObject<CoreArgIds.Entity, Options, CoreEntityArgParentIds>
+	Entity extends CoreEntity<Options>
 >({
 	Base,
 	options
@@ -249,32 +281,82 @@ export function CoreCellClassFactory<
 	 */
 	options: Options;
 }) {
+	/**
+	 * Base constructor params.
+	 */
+	type BaseParams = ConstructorParameters<typeof NewBase>;
+
+	/**
+	 * Constructor params.
+	 */
+	type ConstructorParams = BaseParams;
+
+	/**
+	 * Class info.
+	 */
+	type ActualClassInfo = ComputedClassInfo<
+		CoreCellClassConstraintData<Options, Entity>,
+		ComputedClassData<{
+			/**
+			 * Instance.
+			 */
+			[ComputedClassWords.Instance]: ComputedClassMembers & {
+				/**
+				 * Base.
+				 */
+				[ComputedClassWords.Base]: InstanceType<typeof NewBase>;
+
+				/**
+				 * Populate.
+				 */
+				[ComputedClassWords.Populate]: Cell;
+			};
+
+			/**
+			 * Static.
+			 */
+			[ComputedClassWords.Static]: ComputedClassMembers & {
+				/**
+				 * Base.
+				 */
+				[ComputedClassWords.Base]: StaticMembers<typeof NewBase>;
+
+				/**
+				 * Populate.
+				 */
+				[ComputedClassWords.Populate]: StaticMembers<typeof Cell>;
+			};
+		}>,
+		BaseParams
+	>;
+
+	/**
+	 * New instance type to use as `this`.
+	 */
+	type ThisInstanceConcrete = ActualClassInfo[ComputedClassWords.ThisInstanceConcrete];
+
+	/**
+	 * New class to re-inject.
+	 */
+	// Intersection preserves constructor parameters of core cell, and instance type of base class
+	type ReturnClass = ActualClassInfo[ComputedClassWords.ClassReturn];
+
 	// Infer the new base for type safe return
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const NewBase = CoreUniverseObjectFactory<
 		BaseClass,
 		CoreArgIds.Cell,
 		Options,
+		CoreCellArgParentIds,
 		Entity,
-		CoreArgIds.Entity,
-		CoreCellArgParentIds
+		CoreArgIds.Entity
 	>({
 		Base,
 		childId: CoreArgIds.Entity,
-		grandparentIds: coreCellArgParentIdSet,
+		id: CoreArgIds.Cell,
 		options,
-		parentId: CoreArgIds.Cell
+		parentIds: coreCellArgParentIdSet
 	});
-
-	/**
-	 * New class to re-inject.
-	 */
-	type NewClass = typeof NewBase & typeof CoreCell;
-
-	/**
-	 * New instance type to use as `this`.
-	 */
-	type NewInstance = InstanceType<NewClass>;
 
 	/**
 	 * Core cell base class.
@@ -283,9 +365,10 @@ export function CoreCellClassFactory<
 	 */
 	// Merging interfaces
 	// eslint-disable-next-line no-redeclare
-	abstract class CoreCell
-		extends (NewBase as abstract new (...args: any[]) => any)
-		implements CoreUniverseObjectContainerImplements<Entity, CoreArgIds.Entity, Options, CoreEntityArgParentIds>
+	abstract class Cell
+		// Casting will remove non-static instance information by intersecting with `any`, while maintaining constructor parameters, that will be included into factory return
+		extends (NewBase as AbstractConstructor<ConstructorParams>)
+		implements StaticImplements<ActualClassInfo[ComputedClassWords.ClassImplements], typeof Cell>
 	{
 		/**
 		 * Default entity.
@@ -293,40 +376,27 @@ export function CoreCellClassFactory<
 		public abstract defaultEntity: Entity;
 
 		/**
-		 * Default entity UUID.
-		 */
-		public abstract defaultEntityUuid: Uuid;
-
-		/**
-		 * Gets default entity UUID.
+		 * Attach {@link CoreEntity} to {@link Cell}.
 		 *
-		 * @param param - Destructure parameter
-		 * @returns Default entity UUID
-		 */
-		public static getDefaultEntityUuid({ cellUuid }: Pick<CellPathExtended, "cellUuid">): Uuid {
-			return getDefaultUuid({
-				path: `${entityUuidUrlPath}${urlPathSeparator}${cellUuid}`
-			});
-		}
-
-		/**
-		 * Attach {@link CoreEntity} to {@link CoreCell}.
+		 * Cell specific method.
 		 *
 		 * @param this - This will match when called with static options
 		 * @param entity - {@link CoreEntity}, anything that resides within a cell
 		 */
-		public attach(this: NewInstance, entity: Entity): void {
+		public attachEntity(this: ThisInstanceConcrete, entity: Entity): void {
 			this.entities.set(entity.entityUuid, entity);
 		}
 
 		/**
-		 * Detach {@link CoreEntity} from {@link CoreCell}.
+		 * Detach {@link CoreEntity} from {@link Cell}.
+		 *
+		 * Cell specific method.
 		 *
 		 * @param this  - This will match when called with static options
 		 * @param param - Destructure parameter
 		 * @returns If deletion was successful or not
 		 */
-		public detach(this: NewInstance, { entityUuid }: CoreEntity): boolean {
+		public detachEntity(this: ThisInstanceConcrete, { entityUuid }: EntityPathOwn): boolean {
 			if (this.entities.has(entityUuid)) {
 				this.entities.delete(entityUuid);
 				return true;
@@ -336,7 +406,7 @@ export function CoreCellClassFactory<
 	}
 
 	// Have to re-inject dynamic bits from generic parents
-	return CoreCell as NewClass;
+	return Cell as ReturnClass;
 }
 
 /**

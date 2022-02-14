@@ -14,8 +14,8 @@ import {
 	CoreArgComplexOptionPathIds,
 	CoreArgIds,
 	CoreArgOptionIds,
-	CoreArgOptionsExtendedUnion,
 	CoreArgOptionsPathExtended,
+	CoreArgOptionsPathExtendedUnion,
 	CoreArgOptionsPathId,
 	CoreArgOptionsPathIdUnion,
 	CoreArgOptionsPathOwn,
@@ -46,7 +46,7 @@ export type CoreArgMeta<
 	ParentIds extends CoreArgIds = never
 > = Record<string, unknown> &
 	(SourceOptions extends CoreArgOptionsPathIdUnion
-		? TargetOptions extends CoreArgOptionsPathOwnUnion | CoreArgOptionsExtendedUnion
+		? TargetOptions extends CoreArgOptionsPathOwnUnion | CoreArgOptionsPathExtendedUnion
 			? {
 					/**
 					 * URL paths.
@@ -54,7 +54,7 @@ export type CoreArgMeta<
 					 * When extended contains parent paths.
 					 */
 					paths: {
-						[K in ChildId | (TargetOptions extends CoreArgOptionsExtendedUnion ? ParentIds : never)]: UrlPath;
+						[K in ChildId | (TargetOptions extends CoreArgOptionsPathExtendedUnion ? ParentIds : never)]: UrlPath;
 					};
 
 					/**
@@ -75,7 +75,7 @@ export type CoreArgMeta<
 			: unknown
 		: unknown) &
 	(SourceOptions extends CoreArgOptionsPathOwnUnion
-		? TargetOptions extends CoreArgOptionsExtendedUnion
+		? TargetOptions extends CoreArgOptionsPathExtendedUnion
 			? {
 					/**
 					 * Path of parent arg.

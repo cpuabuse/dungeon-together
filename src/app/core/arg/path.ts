@@ -55,7 +55,7 @@ export type CoreArgPath<
 	P extends CoreArgIds = never
 > = O extends CoreArgOptionsPathIdUnion
 	? CoreArgPathId
-	: CoreArgPathOwnOrExtended<I | (O extends CoreArgOptionsExtendedUnion ? P : never)>;
+	: CoreArgPathOwnOrExtended<I | (O extends CoreArgOptionsPathExtendedUnion ? P : never)>;
 
 /**
  * Generate a name for path property.
@@ -86,8 +86,7 @@ export type CoreArgOptionsPathOwn = CoreArgOptionsGenerate<
 /**
  * Options with path.
  */
-export type CoreArgOptionsPathExtended = CoreArgOptionsUnionGenerate<
-	never,
+export type CoreArgOptionsPathExtended = CoreArgOptionsGenerate<
 	never,
 	CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
 >;
@@ -112,7 +111,7 @@ export type CoreArgOptionsPathOwnUnion = CoreArgOptionsUnionGenerate<
 /**
  * Core arg options with extended path.
  */
-export type CoreArgOptionsExtendedUnion = CoreArgOptionsUnionGenerate<
+export type CoreArgOptionsPathExtendedUnion = CoreArgOptionsUnionGenerate<
 	never,
 	never,
 	CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]

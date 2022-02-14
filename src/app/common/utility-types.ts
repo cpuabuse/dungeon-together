@@ -12,7 +12,7 @@
  */
 // `C extends I` to show which properties are missing in errors
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export type StaticImplements<I extends new (...args: any[]) => any, C extends I> = InstanceType<I>;
+export type StaticImplements<I extends abstract new (...args: any[]) => any, C extends I> = InstanceType<I>;
 
 /**
  * Converts a class to abstract version.
@@ -67,7 +67,7 @@ export function hasOwnProperty<K extends string, P>(
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	obj: {
 		/**
-		 *
+		 * Key-value pairs.
 		 */
 		[E in K]?: P;
 	},
@@ -81,11 +81,74 @@ export function hasOwnProperty<K extends string, P>(
 }
 
 /**
+ * Maybe defined, maybe undefined partial.
  * Creates a type conditionally.
+ * To be used for destructured optional parameters.
  *
  * If condition is true, returns the type, otherwise returns partial with undefined properties.
  */
 export type MaybeDefined<
 	DefinedCondition extends boolean,
 	T extends Record<string, any>
-> = DefinedCondition extends true ? T : Partial<T> & Record<string, never>;
+> = DefinedCondition extends true
+	? T
+	: {
+			[K in keyof T]?: never;
+	  };
+
+/**
+ * Creates a constructor, to be used in module.
+ */
+type Constructor<
+	IsAbstract extends boolean = true,
+	// "{}" is needed exactly, to preserve instance type and to be able to extend
+	// eslint-disable-next-line @typescript-eslint/ban-types
+	Instance extends object = any,
+	Parameters extends any[] = any
+> = IsAbstract extends true ? abstract new (...args: Parameters) => Instance : new (...args: Parameters) => Instance;
+
+/**
+ * Any constructor, to be used as constraints for utility types. Any constructor, concrete or abstract will extend this.
+ */
+export type AnyConstructor = Constructor;
+
+/**
+ * Any constructor.
+ */
+// "{}" is needed exactly, to preserve instance type and to be able to extend
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type ConcreteConstructorConstraint<Instance extends {} = {}> = Constructor<false, Instance>;
+
+/**
+ * Any constructor, that is abstract.
+ */
+// "{}" is needed exactly, to preserve instance type and to be able to extend
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type AbstractConstructorConstraint<Instance extends {} = {}> = Constructor<true, Instance>;
+
+/**
+ * Creates a constructor.
+ */
+// "{}" is needed exactly, to preserve instance type and to be able to extend
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type ConcreteConstructor<Parameters extends any[] = any[], Instance extends {} = {}> = Constructor<
+	false,
+	Instance,
+	Parameters
+>;
+
+/**
+ * Creates an abstract constructor.
+ */
+// "{}" is needed exactly, to preserve instance type and to be able to extend
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type AbstractConstructor<Parameters extends any[] = any[], Instance extends {} = {}> = Constructor<
+	true,
+	Instance,
+	Parameters
+>;
+
+/**
+ * Gets static members from a class, omitting constructor.
+ */
+export type StaticMembers<T extends AnyConstructor> = Omit<T, "new">;

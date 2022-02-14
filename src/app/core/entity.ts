@@ -4,36 +4,34 @@
 */
 
 /**
- * Entity.
+ * @file Entity.
  */
 
 import {
-	defaultCellUuid,
-	defaultGridUuid,
-	defaultKindUuid,
-	defaultShardUuid,
-	entityUuidUrlPath,
-	urlPathSeparator
-} from "../common/defaults";
-import { ToAbstract } from "../common/utility-types";
-import { Uuid, getDefaultUuid } from "../common/uuid";
+	ComputedClassClassConstraint,
+	ComputedClassData,
+	ComputedClassInfo,
+	ComputedClassInstanceConstraint,
+	ComputedClassMembers,
+	ComputedClassWords
+} from "../common/computed-class";
+import { defaultCellUuid, defaultGridUuid, defaultKindUuid, defaultShardUuid } from "../common/defaults";
+import { AbstractConstructor, StaticImplements } from "../common/utility-types";
+import { Uuid } from "../common/uuid";
 import { CoreArg, CoreArgIds, CoreArgOptionsPathExtended, CoreArgOptionsPathOwn, CoreArgPath } from "./arg";
 import { CoreArgOptionIds, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
-import { CoreBase, CoreBaseClass, CoreBaseClassNonRecursive } from "./base";
-import { CellPathExtended, CoreCell, CoreCellArgParentIds } from "./cell";
+import { CoreBase, CoreBaseClassNonRecursive } from "./base";
+import { CellPathExtended, CoreCell, CoreCellArgParentIds, coreCellArgParentIdSet } from "./cell";
 import {
-	CoreUniverseObject,
+	CoreUniverseObjectArgsOptionsUnion,
+	CoreUniverseObjectClassConstraintDataExtends,
+	CoreUniverseObjectFactory,
 	// Type used only for documentation
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	CoreUniverseObjectInherit
 } from "./universe-object";
 
 // #region To be removed
-/**
- * Word referring to entity.
- */
-export type CoreEntityWord = "Entity";
-
 /**
  * An object-like.
  */
@@ -62,15 +60,6 @@ export interface CommsEntityArgs extends EntityPathExtended {
 export type CommsEntityRaw = Omit<CommsEntityArgs, keyof CellPathExtended>;
 
 /**
- * Typeof class for entities.
- *
- * It may be abstract.
- */
-export type CoreEntityClass = ToAbstract<{
-	new (...args: any[]): CommsEntity;
-}>;
-
-/**
  * Implementable [[CommsEntityArgs]].
  */
 export interface CommsEntity extends CommsEntityArgs {
@@ -79,27 +68,12 @@ export interface CommsEntity extends CommsEntityArgs {
 	 */
 	terminate(): void;
 }
-
-/**
- * Core entity type.
- */
-export type CoreEntity = CommsEntity;
 // #endregion
 
 /**
  * {@link CoreEntityArgs} parent IDs.
  */
-export type CoreEntityArgParentIds = CoreCellArgParentIds | CoreArgIds.Cell;
-
-/**
- * Path to an entity only.
- */
-export type EntityPathOwn = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPathOwn, CoreEntityArgParentIds>;
-
-/**
- * Path to an entity.
- */
-export type EntityPathExtended = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPathExtended, CoreEntityArgParentIds>;
+export type CoreEntityArgParentIds = typeof coreEntityArgParentIds[number];
 
 /**
  * Core entity.
@@ -126,17 +100,97 @@ export type CoreEntityArgs<O extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.E
 		: unknown);
 
 /**
+ * Path to an entity only.
+ */
+export type EntityPathOwn = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPathOwn, CoreEntityArgParentIds>;
+
+/**
+ * Path to an entity.
+ */
+export type EntityPathExtended = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPathExtended, CoreEntityArgParentIds>;
+
+/**
+ * Constraint data.
+ */
+export type CoreEntityClassConstraintData<Options extends CoreUniverseObjectArgsOptionsUnion> =
+	CoreUniverseObjectClassConstraintDataExtends<CoreArgIds.Entity, Options, CoreEntityArgParentIds> &
+		ComputedClassData<{
+			/**
+			 * Instance.
+			 */
+			[ComputedClassWords.Instance]: ComputedClassMembers & {
+				/**
+				 * Populate.
+				 */
+				[ComputedClassWords.Populate]: {
+					/**
+					 * Move entity.
+					 */
+					move(cellPath: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>): void;
+
+					/**
+					 * Kind UUID.
+					 */
+					kindUuid: Uuid;
+
+					/**
+					 * Mode UUID.
+					 */
+					modeUuid: Uuid;
+
+					/**
+					 * World UUID.
+					 */
+					worldUuid: Uuid;
+				};
+			};
+
+			/**
+			 * Static.
+			 */
+			[ComputedClassWords.Static]: ComputedClassMembers;
+		}>;
+
+/**
+ * Core cell.
+ */
+export type CoreEntity<Options extends CoreUniverseObjectArgsOptionsUnion> = ComputedClassInstanceConstraint<
+	CoreEntityClassConstraintData<Options>
+>;
+
+/**
+ * Typeof class for entities.
+ *
+ * It may be abstract.
+ */
+export type CoreEntityClass<Options extends CoreUniverseObjectArgsOptionsUnion> = ComputedClassClassConstraint<
+	CoreEntityClassConstraintData<Options>
+>;
+
+/**
+ * Tuple with core entity arg parent IDS.
+ */
+// Infer type from `as const` assertion
+// eslint-disable-next-line @typescript-eslint/typedef
+const coreEntityArgParentIds = [...coreCellArgParentIdSet, CoreArgIds.Cell] as const;
+
+/**
+ * Unique set with parent ID's for core entity arg.
+ */
+export const coreEntityArgParentIdSet: Set<CoreEntityArgParentIds> = new Set(coreEntityArgParentIds);
+
+/**
  * Core entity class factory.
  *
- * @param param
+ * @param param - Destructured parameter
  * @see {@link CoreBaseClassNonRecursive} for usage
  * @returns Core entity class
  */
 // Forcing inference
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreEntityClassFactory<
-	C extends CoreBaseClassNonRecursive = CoreBaseClass,
-	O extends CoreArgOptionsUnion = CoreArgOptions
+	BaseClass extends CoreBaseClassNonRecursive,
+	Options extends CoreUniverseObjectArgsOptionsUnion
 >({
 	Base,
 	options
@@ -144,63 +198,90 @@ export function CoreEntityClassFactory<
 	/**
 	 * Client base.
 	 */
-	Base: C;
+	Base: BaseClass;
 
 	/**
 	 * Options.
 	 */
-	options: O;
+	options: Options;
 }) {
 	/**
-	 * Entity type extracted from entity class.
+	 * Base constructor parameters.
 	 */
-	type Entity = C extends {
-		/**
-		 * Universe.
-		 */
-		universe: {
+	type BaseParams = ConstructorParameters<typeof NewBase>;
+
+	/**
+	 * Constructor params.
+	 */
+	type ConstructorParams = BaseParams;
+
+	/**
+	 * Actual class info.
+	 */
+	type ActualClassInfo = ComputedClassInfo<
+		CoreEntityClassConstraintData<Options>,
+		ComputedClassData<{
 			/**
-			 * Entity class.
+			 * Instance.
 			 */
-			Entity: infer T;
-		};
-	}
-		? T extends CoreEntityClass
-			? InstanceType<T>
-			: CoreEntity
-		: CoreEntity;
+			[ComputedClassWords.Instance]: ComputedClassMembers & {
+				/**
+				 * Base.
+				 */
+				[ComputedClassWords.Base]: InstanceType<typeof NewBase>;
+
+				/**
+				 * Populate.
+				 */
+				[ComputedClassWords.Populate]: Entity;
+			};
+
+			/**
+			 * Static.
+			 */
+			[ComputedClassWords.Static]: ComputedClassMembers & {
+				/**
+				 * Base.
+				 */
+				[ComputedClassWords.Base]: typeof NewBase;
+
+				/**
+				 * Populate.
+				 */
+				[ComputedClassWords.Populate]: typeof Entity;
+			};
+		}>,
+		ConstructorParams
+	>;
+
+	/**
+	 * New instance type to use as `this`.
+	 */
+	type ThisInstanceConcrete = ActualClassInfo[ComputedClassWords.ThisInstanceConcrete];
+
+	/**
+	 * Class to return.
+	 */
+	type ReturnClass = ActualClassInfo[ComputedClassWords.ClassReturn];
+
+	// Infer the new base for type safe return
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const NewBase = CoreUniverseObjectFactory<BaseClass, CoreArgIds.Entity, Options, CoreEntityArgParentIds>({
+		Base,
+		id: CoreArgIds.Entity,
+		options,
+		parentIds: coreEntityArgParentIdSet
+	});
 
 	/**
 	 * Core entity.
 	 *
 	 * @see CoreUniverseObjectInherit for more details
 	 */
-	abstract class CoreEntity extends Base implements CoreUniverseObject<CoreEntityWord> {
-		/**
-		 * Cell UUID.
-		 */
-		public abstract cellUuid: Uuid;
-
-		/**
-		 * Default entity.
-		 */
-		public abstract defaultEntity: Entity;
-
-		/**
-		 * Default entity UUID.
-		 */
-		public abstract defaultEntityUuid: Uuid;
-
-		/**
-		 * Entity UUID.
-		 */
-		public abstract entityUuid: Uuid;
-
-		/**
-		 * Grid UUID.
-		 */
-		public abstract gridUuid: Uuid;
-
+	abstract class Entity
+		extends (NewBase as AbstractConstructor<ConstructorParams>)
+		implements StaticImplements<ActualClassInfo[ComputedClassWords.ClassImplements], typeof Entity>
+	{
 		/**
 		 * Kind of entity.
 		 */
@@ -212,65 +293,30 @@ export function CoreEntityClassFactory<
 		public abstract modeUuid: Uuid;
 
 		/**
-		 * Shard UUID.
-		 */
-		public abstract shardUuid: Uuid;
-
-		/**
 		 * World in which entity resides.
 		 */
 		public abstract worldUuid: Uuid;
 
 		/**
-		 * Gets default entity UUID.
-		 *
-		 * @param param
-		 * @returns Default entity UUID
-		 */
-		public static getDefaultEntityUuid({ entityUuid }: EntityPathOwn): Uuid {
-			return getDefaultUuid({
-				path: `${entityUuidUrlPath}${urlPathSeparator}${entityUuid}`
-			});
-		}
-
-		/**
 		 * Move entity to a different cell.
 		 *
+		 * @param this - This from computed class
 		 * @param cellPath - Path to the target cell
-		 * @returns If successful or not
 		 */
-		public move(cellPath: CellPathExtended): boolean {
+		public move(
+			this: ThisInstanceConcrete,
+			cellPath: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>
+		): void {
 			// Locate cells
-			let sourceCell: CoreCell = (this as CoreBase).universe.getCell(this);
-			let targetCell: CoreCell = (this as CoreBase).universe.getCell(cellPath);
+			// Does not overlap, casting
+			let targetCell: CoreCell<Options> = (this as CoreBase<Options>).universe.getCell(cellPath);
 
 			// Reattach
-			if (sourceCell.detach(this)) {
-				this.doMove(targetCell);
-				return true;
-			}
-			return false;
-		}
-
-		/**
-		 * Terminate.
-		 */
-		public abstract terminate(): void;
-
-		/**
-		 * Perform move to a cell unconditionally, without detaching.
-		 *
-		 * @param cell - Target cell
-		 */
-		protected doMove(cell: CoreCell): void {
-			this.shardUuid = cell.shardUuid;
-			this.gridUuid = cell.gridUuid;
-			this.cellUuid = cell.cellUuid;
-			cell.attach(this);
+			targetCell.attachEntity(this);
 		}
 	}
 
-	return CoreEntity;
+	return Entity as ReturnClass;
 }
 
 /**
@@ -289,7 +335,7 @@ export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPath
  *
  * Has to strictly follow {@link CoreEntityArgs}.
  *
- * @param param
+ * @param param - Destructured parameter
  * @returns Target args entity
  */
 export function coreEntityArgsConvert<S extends CoreArgOptionsUnion, T extends CoreArgOptionsUnion>({

@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"esModuleInterop": true,
 		"jsx": "preserve",
-		"lib": ["DOM", "es2020"],
+		"lib": ["es2020", "DOM"],
 		"module": "ES2020",
 		"moduleResolution": "node",
 		"noImplicitAny": true,
