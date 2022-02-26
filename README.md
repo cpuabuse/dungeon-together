@@ -34,6 +34,6 @@ npm run build:run:standalone:browser
 #### Core
 
 ```
-npm run build:test:core:node
-npm run run:test:core:node
+npm run build:test:unit
+npm run run:test:unit
 ```
