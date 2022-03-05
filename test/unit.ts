@@ -4,7 +4,7 @@
 */
 
 import { tTest } from "./unit/core/child-meta";
-import { unitTest } from "./unit/core/test";
+import { unitTest } from "./unit/core/convert-path";
 
 /**
  * @file Tests for core
