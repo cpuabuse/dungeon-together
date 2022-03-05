@@ -3,7 +3,7 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
-import { tTest } from "./unit/core/child-meta";
+import { childMetaIdToId, tTest } from "./unit/core/child-meta";
 import { unitTest } from "./unit/core/convert-path";
 
 /**
@@ -14,4 +14,8 @@ unitTest();
 
 describe("createChildMeta", function () {
 	it("should work", tTest);
+
+	describe("ID to ID", function () {
+		it("produce the same meta", childMetaIdToId);
+	});
 });
