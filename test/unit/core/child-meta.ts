@@ -7,23 +7,30 @@
  * @file Unit test for core
  */
 
-import { deepStrictEqual, ok } from "assert";
+import { ok } from "assert";
+import { assert } from "chai";
 import { MaybeDefined } from "../../../src/app/common/utility-types";
 import {
-	CoreArgComplexOptionPathIds,
+	CoreArg,
 	CoreArgIds,
 	CoreArgMeta,
-	CoreArgOptionIds,
 	CoreArgOptionsPathId,
-	coreArgChildMetaGenerate,
-	coreArgComplexOptionSymbolIndex,
-	coreArgOptionIdsToOptions,
 	CoreArgOptionsUnion,
-	CoreArg
+	coreArgChildMetaGenerate
 } from "../../../src/app/core/arg";
+import { optionsPathId, optionsPathOwn } from "./lib/options";
+import {
+	defaultCellPath,
+	defaultGridPath,
+	defaultOrigin,
+	defaultSystemNameSpace,
+	defaultUserNameSpace
+} from "./lib/path";
 
 /**
  * Helper function testing meta creation.
+ *
+ * @param param
  */
 function metaGenerateTest<
 	ChildId extends CoreArgIds,
@@ -37,12 +44,7 @@ function metaGenerateTest<
 		/**
 		 * Expected meta.
 		 */
-		expected: CoreArgMeta<
-			CoreArgIds.Cell,
-			CoreArgOptionsPathId,
-			CoreArgOptionsPathId,
-			CoreArgIds.Grid | CoreArgIds.Shard
-		>;
+		expected: CoreArgMeta<CoreArgIds.Cell, SourceOptions, TargetOptions, CoreArgIds.Grid | CoreArgIds.Shard>;
 
 		/**
 		 * Index of child.
@@ -95,14 +97,9 @@ function metaGenerateTest<
 			CoreArgIds.Grid | CoreArgIds.Shard
 		> = coreArgChildMetaGenerate(param);
 
-		deepStrictEqual(actual, param.expected);
+		assert.containSubset(actual, param.expected);
 	};
 }
-
-const optionsPathId: CoreArgOptionsPathId = coreArgOptionIdsToOptions({
-	idSet: new Set(),
-	symbolSet: new Set([coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]])
-});
 
 /**
  * Test value.
@@ -121,6 +118,7 @@ export function tTest(): void {
  */
 export const childMetaIdToId: () => void = metaGenerateTest({
 	childArgId: CoreArgIds.Cell,
+	expected: {},
 	index: 0,
 	meta: {},
 	parentArgId: CoreArgIds.Grid,
@@ -128,13 +126,33 @@ export const childMetaIdToId: () => void = metaGenerateTest({
 	sourceParentArg: {
 		id: "test"
 	},
-	targetOptions: optionsPathId,
-	expected: {}
+	targetOptions: optionsPathId
 });
 
 /**
  * Test ID to own.
  */
-export function childMetaIdToOwn(): void {
-	ok(true);
-}
+export const childMetaIdToOwn: () => void = metaGenerateTest({
+	childArgId: CoreArgIds.Cell,
+	expected: {
+		origin: defaultOrigin,
+		paths: {
+			[CoreArgIds.Cell]: defaultCellPath
+		},
+		systemNamespace: defaultSystemNameSpace,
+		userNamespace: defaultUserNameSpace
+	},
+	index: 0,
+	meta: {
+		origin: defaultOrigin,
+		paths: {
+			[CoreArgIds.Grid]: defaultGridPath
+		},
+		systemNamespace: defaultSystemNameSpace,
+		userNamespace: defaultUserNameSpace
+	},
+	parentArgId: CoreArgIds.Grid,
+	sourceOptions: optionsPathId,
+	sourceParentArg: {},
+	targetOptions: optionsPathOwn
+});

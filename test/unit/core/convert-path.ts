@@ -8,9 +8,8 @@
  */
 
 import { deepStrictEqual, ok } from "assert";
-import { UrlOrigin, UrlPath } from "../../../src/app/common/url";
 import { hasOwnProperty } from "../../../src/app/common/utility-types";
-import { Uuid, getDefaultUuid } from "../../../src/app/common/uuid";
+import { getDefaultUuid } from "../../../src/app/common/uuid";
 import {
 	CoreArgComplexOptionPathIds,
 	CoreArgComplexOptionSymbolIndex,
@@ -21,10 +20,21 @@ import {
 	CoreArgOptionsPathId,
 	CoreArgOptionsPathOwn,
 	CoreArgPath,
-	coreArgComplexOptionSymbolIndex,
-	coreArgOptionIdsToOptions,
 	coreArgPathConvert
 } from "../../../src/app/core/arg";
+import { optionsPathExtended, optionsPathId, optionsPathOwn } from "./lib/options";
+import {
+	defaultCellPath,
+	defaultCellUuid,
+	defaultGridPath,
+	defaultGridUuid,
+	defaultId,
+	defaultOrigin,
+	defaultShardPath,
+	defaultShardUuid,
+	defaultSystemNameSpace,
+	defaultUserNameSpace
+} from "./lib/path";
 
 /**
  * Unit tests function.
@@ -57,7 +67,7 @@ export function unitTest(): void {
 	 * Generate a test for `it`.
 	 *
 	 * @param param - Destructed parameter
-	 * @returns Function to be run by `it`.
+	 * @returns Function to be run by `it`
 	 */
 	function pathConvertTest<
 		Id extends CoreArgIds,
@@ -189,25 +199,6 @@ export function unitTest(): void {
 		};
 	}
 
-	const defaultSystemNameSpace: UrlPath = "system";
-	const defaultUserNameSpace: UrlPath = "user";
-	const defaultOrigin: UrlOrigin = new URL("https://example.com/dt");
-	const defaultId: UrlPath = "test/id";
-	const defaultShardPath: UrlPath = `${defaultSystemNameSpace}/universe-objects/0`;
-	const defaultGridPath: UrlPath = `${defaultShardPath}/0`;
-	const defaultCellPath: UrlPath = `${defaultGridPath}/0`;
-	const defaultShardUuid: Uuid = getDefaultUuid({
-		origin: defaultOrigin,
-		path: defaultShardPath
-	});
-	const defaultGridUuid: Uuid = getDefaultUuid({
-		origin: defaultOrigin,
-		path: defaultGridPath
-	});
-	const defaultCellUuid: Uuid = getDefaultUuid({
-		origin: defaultOrigin,
-		path: defaultCellPath
-	});
 	const cellBaseParam: BaseParam<CoreArgIds.Cell, CoreArgIds.Shard | CoreArgIds.Grid> = {
 		id: CoreArgIds.Cell,
 		parentIds: new Set([CoreArgIds.Shard, CoreArgIds.Grid])
@@ -216,18 +207,6 @@ export function unitTest(): void {
 		id: CoreArgIds.Shard,
 		parentIds: new Set()
 	};
-	const optionsPathId: CoreArgOptionsPathId = coreArgOptionIdsToOptions({
-		idSet: new Set(),
-		symbolSet: new Set([coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]])
-	});
-	const optionsPathOwn: CoreArgOptionsPathOwn = coreArgOptionIdsToOptions({
-		idSet: new Set(),
-		symbolSet: new Set([coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]])
-	});
-	const optionsPathExtended: CoreArgOptionsPathExtended = coreArgOptionIdsToOptions({
-		idSet: new Set(),
-		symbolSet: new Set([coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]])
-	});
 
 	// Tests
 	const ownToIdTests: PathConvertToIdTests = pathConvertToIdTests({
