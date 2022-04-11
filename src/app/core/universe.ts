@@ -10,7 +10,7 @@
 import { Application } from "./application";
 import { CoreArgIds, CoreArgPath } from "./arg";
 import { CoreBaseClass } from "./base";
-import { CoreCellArgParentIds, CoreCellClass } from "./cell";
+import { CoreCellArgGrandparentIds, CoreCellClass } from "./cell";
 import { CommsEntity, CoreEntityClass, EntityPathExtended } from "./entity";
 import { CommsGrid, CoreGridClass, GridPath } from "./grid";
 import { CommsShard, CommsShardArgs, CoreShardClass, ShardPath } from "./shard";
@@ -82,7 +82,9 @@ export abstract class CoreUniverse<
 	/**
 	 * Gets the [[CommsCell]].
 	 */
-	public abstract getCell(path: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>): InstanceType<CellClass>;
+	public abstract getCell(
+		path: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgGrandparentIds>
+	): InstanceType<CellClass>;
 
 	/**
 	 * Gets the [[CommsEntity]].

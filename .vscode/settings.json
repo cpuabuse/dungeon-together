@@ -28,5 +28,6 @@
 	"editor.semanticTokenColorCustomizations": {
 		"enabled": true,
 		"rules": { "typeParameter": "#22AA22" }
-	}
+	},
+	"typescript.tsdk": "node_modules/typescript/lib"
 }

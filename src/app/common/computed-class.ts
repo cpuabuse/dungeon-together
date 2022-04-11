@@ -99,6 +99,39 @@ export type ComputedClassExtractClass<
 		: unknown);
 
 /**
+ * Assigns data to class.
+ *
+ * @param param - Destructured parameter
+ */
+export function computedClassAssign({
+	Base,
+	members
+}: {
+	/**
+	 * Base class.
+	 */
+	Base: {
+		/**
+		 * Prototype.
+		 */
+		prototype: unknown;
+	};
+
+	/**
+	 * Members.
+	 */
+	members: ComputedClassAssign & ComputedClassAssign<"staticAssign">;
+}): void {
+	Object.values(members.assign).forEach(method => {
+		(Base.prototype as Record<string, unknown>)[method.name] = method.value;
+	});
+
+	Object.values(members.staticAssign).forEach(method => {
+		(Base as Record<string, unknown>)[method.name] = method.value;
+	});
+}
+
+/**
  * Instructions for class generation.
  */
 type ComputedClassInclude =
@@ -238,11 +271,23 @@ export type ComputedClassData<
 		[ComputedClassWords.Instance]: ComputedClassMembers;
 
 		/**
-		 * Static part of the class.
+		 * Static part of the class, which can have a constructor in base.
 		 */
 		[ComputedClassWords.Static]: ComputedClassMembers;
 	}
 > = Data;
+
+/**
+ * Intersects computed class data.
+ */
+export type ComputedClassIntersectData<DataArray extends [ComputedClassData, ...ComputedClassData[]]> =
+	DataArray extends [infer Data, ...infer Rest]
+		? Rest extends [ComputedClassData, ...ComputedClassData[]]
+			? Data extends ComputedClassData
+				? ComputedClassData<Data & ComputedClassIntersectData<Rest>>
+				: never
+			: Data
+		: never;
 
 /**
  * Used to generate base data for classes extending computed class.
@@ -266,7 +311,7 @@ export type ComputedClassDataExtends<Data extends ComputedClassData> = {
 	};
 
 	/**
-	 * Static.
+	 * Static, which can have a constructor in base.
 	 */
 	[ComputedClassWords.Static]: {
 		/**

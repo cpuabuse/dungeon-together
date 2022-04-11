@@ -21,7 +21,13 @@ import { Uuid } from "../common/uuid";
 import { CoreArg, CoreArgIds, CoreArgOptionsPathExtended, CoreArgOptionsPathOwn, CoreArgPath } from "./arg";
 import { CoreArgOptionIds, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
 import { CoreBase, CoreBaseClassNonRecursive } from "./base";
-import { CellPathExtended, CoreCell, CoreCellArgParentIds, coreCellArgParentIdSet } from "./cell";
+import {
+	CellPathExtended,
+	CoreCell,
+	CoreCellArgGrandparentIds,
+	CoreCellArgParentIds,
+	coreCellArgParentIds
+} from "./cell";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectClassConstraintDataExtends,
@@ -71,6 +77,11 @@ export interface CommsEntity extends CommsEntityArgs {
 // #endregion
 
 /**
+ * {@link CoreEntityArgs} grandparent IDs.
+ */
+export type CoreEntityArgGrandparentIds = typeof coreEntityArgGrandparentIds[number];
+
+/**
  * {@link CoreEntityArgs} parent IDs.
  */
 export type CoreEntityArgParentIds = typeof coreEntityArgParentIds[number];
@@ -113,7 +124,7 @@ export type EntityPathExtended = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPa
  * Constraint data.
  */
 export type CoreEntityClassConstraintData<Options extends CoreUniverseObjectArgsOptionsUnion> =
-	CoreUniverseObjectClassConstraintDataExtends<CoreArgIds.Entity, Options, CoreEntityArgParentIds> &
+	CoreUniverseObjectClassConstraintDataExtends<CoreArgIds.Entity, Options, CoreEntityArgGrandparentIds> &
 		ComputedClassData<{
 			/**
 			 * Instance.
@@ -123,11 +134,6 @@ export type CoreEntityClassConstraintData<Options extends CoreUniverseObjectArgs
 				 * Populate.
 				 */
 				[ComputedClassWords.Populate]: {
-					/**
-					 * Move entity.
-					 */
-					move(cellPath: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>): void;
-
 					/**
 					 * Kind UUID.
 					 */
@@ -168,16 +174,23 @@ export type CoreEntityClass<Options extends CoreUniverseObjectArgsOptionsUnion> 
 >;
 
 /**
+ * Tuple with core entity arg grandparent IDS.
+ */
+// Infer type from `as const` assertion
+// eslint-disable-next-line @typescript-eslint/typedef
+const coreEntityArgGrandparentIds = [...coreCellArgParentIds] as const;
+
+/**
  * Tuple with core entity arg parent IDS.
  */
 // Infer type from `as const` assertion
 // eslint-disable-next-line @typescript-eslint/typedef
-const coreEntityArgParentIds = [...coreCellArgParentIdSet, CoreArgIds.Cell] as const;
+export const coreEntityArgParentIds = [...coreCellArgParentIds, CoreArgIds.Cell] as const;
 
 /**
  * Unique set with parent ID's for core entity arg.
  */
-export const coreEntityArgParentIdSet: Set<CoreEntityArgParentIds> = new Set(coreEntityArgParentIds);
+export const coreEntityArgGrandparentIdSet: Set<CoreEntityArgGrandparentIds> = new Set(coreEntityArgGrandparentIds);
 
 /**
  * Core entity class factory.
@@ -266,11 +279,18 @@ export function CoreEntityClassFactory<
 
 	// Infer the new base for type safe return
 	// eslint-disable-next-line @typescript-eslint/typedef
-	const NewBase = CoreUniverseObjectFactory<BaseClass, CoreArgIds.Entity, Options, CoreEntityArgParentIds>({
+	const NewBase = CoreUniverseObjectFactory<
+		BaseClass,
+		CoreArgIds.Entity,
+		Options,
+		CoreArgIds.Cell,
+		CoreEntityArgGrandparentIds
+	>({
 		Base,
+		grandparentIds: coreEntityArgGrandparentIdSet,
 		id: CoreArgIds.Entity,
 		options,
-		parentIds: coreEntityArgParentIdSet
+		parentId: CoreArgIds.Cell
 	});
 
 	/**
@@ -296,24 +316,6 @@ export function CoreEntityClassFactory<
 		 * World in which entity resides.
 		 */
 		public abstract worldUuid: Uuid;
-
-		/**
-		 * Move entity to a different cell.
-		 *
-		 * @param this - This from computed class
-		 * @param cellPath - Path to the target cell
-		 */
-		public move(
-			this: ThisInstanceConcrete,
-			cellPath: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>
-		): void {
-			// Locate cells
-			// Does not overlap, casting
-			let targetCell: CoreCell<Options> = (this as CoreBase<Options>).universe.getCell(cellPath);
-
-			// Reattach
-			targetCell.attachEntity(this);
-		}
 	}
 
 	return Entity as ReturnClass;

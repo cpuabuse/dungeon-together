@@ -39,12 +39,18 @@ type CoreUniverseObjectContainerClassConstraintData<
 	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds>,
 	ChildId extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	ParentIds extends CoreArgIds = never
+	ParentIds extends CoreArgIds = never,
+	Base extends ConcreteConstructorConstraint = ConcreteConstructorConstraint
 > = ComputedClassData<{
 	/**
 	 * Concrete injection and abstract members, no own members.
 	 */
 	[ComputedClassWords.Instance]: ComputedClassMembers & {
+		/**
+		 * Base instance.
+		 */
+		[ComputedClassWords.Base]: InstanceType<Base>;
+
 		/**
 		 * Inject.
 		 */
@@ -73,7 +79,12 @@ type CoreUniverseObjectContainerClassConstraintData<
 	/**
 	 * No static members in this class.
 	 */
-	[ComputedClassWords.Static]: ComputedClassMembers;
+	[ComputedClassWords.Static]: ComputedClassMembers & {
+		/**
+		 * Base class.
+		 */
+		[ComputedClassWords.Base]: Base;
+	};
 }>;
 
 /**
@@ -83,9 +94,10 @@ export type CoreUniverseObjectContainerClassConstraintDataExtends<
 	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds>,
 	ChildId extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	ParentIds extends CoreArgIds = never
+	ParentIds extends CoreArgIds = never,
+	Base extends ConcreteConstructorConstraint = ConcreteConstructorConstraint
 > = ComputedClassDataExtends<
-	CoreUniverseObjectContainerClassConstraintData<ChildUniverseObject, ChildId, Options, ParentIds>
+	CoreUniverseObjectContainerClassConstraintData<ChildUniverseObject, ChildId, Options, ParentIds, Base>
 >;
 
 /**
@@ -150,7 +162,7 @@ export type CoreUniverseObjectContainer<
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreUniverseObjectContainerFactory<
 	BaseClass extends ConcreteConstructorConstraint,
-	// It is irrelevant if child has grandchildren or not
+	// It is irrelevant if child has grandchildren or not (same for parent)
 	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds>,
 	ChildId extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,

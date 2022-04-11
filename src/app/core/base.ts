@@ -66,9 +66,9 @@ export interface CoreBase<
  *
  * To summarize, core factory generic parameter can extend only non-recursive base. {@link CoreBaseNonRecursiveInstance} provides at least some type constraints.
  */
-export interface CoreBaseClassNonRecursive {
+export type CoreBaseClassNonRecursive = CoreBaseNonRecursiveStatic & {
 	new (...args: any[]): CoreBaseNonRecursiveInstance;
-}
+};
 
 /**
  * Class type for core base.

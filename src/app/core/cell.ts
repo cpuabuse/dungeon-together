@@ -39,7 +39,7 @@ import {
 	CommsEntityArgs,
 	CommsEntityRaw,
 	CoreEntity,
-	CoreEntityArgParentIds,
+	CoreEntityArgGrandparentIds,
 	CoreEntityArgs,
 	EntityPathExtended,
 	EntityPathOwn,
@@ -158,6 +158,11 @@ export function commsCellRawToArgs(rawSource: CommsCellRaw, path: CellPathExtend
 // #endregion
 
 /**
+ * IDs of grandparents of {@link CoreCellArg}.
+ */
+export type CoreCellArgGrandparentIds = typeof coreCellArgGrandparentIds[number];
+
+/**
  * IDs of parents of {@link CoreCellArg}.
  */
 export type CoreCellArgParentIds = typeof coreCellArgParentIds[number];
@@ -168,7 +173,7 @@ export type CoreCellArgParentIds = typeof coreCellArgParentIds[number];
  * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
 export type CoreCellArg<O extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Cell, O, CoreCellArgParentIds> &
-	CoreArgsContainer<CoreEntityArgs<O>, CoreArgIds.Entity, O, CoreEntityArgParentIds> &
+	CoreArgsContainer<CoreEntityArgs<O>, CoreArgIds.Entity, O, CoreEntityArgGrandparentIds> &
 	(O[CoreArgOptionIds.Vector] extends true ? Vector : unknown) & {
 		/**
 		 * Worlds.
@@ -195,7 +200,7 @@ type CoreCellClassConstraintData<
 > = CoreUniverseObjectClassConstraintDataExtends<
 	CoreArgIds.Cell,
 	Options,
-	CoreCellArgParentIds,
+	CoreCellArgGrandparentIds,
 	Entity,
 	CoreArgIds.Entity
 > &
@@ -243,16 +248,23 @@ export type CoreCellClass<
 > = ComputedClassClassConstraint<CoreCellClassConstraintData<Options, Entity>>;
 
 /**
+ * Tuple with core cell arg grandparent IDS.
+ */
+// Infer type from `as const` assertion
+// eslint-disable-next-line @typescript-eslint/typedef
+const coreCellArgGrandparentIds = [CoreArgIds.Shard] as const;
+
+/**
  * Tuple with core cell arg parent IDS.
  */
 // Infer type from `as const` assertion
 // eslint-disable-next-line @typescript-eslint/typedef
-const coreCellArgParentIds = [CoreArgIds.Shard, CoreArgIds.Grid] as const;
+export const coreCellArgParentIds = [...coreCellArgGrandparentIds, CoreArgIds.Grid] as const;
 
 /**
  * Unique set with parent ID's for core cell arg.
  */
-export const coreCellArgParentIdSet: Set<CoreCellArgParentIds> = new Set(coreCellArgParentIds);
+export const coreCellArgGrandparentIdSet: Set<CoreCellArgGrandparentIds> = new Set(coreCellArgGrandparentIds);
 
 /**
  * Factory for core cell.
@@ -347,7 +359,7 @@ export function CoreCellClassFactory<
 		BaseClass,
 		CoreArgIds.Cell,
 		Options,
-		CoreCellArgParentIds,
+		CoreCellArgGrandparentIds,
 		Entity,
 		CoreArgIds.Entity
 	>({
@@ -355,7 +367,7 @@ export function CoreCellClassFactory<
 		childId: CoreArgIds.Entity,
 		id: CoreArgIds.Cell,
 		options,
-		parentIds: coreCellArgParentIdSet
+		parentIds: coreCellArgGrandparentIdSet
 	});
 
 	/**
@@ -444,7 +456,7 @@ export function coreCellArgsConvert<
 	/**
 	 * Meta.
 	 */
-	meta: CoreArgMeta<CoreArgIds.Cell, SourceOptions, TargetOptions, CoreCellArgParentIds>;
+	meta: CoreArgMeta<CoreArgIds.Cell, SourceOptions, TargetOptions, CoreCellArgGrandparentIds>;
 }): CoreCellArg<TargetOptions> {
 	/**
 	 * Core cell args with vector.
@@ -470,7 +482,7 @@ export function coreCellArgsConvert<
 		coreArgPathConvert({
 			id: CoreArgIds.Cell,
 			meta,
-			parentIds: coreCellArgParentIdSet,
+			parentIds: coreCellArgGrandparentIdSet,
 			sourceArgPath: sourceCell,
 			sourceOptions,
 			targetOptions
