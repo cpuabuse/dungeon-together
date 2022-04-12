@@ -146,13 +146,13 @@ export function coreArgPathConvert<
 				// ID to extended
 				case coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]:
 					return [id, ...parentIds].reduce(
-						(result, id) => ({
+						(result, extendedId) => ({
 							...result,
-							[coreArgIdToPathUuidPropertyName({ id })]: getDefaultUuid({
+							[coreArgIdToPathUuidPropertyName({ id: extendedId })]: getDefaultUuid({
 								// Casting, since no overlaps
 								origin: (meta as unknown as MetaPathIdToExtended).origin,
 								// Casting, since no overlaps
-								path: (meta as unknown as MetaPathIdToExtended).paths[id]
+								path: (meta as unknown as MetaPathIdToExtended).paths[extendedId]
 							})
 						}),
 						{} as ChildArgPathExtended
@@ -210,9 +210,9 @@ export function coreArgPathConvert<
 
 				// Extended to extended
 				case coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]:
-					return [id, ...parentIds].reduce((result, id) => {
-						const uuidPropertyName: CoreArgPathUuidPropertyName<typeof id> = coreArgIdToPathUuidPropertyName({
-							id
+					return [id, ...parentIds].reduce((result, extendedId) => {
+						const uuidPropertyName: CoreArgPathUuidPropertyName<typeof extendedId> = coreArgIdToPathUuidPropertyName({
+							id: extendedId
 						});
 						return {
 							...result,

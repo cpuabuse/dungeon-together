@@ -179,6 +179,7 @@ export type CoreArgOptionsUnion = CoreArgOptionsUnionGenerate<never, never>;
  *
  * If inappropriate symbols are given, `never` will be returned, so JS data consistency checks omitted.
  *
+ * @param param - Destructured parameter
  * @returns Options object
  */
 export function coreArgOptionIdsToOptions<I extends CoreArgSimpleOptionIds, S extends CoreArgComplexOptionSymbols>({

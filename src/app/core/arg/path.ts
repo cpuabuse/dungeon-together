@@ -71,7 +71,7 @@ export type CoreArgPath<
 /**
  * Generate a name for path property.
  *
- * @param param
+ * @param param - Destructured parameter
  * @returns The name of the path property
  */
 export function coreArgIdToPathUuidPropertyName<I extends CoreArgIds>({
