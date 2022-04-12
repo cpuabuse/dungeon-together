@@ -278,18 +278,6 @@ export type ComputedClassData<
 > = Data;
 
 /**
- * Intersects computed class data.
- */
-export type ComputedClassIntersectData<DataArray extends [ComputedClassData, ...ComputedClassData[]]> =
-	DataArray extends [infer Data, ...infer Rest]
-		? Rest extends [ComputedClassData, ...ComputedClassData[]]
-			? Data extends ComputedClassData
-				? ComputedClassData<Data & ComputedClassIntersectData<Rest>>
-				: never
-			: Data
-		: never;
-
-/**
  * Used to generate base data for classes extending computed class.
  *
  * @typeParam Include - {@link ComputedClassWords.Populate} to populate with abstract members or not

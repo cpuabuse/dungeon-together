@@ -16,7 +16,6 @@ import {
 	ComputedClassExtractInstance,
 	ComputedClassInfo,
 	ComputedClassInstanceConstraint,
-	ComputedClassIntersectData,
 	ComputedClassMembers,
 	ComputedClassWords,
 	computedClassAssign
@@ -101,11 +100,9 @@ type CoreUniverseObjectClassConstraintData<
 	GrandparentIds extends CoreArgIds = never,
 	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, Id, ParentId | GrandparentIds> = never,
 	ChildId extends CoreArgIds = never
-> = ComputedClassIntersectData<
-	[
-		// Container specific data
-		CoreUniverseObjectClassContainerConstraintData<Id, Options, ParentId, GrandparentIds, ChildUniverseObject, ChildId>,
-
+> =
+	// Container specific data
+	CoreUniverseObjectClassContainerConstraintData<Id, Options, ParentId, GrandparentIds, ChildUniverseObject, ChildId> &
 		// General data
 
 		ComputedClassData<{
@@ -136,7 +133,7 @@ type CoreUniverseObjectClassConstraintData<
 						? unknown
 						: {
 								[K in `move${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-									path: CoreArgPath<ParentId, CoreArgOptionsPathOwn, GrandparentIds>
+									path: CoreArgPath<ParentId, Options, GrandparentIds>
 								) => void;
 						  });
 
@@ -192,9 +189,7 @@ type CoreUniverseObjectClassConstraintData<
 							Options
 					  >[ComputedClassWords.Static][ComputedClassWords.Populate];
 			};
-		}>
-	]
->;
+		}>;
 
 /**
  * Class constraint data to be used by extending computed classes.
@@ -622,13 +617,24 @@ export function CoreUniverseObjectFactory<
 		/**
 		 * Path for a parent.
 		 */
-		type ParentPath = CoreArgPath<ParentId, CoreArgOptionsPathOwn, GrandparentIds>;
+		type ParentPath = CoreArgPath<ParentId, Options, GrandparentIds>;
 
 		/**
 		 * Dummy type, constructed from assumption that parent has no parents.
+		 *
+		 * @remarks
+		 * From the perspective of a parent, it's child doesn't have grandparents, which is incompatible with {@link ThisInstanceConcrete}.
 		 */
 		type ParentUniverseObject = ComputedClassInstanceConstraint<
-			CoreUniverseObjectClassContainerConstraintData<ParentId, Options, never, never, ThisInstanceConcrete, Id, true>
+			CoreUniverseObjectClassContainerConstraintData<
+				ParentId,
+				Options,
+				never,
+				never,
+				CoreUniverseObject<Id, Options, ParentId>,
+				Id,
+				true
+			>
 		>;
 
 		// Null if not present

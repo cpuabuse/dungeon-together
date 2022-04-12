@@ -39,8 +39,8 @@ import {
 	CommsEntityArgs,
 	CommsEntityRaw,
 	CoreEntity,
+	CoreEntityArg,
 	CoreEntityArgGrandparentIds,
-	CoreEntityArgs,
 	EntityPathExtended,
 	EntityPathOwn,
 	commsEntityRawToArgs,
@@ -173,7 +173,7 @@ export type CoreCellArgParentIds = typeof coreCellArgParentIds[number];
  * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
 export type CoreCellArg<O extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Cell, O, CoreCellArgParentIds> &
-	CoreArgsContainer<CoreEntityArgs<O>, CoreArgIds.Entity, O, CoreEntityArgGrandparentIds> &
+	CoreArgsContainer<CoreEntityArg<O>, CoreArgIds.Entity, O, CoreEntityArgGrandparentIds> &
 	(O[CoreArgOptionIds.Vector] extends true ? Vector : unknown) & {
 		/**
 		 * Worlds.

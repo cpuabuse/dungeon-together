@@ -15,10 +15,18 @@ import {
 	ComputedClassMembers,
 	ComputedClassWords
 } from "../common/computed-class";
-import { defaultCellUuid, defaultGridUuid, defaultKindUuid, defaultShardUuid } from "../common/defaults";
+import { defaultKindUuid } from "../common/defaults";
 import { AbstractConstructor, StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
-import { CoreArg, CoreArgIds, CoreArgOptionsPathExtended, CoreArgOptionsPathOwn, CoreArgPath } from "./arg";
+import {
+	CoreArg,
+	CoreArgIds,
+	CoreArgMeta,
+	CoreArgOptionsPathExtended,
+	CoreArgOptionsPathOwn,
+	CoreArgPath,
+	coreArgPathConvert
+} from "./arg";
 import { CoreArgOptionIds, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
 import { CoreBaseClassNonRecursive } from "./base";
 import { CellPathExtended, coreCellArgParentIds } from "./cell";
@@ -71,21 +79,33 @@ export interface CommsEntity extends CommsEntityArgs {
 // #endregion
 
 /**
- * {@link CoreEntityArgs} grandparent IDs.
+ * {@link CoreEntityArg} grandparent IDs.
  */
 export type CoreEntityArgGrandparentIds = typeof coreEntityArgGrandparentIds[number];
 
 /**
- * {@link CoreEntityArgs} parent IDs.
+ * {@link CoreEntityArg} parent IDs.
  */
 export type CoreEntityArgParentIds = typeof coreEntityArgParentIds[number];
+
+/**
+ * Kind part of entity arg.
+ */
+type CoreEntityArgKind<O extends CoreArgOptionsUnion> = O[CoreArgOptionIds.Kind] extends true
+	? {
+			/**
+			 * Kind of entity.
+			 */
+			kindUuid: Uuid;
+	  }
+	: object;
 
 /**
  * Core entity.
  *
  * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
-export type CoreEntityArgs<O extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Entity, O, CoreEntityArgParentIds> & {
+export type CoreEntityArg<O extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Entity, O, CoreEntityArgParentIds> & {
 	/**
 	 * Mode of the entity.
 	 */
@@ -95,14 +115,7 @@ export type CoreEntityArgs<O extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.E
 	 * World in which entity resides.
 	 */
 	worldUuid: Uuid;
-} & (O[CoreArgOptionIds.Kind] extends true
-		? {
-				/**
-				 * Kind of entity.
-				 */
-				kindUuid: Uuid;
-		  }
-		: unknown);
+} & CoreEntityArgKind<O>;
 
 /**
  * Path to an entity only.
@@ -118,7 +131,12 @@ export type EntityPathExtended = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPa
  * Constraint data.
  */
 export type CoreEntityClassConstraintData<Options extends CoreUniverseObjectArgsOptionsUnion> =
-	CoreUniverseObjectClassConstraintDataExtends<CoreArgIds.Entity, Options, CoreEntityArgGrandparentIds> &
+	CoreUniverseObjectClassConstraintDataExtends<
+		CoreArgIds.Entity,
+		Options,
+		CoreArgIds.Cell,
+		CoreEntityArgGrandparentIds
+	> &
 		ComputedClassData<{
 			/**
 			 * Instance.
@@ -183,6 +201,11 @@ export const coreEntityArgParentIds = [...coreCellArgParentIds, CoreArgIds.Cell]
 
 /**
  * Unique set with parent ID's for core entity arg.
+ */
+export const coreEntityArgParentIdSet: Set<CoreEntityArgParentIds> = new Set(coreEntityArgParentIds);
+
+/**
+ * Unique set with grandparent ID's for core entity arg.
  */
 export const coreEntityArgGrandparentIdSet: Set<CoreEntityArgGrandparentIds> = new Set(coreEntityArgGrandparentIds);
 
@@ -262,11 +285,6 @@ export function CoreEntityClassFactory<
 	>;
 
 	/**
-	 * New instance type to use as `this`.
-	 */
-	type ThisInstanceConcrete = ActualClassInfo[ComputedClassWords.ThisInstanceConcrete];
-
-	/**
 	 * Class to return.
 	 */
 	type ReturnClass = ActualClassInfo[ComputedClassWords.ClassReturn];
@@ -312,24 +330,14 @@ export function CoreEntityClassFactory<
 		public abstract worldUuid: Uuid;
 	}
 
-	return Entity as ReturnClass;
-}
-
-/**
- * @param rawSource
- * @param path
- */
-export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPathExtended): CommsEntityArgs {
-	return {
-		...path,
-		...rawSource
-	};
+	// Return as `ReturnClass`, and verify it satisfies arg constraints
+	return Entity as InstanceType<ReturnClass> extends CoreEntityArg<Options> ? ReturnClass : never;
 }
 
 /**
  * Converts entity args between options.
  *
- * Has to strictly follow {@link CoreEntityArgs}.
+ * Has to strictly follow {@link CoreEntityArg}.
  *
  * @param param - Destructured parameter
  * @returns Target args entity
@@ -337,7 +345,8 @@ export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPath
 export function coreEntityArgsConvert<S extends CoreArgOptionsUnion, T extends CoreArgOptionsUnion>({
 	entity,
 	sourceOptions,
-	targetOptions
+	targetOptions,
+	meta
 }: {
 	/**
 	 * Source options.
@@ -352,52 +361,70 @@ export function coreEntityArgsConvert<S extends CoreArgOptionsUnion, T extends C
 	/**
 	 * Target source entity.
 	 */
-	entity: CoreEntityArgs<S>;
-}): CoreEntityArgs<T> {
+	entity: CoreEntityArg<S>;
+
+	/**
+	 * Meta for entity.
+	 */
+	meta: CoreArgMeta<CoreArgIds.Entity, S, T, CoreEntityArgParentIds>;
+}): CoreEntityArg<T> {
 	// Define source and result, with minimal options
-	const sourceEntity: CoreEntityArgs<S> = entity;
+	const sourceEntity: CoreEntityArg<S> = entity;
 	const sourceEntityAs: Record<string, any> = sourceEntity;
-	// Cannot assign to conditional type without casting
-	let targetEntity: CoreEntityArgs<T> = {
-		entityUuid: sourceEntity.entityUuid,
+
+	let targetEntity: CoreEntityArg<T> = {
+		// Generate path
+		...coreArgPathConvert({
+			id: CoreArgIds.Entity,
+			meta,
+			parentIds: coreEntityArgParentIdSet,
+			sourceArgPath: entity,
+			sourceOptions,
+			targetOptions
+		}),
+
+		// Generate mode
 		modeUuid: sourceEntity.modeUuid,
-		worldUuid: sourceEntity.worldUuid
-	} as CoreEntityArgs<T>;
-	let targetEntityAs: Record<string, any> = targetEntity;
 
-	// Path
-	if (targetOptions[CoreArgOptionIds.Path] === true) {
-		/**
-		 * Entity with path.
-		 */
-		type EntityWithPath = CoreEntityArgs<CoreArgOptionsGenerate<CoreArgOptionIds.Path>>;
-		let targetEntityWithPath: EntityWithPath = targetEntityAs as EntityWithPath;
-		if (sourceOptions[CoreArgOptionIds.Path] === true) {
-			const sourceEntityWithPath: EntityWithPath = sourceEntityAs as EntityWithPath;
-			targetEntityWithPath.shardUuid = sourceEntityWithPath.shardUuid;
-			targetEntityWithPath.gridUuid = sourceEntityWithPath.gridUuid;
-			targetEntityWithPath.cellUuid = sourceEntityWithPath.cellUuid;
-		} else {
-			targetEntityWithPath.shardUuid = defaultShardUuid;
-			targetEntityWithPath.gridUuid = defaultGridUuid;
-			targetEntityWithPath.cellUuid = defaultCellUuid;
-		}
-	}
+		// Generate world
+		worldUuid: sourceEntity.worldUuid,
 
-	// Kind
-	if (targetOptions[CoreArgOptionIds.Kind] === true) {
-		/**
-		 * Entity with kind.
-		 */
-		type EntityWithKind = CoreEntityArgs<CoreArgOptionsGenerate<CoreArgOptionIds.Kind>>;
-		let targetEntityWithKind: EntityWithKind = targetEntityAs as EntityWithKind;
-		if (sourceOptions[CoreArgOptionIds.Kind] === true) {
-			targetEntityWithKind.kindUuid = (sourceEntityAs as EntityWithKind).kindUuid;
-		} else {
-			targetEntityWithKind.kindUuid = defaultKindUuid;
-		}
-	}
+		// Generate kind
+		...(function (): CoreEntityArgKind<T> {
+			/**
+			 * Entity with kind.
+			 */
+			type EntityWithKind = CoreEntityArg<CoreArgOptionsGenerate<CoreArgOptionIds.Kind>>;
+
+			let argKind: CoreEntityArgKind<T> =
+				targetOptions[CoreArgOptionIds.Kind] === true
+					? {
+							kindUuid:
+								sourceOptions[CoreArgOptionIds.Kind] === true
+									? (sourceEntityAs as EntityWithKind).kindUuid
+									: defaultKindUuid
+					  }
+					: ({} as CoreEntityArgKind<T>);
+
+			return argKind;
+		})()
+	};
 
 	// Return
 	return targetEntity;
+}
+
+// TODO: Remove
+/**
+ * Legacy.
+ *
+ * @param rawSource - Legacy
+ * @param path - Legacy
+ * @returns - Legacy
+ */
+export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPathExtended): CommsEntityArgs {
+	return {
+		...path,
+		...rawSource
+	};
 }
