@@ -20,16 +20,27 @@ import {
 	coreArgObjectWords
 } from ".";
 
+// BUG: Remove fix
 /**
  * A type for the property name of path UUID.
+ *
+ * @remarks Unknown breaking change in TS 4.6, prevents union from being produced, when the parameter is generic union, so temporary fix of recursion applied.
  */
-export type CoreArgPathUuidPropertyName<I extends CoreArgIds> = `${CoreArgObjectWords[I]["singularLowercaseWord"]}Uuid`;
+export type CoreArgPathUuidPropertyName<I extends CoreArgIds> = I extends infer A | infer B
+	? A extends CoreArgIds
+		? B extends CoreArgIds
+			?
+					| `${CoreArgObjectWords[A]["singularLowercaseWord"]}Uuid`
+					| `${CoreArgObjectWords[B]["singularLowercaseWord"]}Uuid`
+			: never
+		: never
+	: never;
 
 /**
  * Generates UUIDs in core arg.
  */
 export type CoreArgPathOwnOrExtended<I extends CoreArgIds> = {
-	[K in CoreArgPathUuidPropertyName<I> as K]: Uuid;
+	[K in I as `${CoreArgObjectWords[K]["singularLowercaseWord"]}Uuid`]: Uuid;
 };
 
 /**

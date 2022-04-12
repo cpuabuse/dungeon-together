@@ -36,10 +36,10 @@ import { CoreUniverseObject, CoreUniverseObjectArgsOptionsUnion } from ".";
  * Data for class constraint.
  */
 type CoreUniverseObjectContainerClassConstraintData<
-	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds>,
+	// Child without children or parents
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options>,
 	ChildId extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	ParentIds extends CoreArgIds = never,
 	Base extends ConcreteConstructorConstraint = ConcreteConstructorConstraint
 > = ComputedClassData<{
 	/**
@@ -60,13 +60,13 @@ type CoreUniverseObjectContainerClassConstraintData<
 			) => void;
 		} & {
 			[K in `get${CoreArgObjectWords[ChildId]["singularCapitalizedWord"]}`]: (
-				path: CoreArgPath<ChildId, Options, ParentIds>
+				path: CoreArgPath<ChildId, Options>
 			) => ChildUniverseObject;
 		} & {
 			[K in `remove${CoreArgObjectWords[ChildId]["singularCapitalizedWord"]}`]: (
-				path: CoreArgPath<ChildId, Options, ParentIds>
+				path: CoreArgPath<ChildId, Options>
 			) => void;
-		} & CoreArgsContainer<ChildUniverseObject, ChildId, Options, ParentIds>;
+		} & CoreArgsContainer<ChildUniverseObject, ChildId, Options>;
 
 		/**
 		 * Abstract.
@@ -91,13 +91,12 @@ type CoreUniverseObjectContainerClassConstraintData<
  * Data to be consumed when extending.
  */
 export type CoreUniverseObjectContainerClassConstraintDataExtends<
-	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds>,
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options>,
 	ChildId extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	ParentIds extends CoreArgIds = never,
 	Base extends ConcreteConstructorConstraint = ConcreteConstructorConstraint
 > = ComputedClassDataExtends<
-	CoreUniverseObjectContainerClassConstraintData<ChildUniverseObject, ChildId, Options, ParentIds, Base>
+	CoreUniverseObjectContainerClassConstraintData<ChildUniverseObject, ChildId, Options, Base>
 >;
 
 /**
@@ -106,38 +105,30 @@ export type CoreUniverseObjectContainerClassConstraintDataExtends<
  * @typeParam ChildUniverseObject - Universe object to contain
  * @typeParam ChildId - ID of the universe object
  * @typeParam Options - Options for the universe object
- * @typeParam ParentIds - Parent IDs of the universe object
  */
 export type CoreUniverseObjectContainerClassImplements<
-	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds>,
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options>,
 	ChildId extends CoreArgIds,
-	Options extends CoreUniverseObjectArgsOptionsUnion,
-	ParentIds extends CoreArgIds = never
-> = ComputedClassClassImplements<
-	CoreUniverseObjectContainerClassConstraintData<ChildUniverseObject, ChildId, Options, ParentIds>
->;
+	Options extends CoreUniverseObjectArgsOptionsUnion
+> = ComputedClassClassImplements<CoreUniverseObjectContainerClassConstraintData<ChildUniverseObject, ChildId, Options>>;
 
 /**
  * Universe object container final type.
  */
 export type CoreUniverseObjectContainerClass<
-	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds>,
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options>,
 	ChildId extends CoreArgIds,
-	Options extends CoreUniverseObjectArgsOptionsUnion,
-	ParentIds extends CoreArgIds = never
-> = ComputedClassClassConstraint<
-	CoreUniverseObjectContainerClassConstraintData<ChildUniverseObject, ChildId, Options, ParentIds>
->;
+	Options extends CoreUniverseObjectArgsOptionsUnion
+> = ComputedClassClassConstraint<CoreUniverseObjectContainerClassConstraintData<ChildUniverseObject, ChildId, Options>>;
 
 /**
  * Universe object container final type.
  */
 export type CoreUniverseObjectContainer<
-	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds>,
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options>,
 	ChildId extends CoreArgIds,
-	Options extends CoreUniverseObjectArgsOptionsUnion,
-	ParentIds extends CoreArgIds = never
-> = InstanceType<CoreUniverseObjectContainerClass<ChildUniverseObject, ChildId, Options, ParentIds>>;
+	Options extends CoreUniverseObjectArgsOptionsUnion
+> = InstanceType<CoreUniverseObjectContainerClass<ChildUniverseObject, ChildId, Options>>;
 
 // #region Factory
 /**
@@ -154,7 +145,6 @@ export type CoreUniverseObjectContainer<
  * @typeParam ChildUniverseObject - Universe object to contain
  * @typeParam ChildId - ID of the universe object
  * @typeParam Options - Options for the universe object
- * @typeParam ParentIds - Parent IDs of the universe object
  * @param param - Destructured Parameter
  * @returns Universe object class
  */
@@ -163,10 +153,9 @@ export type CoreUniverseObjectContainer<
 export function CoreUniverseObjectContainerFactory<
 	BaseClass extends ConcreteConstructorConstraint,
 	// It is irrelevant if child has grandchildren or not (same for parent)
-	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, ParentIds>,
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options>,
 	ChildId extends CoreArgIds,
-	Options extends CoreUniverseObjectArgsOptionsUnion,
-	ParentIds extends CoreArgIds = never
+	Options extends CoreUniverseObjectArgsOptionsUnion
 >({
 	Base,
 	id,
@@ -203,7 +192,7 @@ export function CoreUniverseObjectContainerFactory<
 	 * Actual class info.
 	 */
 	type ActualClassInfo = ComputedClassInfo<
-		CoreUniverseObjectContainerClassConstraintData<ChildUniverseObject, ChildId, Options, ParentIds>,
+		CoreUniverseObjectContainerClassConstraintData<ChildUniverseObject, ChildId, Options>,
 		ComputedClassData<{
 			/**
 			 * Instance part of the class.
@@ -327,7 +316,7 @@ export function CoreUniverseObjectContainerFactory<
 				 * @param path - Path to search for
 				 * @returns Universe object
 				 */
-				value(this: ThisInstanceConcrete, path: CoreArg<ChildId, Options, ParentIds>): ChildUniverseObject {
+				value(this: ThisInstanceConcrete, path: CoreArg<ChildId, Options>): ChildUniverseObject {
 					let universeObject: ChildUniverseObject | undefined = this[nameUniverseObjects].get(
 						path[pathUuidPropertyName]
 					);
@@ -344,7 +333,7 @@ export function CoreUniverseObjectContainerFactory<
 				 * @param this - Universe object container
 				 * @param path - Path to search for
 				 */
-				value(this: ThisInstanceConcrete, path: CoreArgPath<ChildId, Options, ParentIds>): void {
+				value(this: ThisInstanceConcrete, path: CoreArgPath<ChildId, Options>): void {
 					this[nameUniverseObjects].delete(path[pathUuidPropertyName]);
 				}
 			}
@@ -357,7 +346,7 @@ export function CoreUniverseObjectContainerFactory<
 				 *
 				 * @returns Map of universe objects
 				 */
-				value: (): CoreArgsWithMapContainerArg<ChildUniverseObject, ChildId, Options, ParentIds> => new Map()
+				value: (): CoreArgsWithMapContainerArg<ChildUniverseObject, ChildId, Options> => new Map()
 			}
 		}
 	};

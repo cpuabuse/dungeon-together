@@ -105,7 +105,7 @@ export function coreArgPathConvert<
 	/**
 	 * Arg with path when own.
 	 */
-	type ChildArgPathExtended = CoreArg<I, CoreArgOptionsPathOwn, P>;
+	type ChildArgPathExtended = CoreArg<I, CoreArgOptionsPathExtended, P>;
 
 	/**
 	 * Options in case the path is common.
@@ -214,7 +214,10 @@ export function coreArgPathConvert<
 						const uuidPropertyName: CoreArgPathUuidPropertyName<typeof id> = coreArgIdToPathUuidPropertyName({
 							id
 						});
-						return { ...result, [uuidPropertyName]: (sourceArgPath as ChildArgPathExtended)[uuidPropertyName] };
+						return {
+							...result,
+							[uuidPropertyName]: (sourceArgPath as ChildArgPathExtended)[uuidPropertyName]
+						};
 					}, {} as ChildArgPathExtended) as CoreArgPath<I, T, P>;
 
 				// No default

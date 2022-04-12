@@ -20,14 +20,8 @@ import { AbstractConstructor, StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import { CoreArg, CoreArgIds, CoreArgOptionsPathExtended, CoreArgOptionsPathOwn, CoreArgPath } from "./arg";
 import { CoreArgOptionIds, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
-import { CoreBase, CoreBaseClassNonRecursive } from "./base";
-import {
-	CellPathExtended,
-	CoreCell,
-	CoreCellArgGrandparentIds,
-	CoreCellArgParentIds,
-	coreCellArgParentIds
-} from "./cell";
+import { CoreBaseClassNonRecursive } from "./base";
+import { CellPathExtended, coreCellArgParentIds } from "./cell";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectClassConstraintDataExtends,

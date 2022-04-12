@@ -123,7 +123,6 @@ type CoreUniverseObjectClassConstraintData<
 							ChildUniverseObject,
 							ChildId,
 							Options,
-							Id | ParentId | GrandparentIds,
 							CoreBaseClassNonRecursive
 					  >[ComputedClassWords.Instance][ComputedClassWords.Base];
 
@@ -132,7 +131,7 @@ type CoreUniverseObjectClassConstraintData<
 				 */
 				[ComputedClassWords.Inject]: object & {
 					[K in `terminate${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: () => void;
-				} & CoreArg<Id, Options, ParentId> &
+				} & CoreArg<Id, Options, ParentId | GrandparentIds> &
 					([ParentId] extends [never]
 						? unknown
 						: {
@@ -150,7 +149,6 @@ type CoreUniverseObjectClassConstraintData<
 							ChildUniverseObject,
 							ChildId,
 							Options,
-							Id | ParentId | GrandparentIds,
 							CoreBaseClassNonRecursive
 					  >[ComputedClassWords.Instance][ComputedClassWords.Populate];
 			};
@@ -169,7 +167,6 @@ type CoreUniverseObjectClassConstraintData<
 							ChildUniverseObject,
 							ChildId,
 							Options,
-							Id | ParentId | GrandparentIds,
 							CoreBaseClassNonRecursive
 					  >[ComputedClassWords.Static][ComputedClassWords.Base];
 
@@ -192,8 +189,7 @@ type CoreUniverseObjectClassConstraintData<
 					: CoreUniverseObjectContainerClassConstraintDataExtends<
 							ChildUniverseObject,
 							ChildId,
-							Options,
-							Id | ParentId | GrandparentIds
+							Options
 					  >[ComputedClassWords.Static][ComputedClassWords.Populate];
 			};
 		}>
@@ -206,12 +202,12 @@ type CoreUniverseObjectClassConstraintData<
 export type CoreUniverseObjectClassConstraintDataExtends<
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	ParentIds extends CoreArgIds = never,
+	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never,
-	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, Id | ParentIds | GrandparentIds> = never,
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, Id, ParentId | GrandparentIds> = never,
 	ChildId extends CoreArgIds = never
 > = ComputedClassDataExtends<
-	CoreUniverseObjectClassConstraintData<Id, Options, ParentIds, GrandparentIds, ChildUniverseObject, ChildId>
+	CoreUniverseObjectClassConstraintData<Id, Options, ParentId, GrandparentIds, ChildUniverseObject, ChildId>
 >;
 
 /**
@@ -241,7 +237,7 @@ export type CoreUniverseObjectClass<
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never,
-	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, Id | ParentId | GrandparentIds> = never,
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, Id, ParentId | GrandparentIds> = never,
 	ChildId extends CoreArgIds = never
 > = ComputedClassClassConstraint<
 	CoreUniverseObjectClassConstraintData<Id, Options, ParentId, GrandparentIds, ChildUniverseObject, ChildId>
@@ -260,7 +256,7 @@ export type CoreUniverseObjectClassImplements<
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentIds extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never,
-	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, Id | ParentIds | GrandparentIds> = never,
+	ChildUniverseObject extends CoreUniverseObject<ChildId, Options, Id, ParentIds | GrandparentIds> = never,
 	ChildId extends CoreArgIds = never
 > = ComputedClassClassImplements<
 	CoreUniverseObjectClassConstraintData<Id, Options, ParentIds, GrandparentIds, ChildUniverseObject, ChildId>
@@ -367,12 +363,7 @@ export function CoreUniverseObjectFactory<
 	/**
 	 * Type of the container class, no matter if it's a container or not.
 	 */
-	type ContainerInstance = CoreUniverseObjectContainer<
-		ChildUniverseObject,
-		ChildId,
-		Options,
-		Id | ParentId | GrandparentIds
-	>;
+	type ContainerInstance = CoreUniverseObjectContainer<ChildUniverseObject, ChildId, Options>;
 
 	/**
 	 * Base constructor parameters to extend.
@@ -382,7 +373,7 @@ export function CoreUniverseObjectFactory<
 	/**
 	 * Parameters for class constructor.
 	 */
-	type ConstructorParams = [CoreArg<Id, Options, ParentId>, ...BaseConstructorParams];
+	type ConstructorParams = [CoreArg<Id, Options, ParentId | GrandparentIds>, ...BaseConstructorParams];
 
 	/**
 	 * Actual class info.
@@ -533,13 +524,7 @@ export function CoreUniverseObjectFactory<
 		 */
 		// Need to extract type
 		// eslint-disable-next-line @typescript-eslint/typedef
-		const ContainerBase = CoreUniverseObjectContainerFactory<
-			BaseClass,
-			ChildUniverseObject,
-			ChildId,
-			Options,
-			Id | ParentId | GrandparentIds
-		>({
+		const ContainerBase = CoreUniverseObjectContainerFactory<BaseClass, ChildUniverseObject, ChildId, Options>({
 			Base,
 			// Overriding conditional type - removing "null"
 			id: childId,
@@ -654,13 +639,13 @@ export function CoreUniverseObjectFactory<
 			/**
 			 * The plural lowercase word for the universe object.
 			 */
-			pluralLowercaseWord: CoreArgObjectWords[Id]["pluralLowercaseWord"];
+			pluralLowercaseWord: CoreArgObjectWords[ParentId]["pluralLowercaseWord"];
 
 			/**
 			 * The singular capitalized word for the universe object.
 			 */
-			singularCapitalizedWord: CoreArgObjectWords[Id]["singularCapitalizedWord"];
-		} = coreArgObjectWords[id];
+			singularCapitalizedWord: CoreArgObjectWords[ParentId]["singularCapitalizedWord"];
+		} = coreArgObjectWords[parentId];
 
 		/* eslint-disable @typescript-eslint/typedef */
 		const nameGetParentUniverseObject = `get${parentWords.singularCapitalizedWord}` as const; // Name of remove universe object function
@@ -797,12 +782,7 @@ export function CoreUniverseObjectFactory<
 	const newBase: AbstractConstructor<BaseConstructorParams> =
 		childData === null
 			? Base
-			: (childData.ContainerBase as CoreUniverseObjectContainerClass<
-					ChildUniverseObject,
-					ChildId,
-					Options,
-					Id | ParentId | GrandparentIds
-			  >);
+			: (childData.ContainerBase as CoreUniverseObjectContainerClass<ChildUniverseObject, ChildId, Options>);
 
 	/**
 	 * Actual class for core universe object.
