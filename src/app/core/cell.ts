@@ -10,10 +10,12 @@
 import {
 	ComputedClassClassConstraint,
 	ComputedClassData,
+	ComputedClassExtractInstance,
 	ComputedClassInfo,
 	ComputedClassInstanceConstraint,
 	ComputedClassMembers,
-	ComputedClassWords
+	ComputedClassWords,
+	computedClassGenerate
 } from "../common/computed-class";
 import { AbstractConstructor, StaticImplements, StaticMembers } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
@@ -31,6 +33,7 @@ import {
 	CoreArgOptionsWithoutMap,
 	CoreArgPath,
 	CoreArgsContainer,
+	coreArgChildMetaGenerate,
 	coreArgPathConvert
 } from "./arg";
 import { CoreBaseClassNonRecursive } from "./base";
@@ -40,9 +43,8 @@ import {
 	CommsEntityRaw,
 	CoreEntity,
 	CoreEntityArg,
-	CoreEntityArgGrandparentIds,
+	CoreEntityArgParentIds,
 	EntityPathExtended,
-	EntityPathOwn,
 	commsEntityRawToArgs,
 	coreEntityArgsConvert
 } from "./entity";
@@ -168,18 +170,31 @@ export type CoreCellArgGrandparentIds = typeof coreCellArgGrandparentIds[number]
 export type CoreCellArgParentIds = typeof coreCellArgParentIds[number];
 
 /**
+ * Vector part of cell arg.
+ */
+type CoreCellArgVector<Options extends CoreArgOptionsUnion> = Options[CoreArgOptionIds.Vector] extends true
+	? Vector
+	: object;
+
+/**
+ * Known part of cell arg.
+ */
+type CoreCellArgKnown<Options extends CoreArgOptionsUnion> = {
+	/**
+	 * Worlds.
+	 */
+	worlds: Options[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
+};
+
+/**
  * Core cell args.
  *
  * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
-export type CoreCellArg<O extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Cell, O, CoreCellArgParentIds> &
-	CoreArgsContainer<CoreEntityArg<O>, CoreArgIds.Entity, O, CoreEntityArgGrandparentIds> &
-	(O[CoreArgOptionIds.Vector] extends true ? Vector : unknown) & {
-		/**
-		 * Worlds.
-		 */
-		worlds: O[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
-	};
+export type CoreCellArg<Options extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Cell, Options, CoreCellArgParentIds> &
+	CoreArgsContainer<CoreEntityArg<Options>, CoreArgIds.Entity, Options, CoreEntityArgParentIds> &
+	CoreCellArgVector<Options> &
+	CoreCellArgKnown<Options>;
 
 /**
  * Cell own path.
@@ -200,6 +215,7 @@ type CoreCellClassConstraintData<
 > = CoreUniverseObjectClassConstraintDataExtends<
 	CoreArgIds.Cell,
 	Options,
+	CoreArgIds.Grid,
 	CoreCellArgGrandparentIds,
 	Entity,
 	CoreArgIds.Entity
@@ -212,17 +228,12 @@ type CoreCellClassConstraintData<
 			/**
 			 * Populate.
 			 */
-			[ComputedClassWords.Populate]: {
-				/**
-				 * Attaches entity.
-				 */
-				attachEntity(entity: Entity): void;
+			[ComputedClassWords.Populate]: CoreCellArgKnown<Options>;
 
-				/**
-				 * Detaches entity.
-				 */
-				detachEntity({ entityUuid }: EntityPathOwn): boolean;
-			};
+			/**
+			 * Implements.
+			 */
+			[ComputedClassWords.Inject]: CoreCellArgVector<Options>;
 		};
 
 		/**
@@ -262,9 +273,14 @@ const coreCellArgGrandparentIds = [CoreArgIds.Shard] as const;
 export const coreCellArgParentIds = [...coreCellArgGrandparentIds, CoreArgIds.Grid] as const;
 
 /**
- * Unique set with parent ID's for core cell arg.
+ * Unique set with grandparent ID's for core cell arg.
  */
 export const coreCellArgGrandparentIdSet: Set<CoreCellArgGrandparentIds> = new Set(coreCellArgGrandparentIds);
+
+/**
+ * Unique set with parent ID's for core cell arg.
+ */
+export const coreCellArgParentIdSet: Set<CoreCellArgParentIds> = new Set(coreCellArgParentIds);
 
 /**
  * Factory for core cell.
@@ -322,6 +338,15 @@ export function CoreCellClassFactory<
 				 * Populate.
 				 */
 				[ComputedClassWords.Populate]: Cell;
+
+				/**
+				 * Inject.
+				 */
+				[ComputedClassWords.Inject]: ComputedClassExtractInstance<
+					typeof members,
+					ThisInstanceConcrete,
+					ConstructorParams
+				>;
 			};
 
 			/**
@@ -339,7 +364,7 @@ export function CoreCellClassFactory<
 				[ComputedClassWords.Populate]: StaticMembers<typeof Cell>;
 			};
 		}>,
-		BaseParams
+		ConstructorParams
 	>;
 
 	/**
@@ -359,16 +384,66 @@ export function CoreCellClassFactory<
 		BaseClass,
 		CoreArgIds.Cell,
 		Options,
+		CoreArgIds.Grid,
 		CoreCellArgGrandparentIds,
 		Entity,
 		CoreArgIds.Entity
 	>({
 		Base,
 		childId: CoreArgIds.Entity,
+		grandparentIds: coreCellArgGrandparentIdSet,
 		id: CoreArgIds.Cell,
 		options,
-		parentIds: coreCellArgGrandparentIdSet
+		parentId: CoreArgIds.Grid
 	});
+
+	// Want to infer
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const coords = ["x", "y", "z"] as const;
+
+	// Members
+	// Infer for type checks
+	// eslint-disable-next-line @typescript-eslint/typedef
+	let members = {
+		generate: {
+			...coords.reduce(
+				(result, name) => ({
+					...result,
+					[name]: {
+						name,
+
+						// ESLint buggy
+						// eslint-disable-next-line jsdoc/require-param
+						/**
+						 * Moves universe object to a different parent.
+						 *
+						 * @param this - Destructured `this`
+						 * @param path - Parent path
+						 * @returns Coordinate
+						 */
+						// Arg should be present for type
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
+						value(this: ThisInstanceConcrete, ...[arg]: ConstructorParams): number {
+							return 0;
+						}
+					}
+				}),
+				{} as {
+					[K in typeof coords[any]]: {
+						/**
+						 * Name.
+						 */
+						name: K;
+
+						/**
+						 * Value.
+						 */
+						value: (this: ThisInstanceConcrete, ...[arg]: ConstructorParams) => number;
+					};
+				}
+			)
+		}
+	};
 
 	/**
 	 * Core cell base class.
@@ -388,37 +463,33 @@ export function CoreCellClassFactory<
 		public abstract defaultEntity: Entity;
 
 		/**
-		 * Attach {@link CoreEntity} to {@link Cell}.
-		 *
-		 * Cell specific method.
-		 *
-		 * @param this - This will match when called with static options
-		 * @param entity - {@link CoreEntity}, anything that resides within a cell
+		 * Worlds.
 		 */
-		public attachEntity(this: ThisInstanceConcrete, entity: Entity): void {
-			this.entities.set(entity.entityUuid, entity);
-		}
+		public worlds: CoreCellArg<Options>["worlds"] = (options[CoreArgOptionIds.Map]
+			? new Set()
+			: new Array()) as CoreCellArg<Options>["worlds"];
 
 		/**
-		 * Detach {@link CoreEntity} from {@link Cell}.
+		 * Constructor.
 		 *
-		 * Cell specific method.
-		 *
-		 * @param this  - This will match when called with static options
-		 * @param param - Destructure parameter
-		 * @returns If deletion was successful or not
+		 * @param args - Constructor parameters
 		 */
-		public detachEntity(this: ThisInstanceConcrete, { entityUuid }: EntityPathOwn): boolean {
-			if (this.entities.has(entityUuid)) {
-				this.entities.delete(entityUuid);
-				return true;
-			}
-			return false;
+		public constructor(...args: ConstructorParams) {
+			// ESLint false negative
+			// eslint-disable-next-line constructor-super
+			super(...args);
+
+			// Assign properties
+			computedClassGenerate({
+				args,
+				members,
+				that: this as unknown as ThisInstanceConcrete
+			});
 		}
 	}
 
 	// Have to re-inject dynamic bits from generic parents
-	return Cell as ReturnClass;
+	return Cell as InstanceType<ReturnClass> extends CoreCellArg<Options> ? ReturnClass : never;
 }
 
 /**
@@ -433,7 +504,7 @@ export function coreCellArgsConvert<
 	SourceOptions extends CoreArgOptionsUnion,
 	TargetOptions extends CoreArgOptionsUnion
 >({
-	sourceCell,
+	cell,
 	sourceOptions,
 	targetOptions,
 	meta
@@ -441,7 +512,7 @@ export function coreCellArgsConvert<
 	/**
 	 * Core cell args.
 	 */
-	sourceCell: CoreCellArg<SourceOptions>;
+	cell: CoreCellArg<SourceOptions>;
 
 	/**
 	 * Option for the source.
@@ -456,22 +527,72 @@ export function coreCellArgsConvert<
 	/**
 	 * Meta.
 	 */
-	meta: CoreArgMeta<CoreArgIds.Cell, SourceOptions, TargetOptions, CoreCellArgGrandparentIds>;
+	meta: CoreArgMeta<CoreArgIds.Cell, SourceOptions, TargetOptions, CoreCellArgParentIds>;
 }): CoreCellArg<TargetOptions> {
 	/**
 	 * Core cell args with vector.
 	 */
-	type ArgWithVector = CoreCellArg<CoreArgOptionsGenerate<CoreArgOptionIds.Vector>>;
+	type CellWithVector = CoreCellArg<CoreArgOptionsGenerate<CoreArgOptionIds.Vector>>;
 
 	/**
 	 * Core cell args with map.
 	 */
-	type ArgWithMap = CoreCellArg<CoreArgOptionsWithMap>;
+	type CellWithMap = CoreCellArg<CoreArgOptionsWithMap>;
 
 	/**
 	 * Core cell args without map.
 	 */
-	type ArgWithoutMap = CoreCellArg<CoreArgOptionsWithoutMap>;
+	type CellWithoutMap = CoreCellArg<CoreArgOptionsWithoutMap>;
+
+	/**
+	 * Core entity args with map.
+	 */
+	type EntityWithMap = CoreEntityArg<CoreArgOptionsWithMap>;
+
+	/**
+	 * Core entity args without map.
+	 */
+	type EntityWithoutMap = CoreEntityArg<CoreArgOptionsWithoutMap>;
+
+	/**
+	 * Convert child.
+	 *
+	 * @param param - Destructure parameter
+	 * @returns Converted child
+	 */
+	function entityArgsConvert({
+		entity,
+		index
+	}: {
+		/**
+		 * Entity.
+		 */
+		entity: CoreEntityArg<SourceOptions>;
+
+		/**
+		 * Index.
+		 */
+		index: number;
+	}): CoreEntityArg<TargetOptions> {
+		return coreEntityArgsConvert({
+			entity,
+
+			meta: coreArgChildMetaGenerate({
+				childArgId: CoreArgIds.Entity,
+				index,
+				meta,
+				parentArgId: CoreArgIds.Cell,
+				sourceOptions,
+				sourceParentArg: cell,
+				targetOptions
+			}),
+
+			// Cast to expected type
+			sourceOptions,
+			// Cast to expected type
+			targetOptions
+		});
+	}
 
 	// Cannot assign to conditional type without casting
 	let targetCell: CoreCellArg<TargetOptions> = {} as CoreCellArg<TargetOptions>;
@@ -482,8 +603,8 @@ export function coreCellArgsConvert<
 		coreArgPathConvert({
 			id: CoreArgIds.Cell,
 			meta,
-			parentIds: coreCellArgGrandparentIdSet,
-			sourceArgPath: sourceCell,
+			parentIds: coreCellArgParentIdSet,
+			sourceArgPath: cell,
 			sourceOptions,
 			targetOptions
 		})
@@ -494,85 +615,65 @@ export function coreCellArgsConvert<
 		if (sourceOptions[CoreArgOptionIds.Vector] === true) {
 			// Source to target
 			// Convert to `unknown` as does not overlap
-			(targetCell as unknown as ArgWithVector).x = (sourceCell as unknown as ArgWithVector).x;
-			(targetCell as unknown as ArgWithVector).y = (sourceCell as unknown as ArgWithVector).y;
-			(targetCell as unknown as ArgWithVector).z = (sourceCell as unknown as ArgWithVector).z;
+			(targetCell as unknown as CellWithVector).x = (cell as unknown as CellWithVector).x;
+			(targetCell as unknown as CellWithVector).y = (cell as unknown as CellWithVector).y;
+			(targetCell as unknown as CellWithVector).z = (cell as unknown as CellWithVector).z;
 		} else {
 			// Default to `0`
 			// Convert to `unknown` as does not overlap
-			(targetCell as unknown as ArgWithVector).x = 0;
-			(targetCell as unknown as ArgWithVector).y = 0;
-			(targetCell as unknown as ArgWithVector).z = 0;
+			(targetCell as unknown as CellWithVector).x = 0;
+			(targetCell as unknown as CellWithVector).y = 0;
+			(targetCell as unknown as CellWithVector).z = 0;
 		}
 	}
 
 	// Map
 	if (targetOptions[CoreArgOptionIds.Map] === true) {
 		// Worlds
-		(targetCell as ArgWithMap).worlds = new Set(sourceCell.worlds);
+		(targetCell as CellWithMap).worlds = new Set(cell.worlds);
 
 		if (sourceOptions[CoreArgOptionIds.Map] === true) {
 			// Entities
-			(targetCell as ArgWithMap).entities = new Map(
+			(targetCell as CellWithMap).entities = new Map(
 				// Argument types correctly inferred from "Array.from()", probably eslint bug
 				// eslint-disable-next-line @typescript-eslint/typedef
-				Array.from((sourceCell as ArgWithMap).entities, ([uuid, entity]) => [
+				Array.from((cell as CellWithMap).entities, ([uuid, entity], index) => [
 					uuid,
-					coreEntityArgsConvert({
-						entity,
-						// Cast to expected type
-						sourceOptions: sourceOptions as CoreArgOptionsWithMap,
-						// Cast to expected type
-						targetOptions: targetOptions as CoreArgOptionsWithMap
-					})
+					// Cast arguments back to generic type, and result to expected type
+					entityArgsConvert({ entity: entity as CoreEntityArg<SourceOptions>, index }) as EntityWithMap
 				])
 			);
 		} else {
 			// Entities
-			(targetCell as ArgWithMap).entities = new Map(
-				(sourceCell as ArgWithoutMap).entities.map(entity => [
+			(targetCell as CellWithMap).entities = new Map(
+				(cell as CellWithoutMap).entities.map((entity, index) => [
 					entity.entityUuid,
-					coreEntityArgsConvert({
-						entity,
-						// Cast to expected type
-						sourceOptions: sourceOptions as CoreArgOptionsWithoutMap,
-						// Cast to expected type
-						targetOptions: targetOptions as CoreArgOptionsWithMap
-					})
+					// Cast arguments back to generic type, and result to expected type
+					entityArgsConvert({ entity: entity as CoreEntityArg<SourceOptions>, index }) as EntityWithMap
 				])
 			);
 		}
 	} else {
 		// Worlds
-		(targetCell as ArgWithoutMap).worlds = Array.from(sourceCell.worlds);
+		(targetCell as CellWithoutMap).worlds = Array.from(cell.worlds);
 
 		if (sourceOptions[CoreArgOptionIds.Map] === true) {
 			// Entities
-			(targetCell as ArgWithoutMap).entities = Array.from(
-				(sourceCell as ArgWithMap).entities,
+			(targetCell as CellWithoutMap).entities = Array.from(
+				(cell as CellWithMap).entities,
 				// Argument types correctly inferred from "Array.from()", probably eslint bug, and UUID is unused
 				// eslint-disable-next-line @typescript-eslint/typedef, @typescript-eslint/no-unused-vars
-				([uuid, entity]) =>
+				([uuid, entity], index) =>
 					// Set to actual type
-					coreEntityArgsConvert({
-						entity,
-						// Cast to expected type
-						sourceOptions: sourceOptions as CoreArgOptionsWithMap,
-						// Cast to expected type
-						targetOptions: targetOptions as CoreArgOptionsWithoutMap
-					})
+					// Cast arguments back to generic type, and result to expected type
+					entityArgsConvert({ entity: entity as CoreEntityArg<SourceOptions>, index }) as EntityWithoutMap
 			);
 		} else {
 			// Entities
-			(targetCell as ArgWithoutMap).entities = (sourceCell as ArgWithoutMap).entities.map(entity =>
-				// Set to actual type
-				coreEntityArgsConvert({
-					entity,
-					// Cast to expected type
-					sourceOptions: sourceOptions as CoreArgOptionsWithoutMap,
-					// Cast to expected type
-					targetOptions: targetOptions as CoreArgOptionsWithoutMap
-				})
+			(targetCell as CellWithoutMap).entities = (cell as CellWithoutMap).entities.map(
+				(entity, index) =>
+					// Cast arguments back to generic type, and result to expected type
+					entityArgsConvert({ entity: entity as CoreEntityArg<SourceOptions>, index }) as EntityWithoutMap
 			);
 		}
 	}

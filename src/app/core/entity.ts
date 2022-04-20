@@ -16,7 +16,7 @@ import {
 	ComputedClassWords
 } from "../common/computed-class";
 import { defaultKindUuid } from "../common/defaults";
-import { AbstractConstructor, StaticImplements } from "../common/utility-types";
+import { AbstractConstructor, StaticImplements, StaticMembers } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import {
 	CoreArg,
@@ -76,6 +76,22 @@ export interface CommsEntity extends CommsEntityArgs {
 	 */
 	terminate(): void;
 }
+
+// TODO: Remove
+/**
+ * Legacy.
+ *
+ * @param rawSource - Legacy
+ * @param path - Legacy
+ * @returns - Legacy
+ */
+export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPathExtended): CommsEntityArgs {
+	return {
+		...path,
+		...rawSource
+	};
+}
+
 // #endregion
 
 /**
@@ -101,21 +117,33 @@ type CoreEntityArgKind<O extends CoreArgOptionsUnion> = O[CoreArgOptionIds.Kind]
 	: object;
 
 /**
- * Core entity.
- *
- * If any changes are made, they should be reflected in {@link coreArgsConvert}.
+ * Statically known properties of core entity arg.
  */
-export type CoreEntityArg<O extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Entity, O, CoreEntityArgParentIds> & {
+// Generic might be used later
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type CoreEntityArgKnown<Options extends CoreArgOptionsUnion> = {
 	/**
 	 * Mode of the entity.
 	 */
 	modeUuid: Uuid;
-
 	/**
 	 * World in which entity resides.
 	 */
 	worldUuid: Uuid;
-} & CoreEntityArgKind<O>;
+};
+
+/**
+ * Core entity.
+ *
+ * If any changes are made, they should be reflected in {@link coreArgsConvert}.
+ */
+export type CoreEntityArg<Options extends CoreArgOptionsUnion> = CoreArg<
+	CoreArgIds.Entity,
+	Options,
+	CoreEntityArgParentIds
+> &
+	CoreEntityArgKnown<Options> &
+	CoreEntityArgKind<Options>;
 
 /**
  * Path to an entity only.
@@ -145,22 +173,12 @@ export type CoreEntityClassConstraintData<Options extends CoreUniverseObjectArgs
 				/**
 				 * Populate.
 				 */
-				[ComputedClassWords.Populate]: {
-					/**
-					 * Kind UUID.
-					 */
-					kindUuid: Uuid;
+				[ComputedClassWords.Populate]: CoreEntityArgKnown<Options>;
 
-					/**
-					 * Mode UUID.
-					 */
-					modeUuid: Uuid;
-
-					/**
-					 * World UUID.
-					 */
-					worldUuid: Uuid;
-				};
+				/**
+				 * Implements.
+				 */
+				[ComputedClassWords.Implement]: CoreEntityArgKind<Options>;
 			};
 
 			/**
@@ -273,16 +291,23 @@ export function CoreEntityClassFactory<
 				/**
 				 * Base.
 				 */
-				[ComputedClassWords.Base]: typeof NewBase;
+				[ComputedClassWords.Base]: StaticMembers<typeof NewBase>;
 
 				/**
 				 * Populate.
 				 */
-				[ComputedClassWords.Populate]: typeof Entity;
+				[ComputedClassWords.Populate]: StaticMembers<typeof Entity>;
 			};
 		}>,
 		ConstructorParams
 	>;
+
+	/**
+	 * New instance type to use as `this`.
+	 */
+	// Saved for future use
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	type ThisInstanceConcrete = ActualClassInfo[ComputedClassWords.ThisInstanceConcrete];
 
 	/**
 	 * Class to return.
@@ -315,11 +340,6 @@ export function CoreEntityClassFactory<
 		implements StaticImplements<ActualClassInfo[ComputedClassWords.ClassImplements], typeof Entity>
 	{
 		/**
-		 * Kind of entity.
-		 */
-		public abstract kindUuid: Uuid;
-
-		/**
 		 * Mode of the entity.
 		 */
 		public abstract modeUuid: Uuid;
@@ -330,8 +350,8 @@ export function CoreEntityClassFactory<
 		public abstract worldUuid: Uuid;
 	}
 
-	// Return as `ReturnClass`, and verify it satisfies arg constraints
-	return Entity as InstanceType<ReturnClass> extends CoreEntityArg<Options> ? ReturnClass : never;
+	// Return as `ReturnClass`, and verify constraint data satisfies arg constraints
+	return Entity as ReturnClass;
 }
 
 /**
@@ -412,19 +432,4 @@ export function coreEntityArgsConvert<S extends CoreArgOptionsUnion, T extends C
 
 	// Return
 	return targetEntity;
-}
-
-// TODO: Remove
-/**
- * Legacy.
- *
- * @param rawSource - Legacy
- * @param path - Legacy
- * @returns - Legacy
- */
-export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPathExtended): CommsEntityArgs {
-	return {
-		...path,
-		...rawSource
-	};
 }

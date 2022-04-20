@@ -18,10 +18,11 @@ import {
 	ComputedClassInstanceConstraint,
 	ComputedClassMembers,
 	ComputedClassWords,
-	computedClassAssign
+	computedClassAssign,
+	computedClassGenerate
 } from "../../common/computed-class";
 import { urlPathSeparator } from "../../common/defaults";
-import { AbstractConstructor, MaybeDefined, StaticImplements } from "../../common/utility-types";
+import { AbstractConstructor, MaybeDefined, StaticImplements, StaticMembers } from "../../common/utility-types";
 import { Uuid, getDefaultUuid } from "../../common/uuid";
 import {
 	CoreArg,
@@ -388,7 +389,7 @@ export function CoreUniverseObjectFactory<
 				/**
 				 * Inject.
 				 */
-				[ComputedClassWords.Inject]: ComputedClassExtractInstance<typeof members, [MemberGenerateParameter]>;
+				[ComputedClassWords.Inject]: ComputedClassExtractInstance<typeof members>;
 
 				/**
 				 * Populate.
@@ -403,7 +404,7 @@ export function CoreUniverseObjectFactory<
 				/**
 				 * Base.
 				 */
-				[ComputedClassWords.Base]: IsContainer extends true ? ContainerBase : BaseClass;
+				[ComputedClassWords.Base]: StaticMembers<IsContainer extends true ? ContainerBase : BaseClass>;
 
 				/**
 				 * Inject.
@@ -413,7 +414,7 @@ export function CoreUniverseObjectFactory<
 				/**
 				 * Populate.
 				 */
-				[ComputedClassWords.Populate]: typeof UniverseObject;
+				[ComputedClassWords.Populate]: StaticMembers<typeof UniverseObject>;
 			};
 		}>,
 		ConstructorParams
@@ -434,7 +435,7 @@ export function CoreUniverseObjectFactory<
 			/**
 			 * Extended path UUID value.
 			 */
-			value: (arg: MemberGenerateParameter) => Uuid;
+			value: (...arg: ConstructorParams) => Uuid;
 		};
 	};
 
@@ -451,10 +452,6 @@ export function CoreUniverseObjectFactory<
 	 */
 	type ThisStaticConcrete = ActualClassInfo[ComputedClassWords.ThisStaticConcrete];
 
-	/**
-	 * Parameter for member generation function.
-	 */
-	type MemberGenerateParameter = ConstructorParams[0];
 	/**
 	 * Return class type.
 	 */
@@ -697,13 +694,15 @@ export function CoreUniverseObjectFactory<
 						[`universeObjectUuidExtended${i}`]: {
 							name: uuidPropertyName,
 
+							// ESLint buggy
+							// eslint-disable-next-line jsdoc/require-param
 							/**
 							 * Extended path UUID.
 							 *
 							 * @param arg - Arg from constructor
 							 * @returns UUID of grandparent universe object
 							 */
-							value: (arg: MemberGenerateParameter): Uuid => {
+							value: (...[arg]: ConstructorParams): Uuid => {
 								return arg[uuidPropertyName];
 							}
 						}
@@ -759,13 +758,17 @@ export function CoreUniverseObjectFactory<
 		generate: {
 			universeObjectUuid: {
 				name: nameUniverseObjectUuid,
+
+				// ESLint buggy
+				// eslint-disable-next-line jsdoc/require-param
 				/**
 				 *	Universe object UUID.
 				 *
+				 * @param this - This instance
 				 * @param arg - CoreArg given to constructor
 				 * @returns UUID of the universe object
 				 */
-				value: (arg: MemberGenerateParameter): Uuid => {
+				value(this: ThisInstanceConcrete, ...[arg]: ConstructorParams): Uuid {
 					return arg[nameUniverseObjectUuid];
 				}
 			},
@@ -808,15 +811,13 @@ export function CoreUniverseObjectFactory<
 		 * When assigning to members, value is cast for extra type safety.
 		 */
 		public constructor(...args: ConstructorParams) {
-			const [arg, ...baseParams]: ConstructorParams = args;
+			const [, ...baseParams]: ConstructorParams = args;
 
 			// Call super constructor
 			super(...baseParams);
 
 			// Assign properties
-			Object.values(members.generate).forEach(property => {
-				(this as Record<string, unknown>)[property.name] = property.value(arg);
-			});
+			computedClassGenerate({ args, members, that: this as unknown as ThisInstanceConcrete });
 		}
 	}
 

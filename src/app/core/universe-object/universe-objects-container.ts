@@ -12,12 +12,20 @@ import {
 	ComputedClassClassImplements,
 	ComputedClassData,
 	ComputedClassDataExtends,
+	ComputedClassExtractClass,
 	ComputedClassExtractInstance,
 	ComputedClassInfo,
 	ComputedClassMembers,
-	ComputedClassWords
+	ComputedClassWords,
+	computedClassAssign,
+	computedClassGenerate
 } from "../../common/computed-class";
-import { ConcreteConstructor, ConcreteConstructorConstraint, StaticImplements } from "../../common/utility-types";
+import {
+	ConcreteConstructor,
+	ConcreteConstructorConstraint,
+	StaticImplements,
+	StaticMembers
+} from "../../common/utility-types";
 
 import {
 	CoreArg,
@@ -40,7 +48,7 @@ type CoreUniverseObjectContainerClassConstraintData<
 	ChildUniverseObject extends CoreUniverseObject<ChildId, Options>,
 	ChildId extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Base extends ConcreteConstructorConstraint = ConcreteConstructorConstraint
+	BaseClass extends ConcreteConstructorConstraint = ConcreteConstructorConstraint
 > = ComputedClassData<{
 	/**
 	 * Concrete injection and abstract members, no own members.
@@ -49,7 +57,7 @@ type CoreUniverseObjectContainerClassConstraintData<
 		/**
 		 * Base instance.
 		 */
-		[ComputedClassWords.Base]: InstanceType<Base>;
+		[ComputedClassWords.Base]: InstanceType<BaseClass>;
 
 		/**
 		 * Inject.
@@ -83,7 +91,7 @@ type CoreUniverseObjectContainerClassConstraintData<
 		/**
 		 * Base class.
 		 */
-		[ComputedClassWords.Base]: Base;
+		[ComputedClassWords.Base]: StaticMembers<BaseClass>;
 	};
 }>;
 
@@ -151,7 +159,7 @@ export type CoreUniverseObjectContainer<
 // Force type inference to extract class type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreUniverseObjectContainerFactory<
-	BaseClass extends ConcreteConstructorConstraint,
+	BaseClass extends ConcreteConstructor,
 	// It is irrelevant if child has grandchildren or not (same for parent)
 	ChildUniverseObject extends CoreUniverseObject<ChildId, Options>,
 	ChildId extends CoreArgIds,
@@ -221,12 +229,17 @@ export function CoreUniverseObjectContainerFactory<
 				/**
 				 * Base.
 				 */
-				[ComputedClassWords.Base]: BaseClass;
+				[ComputedClassWords.Base]: StaticMembers<BaseClass>;
 
 				/**
 				 * Members assigned via class block.
 				 */
-				[ComputedClassWords.Populate]: typeof UniverseObjectContainer;
+				[ComputedClassWords.Populate]: StaticMembers<typeof UniverseObjectContainer>;
+
+				/**
+				 * Injected static members.
+				 */
+				[ComputedClassWords.Inject]: ComputedClassExtractClass<typeof members>;
 			};
 		}>,
 		ConstructorParams
@@ -344,11 +357,15 @@ export function CoreUniverseObjectContainerFactory<
 				/**
 				 * Function generating a new map of universe objects.
 				 *
+				 * @param this - Universe object container
 				 * @returns Map of universe objects
 				 */
-				value: (): CoreArgsWithMapContainerArg<ChildUniverseObject, ChildId, Options> => new Map()
+				value(this: ThisInstanceConcrete): CoreArgsWithMapContainerArg<ChildUniverseObject, ChildId, Options> {
+					return new Map();
+				}
 			}
-		}
+		},
+		staticAssign: {}
 	};
 
 	/**
@@ -377,16 +394,13 @@ export function CoreUniverseObjectContainerFactory<
 			super(...args);
 
 			// Assign properties
-			Object.values(members.generate).forEach(property => {
-				(this as Record<string, unknown>)[property.name] = property.value();
-			});
+			// Within context of the class, `this` is not seen as `ThisInstanceConcrete` yet
+			computedClassGenerate({ args: [], members, that: this as unknown as ThisInstanceConcrete });
 		}
 	}
 
 	// Set prototype
-	Object.values(members.assign).forEach(method => {
-		(UniverseObjectContainer.prototype as Record<string, unknown>)[method.name] = method.value;
-	});
+	computedClassAssign({ Base: UniverseObjectContainer, members });
 
 	// Return
 	return UniverseObjectContainer as ReturnClass;

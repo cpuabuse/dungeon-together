@@ -32,6 +32,7 @@ export type ComputedClassAssign<Property extends "assign" | "staticAssign" = "as
  * Generate part of members.
  */
 export type ComputedClassGenerate<
+	That = any,
 	Parameter extends any[] = any[],
 	Property extends "generate" | "staticGenerate" = "generate"
 > = {
@@ -45,7 +46,7 @@ export type ComputedClassGenerate<
 			/**
 			 * Generation function.
 			 */
-			value: (...arg: Parameter) => unknown;
+			value: (this: That, ...arg: Parameter) => unknown;
 		};
 	};
 };
@@ -57,14 +58,18 @@ export type ComputedClassGenerate<
  * For some reason, some information is lost if not using two subtypes.
  */
 export type ComputedClassExtractInstance<
-	T extends ComputedClassAssign | ComputedClassGenerate<P> | (ComputedClassAssign & ComputedClassGenerate<P>),
+	T extends
+		| ComputedClassAssign
+		| ComputedClassGenerate<That, P>
+		| (ComputedClassAssign & ComputedClassGenerate<That, P>),
+	That = any,
 	P extends any[] = any[]
 > = (T extends ComputedClassAssign
 	? {
 			[K in keyof T["assign"] as T["assign"][K]["name"]]: T["assign"][K]["value"];
 	  }
 	: unknown) &
-	(T extends ComputedClassGenerate<P>
+	(T extends ComputedClassGenerate<That, P>
 		? {
 				[K in keyof T["generate"] as T["generate"][K]["name"]]: ReturnType<T["generate"][K]["value"]>;
 		  }
@@ -79,17 +84,18 @@ export type ComputedClassExtractInstance<
 export type ComputedClassExtractClass<
 	T extends
 		| ComputedClassAssign<"staticAssign">
-		| ComputedClassGenerate<P, "staticGenerate">
-		| (ComputedClassAssign<"staticAssign"> & ComputedClassGenerate<P, "staticGenerate">),
+		| ComputedClassGenerate<That, P, "staticGenerate">
+		| (ComputedClassAssign<"staticAssign"> & ComputedClassGenerate<That, P, "staticGenerate">),
+	That = any,
 	P extends any[] = any[]
 > = (T extends ComputedClassAssign<"staticAssign">
 	? {
 			[K in keyof T["staticAssign"] as T["staticAssign"][K]["name"]]: T["staticAssign"][K]["value"];
 	  }
 	: unknown) &
-	(T extends ComputedClassGenerate<P, "staticGenerate">
+	(T extends ComputedClassGenerate<That, P, "staticGenerate">
 		? // Check that generation params match
-		  T extends ComputedClassGenerate<P, "staticGenerate">
+		  T extends ComputedClassGenerate<That, P, "staticGenerate">
 			? {
 					[K in keyof T["staticGenerate"] as T["staticGenerate"][K]["name"]]: ReturnType<
 						T["staticGenerate"][K]["value"]
@@ -128,6 +134,36 @@ export function computedClassAssign({
 
 	Object.values(members.staticAssign).forEach(method => {
 		(Base as Record<string, unknown>)[method.name] = method.value;
+	});
+}
+
+/**
+ * Assigns data to class.
+ *
+ * @param param - Destructured parameter
+ */
+export function computedClassGenerate<That, P extends any[]>({
+	that,
+	members,
+	args
+}: {
+	/**
+	 * Argument for generate functions.
+	 */
+	args: P;
+
+	/**
+	 * Base class.
+	 */
+	that: That;
+
+	/**
+	 * Members.
+	 */
+	members: ComputedClassGenerate<That, P>;
+}): void {
+	Object.values(members.generate).forEach(property => {
+		(that as Record<string, unknown>)[property.name] = property.value.apply(that, args);
 	});
 }
 
@@ -189,9 +225,8 @@ type ComputedClassGenerateClass<
 	Data extends ComputedClassData,
 	Include extends ComputedClassInclude,
 	Parameters extends any[]
-> = AbstractConstructor<Parameters> & // Inject the parameters, order over static classes matters (first constructor parameters will be used)
-	AbstractConstructorConstraint<ComputedClassGenerateInstance<Data, Include>> & // Inject the instance members
-	ComputedClassGenerateStatic<Data, Include>; // Inject the static members
+> = AbstractConstructor<Parameters, ComputedClassGenerateInstance<Data, Include>> &
+	ComputedClassGenerateStatic<Data, Include>;
 
 /**
  * Class constraint.
@@ -206,8 +241,8 @@ type ComputedClassGenerateClass<
 type ComputedClassGenerateClassConstraint<
 	Data extends ComputedClassData,
 	Include extends ComputedClassInclude
-> = ComputedClassGenerateStatic<Data, Include> &
-	AbstractConstructorConstraint<ComputedClassGenerateInstance<Data, Include>>;
+> = AbstractConstructorConstraint<ComputedClassGenerateInstance<Data, Include>> &
+	ComputedClassGenerateStatic<Data, Include>;
 
 /**
  * Enum to index {@link ComputedClassData}.
