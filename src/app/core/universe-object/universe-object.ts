@@ -364,12 +364,24 @@ export function CoreUniverseObjectFactory<
 	/**
 	 * Base constructor parameters to extend.
 	 */
-	type BaseConstructorParams = ConstructorParameters<[ChildId] extends [never] ? BaseClass : ContainerBase>;
+	type BaseParams = ConstructorParameters<[ChildId] extends [never] ? BaseClass : ContainerBase>;
 
 	/**
 	 * Parameters for class constructor.
 	 */
-	type ConstructorParams = [CoreArg<Id, Options, ParentId | GrandparentIds>, ...BaseConstructorParams];
+	type ConstructorParams = [CoreArg<Id, Options, ParentId | GrandparentIds>, ...BaseParams];
+
+	/**
+	 * Parameters for generate functions.
+	 */
+	type GenerateParams = [
+		{
+			/**
+			 * Arg path.
+			 */
+			path: ConstructorParams[0];
+		}
+	];
 
 	/**
 	 * Actual class info.
@@ -389,7 +401,7 @@ export function CoreUniverseObjectFactory<
 				/**
 				 * Inject.
 				 */
-				[ComputedClassWords.Inject]: ComputedClassExtractInstance<typeof members>;
+				[ComputedClassWords.Inject]: ComputedClassExtractInstance<typeof members, ThisInstanceConcrete, GenerateParams>;
 
 				/**
 				 * Populate.
@@ -768,8 +780,10 @@ export function CoreUniverseObjectFactory<
 				 * @param arg - CoreArg given to constructor
 				 * @returns UUID of the universe object
 				 */
-				value(this: ThisInstanceConcrete, ...[arg]: ConstructorParams): Uuid {
-					return arg[nameUniverseObjectUuid];
+				// Nested destructuring bug - https://github.com/typescript-eslint/typescript-eslint/issues/4725
+				// eslint-disable-next-line @typescript-eslint/typedef
+				value(this: ThisInstanceConcrete, ...[{ path }]: GenerateParams): Uuid {
+					return path[nameUniverseObjectUuid];
 				}
 			},
 			...extendedPathMembers
@@ -788,7 +802,7 @@ export function CoreUniverseObjectFactory<
 	 * @remarks
 	 * Abstract, as it might extend container, which is abstract.
 	 */
-	const newBase: AbstractConstructor<BaseConstructorParams> =
+	const newBase: AbstractConstructor<BaseParams> =
 		childData === null
 			? Base
 			: (childData.ContainerBase as CoreUniverseObjectContainerClass<ChildUniverseObject, ChildId, Options>);
@@ -811,13 +825,13 @@ export function CoreUniverseObjectFactory<
 		 * When assigning to members, value is cast for extra type safety.
 		 */
 		public constructor(...args: ConstructorParams) {
-			const [, ...baseParams]: ConstructorParams = args;
+			const [path, ...baseParams]: ConstructorParams = args;
 
 			// Call super constructor
 			super(...baseParams);
 
 			// Assign properties
-			computedClassGenerate({ args, members, that: this as unknown as ThisInstanceConcrete });
+			computedClassGenerate({ args: [{ path }], members, that: this as unknown as ThisInstanceConcrete });
 		}
 	}
 

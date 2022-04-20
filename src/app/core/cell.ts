@@ -317,7 +317,19 @@ export function CoreCellClassFactory<
 	/**
 	 * Constructor params.
 	 */
-	type ConstructorParams = BaseParams;
+	type ConstructorParams = [CoreCellArg<Options>, ...(BaseParams extends [any, ...infer Rest] ? Rest : never)];
+
+	/**
+	 * Parameters for generate functions.
+	 */
+	type GenerateParams = [
+		{
+			/**
+			 * Arg path.
+			 */
+			path: BaseParams[0];
+		}
+	];
 
 	/**
 	 * Class info.
@@ -342,11 +354,7 @@ export function CoreCellClassFactory<
 				/**
 				 * Inject.
 				 */
-				[ComputedClassWords.Inject]: ComputedClassExtractInstance<
-					typeof members,
-					ThisInstanceConcrete,
-					ConstructorParams
-				>;
+				[ComputedClassWords.Inject]: ComputedClassExtractInstance<typeof members, ThisInstanceConcrete, GenerateParams>;
 			};
 
 			/**
@@ -438,7 +446,9 @@ export function CoreCellClassFactory<
 						/**
 						 * Value.
 						 */
-						value: (this: ThisInstanceConcrete, ...[arg]: ConstructorParams) => number;
+						// Nested destructuring bug - https://github.com/typescript-eslint/typescript-eslint/issues/4725
+						// eslint-disable-next-line @typescript-eslint/typedef
+						value: (this: ThisInstanceConcrete, ...[{ path }]: GenerateParams) => number;
 					};
 				}
 			)
@@ -475,13 +485,15 @@ export function CoreCellClassFactory<
 		 * @param args - Constructor parameters
 		 */
 		public constructor(...args: ConstructorParams) {
+			const [path]: ConstructorParams = args;
+
 			// ESLint false negative
 			// eslint-disable-next-line constructor-super
 			super(...args);
 
 			// Assign properties
 			computedClassGenerate({
-				args,
+				args: [{ path }],
 				members,
 				that: this as unknown as ThisInstanceConcrete
 			});

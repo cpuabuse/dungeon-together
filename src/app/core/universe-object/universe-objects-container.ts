@@ -197,6 +197,11 @@ export function CoreUniverseObjectContainerFactory<
 	type ConstructorParams = BaseParams;
 
 	/**
+	 * Parameters for generate functions.
+	 */
+	type GenerateParams = [];
+
+	/**
 	 * Actual class info.
 	 */
 	type ActualClassInfo = ComputedClassInfo<
@@ -214,7 +219,7 @@ export function CoreUniverseObjectContainerFactory<
 				/**
 				 * Members assigned via prototype.
 				 */
-				[ComputedClassWords.Inject]: ComputedClassExtractInstance<typeof members>;
+				[ComputedClassWords.Inject]: ComputedClassExtractInstance<typeof members, ThisInstanceConcrete, GenerateParams>;
 
 				/**
 				 * Members assigned via class block.
@@ -358,9 +363,15 @@ export function CoreUniverseObjectContainerFactory<
 				 * Function generating a new map of universe objects.
 				 *
 				 * @param this - Universe object container
+				 * @param args - Args provided by
 				 * @returns Map of universe objects
 				 */
-				value(this: ThisInstanceConcrete): CoreArgsWithMapContainerArg<ChildUniverseObject, ChildId, Options> {
+				value(
+					this: ThisInstanceConcrete,
+					// Args here to preserve types
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+					...args: GenerateParams
+				): CoreArgsWithMapContainerArg<ChildUniverseObject, ChildId, Options> {
 					return new Map();
 				}
 			}
