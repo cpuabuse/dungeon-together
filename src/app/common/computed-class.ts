@@ -250,21 +250,33 @@ type ComputedClassGenerateClassConstraint<
 export enum ComputedClassWords {
 	/**
 	 * Members taken from base class.
+	 *
+	 * In constraint is constraint of base class.
+	 * In actual is actual base class.
 	 */
 	Base = "Base",
 
 	/**
 	 * Part of the class to be populated by extending class.
+	 *
+	 * In constraint is own statically known properties, and inherited for implementation `Implement` of base.
+	 * In actual is class itself.
 	 */
 	Populate = "Populate",
 
 	/**
 	 * Members populated statically within `class` block.
+	 *
+	 * In constraint, dynamic members of class.
+	 * In actual is an injection via this file's injection functions.
 	 */
 	Inject = "Inject",
 
 	/**
 	 * Members assigned via prototype.
+	 *
+	 * In constraint, members to be implemented by extending class.
+	 * In actual does not exist.
 	 */
 	Implement = "Implement",
 
@@ -316,6 +328,12 @@ export type ComputedClassData<
  * Used to generate base data for classes extending computed class.
  *
  * @typeParam Include - {@link ComputedClassWords.Populate} to populate with abstract members or not
+ * @remarks
+ * Since populate defines class' `implements`, members must be statically known, thus:
+ * - When some members to go into implement, to be intersected manually, with exhaustive index access based on `keyof`.
+ * - When used with condition, to be intersected per member, manually (All members go into implement instead of populate).
+ *
+ * Plain intersection is fine, as when condition above happen, `implements` will error.
  */
 export type ComputedClassDataExtends<Data extends ComputedClassData> = {
 	/**

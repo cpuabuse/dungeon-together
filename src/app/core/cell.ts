@@ -170,31 +170,49 @@ export type CoreCellArgGrandparentIds = typeof coreCellArgGrandparentIds[number]
 export type CoreCellArgParentIds = typeof coreCellArgParentIds[number];
 
 /**
- * Vector part of cell arg.
+ * Core cell arg constraint data.
  */
-type CoreCellArgVector<Options extends CoreArgOptionsUnion> = Options[CoreArgOptionIds.Vector] extends true
-	? Vector
-	: object;
-
-/**
- * Known part of cell arg.
- */
-type CoreCellArgKnown<Options extends CoreArgOptionsUnion> = {
+type CoreCellArgConstraintData<Options extends CoreArgOptionsUnion> = ComputedClassData<{
 	/**
-	 * Worlds.
+	 * Instance.
 	 */
-	worlds: Options[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
-};
+	[ComputedClassWords.Instance]: ComputedClassMembers & {
+		/**
+		 * Base.
+		 */
+		[ComputedClassWords.Base]: CoreArg<CoreArgIds.Cell, Options, CoreCellArgParentIds> &
+			CoreArgsContainer<CoreEntityArg<Options>, CoreArgIds.Entity, Options, CoreEntityArgParentIds>;
+
+		/**
+		 * Populate.
+		 */
+		[ComputedClassWords.Populate]: {
+			/**
+			 * Worlds.
+			 */
+			worlds: Options[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
+		};
+
+		/**
+		 * Inject.
+		 */
+		[ComputedClassWords.Inject]: Options[CoreArgOptionIds.Vector] extends true ? Vector : object;
+	};
+
+	/**
+	 * Static.
+	 */
+	[ComputedClassWords.Static]: ComputedClassMembers;
+}>;
 
 /**
  * Core cell args.
  *
  * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
-export type CoreCellArg<Options extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Cell, Options, CoreCellArgParentIds> &
-	CoreArgsContainer<CoreEntityArg<Options>, CoreArgIds.Entity, Options, CoreEntityArgParentIds> &
-	CoreCellArgVector<Options> &
-	CoreCellArgKnown<Options>;
+export type CoreCellArg<Options extends CoreArgOptionsUnion> = ComputedClassInstanceConstraint<
+	CoreCellArgConstraintData<Options>
+>;
 
 /**
  * Cell own path.
@@ -220,27 +238,7 @@ type CoreCellClassConstraintData<
 	Entity,
 	CoreArgIds.Entity
 > &
-	ComputedClassData<{
-		/**
-		 * Instance.
-		 */
-		[ComputedClassWords.Instance]: ComputedClassMembers & {
-			/**
-			 * Populate.
-			 */
-			[ComputedClassWords.Populate]: CoreCellArgKnown<Options>;
-
-			/**
-			 * Implements.
-			 */
-			[ComputedClassWords.Inject]: CoreCellArgVector<Options>;
-		};
-
-		/**
-		 * Static.
-		 */
-		[ComputedClassWords.Static]: ComputedClassMembers;
-	}>;
+	ComputedClassData<CoreCellArgConstraintData<Options>>;
 
 /**
  * Core cell.

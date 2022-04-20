@@ -106,6 +106,7 @@ type CoreUniverseObjectClassConstraintData<
 	CoreUniverseObjectClassContainerConstraintData<Id, Options, ParentId, GrandparentIds, ChildUniverseObject, ChildId> &
 		// General data
 
+		// Since extends base and populate are conditional, they must be inserted manually, without intersection
 		ComputedClassData<{
 			/**
 			 * Instance, containing only injected concrete methods.
@@ -139,7 +140,13 @@ type CoreUniverseObjectClassConstraintData<
 						  });
 
 				/**
-				 * Base.
+				 * Implement.
+				 *
+				 * @remarks
+				 * Re-implement in subclass.
+				 * Since extended populate is not statically known (conditional), it cannot be added to populate.
+				 *
+				 * @see {@link ComputedClassDataExtends}
 				 */
 				[ComputedClassWords.Implement]: [ChildId] extends [never]
 					? object
@@ -180,7 +187,13 @@ type CoreUniverseObjectClassConstraintData<
 					  };
 
 				/**
-				 * Base.
+				 * Implement.
+				 *
+				 * @remarks
+				 * Re-implement in subclass.
+				 * Since extended populate is not statically known (conditional), it cannot be added to populate.
+				 *
+				 * @see {@link ComputedClassDataExtends}
 				 */
 				[ComputedClassWords.Implement]: [ChildId] extends [never]
 					? object

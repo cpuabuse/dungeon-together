@@ -117,33 +117,52 @@ type CoreEntityArgKind<O extends CoreArgOptionsUnion> = O[CoreArgOptionIds.Kind]
 	: object;
 
 /**
- * Statically known properties of core entity arg.
+ * Constraint for core entity arg.
  */
-// Generic might be used later
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type CoreEntityArgKnown<Options extends CoreArgOptionsUnion> = {
+type CoreEntityArgConstraintData<Options extends CoreArgOptionsUnion> = ComputedClassData<{
 	/**
-	 * Mode of the entity.
+	 * Instance.
 	 */
-	modeUuid: Uuid;
+	[ComputedClassWords.Instance]: ComputedClassMembers & {
+		/**
+		 * Base.
+		 */
+		[ComputedClassWords.Base]: CoreArg<CoreArgIds.Entity, Options, CoreEntityArgParentIds>;
+
+		/**
+		 * Populate.
+		 */
+		[ComputedClassWords.Populate]: {
+			/**
+			 * Mode of the entity.
+			 */
+			modeUuid: Uuid;
+			/**
+			 * World in which entity resides.
+			 */
+			worldUuid: Uuid;
+		};
+
+		/**
+		 * Implements.
+		 */
+		[ComputedClassWords.Implement]: CoreEntityArgKind<Options>;
+	};
+
 	/**
-	 * World in which entity resides.
+	 * Static.
 	 */
-	worldUuid: Uuid;
-};
+	[ComputedClassWords.Static]: ComputedClassMembers;
+}>;
 
 /**
  * Core entity.
  *
  * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
-export type CoreEntityArg<Options extends CoreArgOptionsUnion> = CoreArg<
-	CoreArgIds.Entity,
-	Options,
-	CoreEntityArgParentIds
-> &
-	CoreEntityArgKnown<Options> &
-	CoreEntityArgKind<Options>;
+export type CoreEntityArg<Options extends CoreArgOptionsUnion> = ComputedClassInstanceConstraint<
+	CoreEntityArgConstraintData<Options>
+>;
 
 /**
  * Path to an entity only.
@@ -165,27 +184,7 @@ export type CoreEntityClassConstraintData<Options extends CoreUniverseObjectArgs
 		CoreArgIds.Cell,
 		CoreEntityArgGrandparentIds
 	> &
-		ComputedClassData<{
-			/**
-			 * Instance.
-			 */
-			[ComputedClassWords.Instance]: ComputedClassMembers & {
-				/**
-				 * Populate.
-				 */
-				[ComputedClassWords.Populate]: CoreEntityArgKnown<Options>;
-
-				/**
-				 * Implements.
-				 */
-				[ComputedClassWords.Implement]: CoreEntityArgKind<Options>;
-			};
-
-			/**
-			 * Static.
-			 */
-			[ComputedClassWords.Static]: ComputedClassMembers;
-		}>;
+		ComputedClassData<CoreEntityArgConstraintData<Options>>;
 
 /**
  * Core cell.
