@@ -7,10 +7,13 @@
  * @file Working with classes with computed properties.
  */
 
-import { AbstractConstructor, AbstractConstructorConstraint } from "./utility-types";
+import { AbstractConstructor, AbstractConstructorConstraint, ConcreteConstructor } from "./utility-types";
 
 /**
  * Assign part of members.
+ *
+ * @remarks
+ * When implementing, it is not necessary to exhaustively add all potential members(even if they are empty), since if a member were to be required, the return class check will fail.
  */
 export type ComputedClassAssign<Property extends "assign" | "staticAssign" = "assign"> = {
 	[K in Property]: {
@@ -30,6 +33,9 @@ export type ComputedClassAssign<Property extends "assign" | "staticAssign" = "as
 
 /**
  * Generate part of members.
+ *
+ * @remarks
+ * When implementing, it is not necessary to exhaustively add all potential members(even if they are empty), since if a member were to be required, the return class check will fail.
  */
 export type ComputedClassGenerate<
 	That = any,
@@ -384,11 +390,15 @@ export type ComputedClassInstanceConstraint<Data extends ComputedClassData> = In
 
 /**
  * Class type constraint.
+ *
+ * @remarks
+ * Is a concrete constraint.
  */
-export type ComputedClassClassConstraint<Data extends ComputedClassData> = ComputedClassGenerateClassConstraint<
-	Data,
-	ComputedClassIncludeAbstract
->;
+export type ComputedClassClassConstraint<
+	Data extends ComputedClassData,
+	Parameters extends any[] = any
+> = ConcreteConstructor<Parameters, ComputedClassGenerateInstance<Data, ComputedClassIncludeAbstract>> &
+	ComputedClassGenerateStatic<Data, ComputedClassIncludeAbstract>;
 
 /**
  * Info for computed class.

@@ -7,15 +7,33 @@
  * @file Universe definitions
  */
 
-import { CoreArgIds, CoreArgObjectWords, CoreArgOptionsPathOwn, CoreArgPath } from "../arg";
+import { ConcreteConstructor } from "../../common/utility-types";
+import { CoreArg, CoreArgIds, CoreArgObjectWords, CoreArgPath } from "../arg";
+import { CoreBaseClassNonRecursive } from "../base";
+import { CoreUniverseObjectArgsOptionsUnion } from "./options";
+import { CoreUniverseObject, CoreUniverseObjectConstructorParameters } from "./universe-object";
 
 /**
  * A universe constraint from perspective of universe object.
+ *
+ * @remarks
+ * For class, this is to be treated like more of a constructor, an object that creates us universe objects, and does not have static type information.
  */
 export type CoreUniverseObjectUniverse<
+	BaseClass extends CoreBaseClassNonRecursive,
+	ChildUniverseObject extends CoreUniverseObject<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
+	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds>,
 	Id extends CoreArgIds,
-	ParentIds extends CoreArgIds,
-	Path extends CoreArgPath<Id, CoreArgOptionsPathOwn, ParentIds>
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	ParentId extends CoreArgIds = never,
+	GrandparentIds extends CoreArgIds = never
 > = {
-	[K in Id as `get${CoreArgObjectWords[K]["singularCapitalizedWord"]}`]: (path: Path) => unknown;
+	[K in `get${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
+		path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
+	) => ChildUniverseObject;
+} & {
+	[K in `${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: ConcreteConstructor<
+		CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>,
+		ChildUniverseObject
+	>;
 };

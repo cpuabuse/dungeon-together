@@ -33,6 +33,7 @@ import { CellPathExtended, coreCellArgParentIds } from "./cell";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectClassConstraintDataExtends,
+	CoreUniverseObjectConstructorParameters,
 	CoreUniverseObjectFactory,
 	// Type used only for documentation
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -179,6 +180,8 @@ export type EntityPathExtended = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPa
  */
 export type CoreEntityClassConstraintData<Options extends CoreUniverseObjectArgsOptionsUnion> =
 	CoreUniverseObjectClassConstraintDataExtends<
+		CoreBaseClassNonRecursive,
+		CoreEntityArg<Options>,
 		CoreArgIds.Entity,
 		Options,
 		CoreArgIds.Cell,
@@ -199,7 +202,14 @@ export type CoreEntity<Options extends CoreUniverseObjectArgsOptionsUnion> = Com
  * It may be abstract.
  */
 export type CoreEntityClass<Options extends CoreUniverseObjectArgsOptionsUnion> = ComputedClassClassConstraint<
-	CoreEntityClassConstraintData<Options>
+	CoreEntityClassConstraintData<Options>,
+	CoreUniverseObjectConstructorParameters<
+		CoreBaseClassNonRecursive,
+		CoreEntityArg<Options>,
+		CoreArgIds.Entity,
+		Options,
+		CoreEntityArgParentIds
+	>
 >;
 
 /**
@@ -253,14 +263,36 @@ export function CoreEntityClassFactory<
 	options: Options;
 }) {
 	/**
-	 * Base constructor parameters.
+	 * Parameter constraint for class to extend.
 	 */
-	type BaseParams = ConstructorParameters<typeof NewBase>;
+	type SuperConstructorExtends = AbstractConstructor<
+		CoreUniverseObjectConstructorParameters<
+			BaseClass,
+			CoreEntityArg<Options>,
+			CoreArgIds.Entity,
+			Options,
+			CoreEntityArgParentIds
+		>
+	>;
+
+	/**
+	 * Super class to extend.
+	 *
+	 * @remarks
+	 * Constrains actual super class to extends to be used, if fails, the return result will be never.
+	 */
+	type SuperClass = typeof NewBase extends SuperConstructorExtends ? typeof NewBase : never;
 
 	/**
 	 * Constructor params.
 	 */
-	type ConstructorParams = BaseParams;
+	type ConstructorParams = CoreUniverseObjectConstructorParameters<
+		BaseClass,
+		CoreEntityArg<Options>,
+		CoreArgIds.Entity,
+		Options,
+		CoreEntityArgParentIds
+	>;
 
 	/**
 	 * Actual class info.
@@ -275,7 +307,7 @@ export function CoreEntityClassFactory<
 				/**
 				 * Base.
 				 */
-				[ComputedClassWords.Base]: InstanceType<typeof NewBase>;
+				[ComputedClassWords.Base]: InstanceType<SuperClass>;
 
 				/**
 				 * Populate.
@@ -290,7 +322,7 @@ export function CoreEntityClassFactory<
 				/**
 				 * Base.
 				 */
-				[ComputedClassWords.Base]: StaticMembers<typeof NewBase>;
+				[ComputedClassWords.Base]: StaticMembers<SuperClass>;
 
 				/**
 				 * Populate.
@@ -317,6 +349,7 @@ export function CoreEntityClassFactory<
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const NewBase = CoreUniverseObjectFactory<
 		BaseClass,
+		CoreEntityArg<Options>,
 		CoreArgIds.Entity,
 		Options,
 		CoreArgIds.Cell,
@@ -335,7 +368,7 @@ export function CoreEntityClassFactory<
 	 * @see CoreUniverseObjectInherit for more details
 	 */
 	abstract class Entity
-		extends (NewBase as AbstractConstructor<ConstructorParams>)
+		extends (NewBase as SuperConstructorExtends)
 		implements StaticImplements<ActualClassInfo[ComputedClassWords.ClassImplements], typeof Entity>
 	{
 		/**
@@ -347,6 +380,19 @@ export function CoreEntityClassFactory<
 		 * World in which entity resides.
 		 */
 		public abstract worldUuid: Uuid;
+
+		// ESLint buggy
+		// eslint-disable-next-line jsdoc/require-param
+		/**
+		 * Entity constructor.
+		 */
+		// ESLint buggy for nested destructured params
+		// eslint-disable-next-line @typescript-eslint/typedef
+		public constructor(...[arg, { created, attachHook }, baseParams]: ConstructorParams) {
+			// ESLint does not like casting on `extends`, also does not seem to deal well with generics
+			// eslint-disable-next-line constructor-super, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
+			super(arg, { attachHook, created }, baseParams);
+		}
 	}
 
 	// Return as `ReturnClass`, and verify constraint data satisfies arg constraints

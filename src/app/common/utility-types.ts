@@ -12,7 +12,7 @@
  */
 // `C extends I` to show which properties are missing in errors
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export type StaticImplements<I extends AbstractConstructorConstraint, C extends I> = InstanceType<I>;
+export type StaticImplements<I extends Constructor, C extends I> = InstanceType<I>;
 
 /**
  * Converts a class to abstract version.
@@ -147,6 +147,6 @@ export type AbstractConstructor<Parameters extends any[] = any[], Instance exten
 /**
  * Gets static members from a class, omitting constructor.
  *
- * Can be used in generics since TS 4.6.
+ * Can mostly be used in generics since TS 4.6.
  */
-export type StaticMembers<T extends Constructor> = Omit<T, "new">;
+export type StaticMembers<T extends Constructor> = Omit<T, "new" | "prototype">;

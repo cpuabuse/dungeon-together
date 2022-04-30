@@ -44,6 +44,7 @@ import {
 	CoreEntity,
 	CoreEntityArg,
 	CoreEntityArgParentIds,
+	CoreEntityClass,
 	EntityPathExtended,
 	commsEntityRawToArgs,
 	coreEntityArgsConvert
@@ -52,6 +53,7 @@ import { GridPath } from "./grid";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectClassConstraintDataExtends,
+	CoreUniverseObjectConstructorParameters,
 	CoreUniverseObjectFactory,
 	// Type used only for documentation
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -231,11 +233,14 @@ type CoreCellClassConstraintData<
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	Entity extends CoreEntity<Options>
 > = CoreUniverseObjectClassConstraintDataExtends<
+	CoreBaseClassNonRecursive,
+	CoreCellArg<Options>,
 	CoreArgIds.Cell,
 	Options,
 	CoreArgIds.Grid,
 	CoreCellArgGrandparentIds,
 	Entity,
+	CoreEntityArg<Options>,
 	CoreArgIds.Entity
 > &
 	ComputedClassData<CoreCellArgConstraintData<Options>>;
@@ -292,7 +297,7 @@ export const coreCellArgParentIdSet: Set<CoreCellArgParentIds> = new Set(coreCel
 export function CoreCellClassFactory<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Entity extends CoreEntity<Options>
+	EntityClass extends CoreEntityClass<Options>
 >({
 	Base,
 	options
@@ -308,14 +313,36 @@ export function CoreCellClassFactory<
 	options: Options;
 }) {
 	/**
-	 * Base constructor params.
+	 * Parameter constraint for class to extend.
 	 */
-	type BaseParams = ConstructorParameters<typeof NewBase>;
+	type SuperConstructorExtends = AbstractConstructor<
+		CoreUniverseObjectConstructorParameters<
+			BaseClass,
+			CoreCellArg<Options>,
+			CoreArgIds.Cell,
+			Options,
+			CoreCellArgParentIds
+		>
+	>;
+
+	/**
+	 * Super class.
+	 *
+	 * @remarks
+	 * Constrains actual super class to extends to be used, if fails, the return result will be never.
+	 */
+	type SuperClass = typeof NewBase extends SuperConstructorExtends ? typeof NewBase : never;
 
 	/**
 	 * Constructor params.
 	 */
-	type ConstructorParams = [CoreCellArg<Options>, ...(BaseParams extends [any, ...infer Rest] ? Rest : never)];
+	type ConstructorParams = CoreUniverseObjectConstructorParameters<
+		BaseClass,
+		CoreCellArg<Options>,
+		CoreArgIds.Cell,
+		Options,
+		CoreCellArgParentIds
+	>;
 
 	/**
 	 * Parameters for generate functions.
@@ -325,7 +352,7 @@ export function CoreCellClassFactory<
 			/**
 			 * Arg path.
 			 */
-			path: BaseParams[0];
+			path: CoreCellArg<Options>;
 		}
 	];
 
@@ -333,7 +360,7 @@ export function CoreCellClassFactory<
 	 * Class info.
 	 */
 	type ActualClassInfo = ComputedClassInfo<
-		CoreCellClassConstraintData<Options, Entity>,
+		CoreCellClassConstraintData<Options, InstanceType<EntityClass>>,
 		ComputedClassData<{
 			/**
 			 * Instance.
@@ -342,7 +369,7 @@ export function CoreCellClassFactory<
 				/**
 				 * Base.
 				 */
-				[ComputedClassWords.Base]: InstanceType<typeof NewBase>;
+				[ComputedClassWords.Base]: InstanceType<SuperClass>;
 
 				/**
 				 * Populate.
@@ -362,7 +389,7 @@ export function CoreCellClassFactory<
 				/**
 				 * Base.
 				 */
-				[ComputedClassWords.Base]: StaticMembers<typeof NewBase>;
+				[ComputedClassWords.Base]: StaticMembers<SuperClass>;
 
 				/**
 				 * Populate.
@@ -384,15 +411,24 @@ export function CoreCellClassFactory<
 	// Intersection preserves constructor parameters of core cell, and instance type of base class
 	type ReturnClass = ActualClassInfo[ComputedClassWords.ClassReturn];
 
+	/**
+	 * Members to inject for vector.
+	 */
+	type MaybeVectorMembers<Key extends "generate"> = Options[CoreArgOptionIds.Vector] extends true
+		? Exclude<typeof vectorData["vectorMembers"], undefined>[Key]
+		: Exclude<typeof vectorData["nonVectorMembers"], undefined>[Key];
+
 	// Infer the new base for type safe return
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const NewBase = CoreUniverseObjectFactory<
 		BaseClass,
+		CoreCellArg<Options>,
 		CoreArgIds.Cell,
 		Options,
 		CoreArgIds.Grid,
 		CoreCellArgGrandparentIds,
-		Entity,
+		CoreEntity<Options>,
+		CoreEntityArg<Options>,
 		CoreArgIds.Entity
 	>({
 		Base,
@@ -407,49 +443,74 @@ export function CoreCellClassFactory<
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const coords = ["x", "y", "z"] as const;
 
+	/**
+	 * Members injected, when not having a vector.
+	 *
+	 * @remarks
+	 * `present` is the discriminant.
+	 */
+	// Infer for type checks
+	// eslint-disable-next-line @typescript-eslint/typedef
+	let vectorData =
+		options.vector === true
+			? {
+					present: true as const,
+					vectorMembers: {
+						generate: {
+							...coords.reduce(
+								(result, name) => ({
+									...result,
+									[name]: {
+										name,
+
+										// ESLint buggy
+										// eslint-disable-next-line jsdoc/require-param
+										/**
+										 * Moves universe object to a different parent.
+										 *
+										 * @param this - Destructured `this`
+										 * @param path - Parent path
+										 * @returns Coordinate
+										 */
+										// Arg should be present for type
+										// eslint-disable-next-line @typescript-eslint/no-unused-vars
+										value(this: ThisInstanceConcrete, ...args: GenerateParams): number {
+											return 0;
+										}
+									}
+								}),
+								{} as {
+									[K in typeof coords[any]]: {
+										/**
+										 * Name.
+										 */
+										name: K;
+
+										/**
+										 * Value.
+										 */
+										value: (this: ThisInstanceConcrete, ...args: GenerateParams) => number;
+									};
+								}
+							)
+						}
+					}
+			  }
+			: {
+					nonVectorMembers: {
+						generate: {}
+					},
+
+					present: false as const
+			  };
+
 	// Members
 	// Infer for type checks
 	// eslint-disable-next-line @typescript-eslint/typedef
 	let members = {
 		generate: {
-			...coords.reduce(
-				(result, name) => ({
-					...result,
-					[name]: {
-						name,
-
-						// ESLint buggy
-						// eslint-disable-next-line jsdoc/require-param
-						/**
-						 * Moves universe object to a different parent.
-						 *
-						 * @param this - Destructured `this`
-						 * @param path - Parent path
-						 * @returns Coordinate
-						 */
-						// Arg should be present for type
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						value(this: ThisInstanceConcrete, ...[arg]: ConstructorParams): number {
-							return 0;
-						}
-					}
-				}),
-				{} as {
-					[K in typeof coords[any]]: {
-						/**
-						 * Name.
-						 */
-						name: K;
-
-						/**
-						 * Value.
-						 */
-						// Nested destructuring bug - https://github.com/typescript-eslint/typescript-eslint/issues/4725
-						// eslint-disable-next-line @typescript-eslint/typedef
-						value: (this: ThisInstanceConcrete, ...[{ path }]: GenerateParams) => number;
-					};
-				}
-			)
+			...((vectorData.present === true ? vectorData.vectorMembers : vectorData.nonVectorMembers)
+				.generate as MaybeVectorMembers<"generate">)
 		}
 	};
 
@@ -462,13 +523,13 @@ export function CoreCellClassFactory<
 	// eslint-disable-next-line no-redeclare
 	abstract class Cell
 		// Casting will remove non-static instance information by intersecting with `any`, while maintaining constructor parameters, that will be included into factory return
-		extends (NewBase as AbstractConstructor<ConstructorParams>)
+		extends (NewBase as SuperConstructorExtends)
 		implements StaticImplements<ActualClassInfo[ComputedClassWords.ClassImplements], typeof Cell>
 	{
 		/**
 		 * Default entity.
 		 */
-		public abstract defaultEntity: Entity;
+		public abstract defaultEntity: InstanceType<EntityClass>;
 
 		/**
 		 * Worlds.
@@ -477,21 +538,23 @@ export function CoreCellClassFactory<
 			? new Set()
 			: new Array()) as CoreCellArg<Options>["worlds"];
 
+		// ESLint buggy
+		// eslint-disable-next-line jsdoc/require-param
 		/**
 		 * Constructor.
 		 *
 		 * @param args - Constructor parameters
 		 */
-		public constructor(...args: ConstructorParams) {
-			const [path]: ConstructorParams = args;
-
-			// ESLint false negative
-			// eslint-disable-next-line constructor-super
-			super(...args);
+		// ESLint buggy for nested destructured params
+		// eslint-disable-next-line @typescript-eslint/typedef
+		public constructor(...[cell, { created, attachHook }, baseParams]: ConstructorParams) {
+			// ESLint false negative, also does not seem to deal well with generics
+			// eslint-disable-next-line constructor-super, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
+			super(cell, { attachHook, created }, baseParams);
 
 			// Assign properties
 			computedClassGenerate({
-				args: [{ path }],
+				args: [{ path: cell }],
 				members,
 				that: this as unknown as ThisInstanceConcrete
 			});
@@ -499,7 +562,7 @@ export function CoreCellClassFactory<
 	}
 
 	// Have to re-inject dynamic bits from generic parents
-	return Cell as InstanceType<ReturnClass> extends CoreCellArg<Options> ? ReturnClass : never;
+	return Cell as ReturnClass;
 }
 
 /**
