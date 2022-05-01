@@ -8,15 +8,17 @@
  */
 
 import {
+	ComputedClassActualData,
+	ComputedClassActualMembers,
 	ComputedClassClassConstraint,
 	ComputedClassClassImplements,
-	ComputedClassData,
+	ComputedClassConstraintData,
+	ComputedClassConstraintMembers,
 	ComputedClassDataExtends,
 	ComputedClassExtractClass,
 	ComputedClassExtractInstance,
 	ComputedClassInfo,
 	ComputedClassInstanceConstraint,
-	ComputedClassMembers,
 	ComputedClassWords,
 	computedClassAssign,
 	computedClassGenerate
@@ -64,11 +66,11 @@ type CoreUniverseObjectContainerClassConstraintData<
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never
-> = ComputedClassData<{
+> = ComputedClassConstraintData<{
 	/**
 	 * Concrete injection and abstract members, no own members.
 	 */
-	[ComputedClassWords.Instance]: ComputedClassMembers & {
+	[ComputedClassWords.Instance]: ComputedClassConstraintMembers & {
 		/**
 		 * Base instance.
 		 */
@@ -119,7 +121,7 @@ type CoreUniverseObjectContainerClassConstraintData<
 	/**
 	 * No static members in this class.
 	 */
-	[ComputedClassWords.Static]: ComputedClassMembers & {
+	[ComputedClassWords.Static]: ComputedClassConstraintMembers & {
 		/**
 		 * Base class.
 		 */
@@ -344,11 +346,11 @@ export function CoreUniverseObjectContainerFactory<
 			ParentId,
 			GrandparentIds
 		>,
-		ComputedClassData<{
+		ComputedClassActualData<{
 			/**
 			 * Instance part of the class.
 			 */
-			[ComputedClassWords.Instance]: ComputedClassMembers & {
+			[ComputedClassWords.Instance]: ComputedClassActualMembers & {
 				/**
 				 * Base.
 				 */
@@ -368,7 +370,7 @@ export function CoreUniverseObjectContainerFactory<
 			/**
 			 * Static part of class.
 			 */
-			[ComputedClassWords.Static]: ComputedClassMembers & {
+			[ComputedClassWords.Static]: ComputedClassActualMembers & {
 				/**
 				 * Base.
 				 */

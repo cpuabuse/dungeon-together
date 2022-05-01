@@ -9,15 +9,17 @@
 
 import { DeferredPromise } from "../../common/async";
 import {
+	ComputedClassActualData,
+	ComputedClassActualMembers,
 	ComputedClassClassConstraint,
 	ComputedClassClassImplements,
-	ComputedClassData,
+	ComputedClassConstraintData,
+	ComputedClassConstraintMembers,
 	ComputedClassDataExtends,
 	ComputedClassExtractClass,
 	ComputedClassExtractInstance,
 	ComputedClassInfo,
 	ComputedClassInstanceConstraint,
-	ComputedClassMembers,
 	ComputedClassWords,
 	computedClassAssign,
 	computedClassGenerate
@@ -71,6 +73,8 @@ export type CoreUniverseObjectConstructorParameters<
  */
 type CoreUniverseObjectClassConstraintData<
 	BaseClass extends CoreBaseClassNonRecursive,
+	// Preserve for future type merging
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds> &
 		CoreArgsContainer<ChildArg, ChildId, Options, Id | ParentId | GrandparentIds>,
 	Id extends CoreArgIds,
@@ -92,11 +96,11 @@ type CoreUniverseObjectClassConstraintData<
 	// General data
 
 	// Since extends base and populate are conditional, they must be inserted manually, without intersection
-	ComputedClassData<{
+	ComputedClassConstraintData<{
 		/**
 		 * Instance, containing only injected concrete methods.
 		 */
-		[ComputedClassWords.Instance]: ComputedClassMembers & {
+		[ComputedClassWords.Instance]: ComputedClassConstraintMembers & {
 			/**
 			 * Base.
 			 */
@@ -172,7 +176,7 @@ type CoreUniverseObjectClassConstraintData<
 		/**
 		 * Class, containing only inherited abstract methods.
 		 */
-		[ComputedClassWords.Static]: ComputedClassMembers & {
+		[ComputedClassWords.Static]: ComputedClassConstraintMembers & {
 			/**
 			 * Base.
 			 */
@@ -557,11 +561,11 @@ export function CoreUniverseObjectFactory<
 			ChildArg,
 			ChildId
 		>,
-		ComputedClassData<{
+		ComputedClassActualData<{
 			/**
 			 * Instance.
 			 */
-			[ComputedClassWords.Instance]: ComputedClassMembers & {
+			[ComputedClassWords.Instance]: ComputedClassActualMembers & {
 				/**
 				 * Base.
 				 */
@@ -581,7 +585,7 @@ export function CoreUniverseObjectFactory<
 			/**
 			 * Static.
 			 */
-			[ComputedClassWords.Static]: ComputedClassMembers & {
+			[ComputedClassWords.Static]: ComputedClassActualMembers & {
 				/**
 				 * Base.
 				 */
@@ -849,7 +853,7 @@ export function CoreUniverseObjectFactory<
 			/**
 			 * Static.
 			 */
-			[ComputedClassWords.Static]: ComputedClassMembers;
+			[ComputedClassWords.Static]: ComputedClassConstraintMembers;
 		}>;
 
 		// Null if not present

@@ -183,6 +183,16 @@ type ComputedClassInclude =
 	| ComputedClassWords.Implement;
 
 /**
+ * Words to include in the constraint data.
+ */
+type ComputedClassIncludeConstraint = ComputedClassInclude;
+
+/**
+ * Words to include in the actual data.
+ */
+type ComputedClassIncludeActual = Exclude<ComputedClassInclude, ComputedClassWords.Implement>;
+
+/**
  * Instructions for abstract generation.
  */
 type ComputedClassIncludeAbstract = ComputedClassInclude;
@@ -195,7 +205,10 @@ type ComputedClassIncludeConcrete = ComputedClassWords.Base | ComputedClassWords
 /**
  * Helper type for generating member type.
  */
-type ComputedClassGenerateMembers<Members extends ComputedClassMembers, Include extends ComputedClassInclude> = object &
+type ComputedClassGenerateMembers<
+	Members extends ComputedClassMembers<Include>,
+	Include extends ComputedClassInclude
+> = object &
 	(ComputedClassWords.Base extends Include ? Members[ComputedClassWords.Base] : unknown) &
 	(ComputedClassWords.Populate extends Include ? Members[ComputedClassWords.Populate] : unknown) &
 	(ComputedClassWords.Inject extends Include ? Members[ComputedClassWords.Inject] : unknown) &
@@ -205,7 +218,7 @@ type ComputedClassGenerateMembers<Members extends ComputedClassMembers, Include 
  * Helper type for generating instance member type.
  */
 type ComputedClassGenerateInstance<
-	Data extends ComputedClassData,
+	Data extends ComputedClassData<Include>,
 	Include extends ComputedClassInclude
 > = ComputedClassGenerateMembers<Data[ComputedClassWords.Instance], Include>;
 
@@ -213,7 +226,7 @@ type ComputedClassGenerateInstance<
  * Helper type for generating static member type.
  */
 type ComputedClassGenerateStatic<
-	Data extends ComputedClassData,
+	Data extends ComputedClassData<Include>,
 	Include extends ComputedClassInclude
 > = ComputedClassGenerateMembers<Data[ComputedClassWords.Static], Include>;
 
@@ -228,7 +241,7 @@ type ComputedClassGenerateStatic<
  * - When used as final class, base, concrete and abstract are present
  */
 type ComputedClassGenerateClass<
-	Data extends ComputedClassData,
+	Data extends ComputedClassData<Include>,
 	Include extends ComputedClassInclude,
 	Parameters extends any[]
 > = AbstractConstructor<Parameters, ComputedClassGenerateInstance<Data, Include>> &
@@ -245,7 +258,7 @@ type ComputedClassGenerateClass<
  * - When used as concrete part of the final constraint to check that concrete part of the actual resulting class satisfies it, base and concrete are present, abstract is absent
  */
 type ComputedClassGenerateClassConstraint<
-	Data extends ComputedClassData,
+	Data extends ComputedClassData<Include>,
 	Include extends ComputedClassInclude
 > = AbstractConstructorConstraint<ComputedClassGenerateInstance<Data, Include>> &
 	ComputedClassGenerateStatic<Data, Include>;
@@ -302,32 +315,53 @@ export enum ComputedClassWords {
  *
  * Can be used as mask.
  */
-export type ComputedClassMembers = {
+type ComputedClassMembers<Include extends ComputedClassInclude> = {
 	/**
 	 * Members.
 	 */
-	[K in ComputedClassInclude]: object;
+	[K in Include]: object;
 };
+
+/**
+ * Members for constraint data.
+ */
+export type ComputedClassConstraintMembers = ComputedClassMembers<ComputedClassIncludeConstraint>;
+
+/**
+ * Members for actual data.
+ */
+export type ComputedClassActualMembers = ComputedClassMembers<ComputedClassIncludeActual>;
 
 /**
  * Repository for computed class types.
  *
- *
  * @remarks
  * Base class must be separated into instance and static, otherwise properties cannot be inferred, if generic is generic.
  */
-export type ComputedClassData<
-	Data extends ComputedClassData = {
-		/**
-		 * Instance part of the class.
-		 */
-		[ComputedClassWords.Instance]: ComputedClassMembers;
+type ComputedClassData<Include extends ComputedClassInclude> = {
+	/**
+	 * Instance part of the class.
+	 */
+	[ComputedClassWords.Instance]: ComputedClassMembers<Include>;
 
-		/**
-		 * Static part of the class, which can have a constructor in base.
-		 */
-		[ComputedClassWords.Static]: ComputedClassMembers;
-	}
+	/**
+	 * Static part of the class, which can have a constructor in base.
+	 */
+	[ComputedClassWords.Static]: ComputedClassMembers<Include>;
+};
+
+/**
+ * Constraint data.
+ */
+export type ComputedClassConstraintData<
+	Data extends ComputedClassData<ComputedClassIncludeConstraint> = ComputedClassData<ComputedClassIncludeConstraint>
+> = Data;
+
+/**
+ * Actual data.
+ */
+export type ComputedClassActualData<
+	Data extends ComputedClassData<ComputedClassIncludeActual> = ComputedClassData<ComputedClassIncludeActual>
 > = Data;
 
 /**
@@ -341,7 +375,7 @@ export type ComputedClassData<
  *
  * Plain intersection is fine, as when condition above happen, `implements` will error.
  */
-export type ComputedClassDataExtends<Data extends ComputedClassData> = {
+export type ComputedClassDataExtends<Data extends ComputedClassData<ComputedClassIncludeConstraint>> = {
 	/**
 	 * Instance.
 	 */
@@ -376,17 +410,14 @@ export type ComputedClassDataExtends<Data extends ComputedClassData> = {
 /**
  * What extending class should implement.
  */
-export type ComputedClassClassImplements<Data extends ComputedClassData> = ComputedClassGenerateClassConstraint<
-	Data,
-	ComputedClassWords.Implement
->;
+export type ComputedClassClassImplements<Data extends ComputedClassData<ComputedClassIncludeConstraint>> =
+	ComputedClassGenerateClassConstraint<Data, ComputedClassWords.Implement>;
 
 /**
  * Instance type constraint.
  */
-export type ComputedClassInstanceConstraint<Data extends ComputedClassData> = InstanceType<
-	ComputedClassClassConstraint<Data>
->;
+export type ComputedClassInstanceConstraint<Data extends ComputedClassData<ComputedClassIncludeConstraint>> =
+	InstanceType<ComputedClassClassConstraint<Data>>;
 
 /**
  * Class type constraint.
@@ -395,7 +426,7 @@ export type ComputedClassInstanceConstraint<Data extends ComputedClassData> = In
  * Is a concrete constraint.
  */
 export type ComputedClassClassConstraint<
-	Data extends ComputedClassData,
+	Data extends ComputedClassData<ComputedClassIncludeConstraint>,
 	Parameters extends any[] = any
 > = ConcreteConstructor<Parameters, ComputedClassGenerateInstance<Data, ComputedClassIncludeAbstract>> &
 	ComputedClassGenerateStatic<Data, ComputedClassIncludeAbstract>;
@@ -404,8 +435,8 @@ export type ComputedClassClassConstraint<
  * Info for computed class.
  */
 export type ComputedClassInfo<
-	ConstraintData extends ComputedClassData,
-	ActualData extends ComputedClassData,
+	ConstraintData extends ComputedClassConstraintData,
+	ActualData extends ComputedClassActualData,
 	Parameters extends any[]
 > = {
 	/**
