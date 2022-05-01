@@ -11,7 +11,6 @@ import {
 	ComputedClassActualData,
 	ComputedClassActualMembers,
 	ComputedClassClassConstraint,
-	ComputedClassClassImplements,
 	ComputedClassConstraintData,
 	ComputedClassConstraintMembers,
 	ComputedClassDataExtends,
@@ -162,44 +161,10 @@ export type CoreUniverseObjectContainerClassConstraintDataExtends<
 >;
 
 /**
- * Abstract part ot the class from {@link CoreUniverseObjectContainerFactory}.
- *
- * @typeParam ChildUniverseObject - Universe object to contain
- * @typeParam ChildId - ID of the universe object
- * @typeParam Options - Options for the universe object
- */
-export type CoreUniverseObjectContainerClassImplements<
-	ChildBaseClass extends CoreBaseClassNonRecursive,
-	ChildUniverseObjectInstance extends CoreUniverseObject<
-		ChildBaseClass,
-		ChildArg,
-		ChildId,
-		Options,
-		ParentId,
-		GrandparentIds
-	>,
-	ChildArg extends CoreArg<ChildId, Options, ParentId | GrandparentIds>,
-	ChildId extends CoreArgIds,
-	Options extends CoreUniverseObjectArgsOptionsUnion,
-	ParentId extends CoreArgIds = never,
-	GrandparentIds extends CoreArgIds = never
-> = ComputedClassClassImplements<
-	CoreUniverseObjectContainerClassConstraintData<
-		ConcreteConstructorConstraint,
-		ChildBaseClass,
-		ChildUniverseObjectInstance,
-		ChildArg,
-		ChildId,
-		Options,
-		ParentId,
-		GrandparentIds
-	>
->;
-
-/**
  * Universe object container final type.
  */
 export type CoreUniverseObjectContainerClass<
+	BaseClass extends ConcreteConstructorConstraint,
 	ChildBaseClass extends CoreBaseClassNonRecursive,
 	ChildUniverseObjectInstance extends CoreUniverseObject<
 		ChildBaseClass,
@@ -216,7 +181,7 @@ export type CoreUniverseObjectContainerClass<
 	GrandparentIds extends CoreArgIds = never
 > = ComputedClassClassConstraint<
 	CoreUniverseObjectContainerClassConstraintData<
-		ConcreteConstructorConstraint,
+		BaseClass,
 		ChildBaseClass,
 		ChildUniverseObjectInstance,
 		ChildArg,
@@ -231,6 +196,7 @@ export type CoreUniverseObjectContainerClass<
  * Universe object container final type.
  */
 export type CoreUniverseObjectContainer<
+	BaseClass extends ConcreteConstructorConstraint,
 	ChildBaseClass extends CoreBaseClassNonRecursive,
 	ChildUniverseObjectInstance extends CoreUniverseObject<
 		ChildBaseClass,
@@ -247,7 +213,7 @@ export type CoreUniverseObjectContainer<
 	GrandparentIds extends CoreArgIds = never
 > = ComputedClassInstanceConstraint<
 	CoreUniverseObjectContainerClassConstraintData<
-		ConcreteConstructorConstraint,
+		BaseClass,
 		ChildBaseClass,
 		ChildUniverseObjectInstance,
 		ChildArg,

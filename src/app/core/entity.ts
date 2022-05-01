@@ -8,11 +8,13 @@
  */
 
 import {
+	ComputedClassActualData,
+	ComputedClassActualMembers,
 	ComputedClassClassConstraint,
-	ComputedClassData,
+	ComputedClassConstraintData,
+	ComputedClassConstraintMembers,
 	ComputedClassInfo,
 	ComputedClassInstanceConstraint,
-	ComputedClassMembers,
 	ComputedClassWords
 } from "../common/computed-class";
 import { defaultKindUuid } from "../common/defaults";
@@ -120,11 +122,11 @@ type CoreEntityArgKind<O extends CoreArgOptionsUnion> = O[CoreArgOptionIds.Kind]
 /**
  * Constraint for core entity arg.
  */
-type CoreEntityArgConstraintData<Options extends CoreArgOptionsUnion> = ComputedClassData<{
+type CoreEntityArgConstraintData<Options extends CoreArgOptionsUnion> = ComputedClassConstraintData<{
 	/**
 	 * Instance.
 	 */
-	[ComputedClassWords.Instance]: ComputedClassMembers & {
+	[ComputedClassWords.Instance]: ComputedClassConstraintMembers & {
 		/**
 		 * Base.
 		 */
@@ -153,7 +155,7 @@ type CoreEntityArgConstraintData<Options extends CoreArgOptionsUnion> = Computed
 	/**
 	 * Static.
 	 */
-	[ComputedClassWords.Static]: ComputedClassMembers;
+	[ComputedClassWords.Static]: ComputedClassConstraintMembers;
 }>;
 
 /**
@@ -187,7 +189,7 @@ export type CoreEntityClassConstraintData<Options extends CoreUniverseObjectArgs
 		CoreArgIds.Cell,
 		CoreEntityArgGrandparentIds
 	> &
-		ComputedClassData<CoreEntityArgConstraintData<Options>>;
+		ComputedClassConstraintData<CoreEntityArgConstraintData<Options>>;
 
 /**
  * Core cell.
@@ -299,11 +301,11 @@ export function CoreEntityClassFactory<
 	 */
 	type ActualClassInfo = ComputedClassInfo<
 		CoreEntityClassConstraintData<Options>,
-		ComputedClassData<{
+		ComputedClassActualData<{
 			/**
 			 * Instance.
 			 */
-			[ComputedClassWords.Instance]: ComputedClassMembers & {
+			[ComputedClassWords.Instance]: ComputedClassActualMembers & {
 				/**
 				 * Base.
 				 */
@@ -318,7 +320,7 @@ export function CoreEntityClassFactory<
 			/**
 			 * Static.
 			 */
-			[ComputedClassWords.Static]: ComputedClassMembers & {
+			[ComputedClassWords.Static]: ComputedClassActualMembers & {
 				/**
 				 * Base.
 				 */

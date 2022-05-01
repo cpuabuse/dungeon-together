@@ -8,12 +8,14 @@
  */
 
 import {
+	ComputedClassActualData,
+	ComputedClassActualMembers,
 	ComputedClassClassConstraint,
-	ComputedClassData,
+	ComputedClassConstraintData,
+	ComputedClassConstraintMembers,
 	ComputedClassExtractInstance,
 	ComputedClassInfo,
 	ComputedClassInstanceConstraint,
-	ComputedClassMembers,
 	ComputedClassWords,
 	computedClassGenerate
 } from "../common/computed-class";
@@ -174,11 +176,11 @@ export type CoreCellArgParentIds = typeof coreCellArgParentIds[number];
 /**
  * Core cell arg constraint data.
  */
-type CoreCellArgConstraintData<Options extends CoreArgOptionsUnion> = ComputedClassData<{
+type CoreCellArgConstraintData<Options extends CoreArgOptionsUnion> = ComputedClassConstraintData<{
 	/**
 	 * Instance.
 	 */
-	[ComputedClassWords.Instance]: ComputedClassMembers & {
+	[ComputedClassWords.Instance]: ComputedClassConstraintMembers & {
 		/**
 		 * Base.
 		 */
@@ -204,7 +206,7 @@ type CoreCellArgConstraintData<Options extends CoreArgOptionsUnion> = ComputedCl
 	/**
 	 * Static.
 	 */
-	[ComputedClassWords.Static]: ComputedClassMembers;
+	[ComputedClassWords.Static]: ComputedClassConstraintMembers;
 }>;
 
 /**
@@ -243,7 +245,7 @@ type CoreCellClassConstraintData<
 	CoreEntityArg<Options>,
 	CoreArgIds.Entity
 > &
-	ComputedClassData<CoreCellArgConstraintData<Options>>;
+	ComputedClassConstraintData<CoreCellArgConstraintData<Options>>;
 
 /**
  * Core cell.
@@ -361,11 +363,11 @@ export function CoreCellClassFactory<
 	 */
 	type ActualClassInfo = ComputedClassInfo<
 		CoreCellClassConstraintData<Options, InstanceType<EntityClass>>,
-		ComputedClassData<{
+		ComputedClassActualData<{
 			/**
 			 * Instance.
 			 */
-			[ComputedClassWords.Instance]: ComputedClassMembers & {
+			[ComputedClassWords.Instance]: ComputedClassActualMembers & {
 				/**
 				 * Base.
 				 */
@@ -385,7 +387,7 @@ export function CoreCellClassFactory<
 			/**
 			 * Static.
 			 */
-			[ComputedClassWords.Static]: ComputedClassMembers & {
+			[ComputedClassWords.Static]: ComputedClassActualMembers & {
 				/**
 				 * Base.
 				 */

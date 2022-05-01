@@ -12,7 +12,6 @@ import {
 	ComputedClassActualData,
 	ComputedClassActualMembers,
 	ComputedClassClassConstraint,
-	ComputedClassClassImplements,
 	ComputedClassConstraintData,
 	ComputedClassConstraintMembers,
 	ComputedClassDataExtends,
@@ -341,46 +340,6 @@ export type CoreUniverseObjectClass<
 >;
 
 /**
- * Abstract part ot the class from {@link CoreUniverseObjectFactory}.
- *
- * @typeParam ChildUniverseObject - Universe object to contain
- * @typeParam ChildId - ID of the universe object
- * @typeParam Options - Options for the universe object
- * @typeParam ParentIds - Parent IDs of the universe object
- */
-export type CoreUniverseObjectClassImplements<
-	BaseClass extends CoreBaseClassNonRecursive,
-	Arg extends CoreArgPath<Id, Options, ParentId | GrandparentIds> &
-		CoreArgsContainer<ChildArg, ChildId, Options, Id | ParentId | GrandparentIds>,
-	Id extends CoreArgIds,
-	Options extends CoreUniverseObjectArgsOptionsUnion,
-	ParentId extends CoreArgIds = never,
-	GrandparentIds extends CoreArgIds = never,
-	ChildUniverseObjectInstance extends CoreUniverseObject<
-		BaseClass,
-		ChildArg,
-		ChildId,
-		Options,
-		Id,
-		ParentId | GrandparentIds
-	> = never,
-	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
-	ChildId extends CoreArgIds = never
-> = ComputedClassClassImplements<
-	CoreUniverseObjectClassConstraintData<
-		BaseClass,
-		Arg,
-		Id,
-		Options,
-		ParentId,
-		GrandparentIds,
-		ChildUniverseObjectInstance,
-		ChildArg,
-		ChildId
-	>
->;
-
-/**
  * Factory for core universe object class.
  *
  * @remarks
@@ -494,6 +453,7 @@ export function CoreUniverseObjectFactory<
 	 * Type of the container class, no matter if it's a container or not.
 	 */
 	type ContainerInstance = CoreUniverseObjectContainer<
+		BaseClass,
 		BaseClass,
 		ChildUniverseObjectInstance,
 		ChildArg,
