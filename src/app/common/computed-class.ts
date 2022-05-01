@@ -417,7 +417,7 @@ export type ComputedClassClassImplements<Data extends ComputedClassData<Computed
  * Instance type constraint.
  */
 export type ComputedClassInstanceConstraint<Data extends ComputedClassData<ComputedClassIncludeConstraint>> =
-	InstanceType<ComputedClassClassConstraint<Data>>;
+	ComputedClassGenerateInstance<Data, ComputedClassIncludeAbstract>;
 
 /**
  * Class type constraint.
