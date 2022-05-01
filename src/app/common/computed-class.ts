@@ -7,7 +7,12 @@
  * @file Working with classes with computed properties.
  */
 
-import { AbstractConstructor, AbstractConstructorConstraint, ConcreteConstructor } from "./utility-types";
+import {
+	AbstractConstructor,
+	AbstractConstructorConstraint,
+	ConcreteConstructor,
+	hasOwnProperty
+} from "./utility-types";
 
 /**
  * Assign part of members.
@@ -64,22 +69,19 @@ export type ComputedClassGenerate<
  * For some reason, some information is lost if not using two subtypes.
  */
 export type ComputedClassExtractInstance<
-	T extends
-		| ComputedClassAssign
-		| ComputedClassGenerate<That, P>
-		| (ComputedClassAssign & ComputedClassGenerate<That, P>),
+	T extends Partial<ComputedClassAssign & ComputedClassGenerate<That, P>>,
 	That = any,
 	P extends any[] = any[]
 > = (T extends ComputedClassAssign
 	? {
 			[K in keyof T["assign"] as T["assign"][K]["name"]]: T["assign"][K]["value"];
 	  }
-	: unknown) &
+	: object) &
 	(T extends ComputedClassGenerate<That, P>
 		? {
 				[K in keyof T["generate"] as T["generate"][K]["name"]]: ReturnType<T["generate"][K]["value"]>;
 		  }
-		: unknown);
+		: object);
 
 /**
  * Type to extract members for the class.
@@ -88,17 +90,14 @@ export type ComputedClassExtractInstance<
  * For some reason, some information is lost if not using two subtypes.
  */
 export type ComputedClassExtractClass<
-	T extends
-		| ComputedClassAssign<"staticAssign">
-		| ComputedClassGenerate<That, P, "staticGenerate">
-		| (ComputedClassAssign<"staticAssign"> & ComputedClassGenerate<That, P, "staticGenerate">),
+	T extends Partial<ComputedClassAssign<"staticAssign"> & ComputedClassGenerate<That, P, "staticGenerate">>,
 	That = any,
 	P extends any[] = any[]
 > = (T extends ComputedClassAssign<"staticAssign">
 	? {
 			[K in keyof T["staticAssign"] as T["staticAssign"][K]["name"]]: T["staticAssign"][K]["value"];
 	  }
-	: unknown) &
+	: object) &
 	(T extends ComputedClassGenerate<That, P, "staticGenerate">
 		? // Check that generation params match
 		  T extends ComputedClassGenerate<That, P, "staticGenerate">
@@ -108,7 +107,7 @@ export type ComputedClassExtractClass<
 					>;
 			  }
 			: never
-		: unknown);
+		: object);
 
 /**
  * Assigns data to class.
@@ -132,15 +131,19 @@ export function computedClassAssign({
 	/**
 	 * Members.
 	 */
-	members: ComputedClassAssign & ComputedClassAssign<"staticAssign">;
+	members: Partial<ComputedClassAssign & ComputedClassAssign<"staticAssign">>;
 }): void {
-	Object.values(members.assign).forEach(method => {
-		(Base.prototype as Record<string, unknown>)[method.name] = method.value;
-	});
+	if (hasOwnProperty(members, "assign")) {
+		Object.values(members.assign).forEach(method => {
+			(Base.prototype as Record<string, unknown>)[method.name] = method.value;
+		});
+	}
 
-	Object.values(members.staticAssign).forEach(method => {
-		(Base as Record<string, unknown>)[method.name] = method.value;
-	});
+	if (hasOwnProperty(members, "staticAssign")) {
+		Object.values(members.staticAssign).forEach(method => {
+			(Base as Record<string, unknown>)[method.name] = method.value;
+		});
+	}
 }
 
 /**
@@ -166,11 +169,13 @@ export function computedClassGenerate<That, P extends any[]>({
 	/**
 	 * Members.
 	 */
-	members: ComputedClassGenerate<That, P>;
+	members: Partial<ComputedClassGenerate<That, P>>;
 }): void {
-	Object.values(members.generate).forEach(property => {
-		(that as Record<string, unknown>)[property.name] = property.value.apply(that, args);
-	});
+	if (hasOwnProperty(members, "generate")) {
+		Object.values(members.generate).forEach(property => {
+			(that as Record<string, unknown>)[property.name] = property.value.apply(that, args);
+		});
+	}
 }
 
 /**
@@ -375,7 +380,7 @@ export type ComputedClassActualData<
  *
  * Plain intersection is fine, as when condition above happen, `implements` will error.
  */
-export type ComputedClassDataExtends<Data extends ComputedClassData<ComputedClassIncludeConstraint>> = {
+export type ComputedClassDataExtends<Data extends ComputedClassConstraintData> = {
 	/**
 	 * Instance.
 	 */
@@ -410,14 +415,16 @@ export type ComputedClassDataExtends<Data extends ComputedClassData<ComputedClas
 /**
  * What extending class should implement.
  */
-export type ComputedClassClassImplements<Data extends ComputedClassData<ComputedClassIncludeConstraint>> =
+export type ComputedClassClassImplements<Data extends ComputedClassConstraintData> =
 	ComputedClassGenerateClassConstraint<Data, ComputedClassWords.Implement>;
 
 /**
  * Instance type constraint.
  */
-export type ComputedClassInstanceConstraint<Data extends ComputedClassData<ComputedClassIncludeConstraint>> =
-	ComputedClassGenerateInstance<Data, ComputedClassIncludeAbstract>;
+export type ComputedClassInstanceConstraint<Data extends ComputedClassConstraintData> = ComputedClassGenerateInstance<
+	Data,
+	ComputedClassIncludeAbstract
+>;
 
 /**
  * Class type constraint.
@@ -426,7 +433,7 @@ export type ComputedClassInstanceConstraint<Data extends ComputedClassData<Compu
  * Is a concrete constraint.
  */
 export type ComputedClassClassConstraint<
-	Data extends ComputedClassData<ComputedClassIncludeConstraint>,
+	Data extends ComputedClassConstraintData,
 	Parameters extends any[] = any
 > = ConcreteConstructor<Parameters, ComputedClassGenerateInstance<Data, ComputedClassIncludeAbstract>> &
 	ComputedClassGenerateStatic<Data, ComputedClassIncludeAbstract>;
