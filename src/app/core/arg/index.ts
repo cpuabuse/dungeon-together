@@ -10,6 +10,7 @@
 // Reexport
 export * from "./arg";
 export * from "./args-container";
+export * from "./arg-container-arg";
 export * from "./meta";
 export * from "./options";
 export * from "./path";

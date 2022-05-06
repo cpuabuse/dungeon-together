@@ -29,11 +29,13 @@ import { Uuid, getDefaultUuid } from "../../common/uuid";
 import {
 	CoreArg,
 	CoreArgComplexOptionPathIds,
+	CoreArgContainerArg,
 	CoreArgIds,
 	CoreArgObjectWords,
 	CoreArgOptionIds,
 	CoreArgOptionsPathExtendedUnion,
 	CoreArgOptionsPathOwn,
+	CoreArgOptionsUnion,
 	CoreArgPath,
 	CoreArgPathUuidPropertyName,
 	CoreArgsContainer,
@@ -72,25 +74,20 @@ export type CoreUniverseObjectConstructorParameters<
  */
 type CoreUniverseObjectClassConstraintData<
 	BaseClass extends CoreBaseClassNonRecursive,
-	// Preserve for future type merging
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds> &
-		CoreArgsContainer<ChildArg, ChildId, Options, Id | ParentId | GrandparentIds>,
+	Arg extends CoreArgContainerArg<Id, Options, ParentId | GrandparentIds, ChildId>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never,
 	ChildUniverseObjectInstance extends CoreUniverseObject<
 		BaseClass,
-		ChildArg,
+		Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 		ChildId,
 		Options,
 		Id,
 		ParentId | GrandparentIds
 	> = never,
-	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
-	ChildId extends CoreArgIds = never,
-	IsContainer extends boolean = [ChildId] extends [never] ? false : true
+	ChildId extends CoreArgIds = never
 > =
 	// General data
 
@@ -110,7 +107,7 @@ type CoreUniverseObjectClassConstraintData<
 						BaseClass,
 						BaseClass,
 						ChildUniverseObjectInstance,
-						ChildArg,
+						Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 						ChildId,
 						Options,
 						Id,
@@ -121,21 +118,21 @@ type CoreUniverseObjectClassConstraintData<
 			 * Externally generated.
 			 */
 			[ComputedClassWords.Inject]: object &
-				(IsContainer extends true
-					? Pick<
+				([ChildId] extends [never]
+					? unknown
+					: Pick<
 							CoreUniverseObjectContainerClassConstraintDataExtends<
 								BaseClass,
 								BaseClass,
 								ChildUniverseObjectInstance,
-								ChildArg,
+								Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 								ChildId,
 								Options,
 								Id,
 								ParentId | GrandparentIds
 							>[ComputedClassWords.Instance][ComputedClassWords.Populate],
 							`add${CoreArgObjectWords[ChildId]["singularCapitalizedWord"]}`
-					  >
-					: unknown) & {
+					  >) & {
 					[K in `terminate${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: () => void;
 				} & CoreArg<Id, Options, ParentId | GrandparentIds> &
 				([ParentId] extends [never]
@@ -162,7 +159,7 @@ type CoreUniverseObjectClassConstraintData<
 							BaseClass,
 							BaseClass,
 							ChildUniverseObjectInstance,
-							ChildArg,
+							Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 							ChildId,
 							Options,
 							Id,
@@ -186,7 +183,7 @@ type CoreUniverseObjectClassConstraintData<
 						BaseClass,
 						BaseClass,
 						ChildUniverseObjectInstance,
-						ChildArg,
+						Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 						ChildId,
 						Options,
 						Id,
@@ -213,18 +210,22 @@ type CoreUniverseObjectClassConstraintData<
 			 *
 			 * @see {@link ComputedClassDataExtends}
 			 */
-			[ComputedClassWords.Implement]: [ChildId] extends [never]
+			[ComputedClassWords.Implement]: {
+				[K in `convert${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: <O extends CoreArgOptionsUnion>(
+					arg: CoreArg<Id, O, ParentId | GrandparentIds>
+				) => void;
+			} & ([ChildId] extends [never]
 				? object
 				: CoreUniverseObjectContainerClassConstraintDataExtends<
 						BaseClass,
 						BaseClass,
 						ChildUniverseObjectInstance,
-						ChildArg,
+						Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 						ChildId,
 						Options,
 						Id,
 						ParentId | GrandparentIds
-				  >[ComputedClassWords.Static][ComputedClassWords.Populate];
+				  >[ComputedClassWords.Static][ComputedClassWords.Populate]);
 		};
 	}>;
 
@@ -233,21 +234,19 @@ type CoreUniverseObjectClassConstraintData<
  */
 export type CoreUniverseObjectClassConstraintDataExtends<
 	BaseClass extends CoreBaseClassNonRecursive,
-	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds> &
-		CoreArgsContainer<ChildArg, ChildId, Options, Id | ParentId | GrandparentIds>,
+	Arg extends CoreArgContainerArg<Id, Options, ParentId | GrandparentIds, ChildId>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never,
 	ChildUniverseObjectInstance extends CoreUniverseObject<
 		BaseClass,
-		ChildArg,
+		Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 		ChildId,
 		Options,
 		Id,
 		ParentId | GrandparentIds
 	> = never,
-	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
 	ChildId extends CoreArgIds = never
 > = ComputedClassDataExtends<
 	CoreUniverseObjectClassConstraintData<
@@ -258,7 +257,6 @@ export type CoreUniverseObjectClassConstraintDataExtends<
 		ParentId,
 		GrandparentIds,
 		ChildUniverseObjectInstance,
-		ChildArg,
 		ChildId
 	>
 >;
@@ -268,21 +266,19 @@ export type CoreUniverseObjectClassConstraintDataExtends<
  */
 export type CoreUniverseObject<
 	BaseClass extends CoreBaseClassNonRecursive,
-	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds> &
-		CoreArgsContainer<ChildArg, ChildId, Options, Id | ParentId | GrandparentIds>,
+	Arg extends CoreArgContainerArg<Id, Options, ParentId | GrandparentIds, ChildId>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never,
 	ChildUniverseObjectInstance extends CoreUniverseObject<
 		BaseClass,
-		ChildArg,
+		Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 		ChildId,
 		Options,
 		Id,
 		ParentId | GrandparentIds
 	> = never,
-	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
 	ChildId extends CoreArgIds = never
 > = ComputedClassInstanceConstraint<
 	CoreUniverseObjectClassConstraintData<
@@ -293,7 +289,6 @@ export type CoreUniverseObject<
 		ParentId,
 		GrandparentIds,
 		ChildUniverseObjectInstance,
-		ChildArg,
 		ChildId
 	>
 >;
@@ -308,21 +303,19 @@ export type CoreUniverseObject<
  */
 export type CoreUniverseObjectClass<
 	BaseClass extends CoreBaseClassNonRecursive,
-	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds> &
-		CoreArgsContainer<ChildArg, ChildId, Options, Id | ParentId | GrandparentIds>,
+	Arg extends CoreArgContainerArg<Id, Options, ParentId | GrandparentIds, ChildId>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never,
 	ChildUniverseObjectInstance extends CoreUniverseObject<
 		BaseClass,
-		ChildArg,
+		Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 		ChildId,
 		Options,
 		Id,
 		ParentId | GrandparentIds
 	> = never,
-	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
 	ChildId extends CoreArgIds = never
 > = ComputedClassClassConstraint<
 	CoreUniverseObjectClassConstraintData<
@@ -333,7 +326,6 @@ export type CoreUniverseObjectClass<
 		ParentId,
 		GrandparentIds,
 		ChildUniverseObjectInstance,
-		ChildArg,
 		ChildId
 	>,
 	CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>
@@ -353,21 +345,19 @@ export type CoreUniverseObjectClass<
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreUniverseObjectFactory<
 	BaseClass extends CoreBaseClassNonRecursive,
-	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds> &
-		CoreArgsContainer<ChildArg, ChildId, Options, Id | ParentId | GrandparentIds>,
+	Arg extends CoreArgContainerArg<Id, Options, ParentId | GrandparentIds, ChildId>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never,
 	ChildUniverseObjectInstance extends CoreUniverseObject<
 		BaseClass,
-		ChildArg,
+		Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 		ChildId,
 		Options,
 		Id,
 		ParentId | GrandparentIds
 	> = never,
-	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
 	ChildId extends CoreArgIds = never
 >({
 	Base,
@@ -456,7 +446,7 @@ export function CoreUniverseObjectFactory<
 		BaseClass,
 		BaseClass,
 		ChildUniverseObjectInstance,
-		ChildArg,
+		Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 		ChildId,
 		Options,
 		Id,
@@ -518,7 +508,6 @@ export function CoreUniverseObjectFactory<
 			ParentId,
 			GrandparentIds,
 			ChildUniverseObjectInstance,
-			ChildArg,
 			ChildId
 		>,
 		ComputedClassActualData<{
@@ -663,7 +652,7 @@ export function CoreUniverseObjectFactory<
 			BaseClass,
 			BaseClass,
 			ChildUniverseObjectInstance,
-			ChildArg,
+			Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 			ChildId,
 			Options,
 			Id,
@@ -693,7 +682,7 @@ export function CoreUniverseObjectFactory<
 						this: ThisInstanceConcrete,
 						childArgs: CoreUniverseObjectConstructorParameters<
 							BaseClass,
-							ChildArg,
+							Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 							ChildId,
 							Options,
 							ParentId | GrandparentIds
@@ -703,7 +692,7 @@ export function CoreUniverseObjectFactory<
 						// eslint-disable-next-line @typescript-eslint/typedef
 						let [, { attachHook, created }]: CoreUniverseObjectConstructorParameters<
 							BaseClass,
-							ChildArg,
+							Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 							ChildId,
 							Options,
 							ParentId | GrandparentIds
@@ -713,7 +702,7 @@ export function CoreUniverseObjectFactory<
 								this.universe as CoreUniverseObjectUniverse<
 									BaseClass,
 									ChildUniverseObjectInstance,
-									ChildArg,
+									Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 									ChildId,
 									Options,
 									Id | ParentId | GrandparentIds
@@ -800,13 +789,12 @@ export function CoreUniverseObjectFactory<
 			 */
 			[ComputedClassWords.Instance]: CoreUniverseObjectClassConstraintData<
 				BaseClass,
-				CoreArg<ParentId, Options> & CoreArgsContainer<CoreArg<Id, Options, ParentId>, Id, Options, ParentId>,
+				CoreArgContainerArg<ParentId, Options, GrandparentIds, Id>,
 				ParentId,
 				Options,
 				never,
 				never,
 				CoreUniverseObject<BaseClass, CoreArg<Id, Options, ParentId>, Id, Options, ParentId>,
-				CoreArg<Id, Options, ParentId>,
 				Id
 			>[ComputedClassWords.Instance];
 
@@ -1013,7 +1001,12 @@ export function CoreUniverseObjectFactory<
 				created.resolve();
 			} else {
 				Promise.all(
-					Array.from(arg["" as `${CoreArgObjectWords[ChildId]["pluralLowercaseWord"]}`].values()).map(childArg => {
+					Array.from(
+						// Cast to keep generic info
+						arg["" as `${CoreArgObjectWords[ChildId]["pluralLowercaseWord"]}`].values() as IterableIterator<
+							Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never
+						>
+					).map(childArg => {
 						let childCreatedPromise: DeferredPromise<void> = new DeferredPromise<void>();
 
 						(this as ContainerInstance)["" as `add${CoreArgObjectWords[ChildId]["singularCapitalizedWord"]}`]([
