@@ -20,9 +20,9 @@ import {
 	coreArgIdToPathUuidPropertyName,
 	coreArgObjectWords
 } from "../arg";
-import { CoreBaseClassNonRecursive } from "../base";
+import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveInstance } from "../base";
 import { CoreUniverseObjectInitializationParameter } from "./parameters";
-import { CoreUniverseObjectConstructorParameters, CoreUniverseObjectInstance2 } from "./universe-object";
+import { CoreUniverseObjectConstructorParameters, CoreUniverseObjectInstance } from "./universe-object";
 import { CoreUniverseObjectArgsOptionsUnion } from ".";
 
 /**
@@ -31,41 +31,64 @@ import { CoreUniverseObjectArgsOptionsUnion } from ".";
  * @remarks
  * Without it, cannot reference `this` easily in generic members.
  * Implementing this type, ensures that members are implemented correctly.
+ *
+ * Cannot use `InstanceType<BaseClass>`, since cannot implement in class (implies dynamic members), even if it would be extended.
  */
 export type CoreUniverseObjectContainerInstance<
 	BaseClass extends CoreBaseClassNonRecursive,
 	// We do not care what class is base class for child
-	Instance extends CoreUniverseObjectInstance2<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
+	Instance extends CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
 	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never
-> = CoreArgsContainer<Instance, Id, Options, ParentId | GrandparentIds> & {
-	[K in `get${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-		path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
-	) => Instance;
-} & {
-	[K in `remove${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-		path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
-	) => void;
-} & {
-	[K in `attach${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-		universeObject: Instance,
-		initializationParameter: Pick<CoreUniverseObjectInitializationParameter, "attachHook">
-	) => void;
-} & {
-	[K in `detach${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-		path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
-	) => boolean;
-} & {
-	[K in `default${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: Instance;
-} & {
-	// Necessary to implement where the created child is known, to call attach
-	[K in `add${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-		childArgs: CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>
-	) => void;
-};
+> = CoreBaseNonRecursiveInstance &
+	CoreArgsContainer<Instance, Id, Options, ParentId | GrandparentIds> & {
+		[K in `get${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
+			path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
+		) => Instance;
+	} & {
+		[K in `remove${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
+			path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
+		) => void;
+	} & {
+		[K in `attach${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
+			universeObject: Instance,
+			initializationParameter: Pick<CoreUniverseObjectInitializationParameter, "attachHook">
+		) => void;
+	} & {
+		[K in `detach${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
+			path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
+		) => boolean;
+	} & {
+		[K in `default${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: Instance;
+	} & {
+		// Necessary to implement where the created child is known, to call attach
+		[K in `add${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
+			childArgs: CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>
+		) => void;
+	};
+
+/**
+ * Static type.
+ *
+ * @remarks
+ * Without it, cannot reference `this` easily in generic members.
+ * Implementing this type, ensures that members are implemented correctly.
+ */
+export type CoreUniverseObjectContainerStatic<
+	BaseClass extends CoreBaseClassNonRecursive,
+	// We do not care what class is base class for child
+	// Preserve for future
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	Instance extends CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
+	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds>,
+	Id extends CoreArgIds,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	ParentId extends CoreArgIds = never,
+	GrandparentIds extends CoreArgIds = never
+> = object;
 
 /**
  * Universe object container members.
@@ -82,7 +105,7 @@ export type CoreUniverseObjectContainerInstance<
 export function generateCoreUniverseObjectContainerMembers<
 	BaseClass extends CoreBaseClassNonRecursive,
 	// We do not care what class is base class for child
-	Instance extends CoreUniverseObjectInstance2<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
+	Instance extends CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
 	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,

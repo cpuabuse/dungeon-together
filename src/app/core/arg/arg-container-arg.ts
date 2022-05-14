@@ -17,7 +17,8 @@ import { CoreArgOptionsUnion } from "./options";
 export type CoreArgContainerArg<
 	Id extends CoreArgIds,
 	Options extends CoreArgOptionsUnion,
-	ParentIds extends CoreArgIds,
-	ChildId extends CoreArgIds = never
-> = CoreArg<Id, Options, ParentIds> &
+	ParentIds extends CoreArgIds = never,
+	ChildId extends CoreArgIds = never,
+	HasNever extends boolean = false
+> = CoreArg<Id, Options, ParentIds, HasNever> &
 	CoreArgsContainer<CoreArg<ChildId, Options, Id | ParentIds>, ChildId, Options, Id | ParentIds>;

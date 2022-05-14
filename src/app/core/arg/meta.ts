@@ -247,7 +247,7 @@ export function coreArgChildMetaGenerate<
 		const { parentArgPath, ...rest } = meta as unknown as MetaWithPathOwnToExtended;
 
 		// UUID property name
-		const parentArgUuidPropertyName: CoreArgPathUuidPropertyName<ChildId> = coreArgIdToPathUuidPropertyName({
+		const parentArgUuidPropertyName: CoreArgPathUuidPropertyName<ParentId> = coreArgIdToPathUuidPropertyName({
 			id: parentArgId
 		});
 

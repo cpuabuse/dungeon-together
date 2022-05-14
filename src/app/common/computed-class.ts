@@ -5,14 +5,30 @@
 
 /**
  * @file Working with classes with computed properties.
+ * @remarks
+ * - `implements` should be constrained with artificial type
+ * - If one pseudo-class "extends" another, artificial type should incorporate both types, while members objects should be separated, as there could be an actual class in between both
  */
 
-import { hasOwnProperty } from "./utility-types";
+import { MapIntersection, hasOwnProperty } from "./utility-types";
 
 /**
  * Type to be produced when extracting, when empty.
  */
-type ComputedClassEmptyType = unknown;
+type EmptyType = unknown;
+
+/**
+ * Effectively class member key signature.
+ */
+type NameType = string | number | symbol;
+
+/**
+ * For when conditional type is empty.
+ *
+ * @remarks
+ * It seems that `object` does not give indication a potential record, and information from potentially condition succeeding is gone.
+ */
+export type EmptyObject = Record<string | number | symbol, unknown>;
 
 /**
  * Words for computed class.
@@ -20,6 +36,7 @@ type ComputedClassEmptyType = unknown;
 export enum ComputedClassWords {
 	Instance = "instance",
 	Static = "static",
+	Constructor = "constructor",
 
 	// Static(not dynamic) information
 	Assign = "assign",
@@ -32,101 +49,132 @@ export enum ComputedClassWords {
 }
 
 /**
- * Assign part of members.
+ * Instance or static property to include into members.
+ * To be used one at a time.
  */
-type ComputedClassAssign = {
-	/**
-	 * Assign.
-	 */
-	[ComputedClassWords.Assign]: {
-		[key: string]: {
-			/**
-			 * Name of the property.
-			 */
-			[ComputedClassWords.Name]: string;
-
-			/**
-			 * Value to assign.
-			 */
-			[ComputedClassWords.Value]: unknown;
-		};
-	};
-};
+type ComputedClassInclude = ComputedClassWords.Instance | ComputedClassWords.Static;
 
 /**
- * Generate part of members.
- *
- * @remarks
- * Parameters are required, for type safety, as generate is run during initialization, and it's parameters might not affect the result (return value used instead), but can break things, if parameters are inconsistent.
+ * Accepted general assign members object.
  */
-type ComputedClassGenerate<Parameters extends any[]> = {
-	/**
-	 * Generate.
-	 */
-	[ComputedClassWords.Generate]: {
-		[key: string]: {
-			/**
-			 * Name of the property.
-			 */
-			[ComputedClassWords.Name]: string;
-
-			/**
-			 * Generation function.
-			 */
-			[ComputedClassWords.Value]: (...arg: Parameters) => unknown;
-		};
-	};
-};
-
-/**
- * Accepted general members object.
- */
-type ComputedClassMembers<Parameters extends any[]> = Partial<ComputedClassAssign & ComputedClassGenerate<Parameters>>;
-
-/**
- * Instance part of members.
- */
-type ComputedClassInstance<Parameters extends any[]> = {
+type ComputedClassMembersAssign<Include extends ComputedClassInclude> = {
 	/**
 	 * Instance.
 	 */
-	[ComputedClassWords.Instance]: ComputedClassMembers<Parameters>;
+	[K in Include]: {
+		/**
+		 * Assign.
+		 */
+		[ComputedClassWords.Assign]: {
+			[key: string]: {
+				/**
+				 * Name of the property.
+				 */
+				[ComputedClassWords.Name]: NameType;
+
+				/**
+				 * Value to assign.
+				 *
+				 * @remarks
+				 * Not using {@link EmptyType} intentionally (expected type is more known).
+				 */
+				[ComputedClassWords.Value]: unknown;
+			};
+		};
+	};
 };
 
 /**
- * Static part of members.
+ * Accepted general generate members object.
+ *
+ *  @remarks
+ * Parameters are required, for type safety, as generate is run during initialization, and it's parameters might not affect the result (return value used instead), but can break things, if parameters are inconsistent.
  */
-type ComputedClassStatic<Parameters extends any[]> = {
+type ComputedClassMembersGenerate<Include extends ComputedClassInclude, Params extends any[]> = {
 	/**
-	 * Static.
+	 * Instance.
 	 */
-	[ComputedClassWords.Static]: ComputedClassMembers<Parameters>;
+	[K in Include]: {
+		/**
+		 * Generate.
+		 */
+		[ComputedClassWords.Generate]: {
+			[key: string]: {
+				/**
+				 * Name of the property.
+				 */
+				[ComputedClassWords.Name]: NameType;
+
+				/**
+				 * Generation function.
+				 */
+				[ComputedClassWords.Value]: (...arg: Params) => unknown;
+			};
+		};
+	};
+};
+
+/**
+ * Accepted general assign members object.
+ */
+type ComputedClassMembersAssignPartial<Include extends ComputedClassInclude> = {
+	/**
+	 * Instance.
+	 */
+	[K in keyof ComputedClassMembersAssign<Include>]?: Partial<ComputedClassMembersAssign<Include>[K]>;
+};
+
+/**
+ * Accepted general generate members object.
+ */
+type ComputedClassMembersGeneratePartial<Include extends ComputedClassInclude, Params extends any[]> = {
+	/**
+	 * Instance.
+	 */
+	[K in keyof ComputedClassMembersGenerate<Include, Params>]?: Partial<
+		ComputedClassMembersGenerate<Include, Params>[K]
+	>;
 };
 
 /**
  * Data with members to be used in assignment functions.
  */
-type ComputedClassDataPerInstance<Parameters extends any[]> = {
+type ComputedClassDataPerInstance<
+	InstanceParameters extends any[],
+	ConstructorParams extends any[]
+> = ComputedClassMembersGeneratePartial<ComputedClassWords.Instance, InstanceParameters> & {
 	/**
-	 * Members.
+	 * Constructor params.
 	 */
-	[ComputedClassWords.Instance]: Partial<ComputedClassGenerate<Parameters>>;
+	[ComputedClassWords.Constructor]?: (...arg: ConstructorParams) => void;
 };
 
 /**
  * Data with members to be used in assignment functions.
  */
-type ComputedClassDataPerClass<Parameters extends any[]> = {
-	/**
-	 * Members.
-	 */
-	[ComputedClassWords.Instance]: Partial<ComputedClassAssign>;
+type ComputedClassDataPerClass<StaticParameters extends any[]> =
+	ComputedClassMembersAssignPartial<ComputedClassWords.Instance> &
+		ComputedClassMembersAssignPartial<ComputedClassWords.Static> &
+		ComputedClassMembersGeneratePartial<ComputedClassWords.Static, StaticParameters>;
 
-	/**
-	 * Static.
-	 */
-	[ComputedClassWords.Static]: ComputedClassMembers<Parameters>;
-};
+/**
+ * Members tuple to be consumed by merge function.
+ */
+type ComputedClassMembers = ComputedClassMembersAssignPartial<ComputedClassWords.Instance> &
+	ComputedClassMembersGeneratePartial<ComputedClassWords.Instance, any[]> &
+	ComputedClassMembersAssignPartial<ComputedClassWords.Static> &
+	ComputedClassMembersGeneratePartial<ComputedClassWords.Static, any[]>;
+
+/**
+ * Merging multiple members.
+ */
+type ComputedClassDeepMerge<MembersTuple extends ComputedClassMembers[]> = MembersTuple extends [infer Members]
+	? Extract<Members, ComputedClassMembers>
+	: MembersTuple extends [infer M, ...infer R]
+	? R extends ComputedClassMembers[]
+		? M & ComputedClassDeepMerge<R>
+		: never
+	: never;
 
 /**
  * Type to extract members for the class.
@@ -135,38 +183,52 @@ type ComputedClassDataPerClass<Parameters extends any[]> = {
  * @remarks
  * While in generic, cannot create type with generic keys from extraction.
  */
-type ComputedClassExtract<T extends ComputedClassMembers<P>, P extends any[]> = (T extends ComputedClassAssign
-	? {
-			[K in keyof T[ComputedClassWords.Assign] as T[ComputedClassWords.Assign][K][ComputedClassWords.Name]]: T[ComputedClassWords.Assign][K][ComputedClassWords.Value];
-	  }
-	: ComputedClassEmptyType) &
-	(T extends ComputedClassGenerate<P>
+type ComputedClassExtract<
+	Members extends ComputedClassMembersAssignPartial<Include> & ComputedClassMembersGeneratePartial<Include, Params>,
+	Include extends ComputedClassInclude,
+	Params extends any[]
+> = Record<string | number | symbol, unknown> &
+	(Members extends ComputedClassMembersAssign<Include>
 		? {
-				[K in keyof T[ComputedClassWords.Generate] as T[ComputedClassWords.Generate][K][ComputedClassWords.Name]]: ReturnType<
-					T[ComputedClassWords.Generate][K][ComputedClassWords.Value]
+				[K in keyof Members[Include][ComputedClassWords.Assign] as Members[Include][ComputedClassWords.Assign][K][ComputedClassWords.Name]]: Members[Include][ComputedClassWords.Assign][K][ComputedClassWords.Value];
+		  }
+		: EmptyType) &
+	(Members extends ComputedClassMembersGenerate<Include, Params>
+		? {
+				[K in keyof Members[Include][ComputedClassWords.Generate] as Members[Include][ComputedClassWords.Generate][K][ComputedClassWords.Name]]: ReturnType<
+					Members[Include][ComputedClassWords.Generate][K][ComputedClassWords.Value]
 				>;
 		  }
-		: ComputedClassEmptyType);
+		: EmptyType);
+
+/**
+ * Helper type, for extract constraint.
+ *
+ * @remarks
+ * Constraint used to remove faulty inference with of intersection with mapped type (happens when generics involved).
+ *
+ * @see {@link MapIntersection}
+ */
+export type ComputedClassExtractConstraint<
+	Include extends ComputedClassInclude,
+	Params extends any[]
+> = MapIntersection<ComputedClassMembersAssignPartial<Include> & ComputedClassMembersGeneratePartial<Include, Params>>;
 
 /**
  * Type to extract members for the class.
  */
 export type ComputedClassExtractInstance<
-	T extends Partial<ComputedClassInstance<Parameters>>,
-	Parameters extends any[]
-> = T extends ComputedClassInstance<Parameters>
-	? ComputedClassExtract<T[ComputedClassWords.Instance], Parameters>
-	: ComputedClassEmptyType;
+	Members extends ComputedClassExtractConstraint<ComputedClassWords.Instance, Params>,
+	Params extends any[]
+> = ComputedClassExtract<Members, ComputedClassWords.Instance, Params>;
 
 /**
  * Type to extract members for the class.
  */
 export type ComputedClassExtractStatic<
-	T extends Partial<ComputedClassStatic<Parameters>>,
-	Parameters extends any[]
-> = T extends ComputedClassStatic<Parameters>
-	? ComputedClassExtract<T[ComputedClassWords.Static], Parameters>
-	: ComputedClassEmptyType;
+	Members extends ComputedClassExtractConstraint<ComputedClassWords.Static, Params>,
+	Params extends any[]
+> = ComputedClassExtract<Members, ComputedClassWords.Static, Params>;
 
 /**
  * Assigns data to class.
@@ -174,11 +236,17 @@ export type ComputedClassExtractStatic<
  *
  * @param param - Destructured parameter
  */
-export function computedClassInjectPerInstance<Parameters extends any[]>({
+export function computedClassInjectPerInstance<Parameters extends any[], ConstructorParams extends any[]>({
+	constructorParameters,
 	instance,
 	members,
 	parameters
 }: {
+	/**
+	 * Constructor parameters.
+	 */
+	constructorParameters: ConstructorParams;
+
 	/**
 	 * Argument for generate functions.
 	 */
@@ -192,15 +260,16 @@ export function computedClassInjectPerInstance<Parameters extends any[]>({
 	/**
 	 * Members.
 	 */
-	members: ComputedClassDataPerInstance<Parameters>;
+	members: ComputedClassDataPerInstance<Parameters, ConstructorParams>;
 }): void {
-	if (hasOwnProperty(members, ComputedClassWords.Instance)) {
-		let instanceMember: Partial<ComputedClassGenerate<Parameters>> = members[ComputedClassWords.Instance];
-		if (hasOwnProperty(instanceMember, ComputedClassWords.Generate)) {
-			Object.values(instanceMember[ComputedClassWords.Generate]).forEach(property => {
-				(instance as Record<string, unknown>)[property.name] = property.value(...parameters);
-			});
-		}
+	// Deal with instance
+	Object.values(members?.[ComputedClassWords.Instance]?.[ComputedClassWords.Generate] ?? {}).forEach(property => {
+		(instance as Record<NameType, unknown>)[property.name] = property.value(...parameters);
+	});
+
+	// Finally, call pseudo-constructor, after instance generation, so that the members are already available
+	if (hasOwnProperty(members, ComputedClassWords.Constructor)) {
+		members[ComputedClassWords.Constructor](...constructorParameters);
 	}
 }
 
@@ -235,34 +304,68 @@ export function computedClassInjectPerClass<Parameters extends any[]>({
 	parameters: Parameters;
 }): void {
 	// Deal with instance
-	if (hasOwnProperty(members, ComputedClassWords.Instance)) {
-		let instance: Partial<ComputedClassAssign> = members[ComputedClassWords.Instance];
-		if (hasOwnProperty(instance, ComputedClassWords.Assign)) {
-			Object.values(instance[ComputedClassWords.Assign]).forEach(method => {
-				(Base.prototype as Record<string, unknown>)[method.name] = method.value;
-			});
-		}
-	}
+	Object.values(members?.[ComputedClassWords.Instance]?.[ComputedClassWords.Assign] ?? {}).forEach(method => {
+		(Base.prototype as Record<NameType, unknown>)[method.name] = method.value;
+	});
 
 	// Deal with static
-	if (hasOwnProperty(members, ComputedClassWords.Static)) {
-		let staticMember: ComputedClassMembers<Parameters> = members[ComputedClassWords.Static];
-		if (hasOwnProperty(staticMember, ComputedClassWords.Assign)) {
-			Object.values(staticMember[ComputedClassWords.Assign]).forEach(method => {
-				(Base as Record<string, unknown>)[method.name] = method.value;
-			});
-		}
+	let staticMembers: ComputedClassDataPerClass<Parameters>[ComputedClassWords.Static] =
+		members?.[ComputedClassWords.Static];
+	if (staticMembers !== undefined) {
+		Object.values(staticMembers?.[ComputedClassWords.Assign] ?? {}).forEach(method => {
+			(Base as Record<NameType, unknown>)[method.name] = method.value;
+		});
 
-		// BUG: For some reason `staticMember` type is changed after the previous call to `hasOwnProperty`, so casting thrice; Probably a TS bug
-		if (hasOwnProperty(staticMember as ComputedClassMembers<Parameters>, ComputedClassWords.Generate)) {
-			Object.values(
-				(staticMember as ComputedClassMembers<Parameters>)[ComputedClassWords.Generate] as Exclude<
-					ComputedClassMembers<Parameters>[ComputedClassWords.Generate],
-					undefined
-				>
-			).forEach(method => {
-				(Base as Record<string, unknown>)[method.name] = method.value(...parameters);
-			});
-		}
+		Object.values(staticMembers?.[ComputedClassWords.Generate] ?? {}).forEach(method => {
+			(Base as Record<NameType, unknown>)[method.name] = method.value(...parameters);
+		});
 	}
+}
+
+/**
+ * Merges multiple members.
+ *
+ * @param param - Destructured parameter
+ * @remarks
+ * `any[]` used as constraint for generate arguments.
+ *
+ * @returns Merged members
+ */
+export function computedClassDeepMerge<MembersTuple extends ComputedClassMembers[]>({
+	membersArray
+}: {
+	/**
+	 * Tuple of members.
+	 *
+	 * @remarks
+	 * Variadic preserves tuple. Array would produce a union type.
+	 */
+	membersArray: [...MembersTuple];
+}): ComputedClassDeepMerge<MembersTuple> {
+	return membersArray.reduce((previous, current) => {
+		return {
+			[ComputedClassWords.Instance]: {
+				[ComputedClassWords.Assign]: {
+					...previous?.[ComputedClassWords.Instance]?.[ComputedClassWords.Assign],
+					...current?.[ComputedClassWords.Instance]?.[ComputedClassWords.Assign]
+				},
+				[ComputedClassWords.Generate]: {
+					...previous?.[ComputedClassWords.Instance]?.[ComputedClassWords.Generate],
+					...current?.[ComputedClassWords.Instance]?.[ComputedClassWords.Generate]
+				}
+			},
+
+			[ComputedClassWords.Static]: {
+				[ComputedClassWords.Assign]: {
+					...previous?.[ComputedClassWords.Static]?.[ComputedClassWords.Assign],
+					...current?.[ComputedClassWords.Static]?.[ComputedClassWords.Assign]
+				},
+				[ComputedClassWords.Generate]: {
+					...previous?.[ComputedClassWords.Static]?.[ComputedClassWords.Generate],
+					...current?.[ComputedClassWords.Static]?.[ComputedClassWords.Generate]
+				}
+			}
+		};
+		// Hard-cast as difficult to infer
+	}) as ComputedClassDeepMerge<MembersTuple>;
 }

@@ -7,7 +7,8 @@
  * @file Core args
  */
 
-import { CoreArgOptionsUnion, CoreArgPath } from ".";
+import { CoreArgPath } from "./path";
+import { CoreArgOptionsUnion } from ".";
 
 /**
  * Identifiers for a universe objects' members.
@@ -24,9 +25,10 @@ export enum CoreArgIds {
  * Definition of core args.
  */
 export type CoreArg<
-	I extends CoreArgIds,
+	Id extends CoreArgIds,
 	// Will be used in the future
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	O extends CoreArgOptionsUnion,
-	P extends CoreArgIds = never
-> = CoreArgPath<I, O, P>;
+	Options extends CoreArgOptionsUnion,
+	ParentIds extends CoreArgIds = never,
+	HasNever extends boolean = false
+> = CoreArgPath<Id, Options, ParentIds, HasNever>;

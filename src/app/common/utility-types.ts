@@ -150,3 +150,56 @@ export type AbstractConstructor<Parameters extends any[] = any[], Instance exten
  * Can mostly be used in generics since TS 4.6.
  */
 export type StaticMembers<T extends Constructor> = Omit<T, "new" | "prototype">;
+
+// BUG: See remarks
+/**
+ * `&` and mapped type are slightly different.
+ *
+ * @remarks
+ * In TS 4.6 inference on `extends` constraint with intersection can go wrong with generics.
+ */
+export type MapIntersection<O> = {
+	[K in keyof O]: O[K];
+};
+
+/**
+ * Generates conditional object type, that can be inferred, working with generics.
+ *
+ * @remarks
+ * This type is an alternative to using `type Extract<T, U> = T extends U ? T : never` directly, since it errors with TS2719 - `Two different types with this name exist, but they are unrelated.` when:
+ * - `U` is generic condition
+ * - New dependent type is inferred (`const c = [extract1, extract2] as const` or using `[extract1, extract2]` as a function argument)
+ * Although casting or explicit typing can fix it, this type keeps `U` `true` or `false`, and makes `Extract` conditional instead.
+ */
+export type ConditionalObject<
+	X extends {
+		/**
+		 * Is present.
+		 */
+		isPresent: boolean;
+
+		/**
+		 * Value.
+		 */
+		value: unknown;
+	},
+	IsPresent extends boolean
+> = (IsPresent extends true
+	? Extract<
+			X,
+			{
+				/**
+				 * Is present.
+				 */
+				isPresent: true;
+			}
+	  >
+	: Extract<
+			X,
+			{
+				/**
+				 * Is present.
+				 */
+				isPresent: false;
+			}
+	  >)["value"];

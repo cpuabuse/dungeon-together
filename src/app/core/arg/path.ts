@@ -7,6 +7,7 @@
  * @file Universe object paths
  */
 
+import { MapIntersection } from "../../common/utility-types";
 import { Uuid } from "../../common/uuid";
 import {
 	CoreArgComplexOptionPathIds,
@@ -24,33 +25,52 @@ import {
 /**
  * A type for the property name of path UUID.
  *
- * @remarks Unknown breaking change in TS 4.6, prevents union from being produced, when the parameter is generic union, so temporary fix of recursion applied.
+ * @remarks Unknown breaking change in TS 4.6, sometimes prevents union from being produced, when the parameter is generic union, so types mismatch. Explicit map produces string union consistently.
  */
-export type CoreArgPathUuidPropertyName<I extends CoreArgIds> = I extends infer A | infer B
-	? A extends CoreArgIds
-		? B extends CoreArgIds
-			?
-					| `${CoreArgObjectWords[A]["singularLowercaseWord"]}Uuid`
-					| `${CoreArgObjectWords[B]["singularLowercaseWord"]}Uuid`
-			: never
-		: never
-	: never;
+export type CoreArgPathUuidPropertyName<I extends CoreArgIds> = {
+	[K in I]: `${CoreArgObjectWords[K]["singularLowercaseWord"]}Uuid`;
+}[I];
 
 /**
  * Generates UUIDs in core arg.
  */
 export type CoreArgPathOwnOrExtended<I extends CoreArgIds> = {
-	[K in I as `${CoreArgObjectWords[K]["singularLowercaseWord"]}Uuid`]: Uuid;
+	[K in I as CoreArgPathUuidPropertyName<K>]: Uuid;
 };
 
 /**
- * Universe object path constraint.
+ * Path.
  */
-export type CoreArgPathId = {
+type Path<
+	I extends CoreArgIds,
+	O extends CoreArgOptionsUnion,
+	P extends CoreArgIds = never
+> = (O extends CoreArgOptionsPathOwnOrExtendedUnion ? CoreArgPathOwnOrExtended<I> : unknown) &
+	(O extends CoreArgOptionsPathExtendedUnion ? CoreArgPathOwnOrExtended<P> : unknown) &
+	(O extends CoreArgOptionsPathIdUnion
+		? {
+				/**
+				 * Id.
+				 */
+				id?: string;
+		  }
+		: unknown);
+
+/**
+ * Path but with always present properties, set to `never` if "missing".
+ *
+ * @remarks
+ * Signature `K in CoreArgPathUuidPropertyName<I>` does not work well, probably due underlying generic mapped union.
+ */
+type PathWithNever<I extends CoreArgIds, O extends CoreArgOptionsUnion, P extends CoreArgIds = never> = {
+	[K in I as CoreArgPathUuidPropertyName<K>]: O extends CoreArgOptionsPathOwnOrExtendedUnion ? string : never;
+} & {
+	[K in P as CoreArgPathUuidPropertyName<K>]: O extends CoreArgOptionsPathExtendedUnion ? string : never;
+} & {
 	/**
-	 * Optional id of arg.
+	 * Id.
 	 */
-	id?: string;
+	id?: O extends CoreArgOptionsPathIdUnion ? string : never;
 };
 
 /**
@@ -63,10 +83,9 @@ export type CoreArgPathId = {
 export type CoreArgPath<
 	I extends CoreArgIds,
 	O extends CoreArgOptionsUnion,
-	P extends CoreArgIds = never
-> = O extends CoreArgOptionsPathIdUnion
-	? CoreArgPathId
-	: CoreArgPathOwnOrExtended<I | (O extends CoreArgOptionsPathExtendedUnion ? P : never)>;
+	P extends CoreArgIds = never,
+	HasNever extends boolean = false
+> = MapIntersection<HasNever extends true ? PathWithNever<I, O, P> : Path<I, O, P>>;
 
 /**
  * Generate a name for path property.
