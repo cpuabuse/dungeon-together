@@ -8,6 +8,7 @@
  */
 
 import { Uuid } from "../../common/uuid";
+import { CoreArgComplexOptionPathIds, CoreArgComplexOptionSymbolIndex } from "./options";
 import {
 	CoreArg,
 	CoreArgIds,
