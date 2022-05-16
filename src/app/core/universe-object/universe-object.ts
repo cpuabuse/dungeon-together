@@ -8,9 +8,14 @@
  */
 
 import { DeferredPromise } from "../../common/async";
-import { ComputedClassWords, EmptyObject, computedClassDeepMerge } from "../../common/computed-class";
+import {
+	ComputedClassEmptyObject,
+	ComputedClassOmitConditionalEmptyObject,
+	ComputedClassWords,
+	computedClassDeepMerge
+} from "../../common/computed-class";
 import { urlPathSeparator } from "../../common/defaults";
-import { ConditionalObject, MaybeDefined, StaticMembers } from "../../common/utility-types";
+import { AbstractConstructor, ConditionalObject, MaybeDefined } from "../../common/utility-types";
 import { Uuid, getDefaultUuid } from "../../common/uuid";
 import {
 	CoreArg,
@@ -28,7 +33,7 @@ import {
 	coreArgIdToPathUuidPropertyName,
 	coreArgObjectWords
 } from "../arg";
-import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveInstance } from "../base";
+import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveInstance, CoreBaseNonRecursiveStatic } from "../base";
 import { CoreUniverseObjectInitializationParameter } from "./parameters";
 import { CoreUniverseObjectContainerInstance, CoreUniverseObjectContainerStatic } from "./universe-objects-container";
 import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectUniverse } from ".";
@@ -66,27 +71,29 @@ export type CoreUniverseObjectInstance<
 		ParentId | GrandparentIds
 	> = never,
 	ChildId extends CoreArgIds = never
-> = CoreArgPath<Id, Options, ParentId | GrandparentIds, true> & {
-	[K in `terminate${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: () => void;
-} & ([ParentId] extends [never]
-		? EmptyObject
-		: {
-				[K in `move${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-					path: CoreArgPath<ParentId, Options, GrandparentIds>
-				) => void;
-		  }) &
-	([ChildId] extends [never]
-		? // Receives base class from container
-		  CoreBaseNonRecursiveInstance
-		: CoreUniverseObjectContainerInstance<
-				BaseClass,
-				ChildInstance,
-				Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
-				ChildId,
-				Options,
-				Id,
-				ParentId | GrandparentIds
-		  >);
+> = ComputedClassOmitConditionalEmptyObject<
+	CoreArgPath<Id, Options, ParentId | GrandparentIds, true> & {
+		[K in `terminate${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: () => void;
+	} & ([ParentId] extends [never]
+			? ComputedClassEmptyObject
+			: {
+					[K in `move${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
+						path: CoreArgPath<ParentId, Options, GrandparentIds>
+					) => void;
+			  }) &
+		([ChildId] extends [never]
+			? // Receives base class from container
+			  CoreBaseNonRecursiveInstance
+			: CoreUniverseObjectContainerInstance<
+					BaseClass,
+					ChildInstance,
+					Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
+					ChildId,
+					Options,
+					Id,
+					ParentId | GrandparentIds
+			  >)
+>;
 
 /**
  * Static part of universe object class.
@@ -107,25 +114,56 @@ export type CoreUniverseObjectStatic<
 		ParentId | GrandparentIds
 	> = never,
 	ChildId extends CoreArgIds = never
-> = {
-	[K in `getDefault${CoreArgObjectWords[ChildId]["singularCapitalizedWord"]}Uuid`]: (
-		path: CoreArgPath<Id, CoreArgOptionsPathOwn, ParentId | GrandparentIds>
-	) => Uuid;
-} & ([ChildId] extends [never]
-	? unknown
-	: CoreUniverseObjectContainerStatic<
-			BaseClass,
-			ChildInstance,
-			Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
-			ChildId,
-			Options,
-			Id,
-			ParentId | GrandparentIds
-	  > & {
-			[K in `getDefault${CoreArgObjectWords[ChildId]["singularCapitalizedWord"]}Uuid`]: (
-				path: CoreArgPath<Id, CoreArgOptionsPathOwn, ParentId | GrandparentIds>
-			) => Uuid;
-	  });
+	// Unlike instance, container does not extend base class
+> = ComputedClassOmitConditionalEmptyObject<
+	CoreBaseNonRecursiveStatic & {
+		// Generic dependent on options, so just any function
+		[K in `convert${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (...args: any[]) => unknown;
+	} & {
+		[K in `getDefault${CoreArgObjectWords[ChildId]["singularCapitalizedWord"]}Uuid`]: (
+			path: CoreArgPath<Id, CoreArgOptionsPathOwn, ParentId | GrandparentIds>
+		) => Uuid;
+	} & ([ChildId] extends [never]
+			? ComputedClassEmptyObject
+			: CoreUniverseObjectContainerStatic<
+					BaseClass,
+					ChildInstance,
+					Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
+					ChildId,
+					Options,
+					Id,
+					ParentId | GrandparentIds
+			  > & {
+					[K in `getDefault${CoreArgObjectWords[ChildId]["singularCapitalizedWord"]}Uuid`]: (
+						path: CoreArgPath<Id, CoreArgOptionsPathOwn, ParentId | GrandparentIds>
+					) => Uuid;
+			  })
+>;
+
+/**
+ * Universe object class.
+ */
+export type CoreUniverseObjectClass<
+	BaseClass extends CoreBaseClassNonRecursive,
+	Arg extends CoreArgContainerArg<Id, Options, ParentId | GrandparentIds, ChildId>,
+	Id extends CoreArgIds,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	ParentId extends CoreArgIds = never,
+	GrandparentIds extends CoreArgIds = never,
+	ChildInstance extends CoreUniverseObjectInstance<
+		BaseClass,
+		Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
+		ChildId,
+		Options,
+		Id,
+		ParentId | GrandparentIds
+	> = never,
+	ChildId extends CoreArgIds = never
+> = CoreUniverseObjectStatic<BaseClass, Arg, Id, Options, ParentId, GrandparentIds, ChildInstance, ChildId> &
+	AbstractConstructor<
+		any[],
+		CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds, ChildInstance, ChildId>
+	>;
 
 /**
  * Generate object members.
@@ -222,8 +260,7 @@ export function generateCoreUniverseObjectMembers<
 	/**
 	 * Static.
 	 */
-	type Static = StaticMembers<BaseClass> &
-		CoreUniverseObjectStatic<BaseClass, Arg, Id, Options, ParentId, GrandparentIds, ChildInstance, ChildId>;
+	type Static = CoreUniverseObjectClass<BaseClass, Arg, Id, Options, ParentId, GrandparentIds, ChildInstance, ChildId>;
 
 	/**
 	 * Parameters for generate functions.

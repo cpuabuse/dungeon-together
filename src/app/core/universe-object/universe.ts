@@ -11,7 +11,7 @@ import { ConcreteConstructor } from "../../common/utility-types";
 import { CoreArg, CoreArgIds, CoreArgObjectWords, CoreArgPath } from "../arg";
 import { CoreBaseClassNonRecursive } from "../base";
 import { CoreUniverseObjectArgsOptionsUnion } from "./options";
-import { CoreUniverseObject, CoreUniverseObjectConstructorParameters } from "./universe-object";
+import { CoreUniverseObjectConstructorParameters, CoreUniverseObjectInstance } from "./universe-object";
 
 /**
  * A universe constraint from perspective of universe object.
@@ -21,7 +21,7 @@ import { CoreUniverseObject, CoreUniverseObjectConstructorParameters } from "./u
  */
 export type CoreUniverseObjectUniverse<
 	BaseClass extends CoreBaseClassNonRecursive,
-	ChildUniverseObject extends CoreUniverseObject<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
+	ChildUniverseObject extends CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
 	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,

@@ -8,14 +8,12 @@
  * @remarks
  * - `implements` should be constrained with artificial type
  * - If one pseudo-class "extends" another, artificial type should incorporate both types, while members objects should be separated, as there could be an actual class in between both
+ *
+ * Type constraints:
+ * - When constraint is conditional {@link ComputedClassEmptyObject} should be used
  */
 
-import { MapIntersection, hasOwnProperty } from "./utility-types";
-
-/**
- * Type to be produced when extracting, when empty.
- */
-type EmptyType = unknown;
+import { MapIntersection, UnknownToObject, hasOwnProperty } from "./utility-types";
 
 /**
  * Effectively class member key signature.
@@ -23,12 +21,33 @@ type EmptyType = unknown;
 type NameType = string | number | symbol;
 
 /**
- * For when conditional type is empty.
+ * Empty object.
+ *
+ * @see {@link ComputedClassEmptyObject}
+ */
+type EmptyObject = Record<NameType, unknown>;
+
+/**
+ * For type constraint, when conditional type is empty.
  *
  * @remarks
- * It seems that `object` does not give indication a potential record, and information from potentially condition succeeding is gone.
+ * It seems if `Record<any, unknown>` were to be used instead of object, information about another type in condition would be preserved, allowing better inference (generic type with grandparents would satisfy constraint without). That leaves the signature in the type, so to implement it, {@link ComputedClassOmitConditionalEmptyObject} should be used.
+ * `object` is also injected, to guarantee unknown is not produced, for when consuming.
  */
-export type EmptyObject = Record<string | number | symbol, unknown>;
+export type ComputedClassEmptyObject = object & EmptyObject;
+
+/**
+ * Omits extra signature information from type constraint.
+ *
+ * @remarks
+ * - `ComputedClassOmitConditionalEmptyObject<object & Record<string, unknown>>` and alike, do not omit
+ * - If `EmptyObject` was passed, `R` would be inferred as unknown, so unknown check is performed to be used as a constraint, while `object` should be injected by {@link ComputedClassEmptyObject} no matter what
+ */
+export type ComputedClassOmitConditionalEmptyObject<T extends object> = T extends EmptyObject & infer R
+	? unknown extends R
+		? T
+		: R
+	: T;
 
 /**
  * Words for computed class.
@@ -187,19 +206,20 @@ type ComputedClassExtract<
 	Members extends ComputedClassMembersAssignPartial<Include> & ComputedClassMembersGeneratePartial<Include, Params>,
 	Include extends ComputedClassInclude,
 	Params extends any[]
-> = Record<string | number | symbol, unknown> &
+> = UnknownToObject<
 	(Members extends ComputedClassMembersAssign<Include>
 		? {
 				[K in keyof Members[Include][ComputedClassWords.Assign] as Members[Include][ComputedClassWords.Assign][K][ComputedClassWords.Name]]: Members[Include][ComputedClassWords.Assign][K][ComputedClassWords.Value];
 		  }
-		: EmptyType) &
-	(Members extends ComputedClassMembersGenerate<Include, Params>
-		? {
-				[K in keyof Members[Include][ComputedClassWords.Generate] as Members[Include][ComputedClassWords.Generate][K][ComputedClassWords.Name]]: ReturnType<
-					Members[Include][ComputedClassWords.Generate][K][ComputedClassWords.Value]
-				>;
-		  }
-		: EmptyType);
+		: unknown) &
+		(Members extends ComputedClassMembersGenerate<Include, Params>
+			? {
+					[K in keyof Members[Include][ComputedClassWords.Generate] as Members[Include][ComputedClassWords.Generate][K][ComputedClassWords.Name]]: ReturnType<
+						Members[Include][ComputedClassWords.Generate][K][ComputedClassWords.Value]
+					>;
+			  }
+			: unknown)
+>;
 
 /**
  * Helper type, for extract constraint.

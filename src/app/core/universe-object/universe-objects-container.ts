@@ -7,7 +7,11 @@
  * @file Universe object common definitions
  */
 
-import { ComputedClassWords } from "../../common/computed-class";
+import {
+	ComputedClassEmptyObject,
+	ComputedClassOmitConditionalEmptyObject,
+	ComputedClassWords
+} from "../../common/computed-class";
 
 import {
 	CoreArg,
@@ -43,32 +47,34 @@ export type CoreUniverseObjectContainerInstance<
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never
-> = CoreBaseNonRecursiveInstance &
-	CoreArgsContainer<Instance, Id, Options, ParentId | GrandparentIds> & {
-		[K in `get${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-			path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
-		) => Instance;
-	} & {
-		[K in `remove${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-			path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
-		) => void;
-	} & {
-		[K in `attach${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-			universeObject: Instance,
-			initializationParameter: Pick<CoreUniverseObjectInitializationParameter, "attachHook">
-		) => void;
-	} & {
-		[K in `detach${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-			path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
-		) => boolean;
-	} & {
-		[K in `default${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: Instance;
-	} & {
-		// Necessary to implement where the created child is known, to call attach
-		[K in `add${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-			childArgs: CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>
-		) => void;
-	};
+> = ComputedClassOmitConditionalEmptyObject<
+	CoreBaseNonRecursiveInstance &
+		CoreArgsContainer<Instance, Id, Options, ParentId | GrandparentIds> & {
+			[K in `get${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
+				path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
+			) => Instance;
+		} & {
+			[K in `remove${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
+				path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
+			) => void;
+		} & {
+			[K in `attach${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
+				universeObject: Instance,
+				initializationParameter: Pick<CoreUniverseObjectInitializationParameter, "attachHook">
+			) => void;
+		} & {
+			[K in `detach${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
+				path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
+			) => boolean;
+		} & {
+			[K in `default${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: Instance;
+		} & {
+			// Necessary to implement where the created child is known, to call attach
+			[K in `add${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
+				childArgs: CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>
+			) => void;
+		}
+>;
 
 /**
  * Static type.
@@ -88,7 +94,23 @@ export type CoreUniverseObjectContainerStatic<
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never
-> = object;
+> = ComputedClassOmitConditionalEmptyObject<ComputedClassEmptyObject>;
+
+/**
+ * Class type.
+ */
+export type CoreUniverseObjectContainerClass<
+	BaseClass extends CoreBaseClassNonRecursive,
+	// We do not care what class is base class for child
+	// Preserve for future
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	Instance extends CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
+	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds>,
+	Id extends CoreArgIds,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	ParentId extends CoreArgIds = never,
+	GrandparentIds extends CoreArgIds = never
+> = ComputedClassOmitConditionalEmptyObject<ComputedClassEmptyObject>;
 
 /**
  * Universe object container members.

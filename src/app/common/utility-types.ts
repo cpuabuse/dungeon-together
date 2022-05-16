@@ -203,3 +203,8 @@ export type ConditionalObject<
 				isPresent: false;
 			}
 	  >)["value"];
+
+/**
+ * For intersecting conditional types. Changes to `object` if unknown.
+ */
+export type UnknownToObject<T> = unknown extends T ? object : T;
