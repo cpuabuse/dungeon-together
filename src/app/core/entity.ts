@@ -8,17 +8,12 @@
  */
 
 import {
-	ComputedClassActualData,
-	ComputedClassActualMembers,
-	ComputedClassClassConstraint,
-	ComputedClassConstraintData,
-	ComputedClassConstraintMembers,
-	ComputedClassInfo,
-	ComputedClassInstanceConstraint,
-	ComputedClassWords
+	ComputedClassExtractInstance,
+	computedClassInjectPerClass,
+	computedClassInjectPerInstance
 } from "../common/computed-class";
 import { defaultKindUuid } from "../common/defaults";
-import { AbstractConstructor, StaticImplements, StaticMembers } from "../common/utility-types";
+import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import {
 	CoreArg,
@@ -34,12 +29,13 @@ import { CoreBaseClassNonRecursive } from "./base";
 import { CellPathExtended, coreCellArgParentIds } from "./cell";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
-	CoreUniverseObjectClassConstraintDataExtends,
+	CoreUniverseObjectClass,
 	CoreUniverseObjectConstructorParameters,
-	CoreUniverseObjectFactory,
 	// Type used only for documentation
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	CoreUniverseObjectInherit
+	CoreUniverseObjectInherit,
+	CoreUniverseObjectInstance,
+	generateCoreUniverseObjectMembers
 } from "./universe-object";
 
 // #region To be removed
@@ -94,7 +90,6 @@ export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPath
 		...rawSource
 	};
 }
-
 // #endregion
 
 /**
@@ -120,52 +115,24 @@ type CoreEntityArgKind<O extends CoreArgOptionsUnion> = O[CoreArgOptionIds.Kind]
 	: object;
 
 /**
- * Constraint for core entity arg.
- */
-type CoreEntityArgConstraintData<Options extends CoreArgOptionsUnion> = ComputedClassConstraintData<{
-	/**
-	 * Instance.
-	 */
-	[ComputedClassWords.Instance]: ComputedClassConstraintMembers & {
-		/**
-		 * Base.
-		 */
-		[ComputedClassWords.Base]: CoreArg<CoreArgIds.Entity, Options, CoreEntityArgParentIds>;
-
-		/**
-		 * Populate.
-		 */
-		[ComputedClassWords.Populate]: {
-			/**
-			 * Mode of the entity.
-			 */
-			modeUuid: Uuid;
-			/**
-			 * World in which entity resides.
-			 */
-			worldUuid: Uuid;
-		};
-
-		/**
-		 * Implements.
-		 */
-		[ComputedClassWords.Implement]: CoreEntityArgKind<Options>;
-	};
-
-	/**
-	 * Static.
-	 */
-	[ComputedClassWords.Static]: ComputedClassConstraintMembers;
-}>;
-
-/**
  * Core entity.
  *
  * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
-export type CoreEntityArg<Options extends CoreArgOptionsUnion> = ComputedClassInstanceConstraint<
-	CoreEntityArgConstraintData<Options>
->;
+export type CoreEntityArg<Options extends CoreArgOptionsUnion> = CoreArg<
+	CoreArgIds.Entity,
+	Options,
+	CoreEntityArgParentIds
+> & {
+	/**
+	 * Mode of the entity.
+	 */
+	modeUuid: Uuid;
+	/**
+	 * World in which entity resides.
+	 */
+	worldUuid: Uuid;
+} & CoreEntityArgKind<Options>;
 
 /**
  * Path to an entity only.
@@ -178,41 +145,20 @@ export type EntityPathOwn = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPathOwn
 export type EntityPathExtended = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPathExtended, CoreEntityArgParentIds>;
 
 /**
- * Constraint data.
+ * Core entity.
  */
-export type CoreEntityClassConstraintData<Options extends CoreUniverseObjectArgsOptionsUnion> =
-	CoreUniverseObjectClassConstraintDataExtends<
-		CoreBaseClassNonRecursive,
+export type CoreEntity<
+	BaseClass extends CoreBaseClassNonRecursive,
+	Options extends CoreUniverseObjectArgsOptionsUnion
+> = CoreEntityArg<Options> &
+	CoreUniverseObjectInstance<
+		BaseClass,
 		CoreEntityArg<Options>,
 		CoreArgIds.Entity,
 		Options,
 		CoreArgIds.Cell,
 		CoreEntityArgGrandparentIds
-	> &
-		ComputedClassConstraintData<CoreEntityArgConstraintData<Options>>;
-
-/**
- * Core cell.
- */
-export type CoreEntity<Options extends CoreUniverseObjectArgsOptionsUnion> = ComputedClassInstanceConstraint<
-	CoreEntityClassConstraintData<Options>
->;
-
-/**
- * Typeof class for entities.
- *
- * It may be abstract.
- */
-export type CoreEntityClass<Options extends CoreUniverseObjectArgsOptionsUnion> = ComputedClassClassConstraint<
-	CoreEntityClassConstraintData<Options>,
-	CoreUniverseObjectConstructorParameters<
-		CoreBaseClassNonRecursive,
-		CoreEntityArg<Options>,
-		CoreArgIds.Entity,
-		Options,
-		CoreEntityArgParentIds
-	>
->;
+	>;
 
 /**
  * Tuple with core entity arg grandparent IDS.
@@ -265,27 +211,6 @@ export function CoreEntityClassFactory<
 	options: Options;
 }) {
 	/**
-	 * Parameter constraint for class to extend.
-	 */
-	type SuperConstructorExtends = AbstractConstructor<
-		CoreUniverseObjectConstructorParameters<
-			BaseClass,
-			CoreEntityArg<Options>,
-			CoreArgIds.Entity,
-			Options,
-			CoreEntityArgParentIds
-		>
-	>;
-
-	/**
-	 * Super class to extend.
-	 *
-	 * @remarks
-	 * Constrains actual super class to extends to be used, if fails, the return result will be never.
-	 */
-	type SuperClass = typeof NewBase extends SuperConstructorExtends ? typeof NewBase : never;
-
-	/**
 	 * Constructor params.
 	 */
 	type ConstructorParams = CoreUniverseObjectConstructorParameters<
@@ -297,59 +222,32 @@ export function CoreEntityClassFactory<
 	>;
 
 	/**
-	 * Actual class info.
+	 * Verify class data satisfies arg constraints, `CoreEntity` is not used, as universe object verification already done via `implements`.
 	 */
-	type ActualClassInfo = ComputedClassInfo<
-		CoreEntityClassConstraintData<Options>,
-		ComputedClassActualData<{
-			/**
-			 * Instance.
-			 */
-			[ComputedClassWords.Instance]: ComputedClassActualMembers & {
-				/**
-				 * Base.
-				 */
-				[ComputedClassWords.Base]: InstanceType<SuperClass>;
-
-				/**
-				 * Populate.
-				 */
-				[ComputedClassWords.Populate]: Entity;
-			};
-
-			/**
-			 * Static.
-			 */
-			[ComputedClassWords.Static]: ComputedClassActualMembers & {
-				/**
-				 * Base.
-				 */
-				[ComputedClassWords.Base]: StaticMembers<SuperClass>;
-
-				/**
-				 * Populate.
-				 */
-				[ComputedClassWords.Populate]: StaticMembers<typeof Entity>;
-			};
-		}>,
-		ConstructorParams
-	>;
+	type ReturnClass = Entity extends CoreEntityArg<Options> ? typeof Entity : never;
 
 	/**
-	 * New instance type to use as `this`.
+	 * Parameters used to construct universe object.
 	 */
-	// Saved for future use
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	type ThisInstanceConcrete = ActualClassInfo[ComputedClassWords.ThisInstanceConcrete];
+	type UniverseObjectParams = [
+		{
+			/**
+			 * Arg.
+			 */
+			arg: CoreEntityArg<Options>;
+		}
+	];
 
 	/**
-	 * Class to return.
+	 * Entity interface merging.
 	 */
-	type ReturnClass = ActualClassInfo[ComputedClassWords.ClassReturn];
+	// Merging
+	// eslint-disable-next-line @typescript-eslint/no-empty-interface
+	interface Entity extends ComputedClassExtractInstance<typeof members, UniverseObjectParams> {}
 
-	// Infer the new base for type safe return
+	// Have to infer type
 	// eslint-disable-next-line @typescript-eslint/typedef
-	const NewBase = CoreUniverseObjectFactory<
+	const members = generateCoreUniverseObjectMembers<
 		BaseClass,
 		CoreEntityArg<Options>,
 		CoreArgIds.Entity,
@@ -357,7 +255,6 @@ export function CoreEntityClassFactory<
 		CoreArgIds.Cell,
 		CoreEntityArgGrandparentIds
 	>({
-		Base,
 		grandparentIds: coreEntityArgGrandparentIdSet,
 		id: CoreArgIds.Entity,
 		options,
@@ -369,9 +266,22 @@ export function CoreEntityClassFactory<
 	 *
 	 * @see CoreUniverseObjectInherit for more details
 	 */
+	// For interface merging
+	// eslint-disable-next-line no-redeclare
 	abstract class Entity
-		extends (NewBase as SuperConstructorExtends)
-		implements StaticImplements<ActualClassInfo[ComputedClassWords.ClassImplements], typeof Entity>
+		extends class extends Base {}
+		implements
+			StaticImplements<
+				CoreUniverseObjectClass<
+					BaseClass,
+					CoreEntityArg<Options>,
+					CoreArgIds.Entity,
+					Options,
+					CoreArgIds.Cell,
+					CoreEntityArgGrandparentIds
+				>,
+				typeof Entity
+			>
 	{
 		/**
 		 * Mode of the entity.
@@ -390,93 +300,106 @@ export function CoreEntityClassFactory<
 		 */
 		// ESLint buggy for nested destructured params
 		// eslint-disable-next-line @typescript-eslint/typedef
-		public constructor(...[arg, { created, attachHook }, baseParams]: ConstructorParams) {
-			// ESLint does not like casting on `extends`, also does not seem to deal well with generics
-			// eslint-disable-next-line constructor-super, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
-			super(arg, { attachHook, created }, baseParams);
+		public constructor(...[arg, init, baseParams]: ConstructorParams) {
+			super(baseParams);
+
+			computedClassInjectPerInstance({
+				constructorParameters: [this, [arg, init, baseParams]],
+				instance: this,
+				members,
+				parameters: [{ arg }]
+			});
+		}
+
+		/**
+		 * Converts entity args between options.
+		 *
+		 * Has to strictly follow {@link CoreEntityArg}.
+		 *
+		 * @param param - Destructured parameter
+		 * @returns Target args entity
+		 */
+		public static convertEntity<S extends CoreArgOptionsUnion, T extends CoreArgOptionsUnion>({
+			entity,
+			sourceOptions,
+			targetOptions,
+			meta
+		}: {
+			/**
+			 * Source options.
+			 */
+			sourceOptions: S;
+
+			/**
+			 * Target options.
+			 */
+			targetOptions: T;
+
+			/**
+			 * Target source entity.
+			 */
+			entity: CoreEntityArg<S>;
+
+			/**
+			 * Meta for entity.
+			 */
+			meta: CoreArgMeta<CoreArgIds.Entity, S, T, CoreEntityArgParentIds>;
+		}): CoreEntityArg<T> {
+			// Define source and result, with minimal options
+			const sourceEntity: CoreEntityArg<S> = entity;
+			const sourceEntityAs: Record<string, any> = sourceEntity;
+
+			let targetEntity: CoreEntityArg<T> = {
+				// Generate path
+				...coreArgPathConvert({
+					id: CoreArgIds.Entity,
+					meta,
+					parentIds: coreEntityArgParentIdSet,
+					sourceArgPath: entity,
+					sourceOptions,
+					targetOptions
+				}),
+
+				// Generate mode
+				modeUuid: sourceEntity.modeUuid,
+
+				// Generate world
+				worldUuid: sourceEntity.worldUuid,
+
+				// Generate kind
+				...(function (): CoreEntityArgKind<T> {
+					/**
+					 * Entity with kind.
+					 */
+					type EntityWithKind = CoreEntityArg<CoreArgOptionsGenerate<CoreArgOptionIds.Kind>>;
+
+					let argKind: CoreEntityArgKind<T> =
+						targetOptions[CoreArgOptionIds.Kind] === true
+							? {
+									kindUuid:
+										sourceOptions[CoreArgOptionIds.Kind] === true
+											? (sourceEntityAs as EntityWithKind).kindUuid
+											: defaultKindUuid
+							  }
+							: ({} as CoreEntityArgKind<T>);
+
+					return argKind;
+				})()
+			};
+
+			// Return
+			return targetEntity;
 		}
 	}
 
-	// Return as `ReturnClass`, and verify constraint data satisfies arg constraints
-	return Entity as ReturnClass;
-}
+	// Inject static
+	computedClassInjectPerClass({
+		Base: Entity,
+		members,
+		// Nothing required
+		parameters: []
+	});
 
-/**
- * Converts entity args between options.
- *
- * Has to strictly follow {@link CoreEntityArg}.
- *
- * @param param - Destructured parameter
- * @returns Target args entity
- */
-export function coreEntityArgsConvert<S extends CoreArgOptionsUnion, T extends CoreArgOptionsUnion>({
-	entity,
-	sourceOptions,
-	targetOptions,
-	meta
-}: {
-	/**
-	 * Source options.
-	 */
-	sourceOptions: S;
-
-	/**
-	 * Target options.
-	 */
-	targetOptions: T;
-
-	/**
-	 * Target source entity.
-	 */
-	entity: CoreEntityArg<S>;
-
-	/**
-	 * Meta for entity.
-	 */
-	meta: CoreArgMeta<CoreArgIds.Entity, S, T, CoreEntityArgParentIds>;
-}): CoreEntityArg<T> {
-	// Define source and result, with minimal options
-	const sourceEntity: CoreEntityArg<S> = entity;
-	const sourceEntityAs: Record<string, any> = sourceEntity;
-
-	let targetEntity: CoreEntityArg<T> = {
-		// Generate path
-		...coreArgPathConvert({
-			id: CoreArgIds.Entity,
-			meta,
-			parentIds: coreEntityArgParentIdSet,
-			sourceArgPath: entity,
-			sourceOptions,
-			targetOptions
-		}),
-
-		// Generate mode
-		modeUuid: sourceEntity.modeUuid,
-
-		// Generate world
-		worldUuid: sourceEntity.worldUuid,
-
-		// Generate kind
-		...(function (): CoreEntityArgKind<T> {
-			/**
-			 * Entity with kind.
-			 */
-			type EntityWithKind = CoreEntityArg<CoreArgOptionsGenerate<CoreArgOptionIds.Kind>>;
-
-			let argKind: CoreEntityArgKind<T> =
-				targetOptions[CoreArgOptionIds.Kind] === true
-					? {
-							kindUuid:
-								sourceOptions[CoreArgOptionIds.Kind] === true
-									? (sourceEntityAs as EntityWithKind).kindUuid
-									: defaultKindUuid
-					  }
-					: ({} as CoreEntityArgKind<T>);
-
-			return argKind;
-		})()
-	};
-
-	// Return
-	return targetEntity;
+	// Cast as return
+	return Entity as unknown as ReturnClass;
 }
