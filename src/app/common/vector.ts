@@ -8,30 +8,39 @@
  */
 
 /**
+ * Enum for coords.
+ */
+export enum VectorCoord {
+	X = "x",
+	Y = "y",
+	Z = "z"
+}
+
+/**
  * The vector representing a point of display.
  */
 export interface Vector {
 	/**
 	 * X coordinate.
 	 */
-	x: number;
+	[VectorCoord.X]: number;
 
 	/**
 	 * Y coordinate.
 	 */
-	y: number;
+	[VectorCoord.Y]: number;
 
 	/**
 	 * Z coordinate.
 	 */
-	z: number;
+	[VectorCoord.Z]: number;
 }
 
 /**
  * Default vector.
  */
 export const defaultVector: Vector = {
-	x: 0,
-	y: 0,
-	z: 0
+	[VectorCoord.X]: 0,
+	[VectorCoord.Y]: 0,
+	[VectorCoord.Z]: 0
 };

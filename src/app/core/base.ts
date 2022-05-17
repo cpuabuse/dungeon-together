@@ -17,19 +17,19 @@ import { CoreUniverseObjectArgsOptionsUnion } from "./universe-object";
  *
  * @see {@link CoreBaseClassNonRecursive} for more information
  */
-export interface CoreBaseNonRecursiveInstance {
-	/**
-	 * A universe instance.
-	 *
-	 * Unknown chosen over any, not to allow assignments.
-	 */
-	universe: unknown;
-}
+// Empty for now
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CoreBaseNonRecursiveInstance {}
 
 /**
  * Static part of {@link CoreBaseClassNonRecursive}.
  */
-export type CoreBaseNonRecursiveStatic = object;
+export interface CoreBaseNonRecursiveStatic {
+	/**
+	 * Universe.
+	 */
+	universe: unknown;
+}
 
 /**
  * Constructor parameters of {@link CoreBaseClassNonRecursive}.
@@ -73,6 +73,6 @@ export type CoreBaseClassNonRecursive = CoreBaseNonRecursiveStatic & {
 /**
  * Class type for core base.
  */
-export interface CoreBaseClass<Options extends CoreUniverseObjectArgsOptionsUnion> {
+export interface CoreBaseClass<Options extends CoreUniverseObjectArgsOptionsUnion> extends CoreBaseNonRecursiveStatic {
 	new (...args: any[]): CoreBase<Options>;
 }

@@ -161,7 +161,7 @@ export type CoreUniverseObjectClass<
 	ChildId extends CoreArgIds = never
 > = CoreUniverseObjectStatic<BaseClass, Arg, Id, Options, ParentId, GrandparentIds, ChildInstance, ChildId> &
 	AbstractConstructor<
-		any[],
+		CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>,
 		CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds, ChildInstance, ChildId>
 	>;
 
@@ -420,7 +420,7 @@ export function generateCoreUniverseObjectMembers<
 											> = childArgs;
 											setTimeout(() => {
 												let child: ChildInstance = new (
-													this.universe as CoreUniverseObjectUniverse<
+													(this.constructor as CoreBaseClassNonRecursive).universe as CoreUniverseObjectUniverse<
 														BaseClass,
 														ChildInstance,
 														Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds>
@@ -513,6 +513,24 @@ export function generateCoreUniverseObjectMembers<
 							Id
 						>;
 
+						/**
+						 * Universe with parent.
+						 *
+						 * @see {@link ParentInstance}
+						 */
+						type ParentUniverse = CoreUniverseObjectUniverse<
+							BaseClass,
+							ParentInstance,
+							CoreArgContainerArg<ParentId, Options, never, Id>,
+							ParentId,
+							Options,
+							// Parents unknown
+							never,
+							never,
+							Instance,
+							Id
+						>;
+
 						// Inferring for final type
 						const parentWords: {
 							/**
@@ -545,13 +563,7 @@ export function generateCoreUniverseObjectMembers<
 											// Locate cells
 											// Does not overlap, casting
 											let parentUniverseObject: ParentInstance = (
-												this.universe as CoreUniverseObjectUniverse<
-													BaseClass,
-													ParentInstance,
-													CoreArg<ParentId, Options>,
-													ParentId,
-													Options
-												>
+												(this.constructor as CoreBaseClassNonRecursive).universe as ParentUniverse
 											)[nameGetParentUniverseObject](path);
 
 											// Reattach

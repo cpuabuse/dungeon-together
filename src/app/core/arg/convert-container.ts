@@ -61,17 +61,19 @@ export type CoreArgConverter<
  *
  * @remarks
  * This function cannot be typed well, so have to be very careful, when used. The container type checks some of the consistency for source, target and options.
+ * Takes a converter function directly, since arg level functions are not aware of universe.
  *
  * @param param - Destructured parameters
  * @returns Converted container
  */
 export function coreArgContainerConvert<
-	Arg extends CoreArgContainerArg<Id, SourceOptions, ParentIds, ChildId>,
+	SourceArg extends CoreArgContainerArg<Id, SourceOptions, ParentIds, ChildId>,
 	Id extends CoreArgIds,
 	SourceOptions extends CoreArgOptionsUnion,
 	TargetOptions extends CoreArgOptionsUnion,
 	ParentIds extends CoreArgIds,
-	ChildArg extends CoreArg<ChildId, TargetOptions, Id | ParentIds>,
+	SourceChildArg extends CoreArg<ChildId, SourceOptions, Id | ParentIds>,
+	TargetChildArg extends CoreArg<ChildId, TargetOptions, Id | ParentIds>,
 	ChildId extends CoreArgIds
 >({
 	id,
@@ -96,8 +98,8 @@ export function coreArgContainerConvert<
 	 * Converter function.
 	 */
 	childConverter: CoreArgConverter<
-		Arg extends CoreArgsContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never,
-		ChildArg,
+		SourceChildArg,
+		TargetChildArg,
 		ChildId,
 		SourceOptions,
 		TargetOptions,
@@ -112,7 +114,7 @@ export function coreArgContainerConvert<
 	/**
 	 * Source arg.
 	 */
-	arg: Arg;
+	arg: SourceArg;
 
 	/**
 	 * Source options.
@@ -123,7 +125,7 @@ export function coreArgContainerConvert<
 	 * Target options.
 	 */
 	targetOptions: TargetOptions;
-}): CoreArgsContainer<ChildArg, ChildId, TargetOptions, Id | ParentIds> {
+}): CoreArgsContainer<TargetChildArg, ChildId, TargetOptions, Id | ParentIds> {
 	/**
 	 * Child args property name (in arg).
 	 */
@@ -133,7 +135,7 @@ export function coreArgContainerConvert<
 	 * Source container property with map.
 	 */
 	type SourceWithMapArgs = CoreArgsWithMapContainerArg<
-		Arg extends CoreArgsContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never,
+		SourceArg extends CoreArgsContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never,
 		ChildId,
 		SourceOptions,
 		Id | ParentIds
@@ -143,7 +145,7 @@ export function coreArgContainerConvert<
 	 * Source container property without map.
 	 */
 	type SourceWithoutMapArgs = CoreArgsWithoutMapContainerArg<
-		Arg extends CoreArgsContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never,
+		SourceArg extends CoreArgsContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never,
 		ChildId,
 		SourceOptions,
 		Id | ParentIds
@@ -152,7 +154,7 @@ export function coreArgContainerConvert<
 	/**
 	 * Target args property.
 	 */
-	type TargetArgs = CoreArgsContainer<ChildArg, ChildId, TargetOptions, Id | ParentIds>[ChildArgsProperty];
+	type TargetArgs = CoreArgsContainer<TargetChildArg, ChildId, TargetOptions, Id | ParentIds>[ChildArgsProperty];
 
 	/**
 	 * Child meta when converting from ID.
@@ -177,7 +179,7 @@ export function coreArgContainerConvert<
 		/**
 		 * Entity.
 		 */
-		child: Arg extends CoreArgsContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never;
+		child: SourceArg extends CoreArgsContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never;
 
 		/**
 		 * Index.
@@ -187,7 +189,7 @@ export function coreArgContainerConvert<
 		/**
 		 * Child arg.
 		 */
-		targetChild: ChildArg;
+		targetChild: TargetChildArg;
 
 		/**
 		 * Child meta.
@@ -223,13 +225,13 @@ export function coreArgContainerConvert<
 				// Cast to expected type
 				targetOptions
 				// Have to cast, as cannot infer generic keys from child
-			} as Parameters<CoreArgConverter<Arg extends CoreArgsContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never, ChildArg, ChildId, SourceOptions, TargetOptions, Id | ParentIds>>[0])
+			} as Parameters<CoreArgConverter<SourceChildArg, TargetChildArg, ChildId, SourceOptions, TargetOptions, Id | ParentIds>>[0])
 		};
 	}
 
 	const nameArgParam: `${CoreArgObjectWords[ChildId]["singularLowercaseWord"]}` = `${coreArgObjectWords[childId].singularLowercaseWord}`;
 	const childArgsProperty: ChildArgsProperty = `${coreArgObjectWords[childId].pluralLowercaseWord}`;
-	const sourceArgs: Arg[ChildArgsProperty] = arg[childArgsProperty];
+	const sourceArgs: SourceArg[ChildArgsProperty] = arg[childArgsProperty];
 	let targetArgs: TargetArgs;
 
 	// (sourceArgs as unknown as SourceContainerWithoutMapArgs).map((child, index) => [
@@ -300,5 +302,5 @@ export function coreArgContainerConvert<
 	return {
 		[childArgsProperty]: targetArgs
 		// Cannot infer template key signature
-	} as unknown as CoreArgsContainer<ChildArg, ChildId, TargetOptions, Id | ParentIds>;
+	} as unknown as CoreArgsContainer<TargetChildArg, ChildId, TargetOptions, Id | ParentIds>;
 }

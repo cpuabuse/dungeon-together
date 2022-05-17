@@ -23,6 +23,8 @@ export * from "./parameters";
  *
  * Universe object factory needs to work with special logic for maintaining base constructor information, while container does not, as it can extend base class directly.
  *
+ * - `extends class extends Base { }` is to silence TS, not to actually add class to chain. Should watch closely over given super params, as they become any.
+ *
  * @remarks
  * This is for documentation purposes only.
  */
