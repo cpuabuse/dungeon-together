@@ -13,7 +13,7 @@
  * @remarks
  * This exposes ability to resolve/reject a promise multiple times, but it seems that it will not affect anything, so no guards introduced.
  */
-export class DeferredPromise<T> extends Promise<T> {
+export class DeferredPromise<T = void> extends Promise<T> {
 	/**
 	 * Promise reject.
 	 */

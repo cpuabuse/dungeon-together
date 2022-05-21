@@ -17,11 +17,35 @@ import {
 	CommsGrid,
 	CommsGridArgs,
 	CommsGridRaw,
-	CoreGridArgs,
+	CoreGridArg,
 	GridPath,
 	commsGridRawToArgs,
 	coreGridArgsConvert
 } from "./grid";
+
+/**
+ * Tuple with core shard arg grandparent IDS.
+ */
+// Infer type from `as const` assertion
+// eslint-disable-next-line @typescript-eslint/typedef
+const coreShardArgGrandparentIds = [] as const;
+
+/**
+ * Tuple with core shard arg parent IDS.
+ */
+// Infer type from `as const` assertion
+// eslint-disable-next-line @typescript-eslint/typedef
+export const coreShardArgParentIds = [...coreShardArgGrandparentIds] as const;
+
+/**
+ * IDs of grandparents of {@link CoreShardArg}.
+ */
+export type CoreShardArgGrandparentIds = typeof coreShardArgGrandparentIds[number];
+
+/**
+ * IDs of parents of {@link CoreShardArg}.
+ */
+export type CoreShardArgParentIds = typeof coreShardArgParentIds[number];
 
 /**
  * Word referring to a shard.
@@ -53,14 +77,13 @@ export type CommsShardRaw = Omit<CommsShardArgs, "grids"> & {
 /**
  * Core shard args.
  */
-export type CoreShardArgs<O extends CoreArgOptionsUnion = CoreArgOptions> = (O[CoreArgOptionIds.Path] extends true
-	? ShardPath
-	: ShardOwnPath) & {
-	/**
-	 * Grids.
-	 */
-	grids: O[CoreArgOptionIds.Map] extends true ? Map<Uuid, CoreGridArgs<O>> : Array<CoreGridArgs<O>>;
-};
+export type CoreShardArgs<Options extends CoreArgOptionsUnion = CoreArgOptions> =
+	(Options[CoreArgOptionIds.Path] extends true ? ShardPath : ShardOwnPath) & {
+		/**
+		 * Grids.
+		 */
+		grids: Options[CoreArgOptionIds.Map] extends true ? Map<Uuid, CoreGridArg<Options>> : Array<CoreGridArg<Options>>;
+	};
 
 /**
  * Typeof class for shards.
@@ -149,6 +172,7 @@ export function commsShardArgsToRaw(argsSource: CommsShardArgs): CommsShardRaw {
  *
  * Has to strictly follow {@link CoreShardArgs}.
  *
+ * @param param
  * @returns Converted shard args
  */
 export function coreShardArgsConvert<S extends CoreArgOptionsUnion, T extends CoreArgOptionsUnion>({

@@ -11,6 +11,11 @@
  *
  * Type constraints:
  * - When constraint is conditional {@link ComputedClassEmptyObject} should be used
+ *
+ * Overriding:
+ * The approach is, when types cannot be inferred from actually assigned objects, then class should redefine the properties, rather than hack it with additional types.
+ * - Static methods and properties should be defined in the derived as a property, as TS does not require initialization (it seems that if strict static property checking were to be introduced, it would also probably come with a definitive operator for it)
+ * - Instance properties initialized by pseudo-constructor should be redefined with `!`
  */
 
 import { MapIntersection, UnknownToObject, hasOwnProperty } from "./utility-types";
@@ -55,7 +60,7 @@ export type ComputedClassOmitConditionalEmptyObject<T extends object> = T extend
 export enum ComputedClassWords {
 	Instance = "instance",
 	Static = "static",
-	Constructor = "constructor",
+	Ctor = "ctor",
 
 	// Static(not dynamic) information
 	Assign = "assign",
@@ -102,6 +107,21 @@ type ComputedClassMembersAssign<Include extends ComputedClassInclude> = {
 		};
 	};
 };
+
+/**
+ * Constructor type.
+ */
+type ComputedClassCtor<ConstructorParams extends any[]> = {
+	/**
+	 * Constructor params.
+	 */
+	[ComputedClassWords.Ctor]: (...arg: ConstructorParams) => unknown;
+};
+
+/**
+ * Partial constructor type.
+ */
+type ComputedClassCtorPartial<ConstructorParams extends any[]> = Partial<ComputedClassCtor<ConstructorParams>>;
 
 /**
  * Accepted general generate members object.
@@ -161,20 +181,20 @@ type ComputedClassMembersGeneratePartial<Include extends ComputedClassInclude, P
 type ComputedClassDataPerInstance<
 	InstanceParameters extends any[],
 	ConstructorParams extends any[]
-> = ComputedClassMembersGeneratePartial<ComputedClassWords.Instance, InstanceParameters> & {
-	/**
-	 * Constructor params.
-	 */
-	[ComputedClassWords.Constructor]?: (...arg: ConstructorParams) => void;
-};
+> = ComputedClassMembersGeneratePartial<ComputedClassWords.Instance, InstanceParameters> &
+	ComputedClassCtorPartial<ConstructorParams>;
 
 /**
  * Data with members to be used in assignment functions.
+ *
+ * @remarks
+ * Remapping needed to make this constraint satisfied with partials.
  */
-type ComputedClassDataPerClass<StaticParameters extends any[]> =
+type ComputedClassDataPerClass<StaticParameters extends any[]> = MapIntersection<
 	ComputedClassMembersAssignPartial<ComputedClassWords.Instance> &
 		ComputedClassMembersAssignPartial<ComputedClassWords.Static> &
-		ComputedClassMembersGeneratePartial<ComputedClassWords.Static, StaticParameters>;
+		ComputedClassMembersGeneratePartial<ComputedClassWords.Static, StaticParameters>
+>;
 
 /**
  * Members tuple to be consumed by merge function.
@@ -288,8 +308,8 @@ export function computedClassInjectPerInstance<Parameters extends any[], Constru
 	});
 
 	// Finally, call pseudo-constructor, after instance generation, so that the members are already available
-	if (hasOwnProperty(members, ComputedClassWords.Constructor)) {
-		members[ComputedClassWords.Constructor](...constructorParameters);
+	if (hasOwnProperty(members, ComputedClassWords.Ctor)) {
+		members[ComputedClassWords.Ctor](...constructorParameters);
 	}
 }
 

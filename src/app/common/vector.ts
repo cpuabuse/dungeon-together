@@ -8,39 +8,29 @@
  */
 
 /**
- * Enum for coords.
+ * Vector coords.
  */
-export enum VectorCoord {
-	X = "x",
-	Y = "y",
-	Z = "z"
-}
+// Infer from array
+// eslint-disable-next-line @typescript-eslint/typedef
+export const vectorCoords = ["x", "y", "z"] as const;
+
+/**
+ * Vector coords.
+ */
+export type VectorCoords = typeof vectorCoords[number];
 
 /**
  * The vector representing a point of display.
  */
-export interface Vector {
-	/**
-	 * X coordinate.
-	 */
-	[VectorCoord.X]: number;
-
-	/**
-	 * Y coordinate.
-	 */
-	[VectorCoord.Y]: number;
-
-	/**
-	 * Z coordinate.
-	 */
-	[VectorCoord.Z]: number;
-}
+export type Vector = {
+	[K in VectorCoords]: number;
+};
 
 /**
  * Default vector.
  */
 export const defaultVector: Vector = {
-	[VectorCoord.X]: 0,
-	[VectorCoord.Y]: 0,
-	[VectorCoord.Z]: 0
+	x: 0,
+	y: 0,
+	z: 0
 };

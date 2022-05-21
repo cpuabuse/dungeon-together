@@ -7,20 +7,39 @@
  * @file Grid
  */
 
+import { ComputedClassWords } from "../common/computed-class";
 import { defaultShardUuid } from "../common/defaults";
+import { AbstractConstructor, StaticImplements, StaticMembers } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
-import { CoreArgOptionIds, CoreArgOptions, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
+import {
+	CoreArg,
+	CoreArgIds,
+	CoreArgMeta,
+	CoreArgOptionsPathExtended,
+	CoreArgOptionsPathOwn,
+	CoreArgPath,
+	CoreArgsContainer
+} from "./arg";
+import { CoreArgOptionIds, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
+import { CoreBaseClassNonRecursive } from "./base";
 import {
 	CellPathExtended,
 	CommsCell,
 	CommsCellArgs,
 	CommsCellRaw,
+	CoreCell,
 	CoreCellArg,
-	commsCellRawToArgs,
-	coreCellArgsConvert
+	CoreCellArgParentIds,
+	commsCellRawToArgs
 } from "./cell";
-import { ShardPath } from "./shard";
+import { ShardPath, coreShardArgParentIds } from "./shard";
+import {
+	CoreUniverseObjectArgsOptionsUnion,
+	CoreUniverseObjectConstructorParameters,
+	CoreUniverseObjectInstance
+} from "./universe-object";
 
+// #region To be removed
 /**
  * Word referring to a grid.
  */
@@ -29,7 +48,7 @@ export type CoreGridWord = "Grid";
 /**
  * A grid-like.
  */
-export interface CommsGridArgs extends GridPath {
+export interface CommsGridArgs extends GridPathExtended {
 	/**
 	 * Locations within the grid.
 	 */
@@ -43,21 +62,9 @@ export interface CommsGridArgs extends GridPath {
  */
 export type CommsGridRaw = Omit<CommsGridArgs, "cells" | keyof ShardPath> & {
 	/**
-	 *
+	 * Legacy.
 	 */
 	cells: Array<CommsCellRaw>;
-};
-
-/**
- * Core grid args.
- */
-export type CoreGridArgs<O extends CoreArgOptionsUnion = CoreArgOptions> = (O[CoreArgOptionIds.Path] extends true
-	? GridPath
-	: GridOwnPath) & {
-	/**
-	 * Locations within the grid.
-	 */
-	cells: O[CoreArgOptionIds.Map] extends true ? Map<Uuid, CoreCellArg<O>> : Array<CoreCellArg<O>>;
 };
 
 /**
@@ -98,34 +105,17 @@ export interface CommsGrid extends CommsGridArgs {
 }
 
 /**
- * Core grid.
- */
-export type CoreGrid = CommsGrid;
-
-/**
- * Grid's own path.
- */
-export interface GridOwnPath {
-	/**
-	 * Grid uuid.
-	 */
-	gridUuid: Uuid;
-}
-
-/**
- * Way to get to grid.
- */
-export interface GridPath extends ShardPath, GridOwnPath {}
-
-/**
  * Converts [[CommsGridRaw]] to [[CommsGridArgs]].
  *
- * @param rawSource
- * @param shardUuid
+ * @param rawSource - Legacy
+ * @param shardUuid - Legacy
+ * @returns - Legacy
  */
 export function commsGridRawToArgs(rawSource: CommsGridRaw, shardUuid: Uuid): CommsGridArgs {
 	return {
 		cells: new Map(
+			// Legacy
+			// eslint-disable-next-line @typescript-eslint/typedef
 			rawSource.cells.map(function (cell) {
 				return [
 					cell.cellUuid,
@@ -137,50 +127,271 @@ export function commsGridRawToArgs(rawSource: CommsGridRaw, shardUuid: Uuid): Co
 		shardUuid
 	};
 }
+// #endregion
+
+/**
+ * Tuple with core grid arg grandparent IDS.
+ */
+// Infer type from `as const` assertion
+// eslint-disable-next-line @typescript-eslint/typedef
+const coreGridArgGrandparentIds = [...coreShardArgParentIds] as const;
+
+/**
+ * Tuple with core grid arg parent IDS.
+ */
+// Infer type from `as const` assertion
+// eslint-disable-next-line @typescript-eslint/typedef
+export const coreGridArgParentIds = [...coreShardArgParentIds, CoreArgIds.Shard] as const;
+
+/**
+ * Unique set with grandparent ID's for core cell arg.
+ */
+export const coreGridArgGrandparentIdSet: Set<CoreGridArgGrandparentIds> = new Set(coreGridArgGrandparentIds);
+
+/**
+ * Unique set with parent ID's for core cell arg.
+ */
+export const coreGridArgParentIdSet: Set<CoreGridArgParentIds> = new Set(coreGridArgParentIds);
+
+/**
+ * IDs of grandparents of {@link CoreGridArg}.
+ */
+export type CoreGridArgGrandparentIds = typeof coreGridArgGrandparentIds[number];
+
+/**
+ * IDs of parents of {@link CoreCellArg}.
+ */
+export type CoreGridArgParentIds = typeof coreGridArgParentIds[number];
+
+/**
+ * Grid's own path.
+ */
+export type GridPathOwn = CoreArgPath<CoreArgIds.Grid, CoreArgOptionsPathOwn, CoreGridArgParentIds>;
+
+/**
+ * Way to get to grid.
+ */
+export type GridPathExtended = CoreArgPath<CoreArgIds.Grid, CoreArgOptionsPathExtended, CoreGridArgParentIds>;
+
+/**
+ * Core grid args.
+ */
+export type CoreGridArg<Options extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Grid, Options, CoreGridArgParentIds> &
+	CoreArgsContainer<CoreCellArg<Options>, CoreArgIds.Cell, Options, CoreCellArgParentIds>;
+
+/**
+ * Core grid.
+ */
+export type CoreGrid<
+	BaseClass extends CoreBaseClassNonRecursive,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	Cell extends CoreCell<BaseClass, Options> = CoreCell<BaseClass, Options>
+> = CoreGridArg<Options> &
+	CoreUniverseObjectInstance<
+		BaseClass,
+		CoreGridArg<Options>,
+		CoreArgIds.Grid,
+		Options,
+		CoreArgIds.Shard,
+		CoreGridArgGrandparentIds,
+		Cell,
+		CoreArgIds.Cell
+	>;
+
+/**
+ * Core grid class factory.
+ *
+ * @param param - Destructured parameter
+ * @returns Grid
+ */
+// Force type inference to extract class type
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function CoreGridClassFactory<
+	BaseClass extends CoreBaseClassNonRecursive,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	Cell extends CoreCell<BaseClass, Options>
+>({
+	Base,
+	options
+}: {
+	/**
+	 * Client base.
+	 */
+	Base: BaseClass;
+
+	/**
+	 * Options.
+	 */
+	options: Options;
+}) {
+	/**
+	 * Core universe object constructor params for grid.
+	 */
+	type GridParams = CoreUniverseObjectConstructorParameters<
+		BaseClass,
+		CoreGridArg<Options>,
+		CoreArgIds.Grid,
+		Options,
+		CoreGridArgParentIds
+	>;
+
+	/**
+	 * Parameter constraint for class to extend.
+	 */
+	type SuperConstructorExtends = AbstractConstructor<GridParams>;
+
+	/**
+	 * Super class.
+	 *
+	 * @remarks
+	 * Constrains actual super class to extends to be used, if fails, the return result will be never.
+	 */
+	type SuperClass = typeof NewBase extends SuperConstructorExtends ? typeof NewBase : never;
+
+	/**
+	 * Constructor params.
+	 */
+	type ConstructorParams = GridParams;
+
+	/**
+	 * Class info.
+	 */
+	type ActualClassInfo = ComputedClassInfo<
+		CoreGridClassConstraintData<BaseClass, Options, Cell>,
+		ComputedClassActualData<{
+			/**
+			 * Instance.
+			 */
+			[ComputedClassWords.Instance]: ComputedClassActualMembers & {
+				/**
+				 * Base.
+				 */
+				[ComputedClassWords.Base]: InstanceType<SuperClass>;
+
+				/**
+				 * Populate.
+				 */
+				[ComputedClassWords.Populate]: Grid;
+			};
+
+			/**
+			 * Static.
+			 */
+			[ComputedClassWords.Static]: ComputedClassActualMembers & {
+				/**
+				 * Base.
+				 */
+				[ComputedClassWords.Base]: StaticMembers<SuperClass>;
+
+				/**
+				 * Populate.
+				 */
+				[ComputedClassWords.Populate]: StaticMembers<typeof Grid>;
+			};
+		}>,
+		ConstructorParams
+	>;
+
+	/**
+	 * New class to re-inject.
+	 */
+	// Intersection preserves constructor parameters of core cell, and instance type of base class
+	type ReturnClass = ActualClassInfo[ComputedClassWords.ClassReturn];
+
+	// Infer the new base for type safe return
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const NewBase = CoreUniverseObjectFactory<
+		BaseClass,
+		CoreGridArg<Options>,
+		CoreArgIds.Grid,
+		Options,
+		CoreArgIds.Shard,
+		CoreGridArgGrandparentIds,
+		Cell,
+		CoreCellArg<Options>,
+		CoreArgIds.Cell
+	>({
+		Base,
+		childId: CoreArgIds.Cell,
+		grandparentIds: coreGridArgGrandparentIdSet,
+		id: CoreArgIds.Grid,
+		options,
+		parentId: CoreArgIds.Shard
+	});
+
+	/**
+	 * Core cell base class.
+	 *
+	 * @see CoreUniverseObjectInherit for more details
+	 */
+	// Merging interfaces
+	// eslint-disable-next-line no-redeclare
+	abstract class Grid
+		// Casting will remove non-static instance information by intersecting with `any`, while maintaining constructor parameters, that will be included into factory return
+		extends (NewBase as SuperConstructorExtends)
+		implements StaticImplements<ActualClassInfo[ComputedClassWords.ClassImplements], typeof Grid>
+	{
+		/**
+		 * Default entity.
+		 */
+		public abstract defaultCell: Cell;
+	}
+
+	// Have to re-inject dynamic bits from generic parents
+	return Grid as ReturnClass;
+}
 
 /**
  * Convert grid args between options.
  *
- * Has to strictly follow {@link CoreGridArgs}.
+ * Has to strictly follow {@link CoreGridArg}.
  *
  * @param param
  * @returns Converted grid args
  */
-export function coreGridArgsConvert<S extends CoreArgOptionsUnion, T extends CoreArgOptionsUnion>({
+export function coreGridArgsConvert<
+	SourceOptions extends CoreArgOptionsUnion,
+	TargetOptions extends CoreArgOptionsUnion
+>({
 	grid,
 	sourceOptions,
-	targetOptions
+	targetOptions,
+	meta
 }: {
 	/**
 	 * Core grid args.
 	 */
-	grid: CoreGridArgs<S>;
+	grid: CoreGridArg<SourceOptions>;
 
 	/**
 	 * Option for the source.
 	 */
-	sourceOptions: S;
+	sourceOptions: SourceOptions;
 
 	/**
 	 * Option for the target.
 	 */
-	targetOptions: T;
-}): CoreGridArgs<T> {
+	targetOptions: TargetOptions;
+
+	/**
+	 * Meta.
+	 */
+	meta: CoreArgMeta<CoreArgIds.Grid, SourceOptions, TargetOptions, CoreGridArgParentIds>;
+}): CoreGridArg<TargetOptions> {
 	// Define source and result, with minimal options
-	const sourceGrid: CoreGridArgs<S> = grid;
+	const sourceGrid: CoreGridArg<SourceOptions> = grid;
 	const sourceGridAs: Record<string, any> = sourceGrid;
 	// Cannot assign to conditional type without casting
-	let targetGrid: CoreGridArgs<T> = {
+	let targetGrid: CoreGridArg<TargetOptions> = {
 		gridUuid: sourceGrid.gridUuid
-	} as CoreGridArgs<T>;
-	let targetGridAs: Record<string, any> = targetGrid;
+	};
 
 	// Path
 	if (targetOptions[CoreArgOptionIds.Path] === true) {
 		/**
 		 * Core grid args with path.
 		 */
-		type CoreGridArgsWithPath = CoreGridArgs<CoreArgOptionsGenerate<CoreArgOptionIds.Path>>;
+		type CoreGridArgsWithPath = CoreGridArg<CoreArgOptionsGenerate<CoreArgOptionIds.Path>>;
 		let targetGridWithPath: CoreGridArgsWithPath = targetGridAs as CoreGridArgsWithPath;
 
 		if (sourceOptions[CoreArgOptionIds.Path] === true) {
@@ -205,89 +416,13 @@ export function coreGridArgsConvert<S extends CoreArgOptionsUnion, T extends Cor
 	/**
 	 * Core grid args with map.
 	 */
-	type CoreGridArgsWithMap = CoreGridArgs<CoreGridArgsOptionsWithMap>;
+	type CoreGridArgsWithMap = CoreGridArg<CoreGridArgsOptionsWithMap>;
 
 	/**
 	 * Core grid args without map.
 	 */
-	type CoreGridArgsWithoutMap = CoreGridArgs<CoreGridArgsOptionsWithoutMap>;
+	type CoreGridArgsWithoutMap = CoreGridArg<CoreGridArgsOptionsWithoutMap>;
 
-	// Map
-	if (targetOptions[CoreArgOptionIds.Map] === true) {
-		let targetGridWithMap: CoreGridArgsWithMap = targetGridAs as CoreGridArgsWithMap;
-
-		if (sourceOptions[CoreArgOptionIds.Map] === true) {
-			// Map to map
-			const sourceGridWithMap: CoreGridArgsWithMap = sourceGridAs as CoreGridArgsWithMap;
-
-			// Cells
-			targetGridWithMap.cells = new Map(
-				// Argument types correctly inferred from "Array.from()", probably eslint bug
-				// eslint-disable-next-line @typescript-eslint/typedef
-				Array.from(sourceGridWithMap.cells, ([uuid, cell]) => [
-					uuid,
-					coreCellArgsConvert({
-						cell,
-						// Cast to expected type
-						sourceOptions: sourceOptions as CoreGridArgsOptionsWithMap,
-						// Cast to expected type
-						targetOptions: targetOptions as CoreGridArgsOptionsWithMap
-					})
-				])
-			);
-		} else {
-			// Array to map
-			const sourceGridWithoutMap: CoreGridArgsWithoutMap = sourceGridAs as CoreGridArgsWithoutMap;
-
-			// Cells
-			targetGridWithMap.cells = new Map(
-				sourceGridWithoutMap.cells.map(cell => [
-					cell.cellUuid,
-					coreCellArgsConvert({
-						cell,
-						// Cast to expected type
-						sourceOptions: sourceOptions as CoreGridArgsOptionsWithoutMap,
-						// Cast to expected type
-						targetOptions: targetOptions as CoreGridArgsOptionsWithMap
-					})
-				])
-			);
-		}
-	} else {
-		let targetGridWithoutMap: CoreGridArgsWithoutMap = sourceGridAs as CoreGridArgsWithoutMap;
-
-		if (sourceOptions[CoreArgOptionIds.Map] === true) {
-			// Map to array
-			const sourceGridWithMap: CoreGridArgsWithMap = sourceGridAs as CoreGridArgsWithMap;
-
-			// Grids
-			targetGridWithoutMap.cells = Array.from(
-				sourceGridWithMap.cells,
-				// Argument types correctly inferred from "Array.from()", and UUID is unused, probably eslint bug
-				// eslint-disable-next-line @typescript-eslint/typedef, @typescript-eslint/no-unused-vars
-				([uuid, cell]) =>
-					// Set to actual type
-					coreCellArgsConvert({
-						cell,
-						sourceOptions: sourceOptions as CoreGridArgsOptionsWithMap,
-						targetOptions: targetOptions as CoreGridArgsOptionsWithoutMap
-					})
-			);
-		} else {
-			// Array to array
-			const sourceGridWithoutMap: CoreGridArgsWithoutMap = sourceGridAs as CoreGridArgsWithoutMap;
-
-			// Cells
-			targetGridWithoutMap.cells = sourceGridWithoutMap.cells.map(cell =>
-				// Set to actual type
-				coreCellArgsConvert({
-					cell,
-					sourceOptions: sourceOptions as CoreGridArgsOptionsWithoutMap,
-					targetOptions: targetOptions as CoreGridArgsOptionsWithoutMap
-				})
-			);
-		}
-	}
 	// Return
 	return targetGrid;
 }
