@@ -13,14 +13,15 @@ import {
 	ComputedClassWords
 } from "../../common/computed-class";
 
+import { AbstractConstructorConstraint } from "../../common/utility-types";
 import {
 	CoreArg,
 	CoreArgIds,
 	CoreArgObjectWords,
+	CoreArgOptionIds,
 	CoreArgPath,
 	CoreArgPathUuidPropertyName,
 	CoreArgsContainer,
-	CoreArgsWithMapContainerArg,
 	coreArgIdToPathUuidPropertyName,
 	coreArgObjectWords
 } from "../arg";
@@ -72,7 +73,7 @@ export type CoreUniverseObjectContainerInstance<
 			// Necessary to implement where the created child is known, to call attach
 			[K in `add${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
 				childArgs: CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>
-			) => void;
+			) => Instance;
 		}
 >;
 
@@ -110,7 +111,10 @@ export type CoreUniverseObjectContainerClass<
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never
-> = ComputedClassOmitConditionalEmptyObject<ComputedClassEmptyObject>;
+> = CoreUniverseObjectContainerStatic<BaseClass, Instance, Arg, Id, Options, ParentId, GrandparentIds> &
+	AbstractConstructorConstraint<
+		CoreUniverseObjectContainerInstance<BaseClass, Instance, Arg, Id, Options, ParentId, GrandparentIds>
+	>;
 
 /**
  * Universe object container members.
@@ -288,8 +292,18 @@ export function generateCoreUniverseObjectContainerMembers<
 					 * @param args - Args provided by
 					 * @returns Map of universe objects
 					 */
-					[ComputedClassWords.Value](): CoreArgsWithMapContainerArg<Instance, Id, Options> {
-						return new Map();
+					[ComputedClassWords.Value](): CoreArgsContainer<
+						Instance,
+						Id,
+						Options,
+						ParentId | GrandparentIds
+					>[`${CoreArgObjectWords[Id]["pluralLowercaseWord"]}`] {
+						return (options[CoreArgOptionIds.Map] ? new Map() : new Array()) as CoreArgsContainer<
+							Instance,
+							Id,
+							Options,
+							ParentId | GrandparentIds
+						>[`${CoreArgObjectWords[Id]["pluralLowercaseWord"]}`];
 					}
 				}
 			}

@@ -67,7 +67,7 @@ export type CoreArgConverter<
  * @returns Converted container
  */
 export function coreArgContainerConvert<
-	SourceArg extends CoreArgContainerArg<Id, SourceOptions, ParentIds, ChildId>,
+	SourceArg extends CoreArgContainerArg<Id, SourceOptions, ParentIds, SourceChildArg, ChildId>,
 	Id extends CoreArgIds,
 	SourceOptions extends CoreArgOptionsUnion,
 	TargetOptions extends CoreArgOptionsUnion,

@@ -8,7 +8,7 @@
  */
 
 import { ConcreteConstructor } from "../../common/utility-types";
-import { CoreArgContainerArg, CoreArgIds, CoreArgObjectWords, CoreArgPath, CoreArgsContainer } from "../arg";
+import { CoreArg, CoreArgContainerArg, CoreArgIds, CoreArgObjectWords, CoreArgPath, CoreArgsContainer } from "../arg";
 import { CoreBaseClassNonRecursive } from "../base";
 import { CoreUniverseObjectArgsOptionsUnion } from "./options";
 import {
@@ -25,8 +25,8 @@ import {
  */
 export type CoreUniverseObjectUniverse<
 	BaseClass extends CoreBaseClassNonRecursive,
-	UniverseObject extends CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
-	Arg extends CoreArgContainerArg<Id, Options, ParentId | GrandparentIds, ChildId>,
+	Instance extends CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
+	Arg extends CoreArgContainerArg<Id, Options, ParentId | GrandparentIds, ChildArg, ChildId>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
@@ -39,12 +39,14 @@ export type CoreUniverseObjectUniverse<
 		Id,
 		ParentId | GrandparentIds
 	> = never,
+	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
 	ChildId extends CoreArgIds = never
 > = {
 	[K in `get${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
 		path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
-	) => UniverseObject;
+	) => Instance;
 } & {
+	// Cannot use class type, since constructor must return exactly provided generic
 	[K in `${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: CoreUniverseObjectStatic<
 		BaseClass,
 		Arg,
@@ -53,10 +55,11 @@ export type CoreUniverseObjectUniverse<
 		ParentId,
 		GrandparentIds,
 		ChildInstance,
+		ChildArg,
 		ChildId
 	> &
 		ConcreteConstructor<
 			CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>,
-			UniverseObject
+			Instance
 		>;
 };

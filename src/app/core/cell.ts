@@ -12,11 +12,13 @@ import {
 	computedClassInjectPerClass,
 	computedClassInjectPerInstance
 } from "../common/computed-class";
+import { defaultKindUuid, defaultModeUuid, defaultWorldUuid } from "../common/defaults";
 import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
-import { Vector, VectorCoord, defaultVector } from "../common/vector";
+import { Vector, defaultVector, vectorCoords } from "../common/vector";
 import {
 	CoreArg,
+	CoreArgComplexOptionPathIds,
 	CoreArgIds,
 	CoreArgMeta,
 	CoreArgOptionIds,
@@ -27,7 +29,10 @@ import {
 	CoreArgOptionsWithVectorUnion,
 	CoreArgOptionsWithoutMapUnion,
 	CoreArgPath,
+	CoreArgPathUuidPropertyName,
 	CoreArgsContainer,
+	coreArgComplexOptionSymbolIndex,
+	coreArgIdToPathUuidPropertyName,
 	coreArgPathConvert
 } from "./arg";
 import { CoreArgConverter, coreArgContainerConvert } from "./arg/convert-container";
@@ -38,9 +43,12 @@ import {
 	CommsEntityRaw,
 	CoreEntity,
 	CoreEntityArg,
+	CoreEntityArgGrandparentIds,
 	CoreEntityArgParentIds,
+	CoreEntityArgWithKind,
 	EntityPathExtended,
-	commsEntityRawToArgs
+	commsEntityRawToArgs,
+	coreEntityArgParentIdSet
 } from "./entity";
 import { GridPathExtended, coreGridArgParentIds } from "./grid";
 import {
@@ -52,6 +60,7 @@ import {
 	CoreUniverseObjectInherit,
 	CoreUniverseObjectInstance,
 	CoreUniverseObjectUniverse,
+	generateCoreUniverseObjectContainerMembers,
 	generateCoreUniverseObjectMembers
 } from "./universe-object";
 
@@ -205,6 +214,7 @@ export type CoreCell<
 		CoreArgIds.Grid,
 		CoreCellArgGrandparentIds,
 		Entity,
+		CoreEntityArg<Options>,
 		CoreArgIds.Entity
 	>;
 
@@ -260,6 +270,16 @@ export function CoreCellClassFactory<
 	options: Options;
 }) {
 	/**
+	 * Core cell args with vector.
+	 */
+	type CellWithVector = CoreCellArg<CoreArgOptionsWithVectorUnion>;
+
+	/**
+	 * Core cell args with map.
+	 */
+	type CellWithMap = CoreCellArg<CoreArgOptionsWithMapUnion>;
+
+	/**
 	 * Constructor params.
 	 */
 	type ConstructorParams = CoreUniverseObjectConstructorParameters<
@@ -273,7 +293,7 @@ export function CoreCellClassFactory<
 	/**
 	 * Parameters for generate functions.
 	 */
-	type GenerateParams = [
+	type GenerateMembersParams = [
 		{
 			/**
 			 * Arg path.
@@ -281,6 +301,11 @@ export function CoreCellClassFactory<
 			arg: CoreCellArg<Options>;
 		}
 	];
+
+	/**
+	 * Parameters for generate with child functions.
+	 */
+	type GenerateMembersWithChildParams = [];
 
 	/**
 	 * Verify class data satisfies arg constraints.
@@ -292,7 +317,24 @@ export function CoreCellClassFactory<
 	 */
 	// Merging
 	// eslint-disable-next-line @typescript-eslint/no-empty-interface
-	interface Cell extends ComputedClassExtractInstance<typeof members, GenerateParams> {}
+	interface Cell
+		extends ComputedClassExtractInstance<typeof membersWithChild, GenerateMembersWithChildParams>,
+			ComputedClassExtractInstance<typeof members, GenerateMembersParams> {}
+
+	// Have to infer type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const membersWithChild = generateCoreUniverseObjectContainerMembers<
+		BaseClass,
+		Entity,
+		CoreEntityArg<Options>,
+		CoreArgIds.Entity,
+		Options,
+		CoreArgIds.Cell,
+		CoreEntityArgGrandparentIds
+	>({
+		id: CoreArgIds.Entity,
+		options
+	});
 
 	// Have to infer type
 	// eslint-disable-next-line @typescript-eslint/typedef
@@ -302,8 +344,12 @@ export function CoreCellClassFactory<
 		CoreArgIds.Cell,
 		Options,
 		CoreArgIds.Grid,
-		CoreCellArgGrandparentIds
+		CoreCellArgGrandparentIds,
+		Entity,
+		CoreEntityArg<Options>,
+		CoreArgIds.Entity
 	>({
+		childId: CoreArgIds.Entity,
 		grandparentIds: coreCellArgGrandparentIdSet,
 		id: CoreArgIds.Cell,
 		options,
@@ -312,6 +358,9 @@ export function CoreCellClassFactory<
 
 	/**
 	 * Core cell base class.
+	 *
+	 * @remarks
+	 * Coords are `!` defined, as they are conditionally never, and assigned in constructor.
 	 *
 	 * @see CoreUniverseObjectInherit for more details
 	 */
@@ -322,36 +371,36 @@ export function CoreCellClassFactory<
 		extends class extends Base {}
 		implements
 			StaticImplements<
+				// Includes container
 				CoreUniverseObjectClass<
 					BaseClass,
 					CoreCellArg<Options>,
 					CoreArgIds.Cell,
 					Options,
 					CoreArgIds.Grid,
-					CoreCellArgGrandparentIds
+					CoreCellArgGrandparentIds,
+					Entity,
+					CoreEntityArg<Options>,
+					CoreArgIds.Entity
 				>,
 				typeof Cell
 			>
 	{
 		/**
-		 * X coordinate.
-		 */
-		public [VectorCoord.X]: Options extends CoreArgOptionsWithVectorUnion ? Vector[VectorCoord.X] : never;
-
-		/**
-		 * Y coordinate.
-		 */
-		public [VectorCoord.X]: Options extends CoreArgOptionsWithVectorUnion ? Vector[VectorCoord.X] : never;
-
-		/**
-		 * Z coordinate.
-		 */
-		public [VectorCoord.Z]: Options extends CoreArgOptionsWithVectorUnion ? Vector[VectorCoord.X] : never;
-
-		/**
 		 * Default entity.
+		 *
+		 * @remarks
+		 * Implemented by {@link generateCoreUniverseObjectMembers}.
 		 */
-		public abstract defaultEntity: Entity;
+		public defaultEntity!: Entity;
+
+		/**
+		 * Implemented via {@link generateCoreUniverseObjectMembers}.
+		 *
+		 * @remarks
+		 * TS static property declaration is not required right now.
+		 */
+		public static getDefaultEntityUuid: (path: CellPathOwn) => Uuid;
 
 		/**
 		 * Worlds.
@@ -359,6 +408,21 @@ export function CoreCellClassFactory<
 		public worlds: CoreCellArg<Options>["worlds"] = (options[CoreArgOptionIds.Map]
 			? new Set()
 			: new Array()) as CoreCellArg<Options>["worlds"];
+
+		/**
+		 * X coordinate.
+		 */
+		public x!: Options extends CoreArgOptionsWithVectorUnion ? number : never;
+
+		/**
+		 * Y coordinate.
+		 */
+		public y!: Options extends CoreArgOptionsWithVectorUnion ? number : never;
+
+		/**
+		 * Z coordinate.
+		 */
+		public z!: Options extends CoreArgOptionsWithVectorUnion ? number : never;
 
 		// ESLint buggy
 		// eslint-disable-next-line jsdoc/require-param
@@ -369,14 +433,50 @@ export function CoreCellClassFactory<
 		 */
 		// ESLint buggy for nested destructured params
 		// eslint-disable-next-line @typescript-eslint/typedef
-		public constructor(...[arg, init, baseParams]: ConstructorParams) {
+		public constructor(...[arg, { attachHook, created }, baseParams]: ConstructorParams) {
 			// ESLint false negative, also does not seem to deal well with generics
 			// eslint-disable-next-line constructor-super, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
-			super(arg, init, baseParams);
+			super(baseParams);
+
+			// Create child arg, then attach conditional props
+			let defaultEntityArg: CoreEntityArg<Options> = {
+				// Ensures getting uuid from subclass
+				entityUuid: (Cell.constructor as typeof Cell).getDefaultEntityUuid(this),
+
+				// Extended path
+				...(options[CoreArgOptionIds.Path] ===
+				coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
+					? Array.from(coreEntityArgParentIdSet.values()).reduce((r, i) => {
+							let uuidPropertyName: CoreArgPathUuidPropertyName<typeof i> = coreArgIdToPathUuidPropertyName({ id: i });
+							return { ...r, [uuidPropertyName]: this[uuidPropertyName] };
+					  }, {})
+					: {}),
+
+				modeUuid: defaultModeUuid,
+				worldUuid: defaultWorldUuid
+			} as CoreEntityArg<Options>;
+			if (options[CoreArgOptionIds.Kind] === true) {
+				(defaultEntityArg as unknown as CoreEntityArgWithKind).kindUuid = defaultKindUuid;
+			}
+
+			// Assign vector
+			if (options[CoreArgOptionIds.Vector]) {
+				vectorCoords.forEach(coord => {
+					(this as CellWithVector)[coord] = (arg as unknown as CellWithVector)[coord];
+				});
+			}
 
 			// Assign properties
 			computedClassInjectPerInstance({
-				constructorParameters: [this, [arg, init, baseParams]],
+				constructorParameters: [],
+				instance: this,
+				members: membersWithChild,
+				parameters: []
+			});
+
+			// Assign properties
+			computedClassInjectPerInstance({
+				constructorParameters: [this, [arg, { attachHook, created }, baseParams], defaultEntityArg],
 				instance: this,
 				members,
 				parameters: [{ arg }]
@@ -417,16 +517,6 @@ export function CoreCellClassFactory<
 			 */
 			meta: CoreArgMeta<CoreArgIds.Cell, SourceOptions, TargetOptions, CoreCellArgParentIds>;
 		}): CoreCellArg<TargetOptions> {
-			/**
-			 * Core cell args with vector.
-			 */
-			type CellWithVector = CoreCellArg<CoreArgOptionsWithVectorUnion>;
-
-			/**
-			 * Core cell args with map.
-			 */
-			type CellWithMap = CoreCellArg<CoreArgOptionsWithMapUnion>;
-
 			/**
 			 * Core cell args without map.
 			 */
@@ -504,6 +594,14 @@ export function CoreCellClassFactory<
 			return targetCell;
 		}
 	}
+
+	// Inject static
+	computedClassInjectPerClass({
+		Base: Cell,
+		members,
+		// Nothing required
+		parameters: []
+	});
 
 	// Inject static
 	computedClassInjectPerClass({

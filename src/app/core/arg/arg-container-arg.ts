@@ -18,7 +18,7 @@ export type CoreArgContainerArg<
 	Id extends CoreArgIds,
 	Options extends CoreArgOptionsUnion,
 	ParentIds extends CoreArgIds = never,
+	ChildArg extends CoreArg<ChildId, Options, Id | ParentIds> = never,
 	ChildId extends CoreArgIds = never,
 	HasNever extends boolean = false
-> = CoreArg<Id, Options, ParentIds, HasNever> &
-	CoreArgsContainer<CoreArg<ChildId, Options, Id | ParentIds>, ChildId, Options, Id | ParentIds>;
+> = CoreArg<Id, Options, ParentIds, HasNever> & CoreArgsContainer<ChildArg, ChildId, Options, Id | ParentIds>;

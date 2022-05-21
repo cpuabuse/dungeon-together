@@ -135,6 +135,11 @@ export type CoreEntityArg<Options extends CoreArgOptionsUnion> = CoreArg<
 } & CoreEntityArgKind<Options>;
 
 /**
+ * Entity with kind.
+ */
+export type CoreEntityArgWithKind = CoreEntityArg<CoreArgOptionsGenerate<CoreArgOptionIds.Kind>>;
+
+/**
  * Path to an entity only.
  */
 export type EntityPathOwn = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPathOwn, CoreEntityArgParentIds>;
@@ -284,14 +289,22 @@ export function CoreEntityClassFactory<
 			>
 	{
 		/**
+		 * Entity kind.
+		 *
+		 * @remarks
+		 * `!`, as conditionally assigned in constructor.
+		 */
+		public kindUuid!: Options[CoreArgOptionIds.Kind] extends true ? Uuid : never;
+
+		/**
 		 * Mode of the entity.
 		 */
-		public abstract modeUuid: Uuid;
+		public modeUuid: Uuid;
 
 		/**
 		 * World in which entity resides.
 		 */
-		public abstract worldUuid: Uuid;
+		public worldUuid: Uuid;
 
 		// ESLint buggy
 		// eslint-disable-next-line jsdoc/require-param
@@ -302,6 +315,13 @@ export function CoreEntityClassFactory<
 		// eslint-disable-next-line @typescript-eslint/typedef
 		public constructor(...[arg, init, baseParams]: ConstructorParams) {
 			super(baseParams);
+
+			// Assign props from arg
+			this.modeUuid = arg.modeUuid;
+			this.worldUuid = arg.worldUuid;
+			if (options[CoreArgOptionIds.Kind] === true) {
+				(this as CoreEntityArgWithKind).kindUuid = (arg as unknown as CoreEntityArgWithKind).kindUuid;
+			}
 
 			computedClassInjectPerInstance({
 				constructorParameters: [this, [arg, init, baseParams]],
@@ -368,17 +388,12 @@ export function CoreEntityClassFactory<
 
 				// Generate kind
 				...(function (): CoreEntityArgKind<T> {
-					/**
-					 * Entity with kind.
-					 */
-					type EntityWithKind = CoreEntityArg<CoreArgOptionsGenerate<CoreArgOptionIds.Kind>>;
-
 					let argKind: CoreEntityArgKind<T> =
 						targetOptions[CoreArgOptionIds.Kind] === true
 							? {
 									kindUuid:
 										sourceOptions[CoreArgOptionIds.Kind] === true
-											? (sourceEntityAs as EntityWithKind).kindUuid
+											? (sourceEntityAs as CoreEntityArgWithKind).kindUuid
 											: defaultKindUuid
 							  }
 							: ({} as CoreEntityArgKind<T>);

@@ -11,6 +11,9 @@ import { DeferredPromise } from "../../common/async";
 
 /**
  * Secondary parameters for constructor.
+ *
+ * @remarks
+ * To be processed with `catch` for logging and `finally` for success, since the purpose is mostly just synchronization.
  */
 export type CoreUniverseObjectInitializationParameter = {
 	/**
@@ -19,7 +22,7 @@ export type CoreUniverseObjectInitializationParameter = {
 	 * @remarks
 	 * For non container universe objects (entity) it does not matter where in constructor resolve happens, nor does it have to be delayed, as then-ables including async functions will be executed in the next loop.
 	 */
-	created: DeferredPromise<void>;
+	created: DeferredPromise;
 
 	/**
 	 * Hook to initialize.
