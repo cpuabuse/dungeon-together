@@ -17,8 +17,9 @@ import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import { Vector, defaultVector, vectorCoords } from "../common/vector";
 import {
-	CoreArg,
 	CoreArgComplexOptionPathIds,
+	CoreArgContainerArg,
+	CoreArgConverter,
 	CoreArgIds,
 	CoreArgMeta,
 	CoreArgOptionIds,
@@ -30,12 +31,11 @@ import {
 	CoreArgOptionsWithoutMapUnion,
 	CoreArgPath,
 	CoreArgPathUuidPropertyName,
-	CoreArgsContainer,
 	coreArgComplexOptionSymbolIndex,
+	coreArgContainerConvert,
 	coreArgIdToPathUuidPropertyName,
 	coreArgPathConvert
 } from "./arg";
-import { CoreArgConverter, coreArgContainerConvert } from "./arg/convert-container";
 import { CoreBaseClassNonRecursive } from "./base";
 import {
 	CommsEntity,
@@ -166,6 +166,11 @@ export function commsCellRawToArgs(rawSource: CommsCellRaw, path: CellPathExtend
 // #endregion
 
 /**
+ * Cell parent ID.
+ */
+type CoreCellArgParentId = typeof coreCellArgParentId;
+
+/**
  * IDs of grandparents of {@link CoreCellArg}.
  */
 export type CoreCellArgGrandparentIds = typeof coreCellArgGrandparentIds[number];
@@ -180,13 +185,18 @@ export type CoreCellArgParentIds = typeof coreCellArgParentIds[number];
  *
  * If any changes are made, they should be reflected in {@link coreArgsConvert}.
  */
-export type CoreCellArg<Options extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Cell, Options, CoreCellArgParentIds> &
-	CoreArgsContainer<CoreEntityArg<Options>, CoreArgIds.Entity, Options, CoreEntityArgParentIds> & {
-		/**
-		 * Worlds.
-		 */
-		worlds: Options[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
-	} & (Options extends CoreArgOptionsWithVectorUnion ? Vector : unknown);
+export type CoreCellArg<Options extends CoreArgOptionsUnion> = CoreArgContainerArg<
+	CoreArgIds.Cell,
+	Options,
+	CoreCellArgParentIds,
+	CoreEntityArg<Options>,
+	CoreArgIds.Entity
+> & {
+	/**
+	 * Worlds.
+	 */
+	worlds: Options[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
+} & (Options extends CoreArgOptionsWithVectorUnion ? Vector : unknown);
 
 /**
  * Cell own path.
@@ -211,26 +221,30 @@ export type CoreCell<
 		CoreCellArg<Options>,
 		CoreArgIds.Cell,
 		Options,
-		CoreArgIds.Grid,
+		CoreCellArgParentId,
 		CoreCellArgGrandparentIds,
 		Entity,
 		CoreEntityArg<Options>,
 		CoreArgIds.Entity
 	>;
 
+// Infer type from `as const` assertion
+/* eslint-disable @typescript-eslint/typedef */
+/**
+ * Cell parent ID.
+ */
+const coreCellArgParentId = CoreArgIds.Grid as const;
+
 /**
  * Tuple with core cell arg grandparent IDS.
  */
-// Infer type from `as const` assertion
-// eslint-disable-next-line @typescript-eslint/typedef
 const coreCellArgGrandparentIds = [...coreGridArgParentIds] as const;
 
 /**
  * Tuple with core cell arg parent IDS.
  */
-// Infer type from `as const` assertion
-// eslint-disable-next-line @typescript-eslint/typedef
-export const coreCellArgParentIds = [...coreGridArgParentIds, CoreArgIds.Grid] as const;
+export const coreCellArgParentIds = [...coreGridArgParentIds, coreCellArgParentId] as const;
+/* eslint-enable @typescript-eslint/typedef */
 
 /**
  * Unique set with grandparent ID's for core cell arg.
@@ -310,7 +324,7 @@ export function CoreCellClassFactory<
 	/**
 	 * Verify class data satisfies arg constraints.
 	 */
-	type ReturnClass = Cell extends CoreEntityArg<Options> ? typeof Cell : never;
+	type ReturnClass = Cell extends CoreCellArg<Options> ? typeof Cell : never;
 
 	/**
 	 * Cell type merging.
@@ -343,7 +357,7 @@ export function CoreCellClassFactory<
 		CoreCellArg<Options>,
 		CoreArgIds.Cell,
 		Options,
-		CoreArgIds.Grid,
+		CoreCellArgParentId,
 		CoreCellArgGrandparentIds,
 		Entity,
 		CoreEntityArg<Options>,
@@ -353,7 +367,7 @@ export function CoreCellClassFactory<
 		grandparentIds: coreCellArgGrandparentIdSet,
 		id: CoreArgIds.Cell,
 		options,
-		parentId: CoreArgIds.Grid
+		parentId: coreCellArgParentId
 	});
 
 	/**
@@ -377,7 +391,7 @@ export function CoreCellClassFactory<
 					CoreCellArg<Options>,
 					CoreArgIds.Cell,
 					Options,
-					CoreArgIds.Grid,
+					CoreCellArgParentId,
 					CoreCellArgGrandparentIds,
 					Entity,
 					CoreEntityArg<Options>,

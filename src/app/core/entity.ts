@@ -93,6 +93,11 @@ export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPath
 // #endregion
 
 /**
+ * Entity parent ID.
+ */
+type CoreEntityArgParentId = typeof coreEntityArgParentId;
+
+/**
  * {@link CoreEntityArg} grandparent IDs.
  */
 export type CoreEntityArgGrandparentIds = typeof coreEntityArgGrandparentIds[number];
@@ -161,23 +166,27 @@ export type CoreEntity<
 		CoreEntityArg<Options>,
 		CoreArgIds.Entity,
 		Options,
-		CoreArgIds.Cell,
+		CoreEntityArgParentId,
 		CoreEntityArgGrandparentIds
 	>;
+
+// Infer type from `as const` assertion
+/* eslint-disable @typescript-eslint/typedef */
+/**
+ * Entity parent ID.
+ */
+const coreEntityArgParentId = CoreArgIds.Cell as const;
 
 /**
  * Tuple with core entity arg grandparent IDS.
  */
-// Infer type from `as const` assertion
-// eslint-disable-next-line @typescript-eslint/typedef
 const coreEntityArgGrandparentIds = [...coreCellArgParentIds] as const;
 
 /**
  * Tuple with core entity arg parent IDS.
  */
-// Infer type from `as const` assertion
-// eslint-disable-next-line @typescript-eslint/typedef
-export const coreEntityArgParentIds = [...coreCellArgParentIds, CoreArgIds.Cell] as const;
+export const coreEntityArgParentIds = [...coreCellArgParentIds, coreEntityArgParentId] as const;
+/* eslint-enable @typescript-eslint/typedef */
 
 /**
  * Unique set with parent ID's for core entity arg.
@@ -257,13 +266,13 @@ export function CoreEntityClassFactory<
 		CoreEntityArg<Options>,
 		CoreArgIds.Entity,
 		Options,
-		CoreArgIds.Cell,
+		CoreEntityArgParentId,
 		CoreEntityArgGrandparentIds
 	>({
 		grandparentIds: coreEntityArgGrandparentIdSet,
 		id: CoreArgIds.Entity,
 		options,
-		parentId: CoreArgIds.Cell
+		parentId: coreEntityArgParentId
 	});
 
 	/**
@@ -282,7 +291,7 @@ export function CoreEntityClassFactory<
 					CoreEntityArg<Options>,
 					CoreArgIds.Entity,
 					Options,
-					CoreArgIds.Cell,
+					CoreEntityArgParentId,
 					CoreEntityArgGrandparentIds
 				>,
 				typeof Entity

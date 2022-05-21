@@ -7,20 +7,30 @@
  * @file Grid
  */
 
-import { ComputedClassWords } from "../common/computed-class";
-import { defaultShardUuid } from "../common/defaults";
-import { AbstractConstructor, StaticImplements, StaticMembers } from "../common/utility-types";
+import {
+	ComputedClassExtractInstance,
+	computedClassInjectPerClass,
+	computedClassInjectPerInstance
+} from "../common/computed-class";
+import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import {
-	CoreArg,
+	CoreArgComplexOptionPathIds,
+	CoreArgContainerArg,
+	CoreArgConverter,
 	CoreArgIds,
 	CoreArgMeta,
+	CoreArgOptionIds,
 	CoreArgOptionsPathExtended,
 	CoreArgOptionsPathOwn,
+	CoreArgOptionsUnion,
 	CoreArgPath,
-	CoreArgsContainer
+	CoreArgPathUuidPropertyName,
+	coreArgComplexOptionSymbolIndex,
+	coreArgContainerConvert,
+	coreArgIdToPathUuidPropertyName,
+	coreArgPathConvert
 } from "./arg";
-import { CoreArgOptionIds, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
 import { CoreBaseClassNonRecursive } from "./base";
 import {
 	CellPathExtended,
@@ -29,14 +39,20 @@ import {
 	CommsCellRaw,
 	CoreCell,
 	CoreCellArg,
+	CoreCellArgGrandparentIds,
 	CoreCellArgParentIds,
-	commsCellRawToArgs
+	commsCellRawToArgs,
+	coreCellArgParentIdSet
 } from "./cell";
 import { ShardPath, coreShardArgParentIds } from "./shard";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
+	CoreUniverseObjectClass,
 	CoreUniverseObjectConstructorParameters,
-	CoreUniverseObjectInstance
+	CoreUniverseObjectInstance,
+	CoreUniverseObjectUniverse,
+	generateCoreUniverseObjectContainerMembers,
+	generateCoreUniverseObjectMembers
 } from "./universe-object";
 
 // #region To be removed
@@ -129,19 +145,23 @@ export function commsGridRawToArgs(rawSource: CommsGridRaw, shardUuid: Uuid): Co
 }
 // #endregion
 
+// Infer type from `as const` assertion
+/* eslint-disable @typescript-eslint/typedef */
+/**
+ * Grid parent ID.
+ */
+const coreGridArgParentId = CoreArgIds.Shard as const;
+
 /**
  * Tuple with core grid arg grandparent IDS.
  */
-// Infer type from `as const` assertion
-// eslint-disable-next-line @typescript-eslint/typedef
 const coreGridArgGrandparentIds = [...coreShardArgParentIds] as const;
 
 /**
  * Tuple with core grid arg parent IDS.
  */
-// Infer type from `as const` assertion
-// eslint-disable-next-line @typescript-eslint/typedef
-export const coreGridArgParentIds = [...coreShardArgParentIds, CoreArgIds.Shard] as const;
+export const coreGridArgParentIds = [...coreShardArgParentIds, coreGridArgParentId] as const;
+/* eslint-enable @typescript-eslint/typedef */
 
 /**
  * Unique set with grandparent ID's for core cell arg.
@@ -152,6 +172,11 @@ export const coreGridArgGrandparentIdSet: Set<CoreGridArgGrandparentIds> = new S
  * Unique set with parent ID's for core cell arg.
  */
 export const coreGridArgParentIdSet: Set<CoreGridArgParentIds> = new Set(coreGridArgParentIds);
+
+/**
+ * Grid parent Id.
+ */
+type CoreGridArgParentId = typeof coreGridArgParentId;
 
 /**
  * IDs of grandparents of {@link CoreGridArg}.
@@ -176,8 +201,13 @@ export type GridPathExtended = CoreArgPath<CoreArgIds.Grid, CoreArgOptionsPathEx
 /**
  * Core grid args.
  */
-export type CoreGridArg<Options extends CoreArgOptionsUnion> = CoreArg<CoreArgIds.Grid, Options, CoreGridArgParentIds> &
-	CoreArgsContainer<CoreCellArg<Options>, CoreArgIds.Cell, Options, CoreCellArgParentIds>;
+export type CoreGridArg<Options extends CoreArgOptionsUnion> = CoreArgContainerArg<
+	CoreArgIds.Grid,
+	Options,
+	CoreGridArgParentIds,
+	CoreCellArg<Options>,
+	CoreArgIds.Cell
+>;
 
 /**
  * Core grid.
@@ -192,9 +222,10 @@ export type CoreGrid<
 		CoreGridArg<Options>,
 		CoreArgIds.Grid,
 		Options,
-		CoreArgIds.Shard,
+		CoreGridArgParentId,
 		CoreGridArgGrandparentIds,
 		Cell,
+		CoreCellArg<Options>,
 		CoreArgIds.Cell
 	>;
 
@@ -225,9 +256,9 @@ export function CoreGridClassFactory<
 	options: Options;
 }) {
 	/**
-	 * Core universe object constructor params for grid.
+	 * Constructor params.
 	 */
-	type GridParams = CoreUniverseObjectConstructorParameters<
+	type ConstructorParams = CoreUniverseObjectConstructorParameters<
 		BaseClass,
 		CoreGridArg<Options>,
 		CoreArgIds.Grid,
@@ -236,87 +267,70 @@ export function CoreGridClassFactory<
 	>;
 
 	/**
-	 * Parameter constraint for class to extend.
+	 * Parameters for generate functions.
 	 */
-	type SuperConstructorExtends = AbstractConstructor<GridParams>;
-
-	/**
-	 * Super class.
-	 *
-	 * @remarks
-	 * Constrains actual super class to extends to be used, if fails, the return result will be never.
-	 */
-	type SuperClass = typeof NewBase extends SuperConstructorExtends ? typeof NewBase : never;
-
-	/**
-	 * Constructor params.
-	 */
-	type ConstructorParams = GridParams;
-
-	/**
-	 * Class info.
-	 */
-	type ActualClassInfo = ComputedClassInfo<
-		CoreGridClassConstraintData<BaseClass, Options, Cell>,
-		ComputedClassActualData<{
+	type GenerateMembersParams = [
+		{
 			/**
-			 * Instance.
+			 * Arg path.
 			 */
-			[ComputedClassWords.Instance]: ComputedClassActualMembers & {
-				/**
-				 * Base.
-				 */
-				[ComputedClassWords.Base]: InstanceType<SuperClass>;
+			arg: CoreGridArg<Options>;
+		}
+	];
 
-				/**
-				 * Populate.
-				 */
-				[ComputedClassWords.Populate]: Grid;
-			};
-
-			/**
-			 * Static.
-			 */
-			[ComputedClassWords.Static]: ComputedClassActualMembers & {
-				/**
-				 * Base.
-				 */
-				[ComputedClassWords.Base]: StaticMembers<SuperClass>;
-
-				/**
-				 * Populate.
-				 */
-				[ComputedClassWords.Populate]: StaticMembers<typeof Grid>;
-			};
-		}>,
-		ConstructorParams
-	>;
+	/**
+	 * Parameters for generate with child functions.
+	 */
+	type GenerateMembersWithChildParams = [];
 
 	/**
 	 * New class to re-inject.
 	 */
 	// Intersection preserves constructor parameters of core cell, and instance type of base class
-	type ReturnClass = ActualClassInfo[ComputedClassWords.ClassReturn];
+	type ReturnClass = Grid extends CoreGridArg<Options> ? typeof Grid : never;
 
-	// Infer the new base for type safe return
+	/**
+	 * Interface merging with grid.
+	 */
+	// Merging
+	// eslint-disable-next-line @typescript-eslint/no-empty-interface
+	interface Grid
+		extends ComputedClassExtractInstance<typeof membersWithChild, GenerateMembersWithChildParams>,
+			ComputedClassExtractInstance<typeof members, GenerateMembersParams> {}
+
+	// Have to infer type
 	// eslint-disable-next-line @typescript-eslint/typedef
-	const NewBase = CoreUniverseObjectFactory<
+	const membersWithChild = generateCoreUniverseObjectContainerMembers<
+		BaseClass,
+		Cell,
+		CoreCellArg<Options>,
+		CoreArgIds.Cell,
+		Options,
+		CoreArgIds.Grid,
+		CoreCellArgGrandparentIds
+	>({
+		id: CoreArgIds.Cell,
+		options
+	});
+
+	// Have to infer type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const members = generateCoreUniverseObjectMembers<
 		BaseClass,
 		CoreGridArg<Options>,
 		CoreArgIds.Grid,
 		Options,
-		CoreArgIds.Shard,
+		CoreGridArgParentId,
 		CoreGridArgGrandparentIds,
 		Cell,
 		CoreCellArg<Options>,
 		CoreArgIds.Cell
 	>({
-		Base,
 		childId: CoreArgIds.Cell,
 		grandparentIds: coreGridArgGrandparentIdSet,
 		id: CoreArgIds.Grid,
 		options,
-		parentId: CoreArgIds.Shard
+		parentId: coreGridArgParentId
 	});
 
 	/**
@@ -328,101 +342,179 @@ export function CoreGridClassFactory<
 	// eslint-disable-next-line no-redeclare
 	abstract class Grid
 		// Casting will remove non-static instance information by intersecting with `any`, while maintaining constructor parameters, that will be included into factory return
-		extends (NewBase as SuperConstructorExtends)
-		implements StaticImplements<ActualClassInfo[ComputedClassWords.ClassImplements], typeof Grid>
+		extends class extends Base {}
+		implements
+			StaticImplements<
+				CoreUniverseObjectClass<
+					BaseClass,
+					CoreGridArg<Options>,
+					CoreArgIds.Grid,
+					Options,
+					CoreGridArgParentId,
+					CoreGridArgGrandparentIds,
+					Cell,
+					CoreCellArg<Options>,
+					CoreArgIds.Cell
+				>,
+				typeof Grid
+			>
 	{
 		/**
 		 * Default entity.
+		 *
+		 * @remarks
+		 * Redefining.
 		 */
-		public abstract defaultCell: Cell;
-	}
+		public defaultCell!: Cell;
 
-	// Have to re-inject dynamic bits from generic parents
-	return Grid as ReturnClass;
-}
-
-/**
- * Convert grid args between options.
- *
- * Has to strictly follow {@link CoreGridArg}.
- *
- * @param param
- * @returns Converted grid args
- */
-export function coreGridArgsConvert<
-	SourceOptions extends CoreArgOptionsUnion,
-	TargetOptions extends CoreArgOptionsUnion
->({
-	grid,
-	sourceOptions,
-	targetOptions,
-	meta
-}: {
-	/**
-	 * Core grid args.
-	 */
-	grid: CoreGridArg<SourceOptions>;
-
-	/**
-	 * Option for the source.
-	 */
-	sourceOptions: SourceOptions;
-
-	/**
-	 * Option for the target.
-	 */
-	targetOptions: TargetOptions;
-
-	/**
-	 * Meta.
-	 */
-	meta: CoreArgMeta<CoreArgIds.Grid, SourceOptions, TargetOptions, CoreGridArgParentIds>;
-}): CoreGridArg<TargetOptions> {
-	// Define source and result, with minimal options
-	const sourceGrid: CoreGridArg<SourceOptions> = grid;
-	const sourceGridAs: Record<string, any> = sourceGrid;
-	// Cannot assign to conditional type without casting
-	let targetGrid: CoreGridArg<TargetOptions> = {
-		gridUuid: sourceGrid.gridUuid
-	};
-
-	// Path
-	if (targetOptions[CoreArgOptionIds.Path] === true) {
 		/**
-		 * Core grid args with path.
+		 * Implemented via {@link generateCoreUniverseObjectMembers}.
+		 *
+		 * @remarks
+		 * TS static property declaration is not required right now.
 		 */
-		type CoreGridArgsWithPath = CoreGridArg<CoreArgOptionsGenerate<CoreArgOptionIds.Path>>;
-		let targetGridWithPath: CoreGridArgsWithPath = targetGridAs as CoreGridArgsWithPath;
+		public static getDefaultCellUuid: (path: GridPathOwn) => Uuid;
 
-		if (sourceOptions[CoreArgOptionIds.Path] === true) {
-			// Source to target
-			targetGridWithPath.shardUuid = (sourceGridAs as CoreGridArgsWithPath).shardUuid;
-		} else {
-			// Default to target
-			targetGridWithPath.shardUuid = defaultShardUuid;
+		// ESLint buggy
+		// eslint-disable-next-line jsdoc/require-param
+		/**
+		 * Constructor.
+		 *
+		 * @param args - Constructor parameters
+		 */
+		// ESLint buggy for nested destructured params
+		// eslint-disable-next-line @typescript-eslint/typedef
+		public constructor(...[arg, { attachHook, created }, baseParams]: ConstructorParams) {
+			// ESLint false negative, also does not seem to deal well with generics
+			// eslint-disable-next-line constructor-super, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
+			super(baseParams);
+
+			// Create child arg, then attach conditional props
+			let defaultCellArg: CoreCellArg<Options> = {
+				// Ensures getting uuid from subclass
+				cellUuid: (Grid.constructor as typeof Grid).getDefaultCellUuid(this),
+
+				// Extended path
+				...(options[CoreArgOptionIds.Path] ===
+				coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
+					? Array.from(coreCellArgParentIdSet.values()).reduce((r, i) => {
+							let uuidPropertyName: CoreArgPathUuidPropertyName<typeof i> = coreArgIdToPathUuidPropertyName({ id: i });
+							return { ...r, [uuidPropertyName]: this[uuidPropertyName] };
+					  }, {})
+					: {})
+			} as CoreCellArg<Options>;
+
+			// Assign properties
+			computedClassInjectPerInstance({
+				constructorParameters: [],
+				instance: this,
+				members: membersWithChild,
+				parameters: []
+			});
+
+			// Assign properties
+			computedClassInjectPerInstance({
+				constructorParameters: [this, [arg, { attachHook, created }, baseParams], defaultCellArg],
+				instance: this,
+				members,
+				parameters: [{ arg }]
+			});
+		}
+
+		/**
+		 * Convert grid args between options.
+		 *
+		 * Has to strictly follow {@link CoreGridArg}.
+		 *
+		 * @param param - Destructured parameter
+		 * @returns Converted grid args
+		 */
+		public static convertGrid<SourceOptions extends CoreArgOptionsUnion, TargetOptions extends CoreArgOptionsUnion>({
+			grid,
+			sourceOptions,
+			targetOptions,
+			meta
+		}: {
+			/**
+			 * Core grid args.
+			 */
+			grid: CoreGridArg<SourceOptions>;
+
+			/**
+			 * Option for the source.
+			 */
+			sourceOptions: SourceOptions;
+
+			/**
+			 * Option for the target.
+			 */
+			targetOptions: TargetOptions;
+
+			/**
+			 * Meta.
+			 */
+			meta: CoreArgMeta<CoreArgIds.Grid, SourceOptions, TargetOptions, CoreGridArgParentIds>;
+		}): CoreGridArg<TargetOptions> {
+			// Cannot assign to conditional type without casting
+			let targetGrid: CoreGridArg<TargetOptions> = {} as CoreGridArg<TargetOptions>;
+
+			// Path
+			Object.assign(
+				targetGrid,
+				coreArgPathConvert({
+					id: CoreArgIds.Grid,
+					meta,
+					parentIds: coreGridArgParentIdSet,
+					sourceArgPath: grid,
+					sourceOptions,
+					targetOptions
+				})
+			);
+
+			// Deal with children
+			Object.assign(
+				targetGrid,
+				coreArgContainerConvert({
+					arg: grid,
+					childConverter: (
+						Grid.universe as CoreUniverseObjectUniverse<BaseClass, Cell, CoreCellArg<Options>, CoreArgIds.Cell, Options>
+					).Cell.convertCell as CoreArgConverter<
+						CoreCellArg<SourceOptions>,
+						CoreCellArg<TargetOptions>,
+						CoreArgIds.Cell,
+						SourceOptions,
+						TargetOptions,
+						CoreCellArgParentIds
+					>,
+					childId: CoreArgIds.Cell,
+					id: CoreArgIds.Grid,
+					meta,
+					sourceOptions,
+					targetOptions
+				})
+			);
+
+			// Return
+			return targetGrid;
 		}
 	}
 
-	/**
-	 * Core grid args options with map.
-	 */
-	type CoreGridArgsOptionsWithMap = CoreArgOptionsGenerate<CoreArgOptionIds.Map>;
+	// Inject static
+	computedClassInjectPerClass({
+		Base: Grid,
+		members,
+		// Nothing required
+		parameters: []
+	});
 
-	/**
-	 * Core grid args options without map.
-	 */
-	type CoreGridArgsOptionsWithoutMap = CoreArgOptions;
+	// Inject static
+	computedClassInjectPerClass({
+		Base: Grid,
+		members,
+		// Nothing required
+		parameters: []
+	});
 
-	/**
-	 * Core grid args with map.
-	 */
-	type CoreGridArgsWithMap = CoreGridArg<CoreGridArgsOptionsWithMap>;
-
-	/**
-	 * Core grid args without map.
-	 */
-	type CoreGridArgsWithoutMap = CoreGridArg<CoreGridArgsOptionsWithoutMap>;
-
-	// Return
-	return targetGrid;
+	// Have to re-inject dynamic bits from generic parents
+	return Grid as ReturnClass;
 }
