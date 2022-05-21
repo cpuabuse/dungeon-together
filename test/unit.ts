@@ -4,7 +4,7 @@
 */
 
 import { init } from "./init";
-import { childMetaIdToId, childMetaIdToOwn, tTest } from "./unit/core/child-meta";
+import { childMetaIdToExpected, childMetaIdToId, childMetaIdToOwn, tTest } from "./unit/core/child-meta";
 import { unitTest } from "./unit/core/convert-path";
 
 /**
@@ -23,5 +23,9 @@ describe("createChildMeta", function () {
 
 	describe("ID to own", function () {
 		it("should produce correct meta", childMetaIdToOwn);
+	});
+
+	describe("ID to expected", function () {
+		it("should produce correct meta", childMetaIdToExpected);
 	});
 });

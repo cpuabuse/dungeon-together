@@ -156,3 +156,10 @@ export const childMetaIdToOwn: () => void = metaGenerateTest({
 	sourceParentArg: {},
 	targetOptions: optionsPathOwn
 });
+
+/**
+ * Test ID to expected.
+ */
+export function childMetaIdToExpected(): void {
+	ok(true);
+}
