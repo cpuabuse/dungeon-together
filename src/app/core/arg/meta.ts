@@ -97,7 +97,7 @@ export type CoreArgMeta<
  * @param param - Destructured parameter
  * @returns Path
  */
-export function coreArgChildMetaGenerate<
+export function coreArgMetaGenerate<
 	ChildId extends CoreArgIds,
 	// Parent of `S`
 	SourceOptions extends CoreArgOptionsUnion,
@@ -106,7 +106,7 @@ export function coreArgChildMetaGenerate<
 	GrandparentIds extends CoreArgIds = never
 >({
 	parentId,
-	childId,
+	id,
 	parentArg,
 	meta,
 	sourceOptions,
@@ -121,7 +121,7 @@ export function coreArgChildMetaGenerate<
 	/**
 	 * Next id.
 	 */
-	childId: ChildId;
+	id: ChildId;
 
 	/**
 	 * Options.
@@ -217,7 +217,7 @@ export function coreArgChildMetaGenerate<
 			...rest,
 			paths: {
 				...paths,
-				[childId]: path
+				[id]: path
 			}
 			// Casting, since no overlaps with return type
 		} as unknown as ReturnType;

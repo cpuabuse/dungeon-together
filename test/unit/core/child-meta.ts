@@ -10,14 +10,7 @@
 import { ok } from "assert";
 import { assert } from "chai";
 import { MaybeDefined } from "../../../src/app/common/utility-types";
-import {
-	CoreArg,
-	CoreArgIds,
-	CoreArgMeta,
-	CoreArgOptionsPathId,
-	CoreArgOptionsUnion,
-	coreArgChildMetaGenerate
-} from "../../../src/app/core/arg";
+import { CoreArg, CoreArgIds, CoreArgMeta, CoreArgOptionsUnion, coreArgMetaGenerate } from "../../../src/app/core/arg";
 import { optionsPathId, optionsPathOwn } from "./lib/options";
 import {
 	defaultCellPath,
@@ -30,10 +23,11 @@ import {
 /**
  * Helper function testing meta creation.
  *
- * @param param
+ * @param param - Destructured parameter
+ * @returns Void function
  */
 function metaGenerateTest<
-	ChildId extends CoreArgIds,
+	Id extends CoreArgIds,
 	// Parent of `S`
 	SourceOptions extends CoreArgOptionsUnion,
 	TargetOptions extends CoreArgOptionsUnion,
@@ -44,7 +38,7 @@ function metaGenerateTest<
 		/**
 		 * Expected meta.
 		 */
-		expected: CoreArgMeta<CoreArgIds.Cell, SourceOptions, TargetOptions, CoreArgIds.Grid | CoreArgIds.Shard>;
+		expected: CoreArgMeta<Id, SourceOptions, TargetOptions, ParentId | GrandparentIds>;
 
 		/**
 		 * Index of child.
@@ -54,7 +48,7 @@ function metaGenerateTest<
 		/**
 		 * Next id.
 		 */
-		childArgId: ChildId;
+		id: Id;
 
 		/**
 		 * Options.
@@ -80,22 +74,23 @@ function metaGenerateTest<
 			 * @remarks
 			 * Used as discriminator.
 			 */
-			parentArgId: ParentId;
+			parentId: ParentId;
 
 			/**
 			 * Parent source arg.
 			 */
-			sourceParentArg: CoreArg<ParentId, SourceOptions, GrandparentIds>;
+			parentArg: CoreArg<ParentId, SourceOptions, GrandparentIds>;
 		}
 	>
 ): () => void {
 	return function () {
-		const actual: CoreArgMeta<
-			CoreArgIds.Cell,
-			CoreArgOptionsPathId,
-			CoreArgOptionsPathId,
-			CoreArgIds.Grid | CoreArgIds.Shard
-		> = coreArgChildMetaGenerate(param);
+		const actual: CoreArgMeta<Id, SourceOptions, TargetOptions, ParentId | GrandparentIds> = coreArgMetaGenerate<
+			Id,
+			SourceOptions,
+			TargetOptions,
+			ParentId,
+			GrandparentIds
+		>(param);
 
 		assert.containSubset(actual, param.expected);
 	};
@@ -117,23 +112,6 @@ export function tTest(): void {
  * Test ID to ID.
  */
 export const childMetaIdToId: () => void = metaGenerateTest({
-	childArgId: CoreArgIds.Cell,
-	expected: {},
-	index: 0,
-	meta: {},
-	parentArgId: CoreArgIds.Grid,
-	sourceOptions: optionsPathId,
-	sourceParentArg: {
-		id: "test"
-	},
-	targetOptions: optionsPathId
-});
-
-/**
- * Test ID to own.
- */
-export const childMetaIdToOwn: () => void = metaGenerateTest({
-	childArgId: CoreArgIds.Cell,
 	expected: {
 		origin: defaultOrigin,
 		paths: {
@@ -142,6 +120,7 @@ export const childMetaIdToOwn: () => void = metaGenerateTest({
 		systemNamespace: defaultSystemNameSpace,
 		userNamespace: defaultUserNameSpace
 	},
+	id: CoreArgIds.Cell,
 	index: 0,
 	meta: {
 		origin: defaultOrigin,
@@ -151,9 +130,39 @@ export const childMetaIdToOwn: () => void = metaGenerateTest({
 		systemNamespace: defaultSystemNameSpace,
 		userNamespace: defaultUserNameSpace
 	},
-	parentArgId: CoreArgIds.Grid,
+	parentArg: {
+		id: "test"
+	},
+	parentId: CoreArgIds.Grid,
 	sourceOptions: optionsPathId,
-	sourceParentArg: {},
+	targetOptions: optionsPathId
+});
+
+/**
+ * Test ID to own.
+ */
+export const childMetaIdToOwn: () => void = metaGenerateTest({
+	expected: {
+		origin: defaultOrigin,
+		paths: {
+			[CoreArgIds.Cell]: defaultCellPath
+		},
+		systemNamespace: defaultSystemNameSpace,
+		userNamespace: defaultUserNameSpace
+	},
+	id: CoreArgIds.Cell,
+	index: 0,
+	meta: {
+		origin: defaultOrigin,
+		paths: {
+			[CoreArgIds.Grid]: defaultGridPath
+		},
+		systemNamespace: defaultSystemNameSpace,
+		userNamespace: defaultUserNameSpace
+	},
+	parentArg: {},
+	parentId: CoreArgIds.Grid,
+	sourceOptions: optionsPathId,
 	targetOptions: optionsPathOwn
 });
 

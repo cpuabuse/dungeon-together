@@ -11,6 +11,7 @@ import { deepStrictEqual, ok } from "assert";
 import { hasOwnProperty } from "../../../src/app/common/utility-types";
 import { getDefaultUuid } from "../../../src/app/common/uuid";
 import {
+	CoreArg,
 	CoreArgComplexOptionPathIds,
 	CoreArgComplexOptionSymbolIndex,
 	CoreArgIds,
@@ -19,7 +20,6 @@ import {
 	CoreArgOptionsGenerate,
 	CoreArgOptionsPathId,
 	CoreArgOptionsPathOwn,
-	CoreArgPath,
 	coreArgConvert
 } from "../../../src/app/core/arg";
 import { optionsPathExtended, optionsPathId, optionsPathOwn } from "./lib/options";
@@ -79,14 +79,14 @@ export function unitTest(): void {
 		id,
 		meta,
 		parentIds,
-		sourceArgPath,
+		arg,
 		sourceOptions,
 		targetOptions
 	}: {
 		/**
 		 * Expected result.
 		 */
-		expected: CoreArgPath<Id, TargetOptions, ParentIds>;
+		expected: CoreArg<Id, TargetOptions, ParentIds>;
 
 		/**
 		 * Meta.
@@ -96,7 +96,7 @@ export function unitTest(): void {
 		/**
 		 * Source path.
 		 */
-		sourceArgPath: CoreArgPath<Id, SourceOptions, ParentIds>;
+		arg: CoreArg<Id, SourceOptions, ParentIds>;
 
 		/**
 		 * Source options.
@@ -111,13 +111,14 @@ export function unitTest(): void {
 		return function () {
 			deepStrictEqual(
 				coreArgConvert({
+					arg,
 					id,
 					meta,
 					parentIds,
-					arg: sourceArgPath,
 					sourceOptions,
 					targetOptions
-				}),
+					// Parent ids is conditional generic
+				} as Parameters<typeof coreArgConvert>[0]),
 				expected
 			);
 		};
@@ -143,27 +144,28 @@ export function unitTest(): void {
 	>({
 		id,
 		parentIds,
-		sourceArgPath,
+		arg,
 		sourceOptions
 	}: {
 		/**
 		 * Source path.
 		 */
-		sourceArgPath: CoreArgPath<Id, SourceOptions, ParentIds>;
+		arg: CoreArg<Id, SourceOptions, ParentIds>;
 
 		/**
 		 * Source options.
 		 */
 		sourceOptions: SourceOptions;
 	} & BaseParam<Id, ParentIds>): PathConvertToIdTests {
-		let result: CoreArgPath<Id, CoreArgOptionsPathId, ParentIds> = coreArgConvert({
+		let result: CoreArg<Id, CoreArgOptionsPathId, ParentIds> = coreArgConvert({
+			arg,
 			id,
 			meta: {},
 			parentIds,
-			arg: sourceArgPath,
 			sourceOptions,
 			targetOptions: optionsPathId
-		});
+			// Parent ids is conditional generic
+		} as Parameters<typeof coreArgConvert>[0]);
 
 		return {
 			/**
@@ -211,7 +213,7 @@ export function unitTest(): void {
 	// Tests
 	const ownToIdTests: PathConvertToIdTests = pathConvertToIdTests({
 		...cellBaseParam,
-		sourceArgPath: { cellUuid: defaultCellUuid },
+		arg: { cellUuid: defaultCellUuid },
 		sourceOptions: optionsPathOwn
 	});
 	const extendedToIdTests: {
@@ -227,7 +229,7 @@ export function unitTest(): void {
 	} = {
 		cell: pathConvertToIdTests({
 			...cellBaseParam,
-			sourceArgPath: {
+			arg: {
 				cellUuid: defaultCellUuid,
 				gridUuid: defaultGridUuid,
 				shardUuid: defaultShardUuid
@@ -237,7 +239,7 @@ export function unitTest(): void {
 
 		shard: pathConvertToIdTests({
 			...shardBaseParam,
-			sourceArgPath: { shardUuid: defaultShardUuid },
+			arg: { shardUuid: defaultShardUuid },
 			sourceOptions: optionsPathExtended
 		})
 	};
@@ -250,9 +252,16 @@ export function unitTest(): void {
 					"should convert path, when ID is undefined",
 					pathConvertTest({
 						...cellBaseParam,
+						arg: {},
 						expected: {},
-						meta: {},
-						sourceArgPath: {},
+						meta: {
+							origin: defaultOrigin,
+							paths: {
+								[CoreArgIds.Cell]: defaultCellPath
+							},
+							systemNamespace: defaultSystemNameSpace,
+							userNamespace: defaultUserNameSpace
+						},
 						sourceOptions: optionsPathId,
 						targetOptions: optionsPathId
 					})
@@ -262,9 +271,16 @@ export function unitTest(): void {
 					"should convert path, when ID is defined",
 					pathConvertTest({
 						...cellBaseParam,
+						arg: { id: defaultId },
 						expected: { id: defaultId },
-						meta: {},
-						sourceArgPath: { id: defaultId },
+						meta: {
+							origin: defaultOrigin,
+							paths: {
+								[CoreArgIds.Cell]: defaultCellPath
+							},
+							systemNamespace: defaultSystemNameSpace,
+							userNamespace: defaultUserNameSpace
+						},
 						sourceOptions: optionsPathId,
 						targetOptions: optionsPathId
 					})
@@ -276,9 +292,16 @@ export function unitTest(): void {
 					"should convert path, when ID is undefined",
 					pathConvertTest({
 						...shardBaseParam,
+						arg: {},
 						expected: {},
-						meta: {},
-						sourceArgPath: {},
+						meta: {
+							origin: defaultOrigin,
+							paths: {
+								[CoreArgIds.Shard]: defaultShardPath
+							},
+							systemNamespace: defaultSystemNameSpace,
+							userNamespace: defaultUserNameSpace
+						},
 						sourceOptions: optionsPathId,
 						targetOptions: optionsPathId
 					})
@@ -288,9 +311,16 @@ export function unitTest(): void {
 					"should convert path, when ID is defined",
 					pathConvertTest({
 						...shardBaseParam,
+						arg: { id: defaultId },
 						expected: { id: defaultId },
-						meta: {},
-						sourceArgPath: { id: defaultId },
+						meta: {
+							origin: defaultOrigin,
+							paths: {
+								[CoreArgIds.Shard]: defaultShardPath
+							},
+							systemNamespace: defaultSystemNameSpace,
+							userNamespace: defaultUserNameSpace
+						},
 						sourceOptions: optionsPathId,
 						targetOptions: optionsPathId
 					})
@@ -304,6 +334,7 @@ export function unitTest(): void {
 					"should convert path, when ID is undefined",
 					pathConvertTest({
 						...cellBaseParam,
+						arg: {},
 						expected: {
 							cellUuid: getDefaultUuid({
 								origin: defaultOrigin,
@@ -318,7 +349,6 @@ export function unitTest(): void {
 							systemNamespace: defaultSystemNameSpace,
 							userNamespace: defaultUserNameSpace
 						},
-						sourceArgPath: {},
 						sourceOptions: optionsPathId,
 						targetOptions: optionsPathOwn
 					})
@@ -328,6 +358,7 @@ export function unitTest(): void {
 					"should convert path, when ID is defined",
 					pathConvertTest({
 						...cellBaseParam,
+						arg: { id: defaultId },
 						expected: {
 							cellUuid: getDefaultUuid({
 								origin: defaultOrigin,
@@ -342,7 +373,6 @@ export function unitTest(): void {
 							systemNamespace: defaultSystemNameSpace,
 							userNamespace: defaultUserNameSpace
 						},
-						sourceArgPath: { id: defaultId },
 						sourceOptions: optionsPathId,
 						targetOptions: optionsPathOwn
 					})
@@ -356,6 +386,7 @@ export function unitTest(): void {
 					"should convert path, when ID is undefined",
 					pathConvertTest({
 						...cellBaseParam,
+						arg: {},
 						expected: {
 							cellUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultCellPath }),
 							gridUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultGridPath }),
@@ -371,7 +402,6 @@ export function unitTest(): void {
 							systemNamespace: defaultSystemNameSpace,
 							userNamespace: defaultUserNameSpace
 						},
-						sourceArgPath: {},
 						sourceOptions: optionsPathId,
 						targetOptions: optionsPathExtended
 					})
@@ -381,6 +411,7 @@ export function unitTest(): void {
 					"should convert path, when ID is defined",
 					pathConvertTest({
 						...cellBaseParam,
+						arg: { id: defaultId },
 						expected: {
 							cellUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultCellPath }),
 							gridUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultGridPath }),
@@ -396,7 +427,6 @@ export function unitTest(): void {
 							systemNamespace: defaultSystemNameSpace,
 							userNamespace: defaultUserNameSpace
 						},
-						sourceArgPath: { id: defaultId },
 						sourceOptions: optionsPathId,
 						targetOptions: optionsPathExtended
 					})
@@ -407,6 +437,7 @@ export function unitTest(): void {
 				it("should convert path, when ID is undefined", function () {
 					pathConvertTest({
 						...shardBaseParam,
+						arg: {},
 						expected: {
 							shardUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultShardPath })
 						},
@@ -418,7 +449,6 @@ export function unitTest(): void {
 							systemNamespace: defaultSystemNameSpace,
 							userNamespace: defaultUserNameSpace
 						},
-						sourceArgPath: {},
 						sourceOptions: optionsPathId,
 						targetOptions: optionsPathExtended
 					});
@@ -427,6 +457,7 @@ export function unitTest(): void {
 				it("should convert path, when ID is defined", function () {
 					pathConvertTest({
 						...shardBaseParam,
+						arg: { id: defaultId },
 						expected: {
 							shardUuid: getDefaultUuid({ origin: defaultOrigin, path: defaultShardPath })
 						},
@@ -438,7 +469,6 @@ export function unitTest(): void {
 							systemNamespace: defaultSystemNameSpace,
 							userNamespace: defaultUserNameSpace
 						},
-						sourceArgPath: { id: defaultId },
 						sourceOptions: optionsPathId,
 						targetOptions: optionsPathExtended
 					});
@@ -460,9 +490,9 @@ export function unitTest(): void {
 					"should convert path",
 					pathConvertTest({
 						...cellBaseParam,
+						arg: { cellUuid: defaultCellUuid },
 						expected: { cellUuid: defaultCellUuid },
 						meta: {},
-						sourceArgPath: { cellUuid: defaultCellUuid },
 						sourceOptions: optionsPathOwn,
 						targetOptions: optionsPathOwn
 					})
@@ -476,11 +506,11 @@ export function unitTest(): void {
 					"should convert path",
 					pathConvertTest({
 						...cellBaseParam,
+						arg: { cellUuid: defaultCellUuid },
 						expected: { cellUuid: defaultCellUuid, gridUuid: defaultGridUuid, shardUuid: defaultShardUuid },
 						meta: {
 							parentArgPath: { gridUuid: defaultGridUuid, shardUuid: defaultShardUuid }
 						},
-						sourceArgPath: { cellUuid: defaultCellUuid },
 						sourceOptions: optionsPathOwn,
 						targetOptions: optionsPathExtended
 					})
@@ -492,11 +522,11 @@ export function unitTest(): void {
 					"should convert path",
 					pathConvertTest({
 						...shardBaseParam,
+						arg: { shardUuid: defaultShardUuid },
 						expected: { shardUuid: defaultShardUuid },
 						meta: {
 							parentArgPath: {}
 						},
-						sourceArgPath: { shardUuid: defaultShardUuid },
 						sourceOptions: optionsPathOwn,
 						targetOptions: optionsPathExtended
 					})
@@ -524,9 +554,9 @@ export function unitTest(): void {
 					"should convert path",
 					pathConvertTest({
 						...cellBaseParam,
+						arg: { cellUuid: defaultCellUuid, gridUuid: defaultGridUuid, shardUuid: defaultShardUuid },
 						expected: { cellUuid: defaultCellUuid },
 						meta: {},
-						sourceArgPath: { cellUuid: defaultCellUuid, gridUuid: defaultGridUuid, shardUuid: defaultShardUuid },
 						sourceOptions: optionsPathExtended,
 						targetOptions: optionsPathOwn
 					})
@@ -538,9 +568,9 @@ export function unitTest(): void {
 					"should convert path",
 					pathConvertTest({
 						...shardBaseParam,
+						arg: { shardUuid: defaultShardUuid },
 						expected: { shardUuid: defaultShardUuid },
 						meta: {},
-						sourceArgPath: { shardUuid: defaultShardUuid },
 						sourceOptions: optionsPathExtended,
 						targetOptions: optionsPathOwn
 					})
@@ -554,9 +584,9 @@ export function unitTest(): void {
 					"should convert path",
 					pathConvertTest({
 						...cellBaseParam,
+						arg: { cellUuid: defaultCellUuid, gridUuid: defaultGridUuid, shardUuid: defaultShardUuid },
 						expected: { cellUuid: defaultCellUuid, gridUuid: defaultGridUuid, shardUuid: defaultShardUuid },
 						meta: {},
-						sourceArgPath: { cellUuid: defaultCellUuid, gridUuid: defaultGridUuid, shardUuid: defaultShardUuid },
 						sourceOptions: optionsPathExtended,
 						targetOptions: optionsPathExtended
 					})
@@ -568,9 +598,9 @@ export function unitTest(): void {
 					"should convert path",
 					pathConvertTest({
 						...shardBaseParam,
+						arg: { shardUuid: defaultShardUuid },
 						expected: { shardUuid: defaultShardUuid },
 						meta: {},
-						sourceArgPath: { shardUuid: defaultShardUuid },
 						sourceOptions: optionsPathExtended,
 						targetOptions: optionsPathExtended
 					})

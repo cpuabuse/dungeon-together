@@ -86,6 +86,8 @@
 		"@typescript-eslint/eslint-plugin": "^5.14.0",
 		"@typescript-eslint/parser": "^5.14.0",
 		"@vue/compiler-sfc": "^3.2.31",
+		"chai": "^4.3.6",
+		"chai-subset": "^1.6.0",
 		"codacy-coverage": "^3.2.0",
 		"cpy-cli": "^4.0.0",
 		"cross-cat": "1.0.0",

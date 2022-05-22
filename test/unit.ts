@@ -3,13 +3,13 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
-import { init } from "./init";
-import { childMetaIdToExpected, childMetaIdToId, childMetaIdToOwn, tTest } from "./unit/core/child-meta";
-import { unitTest } from "./unit/core/convert-path";
-
 /**
  * @file Tests for core
  */
+
+import { init } from "./init";
+import { childMetaIdToExpected, childMetaIdToId, childMetaIdToOwn, tTest } from "./unit/core/child-meta";
+import { unitTest } from "./unit/core/convert-arg";
 
 init();
 unitTest();

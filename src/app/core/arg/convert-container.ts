@@ -12,7 +12,7 @@ import { CoreArg, CoreArgIds } from "./arg";
 import { CoreArgContainer } from "./container";
 import { CoreArgConverter } from "./convert";
 import { CoreArgsWithMapContainerArg, CoreArgsWithoutMapContainerArg } from "./map";
-import { CoreArgMeta, coreArgChildMetaGenerate } from "./meta";
+import { CoreArgMeta, coreArgMetaGenerate } from "./meta";
 import {
 	CoreArgComplexOptionPathIds,
 	CoreArgOptionIds,
@@ -162,8 +162,8 @@ export function coreArgConvertContainer<
 		 */
 		childMeta: CoreArgMeta<ChildId, SourceOptions, TargetOptions, Id | ParentIds>;
 	} {
-		let childMeta: CoreArgMeta<ChildId, SourceOptions, TargetOptions, Id | ParentIds> = coreArgChildMetaGenerate({
-			childId,
+		let childMeta: CoreArgMeta<ChildId, SourceOptions, TargetOptions, Id | ParentIds> = coreArgMetaGenerate({
+			id: childId,
 			index,
 			meta,
 			parentArg: id,
@@ -171,7 +171,7 @@ export function coreArgConvertContainer<
 			sourceOptions,
 			targetOptions
 			// Parent arg/Id are conditional in child meta, but we know they are here, so we have to cast; Result as whole loses generic types, so need to cast as well
-		} as Parameters<typeof coreArgChildMetaGenerate>[0]) as CoreArgMeta<
+		} as Parameters<typeof coreArgMetaGenerate>[0]) as CoreArgMeta<
 			ChildId,
 			SourceOptions,
 			TargetOptions,
