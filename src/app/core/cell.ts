@@ -44,6 +44,7 @@ import {
 	CoreEntity,
 	CoreEntityArg,
 	CoreEntityArgGrandparentIds,
+	CoreEntityArgParentId,
 	CoreEntityArgParentIds,
 	CoreEntityArgWithKind,
 	EntityPathExtended,
@@ -168,7 +169,7 @@ export function commsCellRawToArgs(rawSource: CommsCellRaw, path: CellPathExtend
 /**
  * Cell parent ID.
  */
-type CoreCellArgParentId = typeof coreCellArgParentId;
+export type CoreCellArgParentId = typeof coreCellArgParentId;
 
 /**
  * IDs of grandparents of {@link CoreCellArg}.
@@ -343,7 +344,7 @@ export function CoreCellClassFactory<
 		CoreEntityArg<Options>,
 		CoreArgIds.Entity,
 		Options,
-		CoreArgIds.Cell,
+		CoreEntityArgParentId,
 		CoreEntityArgGrandparentIds
 	>({
 		id: CoreArgIds.Entity,

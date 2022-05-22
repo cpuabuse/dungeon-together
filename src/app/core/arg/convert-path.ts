@@ -7,7 +7,7 @@
  * @file Path conversion.
  */
 
-import { hasOwnProperty } from "../../common/utility-types";
+import { MaybeDefined, hasOwnProperty } from "../../common/utility-types";
 import { getDefaultUuid } from "../../common/uuid";
 import {
 	CoreArg,
@@ -66,13 +66,6 @@ export function coreArgPathConvert<
 	id: I;
 
 	/**
-	 * Arg index.
-	 *
-	 * Set must contain all elements of type `P`.
-	 */
-	parentIds: Set<P>;
-
-	/**
 	 * Core cell args.
 	 */
 	sourceArgPath: CoreArgPath<I, S, P>;
@@ -91,7 +84,15 @@ export function coreArgPathConvert<
 	 * Meta.
 	 */
 	meta: CoreArgMeta<I, S, T, P>;
-}): CoreArgPath<I, T, P> {
+} & MaybeDefined<
+	[P] extends [never] ? false : true,
+	{
+		/**
+		 * Optional parent IDs.
+		 */
+		parentIds: Set<P>;
+	}
+>): CoreArgPath<I, T, P> {
 	/**
 	 * Arg with path when common.
 	 */
@@ -145,7 +146,7 @@ export function coreArgPathConvert<
 
 				// ID to extended
 				case coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]:
-					return [id, ...parentIds].reduce(
+					return [id, ...(parentIds ?? [])].reduce(
 						(result, extendedId) => ({
 							...result,
 							[coreArgIdToPathUuidPropertyName({ id: extendedId })]: getDefaultUuid({
@@ -210,7 +211,7 @@ export function coreArgPathConvert<
 
 				// Extended to extended
 				case coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]:
-					return [id, ...parentIds].reduce((result, extendedId) => {
+					return [id, ...(parentIds ?? [])].reduce((result, extendedId) => {
 						const uuidPropertyName: CoreArgPathUuidPropertyName<typeof extendedId> = coreArgIdToPathUuidPropertyName({
 							id: extendedId
 						});

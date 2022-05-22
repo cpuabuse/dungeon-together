@@ -213,13 +213,6 @@ export function generateCoreUniverseObjectMembers<
 	id: Id;
 
 	/**
-	 * Arg index.
-	 *
-	 * Set must contain all elements of type `GrandparentIds`.
-	 */
-	grandparentIds: Set<GrandparentIds>;
-
-	/**
 	 * Args options.
 	 */
 	options: Options;
@@ -239,6 +232,13 @@ export function generateCoreUniverseObjectMembers<
 			 * Optional parent ID.
 			 */
 			parentId: ParentId;
+
+			/**
+			 * Arg index.
+			 *
+			 * Set must contain all elements of type `GrandparentIds`.
+			 */
+			grandparentIds: Set<GrandparentIds>;
 		}
 	>) {
 	/**
@@ -624,7 +624,9 @@ export function generateCoreUniverseObjectMembers<
 								id,
 								...(options.path ===
 								coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
-									? [...(parentId === undefined ? [] : [parentId]), ...grandparentIds]
+									? // Grandparent ids are discriminated by parent id
+									  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+									  [...(parentId === undefined ? [] : [parentId]), ...grandparentIds!]
 									: [])
 							].reduce((result, i) => {
 								let uuidPropertyName: CoreArgPathUuidPropertyName<typeof i> = coreArgIdToPathUuidPropertyName({

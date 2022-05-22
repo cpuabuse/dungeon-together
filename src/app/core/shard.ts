@@ -11,47 +11,54 @@
  * Shard.
  */
 
+import {
+	ComputedClassExtractInstance,
+	computedClassInjectPerClass,
+	computedClassInjectPerInstance
+} from "../common/computed-class";
+import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
-import { CoreArgOptionIds, CoreArgOptions, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
+import {
+	CoreArgComplexOptionPathIds,
+	CoreArgContainerArg,
+	CoreArgConverter,
+	CoreArgIds,
+	CoreArgMeta,
+	CoreArgOptionIds,
+	CoreArgOptionsPathExtended,
+	CoreArgOptionsPathOwn,
+	CoreArgOptionsUnion,
+	CoreArgPath,
+	CoreArgPathUuidPropertyName,
+	coreArgComplexOptionSymbolIndex,
+	coreArgContainerConvert,
+	coreArgIdToPathUuidPropertyName,
+	coreArgPathConvert
+} from "./arg";
+import { CoreBaseClassNonRecursive } from "./base";
 import {
 	CommsGrid,
 	CommsGridArgs,
 	CommsGridRaw,
+	CoreGrid,
 	CoreGridArg,
-	GridPath,
-	commsGridRawToArgs,
-	coreGridArgsConvert
+	CoreGridArgGrandparentIds,
+	CoreGridArgParentId,
+	CoreGridArgParentIds,
+	GridPathOwn,
+	coreGridArgParentIdSet
 } from "./grid";
+import {
+	CoreUniverseObjectArgsOptionsUnion,
+	CoreUniverseObjectClass,
+	CoreUniverseObjectConstructorParameters,
+	CoreUniverseObjectInstance,
+	CoreUniverseObjectUniverse,
+	generateCoreUniverseObjectContainerMembers,
+	generateCoreUniverseObjectMembers
+} from "./universe-object";
 
-/**
- * Tuple with core shard arg grandparent IDS.
- */
-// Infer type from `as const` assertion
-// eslint-disable-next-line @typescript-eslint/typedef
-const coreShardArgGrandparentIds = [] as const;
-
-/**
- * Tuple with core shard arg parent IDS.
- */
-// Infer type from `as const` assertion
-// eslint-disable-next-line @typescript-eslint/typedef
-export const coreShardArgParentIds = [...coreShardArgGrandparentIds] as const;
-
-/**
- * IDs of grandparents of {@link CoreShardArg}.
- */
-export type CoreShardArgGrandparentIds = typeof coreShardArgGrandparentIds[number];
-
-/**
- * IDs of parents of {@link CoreShardArg}.
- */
-export type CoreShardArgParentIds = typeof coreShardArgParentIds[number];
-
-/**
- * Word referring to a shard.
- */
-export type CoreShardWord = "Shard";
-
+// #region To be removed
 /**
  * Everything-like.
  */
@@ -69,27 +76,9 @@ export interface CommsShardArgs extends ShardPath {
  */
 export type CommsShardRaw = Omit<CommsShardArgs, "grids"> & {
 	/**
-	 *
+	 * Legacy.
 	 */
 	grids: Array<CommsGridRaw>;
-};
-
-/**
- * Core shard args.
- */
-export type CoreShardArgs<Options extends CoreArgOptionsUnion = CoreArgOptions> =
-	(Options[CoreArgOptionIds.Path] extends true ? ShardPath : ShardOwnPath) & {
-		/**
-		 * Grids.
-		 */
-		grids: Options[CoreArgOptionIds.Map] extends true ? Map<Uuid, CoreGridArg<Options>> : Array<CoreGridArg<Options>>;
-	};
-
-/**
- * Typeof class for shards.
- */
-export type CoreShardClass = {
-	new (...args: any[]): CommsShard;
 };
 
 /**
@@ -109,12 +98,12 @@ export interface CommsShard extends CommsShardArgs {
 	/**
 	 * Gets [[CommsGrid]].
 	 */
-	getGrid(path: GridPath): CommsGrid;
+	getGrid(path: GridPathOwn): CommsGrid;
 
 	/**
 	 * Removes [[CommsGrid]].
 	 */
-	removeGrid(path: GridPath): void;
+	removeGrid(path: GridPathOwn): void;
 
 	/**
 	 * Terminates `this`.
@@ -123,175 +112,374 @@ export interface CommsShard extends CommsShardArgs {
 }
 
 /**
+ * Core shard args.
+ */
+export type CoreShardArgs<Options extends CoreArgOptionsUnion> = (Options[CoreArgOptionIds.Path] extends true
+	? ShardPathExtended
+	: ShardPathOwn) & {
+	/**
+	 * Grids.
+	 */
+	grids: Options[CoreArgOptionIds.Map] extends true ? Map<Uuid, CoreGridArg<Options>> : Array<CoreGridArg<Options>>;
+};
+
+/**
+ * Way to get to shard.
+ */
+export type ShardPath = ShardPathOwn;
+// #endregion
+
+/**
+ * Parent ID of {@link CoreShardArg}.
+ */
+export type CoreShardArgParentId = never;
+
+/**
+ * IDs of grandparents of {@link CoreShardArg}.
+ */
+export type CoreShardArgGrandparentIds = never;
+
+/**
+ * IDs of parents of {@link CoreShardArg}.
+ */
+export type CoreShardArgParentIds = typeof coreShardArgParentIds[number];
+
+/**
+ * Grid's own shard.
+ */
+export type ShardPathOwn = CoreArgPath<CoreArgIds.Shard, CoreArgOptionsPathOwn, CoreShardArgParentIds>;
+
+/**
+ * Way to get to shard.
+ */
+export type ShardPathExtended = CoreArgPath<CoreArgIds.Shard, CoreArgOptionsPathExtended, CoreShardArgParentIds>;
+
+/**
+ * Core shard arg.
+ */
+export type CoreShardArg<Options extends CoreArgOptionsUnion> = CoreArgContainerArg<
+	CoreArgIds.Shard,
+	Options,
+	CoreShardArgParentIds,
+	CoreGridArg<Options>,
+	CoreArgIds.Grid
+>;
+
+/**
  * Core shard.
  */
-export type CoreShard = CommsShard;
+export type CoreShard<
+	BaseClass extends CoreBaseClassNonRecursive,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	Grid extends CoreGrid<BaseClass, Options> = CoreGrid<BaseClass, Options>
+> = CoreShardArg<Options> &
+	CoreUniverseObjectInstance<
+		BaseClass,
+		CoreShardArg<Options>,
+		CoreArgIds.Shard,
+		Options,
+		CoreShardArgParentId,
+		CoreShardArgGrandparentIds,
+		Grid,
+		CoreGridArg<Options>,
+		CoreArgIds.Grid
+	>;
 
 /**
- * Way to get to shard.
+ * Tuple with core shard arg parent IDS.
  */
-export interface ShardOwnPath {
-	/**
-	 * Shard uuid.
-	 */
-	shardUuid: Uuid;
-}
+// Infer type from `as const` assertion
+// eslint-disable-next-line @typescript-eslint/typedef
+export const coreShardArgParentIds = [] as const;
 
 /**
- * Way to get to shard.
- */
-export type ShardPath = ShardOwnPath;
-
-/**
- * Converts [[CommsShardRaw]] to [[CommsShardArgs]].
+ * Core shard class factory.
  *
- * @param rawSource
+ * @param param - Destructured parameter
+ * @returns Shard
  */
-export function commsShardRawToArgs(rawSource: CommsShardRaw): CommsShardArgs {
-	return {
-		grids: new Map(
-			rawSource.grids.map(function (grid) {
-				return [grid.gridUuid, commsGridRawToArgs(grid, rawSource.shardUuid)];
-			})
-		),
-		shardUuid: rawSource.shardUuid
-	};
-}
-
-/**
- * Converts [[CommsShardArgs]] to [[CommsShardRaw]].
- *
- * @param argsSource
- */
-export function commsShardArgsToRaw(argsSource: CommsShardArgs): CommsShardRaw {
-	return { grids: new Array(), shardUuid: argsSource.shardUuid };
-}
-
-/**
- * Convert shard args between options.
- *
- * Has to strictly follow {@link CoreShardArgs}.
- *
- * @param param
- * @returns Converted shard args
- */
-export function coreShardArgsConvert<S extends CoreArgOptionsUnion, T extends CoreArgOptionsUnion>({
-	shard,
-	sourceOptions,
-	targetOptions
+// Force type inference to extract class type
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function CoreShardClassFactory<
+	BaseClass extends CoreBaseClassNonRecursive,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	Grid extends CoreGrid<BaseClass, Options>
+>({
+	Base,
+	options
 }: {
 	/**
-	 * Core shard args.
+	 * Client base.
 	 */
-	shard: CoreShardArgs<S>;
+	Base: BaseClass;
 
 	/**
-	 * Option for the source.
+	 * Options.
 	 */
-	sourceOptions: S;
+	options: Options;
+}) {
+	/**
+	 * Constructor params.
+	 */
+	type ConstructorParams = CoreUniverseObjectConstructorParameters<
+		BaseClass,
+		CoreShardArg<Options>,
+		CoreArgIds.Shard,
+		Options,
+		CoreShardArgParentIds
+	>;
 
 	/**
-	 * Option for the target.
+	 * Parameters for generate functions.
 	 */
-	targetOptions: T;
-}): CoreShardArgs<T> {
-	// Define source and result, with minimal options
-	const sourceShard: CoreShardArgs<S> = shard;
-	const sourceShardAs: Record<string, any> = sourceShard;
-	// Cannot assign to conditional type without casting
-	let targetShard: CoreShardArgs<T> = {
-		shardUuid: sourceShard.shardUuid
-	} as CoreShardArgs<T>;
-	let targetShardAs: Record<string, any> = targetShard;
-
-	/**
-	 * Core shard args options with map.
-	 */
-	type CoreShardArgsOptionsWithMap = CoreArgOptionsGenerate<CoreArgOptionIds.Map>;
-
-	/**
-	 * Core shard args options without map.
-	 */
-	type CoreShardArgsOptionsWithoutMap = CoreArgOptions;
-
-	/**
-	 * Core shard args with map.
-	 */
-	type CoreShardArgsWithMap = CoreShardArgs<CoreShardArgsOptionsWithMap>;
-
-	/**
-	 * Core shard args without map.
-	 */
-	type CoreShardArgsWithoutMap = CoreShardArgs<CoreShardArgsOptionsWithoutMap>;
-
-	// Map
-	if (targetOptions[CoreArgOptionIds.Map] === true) {
-		let targetShardWithMap: CoreShardArgsWithMap = targetShardAs as CoreShardArgsWithMap;
-
-		if (sourceOptions[CoreArgOptionIds.Map] === true) {
-			// Map to map
-			// Cells
-			targetShardWithMap.grids = new Map(
-				// Argument types correctly inferred from "Array.from()", probably eslint bug
-				// eslint-disable-next-line @typescript-eslint/typedef
-				Array.from((sourceShardAs as CoreShardArgsWithMap).grids, ([uuid, grid]) => [
-					uuid,
-					coreGridArgsConvert({
-						grid,
-						// Cast to expected type
-						sourceOptions: sourceOptions as CoreShardArgsOptionsWithMap,
-						// Cast to expected type
-						targetOptions: targetOptions as CoreShardArgsOptionsWithMap
-					})
-				])
-			);
-		} else {
-			// Array to map
-			// Grids
-			targetShardWithMap.grids = new Map(
-				(sourceShardAs as CoreShardArgsWithoutMap).grids.map(grid => [
-					grid.gridUuid,
-					coreGridArgsConvert({
-						grid,
-						// Cast to expected type
-						sourceOptions: sourceOptions as CoreShardArgsOptionsWithoutMap,
-						// Cast to expected type
-						targetOptions: targetOptions as CoreShardArgsOptionsWithMap
-					})
-				])
-			);
+	type GenerateMembersParams = [
+		{
+			/**
+			 * Arg path.
+			 */
+			arg: CoreShardArg<Options>;
 		}
-	} else {
-		let targetShardWithoutMap: CoreShardArgsWithoutMap = targetShardAs as CoreShardArgsWithoutMap;
+	];
 
-		if (sourceOptions[CoreArgOptionIds.Map] === true) {
-			// Map to array
-			// Grids
-			targetShardWithoutMap.grids = Array.from(
-				(sourceShardAs as CoreShardArgsWithMap).grids,
-				// Argument types correctly inferred from "Array.from()", and UUID is unused, probably eslint bug
-				// eslint-disable-next-line @typescript-eslint/typedef, @typescript-eslint/no-unused-vars
-				([uuid, grid]) =>
-					// Set to actual type
-					coreGridArgsConvert({
-						grid,
-						sourceOptions: sourceOptions as CoreShardArgsOptionsWithMap,
-						targetOptions: targetOptions as CoreShardArgsOptionsWithoutMap
-					})
-			);
-		} else {
-			// Array to array
-			// Cells
-			targetShardWithoutMap.grids = (sourceShardAs as CoreShardArgsWithoutMap).grids.map(grid =>
-				// Set to actual type
-				coreGridArgsConvert({
-					grid,
-					sourceOptions: sourceOptions as CoreShardArgsOptionsWithoutMap,
-					targetOptions: targetOptions as CoreShardArgsOptionsWithoutMap
+	/**
+	 * Parameters for generate with child functions.
+	 */
+	type GenerateMembersWithChildParams = [];
+
+	/**
+	 * New class to re-inject.
+	 */
+	// Intersection preserves constructor parameters of core cell, and instance type of base class
+	type ReturnClass = Shard extends CoreShardArg<Options> ? typeof Shard : never;
+
+	/**
+	 * Interface merging with grid.
+	 */
+	// Merging
+	// eslint-disable-next-line @typescript-eslint/no-empty-interface
+	interface Shard
+		extends ComputedClassExtractInstance<typeof membersWithChild, GenerateMembersWithChildParams>,
+			ComputedClassExtractInstance<typeof members, GenerateMembersParams> {}
+
+	// Have to infer type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const membersWithChild = generateCoreUniverseObjectContainerMembers<
+		BaseClass,
+		Grid,
+		CoreGridArg<Options>,
+		CoreArgIds.Grid,
+		Options,
+		CoreGridArgParentId,
+		CoreGridArgGrandparentIds
+	>({
+		id: CoreArgIds.Grid,
+		options
+	});
+
+	// Have to infer type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const members = generateCoreUniverseObjectMembers<
+		BaseClass,
+		CoreShardArg<Options>,
+		CoreArgIds.Shard,
+		Options,
+		CoreShardArgParentId,
+		CoreShardArgGrandparentIds,
+		Grid,
+		CoreGridArg<Options>,
+		CoreArgIds.Grid
+	>({
+		childId: CoreArgIds.Grid,
+		id: CoreArgIds.Shard,
+		options
+	});
+
+	/**
+	 * Core shard base class.
+	 *
+	 * @see CoreUniverseObjectInherit for more details
+	 */
+	// Merging interfaces
+	// eslint-disable-next-line no-redeclare
+	abstract class Shard
+		// Casting will remove non-static instance information by intersecting with `any`, while maintaining constructor parameters, that will be included into factory return
+		extends class extends Base {}
+		implements
+			StaticImplements<
+				CoreUniverseObjectClass<
+					BaseClass,
+					CoreShardArg<Options>,
+					CoreArgIds.Shard,
+					Options,
+					CoreShardArgParentId,
+					CoreShardArgGrandparentIds,
+					Grid,
+					CoreGridArg<Options>,
+					CoreArgIds.Grid
+				>,
+				typeof Shard
+			>
+	{
+		/**
+		 * Default entity.
+		 *
+		 * @remarks
+		 * Redefining.
+		 */
+		public defaultGrid!: Grid;
+
+		/**
+		 * Implemented via {@link generateCoreUniverseObjectMembers}.
+		 *
+		 * @remarks
+		 * TS static property declaration is not required right now.
+		 */
+		public static getDefaultGridUuid: (path: ShardPathOwn) => Uuid;
+
+		// ESLint buggy
+		// eslint-disable-next-line jsdoc/require-param
+		/**
+		 * Constructor.
+		 *
+		 * @param args - Constructor parameters
+		 */
+		// ESLint buggy for nested destructured params
+		// eslint-disable-next-line @typescript-eslint/typedef
+		public constructor(...[arg, { attachHook, created }, baseParams]: ConstructorParams) {
+			// ESLint false negative, also does not seem to deal well with generics
+			// eslint-disable-next-line constructor-super, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
+			super(baseParams);
+
+			// Create child arg, then attach conditional props
+			let defaultGridArg: CoreGridArg<Options> = {
+				// Ensures getting uuid from subclass
+				gridUuid: (Shard.constructor as typeof Shard).getDefaultGridUuid(this),
+
+				// Extended path
+				...(options[CoreArgOptionIds.Path] ===
+				coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
+					? Array.from(coreGridArgParentIdSet.values()).reduce((r, i) => {
+							let uuidPropertyName: CoreArgPathUuidPropertyName<typeof i> = coreArgIdToPathUuidPropertyName({ id: i });
+							return { ...r, [uuidPropertyName]: this[uuidPropertyName] };
+					  }, {})
+					: {})
+			} as CoreGridArg<Options>;
+
+			// Assign properties
+			computedClassInjectPerInstance({
+				constructorParameters: [],
+				instance: this,
+				members: membersWithChild,
+				parameters: []
+			});
+
+			// Assign properties
+			computedClassInjectPerInstance({
+				constructorParameters: [this, [arg, { attachHook, created }, baseParams], defaultGridArg],
+				instance: this,
+				members,
+				parameters: [{ arg }]
+			});
+		}
+
+		/**
+		 * Convert shard args between options.
+		 *
+		 * Has to strictly follow {@link CoreShardArg}.
+		 *
+		 * @param param - Destructured parameter
+		 * @returns Converted shard args
+		 */
+		public static convertShard<SourceOptions extends CoreArgOptionsUnion, TargetOptions extends CoreArgOptionsUnion>({
+			shard,
+			sourceOptions,
+			targetOptions,
+			meta
+		}: {
+			/**
+			 * Core grid args.
+			 */
+			shard: CoreShardArg<SourceOptions>;
+
+			/**
+			 * Option for the source.
+			 */
+			sourceOptions: SourceOptions;
+
+			/**
+			 * Option for the target.
+			 */
+			targetOptions: TargetOptions;
+
+			/**
+			 * Meta.
+			 */
+			meta: CoreArgMeta<CoreArgIds.Shard, SourceOptions, TargetOptions, CoreShardArgParentIds>;
+		}): CoreShardArg<TargetOptions> {
+			// Cannot assign to conditional type without casting
+			let targetShard: CoreShardArg<TargetOptions> = {} as CoreShardArg<TargetOptions>;
+
+			// Path
+			Object.assign(
+				targetShard,
+				coreArgPathConvert({
+					id: CoreArgIds.Shard,
+					meta,
+					sourceArgPath: shard,
+					sourceOptions,
+					targetOptions
 				})
 			);
+
+			// Deal with children
+			Object.assign(
+				targetShard,
+				coreArgContainerConvert({
+					arg: shard,
+					childConverter: (
+						Shard.universe as CoreUniverseObjectUniverse<
+							BaseClass,
+							Grid,
+							CoreGridArg<Options>,
+							CoreArgIds.Grid,
+							Options
+						>
+					).Grid.convertGrid as CoreArgConverter<
+						CoreGridArg<SourceOptions>,
+						CoreGridArg<TargetOptions>,
+						CoreArgIds.Grid,
+						SourceOptions,
+						TargetOptions,
+						CoreGridArgParentIds
+					>,
+					childId: CoreArgIds.Grid,
+					id: CoreArgIds.Shard,
+					meta,
+					sourceOptions,
+					targetOptions
+				})
+			);
+
+			// Return
+			return targetShard;
 		}
 	}
-	// Return
-	return targetShard;
+
+	// Inject static
+	computedClassInjectPerClass({
+		Base: Shard,
+		members,
+		// Nothing required
+		parameters: []
+	});
+
+	// Inject static
+	computedClassInjectPerClass({
+		Base: Shard,
+		members,
+		// Nothing required
+		parameters: []
+	});
+
+	return Shard as ReturnClass;
 }

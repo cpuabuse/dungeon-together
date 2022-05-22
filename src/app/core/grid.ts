@@ -40,8 +40,8 @@ import {
 	CoreCell,
 	CoreCellArg,
 	CoreCellArgGrandparentIds,
+	CoreCellArgParentId,
 	CoreCellArgParentIds,
-	commsCellRawToArgs,
 	coreCellArgParentIdSet
 } from "./cell";
 import { ShardPath, coreShardArgParentIds } from "./shard";
@@ -119,30 +119,6 @@ export interface CommsGrid extends CommsGridArgs {
 	 */
 	terminate(): void;
 }
-
-/**
- * Converts [[CommsGridRaw]] to [[CommsGridArgs]].
- *
- * @param rawSource - Legacy
- * @param shardUuid - Legacy
- * @returns - Legacy
- */
-export function commsGridRawToArgs(rawSource: CommsGridRaw, shardUuid: Uuid): CommsGridArgs {
-	return {
-		cells: new Map(
-			// Legacy
-			// eslint-disable-next-line @typescript-eslint/typedef
-			rawSource.cells.map(function (cell) {
-				return [
-					cell.cellUuid,
-					commsCellRawToArgs(cell, { cellUuid: cell.cellUuid, gridUuid: rawSource.gridUuid, shardUuid })
-				];
-			})
-		),
-		gridUuid: rawSource.gridUuid,
-		shardUuid
-	};
-}
 // #endregion
 
 // Infer type from `as const` assertion
@@ -176,7 +152,7 @@ export const coreGridArgParentIdSet: Set<CoreGridArgParentIds> = new Set(coreGri
 /**
  * Grid parent Id.
  */
-type CoreGridArgParentId = typeof coreGridArgParentId;
+export type CoreGridArgParentId = typeof coreGridArgParentId;
 
 /**
  * IDs of grandparents of {@link CoreGridArg}.
@@ -306,7 +282,7 @@ export function CoreGridClassFactory<
 		CoreCellArg<Options>,
 		CoreArgIds.Cell,
 		Options,
-		CoreArgIds.Grid,
+		CoreCellArgParentId,
 		CoreCellArgGrandparentIds
 	>({
 		id: CoreArgIds.Cell,
@@ -334,7 +310,7 @@ export function CoreGridClassFactory<
 	});
 
 	/**
-	 * Core cell base class.
+	 * Core grid base class.
 	 *
 	 * @see CoreUniverseObjectInherit for more details
 	 */

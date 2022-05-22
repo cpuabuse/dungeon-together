@@ -95,7 +95,7 @@ export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPath
 /**
  * Entity parent ID.
  */
-type CoreEntityArgParentId = typeof coreEntityArgParentId;
+export type CoreEntityArgParentId = typeof coreEntityArgParentId;
 
 /**
  * {@link CoreEntityArg} grandparent IDs.
