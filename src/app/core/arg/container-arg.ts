@@ -8,7 +8,7 @@
  */
 
 import { CoreArg, CoreArgIds } from "./arg";
-import { CoreArgsContainer } from "./args-container";
+import { CoreArgContainer } from "./container";
 import { CoreArgOptionsUnion } from "./options";
 
 /**
@@ -21,4 +21,4 @@ export type CoreArgContainerArg<
 	ChildArg extends CoreArg<ChildId, Options, Id | ParentIds> = never,
 	ChildId extends CoreArgIds = never,
 	HasNever extends boolean = false
-> = CoreArg<Id, Options, ParentIds, HasNever> & CoreArgsContainer<ChildArg, ChildId, Options, Id | ParentIds>;
+> = CoreArg<Id, Options, ParentIds, HasNever> & CoreArgContainer<ChildArg, ChildId, Options, Id | ParentIds>;

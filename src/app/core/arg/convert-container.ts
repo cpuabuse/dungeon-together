@@ -9,8 +9,8 @@
 
 import { Uuid, getDefaultUuid } from "../../common/uuid";
 import { CoreArg, CoreArgIds } from "./arg";
-import { CoreArgContainerArg } from "./arg-container-arg";
-import { CoreArgsContainer } from "./args-container";
+import { CoreArgContainer } from "./container";
+import { CoreArgConverter } from "./convert";
 import { CoreArgsWithMapContainerArg, CoreArgsWithoutMapContainerArg } from "./map";
 import { CoreArgMeta, coreArgChildMetaGenerate } from "./meta";
 import {
@@ -23,40 +23,6 @@ import { CoreArgOptionsPathId, CoreArgPathOwnOrExtended, coreArgIdToPathUuidProp
 import { CoreArgObjectWords, coreArgObjectWords } from "./words";
 
 /**
- * Converter function type.
- */
-export type CoreArgConverter<
-	SourceArg extends CoreArg<Id, SourceOptions, ParentIds>,
-	TargetArg extends CoreArg<Id, TargetOptions, ParentIds>,
-	Id extends CoreArgIds,
-	SourceOptions extends CoreArgOptionsUnion,
-	TargetOptions extends CoreArgOptionsUnion,
-	ParentIds extends CoreArgIds = never
-> = (
-	params: {
-		/**
-		 * Target source entity.
-		 */
-		[K in `${CoreArgObjectWords[Id]["singularLowercaseWord"]}`]: SourceArg;
-	} & {
-		/**
-		 * Source options.
-		 */
-		sourceOptions: SourceOptions;
-
-		/**
-		 * Target options.
-		 */
-		targetOptions: TargetOptions;
-
-		/**
-		 * Meta for entity.
-		 */
-		meta: CoreArgMeta<Id, SourceOptions, TargetOptions, ParentIds>;
-	}
-) => TargetArg;
-
-/**
  * Converts container.
  *
  * @remarks
@@ -66,8 +32,8 @@ export type CoreArgConverter<
  * @param param - Destructured parameters
  * @returns Converted container
  */
-export function coreArgContainerConvert<
-	SourceArg extends CoreArgContainerArg<Id, SourceOptions, ParentIds, SourceChildArg, ChildId>,
+export function coreArgConvertContainer<
+	SourceArg extends CoreArgContainer<SourceChildArg, ChildId, SourceOptions, Id | ParentIds>,
 	Id extends CoreArgIds,
 	SourceOptions extends CoreArgOptionsUnion,
 	TargetOptions extends CoreArgOptionsUnion,
@@ -125,7 +91,7 @@ export function coreArgContainerConvert<
 	 * Target options.
 	 */
 	targetOptions: TargetOptions;
-}): CoreArgsContainer<TargetChildArg, ChildId, TargetOptions, Id | ParentIds> {
+}): CoreArgContainer<TargetChildArg, ChildId, TargetOptions, Id | ParentIds> {
 	/**
 	 * Child args property name (in arg).
 	 */
@@ -135,7 +101,7 @@ export function coreArgContainerConvert<
 	 * Source container property with map.
 	 */
 	type SourceWithMapArgs = CoreArgsWithMapContainerArg<
-		SourceArg extends CoreArgsContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never,
+		SourceArg extends CoreArgContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never,
 		ChildId,
 		SourceOptions,
 		Id | ParentIds
@@ -145,7 +111,7 @@ export function coreArgContainerConvert<
 	 * Source container property without map.
 	 */
 	type SourceWithoutMapArgs = CoreArgsWithoutMapContainerArg<
-		SourceArg extends CoreArgsContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never,
+		SourceArg extends CoreArgContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never,
 		ChildId,
 		SourceOptions,
 		Id | ParentIds
@@ -154,7 +120,7 @@ export function coreArgContainerConvert<
 	/**
 	 * Target args property.
 	 */
-	type TargetArgs = CoreArgsContainer<TargetChildArg, ChildId, TargetOptions, Id | ParentIds>[ChildArgsProperty];
+	type TargetArgs = CoreArgContainer<TargetChildArg, ChildId, TargetOptions, Id | ParentIds>[ChildArgsProperty];
 
 	/**
 	 * Child meta when converting from ID.
@@ -179,7 +145,7 @@ export function coreArgContainerConvert<
 		/**
 		 * Entity.
 		 */
-		child: SourceArg extends CoreArgsContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never;
+		child: SourceArg extends CoreArgContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never;
 
 		/**
 		 * Index.
@@ -302,5 +268,5 @@ export function coreArgContainerConvert<
 	return {
 		[childArgsProperty]: targetArgs
 		// Cannot infer template key signature
-	} as unknown as CoreArgsContainer<TargetChildArg, ChildId, TargetOptions, Id | ParentIds>;
+	} as unknown as CoreArgContainer<TargetChildArg, ChildId, TargetOptions, Id | ParentIds>;
 }

@@ -31,9 +31,8 @@ import {
 	CoreArgPath,
 	CoreArgPathUuidPropertyName,
 	coreArgComplexOptionSymbolIndex,
-	coreArgContainerConvert,
-	coreArgIdToPathUuidPropertyName,
-	coreArgPathConvert
+	coreArgConvertContainerArg,
+	coreArgIdToPathUuidPropertyName
 } from "./arg";
 import { CoreBaseClassNonRecursive } from "./base";
 import {
@@ -417,48 +416,24 @@ export function CoreShardClassFactory<
 			meta: CoreArgMeta<CoreArgIds.Shard, SourceOptions, TargetOptions, CoreShardArgParentIds>;
 		}): CoreShardArg<TargetOptions> {
 			// Cannot assign to conditional type without casting
-			let targetShard: CoreShardArg<TargetOptions> = {} as CoreShardArg<TargetOptions>;
-
-			// Path
-			Object.assign(
-				targetShard,
-				coreArgPathConvert({
-					id: CoreArgIds.Shard,
-					meta,
-					sourceArgPath: shard,
-					sourceOptions,
-					targetOptions
-				})
-			);
-
-			// Deal with children
-			Object.assign(
-				targetShard,
-				coreArgContainerConvert({
-					arg: shard,
-					childConverter: (
-						Shard.universe as CoreUniverseObjectUniverse<
-							BaseClass,
-							Grid,
-							CoreGridArg<Options>,
-							CoreArgIds.Grid,
-							Options
-						>
-					).Grid.convertGrid as CoreArgConverter<
-						CoreGridArg<SourceOptions>,
-						CoreGridArg<TargetOptions>,
-						CoreArgIds.Grid,
-						SourceOptions,
-						TargetOptions,
-						CoreGridArgParentIds
-					>,
-					childId: CoreArgIds.Grid,
-					id: CoreArgIds.Shard,
-					meta,
-					sourceOptions,
-					targetOptions
-				})
-			);
+			let targetShard: CoreShardArg<TargetOptions> = coreArgConvertContainerArg({
+				arg: shard,
+				childConverter: (
+					Shard.universe as CoreUniverseObjectUniverse<BaseClass, Grid, CoreGridArg<Options>, CoreArgIds.Grid, Options>
+				).Grid.convertGrid as CoreArgConverter<
+					CoreGridArg<SourceOptions>,
+					CoreGridArg<TargetOptions>,
+					CoreArgIds.Grid,
+					SourceOptions,
+					TargetOptions,
+					CoreGridArgParentIds
+				>,
+				childId: CoreArgIds.Grid,
+				id: CoreArgIds.Shard,
+				meta,
+				sourceOptions,
+				targetOptions
+			}) as CoreShardArg<TargetOptions>;
 
 			// Return
 			return targetShard;

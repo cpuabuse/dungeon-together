@@ -32,9 +32,8 @@ import {
 	CoreArgPath,
 	CoreArgPathUuidPropertyName,
 	coreArgComplexOptionSymbolIndex,
-	coreArgContainerConvert,
-	coreArgIdToPathUuidPropertyName,
-	coreArgPathConvert
+	coreArgConvertContainerArg,
+	coreArgIdToPathUuidPropertyName
 } from "./arg";
 import { CoreBaseClassNonRecursive } from "./base";
 import {
@@ -538,20 +537,31 @@ export function CoreCellClassFactory<
 			type CellWithoutMap = CoreCellArg<CoreArgOptionsWithoutMapUnion>;
 
 			// Cannot assign to conditional type without casting
-			let targetCell: CoreCellArg<TargetOptions> = {} as CoreCellArg<TargetOptions>;
-
-			// Assign the path
-			Object.assign(
-				targetCell,
-				coreArgPathConvert({
-					id: CoreArgIds.Cell,
-					meta,
-					parentIds: coreCellArgParentIdSet,
-					sourceArgPath: cell,
-					sourceOptions,
-					targetOptions
-				})
-			);
+			let targetCell: CoreCellArg<TargetOptions> = coreArgConvertContainerArg({
+				arg: cell,
+				childConverter: (
+					Cell.universe as CoreUniverseObjectUniverse<
+						BaseClass,
+						Entity,
+						CoreEntityArg<Options>,
+						CoreArgIds.Entity,
+						Options
+					>
+				).Entity.convertEntity as CoreArgConverter<
+					CoreEntityArg<SourceOptions>,
+					CoreEntityArg<TargetOptions>,
+					CoreArgIds.Entity,
+					SourceOptions,
+					TargetOptions,
+					CoreEntityArgParentIds
+				>,
+				childId: CoreArgIds.Entity,
+				id: CoreArgIds.Cell,
+				meta,
+				parentIds: coreCellArgParentIdSet,
+				sourceOptions,
+				targetOptions
+			}) as CoreCellArg<TargetOptions>;
 
 			// Vector
 			if (targetOptions[CoreArgOptionIds.Vector] === true) {
@@ -575,35 +585,6 @@ export function CoreCellClassFactory<
 				// Worlds
 				(targetCell as CellWithoutMap).worlds = Array.from(cell.worlds);
 			}
-
-			// Deal with children
-			Object.assign(
-				targetCell,
-				coreArgContainerConvert({
-					arg: cell,
-					childConverter: (
-						Cell.universe as CoreUniverseObjectUniverse<
-							BaseClass,
-							Entity,
-							CoreEntityArg<Options>,
-							CoreArgIds.Entity,
-							Options
-						>
-					).Entity.convertEntity as CoreArgConverter<
-						CoreEntityArg<SourceOptions>,
-						CoreEntityArg<TargetOptions>,
-						CoreArgIds.Entity,
-						SourceOptions,
-						TargetOptions,
-						CoreEntityArgParentIds
-					>,
-					childId: CoreArgIds.Entity,
-					id: CoreArgIds.Cell,
-					meta,
-					sourceOptions,
-					targetOptions
-				})
-			);
 
 			// Return
 			return targetCell;

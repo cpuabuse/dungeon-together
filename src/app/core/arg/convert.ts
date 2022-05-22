@@ -3,6 +3,11 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+import { CoreArg, CoreArgIds } from "./arg";
+import { CoreArgMeta } from "./meta";
+import { CoreArgOptionsUnion } from "./options";
+import { CoreArgObjectWords } from "./words";
+
 /**
  * @file Arg conversion
  */
@@ -20,3 +25,37 @@
  * This is for documentation purposes only.
  */
 export type CoreArgConvertDoc = never;
+
+/**
+ * Converter function type.
+ */
+export type CoreArgConverter<
+	SourceArg extends CoreArg<Id, SourceOptions, ParentIds>,
+	TargetArg extends CoreArg<Id, TargetOptions, ParentIds>,
+	Id extends CoreArgIds,
+	SourceOptions extends CoreArgOptionsUnion,
+	TargetOptions extends CoreArgOptionsUnion,
+	ParentIds extends CoreArgIds = never
+> = (
+	params: {
+		/**
+		 * Target source entity.
+		 */
+		[K in `${CoreArgObjectWords[Id]["singularLowercaseWord"]}`]: SourceArg;
+	} & {
+		/**
+		 * Source options.
+		 */
+		sourceOptions: SourceOptions;
+
+		/**
+		 * Target options.
+		 */
+		targetOptions: TargetOptions;
+
+		/**
+		 * Meta for entity.
+		 */
+		meta: CoreArgMeta<Id, SourceOptions, TargetOptions, ParentIds>;
+	}
+) => TargetArg;

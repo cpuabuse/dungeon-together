@@ -8,7 +8,7 @@
  */
 
 import { ConcreteConstructor } from "../../common/utility-types";
-import { CoreArg, CoreArgContainerArg, CoreArgIds, CoreArgObjectWords, CoreArgPath, CoreArgsContainer } from "../arg";
+import { CoreArg, CoreArgContainer, CoreArgContainerArg, CoreArgIds, CoreArgObjectWords, CoreArgPath } from "../arg";
 import { CoreBaseClassNonRecursive } from "../base";
 import { CoreUniverseObjectArgsOptionsUnion } from "./options";
 import {
@@ -33,7 +33,7 @@ export type CoreUniverseObjectUniverse<
 	GrandparentIds extends CoreArgIds = never,
 	ChildInstance extends CoreUniverseObjectInstance<
 		BaseClass,
-		Arg extends CoreArgsContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
+		Arg extends CoreArgContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 		ChildId,
 		Options,
 		Id,

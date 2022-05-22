@@ -16,12 +16,12 @@ import {
 import { AbstractConstructorConstraint } from "../../common/utility-types";
 import {
 	CoreArg,
+	CoreArgContainer,
 	CoreArgIds,
 	CoreArgObjectWords,
 	CoreArgOptionIds,
 	CoreArgPath,
 	CoreArgPathUuidPropertyName,
-	CoreArgsContainer,
 	coreArgIdToPathUuidPropertyName,
 	coreArgObjectWords
 } from "../arg";
@@ -50,7 +50,7 @@ export type CoreUniverseObjectContainerInstance<
 	GrandparentIds extends CoreArgIds = never
 > = ComputedClassOmitConditionalEmptyObject<
 	CoreBaseNonRecursiveInstance &
-		CoreArgsContainer<Instance, Id, Options, ParentId | GrandparentIds> & {
+		CoreArgContainer<Instance, Id, Options, ParentId | GrandparentIds> & {
 			[K in `get${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
 				path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
 			) => Instance;
@@ -292,13 +292,13 @@ export function generateCoreUniverseObjectContainerMembers<
 					 * @param args - Args provided by
 					 * @returns Map of universe objects
 					 */
-					[ComputedClassWords.Value](): CoreArgsContainer<
+					[ComputedClassWords.Value](): CoreArgContainer<
 						Instance,
 						Id,
 						Options,
 						ParentId | GrandparentIds
 					>[`${CoreArgObjectWords[Id]["pluralLowercaseWord"]}`] {
-						return (options[CoreArgOptionIds.Map] ? new Map() : new Array()) as CoreArgsContainer<
+						return (options[CoreArgOptionIds.Map] ? new Map() : new Array()) as CoreArgContainer<
 							Instance,
 							Id,
 							Options,

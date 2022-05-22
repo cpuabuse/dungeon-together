@@ -20,7 +20,7 @@ import {
 	CoreArgOptionsPathId,
 	CoreArgOptionsPathOwn,
 	CoreArgPath,
-	coreArgPathConvert
+	coreArgConvert
 } from "../../../src/app/core/arg";
 import { optionsPathExtended, optionsPathId, optionsPathOwn } from "./lib/options";
 import {
@@ -110,11 +110,11 @@ export function unitTest(): void {
 	} & BaseParam<Id, ParentIds>): () => void {
 		return function () {
 			deepStrictEqual(
-				coreArgPathConvert({
+				coreArgConvert({
 					id,
 					meta,
 					parentIds,
-					sourceArgPath,
+					arg: sourceArgPath,
 					sourceOptions,
 					targetOptions
 				}),
@@ -156,11 +156,11 @@ export function unitTest(): void {
 		 */
 		sourceOptions: SourceOptions;
 	} & BaseParam<Id, ParentIds>): PathConvertToIdTests {
-		let result: CoreArgPath<Id, CoreArgOptionsPathId, ParentIds> = coreArgPathConvert({
+		let result: CoreArgPath<Id, CoreArgOptionsPathId, ParentIds> = coreArgConvert({
 			id,
 			meta: {},
 			parentIds,
-			sourceArgPath,
+			arg: sourceArgPath,
 			sourceOptions,
 			targetOptions: optionsPathId
 		});

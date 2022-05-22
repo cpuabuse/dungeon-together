@@ -27,9 +27,8 @@ import {
 	CoreArgPath,
 	CoreArgPathUuidPropertyName,
 	coreArgComplexOptionSymbolIndex,
-	coreArgContainerConvert,
-	coreArgIdToPathUuidPropertyName,
-	coreArgPathConvert
+	coreArgConvertContainerArg,
+	coreArgIdToPathUuidPropertyName
 } from "./arg";
 import { CoreBaseClassNonRecursive } from "./base";
 import {
@@ -432,43 +431,25 @@ export function CoreGridClassFactory<
 			meta: CoreArgMeta<CoreArgIds.Grid, SourceOptions, TargetOptions, CoreGridArgParentIds>;
 		}): CoreGridArg<TargetOptions> {
 			// Cannot assign to conditional type without casting
-			let targetGrid: CoreGridArg<TargetOptions> = {} as CoreGridArg<TargetOptions>;
-
-			// Path
-			Object.assign(
-				targetGrid,
-				coreArgPathConvert({
-					id: CoreArgIds.Grid,
-					meta,
-					parentIds: coreGridArgParentIdSet,
-					sourceArgPath: grid,
-					sourceOptions,
-					targetOptions
-				})
-			);
-
-			// Deal with children
-			Object.assign(
-				targetGrid,
-				coreArgContainerConvert({
-					arg: grid,
-					childConverter: (
-						Grid.universe as CoreUniverseObjectUniverse<BaseClass, Cell, CoreCellArg<Options>, CoreArgIds.Cell, Options>
-					).Cell.convertCell as CoreArgConverter<
-						CoreCellArg<SourceOptions>,
-						CoreCellArg<TargetOptions>,
-						CoreArgIds.Cell,
-						SourceOptions,
-						TargetOptions,
-						CoreCellArgParentIds
-					>,
-					childId: CoreArgIds.Cell,
-					id: CoreArgIds.Grid,
-					meta,
-					sourceOptions,
-					targetOptions
-				})
-			);
+			let targetGrid: CoreGridArg<TargetOptions> = coreArgConvertContainerArg({
+				arg: grid,
+				childConverter: (
+					Grid.universe as CoreUniverseObjectUniverse<BaseClass, Cell, CoreCellArg<Options>, CoreArgIds.Cell, Options>
+				).Cell.convertCell as CoreArgConverter<
+					CoreCellArg<SourceOptions>,
+					CoreCellArg<TargetOptions>,
+					CoreArgIds.Cell,
+					SourceOptions,
+					TargetOptions,
+					CoreCellArgParentIds
+				>,
+				childId: CoreArgIds.Cell,
+				id: CoreArgIds.Grid,
+				meta,
+				parentIds: coreGridArgParentIdSet,
+				sourceOptions,
+				targetOptions
+			}) as CoreGridArg<TargetOptions>;
 
 			// Return
 			return targetGrid;

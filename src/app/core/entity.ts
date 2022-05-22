@@ -22,7 +22,7 @@ import {
 	CoreArgOptionsPathExtended,
 	CoreArgOptionsPathOwn,
 	CoreArgPath,
-	coreArgPathConvert
+	coreArgConvert
 } from "./arg";
 import { CoreArgOptionIds, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
 import { CoreBaseClassNonRecursive } from "./base";
@@ -380,11 +380,11 @@ export function CoreEntityClassFactory<
 
 			let targetEntity: CoreEntityArg<T> = {
 				// Generate path
-				...coreArgPathConvert({
+				...coreArgConvert({
+					arg: entity,
 					id: CoreArgIds.Entity,
 					meta,
 					parentIds: coreEntityArgParentIdSet,
-					sourceArgPath: entity,
 					sourceOptions,
 					targetOptions
 				}),

@@ -25,7 +25,7 @@ import {
  * @typeParam Options - Options for the universe object
  * @typeParam ParentIds - Parent IDs of the universe object
  */
-export type CoreArgsContainer<
+export type CoreArgContainer<
 	Arg extends CoreArg<ChildId, Options, ParentIds>,
 	ChildId extends CoreArgIds,
 	Options extends CoreArgOptionsUnion,
