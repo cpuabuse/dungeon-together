@@ -15,7 +15,7 @@ import {
 	computedClassDeepMerge
 } from "../../common/computed-class";
 import { urlPathSeparator } from "../../common/defaults";
-import { AbstractConstructorConstraint, ConditionalObject, MaybeDefined } from "../../common/utility-types";
+import { ConcreteConstructor, ConditionalObject, MaybeDefined } from "../../common/utility-types";
 import { Uuid, getDefaultUuid } from "../../common/uuid";
 import {
 	CoreArg,
@@ -76,7 +76,7 @@ export type CoreUniverseObjectInstance<
 	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
 	ChildId extends CoreArgIds = never
 > = ComputedClassOmitConditionalEmptyObject<
-	CoreArgPath<Id, Options, ParentId | GrandparentIds, true> & {
+	CoreArg<Id, Options, ParentId | GrandparentIds, true> & {
 		[K in `terminate${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: () => void;
 	} & ([ParentId] extends [never]
 			? ComputedClassEmptyObject
@@ -152,6 +152,17 @@ export type CoreUniverseObjectStatic<
  */
 export type CoreUniverseObjectClass<
 	BaseClass extends CoreBaseClassNonRecursive,
+	Instance extends CoreUniverseObjectInstance<
+		BaseClass,
+		Arg,
+		Id,
+		Options,
+		ParentId,
+		GrandparentIds,
+		ChildInstance,
+		ChildArg,
+		ChildId
+	>,
 	Arg extends CoreArgContainerArg<Id, Options, ParentId | GrandparentIds, ChildArg, ChildId>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
@@ -168,8 +179,9 @@ export type CoreUniverseObjectClass<
 	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
 	ChildId extends CoreArgIds = never
 > = CoreUniverseObjectStatic<BaseClass, Arg, Id, Options, ParentId, GrandparentIds, ChildInstance, ChildArg, ChildId> &
-	AbstractConstructorConstraint<
-		CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds, ChildInstance, ChildArg, ChildId>
+	ConcreteConstructor<
+		CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>,
+		Instance
 	>;
 
 /**
@@ -272,8 +284,9 @@ export function generateCoreUniverseObjectMembers<
 	/**
 	 * Static.
 	 */
-	type Static = CoreUniverseObjectClass<
+	type Class = CoreUniverseObjectClass<
 		BaseClass,
+		Instance,
 		Arg,
 		Id,
 		Options,
@@ -500,7 +513,7 @@ export function generateCoreUniverseObjectMembers<
 										 * @param path - Universe object own path
 										 * @returns Default universe object UUID
 										 */
-										value(this: Static, path: CoreArgPath<Id, CoreArgOptionsPathOwn, ParentId | GrandparentIds>): Uuid {
+										value(this: Class, path: CoreArgPath<Id, CoreArgOptionsPathOwn, ParentId | GrandparentIds>): Uuid {
 											return getDefaultUuid({
 												path: `${universeObjectsUuidPath}${urlPathSeparator}${path[nameUniverseObjectUuid]}`
 											});
@@ -526,18 +539,29 @@ export function generateCoreUniverseObjectMembers<
 					isPresent: true as const,
 					value: (() => {
 						/**
+						 * Used for semantics.
+						 */
+						type ParentParentId = never;
+
+						/**
+						 * Used for semantics.
+						 */
+						type ParentGrandparentIds = never;
+
+						/**
 						 * Parent's instance.
 						 *
 						 * @remarks
-						 * Parent's parent information missing, as it is not known or required.
+						 * Pseudo-instance.
+						 * Parent's parent information missing, as it is not known or required. At the same time, it is unsafe to operate on anything that would depend on parent's parents or grandparents.
 						 */
 						type ParentInstance = CoreUniverseObjectInstance<
 							BaseClass,
-							CoreArgContainerArg<ParentId, Options, never, Arg, Id>,
+							CoreArgContainerArg<ParentId, Options, ParentParentId | ParentGrandparentIds, Arg, Id>,
 							ParentId,
 							Options,
-							never,
-							never,
+							ParentParentId,
+							ParentGrandparentIds,
 							Instance,
 							Arg,
 							Id
@@ -551,12 +575,12 @@ export function generateCoreUniverseObjectMembers<
 						type ParentUniverse = CoreUniverseObjectUniverse<
 							BaseClass,
 							ParentInstance,
-							CoreArgContainerArg<ParentId, Options, never, Arg, Id>,
+							CoreArgContainerArg<ParentId, Options, ParentParentId | ParentGrandparentIds, Arg, Id>,
 							ParentId,
 							Options,
 							// Parents unknown
-							never,
-							never,
+							ParentParentId,
+							ParentGrandparentIds,
 							Instance,
 							Arg,
 							Id

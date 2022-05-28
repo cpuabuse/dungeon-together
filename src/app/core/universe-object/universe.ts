@@ -7,15 +7,10 @@
  * @file Universe definitions
  */
 
-import { ConcreteConstructor } from "../../common/utility-types";
 import { CoreArg, CoreArgContainer, CoreArgContainerArg, CoreArgIds, CoreArgObjectWords, CoreArgPath } from "../arg";
 import { CoreBaseClassNonRecursive } from "../base";
 import { CoreUniverseObjectArgsOptionsUnion } from "./options";
-import {
-	CoreUniverseObjectConstructorParameters,
-	CoreUniverseObjectInstance,
-	CoreUniverseObjectStatic
-} from "./universe-object";
+import { CoreUniverseObjectClass, CoreUniverseObjectInstance } from "./universe-object";
 
 /**
  * A universe constraint from perspective of universe object.
@@ -25,7 +20,17 @@ import {
  */
 export type CoreUniverseObjectUniverse<
 	BaseClass extends CoreBaseClassNonRecursive,
-	Instance extends CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
+	Instance extends CoreUniverseObjectInstance<
+		BaseClass,
+		Arg,
+		Id,
+		Options,
+		ParentId,
+		GrandparentIds,
+		ChildInstance,
+		ChildArg,
+		ChildId
+	>,
 	Arg extends CoreArgContainerArg<Id, Options, ParentId | GrandparentIds, ChildArg, ChildId>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
@@ -47,8 +52,9 @@ export type CoreUniverseObjectUniverse<
 	) => Instance;
 } & {
 	// Cannot use class type, since constructor must return exactly provided generic
-	[K in `${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: CoreUniverseObjectStatic<
+	[K in `${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: CoreUniverseObjectClass<
 		BaseClass,
+		Instance,
 		Arg,
 		Id,
 		Options,
@@ -57,9 +63,5 @@ export type CoreUniverseObjectUniverse<
 		ChildInstance,
 		ChildArg,
 		ChildId
-	> &
-		ConcreteConstructor<
-			CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>,
-			Instance
-		>;
+	>;
 };

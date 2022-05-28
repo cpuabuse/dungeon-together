@@ -13,7 +13,7 @@ import {
 	computedClassInjectPerInstance
 } from "../common/computed-class";
 import { defaultKindUuid } from "../common/defaults";
-import { StaticImplements } from "../common/utility-types";
+import { StaticImplements, ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import {
 	CoreArg,
@@ -157,18 +157,49 @@ export type EntityPathExtended = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPa
 /**
  * Core entity.
  */
-export type CoreEntity<
+export type CoreEntityInstance<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion
-> = CoreEntityArg<Options> &
-	CoreUniverseObjectInstance<
-		BaseClass,
-		CoreEntityArg<Options>,
-		CoreArgIds.Entity,
-		Options,
-		CoreEntityArgParentId,
-		CoreEntityArgGrandparentIds
-	>;
+> = {
+	/**
+	 * Entity kind.
+	 */
+	kindUuid: Options[CoreArgOptionIds.Kind] extends true ? Uuid : never;
+
+	/**
+	 * Mode of the entity.
+	 */
+	modeUuid: Uuid;
+
+	/**
+	 * World in which entity resides.
+	 */
+	worldUuid: Uuid;
+} & CoreUniverseObjectInstance<
+	BaseClass,
+	CoreEntityArg<Options>,
+	CoreArgIds.Entity,
+	Options,
+	CoreEntityArgParentId,
+	CoreEntityArgGrandparentIds
+>;
+
+/**
+ * Core entity.
+ */
+export type CoreEntityClass<
+	BaseClass extends CoreBaseClassNonRecursive,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	Entity extends CoreEntityInstance<BaseClass, Options> = CoreEntityInstance<BaseClass, Options>
+> = CoreUniverseObjectClass<
+	BaseClass,
+	Entity,
+	CoreEntityArg<Options>,
+	CoreArgIds.Entity,
+	Options,
+	CoreEntityArgParentId,
+	CoreEntityArgGrandparentIds
+>;
 
 // Infer type from `as const` assertion
 /* eslint-disable @typescript-eslint/typedef */
@@ -236,11 +267,6 @@ export function CoreEntityClassFactory<
 	>;
 
 	/**
-	 * Verify class data satisfies arg constraints, `CoreEntity` is not used, as universe object verification already done via `implements`.
-	 */
-	type ReturnClass = Entity extends CoreEntityArg<Options> ? typeof Entity : never;
-
-	/**
 	 * Parameters used to construct universe object.
 	 */
 	type UniverseObjectParams = [
@@ -284,18 +310,7 @@ export function CoreEntityClassFactory<
 	// eslint-disable-next-line no-redeclare
 	abstract class Entity
 		extends class extends Base {}
-		implements
-			StaticImplements<
-				CoreUniverseObjectClass<
-					BaseClass,
-					CoreEntityArg<Options>,
-					CoreArgIds.Entity,
-					Options,
-					CoreEntityArgParentId,
-					CoreEntityArgGrandparentIds
-				>,
-				typeof Entity
-			>
+		implements StaticImplements<ToAbstract<CoreEntityClass<BaseClass, Options>>, typeof Entity>
 	{
 		/**
 		 * Entity kind.
@@ -425,5 +440,5 @@ export function CoreEntityClassFactory<
 	});
 
 	// Cast as return
-	return Entity as unknown as ReturnClass;
+	return Entity;
 }

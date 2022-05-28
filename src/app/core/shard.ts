@@ -16,7 +16,7 @@ import {
 	computedClassInjectPerClass,
 	computedClassInjectPerInstance
 } from "../common/computed-class";
-import { StaticImplements } from "../common/utility-types";
+import { StaticImplements, ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import {
 	CoreArgComplexOptionPathIds,
@@ -39,11 +39,11 @@ import {
 	CommsGrid,
 	CommsGridArgs,
 	CommsGridRaw,
-	CoreGrid,
 	CoreGridArg,
 	CoreGridArgGrandparentIds,
 	CoreGridArgParentId,
 	CoreGridArgParentIds,
+	CoreGridInstance,
 	GridPathOwn,
 	coreGridArgParentIdSet
 } from "./grid";
@@ -167,22 +167,42 @@ export type CoreShardArg<Options extends CoreArgOptionsUnion> = CoreArgContainer
 /**
  * Core shard.
  */
-export type CoreShard<
+export type CoreShardInstance<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Grid extends CoreGrid<BaseClass, Options> = CoreGrid<BaseClass, Options>
-> = CoreShardArg<Options> &
-	CoreUniverseObjectInstance<
-		BaseClass,
-		CoreShardArg<Options>,
-		CoreArgIds.Shard,
-		Options,
-		CoreShardArgParentId,
-		CoreShardArgGrandparentIds,
-		Grid,
-		CoreGridArg<Options>,
-		CoreArgIds.Grid
-	>;
+	Grid extends CoreGridInstance<BaseClass, Options> = CoreGridInstance<BaseClass, Options>
+> = CoreUniverseObjectInstance<
+	BaseClass,
+	CoreShardArg<Options>,
+	CoreArgIds.Shard,
+	Options,
+	CoreShardArgParentId,
+	CoreShardArgGrandparentIds,
+	Grid,
+	CoreGridArg<Options>,
+	CoreArgIds.Grid
+>;
+
+/**
+ * Core shard class.
+ */
+export type CoreShardClass<
+	BaseClass extends CoreBaseClassNonRecursive,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	Grid extends CoreGridInstance<BaseClass, Options> = CoreGridInstance<BaseClass, Options>,
+	Shard extends CoreShardInstance<BaseClass, Options, Grid> = CoreShardInstance<BaseClass, Options, Grid>
+> = CoreUniverseObjectClass<
+	BaseClass,
+	Shard,
+	CoreShardArg<Options>,
+	CoreArgIds.Shard,
+	Options,
+	CoreShardArgParentId,
+	CoreShardArgGrandparentIds,
+	Grid,
+	CoreGridArg<Options>,
+	CoreArgIds.Grid
+>;
 
 /**
  * Tuple with core shard arg parent IDS.
@@ -202,7 +222,7 @@ export const coreShardArgParentIds = [] as const;
 export function CoreShardClassFactory<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Grid extends CoreGrid<BaseClass, Options>
+	Grid extends CoreGridInstance<BaseClass, Options>
 >({
 	Base,
 	options
@@ -303,21 +323,7 @@ export function CoreShardClassFactory<
 	abstract class Shard
 		// Casting will remove non-static instance information by intersecting with `any`, while maintaining constructor parameters, that will be included into factory return
 		extends class extends Base {}
-		implements
-			StaticImplements<
-				CoreUniverseObjectClass<
-					BaseClass,
-					CoreShardArg<Options>,
-					CoreArgIds.Shard,
-					Options,
-					CoreShardArgParentId,
-					CoreShardArgGrandparentIds,
-					Grid,
-					CoreGridArg<Options>,
-					CoreArgIds.Grid
-				>,
-				typeof Shard
-			>
+		implements StaticImplements<ToAbstract<CoreShardClass<BaseClass, Options, Grid>>, typeof Shard>
 	{
 		/**
 		 * Default entity.

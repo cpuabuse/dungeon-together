@@ -42,7 +42,7 @@ type EmptyObject = Record<NameType, unknown>;
 export type ComputedClassEmptyObject = object & EmptyObject;
 
 /**
- * Omits extra signature information from type constraint.
+ * Omits extra signature information from type constraint, for class to be able to implement.
  *
  * @remarks
  * - `ComputedClassOmitConditionalEmptyObject<object & Record<string, unknown>>` and alike, do not omit

@@ -23,7 +23,9 @@ export * from "./parameters";
  *
  * Universe object factory needs to work with special logic for maintaining base constructor information, while container does not, as it can extend base class directly.
  *
- * - `extends class extends Base { }` is to silence TS, not to actually add class to chain. Should watch closely over given super params, as they become any.
+ * - `extends class extends Base { }` is to silence TS, not to actually add class to chain. Should watch closely over given super params, as they become any
+ * - Base itself should have `any[]` arguments, so that final arguments are produced same as mixin
+ * - Generic universe object has children listed last in arguments, as they are optionally present, while ID-determined universe objects are optionally aware of themselves or their parents, but chain depend on children, so order is inverted
  *
  * @remarks
  * This is for documentation purposes only.

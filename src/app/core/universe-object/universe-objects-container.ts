@@ -13,7 +13,7 @@ import {
 	ComputedClassWords
 } from "../../common/computed-class";
 
-import { AbstractConstructorConstraint } from "../../common/utility-types";
+import { Ctor } from "../../common/utility-types";
 import {
 	CoreArg,
 	CoreArgContainer,
@@ -110,9 +110,12 @@ export type CoreUniverseObjectContainerClass<
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
-	GrandparentIds extends CoreArgIds = never
+	GrandparentIds extends CoreArgIds = never,
+	IsAbstract extends boolean = true
 > = CoreUniverseObjectContainerStatic<BaseClass, Instance, Arg, Id, Options, ParentId, GrandparentIds> &
-	AbstractConstructorConstraint<
+	Ctor<
+		IsAbstract,
+		ConstructorParameters<BaseClass>,
 		CoreUniverseObjectContainerInstance<BaseClass, Instance, Arg, Id, Options, ParentId, GrandparentIds>
 	>;
 

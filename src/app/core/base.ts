@@ -7,9 +7,6 @@
  * @file File for custom prototype chain.
  */
 
-import { CoreCellClass } from "./cell";
-import { CoreEntityClass } from "./entity";
-import { CoreUniverse } from "./universe";
 import { CoreUniverseObjectArgsOptionsUnion } from "./universe-object";
 
 /**
@@ -39,15 +36,13 @@ export type CoreBaseNonRecursiveParameters = any[];
 /**
  * To merge with base prototype implementation.
  */
-export interface CoreBase<
-	Options extends CoreUniverseObjectArgsOptionsUnion,
-	CellClass extends CoreCellClass<Options> = CoreCellClass<Options>,
-	EntityClass extends CoreEntityClass<Options> = CoreEntityClass<Options>
-> extends CoreBaseNonRecursiveInstance {
+// TODO: Remove this
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export interface CoreBase<Options extends CoreUniverseObjectArgsOptionsUnion> extends CoreBaseNonRecursiveInstance {
 	/**
 	 * A universe instance.
 	 */
-	universe: CoreUniverse<Options, CellClass, EntityClass>;
+	universe: unknown;
 }
 
 /**

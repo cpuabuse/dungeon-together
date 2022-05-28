@@ -7,10 +7,10 @@
  * @file UUID search functionality
  */
 
-import { CoreCell } from "../core/cell";
-import { CoreEntity, EntityPathExtended } from "../core/entity";
-import { CoreGrid } from "../core/grid";
-import { CoreShard } from "../core/shard";
+import { CoreCellInstance } from "../core/cell";
+import { CoreEntityInstance, EntityPathExtended } from "../core/entity";
+import { CoreGridInstance } from "../core/grid";
+import { CoreShardInstance } from "../core/shard";
 import { CoreUniverseClassAbstractStatic } from "../core/universe";
 import { Uuid } from "./uuid";
 
@@ -37,7 +37,7 @@ export function CoreUniverseUuidSearchFactory<C extends CoreUniverseClassAbstrac
 		/**
 		 * Indexing for cells.
 		 */
-		public abstract cellsIndex: Map<Uuid, CoreCell>;
+		public abstract cellsIndex: Map<Uuid, CoreCellInstance>;
 
 		/**
 		 * Indexed path to a default entity.
@@ -47,17 +47,17 @@ export function CoreUniverseUuidSearchFactory<C extends CoreUniverseClassAbstrac
 		/**
 		 * Indexing for entities.
 		 */
-		public abstract entitiesIndex: Map<Uuid, CoreEntity>;
+		public abstract entitiesIndex: Map<Uuid, CoreEntityInstance>;
 
 		/**
 		 * Indexing for grids.
 		 */
-		public abstract gridsIndex: Map<Uuid, CoreGrid>;
+		public abstract gridsIndex: Map<Uuid, CoreGridInstance>;
 
 		/**
 		 * Indexing for shards.
 		 */
-		public abstract shardsIndex: Map<Uuid, CoreShard>;
+		public abstract shardsIndex: Map<Uuid, CoreShardInstance>;
 
 		/**
 		 * Gets a cell by UUID.

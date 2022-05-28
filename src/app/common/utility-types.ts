@@ -12,7 +12,7 @@
  */
 // `C extends I` to show which properties are missing in errors
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export type StaticImplements<I extends Constructor, C extends I> = InstanceType<I>;
+export type StaticImplements<I extends Ctor, C extends I> = InstanceType<I>;
 
 /**
  * Converts a class to abstract version.
@@ -102,7 +102,7 @@ export type MaybeDefined<
  * @remarks
  * Any constructor, to be used as constraints for utility types. So that any constructor, concrete or abstract will extend this.
  */
-type Constructor<
+export type Ctor<
 	IsAbstract extends boolean = true,
 	// "{}" is needed exactly, to preserve instance type and to be able to extend
 	// eslint-disable-next-line @typescript-eslint/ban-types
@@ -116,7 +116,7 @@ type Constructor<
  * @remarks
  * Parameter constraint stays as `any`, as generic conditional types will not be assignable to other constraints.
  */
-export type ConcreteConstructorConstraint<Instance extends object = object> = Constructor<false, any, Instance>;
+export type ConcreteConstructorConstraint<Instance extends object = object> = Ctor<false, any, Instance>;
 
 /**
  * Abstract constructor constraint.
@@ -124,12 +124,12 @@ export type ConcreteConstructorConstraint<Instance extends object = object> = Co
  * @remarks
  * Parameter constraint stays as `any`, as generic conditional types will not be assignable to other constraints.
  */
-export type AbstractConstructorConstraint<Instance extends object = object> = Constructor<true, any, Instance>;
+export type AbstractConstructorConstraint<Instance extends object = object> = Ctor<true, any, Instance>;
 
 /**
  * Creates a constructor.
  */
-export type ConcreteConstructor<Parameters extends any[] = any[], Instance extends object = object> = Constructor<
+export type ConcreteConstructor<Parameters extends any[] = any[], Instance extends object = object> = Ctor<
 	false,
 	Parameters,
 	Instance
@@ -138,7 +138,7 @@ export type ConcreteConstructor<Parameters extends any[] = any[], Instance exten
 /**
  * Creates an abstract constructor.
  */
-export type AbstractConstructor<Parameters extends any[] = any[], Instance extends object = object> = Constructor<
+export type AbstractConstructor<Parameters extends any[] = any[], Instance extends object = object> = Ctor<
 	true,
 	Parameters,
 	Instance
@@ -149,7 +149,7 @@ export type AbstractConstructor<Parameters extends any[] = any[], Instance exten
  *
  * Can mostly be used in generics since TS 4.6.
  */
-export type StaticMembers<T extends Constructor> = Omit<T, "new" | "prototype">;
+export type StaticMembers<T extends Ctor> = Omit<T, "new" | "prototype">;
 
 // BUG: See remarks
 /**

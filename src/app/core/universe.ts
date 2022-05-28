@@ -9,11 +9,16 @@
 
 import { Application } from "./application";
 import { CoreArgIds, CoreArgPath } from "./arg";
-import { CoreBaseClass } from "./base";
-import { CoreCellArgGrandparentIds, CoreCellClass } from "./cell";
-import { CommsEntity, CoreEntityClass, EntityPathExtended } from "./entity";
-import { CommsGrid, CoreGridClass, GridPath } from "./grid";
-import { CommsShard, CommsShardArgs, CoreShardClass, ShardPath } from "./shard";
+import { CoreBaseClassNonRecursive } from "./base";
+import {
+	CoreCellArg,
+	CoreCellArgGrandparentIds,
+	CoreCellArgParentId,
+	CoreCellArgParentIds,
+	CoreCellClass,
+	CoreCellInstance
+} from "./cell";
+import { CoreEntityArgParentIds, CoreEntityClass, CoreEntityInstance } from "./entity";
 import { CoreUniverseObjectArgsOptionsUnion } from "./universe-object";
 
 /**
@@ -22,89 +27,20 @@ import { CoreUniverseObjectArgsOptionsUnion } from "./universe-object";
  * Must remain statically typed, without use of mixins, for appropriate type recursions.
  */
 export abstract class CoreUniverse<
-	Options extends CoreUniverseObjectArgsOptionsUnion,
-	CellClass extends CoreCellClass<Options> = CoreCellClass<Options>,
-	EntityClass extends CoreEntityClass<Options> = CoreEntityClass<Options>
+	BaseClass extends CoreBaseClassNonRecursive,
+	Options extends CoreUniverseObjectArgsOptionsUnion
 > {
-	/**
-	 * Shard prototype.
-	 */
-	public abstract readonly Cell: CellClass;
+	public abstract Cell: CoreCellClass<BaseClass, Options>;
 
-	/**
-	 * Shard prototype.
-	 */
-	public abstract readonly Entity: EntityClass;
+	public abstract Entity: CoreEntityClass<BaseClass, Options>;
 
-	/**
-	 * Shard prototype.
-	 */
-	public abstract readonly Grid: CoreGridClass;
-
-	/**
-	 * Shard prototype.
-	 */
-	public abstract readonly Shard: CoreShardClass;
-
-	/**
-	 * Application.
-	 */
-	public application: Application;
-
-	/**
-	 * Base object class.
-	 */
-	protected abstract readonly Base: CoreBaseClass<Options>;
-
-	/**
-	 * Constructs the universe core.
-	 *
-	 * @param param
-	 */
-	public constructor({
-		application
-	}: {
-		/**
-		 * App this is added to.
-		 */
-		application: Application;
-	}) {
-		this.application = application;
-	}
-
-	/**
-	 * Add shard to universe.
-	 *
-	 * @returns `true` on success, `false` on failure
-	 */
-	public abstract addShard(shard: CommsShardArgs): void;
-
-	/**
-	 * Gets the [[CommsCell]].
-	 */
 	public abstract getCell(
-		path: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgGrandparentIds>
-	): InstanceType<CellClass>;
+		path: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>
+	): CoreCellInstance<BaseClass, Options>;
 
-	/**
-	 * Gets the [[CommsEntity]].
-	 */
-	public abstract getEntity(path: EntityPathExtended): CommsEntity;
-
-	/**
-	 * Gets the grid.
-	 */
-	public abstract getGrid(path: GridPath): CommsGrid;
-
-	/**
-	 * Gets the shard.
-	 */
-	public abstract getShard(path: ShardPath): CommsShard;
-
-	/**
-	 * Remove shard from universe.
-	 */
-	public abstract removeShard(CommsShard: ShardPath): void;
+	public abstract getEntity(
+		path: CoreArgPath<CoreArgIds.Entity, Options, CoreEntityArgParentIds>
+	): CoreEntityInstance<BaseClass, Options>;
 }
 
 /**
@@ -116,21 +52,3 @@ export interface CoreUniverseArgs {
 	 */
 	application: Application;
 }
-
-/**
- * Original abstract class type for core universe.
- */
-export type CoreUniverseClassOriginalAbstract = typeof CoreUniverse;
-
-/**
- * Class type for classes extending core universe.
- */
-export interface CoreUniverseClassConcreteStatic<U extends CoreUniverse = CoreUniverse> {
-	new (...args: any[]): U;
-}
-
-/**
- * Class type for abstract classes, like {@link CoreUniverse}, to be used in mixin to generate the final core universe functionality.
- * In this type, arguments are `any`.
- */
-export type CoreUniverseClassAbstractStatic<U extends CoreUniverse = CoreUniverse> = abstract new (...args: any[]) => U;

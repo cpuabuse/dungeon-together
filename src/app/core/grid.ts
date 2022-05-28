@@ -12,7 +12,7 @@ import {
 	computedClassInjectPerClass,
 	computedClassInjectPerInstance
 } from "../common/computed-class";
-import { StaticImplements } from "../common/utility-types";
+import { MapIntersection, StaticImplements, ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import {
 	CoreArgComplexOptionPathIds,
@@ -36,11 +36,11 @@ import {
 	CommsCell,
 	CommsCellArgs,
 	CommsCellRaw,
-	CoreCell,
 	CoreCellArg,
 	CoreCellArgGrandparentIds,
 	CoreCellArgParentId,
 	CoreCellArgParentIds,
+	CoreCellInstance,
 	coreCellArgParentIdSet
 } from "./cell";
 import { ShardPath, coreShardArgParentIds } from "./shard";
@@ -80,13 +80,6 @@ export type CommsGridRaw = Omit<CommsGridArgs, "cells" | keyof ShardPath> & {
 	 * Legacy.
 	 */
 	cells: Array<CommsCellRaw>;
-};
-
-/**
- * Typeof class for grids.
- */
-export type CoreGridClass = {
-	new (...args: any[]): CommsGrid;
 };
 
 /**
@@ -187,22 +180,42 @@ export type CoreGridArg<Options extends CoreArgOptionsUnion> = CoreArgContainerA
 /**
  * Core grid.
  */
-export type CoreGrid<
+export type CoreGridInstance<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Cell extends CoreCell<BaseClass, Options> = CoreCell<BaseClass, Options>
-> = CoreGridArg<Options> &
-	CoreUniverseObjectInstance<
-		BaseClass,
-		CoreGridArg<Options>,
-		CoreArgIds.Grid,
-		Options,
-		CoreGridArgParentId,
-		CoreGridArgGrandparentIds,
-		Cell,
-		CoreCellArg<Options>,
-		CoreArgIds.Cell
-	>;
+	Cell extends CoreCellInstance<BaseClass, Options> = CoreCellInstance<BaseClass, Options>
+> = CoreUniverseObjectInstance<
+	BaseClass,
+	CoreGridArg<Options>,
+	CoreArgIds.Grid,
+	Options,
+	CoreGridArgParentId,
+	CoreGridArgGrandparentIds,
+	Cell,
+	CoreCellArg<Options>,
+	CoreArgIds.Cell
+>;
+
+/**
+ * Core grid class.
+ */
+export type CoreGridClass<
+	BaseClass extends CoreBaseClassNonRecursive,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	Cell extends CoreCellInstance<BaseClass, Options> = CoreCellInstance<BaseClass, Options>,
+	Grid extends CoreGridInstance<BaseClass, Options, Cell> = CoreGridInstance<BaseClass, Options, Cell>
+> = CoreUniverseObjectClass<
+	BaseClass,
+	Grid,
+	CoreGridArg<Options>,
+	CoreArgIds.Grid,
+	Options,
+	CoreGridArgParentId,
+	CoreGridArgGrandparentIds,
+	Cell,
+	CoreCellArg<Options>,
+	CoreArgIds.Cell
+>;
 
 /**
  * Core grid class factory.
@@ -215,7 +228,7 @@ export type CoreGrid<
 export function CoreGridClassFactory<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Cell extends CoreCell<BaseClass, Options>
+	Cell extends CoreCellInstance<BaseClass, Options>
 >({
 	Base,
 	options
@@ -318,21 +331,7 @@ export function CoreGridClassFactory<
 	abstract class Grid
 		// Casting will remove non-static instance information by intersecting with `any`, while maintaining constructor parameters, that will be included into factory return
 		extends class extends Base {}
-		implements
-			StaticImplements<
-				CoreUniverseObjectClass<
-					BaseClass,
-					CoreGridArg<Options>,
-					CoreArgIds.Grid,
-					Options,
-					CoreGridArgParentId,
-					CoreGridArgGrandparentIds,
-					Cell,
-					CoreCellArg<Options>,
-					CoreArgIds.Cell
-				>,
-				typeof Grid
-			>
+		implements StaticImplements<ToAbstract<CoreGridClass<BaseClass, Options, Cell>>, typeof Grid>
 	{
 		/**
 		 * Default entity.

@@ -13,7 +13,7 @@ import {
 	computedClassInjectPerInstance
 } from "../common/computed-class";
 import { defaultKindUuid, defaultModeUuid, defaultWorldUuid } from "../common/defaults";
-import { StaticImplements } from "../common/utility-types";
+import { StaticImplements, ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import { Vector, defaultVector, vectorCoords } from "../common/vector";
 import {
@@ -40,17 +40,18 @@ import {
 	CommsEntity,
 	CommsEntityArgs,
 	CommsEntityRaw,
-	CoreEntity,
 	CoreEntityArg,
 	CoreEntityArgGrandparentIds,
 	CoreEntityArgParentId,
 	CoreEntityArgParentIds,
 	CoreEntityArgWithKind,
+	CoreEntityInstance,
 	EntityPathExtended,
 	commsEntityRawToArgs,
 	coreEntityArgParentIdSet
 } from "./entity";
 import { GridPathExtended, coreGridArgParentIds } from "./grid";
+import { CoreUniverse } from "./universe";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectClass,
@@ -59,7 +60,6 @@ import {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	CoreUniverseObjectInherit,
 	CoreUniverseObjectInstance,
-	CoreUniverseObjectUniverse,
 	generateCoreUniverseObjectContainerMembers,
 	generateCoreUniverseObjectMembers
 } from "./universe-object";
@@ -211,12 +211,18 @@ export type CellPathExtended = CoreArgPath<CoreArgIds.Cell, CoreArgOptionsPathEx
 /**
  * Core cell.
  */
-export type CoreCell<
+export type CoreCellInstance<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Entity extends CoreEntity<BaseClass, Options> = CoreEntity<BaseClass, Options>
-> = CoreCellArg<Options> &
-	CoreUniverseObjectInstance<
+	Entity extends CoreEntityInstance<BaseClass, Options> = CoreEntityInstance<BaseClass, Options>
+> = {
+	/**
+	 * Worlds.
+	 */
+	worlds: Options[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
+} & {
+	[K in keyof Vector]: Options extends CoreArgOptionsWithVectorUnion ? Vector[K] : never;
+} & CoreUniverseObjectInstance<
 		BaseClass,
 		CoreCellArg<Options>,
 		CoreArgIds.Cell,
@@ -227,6 +233,27 @@ export type CoreCell<
 		CoreEntityArg<Options>,
 		CoreArgIds.Entity
 	>;
+
+/**
+ * Core cell class.
+ */
+export type CoreCellClass<
+	BaseClass extends CoreBaseClassNonRecursive,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	Entity extends CoreEntityInstance<BaseClass, Options> = CoreEntityInstance<BaseClass, Options>,
+	Cell extends CoreCellInstance<BaseClass, Options, Entity> = CoreCellInstance<BaseClass, Options, Entity>
+> = CoreUniverseObjectClass<
+	BaseClass,
+	Cell,
+	CoreCellArg<Options>,
+	CoreArgIds.Cell,
+	Options,
+	CoreCellArgParentId,
+	CoreCellArgGrandparentIds,
+	Entity,
+	CoreEntityArg<Options>,
+	CoreArgIds.Entity
+>;
 
 // Infer type from `as const` assertion
 /* eslint-disable @typescript-eslint/typedef */
@@ -268,7 +295,7 @@ export const coreCellArgParentIdSet: Set<CoreCellArgParentIds> = new Set(coreCel
 export function CoreCellClassFactory<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Entity extends CoreEntity<BaseClass, Options>
+	Entity extends CoreEntityInstance<BaseClass, Options>
 >({
 	Base,
 	options
@@ -386,17 +413,7 @@ export function CoreCellClassFactory<
 		implements
 			StaticImplements<
 				// Includes container
-				CoreUniverseObjectClass<
-					BaseClass,
-					CoreCellArg<Options>,
-					CoreArgIds.Cell,
-					Options,
-					CoreCellArgParentId,
-					CoreCellArgGrandparentIds,
-					Entity,
-					CoreEntityArg<Options>,
-					CoreArgIds.Entity
-				>,
+				ToAbstract<CoreCellClass<BaseClass, Options, Entity>>,
 				typeof Cell
 			>
 	{
@@ -426,17 +443,17 @@ export function CoreCellClassFactory<
 		/**
 		 * X coordinate.
 		 */
-		public x!: Options extends CoreArgOptionsWithVectorUnion ? number : never;
+		public x!: Options extends CoreArgOptionsWithVectorUnion ? Vector["x"] : never;
 
 		/**
 		 * Y coordinate.
 		 */
-		public y!: Options extends CoreArgOptionsWithVectorUnion ? number : never;
+		public y!: Options extends CoreArgOptionsWithVectorUnion ? Vector["y"] : never;
 
 		/**
 		 * Z coordinate.
 		 */
-		public z!: Options extends CoreArgOptionsWithVectorUnion ? number : never;
+		public z!: Options extends CoreArgOptionsWithVectorUnion ? Vector["z"] : never;
 
 		// ESLint buggy
 		// eslint-disable-next-line jsdoc/require-param
@@ -539,15 +556,7 @@ export function CoreCellClassFactory<
 			// Cannot assign to conditional type without casting
 			let targetCell: CoreCellArg<TargetOptions> = coreArgConvertContainerArg({
 				arg: cell,
-				childConverter: (
-					Cell.universe as CoreUniverseObjectUniverse<
-						BaseClass,
-						Entity,
-						CoreEntityArg<Options>,
-						CoreArgIds.Entity,
-						Options
-					>
-				).Entity.convertEntity as CoreArgConverter<
+				childConverter: (Cell.universe as CoreUniverse<BaseClass, Options>).Entity.convertEntity as CoreArgConverter<
 					CoreEntityArg<SourceOptions>,
 					CoreEntityArg<TargetOptions>,
 					CoreArgIds.Entity,
