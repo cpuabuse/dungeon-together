@@ -7,6 +7,7 @@
  * @file Cell
  */
 
+import { Target } from "@interactjs/types";
 import {
 	ComputedClassExtractInstance,
 	computedClassInjectPerClass,
@@ -22,6 +23,7 @@ import {
 	CoreArgConverter,
 	CoreArgIds,
 	CoreArgMeta,
+	CoreArgObjectWords,
 	CoreArgOptionIds,
 	CoreArgOptionsPathExtended,
 	CoreArgOptionsPathOwn,
@@ -252,7 +254,28 @@ export type CoreCellClass<
 	CoreCellArgGrandparentIds,
 	Entity,
 	CoreEntityArg<Options>,
-	CoreArgIds.Entity
+	CoreArgIds.Entity,
+	<SourceOptions extends CoreArgOptionsUnion, TargetOptions extends CoreArgOptionsUnion>(
+		...args: Parameters<
+			CoreArgConverter<
+				CoreCellArg<SourceOptions>,
+				CoreCellArg<TargetOptions>,
+				CoreArgIds.Cell,
+				SourceOptions,
+				TargetOptions,
+				CoreCellArgParentIds
+			>
+		>
+	) => ReturnType<
+		CoreArgConverter<
+			CoreCellArg<SourceOptions>,
+			CoreCellArg<TargetOptions>,
+			CoreArgIds.Cell,
+			SourceOptions,
+			TargetOptions,
+			CoreCellArgParentIds
+		>
+	>
 >;
 
 // Infer type from `as const` assertion
@@ -553,17 +576,21 @@ export function CoreCellClassFactory<
 			 */
 			type CellWithoutMap = CoreCellArg<CoreArgOptionsWithoutMapUnion>;
 
-			// Cannot assign to conditional type without casting
-			let targetCell: CoreCellArg<TargetOptions> = coreArgConvertContainerArg({
+			// Arg
+			let targetCell: CoreCellArg<TargetOptions> = coreArgConvertContainerArg<
+				CoreCellArg<SourceOptions>,
+				CoreArgIds.Cell,
+				SourceOptions,
+				TargetOptions,
+				CoreCellArgParentIds,
+				CoreEntityArg<SourceOptions>,
+				CoreEntityArg<TargetOptions>,
+				CoreArgIds.Entity
+			>({
 				arg: cell,
-				childConverter: (Cell.universe as CoreUniverse<BaseClass, Options>).Entity.convertEntity as CoreArgConverter<
-					CoreEntityArg<SourceOptions>,
-					CoreEntityArg<TargetOptions>,
-					CoreArgIds.Entity,
-					SourceOptions,
-					TargetOptions,
-					CoreEntityArgParentIds
-				>,
+				// False negative
+				// eslint-disable-next-line @typescript-eslint/unbound-method
+				childConverter: (Cell.universe as CoreUniverse<BaseClass, Options>).Entity.convertEntity,
 				childId: CoreArgIds.Entity,
 				id: CoreArgIds.Cell,
 				meta,

@@ -21,6 +21,7 @@ import {
 	CoreArg,
 	CoreArgComplexOptionPathIds,
 	CoreArgContainerArg,
+	CoreArgConverterConstraint,
 	CoreArgIds,
 	CoreArgObjectWords,
 	CoreArgOptionIds,
@@ -120,12 +121,15 @@ export type CoreUniverseObjectStatic<
 		ParentId | GrandparentIds
 	> = never,
 	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
-	ChildId extends CoreArgIds = never
-	// Unlike instance, container does not extend base class
+	ChildId extends CoreArgIds = never,
+	Converter extends CoreArgConverterConstraint<Id, ParentId | GrandparentIds> = CoreArgConverterConstraint<
+		Id,
+		ParentId | GrandparentIds
+	>
 > = ComputedClassOmitConditionalEmptyObject<
 	CoreBaseNonRecursiveStatic & {
 		// Generic dependent on options, so just any function
-		[K in `convert${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (...args: any[]) => unknown;
+		[K in `convert${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: Converter;
 	} & {
 		[K in `getDefault${CoreArgObjectWords[ChildId]["singularCapitalizedWord"]}Uuid`]: (
 			path: CoreArgPath<Id, CoreArgOptionsPathOwn, ParentId | GrandparentIds>
@@ -177,8 +181,23 @@ export type CoreUniverseObjectClass<
 		ParentId | GrandparentIds
 	> = never,
 	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
-	ChildId extends CoreArgIds = never
-> = CoreUniverseObjectStatic<BaseClass, Arg, Id, Options, ParentId, GrandparentIds, ChildInstance, ChildArg, ChildId> &
+	ChildId extends CoreArgIds = never,
+	Converter extends CoreArgConverterConstraint<Id, ParentId | GrandparentIds> = CoreArgConverterConstraint<
+		Id,
+		ParentId | GrandparentIds
+	>
+> = CoreUniverseObjectStatic<
+	BaseClass,
+	Arg,
+	Id,
+	Options,
+	ParentId,
+	GrandparentIds,
+	ChildInstance,
+	ChildArg,
+	ChildId,
+	Converter
+> &
 	ConcreteConstructor<
 		CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>,
 		Instance

@@ -3,14 +3,14 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+/**
+ * @file Arg conversion
+ */
+
 import { CoreArg, CoreArgIds } from "./arg";
 import { CoreArgMeta } from "./meta";
 import { CoreArgOptionsUnion } from "./options";
 import { CoreArgObjectWords } from "./words";
-
-/**
- * @file Arg conversion
- */
 
 /**
  * Principles of arg conversion functions:
@@ -59,3 +59,13 @@ export type CoreArgConverter<
 		meta: CoreArgMeta<Id, SourceOptions, TargetOptions, ParentIds>;
 	}
 ) => TargetArg;
+
+/**
+ * Constraint for converter of any arguments.
+ */
+export type CoreArgConverterConstraint<Id extends CoreArgIds, ParentIds extends CoreArgIds = never> = <
+	SourceOptions extends CoreArgOptionsUnion,
+	TargetOptions extends CoreArgOptionsUnion
+>(
+	...args: Parameters<CoreArgConverter<any, any, Id, SourceOptions, TargetOptions, ParentIds>>
+) => ReturnType<CoreArgConverter<any, any, Id, SourceOptions, TargetOptions, ParentIds>>;

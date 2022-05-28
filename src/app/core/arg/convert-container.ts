@@ -166,7 +166,7 @@ export function coreArgConvertContainer<
 			id: childId,
 			index,
 			meta,
-			parentArg: id,
+			parentArg: arg,
 			parentId: id,
 			sourceOptions,
 			targetOptions

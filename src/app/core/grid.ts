@@ -12,7 +12,7 @@ import {
 	computedClassInjectPerClass,
 	computedClassInjectPerInstance
 } from "../common/computed-class";
-import { MapIntersection, StaticImplements, ToAbstract } from "../common/utility-types";
+import { StaticImplements, ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import {
 	CoreArgComplexOptionPathIds,
@@ -39,17 +39,16 @@ import {
 	CoreCellArg,
 	CoreCellArgGrandparentIds,
 	CoreCellArgParentId,
-	CoreCellArgParentIds,
 	CoreCellInstance,
 	coreCellArgParentIdSet
 } from "./cell";
 import { ShardPath, coreShardArgParentIds } from "./shard";
+import { CoreUniverse } from "./universe";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectClass,
 	CoreUniverseObjectConstructorParameters,
 	CoreUniverseObjectInstance,
-	CoreUniverseObjectUniverse,
 	generateCoreUniverseObjectContainerMembers,
 	generateCoreUniverseObjectMembers
 } from "./universe-object";
@@ -183,7 +182,8 @@ export type CoreGridArg<Options extends CoreArgOptionsUnion> = CoreArgContainerA
 export type CoreGridInstance<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Cell extends CoreCellInstance<BaseClass, Options> = CoreCellInstance<BaseClass, Options>
+	// `any` effectively means being agnostic to grandchildren, as generic expression is not dependent on it
+	Cell extends CoreCellInstance<BaseClass, Options, any> = CoreCellInstance<BaseClass, Options>
 > = CoreUniverseObjectInstance<
 	BaseClass,
 	CoreGridArg<Options>,
@@ -202,7 +202,8 @@ export type CoreGridInstance<
 export type CoreGridClass<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Cell extends CoreCellInstance<BaseClass, Options> = CoreCellInstance<BaseClass, Options>,
+	// `any` effectively means being agnostic to grandchildren, as generic expression is not dependent on it
+	Cell extends CoreCellInstance<BaseClass, Options, any> = CoreCellInstance<BaseClass, Options>,
 	Grid extends CoreGridInstance<BaseClass, Options, Cell> = CoreGridInstance<BaseClass, Options, Cell>
 > = CoreUniverseObjectClass<
 	BaseClass,
@@ -214,7 +215,28 @@ export type CoreGridClass<
 	CoreGridArgGrandparentIds,
 	Cell,
 	CoreCellArg<Options>,
-	CoreArgIds.Cell
+	CoreArgIds.Cell,
+	<SourceOptions extends CoreArgOptionsUnion, TargetOptions extends CoreArgOptionsUnion>(
+		...args: Parameters<
+			CoreArgConverter<
+				CoreGridArg<SourceOptions>,
+				CoreGridArg<TargetOptions>,
+				CoreArgIds.Grid,
+				SourceOptions,
+				TargetOptions,
+				CoreGridArgParentIds
+			>
+		>
+	) => ReturnType<
+		CoreArgConverter<
+			CoreGridArg<SourceOptions>,
+			CoreGridArg<TargetOptions>,
+			CoreArgIds.Grid,
+			SourceOptions,
+			TargetOptions,
+			CoreGridArgParentIds
+		>
+	>
 >;
 
 /**
@@ -430,18 +452,18 @@ export function CoreGridClassFactory<
 			meta: CoreArgMeta<CoreArgIds.Grid, SourceOptions, TargetOptions, CoreGridArgParentIds>;
 		}): CoreGridArg<TargetOptions> {
 			// Cannot assign to conditional type without casting
-			let targetGrid: CoreGridArg<TargetOptions> = coreArgConvertContainerArg({
+			let targetGrid: CoreGridArg<TargetOptions> = coreArgConvertContainerArg<
+				CoreGridArg<SourceOptions>,
+				CoreArgIds.Grid,
+				SourceOptions,
+				TargetOptions,
+				CoreGridArgParentIds,
+				CoreCellArg<SourceOptions>,
+				CoreCellArg<TargetOptions>,
+				CoreArgIds.Cell
+			>({
 				arg: grid,
-				childConverter: (
-					Grid.universe as CoreUniverseObjectUniverse<BaseClass, Cell, CoreCellArg<Options>, CoreArgIds.Cell, Options>
-				).Cell.convertCell as CoreArgConverter<
-					CoreCellArg<SourceOptions>,
-					CoreCellArg<TargetOptions>,
-					CoreArgIds.Cell,
-					SourceOptions,
-					TargetOptions,
-					CoreCellArgParentIds
-				>,
+				childConverter: (Grid.universe as CoreUniverse<BaseClass, Options>).Cell.convertCell,
 				childId: CoreArgIds.Cell,
 				id: CoreArgIds.Grid,
 				meta,

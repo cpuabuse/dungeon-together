@@ -42,17 +42,16 @@ import {
 	CoreGridArg,
 	CoreGridArgGrandparentIds,
 	CoreGridArgParentId,
-	CoreGridArgParentIds,
 	CoreGridInstance,
 	GridPathOwn,
 	coreGridArgParentIdSet
 } from "./grid";
+import { CoreUniverse } from "./universe";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectClass,
 	CoreUniverseObjectConstructorParameters,
 	CoreUniverseObjectInstance,
-	CoreUniverseObjectUniverse,
 	generateCoreUniverseObjectContainerMembers,
 	generateCoreUniverseObjectMembers
 } from "./universe-object";
@@ -170,7 +169,8 @@ export type CoreShardArg<Options extends CoreArgOptionsUnion> = CoreArgContainer
 export type CoreShardInstance<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Grid extends CoreGridInstance<BaseClass, Options> = CoreGridInstance<BaseClass, Options>
+	// `any` effectively means being agnostic to grandchildren, as generic expression is not dependent on it
+	Grid extends CoreGridInstance<BaseClass, Options, any> = CoreGridInstance<BaseClass, Options>
 > = CoreUniverseObjectInstance<
 	BaseClass,
 	CoreShardArg<Options>,
@@ -189,7 +189,8 @@ export type CoreShardInstance<
 export type CoreShardClass<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Grid extends CoreGridInstance<BaseClass, Options> = CoreGridInstance<BaseClass, Options>,
+	// `any` effectively means being agnostic to grandchildren, as generic expression is not dependent on it
+	Grid extends CoreGridInstance<BaseClass, Options, any> = CoreGridInstance<BaseClass, Options>,
 	Shard extends CoreShardInstance<BaseClass, Options, Grid> = CoreShardInstance<BaseClass, Options, Grid>
 > = CoreUniverseObjectClass<
 	BaseClass,
@@ -201,7 +202,28 @@ export type CoreShardClass<
 	CoreShardArgGrandparentIds,
 	Grid,
 	CoreGridArg<Options>,
-	CoreArgIds.Grid
+	CoreArgIds.Grid,
+	<SourceOptions extends CoreArgOptionsUnion, TargetOptions extends CoreArgOptionsUnion>(
+		...args: Parameters<
+			CoreArgConverter<
+				CoreShardArg<SourceOptions>,
+				CoreShardArg<TargetOptions>,
+				CoreArgIds.Shard,
+				SourceOptions,
+				TargetOptions,
+				CoreShardArgParentIds
+			>
+		>
+	) => ReturnType<
+		CoreArgConverter<
+			CoreShardArg<SourceOptions>,
+			CoreShardArg<TargetOptions>,
+			CoreArgIds.Shard,
+			SourceOptions,
+			TargetOptions,
+			CoreShardArgParentIds
+		>
+	>
 >;
 
 /**
@@ -422,18 +444,18 @@ export function CoreShardClassFactory<
 			meta: CoreArgMeta<CoreArgIds.Shard, SourceOptions, TargetOptions, CoreShardArgParentIds>;
 		}): CoreShardArg<TargetOptions> {
 			// Cannot assign to conditional type without casting
-			let targetShard: CoreShardArg<TargetOptions> = coreArgConvertContainerArg({
+			let targetShard: CoreShardArg<TargetOptions> = coreArgConvertContainerArg<
+				CoreShardArg<SourceOptions>,
+				CoreArgIds.Shard,
+				SourceOptions,
+				TargetOptions,
+				CoreShardArgParentIds,
+				CoreGridArg<SourceOptions>,
+				CoreGridArg<TargetOptions>,
+				CoreArgIds.Grid
+			>({
 				arg: shard,
-				childConverter: (
-					Shard.universe as CoreUniverseObjectUniverse<BaseClass, Grid, CoreGridArg<Options>, CoreArgIds.Grid, Options>
-				).Grid.convertGrid as CoreArgConverter<
-					CoreGridArg<SourceOptions>,
-					CoreGridArg<TargetOptions>,
-					CoreArgIds.Grid,
-					SourceOptions,
-					TargetOptions,
-					CoreGridArgParentIds
-				>,
+				childConverter: (Shard.universe as CoreUniverse<BaseClass, Options>).Grid.convertGrid,
 				childId: CoreArgIds.Grid,
 				id: CoreArgIds.Shard,
 				meta,

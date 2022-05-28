@@ -17,6 +17,7 @@ import { StaticImplements, ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import {
 	CoreArg,
+	CoreArgConverter,
 	CoreArgIds,
 	CoreArgMeta,
 	CoreArgOptionsPathExtended,
@@ -198,7 +199,31 @@ export type CoreEntityClass<
 	CoreArgIds.Entity,
 	Options,
 	CoreEntityArgParentId,
-	CoreEntityArgGrandparentIds
+	CoreEntityArgGrandparentIds,
+	never,
+	never,
+	never,
+	<SourceOptions extends CoreArgOptionsUnion, TargetOptions extends CoreArgOptionsUnion>(
+		...args: Parameters<
+			CoreArgConverter<
+				CoreEntityArg<SourceOptions>,
+				CoreEntityArg<TargetOptions>,
+				CoreArgIds.Entity,
+				SourceOptions,
+				TargetOptions,
+				CoreEntityArgParentIds
+			>
+		>
+	) => ReturnType<
+		CoreArgConverter<
+			CoreEntityArg<SourceOptions>,
+			CoreEntityArg<TargetOptions>,
+			CoreArgIds.Entity,
+			SourceOptions,
+			TargetOptions,
+			CoreEntityArgParentIds
+		>
+	>
 >;
 
 // Infer type from `as const` assertion
