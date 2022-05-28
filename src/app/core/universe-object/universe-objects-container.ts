@@ -26,7 +26,6 @@ import {
 	coreArgObjectWords
 } from "../arg";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveInstance } from "../base";
-import { CoreUniverseObjectInitializationParameter } from "./parameters";
 import { CoreUniverseObjectConstructorParameters, CoreUniverseObjectInstance } from "./universe-object";
 import { CoreUniverseObjectArgsOptionsUnion } from ".";
 
@@ -59,10 +58,7 @@ export type CoreUniverseObjectContainerInstance<
 				path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
 			) => void;
 		} & {
-			[K in `attach${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-				universeObject: Instance,
-				initializationParameter: Pick<CoreUniverseObjectInitializationParameter, "attachHook">
-			) => void;
+			[K in `attach${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (universeObject: Instance) => void;
 		} & {
 			[K in `detach${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
 				path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
@@ -221,13 +217,7 @@ export function generateCoreUniverseObjectContainerMembers<
 					 * @param universeObject - Child universe object
 					 * @param initializationParameter - Initialization parameter
 					 */
-					[ComputedClassWords.Value](
-						this: ThisInstance,
-						universeObject: Instance,
-						// Keep for type consistency
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						initializationParameter: Pick<CoreUniverseObjectInitializationParameter, "attachHook">
-					): void {
+					[ComputedClassWords.Value](this: ThisInstance, universeObject: Instance): void {
 						this[nameUniverseObjects].set(universeObject[pathUuidPropertyName], universeObject);
 					}
 				},
@@ -261,7 +251,10 @@ export function generateCoreUniverseObjectContainerMembers<
 					 * @param path - Path to search for
 					 * @returns Universe object
 					 */
-					[ComputedClassWords.Value](this: ThisInstance, path: CoreArg<Id, Options>): Instance {
+					[ComputedClassWords.Value](
+						this: ThisInstance,
+						path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
+					): Instance {
 						let universeObject: Instance | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
 						return universeObject === undefined ? this[nameAbstractDefaultUniverseObject] : universeObject;
 					}
@@ -277,7 +270,10 @@ export function generateCoreUniverseObjectContainerMembers<
 					 * @param this - Universe object container
 					 * @param path - Path to search for
 					 */
-					[ComputedClassWords.Value](this: ThisInstance, path: CoreArgPath<Id, Options>): void {
+					[ComputedClassWords.Value](
+						this: ThisInstance,
+						path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
+					): void {
 						this[nameUniverseObjects].delete(path[pathUuidPropertyName]);
 					}
 				}

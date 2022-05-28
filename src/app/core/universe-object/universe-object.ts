@@ -465,7 +465,7 @@ export function generateCoreUniverseObjectMembers<
 													// Nothing
 												})
 												.finally(() => {
-													this[nameAttachChildUniverseObjects](child, { attachHook });
+													this[nameAttachChildUniverseObjects](child);
 												});
 
 											child = new (

@@ -34,8 +34,8 @@ export type CoreArgContainer<
 	/**
 	 * Child universe objects.
 	 */
-	// ``${K}`` used over `K` is important in TS 4.6, as it gives slightly different types
-	[K in CoreArgObjectWords[ChildId]["pluralLowercaseWord"] as `${K}`]: Options extends CoreArgOptionsWithMapUnion
+	// In TS 4.6 (reverted in 4.7) `as `${K}`` should be used, as it gives slightly different types
+	[K in `${CoreArgObjectWords[ChildId]["pluralLowercaseWord"]}`]: Options extends CoreArgOptionsWithMapUnion
 		? CoreArgsWithMapContainerArg<Arg, ChildId, Options, ParentIds>
 		: CoreArgsWithoutMapContainerArg<Arg, ChildId, Options, ParentIds>;
 };
