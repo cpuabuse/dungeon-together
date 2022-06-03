@@ -7,8 +7,16 @@
  * @file Universe definitions
  */
 
-import { CoreArg, CoreArgContainer, CoreArgContainerArg, CoreArgIds, CoreArgObjectWords, CoreArgPath } from "../arg";
+import {
+	CoreArg,
+	CoreArgContainer,
+	CoreArgContainerArg,
+	CoreArgIds,
+	CoreArgObjectWords,
+	CoreArgOptionsPathOwnUnion
+} from "../arg";
 import { CoreBaseClassNonRecursive } from "../base";
+import { CoreArgIndexableReader, CoreArgIndexer } from "../indexable";
 import { CoreUniverseObjectArgsOptionsUnion } from "./options";
 import { CoreUniverseObjectClass, CoreUniverseObjectInstance } from "./universe-object";
 
@@ -47,10 +55,6 @@ export type CoreUniverseObjectUniverse<
 	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
 	ChildId extends CoreArgIds = never
 > = {
-	[K in `get${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-		path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
-	) => Instance;
-} & {
 	// Cannot use class type, since constructor must return exactly provided generic
 	[K in `${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: CoreUniverseObjectClass<
 		BaseClass,
@@ -64,4 +68,15 @@ export type CoreUniverseObjectUniverse<
 		ChildArg,
 		ChildId
 	>;
-};
+} & ([ParentId] extends [never]
+	? CoreArgIndexableReader<Instance, Id, Options, ParentId | GrandparentIds>
+	: {
+			[K in keyof CoreArgIndexer<
+				Instance,
+				Id,
+				Options,
+				ParentId | GrandparentIds
+			>]: Options extends CoreArgOptionsPathOwnUnion
+				? CoreArgIndexer<Instance, Id, Options, ParentId | GrandparentIds>[K]
+				: never;
+	  });

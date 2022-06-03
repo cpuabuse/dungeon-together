@@ -7,7 +7,6 @@
  * @file Cell
  */
 
-import { Target } from "@interactjs/types";
 import {
 	ComputedClassExtractInstance,
 	computedClassInjectPerClass,
@@ -23,7 +22,6 @@ import {
 	CoreArgConverter,
 	CoreArgIds,
 	CoreArgMeta,
-	CoreArgObjectWords,
 	CoreArgOptionIds,
 	CoreArgOptionsPathExtended,
 	CoreArgOptionsPathOwn,
@@ -45,7 +43,6 @@ import {
 	CoreEntityArg,
 	CoreEntityArgGrandparentIds,
 	CoreEntityArgParentId,
-	CoreEntityArgParentIds,
 	CoreEntityArgWithKind,
 	CoreEntityInstance,
 	EntityPathExtended,
@@ -630,7 +627,7 @@ export function CoreCellClassFactory<
 	// Inject static
 	computedClassInjectPerClass({
 		Base: Cell,
-		members,
+		members: membersWithChild,
 		// Nothing required
 		parameters: []
 	});

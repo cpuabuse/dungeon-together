@@ -34,6 +34,7 @@ import {
 	coreArgObjectWords
 } from "../arg";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveInstance, CoreBaseNonRecursiveStatic } from "../base";
+import { CoreArgIndexableReader, CoreArgIndexer } from "../indexable";
 import { CoreUniverseObjectInitializationParameter } from "./parameters";
 import { CoreUniverseObjectContainerInstance, CoreUniverseObjectContainerStatic } from "./universe-objects-container";
 import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectUniverse } from ".";
@@ -591,18 +592,12 @@ export function generateCoreUniverseObjectMembers<
 						 *
 						 * @see {@link ParentInstance}
 						 */
-						type ParentUniverse = CoreUniverseObjectUniverse<
-							BaseClass,
+						type ParentUniverse = CoreArgIndexer<
 							ParentInstance,
-							CoreArgContainerArg<ParentId, Options, ParentParentId | ParentGrandparentIds, Arg, Id>,
 							ParentId,
 							Options,
 							// Parents unknown
-							ParentParentId,
-							ParentGrandparentIds,
-							Instance,
-							Arg,
-							Id
+							ParentParentId | ParentGrandparentIds
 						>;
 
 						// Inferring for final type
@@ -635,10 +630,18 @@ export function generateCoreUniverseObjectMembers<
 										 */
 										value(this: Instance, path: CoreArgPath<ParentId, Options, GrandparentIds>): void {
 											// Locate cells
-											// Does not overlap, casting
 											let parentUniverseObject: ParentInstance = (
-												(this.constructor as CoreBaseClassNonRecursive).universe as ParentUniverse
-											)[nameGetParentUniverseObject](path);
+												((this.constructor as CoreBaseClassNonRecursive).universe as ParentUniverse)[
+													nameGetParentUniverseObject
+													// BUG: TS 4.7 - Generic template key intersection function overrides, if identical arguments
+												] as unknown as CoreArgIndexableReader<
+													ParentInstance,
+													ParentId,
+													Options,
+													// Parents unknown
+													ParentParentId | ParentGrandparentIds
+												>[typeof nameGetParentUniverseObject]
+											)(path);
 
 											// Reattach
 											parentUniverseObject[nameAttachUniverseObject](this);
@@ -690,7 +693,7 @@ export function generateCoreUniverseObjectMembers<
 										 */
 										// ESLint nested destructured bug
 										// eslint-disable-next-line @typescript-eslint/typedef
-										[ComputedClassWords.Value]: (...[{ arg }]: GenerateParams): Uuid => {
+										[ComputedClassWords.Value](...[{ arg }]: GenerateParams): Uuid {
 											return (arg as CoreArgPath<Id, CoreArgOptionsPathExtended, ParentId | GrandparentIds>)[
 												uuidPropertyName
 											];

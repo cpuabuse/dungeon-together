@@ -471,7 +471,7 @@ export function CoreShardClassFactory<
 	// Inject static
 	computedClassInjectPerClass({
 		Base: Shard,
-		members,
+		members: membersWithChild,
 		// Nothing required
 		parameters: []
 	});

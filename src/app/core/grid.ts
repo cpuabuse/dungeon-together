@@ -480,7 +480,7 @@ export function CoreGridClassFactory<
 	// Inject static
 	computedClassInjectPerClass({
 		Base: Grid,
-		members,
+		members: membersWithChild,
 		// Nothing required
 		parameters: []
 	});

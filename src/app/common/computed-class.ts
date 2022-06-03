@@ -16,6 +16,7 @@
  * The approach is, when types cannot be inferred from actually assigned objects, then class should redefine the properties, rather than hack it with additional types.
  * - Static methods and properties should be defined in the derived as a property, as TS does not require initialization (it seems that if strict static property checking were to be introduced, it would also probably come with a definitive operator for it)
  * - Instance properties initialized by pseudo-constructor should be redefined with `!`
+ * - For prototype, instance assign, and static assign this will automatically bound; For that arrow syntax should not be used; Also have to be careful about `this` used in generate wrapper, as it will be bound to class initialization scope, and not the class or instance itself
  */
 
 import { MapIntersection, UnknownToObject, hasOwnProperty } from "./utility-types";

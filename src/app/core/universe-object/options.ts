@@ -3,23 +3,13 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+import { CoreArgIndexableOptionsUnion } from "../indexable";
+
 /**
  * @file Core args
  */
 
-import {
-	CoreArgComplexOptionPathIds,
-	CoreArgComplexOptionSymbolIndex,
-	CoreArgOptionIds,
-	CoreArgOptionsUnionGenerate
-} from "../arg";
-
 /**
  * Args options constraint for core universe objects.
  */
-export type CoreUniverseObjectArgsOptionsUnion = CoreArgOptionsUnionGenerate<
-	CoreArgOptionIds.Map,
-	never,
-	| CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
-	| CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
->;
+export type CoreUniverseObjectArgsOptionsUnion = CoreArgIndexableOptionsUnion;

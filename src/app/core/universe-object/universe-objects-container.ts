@@ -13,7 +13,7 @@ import {
 	ComputedClassWords
 } from "../../common/computed-class";
 
-import { Ctor } from "../../common/utility-types";
+import { ConcreteConstructorConstraint } from "../../common/utility-types";
 import {
 	CoreArg,
 	CoreArgContainer,
@@ -25,7 +25,8 @@ import {
 	coreArgIdToPathUuidPropertyName,
 	coreArgObjectWords
 } from "../arg";
-import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveInstance } from "../base";
+import { CoreBaseClassNonRecursive } from "../base";
+import { CoreArgIndexableReader, CoreArgIndexer } from "../indexable";
 import { CoreUniverseObjectConstructorParameters, CoreUniverseObjectInstance } from "./universe-object";
 import { CoreUniverseObjectArgsOptionsUnion } from ".";
 
@@ -48,23 +49,12 @@ export type CoreUniverseObjectContainerInstance<
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never
 > = ComputedClassOmitConditionalEmptyObject<
-	CoreBaseNonRecursiveInstance &
-		CoreArgContainer<Instance, Id, Options, ParentId | GrandparentIds> & {
-			[K in `get${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-				path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
-			) => Instance;
-		} & {
+	// Includes container
+	CoreArgIndexer<Instance, Id, Options, ParentId | GrandparentIds> &
+		CoreArgIndexableReader<Instance, Id, Options, ParentId | GrandparentIds> & {
 			[K in `remove${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
 				path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
 			) => void;
-		} & {
-			[K in `attach${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (universeObject: Instance) => void;
-		} & {
-			[K in `detach${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-				path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
-			) => boolean;
-		} & {
-			[K in `default${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: Instance;
 		} & {
 			// Necessary to implement where the created child is known, to call attach
 			[K in `add${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
@@ -98,22 +88,23 @@ export type CoreUniverseObjectContainerStatic<
  */
 export type CoreUniverseObjectContainerClass<
 	BaseClass extends CoreBaseClassNonRecursive,
-	// We do not care what class is base class for child
-	// Preserve for future
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	Container extends CoreUniverseObjectContainerInstance<
+		BaseClass,
+		Instance,
+		Arg,
+		Id,
+		Options,
+		ParentId,
+		GrandparentIds
+	>,
 	Instance extends CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
 	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
-	GrandparentIds extends CoreArgIds = never,
-	IsAbstract extends boolean = true
+	GrandparentIds extends CoreArgIds = never
 > = CoreUniverseObjectContainerStatic<BaseClass, Instance, Arg, Id, Options, ParentId, GrandparentIds> &
-	Ctor<
-		IsAbstract,
-		ConstructorParameters<BaseClass>,
-		CoreUniverseObjectContainerInstance<BaseClass, Instance, Arg, Id, Options, ParentId, GrandparentIds>
-	>;
+	ConcreteConstructorConstraint<Container>;
 
 /**
  * Universe object container members.
@@ -230,13 +221,12 @@ export function generateCoreUniverseObjectContainerMembers<
 					 *
 					 * @param this - This instance
 					 * @param path - Child universe object
-					 * @returns True if detached, false if not
 					 */
 					[ComputedClassWords.Value](
 						this: ThisInstance,
 						path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
-					): boolean {
-						return this[nameUniverseObjects].delete(path[pathUuidPropertyName]);
+					): void {
+						this[nameUniverseObjects].delete(path[pathUuidPropertyName]);
 					}
 				},
 				getUniverseObject: {
