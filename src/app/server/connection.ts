@@ -12,7 +12,7 @@ import { LogLevel, processLog } from "../client/error";
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { ProcessCallback, VSocket } from "../common/vsocket";
-import { CommsConnection, CommsConnectionArgs, Envelope, Message } from "../core/connection";
+import { CoreConnection, CoreConnectionParam, Envelope, Message } from "../core/connection";
 import { CoreUniverse } from "../core/universe";
 import { compile } from "../tool/compile";
 import { ServerUniverse } from "./universe";
@@ -20,7 +20,7 @@ import { ServerUniverse } from "./universe";
 /**
  * Server connection.
  */
-export class ServerConnection implements CommsConnection {
+export class ServerConnection implements CoreConnection {
 	/**
 	 * Server shards.
 	 */
@@ -36,7 +36,7 @@ export class ServerConnection implements CommsConnection {
 	 *
 	 * @param target - Socket
 	 */
-	public constructor({ socket }: CommsConnectionArgs) {
+	public constructor({ socket }: CoreConnectionParam) {
 		// Set this target
 		this.socket = socket;
 	}

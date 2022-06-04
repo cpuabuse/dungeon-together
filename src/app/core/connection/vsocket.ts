@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -9,11 +9,11 @@
  * Server WS and client Websocket classes to be added.
  */
 
-import { LogLevel, processLog } from "../client/error";
-import { Envelope, Message } from "../core/connection";
-import { CoreUniverse } from "../core/universe";
-import { MessageTypeWord, vSocketMaxQueue, vSocketProcessStackLimit } from "./defaults/connection";
-import { ErroringReturn } from "./error";
+import { LogLevel, processLog } from "../../client/error";
+import { MessageTypeWord, vSocketMaxQueue, vSocketProcessStackLimit } from "../../common/defaults/connection";
+import { ErroringReturn } from "../../common/error";
+import { CoreUniverseInstanceNonRecursive } from "../universe";
+import { Envelope, Message } from "./connection";
 
 /**
  * Type for callback function to sockets.
@@ -83,7 +83,11 @@ interface SocketProcessBaseTickTockArgs {
 /**
  * Arguments for single socket.
  */
-interface VStandaloneSocketSingleArgs<C extends CoreUniverse, CP extends CoreUniverse, CS extends CoreUniverse> {
+interface VStandaloneSocketSingleArgs<
+	C extends CoreUniverseInstanceNonRecursive,
+	CP extends CoreUniverseInstanceNonRecursive,
+	CS extends CoreUniverseInstanceNonRecursive
+> {
 	/**
 	 * Callback to call in superclass.
 	 */
@@ -103,7 +107,10 @@ interface VStandaloneSocketSingleArgs<C extends CoreUniverse, CP extends CoreUni
 /**
  * Combined arguments for the socket constructor.
  */
-interface VStandaloneSocketArgs<CP extends CoreUniverse, CS extends CoreUniverse> {
+interface VStandaloneSocketArgs<
+	CP extends CoreUniverseInstanceNonRecursive,
+	CS extends CoreUniverseInstanceNonRecursive
+> {
 	/**
 	 * Arguments for this socket.
 	 */
@@ -145,6 +152,8 @@ export class SocketProcessBase {
 
 	/**
 	 * Adds the process to socket.
+	 *
+	 * @param param - Destructured param
 	 */
 	public addProcess({
 		word,
@@ -165,6 +174,8 @@ export class SocketProcessBase {
 
 	/**
 	 * To be invoked via event emitter.
+	 *
+	 * @param param - Destructured param
 	 */
 	public async tick({ word }: SocketProcessBaseTickTockArgs): Promise<void> {
 		let process: ErroringReturn<SocketProcessBaseProcess> = this.getProcess({ word });
@@ -189,6 +200,7 @@ export class SocketProcessBase {
 	/**
 	 * Wrapper to synchronously process.
 	 *
+	 * @param param - Destructured param
 	 * @throws {@link TypeError}
 	 * Throws, if the process does not exist.
 	 *
@@ -204,6 +216,7 @@ export class SocketProcessBase {
 	/**
 	 * To be invoked as a function.
 	 *
+	 * @param param - Destructured param
 	 * @throws {@link TypeError}
 	 * Throws, if the process does not exist.
 	 *
@@ -252,7 +265,7 @@ export class SocketProcessBase {
  *
  * Emitter dispatches `tick()`; `tick()` performs processing, if `tock()` is not queued, otherwise `tick()` calls `tock()` asynchronously; `tock()` will requeue itself, if the process is not finished, while counting stack depth.
  */
-export abstract class VSocket<C extends CoreUniverse> extends SocketProcessBase {
+export abstract class VSocket<C extends CoreUniverseInstanceNonRecursive> extends SocketProcessBase {
 	/**
 	 * Universe socket.
 	 */
@@ -339,7 +352,10 @@ export abstract class VSocket<C extends CoreUniverse> extends SocketProcessBase 
 /**
  * A class emulating Websocket for standalone connections.
  */
-export class VStandaloneSocket<CP extends CoreUniverse, CS extends CoreUniverse = CoreUniverse> extends VSocket<CP> {
+export class VStandaloneSocket<
+	CP extends CoreUniverseInstanceNonRecursive,
+	CS extends CoreUniverseInstanceNonRecursive = CoreUniverseInstanceNonRecursive
+> extends VSocket<CP> {
 	/**
 	 * A client-server corresponding socket.
 	 */

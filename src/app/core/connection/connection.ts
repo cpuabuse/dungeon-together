@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,25 +7,25 @@
  * @file Connection between server and client.
  */
 
-import { MessageTypeWord } from "../common/defaults/connection";
-import { Uuid } from "../common/uuid";
-import { VSocket } from "../common/vsocket";
-import { CoreUniverse } from "./universe";
+import { MessageTypeWord } from "../../common/defaults/connection";
+import { Uuid } from "../../common/uuid";
+import { CoreUniverseInstanceNonRecursive } from "../universe";
+import { VSocket } from "./vsocket";
 
 /**
  * Args for connection constructor.
  */
-export interface CommsConnectionArgs {
+export interface CoreConnectionParam<U extends CoreUniverseInstanceNonRecursive> {
 	/**
 	 * Actual connection.
 	 */
-	socket: VSocket<CoreUniverse>;
+	socket: VSocket<U>;
 }
 
 /**
  * Common connection.
  */
-export interface CommsConnection extends CommsConnectionArgs {
+export interface CoreConnection<U extends CoreUniverseInstanceNonRecursive> extends CoreConnectionParam<U> {
 	/**
 	 * Client UUID.
 	 */
@@ -48,6 +48,8 @@ export class Message {
 
 	/**
 	 * Constructor for message.
+	 *
+	 * @param param - Destructured parameter
 	 */
 	public constructor({
 		body,
@@ -80,6 +82,8 @@ export class Envelope {
 
 	/**
 	 * Constructor for envelope.
+	 *
+	 * @param param - Destructured parameter
 	 */
 	public constructor({
 		messages

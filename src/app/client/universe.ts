@@ -19,7 +19,7 @@ import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import { CoreUniverseUuidSearchFactory } from "../common/uuid-search";
 import { CellPathExtended } from "../core/cell";
-import { CommsConnectionArgs } from "../core/connection";
+import { CoreConnectionParam } from "../core/connection";
 import { EntityPathExtended } from "../core/entity";
 import { GridPath } from "../core/grid";
 import { CommsShardArgs, ShardPath } from "../core/shard";
@@ -434,7 +434,7 @@ export class ClientUniverse
 	 * @param connectionArgs - Connection args
 	 * @returns - The connection added
 	 */
-	public addConnection(connectionArgs: CommsConnectionArgs): ClientConnection {
+	public addConnection(connectionArgs: CoreConnectionParam): ClientConnection {
 		let connection: ClientConnection = new ClientConnection(connectionArgs);
 		this.connections.add(connection);
 		return connection;

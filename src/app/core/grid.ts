@@ -465,6 +465,8 @@ export function CoreGridClassFactory<
 				CoreArgIds.Cell
 			>({
 				arg: grid,
+				// False negative
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
 				childConverter: (Grid.universe as CoreUniverse<BaseClass, Options>).Cell.convertCell,
 				childId: CoreArgIds.Cell,
 				id: CoreArgIds.Grid,

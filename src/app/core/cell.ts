@@ -24,7 +24,10 @@ import {
 	CoreArgMeta,
 	CoreArgOptionIds,
 	CoreArgOptionsPathExtended,
+	CoreArgOptionsPathId,
+	CoreArgOptionsPathIdUnion,
 	CoreArgOptionsPathOwn,
+	CoreArgOptionsPathOwnOrExtendedUnion,
 	CoreArgOptionsUnion,
 	CoreArgOptionsWithMapUnion,
 	CoreArgOptionsWithVectorUnion,
@@ -35,6 +38,7 @@ import {
 	coreArgConvertContainerArg,
 	coreArgIdToPathUuidPropertyName
 } from "./arg";
+import { CoreArgOptionsWithNavUnion } from "./arg/nav";
 import { CoreBaseClassNonRecursive } from "./base";
 import {
 	CommsEntity,
@@ -50,6 +54,7 @@ import {
 	coreEntityArgParentIdSet
 } from "./entity";
 import { GridPathExtended, coreGridArgParentIds } from "./grid";
+import { Nav } from "./nav";
 import { CoreUniverse } from "./universe";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
@@ -195,7 +200,26 @@ export type CoreCellArg<Options extends CoreArgOptionsUnion> = CoreArgContainerA
 	 * Worlds.
 	 */
 	worlds: Options[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
-} & (Options extends CoreArgOptionsWithVectorUnion ? Vector : unknown);
+} & (Options extends CoreArgOptionsWithVectorUnion ? Vector : unknown) &
+	(Options extends CoreArgOptionsWithNavUnion
+		? {
+				/**
+				 * Nav.
+				 */
+				nav: Options extends CoreArgOptionsPathIdUnion
+					? {
+							[K in Nav]?: CoreArgPath<CoreArgIds.Cell, CoreArgOptionsPathId, CoreCellArgParentIds>;
+					  }
+					: Options extends CoreArgOptionsPathOwnOrExtendedUnion
+					? {
+							[K in Nav]: CellPathOwn;
+					  }
+					: {
+							// Nav for undetermined path options
+							[K in Nav]: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>;
+					  };
+		  }
+		: unknown);
 
 /**
  * Cell own path.
@@ -219,6 +243,15 @@ export type CoreCellInstance<
 	 * Worlds.
 	 */
 	worlds: Options[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
+
+	/**
+	 * Nav.
+	 */
+	nav: Options extends CoreArgOptionsWithNavUnion
+		? {
+				[K in Nav]: CellPathOwn;
+		  }
+		: never;
 } & {
 	[K in keyof Vector]: Options extends CoreArgOptionsWithVectorUnion ? Vector[K] : never;
 } & CoreUniverseObjectInstance<
@@ -330,6 +363,11 @@ export function CoreCellClassFactory<
 	 */
 	options: Options;
 }) {
+	/**
+	 * Cell with nav.
+	 */
+	type CellWithNav = CoreCellArg<Options & CoreArgOptionsWithNavUnion>;
+
 	/**
 	 * Core cell args with vector.
 	 */
@@ -453,6 +491,12 @@ export function CoreCellClassFactory<
 		 */
 		public static getDefaultEntityUuid: (path: CellPathOwn) => Uuid;
 
+		public nav!: Options extends CoreArgOptionsWithNavUnion
+			? {
+					[K in Nav]: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>;
+			  }
+			: never;
+
 		/**
 		 * Worlds.
 		 */
@@ -514,6 +558,15 @@ export function CoreCellClassFactory<
 			if (options[CoreArgOptionIds.Vector]) {
 				vectorCoords.forEach(coord => {
 					(this as CellWithVector)[coord] = (arg as unknown as CellWithVector)[coord];
+				});
+			}
+
+			// Assign nav
+			if (options[CoreArgOptionIds.Nav]) {
+				// False negative
+
+				Object.values(Nav).forEach(nav => {
+					(this as CellWithNav).nav[nav] = { cellUuid: (arg as CellWithNav).nav[nav].cellUuid };
 				});
 			}
 
@@ -586,7 +639,7 @@ export function CoreCellClassFactory<
 			>({
 				arg: cell,
 				// False negative
-				// eslint-disable-next-line @typescript-eslint/unbound-method
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
 				childConverter: (Cell.universe as CoreUniverse<BaseClass, Options>).Entity.convertEntity,
 				childId: CoreArgIds.Entity,
 				id: CoreArgIds.Cell,

@@ -457,6 +457,8 @@ export function CoreShardClassFactory<
 				CoreArgIds.Grid
 			>({
 				arg: shard,
+				// False negative
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
 				childConverter: (Shard.universe as CoreUniverse<BaseClass, Options>).Grid.convertGrid,
 				childId: CoreArgIds.Grid,
 				id: CoreArgIds.Shard,

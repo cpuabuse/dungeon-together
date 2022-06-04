@@ -10,7 +10,7 @@
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { ProcessCallback, VSocket } from "../common/vsocket";
-import { CommsConnection, CommsConnectionArgs, Envelope, Message } from "../core/connection";
+import { CoreConnection, CoreConnectionParam, Envelope, Message } from "../core/connection";
 import { CommsShardArgs, CommsShardRaw, commsShardRawToArgs } from "../core/shard";
 import { CoreUniverse } from "../core/universe";
 import { LogLevel, processLog } from "./error";
@@ -20,7 +20,7 @@ import { ClientUniverse } from "./universe";
 /**
  * Client connection.
  */
-export class ClientConnection implements CommsConnection {
+export class ClientConnection implements CoreConnection {
 	/**
 	 * Client UUIDs.
 	 */
@@ -36,7 +36,7 @@ export class ClientConnection implements CommsConnection {
 	 *
 	 * @param target - Socket
 	 */
-	public constructor({ socket }: CommsConnectionArgs) {
+	public constructor({ socket }: CoreConnectionParam) {
 		// Set this target
 		this.socket = socket;
 	}

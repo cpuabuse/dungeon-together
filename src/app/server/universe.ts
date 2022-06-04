@@ -11,7 +11,7 @@ import { defaultKindUuid, defaultShardUuid, defaultWorldUuid } from "../common/d
 import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import { CellPathExtended } from "../core/cell";
-import { CommsConnectionArgs } from "../core/connection";
+import { CoreConnectionParam } from "../core/connection";
 import { EntityPathExtended } from "../core/entity";
 import { GridPath } from "../core/grid";
 import { ShardPath } from "../core/shard";
@@ -135,7 +135,7 @@ export class ServerUniverse
 	 * @param connectionArgs - Connection args
 	 * @returns - The connection added
 	 */
-	public addConnection(connectionArgs: CommsConnectionArgs): ServerConnection {
+	public addConnection(connectionArgs: CoreConnectionParam): ServerConnection {
 		let connection: ServerConnection = new ServerConnection(connectionArgs);
 		this.connections.add(connection);
 		return connection;
