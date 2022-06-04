@@ -7,6 +7,7 @@
  * @file File for custom prototype chain.
  */
 
+import { CoreUniverseInstanceNonRecursive } from "./universe";
 import { CoreUniverseObjectArgsOptionsUnion } from "./universe-object";
 
 /**
@@ -25,7 +26,7 @@ export interface CoreBaseNonRecursiveStatic {
 	/**
 	 * Universe.
 	 */
-	universe: unknown;
+	universe: CoreUniverseInstanceNonRecursive;
 }
 
 /**
@@ -38,12 +39,7 @@ export type CoreBaseNonRecursiveParameters = any[];
  */
 // TODO: Remove this
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface CoreBase<Options extends CoreUniverseObjectArgsOptionsUnion> extends CoreBaseNonRecursiveInstance {
-	/**
-	 * A universe instance.
-	 */
-	universe: unknown;
-}
+export type CoreBase<Options extends CoreUniverseObjectArgsOptionsUnion> = CoreBaseNonRecursiveInstance;
 
 /**
  * Non-recursive class type for core base.
@@ -69,5 +65,10 @@ export type CoreBaseClassNonRecursive = CoreBaseNonRecursiveStatic & {
  * Class type for core base.
  */
 export interface CoreBaseClass<Options extends CoreUniverseObjectArgsOptionsUnion> extends CoreBaseNonRecursiveStatic {
+	/**
+	 * Universe;
+	 */
+	universe: CoreUniverseInstanceNonRecursive;
+
 	new (...args: any[]): CoreBase<Options>;
 }

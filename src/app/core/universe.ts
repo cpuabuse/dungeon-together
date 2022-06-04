@@ -13,9 +13,8 @@ import {
 	computedClassInjectPerClass,
 	computedClassInjectPerInstance
 } from "../common/computed-class";
-import { defaultShardUuid, defaultUuidUrlKeyword } from "../common/defaults";
-import { StaticImplements, ToAbstract } from "../common/utility-types";
-import { Uuid, getDefaultUuid } from "../common/uuid";
+import { ConcreteConstructor, StaticImplements, ToAbstract } from "../common/utility-types";
+import { Uuid } from "../common/uuid";
 import { Application } from "./application";
 import {
 	CoreArg,
@@ -80,6 +79,54 @@ import {
 	CoreUniverseObjectUniverse,
 	generateCoreUniverseObjectContainerMembers
 } from "./universe-object";
+
+/**
+ * Unique universe identifier.
+ */
+// eslint-disable-next-line @typescript-eslint/typedef
+export const universeNamespace = "universe" as const;
+
+/**
+ * Unique universe identifier.
+ */
+export type UniverseNamespace = typeof universeNamespace;
+
+/**
+ * First parameter for concrete universe.
+ */
+export type CoreUniverseRequiredConstructorParameter = {
+	/**
+	 * App with state.
+	 */
+	application: Application;
+
+	/**
+	 * Universe UUID.
+	 */
+	universeUuid: Uuid;
+};
+
+/**
+ * Definition of parameters for concrete universe.
+ */
+export type CoreUniverseConstructorParams<R extends any[] = any[]> = [CoreUniverseRequiredConstructorParameter, ...R];
+
+/**
+ * Placeholder for the universe.
+ *
+ * @see {@link CoreBaseClassNonRecursive}
+ */
+export type CoreUniverseInstanceNonRecursive = object;
+
+/**
+ * Placeholder for the universe.
+ *
+ * @see {@link CoreBaseClassNonRecursive}
+ */
+export type CoreUniverseClassNonRecursive<
+	Universe extends CoreUniverseInstanceNonRecursive = CoreUniverseInstanceNonRecursive,
+	R extends any[] = any[]
+> = ConcreteConstructor<CoreUniverseConstructorParams<R>, Universe>;
 
 /**
  * Core universe class.
@@ -148,16 +195,25 @@ export type CoreUniverseClass<
 	Entity extends CoreEntityInstance<BaseClass, Options> = CoreEntityInstance<BaseClass, Options>,
 	Cell extends CoreCellInstance<BaseClass, Options, Entity> = CoreCellInstance<BaseClass, Options, Entity>,
 	Grid extends CoreGridInstance<BaseClass, Options, Cell> = CoreGridInstance<BaseClass, Options, Cell>,
-	Shard extends CoreShardInstance<BaseClass, Options, Grid> = CoreShardInstance<BaseClass, Options, Grid>
+	Shard extends CoreShardInstance<BaseClass, Options, Grid> = CoreShardInstance<BaseClass, Options, Grid>,
+	Universe extends CoreUniverse<BaseClass, Options, Entity, Cell, Grid, Shard> = CoreUniverse<
+		BaseClass,
+		Options,
+		Entity,
+		Cell,
+		Grid,
+		Shard
+	>
 > = CoreUniverseObjectContainerClass<
 	BaseClass,
-	CoreUniverse<BaseClass, Options, Entity, Cell, Grid, Shard>,
+	Universe,
 	Shard,
 	CoreShardArg<Options>,
 	CoreArgIds.Shard,
 	Options,
 	CoreShardArgParentId,
-	CoreShardArgGrandparentIds
+	CoreShardArgGrandparentIds,
+	CoreUniverseConstructorParams
 >;
 
 /**
@@ -322,20 +378,14 @@ export function CoreUniverseClassFactory<
 		 * @param baseParams - Base parameters for default shard
 		 */
 		public constructor(
+			{ application, universeUuid }: CoreUniverseRequiredConstructorParameter,
 			{
-				application,
 				Base,
 				Cell,
 				Entity,
 				Grid,
-				Shard,
-				universeUuid
+				Shard
 			}: {
-				/**
-				 * App with state.
-				 */
-				application: Application;
-
 				/**
 				 * Base class.
 				 */
@@ -360,11 +410,6 @@ export function CoreUniverseClassFactory<
 				 * Shard class.
 				 */
 				Shard: CoreShardClass<BaseClass, Options, Grid, Shard>;
-
-				/**
-				 * Universe UUID.
-				 */
-				universeUuid: Uuid;
 			},
 			baseParams: ConstructorParameters<BaseClass>
 		) {

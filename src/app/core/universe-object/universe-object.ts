@@ -34,7 +34,7 @@ import {
 } from "../arg";
 import { coreArgGenerateDefaultUuid } from "../arg/uuid";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveInstance, CoreBaseNonRecursiveStatic } from "../base";
-import { CoreArgIndexableReader, CoreArgIndexer } from "../indexable";
+import { CoreArgIndexableReader } from "../indexable";
 import { CoreUniverseObjectInitializationParameter } from "./parameters";
 import { CoreUniverseObjectContainerInstance, CoreUniverseObjectContainerStatic } from "./universe-objects-container";
 import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectUniverse } from ".";

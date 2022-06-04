@@ -13,7 +13,7 @@ import {
 	ComputedClassWords
 } from "../../common/computed-class";
 
-import { ConcreteConstructorConstraint } from "../../common/utility-types";
+import { ConcreteConstructor, ConcreteConstructorConstraint } from "../../common/utility-types";
 import {
 	CoreArg,
 	CoreArgContainer,
@@ -102,9 +102,10 @@ export type CoreUniverseObjectContainerClass<
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
-	GrandparentIds extends CoreArgIds = never
+	GrandparentIds extends CoreArgIds = never,
+	ConstructorParams extends any[] = any[]
 > = CoreUniverseObjectContainerStatic<BaseClass, Instance, Arg, Id, Options, ParentId, GrandparentIds> &
-	ConcreteConstructorConstraint<Container>;
+	ConcreteConstructor<ConstructorParams, Container>;
 
 /**
  * Universe object container members.

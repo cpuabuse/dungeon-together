@@ -11,11 +11,15 @@
 
 import { urlPathSeparator } from "../../common/defaults";
 import { Uuid, getDefaultUuid } from "../../common/uuid";
+import { coreGenerateUuid } from "../uuid";
 import { CoreArgIds } from "./arg";
 import { coreArgObjectWords } from "./words";
 
 /**
- * @param param
+ * Generates unique ID-based UUID.
+ *
+ * @param param - Destructured parameter
+ * @returns New UUID
  */
 export function coreArgGenerateDefaultUuid<Id extends CoreArgIds>({
 	id,
@@ -31,7 +35,5 @@ export function coreArgGenerateDefaultUuid<Id extends CoreArgIds>({
 	 */
 	uuid: Uuid;
 }): Uuid {
-	return getDefaultUuid({
-		path: `${coreArgObjectWords[id].pluralLowercaseWord}${urlPathSeparator}${uuid}`
-	});
+	return coreGenerateUuid({ namespace: coreArgObjectWords[id].pluralLowercaseWord, path: uuid });
 }

@@ -23,7 +23,11 @@ import { CommsConnectionArgs } from "../core/connection";
 import { EntityPathExtended } from "../core/entity";
 import { GridPath } from "../core/grid";
 import { CommsShardArgs, ShardPath } from "../core/shard";
-import { CoreUniverse, CoreUniverseClassConcreteStatic, CoreUniverseParams } from "../core/universe";
+import {
+	CoreUniverse,
+	CoreUniverseClassConcreteStatic,
+	CoreUniverseRequiredConstructorParameter
+} from "../core/universe";
 import UniverseComponent from "../vue/universe.vue";
 import { ClientBaseClass, ClientBaseFactory } from "./base";
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
@@ -42,7 +46,7 @@ import "./gui/static-init";
 /**
  * Constructor args for client universe.
  */
-export interface ClientUniverseArgs extends CoreUniverseParams {
+export interface ClientUniverseArgs extends CoreUniverseRequiredConstructorParameter {
 	/**
 	 * HTML element.
 	 */

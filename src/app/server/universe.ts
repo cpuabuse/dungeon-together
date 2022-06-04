@@ -15,7 +15,11 @@ import { CommsConnectionArgs } from "../core/connection";
 import { EntityPathExtended } from "../core/entity";
 import { GridPath } from "../core/grid";
 import { ShardPath } from "../core/shard";
-import { CoreUniverse, CoreUniverseParams, CoreUniverseClassConcreteStatic } from "../core/universe";
+import {
+	CoreUniverse,
+	CoreUniverseRequiredConstructorParameter,
+	CoreUniverseClassConcreteStatic
+} from "../core/universe";
 import { ServerBaseClass, ServerBaseFactory } from "./base";
 import { ServerCell, ServerCellClass, ServerCellFactory } from "./cell";
 import { ServerConnection } from "./connection";
@@ -33,7 +37,7 @@ import { World } from "./world";
 /**
  * Constructor args for server universe.
  */
-export type ServerUniverseArgs = CoreUniverseParams;
+export type ServerUniverseArgs = CoreUniverseRequiredConstructorParameter;
 
 /**
  * Server-side shard.

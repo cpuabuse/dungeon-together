@@ -19,7 +19,9 @@ export type Uuid = string;
 /**
  * Generates default UUID.
  *
+ * @param param - Destructured parameter
  * @throws [[URL]] generates errors
+ *
  * @returns UUID
  */
 export function getDefaultUuid({

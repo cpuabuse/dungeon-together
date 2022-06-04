@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,9 +7,10 @@
  * @file File for application with a shared state.
  */
 
-import { DestructureParameters } from "../common/utility-types";
+import { Uuid } from "../common/uuid";
 import { CoreState } from "./state";
-import { CoreUniverse, CoreUniverseClassConcreteStatic } from "./universe";
+import { CoreUniverseClassNonRecursive, CoreUniverseInstanceNonRecursive, universeNamespace } from "./universe";
+import { coreGenerateUuid } from "./uuid";
 
 /**
  * An application, to be extended.
@@ -23,47 +24,32 @@ export class Application {
 	/**
 	 * Universes array.
 	 */
-	private universes: Array<CoreUniverse> = new Array<CoreUniverse>();
+	private universes: Map<Uuid, CoreUniverseInstanceNonRecursive> = new Map();
 
 	/**
 	 * Adds the universe to the application.
 	 *
+	 * @param param - Destructured parameter
 	 * @returns Created universe
 	 */
-	public async addUniverse<C extends CoreUniverseClassConcreteStatic<InstanceType<C>>>({
+	public addUniverse<U extends CoreUniverseInstanceNonRecursive, R extends any[]>({
 		args,
 		Universe
-	}: keyof DestructureParameters<C> extends "application"
-		? {
-				/**
-				 * Constructor args.
-				 */
-				args?: Record<"string", never>;
+	}: {
+		/**
+		 * Array for rest elements in the constructor of the universe.
+		 */
+		args: R;
 
-				/**
-				 * Universe class.
-				 */
-				Universe: C;
-		  }
-		: {
-				/**
-				 * Constructor args.
-				 */
-				args: Omit<DestructureParameters<C>, "application">;
+		/**
+		 * Universe class.
+		 */
+		Universe: CoreUniverseClassNonRecursive<U>;
+	}): U {
+		let universeUuid: Uuid = coreGenerateUuid({ namespace: universeNamespace, path: this.universes.size.toString() });
+		let universe: U = new Universe({ application: this, universeUuid }, ...args);
+		this.universes.set(universeUuid, universe);
 
-				/**
-				 * Universe.
-				 */
-				Universe: C;
-		  }): Promise<InstanceType<C>> {
-		let universe: InstanceType<C> = new Universe({ application: this, ...args });
-		this.universes.push(universe);
-		// TS will infer the type of resolve parameter from generic
-		// eslint-disable-next-line @typescript-eslint/typedef
-		return new Promise<InstanceType<C>>(function (resolve) {
-			setTimeout(function () {
-				resolve(universe);
-			});
-		});
+		return universe;
 	}
 }
