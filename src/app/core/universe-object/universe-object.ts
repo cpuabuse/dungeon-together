@@ -14,9 +14,8 @@ import {
 	ComputedClassWords,
 	computedClassDeepMerge
 } from "../../common/computed-class";
-import { urlPathSeparator } from "../../common/defaults";
 import { ConcreteConstructor, ConditionalObject, MaybeDefined } from "../../common/utility-types";
-import { Uuid, getDefaultUuid } from "../../common/uuid";
+import { Uuid } from "../../common/uuid";
 import {
 	CoreArg,
 	CoreArgComplexOptionPathIds,
@@ -33,6 +32,7 @@ import {
 	coreArgIdToPathUuidPropertyName,
 	coreArgObjectWords
 } from "../arg";
+import { coreArgGenerateDefaultUuid } from "../arg/uuid";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveInstance, CoreBaseNonRecursiveStatic } from "../base";
 import { CoreArgIndexableReader, CoreArgIndexer } from "../indexable";
 import { CoreUniverseObjectInitializationParameter } from "./parameters";
@@ -133,7 +133,7 @@ export type CoreUniverseObjectStatic<
 		[K in `convert${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: Converter;
 	} & {
 		[K in `getDefault${CoreArgObjectWords[ChildId]["singularCapitalizedWord"]}Uuid`]: (
-			path: CoreArgPath<Id, CoreArgOptionsPathOwn, ParentId | GrandparentIds>
+			path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
 		) => Uuid;
 	} & ([ChildId] extends [never]
 			? ComputedClassEmptyObject
@@ -385,7 +385,6 @@ export function generateCoreUniverseObjectMembers<
 	const nameTerminateUniverseObject = `terminate${words.singularCapitalizedWord}` as const; // Name of remove universe object function
 	const nameUniverseObjectUuid = coreArgIdToPathUuidPropertyName({ id }); // Name of universe object UUID
 	const nameMoveUniverseObject = `move${words.singularCapitalizedWord}` as const; // Name of move universe object function
-	const universeObjectsUuidPath = `pluralLowercaseWord` as const; // Name of universe object UUID
 	/* eslint-enable @typescript-eslint/typedef */
 
 	// Extract child members type
@@ -417,6 +416,18 @@ export function generateCoreUniverseObjectMembers<
 					isPresent: true as const,
 
 					value: (() => {
+						/**
+						 * Universe for child.
+						 */
+						type ChildUniverse = CoreUniverseObjectUniverse<
+							BaseClass,
+							ChildInstance,
+							ChildArg,
+							ChildId,
+							Options,
+							Id | ParentId | GrandparentIds
+						>;
+
 						// Words to be used for child, if not child, then null
 						const childWords: {
 							/**
@@ -436,6 +447,11 @@ export function generateCoreUniverseObjectMembers<
 						const nameAttachChildUniverseObjects = `attach${childWords.singularCapitalizedWord}` as const; // Name of universe objects member
 						const nameAddChildUniverseObject = `add${childWords.singularCapitalizedWord}` as const; // Name of universe objects member
 						const nameChildUniverseObjectClass = `${childWords.singularCapitalizedWord}` as const; // Name of child class
+						const nameAttachChildUniverseObject = `attach${childWords.singularCapitalizedWord}` as const; // Name of attach universe object function
+						const nameDetachUniverseObject = `detach${childWords.singularCapitalizedWord}` as const; // Name of detach universe object function
+						const childPathUuidPropertyName: CoreArgPathUuidPropertyName<ChildId> = coreArgIdToPathUuidPropertyName({
+							id: childId
+						}); // UUID property name within a path
 
 						return {
 							[ComputedClassWords.Instance]: {
@@ -458,7 +474,7 @@ export function generateCoreUniverseObjectMembers<
 										// eslint-disable-next-line @typescript-eslint/require-await
 										value(
 											this: Instance,
-											childArgs: CoreUniverseObjectConstructorParameters<
+											...childArgs: CoreUniverseObjectConstructorParameters<
 												BaseClass,
 												ChildArg,
 												ChildId,
@@ -488,19 +504,80 @@ export function generateCoreUniverseObjectMembers<
 													this[nameAttachChildUniverseObjects](child);
 												});
 
-											child = new (
-												(this.constructor as CoreBaseClassNonRecursive).universe as CoreUniverseObjectUniverse<
-													BaseClass,
-													ChildInstance,
-													ChildArg,
-													ChildId,
-													Options,
-													Id | ParentId | GrandparentIds
-												>
-											)[nameChildUniverseObjectClass](...childArgs);
+											child = new ((this.constructor as CoreBaseClassNonRecursive).universe as ChildUniverse)[
+												nameChildUniverseObjectClass
+											](...childArgs);
 
 											return child;
 										}
+									},
+
+									attachChildUniverseObject: {
+										[ComputedClassWords.Name]: nameAttachChildUniverseObject,
+
+										/**
+										 * Attaches child universe object.
+										 *
+										 * @param this - This instance
+										 * @param universeObject - Child universe object
+										 * @param initializationParameter - Initialization parameter
+										 */
+										[ComputedClassWords.Value]:
+											options[CoreArgOptionIds.Path] ===
+											coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
+												? function (this: Instance, universeObject: ChildInstance): void {
+														// Deal with universe object
+														(this as InstanceWithChild)[nameChildUniverseObjects].set(
+															universeObject[childPathUuidPropertyName],
+															universeObject
+														);
+
+														// Deal with universe
+														((this.constructor as CoreBaseClassNonRecursive).universe as ChildUniverse)[
+															nameChildUniverseObjects
+														].set(universeObject[childPathUuidPropertyName], universeObject);
+												  }
+												: function (this: Instance, universeObject: ChildInstance): void {
+														(this as InstanceWithChild)[nameChildUniverseObjects].set(
+															universeObject[childPathUuidPropertyName],
+															universeObject
+														);
+												  }
+									},
+
+									detachChildUniverseObject: {
+										[ComputedClassWords.Name]: nameDetachUniverseObject,
+
+										/**
+										 * Detaches child universe object.
+										 *
+										 * @param this - This instance
+										 * @param path - Child universe object
+										 */
+										[ComputedClassWords.Value]:
+											options[CoreArgOptionIds.Path] ===
+											coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
+												? function (
+														this: Instance,
+														path: CoreArgPath<ChildId, Options, Id | ParentId | GrandparentIds>
+												  ): void {
+														(this as InstanceWithChild)[nameChildUniverseObjects].delete(
+															path[childPathUuidPropertyName]
+														);
+
+														// Deal with universe
+														((this.constructor as CoreBaseClassNonRecursive).universe as ChildUniverse)[
+															nameChildUniverseObjects
+														].delete(path[childPathUuidPropertyName]);
+												  }
+												: function (
+														this: Instance,
+														path: CoreArgPath<ChildId, Options, Id | ParentId | GrandparentIds>
+												  ): void {
+														(this as InstanceWithChild)[nameChildUniverseObjects].delete(
+															path[childPathUuidPropertyName]
+														);
+												  }
 									},
 
 									terminateUniverseObject: {
@@ -533,10 +610,8 @@ export function generateCoreUniverseObjectMembers<
 										 * @param path - Universe object own path
 										 * @returns Default universe object UUID
 										 */
-										value(this: Class, path: CoreArgPath<Id, CoreArgOptionsPathOwn, ParentId | GrandparentIds>): Uuid {
-											return getDefaultUuid({
-												path: `${universeObjectsUuidPath}${urlPathSeparator}${path[nameUniverseObjectUuid]}`
-											});
+										value(this: Class, path: CoreArgPath<Id, Options, ParentId | GrandparentIds>): Uuid {
+											return coreArgGenerateDefaultUuid({ id, uuid: path[nameUniverseObjectUuid] });
 										}
 									}
 								}
@@ -569,6 +644,11 @@ export function generateCoreUniverseObjectMembers<
 						type ParentGrandparentIds = never;
 
 						/**
+						 * Used for semantics.
+						 */
+						type ParentArg = CoreArgContainerArg<ParentId, Options, ParentParentId | ParentGrandparentIds, Arg, Id>;
+
+						/**
 						 * Parent's instance.
 						 *
 						 * @remarks
@@ -577,7 +657,7 @@ export function generateCoreUniverseObjectMembers<
 						 */
 						type ParentInstance = CoreUniverseObjectInstance<
 							BaseClass,
-							CoreArgContainerArg<ParentId, Options, ParentParentId | ParentGrandparentIds, Arg, Id>,
+							ParentArg,
 							ParentId,
 							Options,
 							ParentParentId,
@@ -592,11 +672,12 @@ export function generateCoreUniverseObjectMembers<
 						 *
 						 * @see {@link ParentInstance}
 						 */
-						type ParentUniverse = CoreArgIndexer<
+						type ParentUniverse = CoreUniverseObjectUniverse<
+							BaseClass,
 							ParentInstance,
+							ParentArg,
 							ParentId,
 							Options,
-							// Parents unknown
 							ParentParentId | ParentGrandparentIds
 						>;
 
@@ -752,14 +833,21 @@ export function generateCoreUniverseObjectMembers<
 				// Deal with default child
 				let defaultChildCreated: DeferredPromise = new DeferredPromise();
 
-				// Casting `as ChildInstance`, since TS for some reason, does not correctly identify a type of intersection of multiple generic keys
+				// BUG: Casting `as ChildInstance`, since TS for some reason, does not correctly identify a type of intersection of multiple generic keys
 				((that as InstanceWithChild)[nameDefaultChildUniverseObject] as ChildInstance) =
 					// Default child created synchronously, before other children
-					(that as InstanceWithChild)[nameAddChildUniverseObject]([
-						defaultChildArg,
-						{ attachHook, created: defaultChildCreated },
-						superParams
-					]);
+					// BUG: Similarly to access to `that`, TS does not correctly infer return value from intersection of types with multiple generic keys, so have to manually cast to a function of correct type
+					(
+						(that as InstanceWithChild)[nameAddChildUniverseObject] as (
+							...childArgs: CoreUniverseObjectConstructorParameters<
+								BaseClass,
+								ChildArg,
+								ChildId,
+								Options,
+								Id | ParentId | GrandparentIds
+							>
+						) => ChildInstance
+					)(defaultChildArg, { attachHook, created: defaultChildCreated }, superParams);
 
 				// Deal with normal children
 				Promise.all([
@@ -775,11 +863,11 @@ export function generateCoreUniverseObjectMembers<
 
 						// Timeout to avoid freezing
 						setTimeout(() => {
-							(that as InstanceWithChild)[nameAddChildUniverseObject]([
+							(that as InstanceWithChild)[nameAddChildUniverseObject](
 								childArg,
 								{ attachHook, created: childCreated },
 								superParams
-							]);
+							);
 						});
 
 						return childCreated;

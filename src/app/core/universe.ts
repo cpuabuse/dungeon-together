@@ -7,12 +7,15 @@
  * @file Core universe.
  */
 
+import { DeferredPromise } from "../common/async";
 import {
 	ComputedClassExtractInstance,
 	computedClassInjectPerClass,
 	computedClassInjectPerInstance
 } from "../common/computed-class";
+import { defaultShardUuid, defaultUuidUrlKeyword } from "../common/defaults";
 import { StaticImplements, ToAbstract } from "../common/utility-types";
+import { Uuid, getDefaultUuid } from "../common/uuid";
 import { Application } from "./application";
 import {
 	CoreArg,
@@ -31,6 +34,7 @@ import {
 	coreArgIdToPathUuidPropertyName,
 	coreArgObjectWords
 } from "./arg";
+import { coreArgGenerateDefaultUuid } from "./arg/uuid";
 import { CoreBaseClassNonRecursive } from "./base";
 import {
 	CellPathOwn,
@@ -66,26 +70,16 @@ import {
 	CoreShardArgParentId,
 	CoreShardArgParentIds,
 	CoreShardClass,
-	CoreShardInstance
+	CoreShardInstance,
+	ShardPathOwn
 } from "./shard";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectConstructorParameters,
 	CoreUniverseObjectContainerClass,
-	CoreUniverseObjectContainerInstance,
 	CoreUniverseObjectUniverse,
 	generateCoreUniverseObjectContainerMembers
 } from "./universe-object";
-
-/**
- * Classes extending core universe to have the constructor signature.
- */
-export interface CoreUniverseParams {
-	/**
-	 * App with state.
-	 */
-	application: Application;
-}
 
 /**
  * Core universe class.
@@ -99,24 +93,15 @@ export type CoreUniverse<
 	Cell extends CoreCellInstance<BaseClass, Options, Entity> = CoreCellInstance<BaseClass, Options, Entity>,
 	Grid extends CoreGridInstance<BaseClass, Options, Cell> = CoreGridInstance<BaseClass, Options, Cell>,
 	Shard extends CoreShardInstance<BaseClass, Options, Grid> = CoreShardInstance<BaseClass, Options, Grid>
-> = CoreUniverseObjectContainerInstance<
+> = CoreUniverseObjectUniverse<
 	BaseClass,
-	Shard,
-	CoreShardArg<Options>,
-	CoreArgIds.Shard,
+	Entity,
+	CoreEntityArg<Options>,
+	CoreArgIds.Entity,
 	Options,
-	CoreShardArgParentId,
-	CoreShardArgGrandparentIds
+	CoreEntityArgParentId,
+	CoreEntityArgGrandparentIds
 > &
-	CoreUniverseObjectUniverse<
-		BaseClass,
-		Entity,
-		CoreEntityArg<Options>,
-		CoreArgIds.Entity,
-		Options,
-		CoreEntityArgParentId,
-		CoreEntityArgGrandparentIds
-	> &
 	CoreUniverseObjectUniverse<
 		BaseClass,
 		Cell,
@@ -191,14 +176,8 @@ export function CoreUniverseClassFactory<
 	Grid extends CoreGridInstance<BaseClass, Options, Cell> = CoreGridInstance<BaseClass, Options, Cell>,
 	Shard extends CoreShardInstance<BaseClass, Options, Grid> = CoreShardInstance<BaseClass, Options, Grid>
 >({
-	Base,
 	options
 }: {
-	/**
-	 * Base class.
-	 */
-	Base: BaseClass;
-
 	/**
 	 * Options.
 	 */
@@ -254,13 +233,15 @@ export function CoreUniverseClassFactory<
 		implements
 			StaticImplements<ToAbstract<CoreUniverseClass<BaseClass, Options, Entity, Cell, Grid, Shard>>, typeof Universe>
 	{
-		public abstract Cell: CoreCellClass<BaseClass, Options, Entity, Cell>;
+		public Base: BaseClass;
 
-		public abstract Entity: CoreEntityClass<BaseClass, Options, Entity>;
+		public Cell: CoreCellClass<BaseClass, Options, Entity, Cell>;
 
-		public abstract Grid: CoreGridClass<BaseClass, Options, Cell, Grid>;
+		public Entity: CoreEntityClass<BaseClass, Options, Entity>;
 
-		public abstract Shard: CoreShardClass<BaseClass, Options, Grid, Shard>;
+		public Grid: CoreGridClass<BaseClass, Options, Cell, Grid>;
+
+		public Shard: CoreShardClass<BaseClass, Options, Grid, Shard>;
 
 		/**
 		 * Application.
@@ -292,7 +273,7 @@ export function CoreUniverseClassFactory<
 		/**
 		 * Default shard.
 		 */
-		public abstract defaultShard: Shard;
+		public defaultShard: Shard;
 
 		public detachCell!: Options extends CoreArgOptionsPathOwnUnion ? (path: CellPathOwn) => void : never;
 
@@ -332,13 +313,73 @@ export function CoreUniverseClassFactory<
 			? CoreArgIndexer<Grid, CoreArgIds.Grid, Options, CoreGridArgParentIds>["grids"]
 			: never;
 
+		public universeUuid: Uuid;
+
 		/**
 		 * Constructs the universe core.
 		 *
 		 * @param param - Destructured parameters
+		 * @param baseParams - Base parameters for default shard
 		 */
-		public constructor({ application }: CoreUniverseParams) {
+		public constructor(
+			{
+				application,
+				Base,
+				Cell,
+				Entity,
+				Grid,
+				Shard,
+				universeUuid
+			}: {
+				/**
+				 * App with state.
+				 */
+				application: Application;
+
+				/**
+				 * Base class.
+				 */
+				Base: BaseClass;
+
+				/**
+				 * Cell class.
+				 */
+				Cell: CoreCellClass<BaseClass, Options, Entity, Cell>;
+
+				/**
+				 * Entity class.
+				 */
+				Entity: CoreEntityClass<BaseClass, Options, Entity>;
+
+				/**
+				 * Grid class.
+				 */
+				Grid: CoreGridClass<BaseClass, Options, Cell, Grid>;
+
+				/**
+				 * Shard class.
+				 */
+				Shard: CoreShardClass<BaseClass, Options, Grid, Shard>;
+
+				/**
+				 * Universe UUID.
+				 */
+				universeUuid: Uuid;
+			},
+			baseParams: ConstructorParameters<BaseClass>
+		) {
+			// Universe UUID
+			this.universeUuid = universeUuid;
+
+			// Application
 			this.application = application;
+
+			// Classes
+			this.Base = Base;
+			this.Shard = Shard;
+			this.Grid = Grid;
+			this.Cell = Cell;
+			this.Entity = Entity;
 
 			// Own path specific
 			if (
@@ -397,17 +438,95 @@ export function CoreUniverseClassFactory<
 				members: membersWithChild,
 				parameters: []
 			});
+
+			// Default shard
+			let defaultShardCreated: DeferredPromise = new DeferredPromise();
+			let defaultShardAttach: Promise<void> = new Promise((resolve, reject) => {
+				defaultShardCreated.then(resolve).catch(reject);
+			});
+			let defaultShardArg: CoreShardArg<Options> = {
+				grids: new Map(),
+				shardUuid: this.getDefaultShardUuid()
+			} as CoreShardArg<Options>;
+			this.defaultShard = this.addShard(
+				defaultShardArg,
+				{ attachHook: defaultShardAttach, created: defaultShardCreated },
+				baseParams
+			);
 		}
 
-		public abstract addShard(
-			shardArgs: CoreUniverseObjectConstructorParameters<
+		/**
+		 * Adds shard.
+		 *
+		 * @param this - Universe
+		 * @param  shardArgs - Arguments for shard constructor
+		 * @returns Resulting shard
+		 */
+		public addShard(
+			this: Universe,
+			...shardArgs: CoreUniverseObjectConstructorParameters<
 				BaseClass,
 				CoreShardArg<Options>,
 				CoreArgIds.Shard,
 				Options,
 				CoreShardArgParentIds
 			>
-		): Shard;
+		): Shard {
+			let shard: Shard;
+			// ESLint buggy for nested destructured params
+			// eslint-disable-next-line @typescript-eslint/typedef
+			let [, { attachHook }]: CoreUniverseObjectConstructorParameters<
+				BaseClass,
+				CoreShardArg<Options>,
+				CoreArgIds.Shard,
+				Options,
+				CoreShardArgParentIds
+			> = shardArgs;
+
+			// Attach hook, delayed to replicate behavior of attach for other universe objects, when path is own
+			attachHook
+				.catch(() => {
+					// TODO: Log error
+				})
+				.finally(() => {
+					this.attachShard(shard);
+				});
+
+			// Create shard
+			shard = new this.Shard(...shardArgs);
+
+			// Return
+			return shard;
+		}
+
+		/**
+		 * Attaches shard.
+		 *
+		 * @param shard - Shard
+		 */
+		public attachShard(shard: Shard): void {
+			this.shards.set(shard.shardUuid, shard);
+		}
+
+		/**
+		 * Detaches shard.
+		 *
+		 * @param path - Shard own path
+		 */
+		public detachShard(path: ShardPathOwn): void {
+			this.shards.delete(path.shardUuid);
+		}
+
+		/**
+		 * Gets default shard UUID.
+		 *
+		 * @returns Shard UUID
+		 */
+		// To be potentially overridden
+		// eslint-disable-next-line class-methods-use-this
+		public getDefaultShardUuid(): Uuid {
+			return coreArgGenerateDefaultUuid({ id: CoreArgIds.Shard, uuid: this.universeUuid });
+		}
 	}
 
 	/**
@@ -639,7 +758,7 @@ export function CoreUniverseClassFactory<
 
 	// Inject static
 	computedClassInjectPerClass({
-		Base,
+		Base: Universe,
 		members: membersWithChild,
 		// Nothing required
 		parameters: []

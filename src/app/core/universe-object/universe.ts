@@ -19,12 +19,15 @@ import { CoreBaseClassNonRecursive } from "../base";
 import { CoreArgIndexableReader, CoreArgIndexer } from "../indexable";
 import { CoreUniverseObjectArgsOptionsUnion } from "./options";
 import { CoreUniverseObjectClass, CoreUniverseObjectInstance } from "./universe-object";
+import { CoreUniverseObjectContainerInstance } from "./universe-objects-container";
 
 /**
  * A universe constraint from perspective of universe object.
  *
  * @remarks
  * For class, this is to be treated like more of a constructor, an object that creates us universe objects, and does not have static type information.
+ *
+ * If we want to access it is a reader, or an indexer, cast it as such, if conditions are known.
  */
 export type CoreUniverseObjectUniverse<
 	BaseClass extends CoreBaseClassNonRecursive,
@@ -69,8 +72,8 @@ export type CoreUniverseObjectUniverse<
 		ChildId
 	>;
 } & ([ParentId] extends [never]
-	? CoreArgIndexableReader<Instance, Id, Options, ParentId | GrandparentIds>
-	: {
+	? CoreUniverseObjectContainerInstance<BaseClass, Instance, Arg, Id, Options, ParentId, GrandparentIds>
+	: CoreArgIndexableReader<Instance, Id, Options, ParentId | GrandparentIds> & {
 			[K in keyof CoreArgIndexer<
 				Instance,
 				Id,

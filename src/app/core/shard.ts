@@ -379,6 +379,8 @@ export function CoreShardClassFactory<
 
 			// Create child arg, then attach conditional props
 			let defaultGridArg: CoreGridArg<Options> = {
+				cells: new Map(),
+
 				// Ensures getting uuid from subclass
 				gridUuid: (Shard.constructor as typeof Shard).getDefaultGridUuid(this),
 

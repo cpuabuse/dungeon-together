@@ -52,14 +52,14 @@ export type CoreUniverseObjectContainerInstance<
 	// Includes container
 	CoreArgIndexer<Instance, Id, Options, ParentId | GrandparentIds> &
 		CoreArgIndexableReader<Instance, Id, Options, ParentId | GrandparentIds> & {
+			// Necessary to implement where the created child is known, to call attach
+			[K in `add${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
+				...childArgs: CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>
+			) => Instance;
+		} & {
 			[K in `remove${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
 				path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
 			) => void;
-		} & {
-			// Necessary to implement where the created child is known, to call attach
-			[K in `add${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-				childArgs: CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>
-			) => Instance;
 		}
 >;
 
@@ -177,9 +177,8 @@ export function generateCoreUniverseObjectContainerMembers<
 	const nameGetUniverseObject = `get${singularCapitalizedWord}` as const; // Name of get universe object function
 	const nameRemoveUniverseObject = `remove${singularCapitalizedWord}` as const; // Name of remove universe object function
 	const nameUniverseObjects = `${pluralLowercaseWord}` as const; // Name of universe objects member
-	const nameAttachUniverseObject = `attach${singularCapitalizedWord}` as const; // Name of attach universe object function
+	const nameDefaultUniverseObject = `default${singularCapitalizedWord}` as const; // Name of default universe object
 	const nameDetachUniverseObject = `detach${singularCapitalizedWord}` as const; // Name of detach universe object function
-	const nameAbstractDefaultUniverseObject = `default${singularCapitalizedWord}` as const; // Name of default universe object
 	/* eslint-enable @typescript-eslint/typedef */
 	const pathUuidPropertyName: CoreArgPathUuidPropertyName<Id> = coreArgIdToPathUuidPropertyName({
 		id
@@ -198,37 +197,6 @@ export function generateCoreUniverseObjectContainerMembers<
 	const members = {
 		[ComputedClassWords.Instance]: {
 			[ComputedClassWords.Assign]: {
-				attachChildUniverseObject: {
-					[ComputedClassWords.Name]: nameAttachUniverseObject,
-
-					/**
-					 * Attaches child universe object.
-					 *
-					 * @param this - This instance
-					 * @param universeObject - Child universe object
-					 * @param initializationParameter - Initialization parameter
-					 */
-					[ComputedClassWords.Value](this: ThisInstance, universeObject: Instance): void {
-						this[nameUniverseObjects].set(universeObject[pathUuidPropertyName], universeObject);
-					}
-				},
-
-				detachChildUniverseObject: {
-					[ComputedClassWords.Name]: nameDetachUniverseObject,
-
-					/**
-					 * Detaches child universe object.
-					 *
-					 * @param this - This instance
-					 * @param path - Child universe object
-					 */
-					[ComputedClassWords.Value](
-						this: ThisInstance,
-						path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
-					): void {
-						this[nameUniverseObjects].delete(path[pathUuidPropertyName]);
-					}
-				},
 				getUniverseObject: {
 					[ComputedClassWords.Name]: nameGetUniverseObject,
 					/**
@@ -246,7 +214,7 @@ export function generateCoreUniverseObjectContainerMembers<
 						path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
 					): Instance {
 						let universeObject: Instance | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
-						return universeObject === undefined ? this[nameAbstractDefaultUniverseObject] : universeObject;
+						return universeObject === undefined ? this[nameDefaultUniverseObject] : universeObject;
 					}
 				},
 				removeUniverseObject: {
@@ -264,7 +232,7 @@ export function generateCoreUniverseObjectContainerMembers<
 						this: ThisInstance,
 						path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
 					): void {
-						this[nameUniverseObjects].delete(path[pathUuidPropertyName]);
+						this[nameDetachUniverseObject](path);
 					}
 				}
 			},

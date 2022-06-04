@@ -390,6 +390,8 @@ export function CoreGridClassFactory<
 				// Ensures getting uuid from subclass
 				cellUuid: (Grid.constructor as typeof Grid).getDefaultCellUuid(this),
 
+				entities: new Map(),
+
 				// Extended path
 				...(options[CoreArgOptionIds.Path] ===
 				coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
