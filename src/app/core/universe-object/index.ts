@@ -27,6 +27,8 @@ export * from "./parameters";
  * - Base itself should have `any[]` arguments, so that final arguments are produced same as mixin
  * - Generic universe object has children listed last in arguments, as they are optionally present, while ID-determined universe objects are optionally aware of themselves or their parents, but chain depend on children, so order is inverted
  *
+ * Type check for implementation of an arg, to happen through universe, as it should expect generic class, from instance intersected with arg.
+ *
  * @remarks
  * This is for documentation purposes only.
  */

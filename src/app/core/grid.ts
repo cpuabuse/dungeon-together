@@ -193,7 +193,8 @@ export type CoreGridInstance<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	// `any` effectively means being agnostic to grandchildren, as generic expression is not dependent on it
-	Cell extends CoreCellInstance<BaseClass, Options, any> = CoreCellInstance<BaseClass, Options>
+	Cell extends CoreCellInstance<BaseClass, Options, any> = CoreCellInstance<BaseClass, Options>,
+	HasNever extends boolean = false
 > = CoreUniverseObjectInstance<
 	BaseClass,
 	CoreGridArg<Options>,
@@ -205,7 +206,8 @@ export type CoreGridInstance<
 	CoreCellArg<Options>,
 	CoreArgIds.Cell
 > &
-	Vector;
+	Vector &
+	(HasNever extends true ? unknown : CoreGridArg<Options>);
 
 /**
  * Core grid class.
@@ -215,7 +217,7 @@ export type CoreGridClass<
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	// `any` effectively means being agnostic to grandchildren, as generic expression is not dependent on it
 	Cell extends CoreCellInstance<BaseClass, Options, any> = CoreCellInstance<BaseClass, Options>,
-	Grid extends CoreGridInstance<BaseClass, Options, Cell> = CoreGridInstance<BaseClass, Options, Cell>
+	Grid extends CoreGridInstance<BaseClass, Options, Cell, true> = CoreGridInstance<BaseClass, Options, Cell, true>
 > = CoreUniverseObjectClass<
 	BaseClass,
 	Grid,

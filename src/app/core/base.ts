@@ -7,8 +7,8 @@
  * @file File for custom prototype chain.
  */
 
+import { ConcreteConstructor } from "../common/utility-types";
 import { CoreUniverseInstanceNonRecursive } from "./universe";
-import { CoreUniverseObjectArgsOptionsUnion } from "./universe-object";
 
 /**
  * Non-recursive minimal outline for base instance.
@@ -35,13 +35,6 @@ export interface CoreBaseNonRecursiveStatic {
 export type CoreBaseNonRecursiveParameters = any[];
 
 /**
- * To merge with base prototype implementation.
- */
-// TODO: Remove this
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export type CoreBase<Options extends CoreUniverseObjectArgsOptionsUnion> = CoreBaseNonRecursiveInstance;
-
-/**
  * Non-recursive class type for core base.
  *
  * **Class**
@@ -57,18 +50,5 @@ export type CoreBase<Options extends CoreUniverseObjectArgsOptionsUnion> = CoreB
  *
  * To summarize, core factory generic parameter can extend only non-recursive base. {@link CoreBaseNonRecursiveInstance} provides at least some type constraints.
  */
-export type CoreBaseClassNonRecursive = CoreBaseNonRecursiveStatic & {
-	new (...args: any[]): CoreBaseNonRecursiveInstance;
-};
-
-/**
- * Class type for core base.
- */
-export interface CoreBaseClass<Options extends CoreUniverseObjectArgsOptionsUnion> extends CoreBaseNonRecursiveStatic {
-	/**
-	 * Universe;
-	 */
-	universe: CoreUniverseInstanceNonRecursive;
-
-	new (...args: any[]): CoreBase<Options>;
-}
+export type CoreBaseClassNonRecursive = CoreBaseNonRecursiveStatic &
+	ConcreteConstructor<CoreBaseNonRecursiveParameters, CoreBaseNonRecursiveInstance>;

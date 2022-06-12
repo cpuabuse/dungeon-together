@@ -31,13 +31,13 @@ type NameType = string | number | symbol;
  *
  * @see {@link ComputedClassEmptyObject}
  */
-type EmptyObject = Record<NameType, unknown>;
+type EmptyObject = Record<any, unknown>;
 
 /**
  * For type constraint, when conditional type is empty.
  *
  * @remarks
- * It seems if `Record<any, unknown>` were to be used instead of object, information about another type in condition would be preserved, allowing better inference (generic type with grandparents would satisfy constraint without). That leaves the signature in the type, so to implement it, {@link ComputedClassOmitConditionalEmptyObject} should be used.
+ * It seems if `Record<any, unknown>` is used instead of just object, information about conditional types would be preserved, allowing better inference (generic type with grandparents would satisfy constraint without). That leaves the signature in the type, so to implement it, {@link ComputedClassOmitConditionalEmptyObject} should be used.
  * `object` is also injected, to guarantee unknown is not produced, for when consuming.
  */
 export type ComputedClassEmptyObject = object & EmptyObject;

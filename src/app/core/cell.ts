@@ -225,7 +225,8 @@ export type CellPathExtended = CoreArgPath<CoreArgIds.Cell, CoreArgOptionsPathEx
 export type CoreCellInstance<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Entity extends CoreEntityInstance<BaseClass, Options> = CoreEntityInstance<BaseClass, Options>
+	Entity extends CoreEntityInstance<BaseClass, Options> = CoreEntityInstance<BaseClass, Options>,
+	HasNever extends boolean = false
 > = {
 	/**
 	 * Worlds.
@@ -250,7 +251,8 @@ export type CoreCellInstance<
 		Entity,
 		CoreEntityArg<Options>,
 		CoreArgIds.Entity
-	>;
+	> &
+	(HasNever extends true ? unknown : CoreCellArg<Options>);
 
 /**
  * Core cell class.
@@ -259,7 +261,7 @@ export type CoreCellClass<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	Entity extends CoreEntityInstance<BaseClass, Options> = CoreEntityInstance<BaseClass, Options>,
-	Cell extends CoreCellInstance<BaseClass, Options, Entity> = CoreCellInstance<BaseClass, Options, Entity>
+	Cell extends CoreCellInstance<BaseClass, Options, Entity, true> = CoreCellInstance<BaseClass, Options, Entity, true>
 > = CoreUniverseObjectClass<
 	BaseClass,
 	Cell,

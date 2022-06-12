@@ -170,7 +170,8 @@ export type CoreShardInstance<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	// `any` effectively means being agnostic to grandchildren, as generic expression is not dependent on it
-	Grid extends CoreGridInstance<BaseClass, Options, any> = CoreGridInstance<BaseClass, Options>
+	Grid extends CoreGridInstance<BaseClass, Options, any> = CoreGridInstance<BaseClass, Options>,
+	HasNever extends boolean = false
 > = CoreUniverseObjectInstance<
 	BaseClass,
 	CoreShardArg<Options>,
@@ -181,7 +182,8 @@ export type CoreShardInstance<
 	Grid,
 	CoreGridArg<Options>,
 	CoreArgIds.Grid
->;
+> &
+	(HasNever extends true ? unknown : CoreShardArg<Options>);
 
 /**
  * Core shard class.
@@ -191,7 +193,7 @@ export type CoreShardClass<
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	// `any` effectively means being agnostic to grandchildren, as generic expression is not dependent on it
 	Grid extends CoreGridInstance<BaseClass, Options, any> = CoreGridInstance<BaseClass, Options>,
-	Shard extends CoreShardInstance<BaseClass, Options, Grid> = CoreShardInstance<BaseClass, Options, Grid>
+	Shard extends CoreShardInstance<BaseClass, Options, Grid, true> = CoreShardInstance<BaseClass, Options, Grid, true>
 > = CoreUniverseObjectClass<
 	BaseClass,
 	Shard,

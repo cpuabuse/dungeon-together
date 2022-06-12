@@ -160,7 +160,8 @@ export type EntityPathExtended = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPa
  */
 export type CoreEntityInstance<
 	BaseClass extends CoreBaseClassNonRecursive,
-	Options extends CoreUniverseObjectArgsOptionsUnion
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	HasNever extends boolean = false
 > = {
 	/**
 	 * Entity kind.
@@ -183,7 +184,8 @@ export type CoreEntityInstance<
 	Options,
 	CoreEntityArgParentId,
 	CoreEntityArgGrandparentIds
->;
+> &
+	(HasNever extends true ? unknown : CoreEntityArg<Options>);
 
 /**
  * Core entity.
@@ -191,7 +193,7 @@ export type CoreEntityInstance<
 export type CoreEntityClass<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Entity extends CoreEntityInstance<BaseClass, Options> = CoreEntityInstance<BaseClass, Options>
+	Entity extends CoreEntityInstance<BaseClass, Options, true> = CoreEntityInstance<BaseClass, Options, true>
 > = CoreUniverseObjectClass<
 	BaseClass,
 	Entity,

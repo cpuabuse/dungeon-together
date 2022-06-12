@@ -14,8 +14,9 @@
 		"tock",
 		"destructure",
 		"destructured",
-		"sgce",
-		"endregion"
+		"endregion",
+		"trit",
+		"vsocket"
 	],
 	"yaml.schemas": {
 		"./schema/dt.yml.json": ["*.dt.yml"]

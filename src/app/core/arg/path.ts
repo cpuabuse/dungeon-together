@@ -37,7 +37,7 @@ export type CoreArgPathUuidPropertyName<I extends CoreArgIds> = `${CoreArgObject
  * Generates UUIDs in core arg.
  */
 export type CoreArgPathOwnOrExtended<I extends CoreArgIds> = {
-	[K in CoreArgPathUuidPropertyName<I> as K]: Uuid;
+	[K in CoreArgPathUuidPropertyName<I>]: Uuid;
 };
 
 /**
@@ -49,8 +49,7 @@ export type CoreArgPathReduced<
 	// Preserve for consistency
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	P extends CoreArgIds = never
-> = object &
-	(O extends CoreArgOptionsPathOwnOrExtendedUnion ? CoreArgPathOwnOrExtended<I> : unknown) &
+> = (O extends CoreArgOptionsPathOwnOrExtendedUnion ? CoreArgPathOwnOrExtended<I> : unknown) &
 	(O extends CoreArgOptionsPathIdUnion
 		? {
 				/**
@@ -66,39 +65,31 @@ export type CoreArgPathReduced<
  * @remarks
  * In TS 4.6, with more changes in 4.7, when ID or parent IDs are generic, partial path members are not inferred.
  */
-type Path<I extends CoreArgIds, O extends CoreArgOptionsUnion, P extends CoreArgIds = never> = CoreArgPathReduced<
-	I,
-	O,
-	P
-> &
-	(O extends CoreArgOptionsPathExtendedUnion ? CoreArgPathOwnOrExtended<I | P> : unknown);
-
-/**
- * Path with all possible members.
- */
-type PathFull<I extends CoreArgIds, P extends CoreArgIds = never> = CoreArgPathOwnOrExtended<I> &
-	CoreArgPathOwnOrExtended<I | P> & {
-		/**
-		 * Id.
-		 */
-		id?: string;
-	};
+type Path<I extends CoreArgIds, O extends CoreArgOptionsUnion, P extends CoreArgIds = never> =
+	// `object` does not change result, but definitively marks as object, so for example spread can happen, when generic; Not present for never-path, not to interfere with universe object
+	object &
+		CoreArgPathReduced<I, O, P> &
+		(O extends CoreArgOptionsPathExtendedUnion ? CoreArgPathOwnOrExtended<I | P> : unknown);
 
 /**
  * Path, with all keys statically known, but absent ones are set to never.
  *
  * @remarks
  * Constructed by intersecting {@link PathFull}, with never types. That makes this type extend normal path, which is a partial of full path.
+ *
+ * When ID-determined, cannot infer that never-path extends path.
+ *
+ * Cannot be never, as then it would be assignable to all.
  */
-type PathNever<I extends CoreArgIds, O extends CoreArgOptionsUnion, P extends CoreArgIds = never> = PathFull<I, P> & {
-	[K in I as CoreArgPathUuidPropertyName<K>]: O extends CoreArgOptionsPathOwnOrExtendedUnion ? string : never;
+type PathNever<I extends CoreArgIds, O extends CoreArgOptionsUnion, P extends CoreArgIds = never> = {
+	[K in CoreArgPathUuidPropertyName<I>]: O extends CoreArgOptionsPathOwnOrExtendedUnion ? Uuid : unknown;
 } & {
-	[K in P as CoreArgPathUuidPropertyName<K>]: O extends CoreArgOptionsPathExtendedUnion ? string : never;
+	[K in CoreArgPathUuidPropertyName<I | P>]: O extends CoreArgOptionsPathExtendedUnion ? Uuid : unknown;
 } & {
 	/**
 	 * Id.
 	 */
-	id?: O extends CoreArgOptionsPathIdUnion ? string : never;
+	id?: O extends CoreArgOptionsPathIdUnion ? string : unknown;
 };
 
 /**
