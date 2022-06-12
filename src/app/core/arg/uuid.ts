@@ -9,8 +9,7 @@
  * @file
  */
 
-import { urlPathSeparator } from "../../common/defaults";
-import { Uuid, getDefaultUuid } from "../../common/uuid";
+import { Uuid } from "../../common/uuid";
 import { coreGenerateUuid } from "../uuid";
 import { CoreArgIds } from "./arg";
 import { coreArgObjectWords } from "./words";

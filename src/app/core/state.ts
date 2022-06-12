@@ -19,7 +19,7 @@ export class CoreState {
 	/**
 	 * Uptime.
 	 *
-	 * @returns Milliseconds since class creation.
+	 * @returns Milliseconds since class creation
 	 */
 	public get upTime(): number {
 		return Date.now() - this.startTime;

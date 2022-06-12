@@ -27,7 +27,7 @@ import {
 } from "./arg";
 import { CoreArgOptionIds, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
 import { CoreBaseClassNonRecursive } from "./base";
-import { CellPathExtended, CellPathOwn, coreCellArgParentIds } from "./cell";
+import { CellPathExtended, coreCellArgParentIds } from "./cell";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectClass,

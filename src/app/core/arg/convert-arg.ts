@@ -178,7 +178,8 @@ export function coreArgConvert<
 					const uuidPropertyName: CoreArgPathUuidPropertyName<I> = coreArgIdToPathUuidPropertyName({ id });
 					return {
 						[uuidPropertyName]: (arg as ChildArgPathOwn)[uuidPropertyName]
-					} as CoreArgPath<I, T, P>;
+						// Generic key signature inference needs `unknown`
+					} as unknown as CoreArgPath<I, T, P>;
 				}
 
 				// Own to extended

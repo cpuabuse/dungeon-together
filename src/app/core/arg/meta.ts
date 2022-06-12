@@ -9,6 +9,7 @@
 
 import { UrlOrigin, UrlPath, separator } from "../../common/url";
 import { MaybeDefined } from "../../common/utility-types";
+import { Vector } from "../../common/vector";
 import {
 	CoreArg,
 	CoreArgComplexOptionPathIds,
@@ -21,7 +22,10 @@ import {
 	CoreArgOptionsPathOwn,
 	CoreArgOptionsPathOwnUnion,
 	CoreArgOptionsUnion,
+	CoreArgOptionsWithNavUnion,
+	CoreArgOptionsWithoutVectorUnion,
 	CoreArgPathOwnOrExtended,
+	CoreArgPathReduced,
 	CoreArgPathUuidPropertyName,
 	coreArgComplexOptionSymbolIndex,
 	coreArgIdToPathUuidPropertyName
@@ -41,11 +45,11 @@ import {
  * @typeParam ParentIds - IDs for the parents; optional
  */
 export type CoreArgMeta<
-	ChildId extends CoreArgIds,
+	Id extends CoreArgIds,
 	SourceOptions extends CoreArgOptionsUnion,
 	TargetOptions extends CoreArgOptionsUnion,
 	ParentIds extends CoreArgIds = never
-> = Record<string, unknown> &
+> = object &
 	(SourceOptions extends CoreArgOptionsPathIdUnion
 		? {
 				/**
@@ -54,7 +58,7 @@ export type CoreArgMeta<
 				 * When extended contains parent paths.
 				 */
 				paths: {
-					[K in ChildId | (TargetOptions extends CoreArgOptionsPathExtendedUnion ? ParentIds : never)]: UrlPath;
+					[K in Id | (TargetOptions extends CoreArgOptionsPathExtendedUnion ? ParentIds : never)]: UrlPath;
 				};
 
 				/**
@@ -85,6 +89,20 @@ export type CoreArgMeta<
 			  }
 			: unknown
 		: unknown);
+
+/**
+ * Index for meta.
+ */
+export type CoreArgMetaNavPathIndex<
+	Id extends CoreArgIds,
+	Options extends CoreArgOptionsWithNavUnion,
+	ParentIds extends CoreArgIds
+> = {
+	/**
+	 * Nav index.
+	 */
+	nav: CoreArgPathReduced<Id, Options, ParentIds>[][][];
+} & (Options extends CoreArgOptionsWithoutVectorUnion ? Vector : unknown);
 
 /**
  * Extracts path from ID-like.
@@ -137,8 +155,8 @@ export function coreArgMetaGenerate<
 	 * Meta.
 	 */
 	meta: CoreArgMeta<ParentId, SourceOptions, TargetOptions, GrandparentIds>;
-	// In case `ParentId` is never, will be evaluated to `never` if not a tuple
 } & MaybeDefined<
+	// In case `ParentId` is never, will be evaluated to `never` if not a tuple
 	[ParentId] extends [never] ? false : true,
 	{
 		/**
@@ -177,7 +195,7 @@ export function coreArgMetaGenerate<
 	 *
 	 * Generation is same for both extended and own, so using an extended type subset.
 	 */
-	type MetaWithPathOwnToExtended = CoreArgMeta<
+	type ParentMetaWithPathOwnToExtended = CoreArgMeta<
 		ParentId,
 		CoreArgOptionsPathOwn,
 		CoreArgOptionsPathExtended,
@@ -232,7 +250,7 @@ export function coreArgMetaGenerate<
 		// If no parent, return what is given
 		if (typeof parentId === "undefined") {
 			// Casting, since no overlaps
-			return { ...(meta as unknown as MetaWithPathOwnToExtended) } as unknown as CoreArgMeta<
+			return { ...(meta as unknown as ParentMetaWithPathOwnToExtended) } as unknown as CoreArgMeta<
 				ChildId,
 				SourceOptions,
 				TargetOptions,
@@ -243,7 +261,7 @@ export function coreArgMetaGenerate<
 		// Casting, since no overlaps
 		// Infer for simplicity
 		// eslint-disable-next-line @typescript-eslint/typedef
-		const { parentArgPath, ...rest } = meta as unknown as MetaWithPathOwnToExtended;
+		const { parentArgPath, ...rest } = meta as unknown as ParentMetaWithPathOwnToExtended;
 
 		// UUID property name
 		const parentArgUuidPropertyName: CoreArgPathUuidPropertyName<ParentId> = coreArgIdToPathUuidPropertyName({

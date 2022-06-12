@@ -13,7 +13,7 @@ import {
 	ComputedClassWords
 } from "../../common/computed-class";
 
-import { ConcreteConstructor, ConcreteConstructorConstraint } from "../../common/utility-types";
+import { ConcreteConstructor } from "../../common/utility-types";
 import {
 	CoreArg,
 	CoreArgContainer,

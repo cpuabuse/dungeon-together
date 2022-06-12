@@ -240,6 +240,26 @@ export function CoreUniverseClassFactory<
 	options: Options;
 }) {
 	/**
+	 * Shard path.
+	 */
+	type ShardPath = CoreArgPath<CoreArgIds.Shard, Options, CoreShardArgParentIds>;
+
+	/**
+	 * Grid path.
+	 */
+	type GridPath = CoreArgPath<CoreArgIds.Grid, Options, CoreGridArgParentIds>;
+
+	/**
+	 * Cell path.
+	 */
+	type CellPath = CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>;
+
+	/**
+	 * Entity path.
+	 */
+	type EntityPath = CoreArgPath<CoreArgIds.Entity, Options, CoreEntityArgParentIds>;
+
+	/**
 	 * Ids.
 	 */
 	type Ids = typeof ids[number];
@@ -764,7 +784,7 @@ export function CoreUniverseClassFactory<
 			path: CoreArgPath<CoreArgIds.Grid, CoreArgOptionsPathExtended, CoreGridArgParentIds>
 		): Grid {
 			// Cast to match paths
-			return this.getShard(path).getGrid(path);
+			return this.getShard(path as ShardPath).getGrid(path as GridPath);
 			// Reverting path argument
 		} as (path: CoreArgPath<CoreArgIds.Grid, Options, CoreGridArgParentIds>) => Grid;
 
@@ -780,7 +800,9 @@ export function CoreUniverseClassFactory<
 			path: CoreArgPath<CoreArgIds.Cell, CoreArgOptionsPathExtended, CoreCellArgParentIds>
 		): Cell {
 			// Cast to match paths
-			return this.getShard(path).getGrid(path).getCell(path);
+			return this.getShard(path as ShardPath)
+				.getGrid(path as GridPath)
+				.getCell(path as CellPath);
 			// Reverting path argument
 		} as (path: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>) => Cell;
 
@@ -796,7 +818,10 @@ export function CoreUniverseClassFactory<
 			path: CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPathExtended, CoreEntityArgParentIds>
 		): Entity {
 			// Cast to match paths
-			return this.getShard(path).getGrid(path).getCell(path).getEntity(path);
+			return this.getShard(path as ShardPath)
+				.getGrid(path as GridPath)
+				.getCell(path as CellPath)
+				.getEntity(path as EntityPath);
 			// Reverting path argument
 		} as (path: CoreArgPath<CoreArgIds.Entity, Options, CoreEntityArgParentIds>) => Entity;
 	}

@@ -12,16 +12,18 @@
  */
 
 // Reexport
-export * from "./container-arg";
 export * from "./arg";
+export * from "./container-arg";
 export * from "./container";
-export * from "./meta";
-export * from "./options";
-export * from "./path";
-export * from "./words";
-export * from "./map";
-export * from "./convert";
 export * from "./convert-arg";
 export * from "./convert-container";
-export * from "./conver-container-arg";
+export * from "./convert-container-arg";
+export * from "./convert";
+export * from "./map";
+export * from "./meta";
+export * from "./nav";
+export * from "./options";
+export * from "./path";
+export * from "./uuid";
 export * from "./vector";
+export * from "./words";

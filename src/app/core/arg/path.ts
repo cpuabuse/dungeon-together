@@ -7,8 +7,8 @@
  * @file Universe object paths
  */
 
-import { MapIntersection } from "../../common/utility-types";
 import { Uuid } from "../../common/uuid";
+import { coreArgComplexOptionSymbolIndex } from "./options";
 import {
 	CoreArgComplexOptionPathIds,
 	CoreArgComplexOptionSymbolIndex,
@@ -20,6 +20,13 @@ import {
 	CoreArgOptionsUnionGenerate,
 	coreArgObjectWords
 } from ".";
+
+/**
+ * Information if were to index path.
+ */
+export type CoreArgPathIndex<Options extends CoreArgOptionsUnion> = Options extends CoreArgOptionsPathIdUnion
+	? string
+	: Uuid;
 
 /**
  * A type for the property name of path UUID.
@@ -34,14 +41,16 @@ export type CoreArgPathOwnOrExtended<I extends CoreArgIds> = {
 };
 
 /**
- * Path.
- *
- * @remarks
- * In TS 4.6, with more changes in 4.7, when ID or parent IDs are generic, partial path members are not inferred.
+ * Reduced path, that has minimum requirement for indexing.
  */
-type Path<I extends CoreArgIds, O extends CoreArgOptionsUnion, P extends CoreArgIds = never> = object &
+export type CoreArgPathReduced<
+	I extends CoreArgIds,
+	O extends CoreArgOptionsUnion,
+	// Preserve for consistency
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	P extends CoreArgIds = never
+> = object &
 	(O extends CoreArgOptionsPathOwnOrExtendedUnion ? CoreArgPathOwnOrExtended<I> : unknown) &
-	(O extends CoreArgOptionsPathExtendedUnion ? CoreArgPathOwnOrExtended<I | P> : unknown) &
 	(O extends CoreArgOptionsPathIdUnion
 		? {
 				/**
@@ -50,6 +59,19 @@ type Path<I extends CoreArgIds, O extends CoreArgOptionsUnion, P extends CoreArg
 				id?: string;
 		  }
 		: unknown);
+
+/**
+ * Path.
+ *
+ * @remarks
+ * In TS 4.6, with more changes in 4.7, when ID or parent IDs are generic, partial path members are not inferred.
+ */
+type Path<I extends CoreArgIds, O extends CoreArgOptionsUnion, P extends CoreArgIds = never> = CoreArgPathReduced<
+	I,
+	O,
+	P
+> &
+	(O extends CoreArgOptionsPathExtendedUnion ? CoreArgPathOwnOrExtended<I | P> : unknown);
 
 /**
  * Path with all possible members.
@@ -88,7 +110,7 @@ export type CoreArgPath<
 	O extends CoreArgOptionsUnion,
 	P extends CoreArgIds = never,
 	HasNever extends boolean = false
-> = MapIntersection<HasNever extends true ? PathNever<I, O, P> : Path<I, O, P>>;
+> = HasNever extends true ? PathNever<I, O, P> : Path<I, O, P>;
 
 /**
  * Generate a name for path property.
@@ -168,3 +190,42 @@ export type CoreArgOptionsPathOwnOrExtendedUnion = CoreArgOptionsUnionGenerate<
 	| CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
 	| CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
 >;
+
+/**
+ * Gets path's index value from path.
+ *
+ * @param param - Destructured parameter
+ * @returns Path index
+ */
+export function coreArgGetPathIndex<
+	Id extends CoreArgIds,
+	Options extends CoreArgOptionsUnion,
+	ParentIds extends CoreArgIds
+>({
+	id,
+	path,
+	options
+}: {
+	/**
+	 * Id.
+	 */
+	id: Id;
+
+	/**
+	 * Path.
+	 */
+	path: CoreArgPathReduced<Id, Options, ParentIds>;
+
+	/**
+	 * Options.
+	 */
+	options: Options;
+}): CoreArgPathIndex<Options> | undefined {
+	if (
+		options[CoreArgOptionIds.Path] ===
+		coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
+	) {
+		return (path as CoreArgPath<Id, CoreArgOptionsPathId, ParentIds>).id;
+	}
+	return (path as CoreArgPath<Id, CoreArgOptionsPathOwn, ParentIds>)[coreArgIdToPathUuidPropertyName({ id })];
+}

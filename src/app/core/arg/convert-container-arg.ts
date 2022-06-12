@@ -13,7 +13,7 @@ import { CoreArg, CoreArgIds } from "./arg";
 import { CoreArgContainerArg } from "./container-arg";
 import { CoreArgConverter } from "./convert";
 import { coreArgConvert } from "./convert-arg";
-import { coreArgConvertContainer } from "./convert-container";
+import { CoreArgConvertContainerLink, coreArgConvertContainer } from "./convert-container";
 import { CoreArgMeta } from "./meta";
 import { CoreArgOptionsUnion } from "./options";
 
@@ -40,7 +40,8 @@ export function coreArgConvertContainerArg<
 	meta,
 	arg,
 	sourceOptions,
-	targetOptions
+	targetOptions,
+	link
 }: {
 	/**
 	 * Id.
@@ -83,6 +84,18 @@ export function coreArgConvertContainerArg<
 	 * Child ID.
 	 */
 	childId: ChildId;
+
+	/**
+	 * To fill a linking object.
+	 */
+	link?: CoreArgConvertContainerLink<
+		ChildId,
+		SourceOptions,
+		TargetOptions,
+		Id | ParentIds,
+		SourceChildArg,
+		TargetChildArg
+	>;
 } & MaybeDefined<
 	[ParentIds] extends [never] ? false : true,
 	{
@@ -107,6 +120,7 @@ export function coreArgConvertContainerArg<
 			childConverter,
 			childId,
 			id,
+			link,
 			meta,
 			sourceOptions,
 			targetOptions

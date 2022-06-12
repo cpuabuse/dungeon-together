@@ -23,22 +23,20 @@ import {
 	CoreArgIds,
 	CoreArgMeta,
 	CoreArgOptionIds,
+	CoreArgOptionsOverride,
 	CoreArgOptionsPathExtended,
-	CoreArgOptionsPathId,
-	CoreArgOptionsPathIdUnion,
 	CoreArgOptionsPathOwn,
-	CoreArgOptionsPathOwnOrExtendedUnion,
 	CoreArgOptionsUnion,
 	CoreArgOptionsWithMapUnion,
+	CoreArgOptionsWithNavUnion,
 	CoreArgOptionsWithVectorUnion,
-	CoreArgOptionsWithoutMapUnion,
 	CoreArgPath,
 	CoreArgPathUuidPropertyName,
 	coreArgComplexOptionSymbolIndex,
 	coreArgConvertContainerArg,
 	coreArgIdToPathUuidPropertyName
 } from "./arg";
-import { CoreArgOptionsWithNavUnion } from "./arg/nav";
+import { CoreArgNav } from "./arg/nav";
 import { CoreBaseClassNonRecursive } from "./base";
 import {
 	CommsEntity,
@@ -54,7 +52,6 @@ import {
 	coreEntityArgParentIdSet
 } from "./entity";
 import { GridPathExtended, coreGridArgParentIds } from "./grid";
-import { Nav } from "./nav";
 import { CoreUniverse } from "./universe";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
@@ -195,31 +192,22 @@ export type CoreCellArg<Options extends CoreArgOptionsUnion> = CoreArgContainerA
 	CoreCellArgParentIds,
 	CoreEntityArg<Options>,
 	CoreArgIds.Entity
-> & {
-	/**
-	 * Worlds.
-	 */
-	worlds: Options[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
-} & (Options extends CoreArgOptionsWithVectorUnion ? Vector : unknown) &
-	(Options extends CoreArgOptionsWithNavUnion
+> &
+	(Options extends CoreArgOptionsWithMapUnion
 		? {
 				/**
-				 * Nav.
+				 * Worlds.
 				 */
-				nav: Options extends CoreArgOptionsPathIdUnion
-					? {
-							[K in Nav]?: CoreArgPath<CoreArgIds.Cell, CoreArgOptionsPathId, CoreCellArgParentIds>;
-					  }
-					: Options extends CoreArgOptionsPathOwnOrExtendedUnion
-					? {
-							[K in Nav]: CellPathOwn;
-					  }
-					: {
-							// Nav for undetermined path options
-							[K in Nav]: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>;
-					  };
+				worlds: Set<Uuid>;
 		  }
-		: unknown);
+		: {
+				/**
+				 * Worlds.
+				 */
+				worlds: Array<Uuid>;
+		  }) &
+	(Options extends CoreArgOptionsWithVectorUnion ? Vector : unknown) &
+	(Options extends CoreArgOptionsWithNavUnion ? CoreArgNav<CoreArgIds.Cell, Options, CoreCellArgParentIds> : unknown);
 
 /**
  * Cell own path.
@@ -242,15 +230,13 @@ export type CoreCellInstance<
 	/**
 	 * Worlds.
 	 */
-	worlds: Options[CoreArgOptionIds.Map] extends true ? Set<Uuid> : Array<Uuid>;
+	worlds: Options extends CoreArgOptionsWithMapUnion ? Set<Uuid> : Array<Uuid>;
 
 	/**
 	 * Nav.
 	 */
 	nav: Options extends CoreArgOptionsWithNavUnion
-		? {
-				[K in Nav]: CellPathOwn;
-		  }
+		? CoreArgNav<CoreArgIds.Cell, Options, CoreCellArgParentIds>["nav"]
 		: never;
 } & {
 	[K in keyof Vector]: Options extends CoreArgOptionsWithVectorUnion ? Vector[K] : never;
@@ -364,19 +350,9 @@ export function CoreCellClassFactory<
 	options: Options;
 }) {
 	/**
-	 * Cell with nav.
-	 */
-	type CellWithNav = CoreCellArg<Options & CoreArgOptionsWithNavUnion>;
-
-	/**
 	 * Core cell args with vector.
 	 */
 	type CellWithVector = CoreCellArg<CoreArgOptionsWithVectorUnion>;
-
-	/**
-	 * Core cell args with map.
-	 */
-	type CellWithMap = CoreCellArg<CoreArgOptionsWithMapUnion>;
 
 	/**
 	 * Constructor params.
@@ -492,17 +468,15 @@ export function CoreCellClassFactory<
 		public static getDefaultEntityUuid: (path: CellPathOwn) => Uuid;
 
 		public nav!: Options extends CoreArgOptionsWithNavUnion
-			? {
-					[K in Nav]: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>;
-			  }
+			? CoreArgNav<CoreArgIds.Cell, Options, CoreCellArgParentIds>["nav"]
 			: never;
 
 		/**
 		 * Worlds.
 		 */
-		public worlds: CoreCellArg<Options>["worlds"] = (options[CoreArgOptionIds.Map]
+		public worlds: Options extends CoreArgOptionsWithMapUnion ? Set<Uuid> : Array<Uuid> = (options[CoreArgOptionIds.Map]
 			? new Set()
-			: new Array()) as CoreCellArg<Options>["worlds"];
+			: new Array()) as Options extends CoreArgOptionsWithMapUnion ? Set<Uuid> : Array<Uuid>;
 
 		/**
 		 * X coordinate.
@@ -529,6 +503,11 @@ export function CoreCellClassFactory<
 		// ESLint buggy for nested destructured params
 		// eslint-disable-next-line @typescript-eslint/typedef
 		public constructor(...[arg, { attachHook, created }, baseParams]: ConstructorParams) {
+			/**
+			 * Cell with nav.
+			 */
+			type CellNav = CoreArgNav<CoreArgIds.Cell, Options & CoreArgOptionsWithNavUnion, CoreCellArgParentIds>;
+
 			// ESLint false negative, also does not seem to deal well with generics
 			// eslint-disable-next-line constructor-super, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment
 			super(baseParams);
@@ -564,9 +543,9 @@ export function CoreCellClassFactory<
 			// Assign nav
 			if (options[CoreArgOptionIds.Nav]) {
 				// False negative
-
-				Object.values(Nav).forEach(nav => {
-					(this as CellWithNav).nav[nav] = { cellUuid: (arg as CellWithNav).nav[nav].cellUuid };
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				(arg as unknown as CellNav).nav.forEach((v, k) => {
+					(this as unknown as CellNav).nav.set(k, v);
 				});
 			}
 
@@ -622,9 +601,21 @@ export function CoreCellClassFactory<
 			meta: CoreArgMeta<CoreArgIds.Cell, SourceOptions, TargetOptions, CoreCellArgParentIds>;
 		}): CoreCellArg<TargetOptions> {
 			/**
+			 * Core cell args with map.
+			 */
+			type TargetCellWithMap = CoreCellArg<TargetOptions & CoreArgOptionsWithMapUnion>;
+
+			/**
 			 * Core cell args without map.
 			 */
-			type CellWithoutMap = CoreCellArg<CoreArgOptionsWithoutMapUnion>;
+			type TargetCellWithoutMap = CoreCellArg<CoreArgOptionsOverride<TargetOptions, never, CoreArgOptionIds.Map>>;
+
+			/**
+			 * Cell with nav.
+			 */
+			type TargetCellWithNavMap = CoreCellArg<
+				CoreArgOptionsOverride<TargetOptions, CoreArgOptionIds.Nav | CoreArgOptionIds.Map>
+			>;
 
 			// Arg
 			let targetCell: CoreCellArg<TargetOptions> = coreArgConvertContainerArg<
@@ -650,7 +641,7 @@ export function CoreCellClassFactory<
 			}) as CoreCellArg<TargetOptions>;
 
 			// Vector
-			if (targetOptions[CoreArgOptionIds.Vector] === true) {
+			if (targetOptions[CoreArgOptionIds.Vector]) {
 				if (sourceOptions[CoreArgOptionIds.Vector] === true) {
 					// Source to target
 					// Convert to `unknown` as does not overlap
@@ -664,12 +655,19 @@ export function CoreCellClassFactory<
 			}
 
 			// Map
-			if (targetOptions[CoreArgOptionIds.Map] === true) {
+			if (targetOptions[CoreArgOptionIds.Map]) {
 				// Worlds
-				(targetCell as CellWithMap).worlds = new Set(cell.worlds);
+				(targetCell as TargetCellWithMap).worlds = new Set(cell.worlds);
 			} else {
 				// Worlds
-				(targetCell as CellWithoutMap).worlds = Array.from(cell.worlds);
+				(targetCell as TargetCellWithoutMap).worlds = Array.from(cell.worlds);
+			}
+
+			// Nav
+			if (targetOptions[CoreArgOptionIds.Nav]) {
+				if (targetOptions[CoreArgOptionIds.Map]) {
+					(targetCell as unknown as TargetCellWithNavMap).nav = new Map();
+				}
 			}
 
 			// Return

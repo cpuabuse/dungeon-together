@@ -169,6 +169,36 @@ export type CoreArgOptionsUnionGenerate<
 };
 
 /**
+ * Generates union operand for override.
+ */
+type CoreArgOptionsOverrideUnionOperand<
+	I extends CoreArgSimpleOptionIds = never,
+	D extends Exclude<CoreArgSimpleOptionIds, I> = never,
+	S extends CoreArgComplexOptionSymbols = never
+> = {
+	[K in I]: true;
+} & {
+	[K in D]: false;
+} & {
+	[K in CoreArgComplexOptionIds as CoreArgComplexOptionValues[K] & S extends never ? never : K]: K & S;
+};
+
+/**
+ * Overrides options with given values.
+ */
+export type CoreArgOptionsOverride<
+	O extends CoreArgOptionsUnion,
+	I extends CoreArgSimpleOptionIds = never,
+	D extends Exclude<CoreArgSimpleOptionIds, I> = never,
+	S extends CoreArgComplexOptionSymbols = never
+> = {
+	[K in CoreArgSimpleOptionIds | CoreArgComplexOptionIds]: (K extends keyof CoreArgOptionsOverrideUnionOperand<I, D, S>
+		? CoreArgOptionsOverrideUnionOperand<I, D, S>[K]
+		: O[K]) &
+		CoreArgOptionsUnionGenerate<I, D, S>[K];
+};
+
+/**
  * Generic argument constraint for any kind of options.
  * Not to be used for actual variables.
  */

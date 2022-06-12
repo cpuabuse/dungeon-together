@@ -3,6 +3,12 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+/**
+ * Core UUID.
+ *
+ * @file
+ */
+
 import { appUrl, urlPathSeparator } from "../common/defaults";
 import { UrlOrigin, UrlPath } from "../common/url";
 import { Uuid, getDefaultUuid } from "../common/uuid";

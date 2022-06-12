@@ -23,6 +23,30 @@ import { CoreArgOptionsPathId, CoreArgPathOwnOrExtended, coreArgIdToPathUuidProp
 import { CoreArgObjectWords, coreArgObjectWords } from "./words";
 
 /**
+ * Maps container's args from source to target.
+ *
+ * @remarks
+ * Mapped with reference to path.
+ */
+export type CoreArgConvertContainerLink<
+	Id extends CoreArgIds,
+	SourceOptions extends CoreArgOptionsUnion,
+	TargetOptions extends CoreArgOptionsUnion,
+	ParentIds extends CoreArgIds,
+	SourceArg extends CoreArg<Id, SourceOptions, ParentIds>,
+	TargetArg extends CoreArg<Id, TargetOptions, ParentIds>
+> = {
+	/**
+	 * Source to target.
+	 */
+	source: Map<SourceArg, TargetArg>;
+	/**
+	 * Target to source.
+	 */
+	target: Map<TargetArg, SourceArg>;
+};
+
+/**
  * Converts container.
  *
  * @remarks
@@ -48,7 +72,8 @@ export function coreArgConvertContainer<
 	meta,
 	arg,
 	sourceOptions,
-	targetOptions
+	targetOptions,
+	link
 }: {
 	/**
 	 * Id.
@@ -91,6 +116,18 @@ export function coreArgConvertContainer<
 	 * Target options.
 	 */
 	targetOptions: TargetOptions;
+
+	/**
+	 * To fill a linking object.
+	 */
+	link?: CoreArgConvertContainerLink<
+		ChildId,
+		SourceOptions,
+		TargetOptions,
+		Id | ParentIds,
+		SourceChildArg,
+		TargetChildArg
+	>;
 }): CoreArgContainer<TargetChildArg, ChildId, TargetOptions, Id | ParentIds> {
 	/**
 	 * Child args property name (in arg).
@@ -100,22 +137,12 @@ export function coreArgConvertContainer<
 	/**
 	 * Source container property with map.
 	 */
-	type SourceWithMapArgs = CoreArgsWithMapContainerArg<
-		SourceArg extends CoreArgContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never,
-		ChildId,
-		SourceOptions,
-		Id | ParentIds
-	>;
+	type SourceWithMapArgs = CoreArgsWithMapContainerArg<SourceChildArg, ChildId, SourceOptions, Id | ParentIds>;
 
 	/**
 	 * Source container property without map.
 	 */
-	type SourceWithoutMapArgs = CoreArgsWithoutMapContainerArg<
-		SourceArg extends CoreArgContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never,
-		ChildId,
-		SourceOptions,
-		Id | ParentIds
-	>;
+	type SourceWithoutMapArgs = CoreArgsWithoutMapContainerArg<SourceChildArg, ChildId, SourceOptions, Id | ParentIds>;
 
 	/**
 	 * Target args property.
@@ -145,7 +172,7 @@ export function coreArgConvertContainer<
 		/**
 		 * Entity.
 		 */
-		child: SourceArg extends CoreArgContainer<infer A, ChildId, SourceOptions, Id | ParentIds> ? A : never;
+		child: SourceChildArg;
 
 		/**
 		 * Index.
@@ -178,20 +205,26 @@ export function coreArgConvertContainer<
 			Id | ParentIds
 		>;
 
+		let targetChild: TargetChildArg = childConverter({
+			meta: childMeta,
+
+			[nameArgParam]: child,
+
+			// Cast to expected type
+			sourceOptions,
+			// Cast to expected type
+			targetOptions
+			// Have to cast, as cannot infer generic keys from child
+		} as Parameters<CoreArgConverter<SourceChildArg, TargetChildArg, ChildId, SourceOptions, TargetOptions, Id | ParentIds>>[0]);
+
+		if (link !== undefined) {
+			link.source.set(child, targetChild);
+			link.target.set(targetChild, child);
+		}
+
 		return {
 			childMeta,
-
-			targetChild: childConverter({
-				meta: childMeta,
-
-				[nameArgParam]: child,
-
-				// Cast to expected type
-				sourceOptions,
-				// Cast to expected type
-				targetOptions
-				// Have to cast, as cannot infer generic keys from child
-			} as Parameters<CoreArgConverter<SourceChildArg, TargetChildArg, ChildId, SourceOptions, TargetOptions, Id | ParentIds>>[0])
+			targetChild
 		};
 	}
 

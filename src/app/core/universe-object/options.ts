@@ -3,11 +3,11 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
-import { CoreArgIndexableOptionsUnion } from "../indexable";
-
 /**
  * @file Core args
  */
+
+import { CoreArgIndexableOptionsUnion } from "../indexable";
 
 /**
  * Args options constraint for core universe objects.

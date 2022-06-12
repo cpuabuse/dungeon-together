@@ -384,6 +384,11 @@ export function CoreShardClassFactory<
 				// Ensures getting uuid from subclass
 				gridUuid: (Shard.constructor as typeof Shard).getDefaultGridUuid(this),
 
+				// Vector
+				x: 0,
+				y: 0,
+				z: 0,
+
 				// Extended path
 				...(options[CoreArgOptionIds.Path] ===
 				coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
