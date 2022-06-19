@@ -17,6 +17,7 @@
  * - Static methods and properties should be defined in the derived as a property, as TS does not require initialization (it seems that if strict static property checking were to be introduced, it would also probably come with a definitive operator for it)
  * - Instance properties initialized by pseudo-constructor should be redefined with `!`
  * - For prototype, instance assign, and static assign this will automatically bound; For that arrow syntax should not be used; Also have to be careful about `this` used in generate wrapper, as it will be bound to class initialization scope, and not the class or instance itself
+ * - Since we are using objects to create and infer member type, the access to polymorphic `this` is lost; Also, the generic `this` cannot be passed as type parameter, since `this` would be of instance type of a class, defined by the member type itself (circular reference); Thus, bivariance has to be preserved in the member type, by defining methods as methods using `prop(): R {}` (or casting), and not as properties using `prop: function (): R {}`, since properties are contravariant, and methods are bivariant
  */
 
 import { MapIntersection, UnknownToObject, hasOwnProperty } from "./utility-types";

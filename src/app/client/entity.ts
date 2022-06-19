@@ -8,17 +8,16 @@
  */
 
 import { AnimatedSprite } from "pixi.js";
-import { Uuid } from "../common/uuid";
-import { CellPathExtended } from "../core/cell";
-import { CommsEntity, CommsEntityArgs, CoreEntityClassFactory } from "../core/entity";
-import { ClientBaseClass } from "./base";
-import { ClientCell } from "./cell";
-import { LogLevel, processLog } from "./error";
+import { CoreArgIds } from "../core/arg";
+import { CoreEntityArg, CoreEntityArgParentIds, CoreEntityClassFactory } from "../core/entity";
+import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
+import { ClientBaseClass, ClientBaseClassWithConstructorParams } from "./base";
+import { ClientOptions, clientOptions } from "./options";
 
 /**
  * Generator for the client entity class.
  *
- * @param param
+ * @param param - Destructured parameter
  * @returns Client entity class
  */
 // Force type inference to extract class type
@@ -32,137 +31,48 @@ export function ClientEntityFactory({
 	Base: ClientBaseClass;
 }) {
 	/**
-	 * Render unit, representing the smallest renderable.
+	 * Render unit, representing set of animations.
 	 */
-	class ClientEntity extends CoreEntityClassFactory({ Base }) implements CommsEntity {
-		/**
-		 * Parent location.
-		 */
-		public cellUuid: Uuid;
-
-		/**
-		 * This.
-		 */
-		public entityUuid: Uuid;
-
-		/**
-		 * Map.
-		 */
-		public gridUuid: Uuid;
-
-		/**
-		 * Kind.
-		 */
-		public kindUuid: Uuid;
-
-		/**
-		 * Mode.
-		 */
-		public modeUuid: Uuid;
-
-		/**
-		 * Shard.
-		 */
-		public shardUuid: Uuid;
-
+	class ClientEntity extends CoreEntityClassFactory({ Base, options: clientOptions }) {
 		/**
 		 * Animated sprite.
 		 */
 		public sprite: AnimatedSprite;
 
 		/**
-		 * World.
-		 */
-		public worldUuid: Uuid;
-
-		/**
-		 * Initializes RU.
+		 * Initializes client entity.
 		 *
-		 * @param param
+		 * @param param - Destructure parameter
 		 */
-		public constructor({ shardUuid, cellUuid, kindUuid, gridUuid, modeUuid, entityUuid, worldUuid }: CommsEntityArgs) {
+		// Nested args ESLint bug
+		// eslint-disable-next-line @typescript-eslint/typedef
+		public constructor([entity, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
+			ClientBaseClassWithConstructorParams,
+			CoreEntityArg<ClientOptions>,
+			CoreArgIds.Entity,
+			ClientOptions,
+			CoreEntityArgParentIds
+		>) {
 			// Call super constructor
-			super();
-
-			// Assing members from interface
-			this.shardUuid = shardUuid;
-			this.cellUuid = cellUuid;
-			this.kindUuid = kindUuid;
-			this.gridUuid = gridUuid;
-			this.modeUuid = modeUuid;
-			this.entityUuid = entityUuid;
-			this.worldUuid = worldUuid;
+			super(entity, { attachHook, created }, baseParams);
 
 			// Create a new Sprite from texture
-			this.sprite = new AnimatedSprite(this.universe.getMode({ uuid: this.modeUuid }).textures);
-
-			// Set coordinates initially
-			this.updateCoordinates();
-
-			// Add to container
-			this.universe.getShard(this).gridContainer.addChild(this.sprite);
-
-			// Set ticker
-			this.universe.getShard(this).app.ticker.add(this.tick, this);
-
-			// Start
-			this.sprite.play();
-
-			// Index
-			this.universe.entitiesIndex.set(this.entityUuid, this);
-		}
-
-		/**
-		 * Moves the entity and updates the display.
-		 *
-		 * @param cell - Target cell.
-		 * @returns `true` as it handles super class errors
-		 */
-		public move(cell: ClientCell): true {
-			if (super.move(cell)) {
-				this.updateCoordinates();
-			} else {
-				processLog({
-					error: new Error(
-						`Failed to move entity "${this.entityUuid}" from cell "${this.cellUuid}" to cell "${cell.cellUuid}"`
-					),
-					level: LogLevel.Warning
-				});
-			}
-
-			return true;
-		}
-
-		/**
-		 * Terminates the [[ClientEntity]].
-		 */
-		public terminate(): void {
-			// Stop
-			this.sprite.stop();
-			this.universe.getShard(this).app.ticker.remove(this.tick, this);
-			this.universe.getShard(this).gridContainer.removeChild(this.sprite);
-
-			// Remove from index
-			this.universe.entitiesIndex.delete(this.entityUuid);
-		}
-
-		/**
-		 * Render tick.
-		 */
-		private tick(): void {
-			this.updateCoordinates();
-		}
-
-		/**
-		 * Updates coordinates for render.
-		 */
-		private updateCoordinates(): void {
-			this.sprite.x = this.universe.getShard(this).sceneWidth * this.universe.getCell(this).x;
-			this.sprite.y = this.universe.getShard(this).sceneHeight * this.universe.getCell(this).y;
-			this.sprite.height = this.universe.getShard(this).sceneWidth;
-			this.sprite.width = this.universe.getShard(this).sceneHeight;
+			this.sprite = new AnimatedSprite(ClientEntity.universe.getMode({ uuid: this.modeUuid }).textures);
 		}
 	}
+
+	/**
+	 * Terminates client entity.
+	 *
+	 * @param this - Client entity
+	 */
+	ClientEntity.prototype.terminateEntity = function (this: ClientEntity): void {
+		// Stop
+		this.sprite.destroy();
+
+		// Super terminate
+		(Object.getPrototypeOf(ClientEntity.prototype) as ClientEntity).terminateEntity();
+	};
 
 	// Return class
 	return ClientEntity;

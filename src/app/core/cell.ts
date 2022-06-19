@@ -385,11 +385,6 @@ export function CoreCellClassFactory<
 	type GenerateMembersWithChildParams = [];
 
 	/**
-	 * Verify class data satisfies arg constraints.
-	 */
-	type ReturnClass = Cell extends CoreCellArg<Options> ? typeof Cell : never;
-
-	/**
 	 * Cell type merging.
 	 */
 	// Merging
@@ -694,5 +689,5 @@ export function CoreCellClassFactory<
 	});
 
 	// Have to re-inject dynamic bits from generic parents
-	return Cell as ReturnClass;
+	return Cell;
 }

@@ -33,6 +33,14 @@ export type FromAbstract<C extends abstract new (...args: any[]) => any> = C ext
 	: never;
 
 /**
+ * Converts an abstract class to non-abstract version.
+ */
+export type ReplaceConcreteConstructorParameters<
+	C extends Ctor<false>,
+	P extends any[]
+> = C extends ConcreteConstructorConstraint<infer R> ? Omit<C, "new"> & (new (...args: P) => R) : never;
+
+/**
  * Destructured params from constructor.
  */
 export type DestructureParameters<C extends new (...args: any[]) => any> = ConstructorParameters<C>[0];
@@ -147,7 +155,9 @@ export type AbstractConstructor<Parameters extends any[] = any[], Instance exten
 /**
  * Gets static members from a class, omitting constructor.
  *
+ * @remarks
  * Can mostly be used in generics since TS 4.6.
+ * For class merging, "prototype" should probably not be removed.
  */
 export type StaticMembers<T extends Ctor> = Omit<T, "new" | "prototype">;
 

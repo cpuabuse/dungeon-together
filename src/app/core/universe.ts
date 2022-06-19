@@ -8,6 +8,7 @@
  */
 
 import { DeferredPromise } from "../common/async";
+import { PromiseQueue } from "../common/async/promise-queue";
 import {
 	ComputedClassExtractInstance,
 	computedClassInjectPerClass,
@@ -388,6 +389,11 @@ export function CoreUniverseClassFactory<
 		public grids!: Options extends CoreArgOptionsPathOwnUnion
 			? CoreArgIndexer<Grid, CoreArgIds.Grid, Options, CoreGridArgParentIds>["grids"]
 			: never;
+
+		/**
+		 * Queue for universe.
+		 */
+		public readonly universeQueue: PromiseQueue = new PromiseQueue();
 
 		public universeUuid: Uuid;
 

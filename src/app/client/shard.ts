@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -14,17 +14,14 @@ import {
 	defaultMinimumEntityInColumn,
 	defaultMinimumEntityInRow,
 	defaultMobileEntityHeight,
-	defaultMobileEntityWidth,
-	gridUuidUrlPath,
-	urlPathSeparator
+	defaultMobileEntityWidth
 } from "../common/defaults";
 import { MessageTypeWord, MovementWord } from "../common/defaults/connection";
-import { Uuid, getDefaultUuid } from "../common/uuid";
-import { VSocket } from "../common/vsocket";
-import { Envelope } from "../core/connection";
-import { CommsGridArgs, GridPath } from "../core/grid";
-import { CommsShard, CommsShardArgs } from "../core/shard";
-import { ClientBaseClass } from "./base";
+import { CoreArgIds } from "../core/arg";
+import { Envelope, VSocket } from "../core/connection";
+import { CoreShardArg, CoreShardArgParentIds, CoreShardClassFactory } from "../core/shard";
+import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
+import { ClientBaseClass, ClientBaseClassWithConstructorParams } from "./base";
 import { ClientGrid } from "./grid";
 import {
 	Input,
@@ -37,9 +34,8 @@ import {
 	scrollSymbol,
 	upSymbol
 } from "./input";
-import { Mode } from "./mode";
+import { ClientOptions, clientOptions } from "./options";
 import { ClientUniverse } from "./universe";
-import { View } from "./view";
 
 /**
  * Created a client shard class.
@@ -64,7 +60,10 @@ export function ClientShardFactory({
 	 *
 	 * Each shard to not interact with another and be treated as a separate thread.
 	 */
-	class ClientShard extends Base implements CommsShard, View {
+	class ClientShard extends CoreShardClassFactory<ClientBaseClass, ClientOptions, ClientGrid>({
+		Base,
+		options: clientOptions
+	}) {
 		/**
 		 * Pixi application.
 		 */
@@ -77,21 +76,9 @@ export function ClientShardFactory({
 		});
 
 		/**
-		 * UUID for default [[ClientGrid]].
-		 */
-		public readonly defaultGridUuid: Uuid;
-
-		/**
 		 * Container for pixi.
 		 */
 		public readonly gridContainer: Container = new Container();
-
-		/**
-		 * Grids for the client shard.
-		 *
-		 * Should be treated as "readonly".
-		 */
-		public readonly grids: Map<Uuid, ClientGrid> = new Map();
 
 		/**
 		 * Viewport for this client shard.
@@ -114,14 +101,9 @@ export function ClientShardFactory({
 		public shardElement: HTMLElement | null = null;
 
 		/**
-		 * This UUID.
-		 */
-		public readonly shardUuid: Uuid;
-
-		/**
 		 * An array of sockets.
 		 */
-		protected sockets: Array<VSocket<ClientUniverse>> = new Array() as Array<VSocket<ClientUniverse>>;
+		protected sockets: Array<VSocket<ClientUniverse>> = new Array<VSocket<ClientUniverse>>();
 
 		/**
 		 * Input events.
@@ -135,16 +117,20 @@ export function ClientShardFactory({
 
 		/**
 		 * Constructor for a screen.
+		 *
+		 * @param param - Destructured parameter
 		 */
-		public constructor({ shardUuid, grids }: CommsShardArgs) {
+		// ESLint bug - nested args
+		// eslint-disable-next-line @typescript-eslint/typedef
+		public constructor([shard, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
+			ClientBaseClassWithConstructorParams,
+			CoreShardArg<ClientOptions>,
+			CoreArgIds.Shard,
+			ClientOptions,
+			CoreShardArgParentIds
+		>) {
 			// Call super constructor
-			super();
-
-			// Set this fields
-			this.shardUuid = shardUuid;
-			this.defaultGridUuid = getDefaultUuid({
-				path: `${gridUuidUrlPath}${urlPathSeparator}${this.shardUuid}`
-			});
+			super(shard, { attachHook, created }, baseParams);
 
 			// Set scene
 			this.setScene();
@@ -152,93 +138,74 @@ export function ClientShardFactory({
 			// Add container to renderer
 			this.app.stage.addChild(this.gridContainer);
 
-			setTimeout(() => {
-				// Initialize children
-				this.addGrid({
-					// Take path from this
-					...this,
-					cells: new Map(),
-					gridUuid: this.defaultGridUuid
-				});
+			// TODO: Remove after change of alert use
+			/* eslint-disable no-magic-numbers, no-console, no-alert, @typescript-eslint/no-unused-vars */
+			// After attach
+			attachHook
+				.then(() => {
+					// Add listeners for right-click input
+					this.input.on(rcSymbol, inputInterface => {
+						alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
+					});
 
-				// Extract data from [CommsShard]
-				grids.forEach(grid => {
-					this.addGrid(grid);
-				});
-			});
+					// Add listeners for left-click input
+					this.input.on(lcSymbol, inputInterface => {
+						alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
+					});
 
-			// Add listeners for right-click input
-			this.input.on(rcSymbol, inputInterface => {
-				alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
-			});
+					// Add listeners for up input
+					// Async callback for event emitter
+					// eslint-disable-next-line @typescript-eslint/no-misused-promises
+					this.input.on(upSymbol, async inputInterface => {
+						// Even though when array is empty an envelope will not be used, in those situations performance is irrelevant, at least on the client side
+						let envelope: Envelope = new Envelope({
+							messages: [
+								{
+									body: { direction: MovementWord.Up },
+									type: MessageTypeWord.Movement
+								}
+							]
+						});
+						await Promise.all(this.sockets.map(socket => socket.send({ envelope })));
+					});
 
-			// Add listeners for left-click input
-			this.input.on(lcSymbol, inputInterface => {
-				alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
-			});
+					// Add listeners for down input
+					this.input.on(downSymbol, inputInterface => {
+						alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
+					});
 
-			// Add listeners for up input
-			// Async callback for event emitter
-			// eslint-disable-next-line @typescript-eslint/no-misused-promises
-			this.input.on(upSymbol, async inputInterface => {
-				// Even though when array is empty an envelope will not be used, in those situations performance is irrelevant, at least on the client side
-				let envelope: Envelope = new Envelope({
-					messages: [
-						{
-							body: { direction: MovementWord.Up },
-							type: MessageTypeWord.Movement
-						}
-					]
-				});
-				await Promise.all(this.sockets.map(socket => socket.send({ envelope })));
-			});
+					// Add listeners for right input
+					this.input.on(rightSymbol, inputInterface => {
+						alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
+					});
 
-			// Add listeners for down input
-			this.input.on(downSymbol, inputInterface => {
-				alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
-			});
+					// Add listeners for left input
+					this.input.on(leftSymbol, inputInterface => {
+						alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
+					});
 
-			// Add listeners for right input
-			this.input.on(rightSymbol, inputInterface => {
-				alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
-			});
+					// Add listeners for scroll input
+					this.input.on(scrollSymbol, inputInterface => {
+						console.log(
+							`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`
+						);
 
-			// Add listeners for left input
-			this.input.on(leftSymbol, inputInterface => {
-				alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
-			});
-
-			// Add listeners for scroll input
-			this.input.on(scrollSymbol, inputInterface => {
-				console.log(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
-
-				// Prototype only
-				this.sceneHeight *= 1 + (inputInterface as InputInterface).y / 1000;
-				this.sceneWidth *= 1 + (inputInterface as InputInterface).y / 1000;
-				this.grids.forEach(grid => {
-					grid.cells.forEach(cell => {
-						cell.entities.forEach(entity => {
-							// entity.updateCoordinates();
+						// Prototype only
+						this.sceneHeight *= 1 + (inputInterface as InputInterface).y / 1000;
+						this.sceneWidth *= 1 + (inputInterface as InputInterface).y / 1000;
+						this.grids.forEach(grid => {
+							grid.cells.forEach(cell => {
+								cell.entities.forEach(entity => {
+									// entity.updateCoordinates();
+								});
+							});
 						});
 					});
+				})
+				.catch(() => {
+					// TODO: Handle error
 				});
-			});
-
-			// Index this
-			this.universe.shardsIndex.set(this.shardUuid, this);
-		}
-
-		/**
-		 * Adds [[ClientGrid]].
-		 *
-		 * @param grid - Arguments for the [[ClientGrid]] constructor
-		 */
-		public addGrid(grid: CommsGridArgs): void {
-			if (this.grids.has(grid.shardUuid)) {
-				// Clear the shard if it already exists
-				this.doRemoveGrid(grid);
-			}
-			this.grids.set(grid.gridUuid, new this.universe.Grid(grid));
+			/* eslint-enable no-magic-numbers, no-console, no-alert, @typescript-eslint/no-unused-vars */
 		}
 
 		/**
@@ -252,6 +219,8 @@ export function ClientShardFactory({
 
 		/**
 		 * Adds socket if does not exist.
+		 *
+		 * @param param - Destructured parameter
 		 */
 		public addSocket({
 			socket
@@ -267,32 +236,15 @@ export function ClientShardFactory({
 		}
 
 		/**
-		 * Removes socket.
-		 */
-		public removeSocket({
-			socket
-		}: {
-			/**
-			 * Client socket to remove.
-			 */
-			socket: VSocket<ClientUniverse>;
-		}): void {
-			let socketIndex: number = this.sockets.indexOf(socket);
-			if (socketIndex > -1) {
-				this.sockets.splice(socketIndex, 1);
-			}
-		}
-
-		/**
 		 * Attach to HTML canvas.
 		 * Can only be attached once, and never detached.
 		 *
 		 * @param element - Any HTML element
 		 */
-		public attach(): void {
+		public attachShardElement(): void {
 			// Performing once, as pixi library does not allow to detach
 			if (!this.isAttached) {
-				let element: HTMLElement = this.universeElement;
+				let element: HTMLElement = ClientShard.universeElement;
 				this.isAttached = true;
 				element.addEventListener("resize", () => {
 					this.app.renderer.resize(element.offsetWidth, element.offsetHeight);
@@ -308,77 +260,28 @@ export function ClientShardFactory({
 		 * The function that fires the input received.
 		 *
 		 * @param inputSymbol - Input symbol received
-		 *
 		 * @param inputInterface - Input event received
-		 *
 		 */
-		public fireInput(inputSymbol: symbol, inputInterface: InputInterface) {
+		public fireInput(inputSymbol: symbol, inputInterface: InputInterface): void {
 			this.input.emit(inputSymbol, inputInterface);
 		}
 
 		/**
-		 * Shortcut to get the [[ClientGrid]].
+		 * Removes socket.
 		 *
-		 * @returns [[clientGrid]], a vector array object
+		 * @param param - Destructured parameter
 		 */
-		public getGrid({ gridUuid }: GridPath): ClientGrid {
-			let clientGrid: ClientGrid | undefined = this.grids.get(gridUuid);
-
-			// Default grid is always there
-			return clientGrid === undefined ? (this.grids.get(this.defaultGridUuid) as ClientGrid) : clientGrid;
-		}
-
-		/**
-		 * Get the modes from the server.
-		 *
-		 * @returns A map containing uuid and modes
-		 */
-		public get modes(): Map<Uuid, Mode> {
-			return new Map();
-		}
-
-		/**
-		 * Removes the [[ClientGrid]]
-		 *
-		 * @param uuid - UUID of the [[ClientGrid]]
-		 *
-		 * @param path - Path to grid
-		 */
-		public removeGrid(path: GridPath): void {
-			if (path.gridUuid !== this.defaultGridUuid) {
-				this.doRemoveGrid(path);
-			}
-		}
-
-		/**
-		 * Performs the necessary cleanup when shard is removed, as a connection to server.
-		 */
-		public terminate(): void {
-			this.grids.forEach(grid => {
-				this.doRemoveGrid(grid);
-			});
-
-			// Update index
-			this.universe.shardsIndex.delete(this.shardUuid);
-		}
-
-		/**
-		 * Updates shard.
-		 */
-		public update({ grids }: CommsShardArgs): void {
-			grids.forEach(grid => {
-				this.getGrid(grid).update(grid);
-			});
-		}
-
-		/**
-		 * Actually remove the [[ClientGrid]] shard from "grids".
-		 */
-		private doRemoveGrid({ gridUuid }: GridPath): void {
-			let grid: ClientGrid | undefined = this.grids.get(gridUuid);
-			if (grid !== undefined) {
-				grid.terminate();
-				this.grids.delete(gridUuid);
+		public removeSocket({
+			socket
+		}: {
+			/**
+			 * Client socket to remove.
+			 */
+			socket: VSocket<ClientUniverse>;
+		}): void {
+			let socketIndex: number = this.sockets.indexOf(socket);
+			if (socketIndex > -1) {
+				this.sockets.splice(socketIndex, 1);
 			}
 		}
 
@@ -412,6 +315,40 @@ export function ClientShardFactory({
 			this.sceneWidth = entityWidth;
 		}
 	}
+
+	/**
+	 * Attaches client grid.
+	 *
+	 * @param this - Client shard
+	 * @param grid - Grid
+	 */
+	ClientShard.prototype.attachGrid = function (this: ClientShard, grid: ClientGrid): void {
+		// Super first
+		(Object.getPrototypeOf(ClientShard.prototype) as ClientShard).attachGrid(grid);
+
+		// Bind to shard as a separate callback, deferred so matches when children show calls
+		ClientShard.universe.universeQueue.addCallback({
+			/**
+			 * Callback.
+			 */
+			callback: () => {
+				// Defer, to process cell at a time
+				grid.shard = this;
+			}
+		});
+
+		grid.cells.forEach(cell => {
+			ClientShard.universe.universeQueue.addCallback({
+				/**
+				 * Callback.
+				 */
+				callback: () => {
+					// Defer, to process cell at a time
+					grid.showCell(cell);
+				}
+			});
+		});
+	};
 
 	// Return the shard class
 	return ClientShard;

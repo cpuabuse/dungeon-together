@@ -14,6 +14,7 @@ import Mousetrap from "mousetrap";
 import { BaseTexture, Texture } from "pixi.js";
 import { App, createApp } from "vue";
 import { createStore } from "vuex";
+import { PromiseQueue } from "../common/async/promise-queue";
 import { defaultCellUuid, defaultGridUuid, defaultModeUuid, defaultShardUuid } from "../common/defaults";
 import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
@@ -33,7 +34,7 @@ import { ClientBaseClass, ClientBaseFactory } from "./base";
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
 import { ClientConnection } from "./connection";
 import { ClientEntity, ClientEntityClass, ClientEntityFactory } from "./entity";
-import { ClientGrid, ClientGridClass, ClientGridFactory } from "./grid";
+import { ClientGrid, ClientGridClass, ClientGridClassFactory } from "./grid";
 import { UniverseState } from "./gui";
 import { Theme } from "./gui/themes";
 import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, scrollSymbol, upSymbol } from "./input";
@@ -205,6 +206,11 @@ export class ClientUniverse
 	public readonly vue: App;
 
 	/**
+	 * Queue for shard.
+	 */
+	public readonly universeQueue: PromiseQueue = new PromiseQueue();
+
+	/**
 	 * Base class for client objects.
 	 */
 	protected readonly Base: ClientBaseClass;
@@ -224,7 +230,7 @@ export class ClientUniverse
 
 		// Generate object classes
 		this.Shard = ClientShardFactory({ Base: this.Base });
-		this.Grid = ClientGridFactory({ Base: this.Base });
+		this.Grid = ClientGridClassFactory({ Base: this.Base });
 		this.Cell = ClientCellFactory({ Base: this.Base });
 		this.Entity = ClientEntityFactory({ Base: this.Base });
 

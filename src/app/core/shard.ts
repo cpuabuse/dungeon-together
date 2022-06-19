@@ -35,6 +35,8 @@ import {
 	coreArgIdToPathUuidPropertyName
 } from "./arg";
 import { CoreBaseClassNonRecursive } from "./base";
+import { CoreCellInstance } from "./cell";
+import { CoreEntityInstance } from "./entity";
 import {
 	CommsGrid,
 	CommsGridArgs,
@@ -246,7 +248,7 @@ export const coreShardArgParentIds = [] as const;
 export function CoreShardClassFactory<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Grid extends CoreGridInstance<BaseClass, Options>
+	Grid extends CoreGridInstance<BaseClass, Options, any>
 >({
 	Base,
 	options
@@ -288,12 +290,6 @@ export function CoreShardClassFactory<
 	 * Parameters for generate with child functions.
 	 */
 	type GenerateMembersWithChildParams = [];
-
-	/**
-	 * New class to re-inject.
-	 */
-	// Intersection preserves constructor parameters of core cell, and instance type of base class
-	type ReturnClass = Shard extends CoreShardArg<Options> ? typeof Shard : never;
 
 	/**
 	 * Interface merging with grid.
@@ -495,5 +491,5 @@ export function CoreShardClassFactory<
 		parameters: []
 	});
 
-	return Shard as ReturnClass;
+	return Shard;
 }

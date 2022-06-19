@@ -318,6 +318,22 @@ export function generateCoreUniverseObjectMembers<
 	>;
 
 	/**
+	 * Universe.
+	 */
+	type Universe = CoreUniverseObjectUniverse<
+		BaseClass,
+		Instance,
+		Arg,
+		Id,
+		Options,
+		ParentId,
+		GrandparentIds,
+		ChildInstance,
+		ChildArg,
+		ChildId
+	>;
+
+	/**
 	 * Parameters for generate functions.
 	 */
 	type GenerateParams = [
@@ -512,20 +528,20 @@ export function generateCoreUniverseObjectMembers<
 										}
 									},
 
-									attachChildUniverseObject: {
-										[ComputedClassWords.Name]: nameAttachChildUniverseObject,
+									attachChildUniverseObject:
+										options[CoreArgOptionIds.Path] ===
+										coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
+											? {
+													[ComputedClassWords.Name]: nameAttachChildUniverseObject,
 
-										/**
-										 * Attaches child universe object.
-										 *
-										 * @param this - This instance
-										 * @param universeObject - Child universe object
-										 * @param initializationParameter - Initialization parameter
-										 */
-										[ComputedClassWords.Value]:
-											options[CoreArgOptionIds.Path] ===
-											coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
-												? function (this: Instance, universeObject: ChildInstance): void {
+													/**
+													 * Attaches child universe object.
+													 *
+													 * @param this - This instance
+													 * @param universeObject - Child universe object
+													 * @param initializationParameter - Initialization parameter
+													 */
+													[ComputedClassWords.Value](this: Instance, universeObject: ChildInstance): void {
 														// Deal with universe object
 														(this as InstanceWithChild)[nameChildUniverseObjects].set(
 															universeObject[childPathUuidPropertyName],
@@ -536,31 +552,42 @@ export function generateCoreUniverseObjectMembers<
 														((this.constructor as CoreBaseClassNonRecursive).universe as ChildUniverse)[
 															nameChildUniverseObjects
 														].set(universeObject[childPathUuidPropertyName], universeObject);
-												  }
-												: function (this: Instance, universeObject: ChildInstance): void {
+													}
+											  }
+											: {
+													[ComputedClassWords.Name]: nameAttachChildUniverseObject,
+
+													/**
+													 * Attaches child universe object.
+													 *
+													 * @param this - This instance
+													 * @param universeObject - Child universe object
+													 * @param initializationParameter - Initialization parameter
+													 */
+													[ComputedClassWords.Value](this: Instance, universeObject: ChildInstance): void {
 														(this as InstanceWithChild)[nameChildUniverseObjects].set(
 															universeObject[childPathUuidPropertyName],
 															universeObject
 														);
-												  }
-									},
+													}
+											  },
 
-									detachChildUniverseObject: {
-										[ComputedClassWords.Name]: nameDetachUniverseObject,
+									detachChildUniverseObject:
+										options[CoreArgOptionIds.Path] ===
+										coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
+											? {
+													[ComputedClassWords.Name]: nameDetachUniverseObject,
 
-										/**
-										 * Detaches child universe object.
-										 *
-										 * @param this - This instance
-										 * @param path - Child universe object
-										 */
-										[ComputedClassWords.Value]:
-											options[CoreArgOptionIds.Path] ===
-											coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
-												? function (
+													/**
+													 * Detaches child universe object.
+													 *
+													 * @param this - This instance
+													 * @param path - Child universe object
+													 */
+													[ComputedClassWords.Value](
 														this: Instance,
 														path: CoreArgPath<ChildId, Options, Id | ParentId | GrandparentIds>
-												  ): void {
+													): void {
 														(this as InstanceWithChild)[nameChildUniverseObjects].delete(
 															path[childPathUuidPropertyName]
 														);
@@ -569,22 +596,35 @@ export function generateCoreUniverseObjectMembers<
 														((this.constructor as CoreBaseClassNonRecursive).universe as ChildUniverse)[
 															nameChildUniverseObjects
 														].delete(path[childPathUuidPropertyName]);
-												  }
-												: function (
+													}
+											  }
+											: {
+													[ComputedClassWords.Name]: nameDetachUniverseObject,
+
+													/**
+													 * Detaches child universe object.
+													 *
+													 * @param this - This instance
+													 * @param path - Child universe object
+													 */
+													[ComputedClassWords.Value](
 														this: Instance,
 														path: CoreArgPath<ChildId, Options, Id | ParentId | GrandparentIds>
-												  ): void {
+													): void {
 														(this as InstanceWithChild)[nameChildUniverseObjects].delete(
 															path[childPathUuidPropertyName]
 														);
-												  }
-									},
+													}
+											  },
 
 									terminateUniverseObject: {
 										name: nameTerminateUniverseObject,
 
 										/**
 										 * Terminates children of universe object.
+										 *
+										 * @remarks
+										 * Should work in both cases of attached or detached.
 										 *
 										 * @param this - Core universe object instance
 										 */
@@ -862,12 +902,17 @@ export function generateCoreUniverseObjectMembers<
 						let childCreated: DeferredPromise = new DeferredPromise();
 
 						// Timeout to avoid freezing
-						setTimeout(() => {
-							(that as InstanceWithChild)[nameAddChildUniverseObject](
-								childArg,
-								{ attachHook, created: childCreated },
-								superParams
-							);
+						((that.constructor as CoreBaseClassNonRecursive).universe as Universe).universeQueue.addCallback({
+							/**
+							 * Callback.
+							 */
+							callback: () => {
+								(that as InstanceWithChild)[nameAddChildUniverseObject](
+									childArg,
+									{ attachHook, created: childCreated },
+									superParams
+								);
+							}
 						});
 
 						return childCreated;

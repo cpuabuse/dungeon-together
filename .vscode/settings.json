@@ -16,7 +16,9 @@
 		"destructured",
 		"endregion",
 		"trit",
-		"vsocket"
+		"vsocket",
+		"bivariance",
+		"bivariant"
 	],
 	"yaml.schemas": {
 		"./schema/dt.yml.json": ["*.dt.yml"]

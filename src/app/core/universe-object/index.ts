@@ -25,9 +25,10 @@ export * from "./parameters";
  *
  * - `extends class extends Base { }` is to silence TS, not to actually add class to chain. Should watch closely over given super params, as they become any
  * - Base itself should have `any[]` arguments, so that final arguments are produced same as mixin
- * - Generic universe object has children listed last in arguments, as they are optionally present, while ID-determined universe objects are optionally aware of themselves or their parents, but chain depend on children, so order is inverted
+ * - Generic universe object has children listed last in arguments, as they are optionally present; ID-determined universe object types are optionally aware of themselves, which chain depends on children, so order is inverted; Core universe generic types are optional and chain depend on children as well, so order is inverted too
+ * - Generic constraint for child universe object in ID-determined universe object types and factories is relaxed with `any`, as it is expected that this constraint to be satisfied by a universe object, already depending on correct generic grandchild; This could be fully written out, but kept this way for shortness
  *
- * Type check for implementation of an arg, to happen through universe, as it should expect generic class, from instance intersected with arg.
+ * Type check for implementation of an arg, to happen through universe, as it should expect generic class, from instance intersected with arg. So is the check for constructor parameters.
  *
  * @remarks
  * This is for documentation purposes only.

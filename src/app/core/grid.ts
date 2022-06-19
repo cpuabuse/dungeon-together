@@ -51,6 +51,7 @@ import {
 	CoreCellInstance,
 	coreCellArgParentIdSet
 } from "./cell";
+import { CoreEntityInstance } from "./entity";
 import { ShardPath, coreShardArgParentIds } from "./shard";
 import { CoreUniverse } from "./universe";
 import {
@@ -263,7 +264,7 @@ export type CoreGridClass<
 export function CoreGridClassFactory<
 	BaseClass extends CoreBaseClassNonRecursive,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Cell extends CoreCellInstance<BaseClass, Options>
+	Cell extends CoreCellInstance<BaseClass, Options, any>
 >({
 	Base,
 	options
@@ -305,12 +306,6 @@ export function CoreGridClassFactory<
 	 * Parameters for generate with child functions.
 	 */
 	type GenerateMembersWithChildParams = [];
-
-	/**
-	 * New class to re-inject.
-	 */
-	// Intersection preserves constructor parameters of core cell, and instance type of base class
-	type ReturnClass = Grid extends CoreGridArg<Options> ? typeof Grid : never;
 
 	/**
 	 * Interface merging with grid.
@@ -726,5 +721,5 @@ export function CoreGridClassFactory<
 	});
 
 	// Have to re-inject dynamic bits from generic parents
-	return Grid as ReturnClass;
+	return Grid;
 }

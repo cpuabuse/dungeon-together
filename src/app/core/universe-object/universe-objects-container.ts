@@ -28,7 +28,7 @@ import {
 import { CoreBaseClassNonRecursive } from "../base";
 import { CoreArgIndexableReader, CoreArgIndexer } from "../indexable";
 import { CoreUniverseObjectConstructorParameters, CoreUniverseObjectInstance } from "./universe-object";
-import { CoreUniverseObjectArgsOptionsUnion } from ".";
+import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectUniverse } from ".";
 
 /**
  * Instance type.
@@ -180,6 +180,7 @@ export function generateCoreUniverseObjectContainerMembers<
 	const nameUniverseObjects = `${pluralLowercaseWord}` as const; // Name of universe objects member
 	const nameDefaultUniverseObject = `default${singularCapitalizedWord}` as const; // Name of default universe object
 	const nameDetachUniverseObject = `detach${singularCapitalizedWord}` as const; // Name of detach universe object function
+	const nameTerminateUniverseObject = `terminate${singularCapitalizedWord}` as const; // Name of remove universe object function
 	/* eslint-enable @typescript-eslint/typedef */
 	const pathUuidPropertyName: CoreArgPathUuidPropertyName<Id> = coreArgIdToPathUuidPropertyName({
 		id
@@ -223,9 +224,6 @@ export function generateCoreUniverseObjectContainerMembers<
 					/**
 					 * Removes the child object.
 					 *
-					 * @remarks
-					 * To be added by universe.
-					 *
 					 * @param this - Universe object container
 					 * @param path - Path to search for
 					 */
@@ -233,7 +231,32 @@ export function generateCoreUniverseObjectContainerMembers<
 						this: ThisInstance,
 						path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
 					): void {
+						let universeObject: Instance | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
 						this[nameDetachUniverseObject](path);
+
+						// Terminate if we can
+						if (universeObject !== undefined) {
+							(
+								(universeObject.constructor as CoreBaseClassNonRecursive).universe as CoreUniverseObjectUniverse<
+									BaseClass,
+									Instance,
+									Arg,
+									Id,
+									Options,
+									ParentId,
+									GrandparentIds
+								>
+							).universeQueue.addCallback({
+								/**
+								 * Callback.
+								 */
+								callback: () => {
+									// False negative, as undefined check above
+									// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+									universeObject![nameTerminateUniverseObject]();
+								}
+							});
+						}
 					}
 				}
 			},

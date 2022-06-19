@@ -7,17 +7,19 @@
  * @file Squares on screen.
  */
 
-import { defaultKindUuid, defaultModeUuid, defaultWorldUuid } from "../common/defaults";
-import { Uuid } from "../common/uuid";
-import { CommsCell, CommsCellArgs, CoreCellClassFactory } from "../core/cell";
-import { CommsEntityArgs, EntityPathExtended } from "../core/entity";
-import { ClientBaseClass } from "./base";
+import { CoreArgIds } from "../core/arg";
+import { CoreCellArg, CoreCellArgParentIds, CoreCellClassFactory } from "../core/cell";
+import { EntityPathOwn } from "../core/entity";
+import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
+import { ClientBaseClass, ClientBaseClassWithConstructorParams } from "./base";
 import { ClientEntity } from "./entity";
+import { ClientOptions, clientOptions } from "./options";
+import { ClientShard } from "./shard";
 
 /**
  * Generator for the client cell class.
  *
- * @param param
+ * @param param - Destructured parameter
  * @returns Client cell class
  */
 // Force type inference to extract class type
@@ -33,179 +35,116 @@ export function ClientCellFactory({
 	/**
 	 * Square(Vector).
 	 */
-	class ClientCell extends CoreCellClassFactory({ Base }) implements CommsCell {
+	class ClientCell extends CoreCellClassFactory<ClientBaseClass, ClientOptions, ClientEntity>({
+		Base,
+		options: clientOptions
+	}) {
 		/**
-		 * This CommsCell UUID.
-		 */
-		public readonly cellUuid: Uuid;
-
-		/**
-		 * UUID for default [[ClientEntity]].
-		 */
-		public readonly defaultEntityUuid: Uuid;
-
-		/**
-		 * Contents of client-cell.
-		 */
-		public readonly entities: Map<Uuid, ClientEntity> = new Map();
-
-		/**
-		 * This id.
-		 */
-		public readonly gridUuid: Uuid;
-
-		/**
-		 * CommsShard path.
-		 */
-		public readonly shardUuid: Uuid;
-
-		/**
-		 * Worlds of this.
-		 */
-		public worlds: Set<Uuid> = new Set();
-
-		/**
-		 * X coordinate.
-		 */
-		public x: number;
-
-		/**
-		 * Y coordinate.
-		 */
-		public y: number;
-
-		/**
-		 * Z coordinate.
-		 */
-		public z: number;
-
-		/**
-		 * Constructs square.
+		 * Parent shard.
 		 *
-		 * @param param
+		 * @remarks
+		 * This member's purpose is not to contain a shard. It is just a symbolic replacement (for simplicity) for client specific properties, that shard contains, like container(canvas).
 		 */
-		public constructor({ shardUuid, cellUuid, gridUuid, entities, x, y, z }: CommsCellArgs) {
-			super();
+		public shard?: ClientShard;
 
-			// Initialize path
-			this.shardUuid = shardUuid;
-			this.cellUuid = cellUuid;
-			this.gridUuid = gridUuid;
-
-			// Initialize coordinates
-			this.x = x;
-			this.y = y;
-			this.z = z;
-
-			// Set default Uuid
-			this.shardUuid = shardUuid;
-			this.defaultEntityUuid = ClientCell.getDefaultEntityUuid(this);
-
-			setTimeout(() => {
-				// Populate with default [[ClientEntity]]
-				this.addEntity({
-					// Take path from this
-					...this,
-					entityUuid: this.defaultEntityUuid,
-					kindUuid: defaultKindUuid,
-					modeUuid: defaultModeUuid,
-					worldUuid: defaultWorldUuid
-				});
-
-				// Fill entities
-				entities.forEach(entity => {
-					this.entities.set(entity.entityUuid, new this.universe.Entity(entity));
-				});
-			});
-
-			// Add to universe's index
-			this.universe.cellsIndex.set(this.cellUuid, this);
+		/**
+		 * Public constructor.
+		 *
+		 * @param param - Destructure parameter
+		 */
+		// ESLint bug - nested args
+		// eslint-disable-next-line @typescript-eslint/typedef
+		public constructor([cell, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
+			ClientBaseClassWithConstructorParams,
+			CoreCellArg<ClientOptions>,
+			CoreArgIds.Cell,
+			ClientOptions,
+			CoreCellArgParentIds
+		>) {
+			super(cell, { attachHook, created }, baseParams);
 		}
 
 		/**
-		 * Adds [[CommsEntity]].
+		 * Stops display of entity in canvas.
 		 *
-		 * @param entity - Arguments for the [[ClientEntity]] constructor
+		 * @param path - Client entity path
+		 * @see {@link ClientCell.showEntity}
 		 */
-		public addEntity(entity: CommsEntityArgs): void {
-			if (this.entities.has(entity.shardUuid)) {
-				// Clear the shard if it already exists
-				this.doRemoveEntity(entity);
-			}
-			// It does not perform the check for "entityUuid" because there is no default
-			this.entities.set(entity.entityUuid, new this.universe.Entity(entity));
+		public hideEntity(path: EntityPathOwn): void {
+			let entity: ClientEntity = this.getEntity(path);
+			this.shard?.gridContainer.removeChild(entity.sprite);
+			entity.sprite.stop();
 		}
 
 		/**
-		 * Shortcut to get the [[ClientEntity]].
+		 * Displays entity appropriately.
+		 * Changes canvas state in relation to the state of the entity.
 		 *
-		 * @param param
-		 * @returns [[ClientEntity]], the smallest renderable
+		 * @param path - Client entity path
+		 * @remarks
+		 * During the initialization, the decorate will not be run as part of attach cell function, since no entity would be attached yet. This results in decorate function running only once, from attach entity function.
+		 *
+		 * Should usually be called within `setTimeout`.
 		 */
-		public getEntity({ entityUuid }: EntityPathExtended): ClientEntity {
-			let clientEntity: ClientEntity | undefined = this.entities.get(entityUuid);
-			// Default scene is always there
-			return clientEntity === undefined ? (this.entities.get(this.defaultEntityUuid) as ClientEntity) : clientEntity;
-		}
+		public showEntity(path: EntityPathOwn): void {
+			let entity: ClientEntity = this.getEntity(path);
 
-		/**
-		 * Actually remove the [[ClientEntity]] instance from "clientCell".
-		 *
-		 * Unlike other clientProtos, this function does not use "doRemoveEntity", because there is no default scene.
-		 *
-		 * @param path - Path to entity
-		 */
-		public removeEntity(path: EntityPathExtended): void {
-			if (path.entityUuid !== this.defaultEntityUuid) {
-				this.doRemoveEntity(path);
-			}
-		}
+			const sceneWidth: number = this.shard?.sceneWidth ?? 0;
+			const sceneHeight: number = this.shard?.sceneHeight ?? 0;
 
-		/**
-		 * Terminates the [[Cell]].
-		 */
-		public terminate(): void {
-			this.entities.forEach(clientEntity => {
-				this.removeEntity(clientEntity);
-			});
+			// Update entity position, do it before adding to container, to avoid jumps on screen
+			entity.sprite.x = sceneWidth * this.x;
+			entity.sprite.y = sceneHeight * this.y;
+			entity.sprite.height = sceneWidth;
+			entity.sprite.width = sceneHeight;
 
-			// Remove index
-			this.universe.cellsIndex.delete(this.cellUuid);
-		}
-
-		/**
-		 * Updates the cell's entities.
-		 *
-		 * Eventually, when the entity is not in the arguments but is present in this cell, it should be either made invisible, or sent to a separate world.
-		 *
-		 * @param param
-		 */
-		public update({ entities, x, y, z }: CommsCellArgs): void {
-			// Rewrite coordinates
-			this.x = x;
-			this.y = y;
-			this.z = z;
-
-			// Move entities here
-			[...entities.keys()].forEach(entityUuid => {
-				const entity: ClientEntity = this.universe.getEntityByUuid({ entityUuid });
-				entity.move(this);
-			});
-		}
-
-		/**
-		 * Actually removes the entity.
-		 *
-		 * @param param
-		 */
-		private doRemoveEntity({ entityUuid }: EntityPathExtended): void {
-			let clientEntity: ClientEntity | undefined = this.entities.get(entityUuid);
-			if (clientEntity !== undefined) {
-				clientEntity.terminate();
-				this.entities.delete(entityUuid);
-			}
+			// Register entity to canvas
+			this.shard?.gridContainer.addChild(entity.sprite);
+			entity.sprite.play();
 		}
 	}
+
+	/**
+	 * Attaches client entity.
+	 *
+	 * @param this - Client cell
+	 * @param entity - Entity
+	 */
+	ClientCell.prototype.attachEntity = function (this: ClientCell, entity: ClientEntity): void {
+		// Super first
+		(Object.getPrototypeOf(ClientCell.prototype) as ClientCell).attachEntity(entity);
+
+		// Post-attach (decoration)
+		ClientCell.universe.universeQueue.addCallback({
+			/**
+			 * Callback.
+			 */
+			callback: () => {
+				this.showEntity(entity);
+			}
+		});
+	};
+
+	/**
+	 * Attaches client entity.
+	 *
+	 * @param this - Client cell
+	 * @param path - Entity path
+	 */
+	ClientCell.prototype.detachEntity = function (this: ClientCell, path: EntityPathOwn): void {
+		// Queued first for semantical order
+		ClientCell.universe.universeQueue.addCallback({
+			/**
+			 * Callback.
+			 */
+			callback: () => {
+				this.hideEntity(path);
+			}
+		});
+
+		// Super last
+		(Object.getPrototypeOf(ClientCell.prototype) as ClientCell).detachEntity(path);
+	};
 
 	// Return the class
 	return ClientCell;

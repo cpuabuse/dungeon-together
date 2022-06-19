@@ -7,6 +7,7 @@
  * @file Universe definitions
  */
 
+import { PromiseQueue } from "../../common/async/promise-queue";
 import {
 	CoreArg,
 	CoreArgContainer,
@@ -82,4 +83,9 @@ export type CoreUniverseObjectUniverse<
 			>]: Options extends CoreArgOptionsPathOwnUnion
 				? CoreArgIndexer<Instance, Id, Options, ParentId | GrandparentIds>[K]
 				: never;
-	  });
+	  }) & {
+		/**
+		 * Queue for universe.
+		 */
+		universeQueue: PromiseQueue;
+	};
