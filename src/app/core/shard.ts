@@ -34,7 +34,7 @@ import {
 	coreArgConvertContainerArg,
 	coreArgIdToPathUuidPropertyName
 } from "./arg";
-import { CoreBaseClassNonRecursive } from "./base";
+import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
 import { CoreCellInstance } from "./cell";
 import { CoreEntityInstance } from "./entity";
 import {
@@ -169,13 +169,13 @@ export type CoreShardArg<Options extends CoreArgOptionsUnion> = CoreArgContainer
  * Core shard.
  */
 export type CoreShardInstance<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	// `any` effectively means being agnostic to grandchildren, as generic expression is not dependent on it
-	Grid extends CoreGridInstance<BaseClass, Options, any> = CoreGridInstance<BaseClass, Options>,
+	Grid extends CoreGridInstance<BaseParams, Options, any> = CoreGridInstance<BaseParams, Options>,
 	HasNever extends boolean = false
 > = CoreUniverseObjectInstance<
-	BaseClass,
+	BaseParams,
 	CoreShardArg<Options>,
 	CoreArgIds.Shard,
 	Options,
@@ -191,13 +191,13 @@ export type CoreShardInstance<
  * Core shard class.
  */
 export type CoreShardClass<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	// `any` effectively means being agnostic to grandchildren, as generic expression is not dependent on it
-	Grid extends CoreGridInstance<BaseClass, Options, any> = CoreGridInstance<BaseClass, Options>,
-	Shard extends CoreShardInstance<BaseClass, Options, Grid, true> = CoreShardInstance<BaseClass, Options, Grid, true>
+	Grid extends CoreGridInstance<BaseParams, Options, any> = CoreGridInstance<BaseParams, Options>,
+	Shard extends CoreShardInstance<BaseParams, Options, Grid, true> = CoreShardInstance<BaseParams, Options, Grid, true>
 > = CoreUniverseObjectClass<
-	BaseClass,
+	BaseParams,
 	Shard,
 	CoreShardArg<Options>,
 	CoreArgIds.Shard,
@@ -247,8 +247,9 @@ export const coreShardArgParentIds = [] as const;
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreShardClassFactory<
 	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Grid extends CoreGridInstance<BaseClass, Options, any>
+	Grid extends CoreGridInstance<BaseParams, Options, any>
 >({
 	Base,
 	options
@@ -267,7 +268,7 @@ export function CoreShardClassFactory<
 	 * Constructor params.
 	 */
 	type ConstructorParams = CoreUniverseObjectConstructorParameters<
-		BaseClass,
+		BaseParams,
 		CoreShardArg<Options>,
 		CoreArgIds.Shard,
 		Options,
@@ -303,7 +304,7 @@ export function CoreShardClassFactory<
 	// Have to infer type
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const membersWithChild = generateCoreUniverseObjectContainerMembers<
-		BaseClass,
+		BaseParams,
 		Grid,
 		CoreGridArg<Options>,
 		CoreArgIds.Grid,
@@ -318,7 +319,7 @@ export function CoreShardClassFactory<
 	// Have to infer type
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const members = generateCoreUniverseObjectMembers<
-		BaseClass,
+		BaseParams,
 		CoreShardArg<Options>,
 		CoreArgIds.Shard,
 		Options,
@@ -343,7 +344,7 @@ export function CoreShardClassFactory<
 	abstract class Shard
 		// Casting will remove non-static instance information by intersecting with `any`, while maintaining constructor parameters, that will be included into factory return
 		extends class extends Base {}
-		implements StaticImplements<ToAbstract<CoreShardClass<BaseClass, Options, Grid>>, typeof Shard>
+		implements StaticImplements<ToAbstract<CoreShardClass<BaseParams, Options, Grid>>, typeof Shard>
 	{
 		/**
 		 * Default entity.
@@ -462,7 +463,7 @@ export function CoreShardClassFactory<
 				arg: shard,
 				// False negative
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-				childConverter: (Shard.universe as CoreUniverse<BaseClass, Options>).Grid.convertGrid,
+				childConverter: (Shard.universe as CoreUniverse<BaseClass, BaseParams, Options>).Grid.convertGrid,
 				childId: CoreArgIds.Grid,
 				id: CoreArgIds.Shard,
 				meta,

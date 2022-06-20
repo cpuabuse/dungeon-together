@@ -37,7 +37,7 @@ export type FromAbstract<C extends abstract new (...args: any[]) => any> = C ext
  */
 export type ReplaceConcreteConstructorParameters<
 	C extends Ctor<false>,
-	P extends any[]
+	P extends any[] = any[]
 > = C extends ConcreteConstructorConstraint<infer R> ? Omit<C, "new"> & (new (...args: P) => R) : never;
 
 /**

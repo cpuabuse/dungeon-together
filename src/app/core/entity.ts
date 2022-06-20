@@ -26,7 +26,7 @@ import {
 	coreArgConvert
 } from "./arg";
 import { CoreArgOptionIds, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
-import { CoreBaseClassNonRecursive } from "./base";
+import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
 import { CellPathExtended, coreCellArgParentIds } from "./cell";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
@@ -159,7 +159,7 @@ export type EntityPathExtended = CoreArgPath<CoreArgIds.Entity, CoreArgOptionsPa
  * Core entity.
  */
 export type CoreEntityInstance<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	HasNever extends boolean = false
 > = {
@@ -178,7 +178,7 @@ export type CoreEntityInstance<
 	 */
 	worldUuid: Uuid;
 } & CoreUniverseObjectInstance<
-	BaseClass,
+	BaseParams,
 	CoreEntityArg<Options>,
 	CoreArgIds.Entity,
 	Options,
@@ -191,11 +191,11 @@ export type CoreEntityInstance<
  * Core entity.
  */
 export type CoreEntityClass<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Entity extends CoreEntityInstance<BaseClass, Options, true> = CoreEntityInstance<BaseClass, Options, true>
+	Entity extends CoreEntityInstance<BaseParams, Options, true> = CoreEntityInstance<BaseParams, Options, true>
 > = CoreUniverseObjectClass<
-	BaseClass,
+	BaseParams,
 	Entity,
 	CoreEntityArg<Options>,
 	CoreArgIds.Entity,
@@ -267,6 +267,7 @@ export const coreEntityArgGrandparentIdSet: Set<CoreEntityArgGrandparentIds> = n
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreEntityClassFactory<
 	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion
 >({
 	Base,
@@ -286,7 +287,7 @@ export function CoreEntityClassFactory<
 	 * Constructor params.
 	 */
 	type ConstructorParams = CoreUniverseObjectConstructorParameters<
-		BaseClass,
+		BaseParams,
 		CoreEntityArg<Options>,
 		CoreArgIds.Entity,
 		Options,
@@ -315,7 +316,7 @@ export function CoreEntityClassFactory<
 	// Have to infer type
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const members = generateCoreUniverseObjectMembers<
-		BaseClass,
+		BaseParams,
 		CoreEntityArg<Options>,
 		CoreArgIds.Entity,
 		Options,
@@ -337,7 +338,7 @@ export function CoreEntityClassFactory<
 	// eslint-disable-next-line no-redeclare
 	abstract class Entity
 		extends class extends Base {}
-		implements StaticImplements<ToAbstract<CoreEntityClass<BaseClass, Options>>, typeof Entity>
+		implements StaticImplements<ToAbstract<CoreEntityClass<BaseParams, Options>>, typeof Entity>
 	{
 		/**
 		 * Entity kind.

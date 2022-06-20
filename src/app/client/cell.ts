@@ -11,7 +11,7 @@ import { CoreArgIds } from "../core/arg";
 import { CoreCellArg, CoreCellArgParentIds, CoreCellClassFactory } from "../core/cell";
 import { EntityPathOwn } from "../core/entity";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
-import { ClientBaseClass, ClientBaseClassWithConstructorParams } from "./base";
+import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientEntity } from "./entity";
 import { ClientOptions, clientOptions } from "./options";
 import { ClientShard } from "./shard";
@@ -35,7 +35,12 @@ export function ClientCellFactory({
 	/**
 	 * Square(Vector).
 	 */
-	class ClientCell extends CoreCellClassFactory<ClientBaseClass, ClientOptions, ClientEntity>({
+	class ClientCell extends CoreCellClassFactory<
+		ClientBaseClass,
+		ClientBaseConstructorParams,
+		ClientOptions,
+		ClientEntity
+	>({
 		Base,
 		options: clientOptions
 	}) {
@@ -47,20 +52,24 @@ export function ClientCellFactory({
 		 */
 		public shard?: ClientShard;
 
+		// ESLint params bug
+		// eslint-disable-next-line jsdoc/require-param
 		/**
 		 * Public constructor.
 		 *
 		 * @param param - Destructure parameter
 		 */
-		// ESLint bug - nested args
-		// eslint-disable-next-line @typescript-eslint/typedef
-		public constructor([cell, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
-			ClientBaseClassWithConstructorParams,
-			CoreCellArg<ClientOptions>,
-			CoreArgIds.Cell,
-			ClientOptions,
-			CoreCellArgParentIds
-		>) {
+		public constructor(
+			// ESLint bug - nested args
+			// eslint-disable-next-line @typescript-eslint/typedef
+			...[cell, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
+				ClientBaseConstructorParams,
+				CoreCellArg<ClientOptions>,
+				CoreArgIds.Cell,
+				ClientOptions,
+				CoreCellArgParentIds
+			>
+		) {
 			super(cell, { attachHook, created }, baseParams);
 		}
 

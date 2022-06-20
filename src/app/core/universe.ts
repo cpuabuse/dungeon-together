@@ -7,7 +7,6 @@
  * @file Core universe.
  */
 
-import { DeferredPromise } from "../common/async";
 import { PromiseQueue } from "../common/async/promise-queue";
 import {
 	ComputedClassExtractInstance,
@@ -35,7 +34,7 @@ import {
 	coreArgObjectWords
 } from "./arg";
 import { coreArgGenerateDefaultUuid } from "./arg/uuid";
-import { CoreBaseClassNonRecursive } from "./base";
+import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
 import {
 	CellPathOwn,
 	CoreCellArg,
@@ -94,6 +93,8 @@ export type UniverseNamespace = typeof universeNamespace;
 
 /**
  * First parameter for concrete universe.
+ *
+ * To be extended and used as argument in concrete universe.
  */
 export type CoreUniverseRequiredConstructorParameter = {
 	/**
@@ -136,13 +137,19 @@ export type CoreUniverseClassNonRecursive<
  */
 export type CoreUniverse<
 	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Entity extends CoreEntityInstance<BaseClass, Options> = CoreEntityInstance<BaseClass, Options>,
-	Cell extends CoreCellInstance<BaseClass, Options, Entity> = CoreCellInstance<BaseClass, Options, Entity>,
-	Grid extends CoreGridInstance<BaseClass, Options, Cell> = CoreGridInstance<BaseClass, Options, Cell>,
-	Shard extends CoreShardInstance<BaseClass, Options, Grid> = CoreShardInstance<BaseClass, Options, Grid>
-> = CoreUniverseObjectUniverse<
-	BaseClass,
+	Entity extends CoreEntityInstance<BaseParams, Options> = CoreEntityInstance<BaseParams, Options>,
+	Cell extends CoreCellInstance<BaseParams, Options, Entity> = CoreCellInstance<BaseParams, Options, Entity>,
+	Grid extends CoreGridInstance<BaseParams, Options, Cell> = CoreGridInstance<BaseParams, Options, Cell>,
+	Shard extends CoreShardInstance<BaseParams, Options, Grid> = CoreShardInstance<BaseParams, Options, Grid>
+> = {
+	/**
+	 * Base class.
+	 */
+	Base: BaseClass;
+} & CoreUniverseObjectUniverse<
+	BaseParams,
 	Entity,
 	CoreEntityArg<Options>,
 	CoreArgIds.Entity,
@@ -151,7 +158,7 @@ export type CoreUniverse<
 	CoreEntityArgGrandparentIds
 > &
 	CoreUniverseObjectUniverse<
-		BaseClass,
+		BaseParams,
 		Cell,
 		CoreCellArg<Options>,
 		CoreArgIds.Cell,
@@ -163,7 +170,7 @@ export type CoreUniverse<
 		CoreArgIds.Entity
 	> &
 	CoreUniverseObjectUniverse<
-		BaseClass,
+		BaseParams,
 		Grid,
 		CoreGridArg<Options>,
 		CoreArgIds.Grid,
@@ -175,7 +182,7 @@ export type CoreUniverse<
 		CoreArgIds.Cell
 	> &
 	CoreUniverseObjectUniverse<
-		BaseClass,
+		BaseParams,
 		Shard,
 		CoreShardArg<Options>,
 		CoreArgIds.Shard,
@@ -192,13 +199,15 @@ export type CoreUniverse<
  */
 export type CoreUniverseClass<
 	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Entity extends CoreEntityInstance<BaseClass, Options> = CoreEntityInstance<BaseClass, Options>,
-	Cell extends CoreCellInstance<BaseClass, Options, Entity> = CoreCellInstance<BaseClass, Options, Entity>,
-	Grid extends CoreGridInstance<BaseClass, Options, Cell> = CoreGridInstance<BaseClass, Options, Cell>,
-	Shard extends CoreShardInstance<BaseClass, Options, Grid> = CoreShardInstance<BaseClass, Options, Grid>,
-	Universe extends CoreUniverse<BaseClass, Options, Entity, Cell, Grid, Shard> = CoreUniverse<
+	Entity extends CoreEntityInstance<BaseParams, Options> = CoreEntityInstance<BaseParams, Options>,
+	Cell extends CoreCellInstance<BaseParams, Options, Entity> = CoreCellInstance<BaseParams, Options, Entity>,
+	Grid extends CoreGridInstance<BaseParams, Options, Cell> = CoreGridInstance<BaseParams, Options, Cell>,
+	Shard extends CoreShardInstance<BaseParams, Options, Grid> = CoreShardInstance<BaseParams, Options, Grid>,
+	Universe extends CoreUniverse<BaseClass, BaseParams, Options, Entity, Cell, Grid, Shard> = CoreUniverse<
 		BaseClass,
+		BaseParams,
 		Options,
 		Entity,
 		Cell,
@@ -206,7 +215,7 @@ export type CoreUniverseClass<
 		Shard
 	>
 > = CoreUniverseObjectContainerClass<
-	BaseClass,
+	BaseParams,
 	Universe,
 	Shard,
 	CoreShardArg<Options>,
@@ -227,11 +236,12 @@ export type CoreUniverseClass<
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreUniverseClassFactory<
 	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Entity extends CoreEntityInstance<BaseClass, Options> = CoreEntityInstance<BaseClass, Options>,
-	Cell extends CoreCellInstance<BaseClass, Options, Entity> = CoreCellInstance<BaseClass, Options, Entity>,
-	Grid extends CoreGridInstance<BaseClass, Options, Cell> = CoreGridInstance<BaseClass, Options, Cell>,
-	Shard extends CoreShardInstance<BaseClass, Options, Grid> = CoreShardInstance<BaseClass, Options, Grid>
+	Entity extends CoreEntityInstance<BaseParams, Options> = CoreEntityInstance<BaseParams, Options>,
+	Cell extends CoreCellInstance<BaseParams, Options, Entity> = CoreCellInstance<BaseParams, Options, Entity>,
+	Grid extends CoreGridInstance<BaseParams, Options, Cell> = CoreGridInstance<BaseParams, Options, Cell>,
+	Shard extends CoreShardInstance<BaseParams, Options, Grid> = CoreShardInstance<BaseParams, Options, Grid>
 >({
 	options
 }: {
@@ -287,7 +297,7 @@ export function CoreUniverseClassFactory<
 	// Have to infer type
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const membersWithChild = generateCoreUniverseObjectContainerMembers<
-		BaseClass,
+		BaseParams,
 		Shard,
 		CoreShardArg<Options>,
 		CoreArgIds.Shard,
@@ -308,17 +318,20 @@ export function CoreUniverseClassFactory<
 	// eslint-disable-next-line no-redeclare
 	abstract class Universe
 		implements
-			StaticImplements<ToAbstract<CoreUniverseClass<BaseClass, Options, Entity, Cell, Grid, Shard>>, typeof Universe>
+			StaticImplements<
+				ToAbstract<CoreUniverseClass<BaseClass, BaseParams, Options, Entity, Cell, Grid, Shard>>,
+				typeof Universe
+			>
 	{
-		public Base: BaseClass;
+		public abstract Base: BaseClass;
 
-		public Cell: CoreCellClass<BaseClass, Options, Entity, Cell>;
+		public abstract Cell: CoreCellClass<BaseParams, Options, Entity, Cell>;
 
-		public Entity: CoreEntityClass<BaseClass, Options, Entity>;
+		public abstract Entity: CoreEntityClass<BaseParams, Options, Entity>;
 
-		public Grid: CoreGridClass<BaseClass, Options, Cell, Grid>;
+		public abstract Grid: CoreGridClass<BaseParams, Options, Cell, Grid>;
 
-		public Shard: CoreShardClass<BaseClass, Options, Grid, Shard>;
+		public abstract Shard: CoreShardClass<BaseParams, Options, Grid, Shard>;
 
 		/**
 		 * Application.
@@ -350,7 +363,7 @@ export function CoreUniverseClassFactory<
 		/**
 		 * Default shard.
 		 */
-		public defaultShard: Shard;
+		public abstract defaultShard: Shard;
 
 		public detachCell!: Options extends CoreArgOptionsPathOwnUnion ? (path: CellPathOwn) => void : never;
 
@@ -400,57 +413,18 @@ export function CoreUniverseClassFactory<
 		/**
 		 * Constructs the universe core.
 		 *
+		 * @remarks
+		 * Base depends on `this`, so it and it's dependents cannot be passed as arguments to this constructor, as it should be called first in sub-class.
+		 *
 		 * @param param - Destructured parameters
 		 * @param baseParams - Base parameters for default shard
 		 */
-		public constructor(
-			{ application, universeUuid }: CoreUniverseRequiredConstructorParameter,
-			{
-				Base,
-				Cell,
-				Entity,
-				Grid,
-				Shard
-			}: {
-				/**
-				 * Base class.
-				 */
-				Base: BaseClass;
-
-				/**
-				 * Cell class.
-				 */
-				Cell: CoreCellClass<BaseClass, Options, Entity, Cell>;
-
-				/**
-				 * Entity class.
-				 */
-				Entity: CoreEntityClass<BaseClass, Options, Entity>;
-
-				/**
-				 * Grid class.
-				 */
-				Grid: CoreGridClass<BaseClass, Options, Cell, Grid>;
-
-				/**
-				 * Shard class.
-				 */
-				Shard: CoreShardClass<BaseClass, Options, Grid, Shard>;
-			},
-			baseParams: ConstructorParameters<BaseClass>
-		) {
+		public constructor({ application, universeUuid }: CoreUniverseRequiredConstructorParameter) {
 			// Universe UUID
 			this.universeUuid = universeUuid;
 
 			// Application
 			this.application = application;
-
-			// Classes
-			this.Base = Base;
-			this.Shard = Shard;
-			this.Grid = Grid;
-			this.Cell = Cell;
-			this.Entity = Entity;
 
 			// Own path specific
 			if (
@@ -509,21 +483,6 @@ export function CoreUniverseClassFactory<
 				members: membersWithChild,
 				parameters: []
 			});
-
-			// Default shard
-			let defaultShardCreated: DeferredPromise = new DeferredPromise();
-			let defaultShardAttach: Promise<void> = new Promise((resolve, reject) => {
-				defaultShardCreated.then(resolve).catch(reject);
-			});
-			let defaultShardArg: CoreShardArg<Options> = {
-				grids: new Map(),
-				shardUuid: this.getDefaultShardUuid()
-			} as CoreShardArg<Options>;
-			this.defaultShard = this.addShard(
-				defaultShardArg,
-				{ attachHook: defaultShardAttach, created: defaultShardCreated },
-				baseParams
-			);
 		}
 
 		/**
@@ -534,9 +493,8 @@ export function CoreUniverseClassFactory<
 		 * @returns Resulting shard
 		 */
 		public addShard(
-			this: Universe,
 			...shardArgs: CoreUniverseObjectConstructorParameters<
-				BaseClass,
+				BaseParams,
 				CoreShardArg<Options>,
 				CoreArgIds.Shard,
 				Options,
@@ -547,7 +505,7 @@ export function CoreUniverseClassFactory<
 			// ESLint buggy for nested destructured params
 			// eslint-disable-next-line @typescript-eslint/typedef
 			let [, { attachHook }]: CoreUniverseObjectConstructorParameters<
-				BaseClass,
+				BaseParams,
 				CoreShardArg<Options>,
 				CoreArgIds.Shard,
 				Options,

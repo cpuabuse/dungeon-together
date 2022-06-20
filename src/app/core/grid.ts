@@ -38,7 +38,7 @@ import {
 	coreArgIdToPathUuidPropertyName,
 	navIndex
 } from "./arg";
-import { CoreBaseClassNonRecursive } from "./base";
+import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
 import {
 	CellPathExtended,
 	CommsCell,
@@ -51,7 +51,6 @@ import {
 	CoreCellInstance,
 	coreCellArgParentIdSet
 } from "./cell";
-import { CoreEntityInstance } from "./entity";
 import { ShardPath, coreShardArgParentIds } from "./shard";
 import { CoreUniverse } from "./universe";
 import {
@@ -191,13 +190,13 @@ export type CoreGridArg<Options extends CoreArgOptionsUnion> = CoreArgContainerA
  * Core grid.
  */
 export type CoreGridInstance<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	// `any` effectively means being agnostic to grandchildren, as generic expression is not dependent on it
-	Cell extends CoreCellInstance<BaseClass, Options, any> = CoreCellInstance<BaseClass, Options>,
+	Cell extends CoreCellInstance<BaseParams, Options, any> = CoreCellInstance<BaseParams, Options>,
 	HasNever extends boolean = false
 > = CoreUniverseObjectInstance<
-	BaseClass,
+	BaseParams,
 	CoreGridArg<Options>,
 	CoreArgIds.Grid,
 	Options,
@@ -214,13 +213,13 @@ export type CoreGridInstance<
  * Core grid class.
  */
 export type CoreGridClass<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	// `any` effectively means being agnostic to grandchildren, as generic expression is not dependent on it
-	Cell extends CoreCellInstance<BaseClass, Options, any> = CoreCellInstance<BaseClass, Options>,
-	Grid extends CoreGridInstance<BaseClass, Options, Cell, true> = CoreGridInstance<BaseClass, Options, Cell, true>
+	Cell extends CoreCellInstance<BaseParams, Options, any> = CoreCellInstance<BaseParams, Options>,
+	Grid extends CoreGridInstance<BaseParams, Options, Cell, true> = CoreGridInstance<BaseParams, Options, Cell, true>
 > = CoreUniverseObjectClass<
-	BaseClass,
+	BaseParams,
 	Grid,
 	CoreGridArg<Options>,
 	CoreArgIds.Grid,
@@ -263,8 +262,9 @@ export type CoreGridClass<
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreGridClassFactory<
 	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Cell extends CoreCellInstance<BaseClass, Options, any>
+	Cell extends CoreCellInstance<BaseParams, Options, any>
 >({
 	Base,
 	options
@@ -283,7 +283,7 @@ export function CoreGridClassFactory<
 	 * Constructor params.
 	 */
 	type ConstructorParams = CoreUniverseObjectConstructorParameters<
-		BaseClass,
+		BaseParams,
 		CoreGridArg<Options>,
 		CoreArgIds.Grid,
 		Options,
@@ -319,7 +319,7 @@ export function CoreGridClassFactory<
 	// Have to infer type
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const membersWithChild = generateCoreUniverseObjectContainerMembers<
-		BaseClass,
+		BaseParams,
 		Cell,
 		CoreCellArg<Options>,
 		CoreArgIds.Cell,
@@ -334,7 +334,7 @@ export function CoreGridClassFactory<
 	// Have to infer type
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const members = generateCoreUniverseObjectMembers<
-		BaseClass,
+		BaseParams,
 		CoreGridArg<Options>,
 		CoreArgIds.Grid,
 		Options,
@@ -361,7 +361,7 @@ export function CoreGridClassFactory<
 	abstract class Grid
 		// Casting will remove non-static instance information by intersecting with `any`, while maintaining constructor parameters, that will be included into factory return
 		extends class extends Base {}
-		implements StaticImplements<ToAbstract<CoreGridClass<BaseClass, Options, Cell>>, typeof Grid>
+		implements StaticImplements<ToAbstract<CoreGridClass<BaseParams, Options, Cell>>, typeof Grid>
 	{
 		/**
 		 * Default entity.
@@ -583,7 +583,7 @@ export function CoreGridClassFactory<
 					CoreArgIds.Cell
 				>({
 					arg: grid,
-					childConverter: (Grid.universe as CoreUniverse<BaseClass, Options>).Cell.convertCell,
+					childConverter: (Grid.universe as CoreUniverse<BaseClass, BaseParams, Options>).Cell.convertCell,
 					childId: CoreArgIds.Cell,
 					id: CoreArgIds.Grid,
 					link,

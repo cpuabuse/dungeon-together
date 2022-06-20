@@ -16,7 +16,7 @@ import {
 	CoreArgObjectWords,
 	CoreArgOptionsPathOwnUnion
 } from "../arg";
-import { CoreBaseClassNonRecursive } from "../base";
+import { CoreBaseNonRecursiveParameters } from "../base";
 import { CoreArgIndexableReader, CoreArgIndexer } from "../indexable";
 import { CoreUniverseObjectArgsOptionsUnion } from "./options";
 import { CoreUniverseObjectClass, CoreUniverseObjectInstance } from "./universe-object";
@@ -31,9 +31,9 @@ import { CoreUniverseObjectContainerInstance } from "./universe-objects-containe
  * If we want to access it is a reader, or an indexer, cast it as such, if conditions are known.
  */
 export type CoreUniverseObjectUniverse<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Instance extends CoreUniverseObjectInstance<
-		BaseClass,
+		BaseParams,
 		Arg,
 		Id,
 		Options,
@@ -49,7 +49,7 @@ export type CoreUniverseObjectUniverse<
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never,
 	ChildInstance extends CoreUniverseObjectInstance<
-		BaseClass,
+		BaseParams,
 		Arg extends CoreArgContainer<infer A, ChildId, Options, Id | ParentId | GrandparentIds> ? A : never,
 		ChildId,
 		Options,
@@ -61,7 +61,7 @@ export type CoreUniverseObjectUniverse<
 > = {
 	// Cannot use class type, since constructor must return exactly provided generic
 	[K in `${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: CoreUniverseObjectClass<
-		BaseClass,
+		BaseParams,
 		Instance,
 		Arg,
 		Id,
@@ -73,7 +73,7 @@ export type CoreUniverseObjectUniverse<
 		ChildId
 	>;
 } & ([ParentId] extends [never]
-	? CoreUniverseObjectContainerInstance<BaseClass, Instance, Arg, Id, Options, ParentId, GrandparentIds>
+	? CoreUniverseObjectContainerInstance<BaseParams, Instance, Arg, Id, Options, ParentId, GrandparentIds>
 	: CoreArgIndexableReader<Instance, Id, Options, ParentId | GrandparentIds> & {
 			[K in keyof CoreArgIndexer<
 				Instance,

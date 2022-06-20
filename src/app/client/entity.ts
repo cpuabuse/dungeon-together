@@ -11,7 +11,7 @@ import { AnimatedSprite } from "pixi.js";
 import { CoreArgIds } from "../core/arg";
 import { CoreEntityArg, CoreEntityArgParentIds, CoreEntityClassFactory } from "../core/entity";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
-import { ClientBaseClass, ClientBaseClassWithConstructorParams } from "./base";
+import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientOptions, clientOptions } from "./options";
 
 /**
@@ -33,26 +33,33 @@ export function ClientEntityFactory({
 	/**
 	 * Render unit, representing set of animations.
 	 */
-	class ClientEntity extends CoreEntityClassFactory({ Base, options: clientOptions }) {
+	class ClientEntity extends CoreEntityClassFactory<ClientBaseClass, ClientBaseConstructorParams, ClientOptions>({
+		Base,
+		options: clientOptions
+	}) {
 		/**
 		 * Animated sprite.
 		 */
 		public sprite: AnimatedSprite;
 
+		// ESLint params bug
+		// eslint-disable-next-line jsdoc/require-param
 		/**
 		 * Initializes client entity.
 		 *
 		 * @param param - Destructure parameter
 		 */
-		// Nested args ESLint bug
-		// eslint-disable-next-line @typescript-eslint/typedef
-		public constructor([entity, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
-			ClientBaseClassWithConstructorParams,
-			CoreEntityArg<ClientOptions>,
-			CoreArgIds.Entity,
-			ClientOptions,
-			CoreEntityArgParentIds
-		>) {
+		public constructor(
+			// Nested args ESLint bug
+			// eslint-disable-next-line @typescript-eslint/typedef
+			...[entity, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
+				ClientBaseConstructorParams,
+				CoreEntityArg<ClientOptions>,
+				CoreArgIds.Entity,
+				ClientOptions,
+				CoreEntityArgParentIds
+			>
+		) {
 			// Call super constructor
 			super(entity, { attachHook, created }, baseParams);
 

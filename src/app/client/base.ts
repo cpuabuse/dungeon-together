@@ -74,14 +74,6 @@ export type ClientBaseConstructorParams = [];
 export type ClientBaseClass = ReturnType<typeof ClientBaseFactory>;
 
 /**
- * Client base class with correct constructor params.
- */
-export type ClientBaseClassWithConstructorParams = ReplaceConcreteConstructorParameters<
-	ClientBaseClass,
-	ClientBaseConstructorParams
->;
-
-/**
  * A type for client proto instance.
  */
 export type ClientBaseInstance = InstanceType<ClientBaseClass>;

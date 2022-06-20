@@ -33,7 +33,12 @@ import {
 	coreArgObjectWords
 } from "../arg";
 import { coreArgGenerateDefaultUuid } from "../arg/uuid";
-import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveInstance, CoreBaseNonRecursiveStatic } from "../base";
+import {
+	CoreBaseClassNonRecursive,
+	CoreBaseNonRecursiveInstance,
+	CoreBaseNonRecursiveParameters,
+	CoreBaseNonRecursiveStatic
+} from "../base";
 import { CoreArgIndexableReader } from "../indexable";
 import { CoreUniverseObjectInitializationParameter } from "./parameters";
 import { CoreUniverseObjectContainerInstance, CoreUniverseObjectContainerStatic } from "./universe-objects-container";
@@ -43,12 +48,12 @@ import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectUniverse } from "
  * Parameters for universe object.
  */
 export type CoreUniverseObjectConstructorParameters<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Arg extends CoreArg<Id, Options, ParentIds>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentIds extends CoreArgIds = never
-> = [arg: Arg, init: CoreUniverseObjectInitializationParameter, baseParams: ConstructorParameters<BaseClass>];
+> = [arg: Arg, init: CoreUniverseObjectInitializationParameter, baseParams: BaseParams];
 
 /**
  * Universe object instance members type.
@@ -59,7 +64,7 @@ export type CoreUniverseObjectConstructorParameters<
  * Constraint is not dependent on the base, due to the fact that the non-recursive core base used, should not be a generic {@link CoreBaseClassNonRecursive}.
  */
 export type CoreUniverseObjectInstance<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	// Future
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	Arg extends CoreArgContainerArg<Id, Options, ParentId | GrandparentIds, ChildArg, ChildId>,
@@ -68,7 +73,7 @@ export type CoreUniverseObjectInstance<
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never,
 	ChildInstance extends CoreUniverseObjectInstance<
-		BaseClass,
+		BaseParams,
 		ChildArg,
 		ChildId,
 		Options,
@@ -91,7 +96,7 @@ export type CoreUniverseObjectInstance<
 			? // Receives base class from container
 			  CoreBaseNonRecursiveInstance
 			: CoreUniverseObjectContainerInstance<
-					BaseClass,
+					BaseParams,
 					ChildInstance,
 					ChildArg,
 					ChildId,
@@ -105,7 +110,7 @@ export type CoreUniverseObjectInstance<
  * Static part of universe object class.
  */
 export type CoreUniverseObjectStatic<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	// Future
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	Arg extends CoreArgContainerArg<Id, Options, ParentId | GrandparentIds, ChildArg, ChildId>,
@@ -114,7 +119,7 @@ export type CoreUniverseObjectStatic<
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never,
 	ChildInstance extends CoreUniverseObjectInstance<
-		BaseClass,
+		BaseParams,
 		ChildArg,
 		ChildId,
 		Options,
@@ -138,7 +143,7 @@ export type CoreUniverseObjectStatic<
 	} & ([ChildId] extends [never]
 			? ComputedClassEmptyObject
 			: CoreUniverseObjectContainerStatic<
-					BaseClass,
+					BaseParams,
 					ChildInstance,
 					ChildArg,
 					ChildId,
@@ -156,9 +161,9 @@ export type CoreUniverseObjectStatic<
  * Universe object class.
  */
 export type CoreUniverseObjectClass<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Instance extends CoreUniverseObjectInstance<
-		BaseClass,
+		BaseParams,
 		Arg,
 		Id,
 		Options,
@@ -174,7 +179,7 @@ export type CoreUniverseObjectClass<
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never,
 	ChildInstance extends CoreUniverseObjectInstance<
-		BaseClass,
+		BaseParams,
 		ChildArg,
 		ChildId,
 		Options,
@@ -188,7 +193,7 @@ export type CoreUniverseObjectClass<
 		ParentId | GrandparentIds
 	>
 > = CoreUniverseObjectStatic<
-	BaseClass,
+	BaseParams,
 	Arg,
 	Id,
 	Options,
@@ -200,7 +205,7 @@ export type CoreUniverseObjectClass<
 	Converter
 > &
 	ConcreteConstructor<
-		CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>,
+		CoreUniverseObjectConstructorParameters<BaseParams, Arg, Id, Options, ParentId | GrandparentIds>,
 		Instance
 	>;
 
@@ -216,14 +221,14 @@ export type CoreUniverseObjectClass<
 // Infer return type for extraction
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function generateCoreUniverseObjectMembers<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Arg extends CoreArgContainerArg<Id, Options, ParentId | GrandparentIds, ChildArg, ChildId>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never,
 	ChildInstance extends CoreUniverseObjectInstance<
-		BaseClass,
+		BaseParams,
 		ChildArg,
 		ChildId,
 		Options,
@@ -277,7 +282,7 @@ export function generateCoreUniverseObjectMembers<
 	 * This instance.
 	 */
 	type Instance = CoreUniverseObjectInstance<
-		BaseClass,
+		BaseParams,
 		Arg,
 		Id,
 		Options,
@@ -292,7 +297,7 @@ export function generateCoreUniverseObjectMembers<
 	 * Instance, when container.
 	 */
 	type InstanceWithChild = CoreUniverseObjectContainerInstance<
-		BaseClass,
+		BaseParams,
 		ChildInstance,
 		ChildArg,
 		ChildId,
@@ -305,7 +310,7 @@ export function generateCoreUniverseObjectMembers<
 	 * Static.
 	 */
 	type Class = CoreUniverseObjectClass<
-		BaseClass,
+		BaseParams,
 		Instance,
 		Arg,
 		Id,
@@ -321,7 +326,7 @@ export function generateCoreUniverseObjectMembers<
 	 * Universe.
 	 */
 	type Universe = CoreUniverseObjectUniverse<
-		BaseClass,
+		BaseParams,
 		Instance,
 		Arg,
 		Id,
@@ -350,7 +355,7 @@ export function generateCoreUniverseObjectMembers<
 	 */
 	type ConstructorParams = [
 		that: Instance,
-		ctorParams: CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>,
+		ctorParams: CoreUniverseObjectConstructorParameters<BaseParams, Arg, Id, Options, ParentId | GrandparentIds>,
 		...defaultChildArg: [ChildId] extends [never] ? [] : [ChildArg]
 	];
 
@@ -436,7 +441,7 @@ export function generateCoreUniverseObjectMembers<
 						 * Universe for child.
 						 */
 						type ChildUniverse = CoreUniverseObjectUniverse<
-							BaseClass,
+							BaseParams,
 							ChildInstance,
 							ChildArg,
 							ChildId,
@@ -491,7 +496,7 @@ export function generateCoreUniverseObjectMembers<
 										value(
 											this: Instance,
 											...childArgs: CoreUniverseObjectConstructorParameters<
-												BaseClass,
+												BaseParams,
 												ChildArg,
 												ChildId,
 												Options,
@@ -501,7 +506,7 @@ export function generateCoreUniverseObjectMembers<
 											// ESLint buggy for nested destructured params
 											// eslint-disable-next-line @typescript-eslint/typedef
 											let [, { attachHook }]: CoreUniverseObjectConstructorParameters<
-												BaseClass,
+												BaseParams,
 												ChildArg,
 												ChildId,
 												Options,
@@ -696,7 +701,7 @@ export function generateCoreUniverseObjectMembers<
 						 * Parent's parent information missing, as it is not known or required. At the same time, it is unsafe to operate on anything that would depend on parent's parents or grandparents.
 						 */
 						type ParentInstance = CoreUniverseObjectInstance<
-							BaseClass,
+							BaseParams,
 							ParentArg,
 							ParentId,
 							Options,
@@ -713,7 +718,7 @@ export function generateCoreUniverseObjectMembers<
 						 * @see {@link ParentInstance}
 						 */
 						type ParentUniverse = CoreUniverseObjectUniverse<
-							BaseClass,
+							BaseParams,
 							ParentInstance,
 							ParentArg,
 							ParentId,
@@ -880,7 +885,7 @@ export function generateCoreUniverseObjectMembers<
 					(
 						(that as InstanceWithChild)[nameAddChildUniverseObject] as (
 							...childArgs: CoreUniverseObjectConstructorParameters<
-								BaseClass,
+								BaseParams,
 								ChildArg,
 								ChildId,
 								Options,

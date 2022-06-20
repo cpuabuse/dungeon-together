@@ -11,7 +11,7 @@ import { CoreArgIds } from "../core/arg";
 import { CellPathOwn } from "../core/cell";
 import { CoreGridArg, CoreGridArgParentIds, CoreGridClassFactory } from "../core/grid";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
-import { ClientBaseClass, ClientBaseClassWithConstructorParams } from "./base";
+import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientCell } from "./cell";
 import { ClientOptions, clientOptions } from "./options";
 import { ClientShard } from "./shard";
@@ -35,7 +35,12 @@ export function ClientGridClassFactory({
 	/**
 	 * Vector Array Object.
 	 */
-	class ClientGrid extends CoreGridClassFactory<ClientBaseClass, ClientOptions, ClientCell>({
+	class ClientGrid extends CoreGridClassFactory<
+		ClientBaseClass,
+		ClientBaseConstructorParams,
+		ClientOptions,
+		ClientCell
+	>({
 		Base,
 		options: clientOptions
 	}) {
@@ -47,20 +52,24 @@ export function ClientGridClassFactory({
 		 */
 		public shard?: ClientShard;
 
+		// ESLint params bug
+		// eslint-disable-next-line jsdoc/require-param
 		/**
 		 * Constructor.
 		 *
 		 * @param param - Destructure parameter
 		 */
-		// ESLint bug - nested args
-		// eslint-disable-next-line @typescript-eslint/typedef
-		public constructor([grid, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
-			ClientBaseClassWithConstructorParams,
-			CoreGridArg<ClientOptions>,
-			CoreArgIds.Grid,
-			ClientOptions,
-			CoreGridArgParentIds
-		>) {
+		public constructor(
+			// ESLint bug - nested args
+			// eslint-disable-next-line @typescript-eslint/typedef
+			...[grid, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
+				ClientBaseConstructorParams,
+				CoreGridArg<ClientOptions>,
+				CoreArgIds.Grid,
+				ClientOptions,
+				CoreGridArgParentIds
+			>
+		) {
 			super(grid, { attachHook, created }, baseParams);
 		}
 

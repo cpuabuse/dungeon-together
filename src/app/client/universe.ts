@@ -14,23 +14,14 @@ import Mousetrap from "mousetrap";
 import { BaseTexture, Texture } from "pixi.js";
 import { App, createApp } from "vue";
 import { createStore } from "vuex";
-import { PromiseQueue } from "../common/async/promise-queue";
-import { defaultCellUuid, defaultGridUuid, defaultModeUuid, defaultShardUuid } from "../common/defaults";
-import { StaticImplements } from "../common/utility-types";
+import { DeferredPromise } from "../common/async";
+import { defaultModeUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
-import { CoreUniverseUuidSearchFactory } from "../common/uuid-search";
-import { CellPathExtended } from "../core/cell";
 import { CoreConnectionParam } from "../core/connection";
-import { EntityPathExtended } from "../core/entity";
-import { GridPath } from "../core/grid";
-import { CommsShardArgs, ShardPath } from "../core/shard";
-import {
-	CoreUniverse,
-	CoreUniverseClassConcreteStatic,
-	CoreUniverseRequiredConstructorParameter
-} from "../core/universe";
+import { CoreShardArg, ShardPath } from "../core/shard";
+import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
 import UniverseComponent from "../vue/universe.vue";
-import { ClientBaseClass, ClientBaseFactory } from "./base";
+import { ClientBaseClass, ClientBaseConstructorParams, ClientBaseFactory } from "./base";
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
 import { ClientConnection } from "./connection";
 import { ClientEntity, ClientEntityClass, ClientEntityFactory } from "./entity";
@@ -39,27 +30,11 @@ import { UniverseState } from "./gui";
 import { Theme } from "./gui/themes";
 import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, scrollSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
+import { ClientOptions, clientOptions } from "./options";
 import { ClientShard, ClientShardClass, ClientShardFactory } from "./shard";
 
 // Static init
 import "./gui/static-init";
-
-/**
- * Constructor args for client universe.
- */
-export interface ClientUniverseArgs extends CoreUniverseRequiredConstructorParameter {
-	/**
-	 * HTML element.
-	 */
-	element: HTMLElement;
-}
-
-/**
- * Base type for client universe.
- */
-// Inference to preserve type information
-// eslint-disable-next-line @typescript-eslint/typedef
-const ClientUniverseBase = CoreUniverseUuidSearchFactory({ Base: CoreUniverse });
 
 /**
  * All instances in client.
@@ -67,10 +42,20 @@ const ClientUniverseBase = CoreUniverseUuidSearchFactory({ Base: CoreUniverse })
  * Termination of the client is impossible, because it is global.
  * For same reason [[Client]] does not store "defaultInstanceUuid" inside.
  */
-export class ClientUniverse
-	extends ClientUniverseBase
-	implements StaticImplements<CoreUniverseClassConcreteStatic, typeof ClientUniverse>
-{
+export class ClientUniverse extends CoreUniverseClassFactory<
+	ClientBaseClass,
+	ClientBaseConstructorParams,
+	ClientOptions,
+	ClientEntity,
+	ClientCell,
+	ClientGrid,
+	ClientShard
+>({ options: clientOptions }) {
+	/**
+	 * Base class.
+	 */
+	public readonly Base: ClientBaseClass;
+
 	/**
 	 * A shard constructor.
 	 */
@@ -101,10 +86,7 @@ export class ClientUniverse
 	 */
 	public connections: Set<ClientConnection> = new Set();
 
-	/**
-	 * Default entity path for indexing
-	 */
-	public defaultEntityPath: EntityPathExtended;
+	public defaultShard: ClientShard;
 
 	/**
 	 * Entities index.
@@ -206,24 +188,26 @@ export class ClientUniverse
 	public readonly vue: App;
 
 	/**
-	 * Queue for shard.
-	 */
-	public readonly universeQueue: PromiseQueue = new PromiseQueue();
-
-	/**
-	 * Base class for client objects.
-	 */
-	protected readonly Base: ClientBaseClass;
-
-	/**
 	 * Constructor.
 	 * The constructor can never be called more than once, during the execution of the program.
 	 *
-	 * @param element - HTML elements
+	 * @param superParams - Super parameters
+	 * @param param - Destructured parameter
 	 */
-	public constructor({ application, element }: ClientUniverseArgs) {
+	public constructor(
+		superParams: CoreUniverseRequiredConstructorParameter,
+		{
+			element
+		}: {
+			/**
+			 * HTML element.
+			 */
+			element: HTMLElement;
+		}
+	) {
 		// Call superclass
-		super({ application });
+		// TODO: Add universe UUID
+		super(superParams);
 
 		// Generate base class
 		this.Base = ClientBaseFactory({ element, universe: this });
@@ -234,36 +218,34 @@ export class ClientUniverse
 		this.Cell = ClientCellFactory({ Base: this.Base });
 		this.Entity = ClientEntityFactory({ Base: this.Base });
 
-		// Get defaults UUIDs
-		let shardUuid: Uuid = defaultShardUuid;
-		let gridUuid: Uuid = defaultGridUuid;
-		let cellUuid: Uuid = defaultCellUuid;
-		let entityUuid: Uuid = this.Cell.getDefaultEntityUuid({ cellUuid });
-		this.defaultEntityPath = {
-			cellUuid,
-			entityUuid,
-			gridUuid,
-			shardUuid
-		};
-
 		// Create vue
 		this.vue = createApp(UniverseComponent);
 
-		// Object initialization
-		setTimeout(() => {
-			this.addShard({ grids: new Map(), shardUuid: defaultShardUuid });
+		// Init vue after initialization
+		this.vue.use(createStore<UniverseState>({ state: { theme: Theme.Dark, universe: this } }));
+		this.vue.use(vueHljs);
 
-			// Init vue after initialization
-			this.vue.use(createStore<UniverseState>({ state: { theme: Theme.Dark, universe: this } }));
-			this.vue.use(vueHljs);
+		// Mount vue
+		let vueElement: HTMLElement = document.createElement("div");
+		this.vue.mount(vueElement);
 
-			// Mount vue
-			let vueElement: HTMLElement = document.createElement("div");
-			this.vue.mount(vueElement);
+		// Display vue
+		element.after(vueElement);
 
-			// Display vue
-			element.after(vueElement);
+		// Default shard
+		let defaultShardCreated: DeferredPromise = new DeferredPromise();
+		let defaultShardAttach: Promise<void> = new Promise((resolve, reject) => {
+			defaultShardCreated.then(resolve).catch(reject);
 		});
+		let defaultShardArg: CoreShardArg<ClientOptions> = {
+			grids: new Map(),
+			shardUuid: this.getDefaultShardUuid()
+		};
+		this.defaultShard = this.addShard(
+			defaultShardArg,
+			{ attachHook: defaultShardAttach, created: defaultShardCreated },
+			[]
+		);
 
 		// JavaScript based events
 		element.addEventListener("contextmenu", event => {
@@ -421,7 +403,7 @@ export class ClientUniverse
 			});
 		});
 
-		// Pinch does not work on mousescroll
+		// Pinch does not work on mouse scroll
 		hammer.on("pinch", () => {
 			// Iterates through shards conditionally
 			this.shards.forEach(clientShard => {
@@ -440,36 +422,10 @@ export class ClientUniverse
 	 * @param connectionArgs - Connection args
 	 * @returns - The connection added
 	 */
-	public addConnection(connectionArgs: CoreConnectionParam): ClientConnection {
+	public addConnection(connectionArgs: CoreConnectionParam<ClientUniverse>): ClientConnection {
 		let connection: ClientConnection = new ClientConnection(connectionArgs);
 		this.connections.add(connection);
 		return connection;
-	}
-
-	/**
-	 * Add [[ClientShard]] to [[ClientUniverse]].
-	 *
-	 * Adds the modes from the shard.
-	 *
-	 * @param shard - Arguments for the [[ClientShard]] constructor
-	 */
-	public addShard(shard: CommsShardArgs): void {
-		if (this.shards.has(shard.shardUuid)) {
-			// Clear the shard if it already exists
-			this.doRemoveShard(shard);
-		}
-
-		// Set the shard and reset modes index
-		let modesIndex: Array<Uuid> = new Array();
-		let clientShard: ClientShard = new this.Shard(shard);
-		this.shards.set(clientShard.shardUuid, new this.Shard(shard));
-		this.modesIndex.set(shard.shardUuid, modesIndex);
-
-		// Populate the universe modes
-		clientShard.modes.forEach((mode, uuid) => {
-			this.modes.set(uuid, mode);
-			modesIndex.push(uuid);
-		});
 	}
 
 	/**
@@ -477,13 +433,13 @@ export class ClientUniverse
 	 *
 	 * Removes unused modes.
 	 *
-	 * @param param
+	 * @param param - Destructured parameter
 	 */
 	public doRemoveShard({ shardUuid }: ShardPath): void {
 		// Checks if there is something to delete in the first place; Then within all the modes associated with the uuid of the shard to delete, we check that they are not within an array made up from all the other mode associations from "modesIndex" to other shards; And if there is no match, then we delete the mode; Finally we delete the shard and the "modesIndex" entry
 		if (this.shards.has(shardUuid)) {
 			// Tell shard it is about to be deleted
-			(this.shards.get(shardUuid) as ClientShard).terminate();
+			this.shards.get(shardUuid)?.terminateShard();
 
 			// Clean up the modes
 			if (this.modesIndex.has(shardUuid)) {
@@ -491,9 +447,13 @@ export class ClientUniverse
 				(this.modesIndex.get(shardUuid) as Array<Uuid>).forEach(modeUuid => {
 					if (
 						!Array.from(this.modesIndex)
+							// False negative
+							// eslint-disable-next-line @typescript-eslint/typedef
 							.filter(function ([key]) {
 								return key !== shardUuid;
 							})
+							// False negative
+							// eslint-disable-next-line @typescript-eslint/typedef
 							.reduce(function (result, [, modesArray]) {
 								return new Set([...Array.from(result), ...modesArray]);
 							}, new Set())
@@ -511,54 +471,18 @@ export class ClientUniverse
 	}
 
 	/**
-	 * Get [[ClientCell]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @param path - Path to cell
-	 * @returns [[ ClientCell]]
-	 */
-	public getCell(path: CellPathExtended): ClientCell {
-		return this.getShard(path).getGrid(path).getCell(path);
-	}
-
-	/**
-	 * Get [[ClientEntity]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @param path - Path to entity
-	 * @returns [[ClientEntity]], the smallest renderable
-	 */
-	public getEntity(path: EntityPathExtended): ClientEntity {
-		return this.getShard(path).getGrid(path).getCell(path).getEntity(path);
-	}
-
-	/**
-	 * Get [[ClientGrid]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @param path - Path to grid
-	 * @returns [[ ClientGrid]]
-	 */
-	public getGrid(path: GridPath): ClientGrid {
-		return this.getShard(path).getGrid(path);
-	}
-
-	/**
 	 * Get [[Mode]].
 	 *
 	 * A shortcut function.
 	 *
-	 * @param param
+	 * @param param - Destructured parameter
 	 * @returns Modes for client
 	 */
 	public getMode({
 		uuid
 	}: {
 		/**
-		 *
+		 * Uuid of the mode.
 		 */
 		uuid: Uuid;
 	}): Mode {
@@ -568,38 +492,5 @@ export class ClientUniverse
 			return this.modes.get(defaultModeUuid) as Mode;
 		}
 		return mode;
-	}
-
-	/**
-	 * Get [[ClientShard]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @param param
-	 * @returns [[clientShard]], everything happening on the screen
-	 */
-	public getShard({ shardUuid }: ShardPath): ClientShard {
-		let clientShard: ClientShard | undefined = this.shards.get(shardUuid);
-
-		if (clientShard === undefined) {
-			// "defaultShardUuid" is always present, since it is initialized and cannot be removed or overwritten
-			return this.shards.get(defaultShardUuid) as ClientShard;
-		}
-		return clientShard;
-	}
-
-	/**
-	 * Remove [[ClientShard]] from [[ClientUniverse]].
-	 *
-	 * Removes unused modes.
-	 *
-	 * @param path - Path to shard
-	 */
-	public removeShard(path: ShardPath): void {
-		// Never remove "defaultShardUuid"
-		if (path.shardUuid === defaultShardUuid) {
-			return;
-		}
-		this.doRemoveShard(path);
 	}
 }

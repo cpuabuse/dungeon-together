@@ -21,7 +21,7 @@ import { CoreArgIds } from "../core/arg";
 import { Envelope, VSocket } from "../core/connection";
 import { CoreShardArg, CoreShardArgParentIds, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
-import { ClientBaseClass, ClientBaseClassWithConstructorParams } from "./base";
+import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientGrid } from "./grid";
 import {
 	Input,
@@ -60,7 +60,12 @@ export function ClientShardFactory({
 	 *
 	 * Each shard to not interact with another and be treated as a separate thread.
 	 */
-	class ClientShard extends CoreShardClassFactory<ClientBaseClass, ClientOptions, ClientGrid>({
+	class ClientShard extends CoreShardClassFactory<
+		ClientBaseClass,
+		ClientBaseConstructorParams,
+		ClientOptions,
+		ClientGrid
+	>({
 		Base,
 		options: clientOptions
 	}) {
@@ -115,20 +120,24 @@ export function ClientShardFactory({
 		 */
 		private isAttached: boolean = false;
 
+		// ESLint params bug
+		// eslint-disable-next-line jsdoc/require-param
 		/**
 		 * Constructor for a screen.
 		 *
 		 * @param param - Destructured parameter
 		 */
-		// ESLint bug - nested args
-		// eslint-disable-next-line @typescript-eslint/typedef
-		public constructor([shard, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
-			ClientBaseClassWithConstructorParams,
-			CoreShardArg<ClientOptions>,
-			CoreArgIds.Shard,
-			ClientOptions,
-			CoreShardArgParentIds
-		>) {
+		public constructor(
+			// ESLint bug - nested args
+			// eslint-disable-next-line @typescript-eslint/typedef
+			...[shard, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
+				ClientBaseConstructorParams,
+				CoreShardArg<ClientOptions>,
+				CoreArgIds.Shard,
+				ClientOptions,
+				CoreShardArgParentIds
+			>
+		) {
 			// Call super constructor
 			super(shard, { attachHook, created }, baseParams);
 

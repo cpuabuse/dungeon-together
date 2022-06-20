@@ -25,7 +25,7 @@ import {
 	coreArgIdToPathUuidPropertyName,
 	coreArgObjectWords
 } from "../arg";
-import { CoreBaseClassNonRecursive } from "../base";
+import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "../base";
 import { CoreArgIndexableReader, CoreArgIndexer } from "../indexable";
 import { CoreUniverseObjectConstructorParameters, CoreUniverseObjectInstance } from "./universe-object";
 import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectUniverse } from ".";
@@ -40,9 +40,9 @@ import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectUniverse } from "
  * Cannot use `InstanceType<BaseClass>`, since cannot implement in class (implies dynamic members), even if it would be extended.
  */
 export type CoreUniverseObjectContainerInstance<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	// We do not care what class is base class for child
-	Instance extends CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
+	Instance extends CoreUniverseObjectInstance<BaseParams, Arg, Id, Options, ParentId, GrandparentIds>,
 	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
@@ -54,7 +54,7 @@ export type CoreUniverseObjectContainerInstance<
 		CoreArgIndexableReader<Instance, Id, Options, ParentId | GrandparentIds> & {
 			// Necessary to implement where the created child is known, to call attach
 			[K in `add${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-				...childArgs: CoreUniverseObjectConstructorParameters<BaseClass, Arg, Id, Options, ParentId | GrandparentIds>
+				...childArgs: CoreUniverseObjectConstructorParameters<BaseParams, Arg, Id, Options, ParentId | GrandparentIds>
 			) => Instance;
 		} & {
 			[K in `remove${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
@@ -71,11 +71,11 @@ export type CoreUniverseObjectContainerInstance<
  * Implementing this type, ensures that members are implemented correctly.
  */
 export type CoreUniverseObjectContainerStatic<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	// We do not care what class is base class for child
 	// Preserve for future
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	Instance extends CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
+	Instance extends CoreUniverseObjectInstance<BaseParams, Arg, Id, Options, ParentId, GrandparentIds>,
 	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
@@ -87,9 +87,9 @@ export type CoreUniverseObjectContainerStatic<
  * Class type.
  */
 export type CoreUniverseObjectContainerClass<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Container extends CoreUniverseObjectContainerInstance<
-		BaseClass,
+		BaseParams,
 		Instance,
 		Arg,
 		Id,
@@ -97,14 +97,14 @@ export type CoreUniverseObjectContainerClass<
 		ParentId,
 		GrandparentIds
 	>,
-	Instance extends CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
+	Instance extends CoreUniverseObjectInstance<BaseParams, Arg, Id, Options, ParentId, GrandparentIds>,
 	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
 	ParentId extends CoreArgIds = never,
 	GrandparentIds extends CoreArgIds = never,
 	ConstructorParams extends any[] = any[]
-> = CoreUniverseObjectContainerStatic<BaseClass, Instance, Arg, Id, Options, ParentId, GrandparentIds> &
+> = CoreUniverseObjectContainerStatic<BaseParams, Instance, Arg, Id, Options, ParentId, GrandparentIds> &
 	ConcreteConstructor<ConstructorParams, Container>;
 
 /**
@@ -120,9 +120,9 @@ export type CoreUniverseObjectContainerClass<
 // Infer return type for extraction
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function generateCoreUniverseObjectContainerMembers<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	// We do not care what class is base class for child
-	Instance extends CoreUniverseObjectInstance<BaseClass, Arg, Id, Options, ParentId, GrandparentIds>,
+	Instance extends CoreUniverseObjectInstance<BaseParams, Arg, Id, Options, ParentId, GrandparentIds>,
 	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
@@ -148,7 +148,7 @@ export function generateCoreUniverseObjectContainerMembers<
 	 * This instance.
 	 */
 	type ThisInstance = CoreUniverseObjectContainerInstance<
-		BaseClass,
+		BaseParams,
 		Instance,
 		Arg,
 		Id,
@@ -238,7 +238,7 @@ export function generateCoreUniverseObjectContainerMembers<
 						if (universeObject !== undefined) {
 							(
 								(universeObject.constructor as CoreBaseClassNonRecursive).universe as CoreUniverseObjectUniverse<
-									BaseClass,
+									BaseParams,
 									Instance,
 									Arg,
 									Id,

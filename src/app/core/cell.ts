@@ -37,7 +37,7 @@ import {
 	coreArgIdToPathUuidPropertyName
 } from "./arg";
 import { CoreArgNav } from "./arg/nav";
-import { CoreBaseClassNonRecursive } from "./base";
+import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
 import {
 	CommsEntity,
 	CommsEntityArgs,
@@ -223,9 +223,9 @@ export type CellPathExtended = CoreArgPath<CoreArgIds.Cell, CoreArgOptionsPathEx
  * Core cell.
  */
 export type CoreCellInstance<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Entity extends CoreEntityInstance<BaseClass, Options> = CoreEntityInstance<BaseClass, Options>,
+	Entity extends CoreEntityInstance<BaseParams, Options> = CoreEntityInstance<BaseParams, Options>,
 	HasNever extends boolean = false
 > = {
 	/**
@@ -242,7 +242,7 @@ export type CoreCellInstance<
 } & {
 	[K in keyof Vector]: Options extends CoreArgOptionsWithVectorUnion ? Vector[K] : never;
 } & CoreUniverseObjectInstance<
-		BaseClass,
+		BaseParams,
 		CoreCellArg<Options>,
 		CoreArgIds.Cell,
 		Options,
@@ -258,12 +258,12 @@ export type CoreCellInstance<
  * Core cell class.
  */
 export type CoreCellClass<
-	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Entity extends CoreEntityInstance<BaseClass, Options> = CoreEntityInstance<BaseClass, Options>,
-	Cell extends CoreCellInstance<BaseClass, Options, Entity, true> = CoreCellInstance<BaseClass, Options, Entity, true>
+	Entity extends CoreEntityInstance<BaseParams, Options> = CoreEntityInstance<BaseParams, Options>,
+	Cell extends CoreCellInstance<BaseParams, Options, Entity, true> = CoreCellInstance<BaseParams, Options, Entity, true>
 > = CoreUniverseObjectClass<
-	BaseClass,
+	BaseParams,
 	Cell,
 	CoreCellArg<Options>,
 	CoreArgIds.Cell,
@@ -335,8 +335,9 @@ export const coreCellArgParentIdSet: Set<CoreCellArgParentIds> = new Set(coreCel
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function CoreCellClassFactory<
 	BaseClass extends CoreBaseClassNonRecursive,
+	BaseParams extends CoreBaseNonRecursiveParameters,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
-	Entity extends CoreEntityInstance<BaseClass, Options>
+	Entity extends CoreEntityInstance<BaseParams, Options>
 >({
 	Base,
 	options
@@ -360,7 +361,7 @@ export function CoreCellClassFactory<
 	 * Constructor params.
 	 */
 	type ConstructorParams = CoreUniverseObjectConstructorParameters<
-		BaseClass,
+		BaseParams,
 		CoreCellArg<Options>,
 		CoreArgIds.Cell,
 		Options,
@@ -396,7 +397,7 @@ export function CoreCellClassFactory<
 	// Have to infer type
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const membersWithChild = generateCoreUniverseObjectContainerMembers<
-		BaseClass,
+		BaseParams,
 		Entity,
 		CoreEntityArg<Options>,
 		CoreArgIds.Entity,
@@ -411,7 +412,7 @@ export function CoreCellClassFactory<
 	// Have to infer type
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const members = generateCoreUniverseObjectMembers<
-		BaseClass,
+		BaseParams,
 		CoreCellArg<Options>,
 		CoreArgIds.Cell,
 		Options,
@@ -444,7 +445,7 @@ export function CoreCellClassFactory<
 		implements
 			StaticImplements<
 				// Includes container
-				ToAbstract<CoreCellClass<BaseClass, Options, Entity>>,
+				ToAbstract<CoreCellClass<BaseParams, Options, Entity>>,
 				typeof Cell
 			>
 	{
@@ -628,7 +629,7 @@ export function CoreCellClassFactory<
 				arg: cell,
 				// False negative
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-				childConverter: (Cell.universe as CoreUniverse<BaseClass, Options>).Entity.convertEntity,
+				childConverter: (Cell.universe as CoreUniverse<BaseClass, BaseParams, Options>).Entity.convertEntity,
 				childId: CoreArgIds.Entity,
 				id: CoreArgIds.Cell,
 				meta,
