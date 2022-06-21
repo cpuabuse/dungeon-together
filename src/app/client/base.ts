@@ -7,7 +7,7 @@
  * @file Base object prototype for client
  */
 
-import { ReplaceConcreteConstructorParameters, StaticImplements } from "../common/utility-types";
+import { StaticImplements } from "../common/utility-types";
 import { CoreBaseClassNonRecursive } from "../core/base";
 import { ClientUniverse } from "./universe";
 

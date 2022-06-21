@@ -31,6 +31,6 @@ export type ClientOptions = CoreArgOptionsGenerate<
  */
 // eslint-disable-next-line @typescript-eslint/typedef
 export const clientOptions: ClientOptions = coreArgOptionIdsToOptions({
-	idSet: new Set(),
+	idSet: new Set([CoreArgOptionIds.Map, CoreArgOptionIds.Vector]),
 	symbolSet: new Set([coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]])
 });

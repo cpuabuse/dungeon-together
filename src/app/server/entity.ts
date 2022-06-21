@@ -7,40 +7,20 @@
  * @file Entity within cells.
  */
 
-import { defaultModeUuid } from "../common/defaults";
 import { FromAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
+import { CoreArgIds } from "../core/arg";
 import { CellPathExtended } from "../core/cell";
-import { CommsEntity, CommsEntityArgs, CoreEntityClassFactory, EntityPathExtended } from "../core/entity";
-import { ServerBaseClass } from "./base";
+import { CoreEntityArg, CoreEntityArgParentIds, CoreEntityClassFactory, EntityPathExtended } from "../core/entity";
+import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
+import { ServerBaseClass, ServerBaseConstructorParams } from "./base";
 import { ServerCell } from "./cell";
-
-/**
- * Arguments for constructor of a server entity.
- */
-export interface InitializeArgs extends CellPathExtended {
-	/**
-	 * Kind of server entity in world.
-	 */
-	kindUuid: Uuid;
-
-	/**
-	 * The whole world
-	 */
-	worldUuid: Uuid;
-}
-
-/**
- * Arguments for a [[ServerEntity]].
- */
-export interface ServerEntityArgs extends CommsEntityArgs {
-	[key: string]: any;
-}
+import { ServerOptions, serverOptions } from "./options";
 
 /**
  * Generator for the server entity class.
  *
- * @param param
+ * @param param - Destructured parameter
  * @returns Server entity class
  */
 // Force type inference to extract class type
@@ -62,81 +42,37 @@ export function ServerEntityFactory({
 	 *
 	 * // TODO: Add ways to create a thing
 	 */
-	abstract class ServerEntity extends CoreEntityClassFactory({ Base }) implements CommsEntity {
-		/**
-		 * Cell occupied by the server entity.
-		 */
-		public cellUuid: Uuid;
+	class ServerEntity extends CoreEntityClassFactory<ServerBaseClass, ServerBaseConstructorParams, ServerOptions>({
+		Base,
+		options: serverOptions
+	}) {
+		public kind: unknown;
 
 		/**
-		 * This UUID.
+		 * Kinds.
 		 */
-		public entityUuid: Uuid;
+		private static kinds: Map<Uuid, unknown> = new Map();
 
-		/**
-		 * Corresponding grid.
-		 */
-		public gridUuid: Uuid;
-
-		/**
-		 * Kind of this server entity in the world.
-		 */
-		public kindUuid: Uuid;
-
-		/**
-		 * Mode of the server entity.
-		 */
-		public modeUuid: string = defaultModeUuid;
-
-		/**
-		 * Universe this resides in.
-		 */
-		public shardUuid: Uuid;
-
-		/**
-		 * World this is in.
-		 */
-		public worldUuid: Uuid;
-
+		// ESLint params bug
+		// eslint-disable-next-line jsdoc/require-param
 		/**
 		 * Constructor.
 		 *
-		 * @param param
+		 * @param param - Destructured parameter
 		 */
-		public constructor({ shardUuid, kindUuid, cellUuid, gridUuid, entityUuid, worldUuid }: ServerEntityArgs) {
-			// ServerProto
-			super();
-
-			// Set path
-			this.shardUuid = shardUuid;
-			this.gridUuid = gridUuid;
-			this.cellUuid = cellUuid;
-			this.entityUuid = entityUuid;
-
-			// Set kind & world
-			this.kindUuid = kindUuid;
-			this.worldUuid = worldUuid;
-		}
-
-		/**
-		 * Initializes the cell's server entities.
-		 */
-		public static initialize(
-			// Fix the linting errors; This method is defined to provide type
-			// eslint-disable-next-line no-empty-pattern
-			{}: InitializeArgs
-		): void {
-			// Do nothing
-		}
-
-		/**
-		 * Initializes the [[ServerEntity]] into the `ServerCell`.
-		 *
-		 * To be called from `ServerCell`.
-		 */
-		public initialize(): void {
-			this.doInitialize();
-			this.universe.getCell(this).attach(this);
+		public constructor(
+			// Nested args ESLint bug
+			// eslint-disable-next-line @typescript-eslint/typedef
+			...[entity, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
+				ServerBaseConstructorParams,
+				CoreEntityArg<ServerOptions>,
+				CoreArgIds.Entity,
+				ServerOptions,
+				CoreEntityArgParentIds
+			>
+		) {
+			// Call super constructor
+			super(entity, { attachHook, created }, baseParams);
 		}
 
 		/**
@@ -144,27 +80,11 @@ export function ServerEntityFactory({
 		 *
 		 * @param entityPath - Path to entity
 		 */
-		public swap(entityPath: EntityPathExtended): void {
-			let entity: ServerEntity = this.universe.getEntity(entityPath);
-			if (entity.kindUuid === this.kindUuid && entity.worldUuid === this.worldUuid) {
-				this.performSwap(entityPath);
-			}
-		}
+		public swapEntity(entityPath: EntityPathExtended): void {
+			let entity: ServerEntity = ServerEntity.universe.getEntity(entityPath);
 
-		/**
-		 * Terminates the [[ServerEntity]].
-		 */
-		public terminate(): void {
-			this.universe.getCell(this).detach(this);
-			this.doTerminate();
+			this.performSwap(entityPath);
 		}
-
-		/**
-		 * Performs actual initialization.
-		 *
-		 * To be overridden by extending classes.
-		 */
-		protected abstract doInitialize(): void;
 
 		/**
 		 * Actually moves the server cell.
@@ -197,27 +117,6 @@ export function ServerEntityFactory({
 			targetEntity.doMove(this);
 			this.doMove(targetCellPath);
 		}
-
-		/**
-		 * Performs necessary cleanup.
-		 */
-		protected abstract doTerminate(): void;
-
-		/**
-		 * Moves to another location.
-		 *
-		 * Should call [[doMove]].
-		 */
-		protected abstract performMove(cellPath: CellPathExtended): void;
-
-		/**
-		 * Performs the swap of 2 [[ServerEntity]].
-		 *
-		 * To be overridden by extending classes.
-		 *
-		 * Should call [[doSwap]].
-		 */
-		protected abstract performSwap(entityPath: EntityPathExtended): void;
 	}
 
 	// Return class
@@ -238,6 +137,11 @@ export type ServerEntityClassConcrete = FromAbstract<ServerEntityClassOriginalAb
  * Instance type of server entity.
  */
 export type ServerEntity = InstanceType<ServerEntityClassConcrete>;
+
+/**
+ * Server entity class.
+ */
+export type ServerEntityClass = ReturnType<typeof ServerEntityFactory>;
 
 /**
  * Generator for the server default entity class.
