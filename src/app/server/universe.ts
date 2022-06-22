@@ -8,28 +8,12 @@
  */
 
 import { defaultKindUuid, defaultShardUuid, defaultWorldUuid } from "../common/defaults";
-import { StaticImplements } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
-import { CellPathExtended } from "../core/cell";
-import { CoreConnectionParam } from "../core/connection";
-import { EntityPathExtended } from "../core/entity";
-import { GridPath } from "../core/grid";
-import { ShardPath } from "../core/shard";
-import {
-	CoreUniverse,
-	CoreUniverseClassConcreteStatic,
-	CoreUniverseClassFactory,
-	CoreUniverseRequiredConstructorParameter
-} from "../core/universe";
+import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
 import { ServerBaseClass, ServerBaseConstructorParams, ServerBaseFactory } from "./base";
-import { ServerCell, ServerCellClass, ServerCellFactory } from "./cell";
+import { ServerCell, ServerCellFactory } from "./cell";
 import { ServerConnection } from "./connection";
-import {
-	DefaultServerEntityFactory,
-	ServerEntity,
-	ServerEntityClassOriginalAbstract,
-	ServerEntityFactory
-} from "./entity";
+import { ServerEntity, ServerEntityFactory } from "./entity";
 import { ServerGrid, ServerGridClass, ServerGridFactory } from "./grid";
 import { Kind } from "./kind";
 import { ServerOptions, serverOptions } from "./options";
@@ -48,13 +32,11 @@ export class ServerUniverse extends CoreUniverseClassFactory<
 	ServerBaseClass,
 	ServerBaseConstructorParams,
 	ServerOptions,
-	ServerEntity
+	ServerEntity,
 	ServerCell
 	// ServerGrid,
 	// ServerShard
 >({ options: serverOptions }) {
-	public universeUuid: Uuid;
-
 	/**
 	 * A shard constructor.
 	 */

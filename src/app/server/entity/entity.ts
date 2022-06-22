@@ -99,12 +99,9 @@ export function ServerEntityFactory({
 			// Get server cell for accurate UUIDs
 			let cell: ServerCell = ServerEntity.universe.getCell(cellPath);
 
-			// Reattach
+			// Reattach; Attach will update uuids in core
 			ServerEntity.universe.getCell(this).detachEntity(this);
-			this.shardUuid = cell.shardUuid;
-			this.gridUuid = cell.gridUuid;
-			this.cellUuid = cell.cellUuid;
-			cell.attach(this);
+			cell.attachEntity(this);
 		}
 
 		/**
@@ -114,12 +111,15 @@ export function ServerEntityFactory({
 		 */
 		public swapEntity(entityPath: EntityPathExtended): void {
 			// Get thing while nothing is changed yet
-			let targetEntity: ServerEntity = ServerEntity.universe.getEntity(entityPath);
-			let targetCellPath: CellPathExtended = { ...entityPath };
+			let otherEntity: ServerEntity = ServerEntity.universe.getEntity(entityPath);
+			let otherCell: ServerCell = ServerEntity.universe.getCell(entityPath);
+			let thisCell: ServerCell = ServerEntity.universe.getCell(this);
 
 			// Set target path
-			targetEntity.doMove(this);
-			this.doMove(targetCellPath);
+			thisCell.detachEntity(this);
+			otherCell.detachEntity(otherEntity);
+			otherCell.attachEntity(this);
+			thisCell.attachEntity(otherEntity);
 		}
 	}
 
