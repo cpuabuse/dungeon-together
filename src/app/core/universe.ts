@@ -538,15 +538,6 @@ export function CoreUniverseClassFactory<
 		}
 
 		/**
-		 * Detaches shard.
-		 *
-		 * @param path - Shard own path
-		 */
-		public detachShard(path: ShardPathOwn): void {
-			this.shards.delete(path.shardUuid);
-		}
-
-		/**
 		 * Gets default shard UUID.
 		 *
 		 * @returns Shard UUID

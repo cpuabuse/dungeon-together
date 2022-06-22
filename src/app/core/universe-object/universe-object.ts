@@ -27,6 +27,7 @@ import {
 	CoreArgOptionsPathExtended,
 	CoreArgOptionsPathOwn,
 	CoreArgPath,
+	CoreArgPathOwnOrExtended,
 	CoreArgPathUuidPropertyName,
 	coreArgComplexOptionSymbolIndex,
 	coreArgIdToPathUuidPropertyName,
@@ -85,13 +86,8 @@ export type CoreUniverseObjectInstance<
 > = ComputedClassOmitConditionalEmptyObject<
 	CoreArg<Id, Options, ParentId | GrandparentIds, true> & {
 		[K in `terminate${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: () => void;
-	} & ([ParentId] extends [never]
-			? ComputedClassEmptyObject
-			: {
-					[K in `move${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
-						path: CoreArgPath<ParentId, Options, GrandparentIds>
-					) => void;
-			  }) &
+		// Preserved for potential future use
+	} & ([ParentId] extends [never] ? ComputedClassEmptyObject : ComputedClassEmptyObject) &
 		([ChildId] extends [never]
 			? // Receives base class from container
 			  CoreBaseNonRecursiveInstance
@@ -405,7 +401,6 @@ export function generateCoreUniverseObjectMembers<
 	/* eslint-disable @typescript-eslint/typedef */
 	const nameTerminateUniverseObject = `terminate${words.singularCapitalizedWord}` as const; // Name of remove universe object function
 	const nameUniverseObjectUuid = coreArgIdToPathUuidPropertyName({ id }); // Name of universe object UUID
-	const nameMoveUniverseObject = `move${words.singularCapitalizedWord}` as const; // Name of move universe object function
 	/* eslint-enable @typescript-eslint/typedef */
 
 	// Extract child members type
@@ -469,7 +464,6 @@ export function generateCoreUniverseObjectMembers<
 						const nameAddChildUniverseObject = `add${childWords.singularCapitalizedWord}` as const; // Name of universe objects member
 						const nameChildUniverseObjectClass = `${childWords.singularCapitalizedWord}` as const; // Name of child class
 						const nameAttachChildUniverseObject = `attach${childWords.singularCapitalizedWord}` as const; // Name of attach universe object function
-						const nameDetachUniverseObject = `detach${childWords.singularCapitalizedWord}` as const; // Name of detach universe object function
 						const childPathUuidPropertyName: CoreArgPathUuidPropertyName<ChildId> = coreArgIdToPathUuidPropertyName({
 							id: childId
 						}); // UUID property name within a path
@@ -522,7 +516,7 @@ export function generateCoreUniverseObjectMembers<
 													// Nothing
 												})
 												.finally(() => {
-													this[nameAttachChildUniverseObjects](child);
+													(this as InstanceWithChild)[nameAttachChildUniverseObjects](child);
 												});
 
 											child = new ((this.constructor as CoreBaseClassNonRecursive).universe as ChildUniverse)[
@@ -570,54 +564,22 @@ export function generateCoreUniverseObjectMembers<
 													 * @param initializationParameter - Initialization parameter
 													 */
 													[ComputedClassWords.Value](this: Instance, universeObject: ChildInstance): void {
+														// Set UUIDs
+														// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+														[id, ...(parentId === undefined ? [] : [parentId, ...grandparentIds!])].forEach(i => {
+															let uuidPropertyName: CoreArgPathUuidPropertyName<typeof i> =
+																coreArgIdToPathUuidPropertyName({
+																	id: i
+																});
+															(universeObject as CoreArgPathOwnOrExtended<typeof i>)[uuidPropertyName] = (
+																this as CoreArgPathOwnOrExtended<typeof i>
+															)[uuidPropertyName];
+														});
+
+														// Add to container
 														(this as InstanceWithChild)[nameChildUniverseObjects].set(
 															universeObject[childPathUuidPropertyName],
 															universeObject
-														);
-													}
-											  },
-
-									detachChildUniverseObject:
-										options[CoreArgOptionIds.Path] ===
-										coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
-											? {
-													[ComputedClassWords.Name]: nameDetachUniverseObject,
-
-													/**
-													 * Detaches child universe object.
-													 *
-													 * @param this - This instance
-													 * @param path - Child universe object
-													 */
-													[ComputedClassWords.Value](
-														this: Instance,
-														path: CoreArgPath<ChildId, Options, Id | ParentId | GrandparentIds>
-													): void {
-														(this as InstanceWithChild)[nameChildUniverseObjects].delete(
-															path[childPathUuidPropertyName]
-														);
-
-														// Deal with universe
-														((this.constructor as CoreBaseClassNonRecursive).universe as ChildUniverse)[
-															nameChildUniverseObjects
-														].delete(path[childPathUuidPropertyName]);
-													}
-											  }
-											: {
-													[ComputedClassWords.Name]: nameDetachUniverseObject,
-
-													/**
-													 * Detaches child universe object.
-													 *
-													 * @param this - This instance
-													 * @param path - Child universe object
-													 */
-													[ComputedClassWords.Value](
-														this: Instance,
-														path: CoreArgPath<ChildId, Options, Id | ParentId | GrandparentIds>
-													): void {
-														(this as InstanceWithChild)[nameChildUniverseObjects].delete(
-															path[childPathUuidPropertyName]
 														);
 													}
 											  },
@@ -665,6 +627,9 @@ export function generateCoreUniverseObjectMembers<
 					})()
 			  };
 
+	/**
+	 * Kept for potential future use.
+	 */
 	const membersWithParentData =
 		parentId === undefined
 			? {
@@ -678,102 +643,9 @@ export function generateCoreUniverseObjectMembers<
 			: {
 					isPresent: true as const,
 					value: (() => {
-						/**
-						 * Used for semantics.
-						 */
-						type ParentParentId = never;
-
-						/**
-						 * Used for semantics.
-						 */
-						type ParentGrandparentIds = never;
-
-						/**
-						 * Used for semantics.
-						 */
-						type ParentArg = CoreArgContainerArg<ParentId, Options, ParentParentId | ParentGrandparentIds, Arg, Id>;
-
-						/**
-						 * Parent's instance.
-						 *
-						 * @remarks
-						 * Pseudo-instance.
-						 * Parent's parent information missing, as it is not known or required. At the same time, it is unsafe to operate on anything that would depend on parent's parents or grandparents.
-						 */
-						type ParentInstance = CoreUniverseObjectInstance<
-							BaseParams,
-							ParentArg,
-							ParentId,
-							Options,
-							ParentParentId,
-							ParentGrandparentIds,
-							Instance,
-							Arg,
-							Id
-						>;
-
-						/**
-						 * Universe with parent.
-						 *
-						 * @see {@link ParentInstance}
-						 */
-						type ParentUniverse = CoreUniverseObjectUniverse<
-							BaseParams,
-							ParentInstance,
-							ParentArg,
-							ParentId,
-							Options,
-							ParentParentId | ParentGrandparentIds
-						>;
-
-						// Inferring for final type
-						const parentWords: {
-							/**
-							 * The plural lowercase word for the universe object.
-							 */
-							pluralLowercaseWord: CoreArgObjectWords[ParentId]["pluralLowercaseWord"];
-
-							/**
-							 * The singular capitalized word for the universe object.
-							 */
-							singularCapitalizedWord: CoreArgObjectWords[ParentId]["singularCapitalizedWord"];
-						} = coreArgObjectWords[parentId];
-
-						const nameAttachUniverseObject = `attach${words.singularCapitalizedWord}` as const; // Name of remove universe object function
-						const nameGetParentUniverseObject = `get${parentWords.singularCapitalizedWord}` as const; // Name of remove universe object function
-
 						return {
 							[ComputedClassWords.Instance]: {
-								[ComputedClassWords.Assign]: {
-									moveUniverseObject: {
-										name: nameMoveUniverseObject,
-
-										/**
-										 * Moves universe object to a different parent.
-										 *
-										 * @param this - Destructured `this`
-										 * @param path - Parent path
-										 */
-										value(this: Instance, path: CoreArgPath<ParentId, Options, GrandparentIds>): void {
-											// Locate cells
-											let parentUniverseObject: ParentInstance = (
-												((this.constructor as CoreBaseClassNonRecursive).universe as ParentUniverse)[
-													nameGetParentUniverseObject
-													// BUG: TS 4.7 - Generic template key intersection function overrides, if identical arguments
-												] as unknown as CoreArgIndexableReader<
-													ParentInstance,
-													ParentId,
-													Options,
-													// Parents unknown
-													ParentParentId | ParentGrandparentIds
-												>[typeof nameGetParentUniverseObject]
-											)(path);
-
-											// Reattach
-											parentUniverseObject[nameAttachUniverseObject](this);
-										}
-									}
-								}
+								[ComputedClassWords.Assign]: {}
 							}
 						};
 					})()
@@ -798,7 +670,7 @@ export function generateCoreUniverseObjectMembers<
 								coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
 									? // Grandparent ids are discriminated by parent id
 									  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-									  [...(parentId === undefined ? [] : [parentId]), ...grandparentIds!]
+									  [...(parentId === undefined ? [] : [parentId, ...grandparentIds!])]
 									: [])
 							].reduce((result, i) => {
 								let uuidPropertyName: CoreArgPathUuidPropertyName<typeof i> = coreArgIdToPathUuidPropertyName({

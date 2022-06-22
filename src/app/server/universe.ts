@@ -17,10 +17,11 @@ import { GridPath } from "../core/grid";
 import { ShardPath } from "../core/shard";
 import {
 	CoreUniverse,
-	CoreUniverseRequiredConstructorParameter,
-	CoreUniverseClassConcreteStatic
+	CoreUniverseClassConcreteStatic,
+	CoreUniverseClassFactory,
+	CoreUniverseRequiredConstructorParameter
 } from "../core/universe";
-import { ServerBaseClass, ServerBaseFactory } from "./base";
+import { ServerBaseClass, ServerBaseConstructorParams, ServerBaseFactory } from "./base";
 import { ServerCell, ServerCellClass, ServerCellFactory } from "./cell";
 import { ServerConnection } from "./connection";
 import {
@@ -31,6 +32,7 @@ import {
 } from "./entity";
 import { ServerGrid, ServerGridClass, ServerGridFactory } from "./grid";
 import { Kind } from "./kind";
+import { ServerOptions, serverOptions } from "./options";
 import { ServerShard, ServerShardArgs, ServerShardClass, ServerShardFactory } from "./shard";
 import { World } from "./world";
 
@@ -42,10 +44,17 @@ export type ServerUniverseArgs = CoreUniverseRequiredConstructorParameter;
 /**
  * Server-side shard.
  */
-export class ServerUniverse
-	extends CoreUniverse
-	implements StaticImplements<CoreUniverseClassConcreteStatic, typeof ServerUniverse>
-{
+export class ServerUniverse extends CoreUniverseClassFactory<
+	ServerBaseClass,
+	ServerBaseConstructorParams,
+	ServerOptions,
+	ServerEntity
+	ServerCell
+	// ServerGrid,
+	// ServerShard
+>({ options: serverOptions }) {
+	public universeUuid: Uuid;
+
 	/**
 	 * A shard constructor.
 	 */
@@ -197,18 +206,6 @@ export class ServerUniverse
 		if (uuid !== defaultWorldUuid) {
 			this.doAddWorld({ uuid, world });
 		}
-	}
-
-	/**
-	 * Get [[ServerCell]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @param path - Path to cell
-	 * @returns [[ServerCell]], the cell within the grid
-	 */
-	public getCell(path: CellPathExtended): ServerCell {
-		return this.getShard(path).getGrid(path).getCell(path);
 	}
 
 	/**

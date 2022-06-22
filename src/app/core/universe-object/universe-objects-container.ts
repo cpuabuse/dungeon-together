@@ -16,12 +16,14 @@ import {
 import { ConcreteConstructor } from "../../common/utility-types";
 import {
 	CoreArg,
+	CoreArgComplexOptionPathIds,
 	CoreArgContainer,
 	CoreArgIds,
 	CoreArgObjectWords,
 	CoreArgOptionIds,
 	CoreArgPath,
 	CoreArgPathUuidPropertyName,
+	coreArgComplexOptionSymbolIndex,
 	coreArgIdToPathUuidPropertyName,
 	coreArgObjectWords
 } from "../arg";
@@ -157,6 +159,11 @@ export function generateCoreUniverseObjectContainerMembers<
 		GrandparentIds
 	>;
 
+	/**
+	 * Universe for child.
+	 */
+	type Universe = CoreUniverseObjectUniverse<BaseParams, Instance, Arg, Id, Options, ParentId | GrandparentIds>;
+
 	// Base words
 	const {
 		pluralLowercaseWord,
@@ -185,6 +192,9 @@ export function generateCoreUniverseObjectContainerMembers<
 	const pathUuidPropertyName: CoreArgPathUuidPropertyName<Id> = coreArgIdToPathUuidPropertyName({
 		id
 	}); // UUID property name within a path
+	const isOwnPath: boolean =
+		options[CoreArgOptionIds.Path] ===
+		coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own];
 
 	/**
 	 * Members of class.
@@ -193,12 +203,30 @@ export function generateCoreUniverseObjectContainerMembers<
 	 *
 	 * - There are implicit constraints of how the const should be structured, but will implicitly be type checked during usage
 	 * - Cannot use abstract as `this`, as it will mismatch when `super` is called
+	 * - Add and attach functions are not implemented here, as they depend on container type
 	 */
 	// Inference required for type check
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const members = {
 		[ComputedClassWords.Instance]: {
 			[ComputedClassWords.Assign]: {
+				detachUniverseObject: {
+					[ComputedClassWords.Name]: nameDetachUniverseObject,
+
+					/**
+					 * Detaches child universe object.
+					 *
+					 * @param this - This instance
+					 * @param path - Child universe object
+					 */
+					[ComputedClassWords.Value](
+						this: ThisInstance,
+						path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
+					): void {
+						this[nameUniverseObjects].delete(path[pathUuidPropertyName]);
+					}
+				},
+
 				getUniverseObject: {
 					[ComputedClassWords.Name]: nameGetUniverseObject,
 					/**
@@ -219,10 +247,14 @@ export function generateCoreUniverseObjectContainerMembers<
 						return universeObject === undefined ? this[nameDefaultUniverseObject] : universeObject;
 					}
 				},
+
 				removeUniverseObject: {
 					[ComputedClassWords.Name]: nameRemoveUniverseObject,
 					/**
 					 * Removes the child object.
+					 *
+					 * @remarks
+					 * Did not split by `isOwnPath`, since function is complicated.
 					 *
 					 * @param this - Universe object container
 					 * @param path - Path to search for
@@ -232,6 +264,16 @@ export function generateCoreUniverseObjectContainerMembers<
 						path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
 					): void {
 						let universeObject: Instance | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
+
+						// Detach from universe
+						if (isOwnPath) {
+							// Deal with universe
+							((this.constructor as CoreBaseClassNonRecursive).universe as Universe)[nameUniverseObjects].delete(
+								path[pathUuidPropertyName]
+							);
+						}
+
+						// Detach
 						this[nameDetachUniverseObject](path);
 
 						// Terminate if we can
@@ -260,6 +302,7 @@ export function generateCoreUniverseObjectContainerMembers<
 					}
 				}
 			},
+
 			[ComputedClassWords.Generate]: {
 				universeObjects: {
 					[ComputedClassWords.Name]: nameUniverseObjects,
