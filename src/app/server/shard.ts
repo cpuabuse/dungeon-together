@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,24 +7,14 @@
  * @file A universe with everything.
  */
 
-import { gridUuidUrlPath, urlPathSeparator } from "../common/defaults";
-import { Uuid, getDefaultUuid } from "../common/uuid";
-import { GridPath } from "../core/grid";
-import { CommsShard, CommsShardArgs } from "../core/shard";
-import { CoreUniverse } from "../core/universe";
-import { ServerBaseClass } from "./base";
+import { Uuid } from "../common/uuid";
+import { CoreArgIds } from "../core/arg";
+import { CoreShardArg, CoreShardArgParentIds, CoreShardClassFactory } from "../core/shard";
+import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
+import { ServerBaseClass, ServerBaseConstructorParams } from "./base";
 import { ServerConnection } from "./connection";
-import { ServerGrid, ServerGridArgs } from "./grid";
-
-/**
- * Universe args.
- */
-export interface ServerShardArgs extends CommsShardArgs {
-	/**
-	 *
-	 */
-	grids: Map<Uuid, ServerGridArgs>;
-}
+import { ServerGrid } from "./grid";
+import { ServerOptions, serverOptions } from "./options";
 
 /**
  * Created a Server shard class.
@@ -47,106 +37,40 @@ export function ServerShardFactory({
 	/**
 	 * A whole universe.
 	 */
-	class ServerShard extends Base implements CommsShard {
+	class ServerShard extends CoreShardClassFactory<
+		ServerBaseClass,
+		ServerBaseConstructorParams,
+		ServerOptions,
+		ServerGrid
+	>({
+		Base,
+		options: serverOptions
+	}) {
 		/**
 		 * Connection to client.
 		 */
 		public connection: Map<Uuid, ServerConnection> = new Map();
 
-		/**
-		 * Default [[ServerGrid]] UUID.
-		 */
-		public defaultGridUuid: Uuid;
-
-		/**
-		 * Grids of the universe.
-		 */
-		public grids: Map<Uuid, ServerGrid> = new Map();
-
-		/**
-		 * This UUID.
-		 */
-		public shardUuid: Uuid;
-
+		// ESLint params bug
+		// eslint-disable-next-line jsdoc/require-param
 		/**
 		 * Constructor.
+		 *
+		 * @param param - Destructured parameters
 		 */
-		public constructor({ shardUuid, grids }: ServerShardArgs) {
+		public constructor(
+			// Nested args ESLint bug
+			// eslint-disable-next-line @typescript-eslint/typedef
+			...[shard, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
+				ServerBaseConstructorParams,
+				CoreShardArg<ServerOptions>,
+				CoreArgIds.Shard,
+				ServerOptions,
+				CoreShardArgParentIds
+			>
+		) {
 			// ServerProto
-			super();
-
-			// Set path
-			this.shardUuid = shardUuid;
-
-			// Deal with default
-			this.defaultGridUuid = getDefaultUuid({
-				path: `${gridUuidUrlPath}${urlPathSeparator}${this.shardUuid}`
-			});
-			setTimeout(() => {
-				this.addGrid({ ...this, cells: new Map(), gridUuid: this.defaultGridUuid });
-
-				grids.forEach(grid => {
-					this.addGrid(grid);
-				});
-			});
-		}
-
-		/**
-		 * Adds [[ServerGrid]].
-		 *
-		 * @param grid - Arguments for the [[ServerGrid]] constructor
-		 */
-		public addGrid(grid: ServerGridArgs): void {
-			if (this.grids.has(grid.gridUuid)) {
-				// Clear the shard if it already exists
-				this.doRemoveGrid(grid);
-			}
-			this.grids.set(grid.gridUuid, new this.universe.Grid(grid));
-		}
-
-		/**
-		 * Gets [[ServerGrid]].
-		 *
-		 * @returns [[grid]], the grid itself
-		 */
-		public getGrid({ gridUuid }: GridPath): ServerGrid {
-			let grid: ServerGrid | undefined = this.grids.get(gridUuid);
-			if (grid === undefined) {
-				// The default is always preserved
-				return this.grids.get(this.defaultGridUuid) as ServerGrid;
-			}
-			return grid;
-		}
-
-		/**
-		 * Removes [[CommsGrid]].
-		 *
-		 * @param path - Path to grid
-		 */
-		public removeGrid(path: GridPath): void {
-			if (path.gridUuid !== this.defaultGridUuid) {
-				this.doRemoveGrid(path);
-			}
-		}
-
-		/**
-		 * Terminates `this`.
-		 */
-		public terminate(): void {
-			this.grids.forEach(function (grid) {
-				grid.terminate();
-			});
-		}
-
-		/**
-		 * Actual removes [[ServerCell]]
-		 */
-		private doRemoveGrid({ gridUuid }: GridPath): void {
-			let grid: ServerGrid | undefined = this.grids.get(gridUuid);
-			if (grid !== undefined) {
-				grid.terminate();
-				this.grids.delete(gridUuid);
-			}
+			super(shard, { attachHook, created }, baseParams);
 		}
 	}
 

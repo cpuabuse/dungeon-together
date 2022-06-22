@@ -15,9 +15,8 @@ import { ServerCell, ServerCellFactory } from "./cell";
 import { ServerConnection } from "./connection";
 import { ServerEntity, ServerEntityFactory } from "./entity";
 import { ServerGrid, ServerGridClass, ServerGridFactory } from "./grid";
-import { Kind } from "./kind";
 import { ServerOptions, serverOptions } from "./options";
-import { ServerShard, ServerShardArgs, ServerShardClass, ServerShardFactory } from "./shard";
+import { ServerShard, ServerShardClass, ServerShardFactory } from "./shard";
 import { World } from "./world";
 
 /**
@@ -33,9 +32,9 @@ export class ServerUniverse extends CoreUniverseClassFactory<
 	ServerBaseConstructorParams,
 	ServerOptions,
 	ServerEntity,
-	ServerCell
-	// ServerGrid,
-	// ServerShard
+	ServerCell,
+	ServerGrid,
+	ServerShard
 >({ options: serverOptions }) {
 	/**
 	 * A shard constructor.

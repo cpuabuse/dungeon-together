@@ -47,7 +47,7 @@ export function ServerGridFactory({
 		/**
 		 * Initializes the server grid.
 		 *
-		 * @param worlds - The default world will be ignored, as it is already present by default.
+		 * @param param - Destructured parameters
 		 */
 		public constructor(
 			// Nested args ESLint bug

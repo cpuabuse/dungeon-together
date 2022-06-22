@@ -48,8 +48,6 @@ export function ServerCellFactory({
 		 * Cell constructor.
 		 *
 		 * Creates nowhere by default.
-		 *
-		 * @param nav - Can be less than [[navAmount]], then `this.nav` will be filled with `this`, if longer than [[navAmount]], then extra values will be ignored
 		 */
 		public constructor(
 			// Nested args ESLint bug
