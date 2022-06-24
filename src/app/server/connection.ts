@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -10,37 +10,9 @@
 import axios from "axios";
 import { LogLevel, processLog } from "../client/error";
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
-import { Uuid } from "../common/uuid";
-import { ProcessCallback, VSocket } from "../common/vsocket";
-import { CoreConnection, CoreConnectionParam, Envelope, Message } from "../core/connection";
-import { CoreUniverse } from "../core/universe";
-import { compile } from "../tool/compile";
+import { Envelope, Message, ProcessCallback, VSocket } from "../core/connection";
+import { compile } from "../yaml/compile";
 import { ServerUniverse } from "./universe";
-
-/**
- * Server connection.
- */
-export class ServerConnection implements CoreConnection {
-	/**
-	 * Server shards.
-	 */
-	public shardUuids: Set<Uuid> = new Set();
-
-	/**
-	 * The target, be it standalone, remote or absent.
-	 */
-	public socket: VSocket<CoreUniverse>;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param target - Socket
-	 */
-	public constructor({ socket }: CoreConnectionParam) {
-		// Set this target
-		this.socket = socket;
-	}
-}
 
 /**
  * Temp shard to send to client.
@@ -50,6 +22,8 @@ export class ServerConnection implements CoreConnection {
 const shardDataPromise: Promise<object> = new Promise(resolve => {
 	axios.get("/data/shard/cave.dt.yml").then(
 		result => {
+			// This whole structure to be removed
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 			resolve(compile(result.data));
 		},
 		() => {

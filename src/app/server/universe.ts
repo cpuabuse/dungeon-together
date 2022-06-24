@@ -10,12 +10,10 @@
 import { DeferredPromise } from "../common/async";
 import { defaultKindUuid, defaultWorldUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
-import { CoreConnectionParam } from "../core/connection";
 import { CoreShardArg } from "../core/shard";
 import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
 import { ServerBaseClass, ServerBaseConstructorParams, ServerBaseFactory } from "./base";
 import { ServerCell, ServerCellClass, ServerCellFactory } from "./cell";
-import { ServerConnection } from "./connection";
 import { ServerEntity, ServerEntityClass, ServerEntityFactory } from "./entity";
 import { ServerGrid, ServerGridClass, ServerGridFactory } from "./grid";
 import { ServerOptions, serverOptions } from "./options";
@@ -65,11 +63,6 @@ export class ServerUniverse extends CoreUniverseClassFactory<
 	public readonly Shard: ServerShardClass;
 
 	/**
-	 * Collection of connections.
-	 */
-	public connections: Set<ServerConnection> = new Set();
-
-	/**
 	 * Default shard.
 	 */
 	public defaultShard: ServerShard;
@@ -83,8 +76,19 @@ export class ServerUniverse extends CoreUniverseClassFactory<
 	 * Constructor.
 	 *
 	 * @param superParams - Super parameters
+	 * @param param - Destructured parameters
 	 */
-	public constructor(superParams: CoreUniverseRequiredConstructorParameter) {
+	public constructor(
+		superParams: CoreUniverseRequiredConstructorParameter,
+		{
+			created
+		}: {
+			/**
+			 * Created promise.
+			 */
+			created: DeferredPromise<void>;
+		}
+	) {
 		// Call superclass
 		super(superParams);
 
@@ -111,17 +115,15 @@ export class ServerUniverse extends CoreUniverseClassFactory<
 			{ attachHook: defaultShardAttach, created: defaultShardCreated },
 			[]
 		);
-	}
 
-	/**
-	 * Adds connection, which subsequently adds a shard.
-	 *
-	 * @param connectionArgs - Connection args
-	 * @returns - The connection added
-	 */
-	public addConnection(connectionArgs: CoreConnectionParam<ServerUniverse>): ServerConnection {
-		let connection: ServerConnection = new ServerConnection(connectionArgs);
-		this.connections.add(connection);
-		return connection;
+		// After default shard added, resolve universe creation
+		defaultShardAttach
+			.catch(() => {
+				// TODO: Process error
+			})
+			// Process unconditionally
+			.finally(() => {
+				created.resolve();
+			});
 	}
 }

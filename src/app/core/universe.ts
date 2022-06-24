@@ -44,6 +44,7 @@ import {
 	CoreCellClass,
 	CoreCellInstance
 } from "./cell";
+import { CoreConnection, CoreConnectionConstructorParams } from "./connection";
 import {
 	CoreEntityArg,
 	CoreEntityArgGrandparentIds,
@@ -69,8 +70,7 @@ import {
 	CoreShardArgParentId,
 	CoreShardArgParentIds,
 	CoreShardClass,
-	CoreShardInstance,
-	ShardPathOwn
+	CoreShardInstance
 } from "./shard";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
@@ -354,6 +354,11 @@ export function CoreUniverseClassFactory<
 			? CoreArgIndexer<Cell, CoreArgIds.Cell, Options, CoreCellArgParentIds>["cells"]
 			: never;
 
+		/**
+		 * Connections.
+		 */
+		public connections: Set<CoreConnection<this>> = new Set();
+
 		public defaultCell!: Options extends CoreArgOptionsPathOwnUnion ? Cell : never;
 
 		public defaultEntity!: Options extends CoreArgOptionsPathOwnUnion ? Entity : never;
@@ -483,6 +488,18 @@ export function CoreUniverseClassFactory<
 				members: membersWithChild,
 				parameters: []
 			});
+		}
+
+		/**
+		 * Adds connection to universe.
+		 *
+		 * @param param - Destructured parameter
+		 * @returns Created connection
+		 */
+		public addConnection({ socket }: CoreConnectionConstructorParams<this>): CoreConnection<this> {
+			let connection: CoreConnection<this> = new CoreConnection<this>({ socket });
+			this.connections.add(connection);
+			return connection;
 		}
 
 		/**

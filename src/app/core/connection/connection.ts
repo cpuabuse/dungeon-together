@@ -13,23 +13,38 @@ import { CoreUniverseInstanceNonRecursive } from "../universe";
 import { VSocket } from "./vsocket";
 
 /**
- * Args for connection constructor.
+ * Constructor params for connection.
  */
-export interface CoreConnectionParam<U extends CoreUniverseInstanceNonRecursive> {
+export type CoreConnectionConstructorParams<U extends CoreUniverseInstanceNonRecursive> = {
 	/**
-	 * Actual connection.
+	 * Universe socket.
 	 */
 	socket: VSocket<U>;
-}
+};
 
 /**
  * Common connection.
  */
-export interface CoreConnection<U extends CoreUniverseInstanceNonRecursive> extends CoreConnectionParam<U> {
+export class CoreConnection<U extends CoreUniverseInstanceNonRecursive> {
 	/**
 	 * Client UUID.
 	 */
-	shardUuids: Set<Uuid>;
+	public shardUuids: Set<Uuid> = new Set();
+
+	/**
+	 * Universe socket.
+	 */
+	public socket: VSocket<U>;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param target - Socket
+	 */
+	public constructor({ socket }: CoreConnectionConstructorParams<U>) {
+		// Set this target
+		this.socket = socket;
+	}
 }
 
 /**

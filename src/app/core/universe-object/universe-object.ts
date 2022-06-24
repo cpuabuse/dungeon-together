@@ -40,7 +40,6 @@ import {
 	CoreBaseNonRecursiveParameters,
 	CoreBaseNonRecursiveStatic
 } from "../base";
-import { CoreArgIndexableReader } from "../indexable";
 import { CoreUniverseObjectInitializationParameter } from "./parameters";
 import { CoreUniverseObjectContainerInstance, CoreUniverseObjectContainerStatic } from "./universe-objects-container";
 import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectUniverse } from ".";

@@ -17,13 +17,11 @@ import { createStore } from "vuex";
 import { DeferredPromise } from "../common/async";
 import { defaultModeUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
-import { CoreConnectionParam } from "../core/connection";
 import { CoreShardArg, ShardPath } from "../core/shard";
 import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
 import UniverseComponent from "../vue/universe.vue";
 import { ClientBaseClass, ClientBaseConstructorParams, ClientBaseFactory } from "./base";
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
-import { ClientConnection } from "./connection";
 import { ClientEntity, ClientEntityClass, ClientEntityFactory } from "./entity";
 import { ClientGrid, ClientGridClass, ClientGridClassFactory } from "./grid";
 import { UniverseState } from "./gui";
@@ -80,11 +78,6 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	 * Cells index.
 	 */
 	public readonly cellsIndex: Map<Uuid, ClientCell> = new Map();
-
-	/**
-	 * Collection of connections.
-	 */
-	public connections: Set<ClientConnection> = new Set();
 
 	public defaultShard: ClientShard;
 
@@ -414,18 +407,6 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 				});
 			});
 		});
-	}
-
-	/**
-	 * Adds connection, which subsequently adds a shard.
-	 *
-	 * @param connectionArgs - Connection args
-	 * @returns - The connection added
-	 */
-	public addConnection(connectionArgs: CoreConnectionParam<ClientUniverse>): ClientConnection {
-		let connection: ClientConnection = new ClientConnection(connectionArgs);
-		this.connections.add(connection);
-		return connection;
 	}
 
 	/**
