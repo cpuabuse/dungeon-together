@@ -20,6 +20,11 @@ export type EntityKindConstructorParams = {
 	 * Entity.
 	 */
 	entity: ServerEntity;
+
+	/**
+	 * Kind props.
+	 */
+	props?: object;
 };
 
 /**
