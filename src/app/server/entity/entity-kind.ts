@@ -10,6 +10,7 @@
  */
 
 import { FromAbstract } from "../../common/utility-types";
+import { Uuid } from "../../common/uuid";
 import { ServerEntity } from "./entity";
 
 /**
@@ -25,6 +26,11 @@ export type EntityKindConstructorParams = {
 	 * Kind props.
 	 */
 	props?: object;
+
+	/**
+	 * Vars is a record of UUIDs to be used in the kind, converted from IDs in files.
+	 */
+	vars?: Record<string, Uuid>;
 };
 
 /**
@@ -35,6 +41,11 @@ export abstract class EntityKind {
 	 * Link to entity.
 	 */
 	public entity: ServerEntity;
+
+	/**
+	 * Kind can be stacked or not.
+	 */
+	public static isStackable: boolean = true;
 
 	/**
 	 * @param param - Destructured parameter

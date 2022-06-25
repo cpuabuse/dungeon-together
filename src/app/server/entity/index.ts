@@ -10,4 +10,4 @@
 
 export * from "./entity";
 export * from "./entity-kind";
-export * from "./default-entity";
+export * from "../kinds/default";

@@ -14,8 +14,8 @@ import { CoreEntityArg, CoreEntityArgParentIds, CoreEntityClassFactory, EntityPa
 import { CoreUniverseObjectConstructorParameters } from "../../core/universe-object";
 import { ServerBaseClass, ServerBaseConstructorParams } from "../base";
 import { ServerCell } from "../cell";
+import { DefaultKindClassFactory } from "../kinds/default";
 import { ServerOptions, serverOptions } from "../options";
-import { DefaultEntityKindClassFactory } from "./default-entity";
 import { EntityKind, EntityKindClassConcrete } from "./entity-kind";
 
 /**
@@ -47,7 +47,7 @@ export function ServerEntityFactory({
 		Base,
 		options: serverOptions
 	}) {
-		private static DefaultKind: EntityKindClassConcrete = DefaultEntityKindClassFactory({ Base: EntityKind });
+		private static DefaultKind: EntityKindClassConcrete = DefaultKindClassFactory({ Base: EntityKind });
 
 		private kind: EntityKind;
 

@@ -9,7 +9,7 @@
  * @file
  */
 
-import { EntityKindClassFactory } from "./entity-kind";
+import { EntityKindClassFactory } from "../entity/entity-kind";
 
 /**
  * Default entity kind.
@@ -22,9 +22,9 @@ import { EntityKindClassFactory } from "./entity-kind";
  */
 // Parameters inferred
 // eslint-disable-next-line @typescript-eslint/typedef
-export const DefaultEntityKindClassFactory: EntityKindClassFactory = function ({ Base }) {
+export const DefaultKindClassFactory: EntityKindClassFactory = function ({ Base }) {
 	/**
 	 * Default entity kind class.
 	 */
-	return class DefaultEntityKind extends Base {};
+	return class DefaultKind extends Base {};
 };
