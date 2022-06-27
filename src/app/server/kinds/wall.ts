@@ -5,7 +5,10 @@
 
 /**
  * Walls etc.
+ *
+ * @file
  */
+
 import { EntityKindClassFactory, EntityKindConstructorParams } from "../entity/entity-kind";
 
 /**
@@ -16,11 +19,11 @@ import { EntityKindClassFactory, EntityKindConstructorParams } from "../entity/e
  */
 // Parameters inferred
 // eslint-disable-next-line @typescript-eslint/typedef
-export const WallKindClassFactory: EntityKindClassFactory = function ({ Base }) {
+export const WallKindClassFactory: EntityKindClassFactory = function ({ Entity }) {
 	/**
 	 * Wall entity kind class.
 	 */
-	return class WallKind extends Base {
+	class WallKind extends Entity.BaseKind {
 		/**
 		 * @override
 		 */
@@ -29,8 +32,10 @@ export const WallKindClassFactory: EntityKindClassFactory = function ({ Base }) 
 		/**
 		 * @param param - Destructured parameter
 		 */
-		public constructor({ entity }: EntityKindConstructorParams) {
-			super({ entity });
+		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
+			super({ entity, ...rest });
 		}
-	};
+	}
+
+	return WallKind;
 };

@@ -16,7 +16,7 @@ import { ServerBaseClass, ServerBaseConstructorParams } from "../base";
 import { ServerCell } from "../cell";
 import { DefaultKindClassFactory } from "../kinds/default";
 import { ServerOptions, serverOptions } from "../options";
-import { EntityKind, EntityKindClassConcrete } from "./entity-kind";
+import { EntityKind, EntityKindClass } from "./entity-kind";
 
 /**
  * Generator for the server entity class.
@@ -47,14 +47,25 @@ export function ServerEntityFactory({
 		Base,
 		options: serverOptions
 	}) {
-		private static DefaultKind: EntityKindClassConcrete = DefaultKindClassFactory({ Base: EntityKind });
+		/**
+		 * The base kind.
+		 */
+		public static BaseKind: EntityKindClass = EntityKind;
 
+		/**
+		 * Default kind.
+		 */
+		private static DefaultKind: EntityKindClass = class DefaultKind extends this.BaseKind {};
+
+		/**
+		 * Entity kind.
+		 */
 		private kind: EntityKind;
 
 		/**
 		 * Kinds, also generate default kind.
 		 */
-		private static kinds: Map<Uuid, EntityKindClassConcrete> = new Map([]);
+		private static kinds: Map<Uuid, EntityKindClass> = new Map([]);
 
 		// ESLint params bug
 		// eslint-disable-next-line jsdoc/require-param
@@ -88,6 +99,23 @@ export function ServerEntityFactory({
 				.catch(() => {
 					// TODO: Process error
 				});
+		}
+
+		/**
+		 * Gets the kind.
+		 *
+		 * @param param - Kind UUID
+		 * @returns Kind class
+		 */
+		public static GetKind({
+			kindUuid
+		}: {
+			/**
+			 * Kind UUID.
+			 */
+			kindUuid: Uuid;
+		}): EntityKindClass {
+			return this.kinds.get(kindUuid) ?? this.DefaultKind;
 		}
 
 		/**

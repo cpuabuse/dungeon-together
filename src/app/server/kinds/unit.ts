@@ -3,11 +3,13 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
-import { EntityKindClassFactory, EntityKindConstructorParams } from "../entity";
-
 /**
  * Units to be occupying cells within the grid.
+ *
+ * @file
  */
+
+import { EntityKindClassFactory, EntityKindConstructorParams } from "../entity";
 
 /**
  * Unit entity kind.
@@ -17,11 +19,11 @@ import { EntityKindClassFactory, EntityKindConstructorParams } from "../entity";
  */
 // Parameters inferred
 // eslint-disable-next-line @typescript-eslint/typedef
-export const UnitKindClassFactory: EntityKindClassFactory = function ({ Base }) {
+export const UnitKindClassFactory: EntityKindClassFactory = function ({ Entity }) {
 	/**
 	 * Unit entity kind class.
 	 */
-	return class UnitKind extends Base {
+	class UnitKind extends Entity.BaseKind {
 		/**
 		 * Attack.
 		 */
@@ -63,15 +65,16 @@ export const UnitKindClassFactory: EntityKindClassFactory = function ({ Base }) 
 		public speed: number = 1;
 
 		/**
-		 * Strength
+		 * Strength.
 		 */
 		public strength: number = 1;
 
 		/**
-		 * @param param - Destructured parameter＝
+		 * @param param - Destructured parameter
 		 */
-		public constructor({ entity }: EntityKindConstructorParams) {
-			super({ entity });
+		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
+			super({ entity, ...rest });
 		}
-	};
+	}
+	return UnitKind;
 };

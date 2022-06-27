@@ -9,19 +9,13 @@
  * @file
  */
 
-import { FromAbstract } from "../../common/utility-types";
 import { Uuid } from "../../common/uuid";
-import { ServerEntity } from "./entity";
+import { ServerEntity, ServerEntityClass } from "./entity";
 
 /**
- * Constructor parameters for {@link EntityKind}.
+ * A type that shares params between class factory and constructor.
  */
-export type EntityKindConstructorParams = {
-	/**
-	 * Entity.
-	 */
-	entity: ServerEntity;
-
+type EntityKindParams = {
 	/**
 	 * Kind props.
 	 */
@@ -34,9 +28,39 @@ export type EntityKindConstructorParams = {
 };
 
 /**
- * Entity kind.
+ * Parameters for factory generating a kind class.
  */
-export abstract class EntityKind {
+export type EntityKindClassFactoryParams = {
+	/**
+	 * Base class.
+	 */
+	Entity: ServerEntityClass;
+} & EntityKindParams;
+
+/**
+ * Describes a factory function to generate kinds.
+ */
+export type EntityKindClassFactory = (params: EntityKindClassFactoryParams) => EntityKindClass;
+
+/**
+ * Constructor parameters for {@link EntityKind}.
+ */
+export type EntityKindConstructorParams = {
+	/**
+	 * Entity.
+	 */
+	entity: ServerEntity;
+} & EntityKindParams;
+
+/**
+ * Entity kind.
+ *
+ * @remarks
+ * The parameters are identical between all kinds, as we treat them the same as complete kinds. The extending classes are not necessarily aware if they are extending this, or another concrete kind.
+ *
+ * For the similar reason, the class is not abstract.
+ */
+export class EntityKind {
 	/**
 	 * Link to entity.
 	 */
@@ -83,23 +107,6 @@ export abstract class EntityKind {
 }
 
 /**
- * Abstract entity kind class.
- */
-export type EntityKindClassAbstract = typeof EntityKind;
-
-/**
  * Entity kind class.
  */
-export type EntityKindClassConcrete = FromAbstract<typeof EntityKind>;
-
-/**
- * Describes a factory function to generate kinds.
- */
-export type EntityKindClassFactory = ({
-	Base
-}: {
-	/**
-	 * Base class.
-	 */
-	Base: EntityKindClassAbstract;
-}) => EntityKindClassConcrete;
+export type EntityKindClass = typeof EntityKind;
