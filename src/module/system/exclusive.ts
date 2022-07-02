@@ -55,14 +55,22 @@ export function ExclusiveKindClassFactory({
 		 * @param cell - Target cell
 		 */
 		public moveEntity(cell: ServerCell): void {
-			let cellVolume: number = (
-				Array.from(cell.entities.values()).filter(entity => {
-					return entity instanceof ExclusiveKind;
-					// Array just filtered to subclasses
-				}) as unknown as Array<ExclusiveKind>
-			).reduce((acc, entity) => {
-				return acc + entity.volume;
-			}, 0);
+			let cellVolume: number = Array.from(cell.entities.values())
+				.filter(
+					(
+						entity
+					): entity is typeof entity & {
+						/**
+						 * Kind.
+						 */
+						kind: ExclusiveKind;
+					} => {
+						return entity.kind instanceof ExclusiveKind;
+					}
+				)
+				.reduce((acc, entity) => {
+					return acc + entity.kind.volume;
+				}, 0);
 
 			if (cellVolume + this.volume <= volumeThreshold) {
 				super.moveEntity(cell);

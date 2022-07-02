@@ -50,14 +50,14 @@ export function ServerEntityFactory({
 		public static BaseKind: EntityKindClass = BaseEntityKindClassFactory({ Entity: this });
 
 		/**
+		 * Entity kind.
+		 */
+		public kind: EntityKind;
+
+		/**
 		 * Default kind.
 		 */
 		private static DefaultKind: EntityKindClass = class DefaultKind extends this.BaseKind {};
-
-		/**
-		 * Entity kind.
-		 */
-		private kind: EntityKind;
 
 		/**
 		 * Kinds, also generate default kind.
