@@ -9,7 +9,27 @@
  * @file
  */
 
-import { EntityKindClassFactory, EntityKindConstructorParams } from "../entity";
+import { EntityKindConstructorParams } from "../../app/server/entity";
+import { ExclusiveKindClass } from "./exclusive";
+
+/**
+ * Words for unit stats.
+ */
+export enum UnitStatWords {
+	Strength = "str",
+	Dexterity = "dex",
+	Constitution = "con",
+	Intelligence = "int",
+	Wit = "wit",
+	Mental = "men"
+}
+
+/**
+ * Unit stats.
+ */
+export type UnitStats = {
+	[K in UnitStatWords]: number;
+};
 
 /**
  * Unit entity kind.
@@ -17,17 +37,30 @@ import { EntityKindClassFactory, EntityKindConstructorParams } from "../entity";
  * @param param - Destructured parameter
  * @returns New class
  */
-// Parameters inferred
-// eslint-disable-next-line @typescript-eslint/typedef
-export const UnitKindClassFactory: EntityKindClassFactory = function ({ Entity }) {
+// Force inference
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function UnitKindClassFactory({
+	Base,
+	stats
+}: {
+	/**
+	 * Server entity.
+	 */
+	Base: ExclusiveKindClass;
+
+	/**
+	 * Unit stats.
+	 */
+	stats: UnitStats;
+}) {
 	/**
 	 * Unit entity kind class.
 	 */
-	class UnitKind extends Entity.BaseKind {
+	class UnitKind extends Base {
 		/**
 		 * Attack.
 		 */
-		public attack: number = 0;
+		public attack: number = 1;
 
 		/**
 		 * CP.
@@ -45,11 +78,6 @@ export const UnitKindClassFactory: EntityKindClassFactory = function ({ Entity }
 		public healthPoints: number = 1;
 
 		/**
-		 * @override
-		 */
-		public static isStackable: boolean = false;
-
-		/**
 		 * LVL.
 		 */
 		public level: number = 1;
@@ -65,6 +93,11 @@ export const UnitKindClassFactory: EntityKindClassFactory = function ({ Entity }
 		public speed: number = 1;
 
 		/**
+		 * Props for unit.
+		 */
+		public stats: UnitStats = { ...stats };
+
+		/**
 		 * Strength.
 		 */
 		public strength: number = 1;
@@ -77,4 +110,4 @@ export const UnitKindClassFactory: EntityKindClassFactory = function ({ Entity }
 		}
 	}
 	return UnitKind;
-};
+}

@@ -9,14 +9,11 @@
 
 import { Uuid } from "../../common/uuid";
 import { CoreArgIds } from "../../core/arg";
-import { CellPathExtended } from "../../core/cell";
-import { CoreEntityArg, CoreEntityArgParentIds, CoreEntityClassFactory, EntityPathExtended } from "../../core/entity";
+import { CoreEntityArg, CoreEntityArgParentIds, CoreEntityClassFactory } from "../../core/entity";
 import { CoreUniverseObjectConstructorParameters } from "../../core/universe-object";
 import { ServerBaseClass, ServerBaseConstructorParams } from "../base";
-import { ServerCell } from "../cell";
-import { DefaultKindClassFactory } from "../kinds/default";
 import { ServerOptions, serverOptions } from "../options";
-import { EntityKind, EntityKindClass } from "./entity-kind";
+import { BaseEntityKindClassFactory, EntityKind, EntityKindClass } from "./kind";
 
 /**
  * Generator for the server entity class.
@@ -50,7 +47,7 @@ export function ServerEntityFactory({
 		/**
 		 * The base kind.
 		 */
-		public static BaseKind: EntityKindClass = EntityKind;
+		public static BaseKind: EntityKindClass = BaseEntityKindClassFactory({ Entity: this });
 
 		/**
 		 * Default kind.
@@ -116,38 +113,6 @@ export function ServerEntityFactory({
 			kindUuid: Uuid;
 		}): EntityKindClass {
 			return this.kinds.get(kindUuid) ?? this.DefaultKind;
-		}
-
-		/**
-		 * Actually moves the server cell.
-		 *
-		 * @param cellPath - Path to cell
-		 */
-		public moveEntity(cellPath: CellPathExtended): void {
-			// Get server cell for accurate UUIDs
-			let cell: ServerCell = ServerEntity.universe.getCell(cellPath);
-
-			// Reattach; Attach will update uuids in core
-			ServerEntity.universe.getCell(this).detachEntity(this);
-			cell.attachEntity(this);
-		}
-
-		/**
-		 * Move.
-		 *
-		 * @param entityPath - Path to entity
-		 */
-		public swapEntity(entityPath: EntityPathExtended): void {
-			// Get thing while nothing is changed yet
-			let otherEntity: ServerEntity = ServerEntity.universe.getEntity(entityPath);
-			let otherCell: ServerCell = ServerEntity.universe.getCell(entityPath);
-			let thisCell: ServerCell = ServerEntity.universe.getCell(this);
-
-			// Set target path
-			thisCell.detachEntity(this);
-			otherCell.detachEntity(otherEntity);
-			otherCell.attachEntity(this);
-			thisCell.attachEntity(otherEntity);
 		}
 	}
 

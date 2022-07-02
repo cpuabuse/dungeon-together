@@ -9,7 +9,8 @@
  * @file
  */
 
-import { EntityKindClassFactory, EntityKindConstructorParams } from "../entity/entity-kind";
+import { EntityKindConstructorParams } from "../../app/server/entity";
+import { ExclusiveKindClass } from "./exclusive";
 
 /**
  * Wall entity kind.
@@ -17,18 +18,20 @@ import { EntityKindClassFactory, EntityKindConstructorParams } from "../entity/e
  * @param param - Destructured parameter
  * @returns New class
  */
-// Parameters inferred
-// eslint-disable-next-line @typescript-eslint/typedef
-export const WallKindClassFactory: EntityKindClassFactory = function ({ Entity }) {
+// Force inference
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function WallKindClassFactory({
+	Base
+}: {
+	/**
+	 * Server entity.
+	 */
+	Base: ExclusiveKindClass;
+}) {
 	/**
 	 * Wall entity kind class.
 	 */
-	class WallKind extends Entity.BaseKind {
-		/**
-		 * @override
-		 */
-		public static isStackable: boolean = false;
-
+	class WallKind extends Base {
 		/**
 		 * @param param - Destructured parameter
 		 */
@@ -38,4 +41,4 @@ export const WallKindClassFactory: EntityKindClassFactory = function ({ Entity }
 	}
 
 	return WallKind;
-};
+}

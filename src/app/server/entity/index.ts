@@ -9,5 +9,4 @@
  */
 
 export * from "./entity";
-export * from "./entity-kind";
-export * from "../kinds/default";
+export * from "./kind";
