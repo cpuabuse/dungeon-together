@@ -21,12 +21,14 @@ import {
 	CoreArgConvertContainerLink,
 	CoreArgConverter,
 	CoreArgIds,
+	CoreArgIndex,
 	CoreArgMeta,
 	CoreArgOptionIds,
 	CoreArgOptionsOverride,
 	CoreArgOptionsPathExtended,
 	CoreArgOptionsPathOwn,
 	CoreArgOptionsUnion,
+	CoreArgOptionsWithMapUnion,
 	CoreArgPath,
 	CoreArgPathReduced,
 	CoreArgPathUuidPropertyName,
@@ -120,7 +122,12 @@ export type CoreGridArg<Options extends CoreArgOptionsUnion> = CoreArgContainerA
 	CoreCellArg<Options>,
 	CoreArgIds.Cell
 > &
-	Vector;
+	Vector & {
+		/**
+		 * Worlds.
+		 */
+		worlds: Options extends CoreArgOptionsWithMapUnion ? Set<CoreArgIndex<Options>> : Array<CoreArgIndex<Options>>;
+	};
 
 /**
  * Core grid.
@@ -504,6 +511,11 @@ export function CoreGridClassFactory<
 
 			// Cannot assign to conditional type without casting
 			let targetGrid: CoreGridArg<TargetOptions> = {
+				worlds: (targetOptions[CoreArgOptionIds.Map]
+					? new Set(grid.worlds)
+					: Array.from(grid.worlds)) as unknown as TargetOptions extends CoreArgOptionsWithMapUnion
+					? Set<Uuid>
+					: Array<Uuid>,
 				x: grid.x,
 				y: grid.y,
 				z: grid.z,

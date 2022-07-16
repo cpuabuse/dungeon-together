@@ -87,19 +87,6 @@ export type CoreCellArg<Options extends CoreArgOptionsUnion> = CoreArgContainerA
 	CoreEntityArg<Options>,
 	CoreArgIds.Entity
 > &
-	(Options extends CoreArgOptionsWithMapUnion
-		? {
-				/**
-				 * Worlds.
-				 */
-				worlds: Set<Uuid>;
-		  }
-		: {
-				/**
-				 * Worlds.
-				 */
-				worlds: Array<Uuid>;
-		  }) &
 	(Options extends CoreArgOptionsWithVectorUnion ? Vector : unknown) &
 	(Options extends CoreArgOptionsWithNavUnion ? CoreArgNav<CoreArgIds.Cell, Options, CoreCellArgParentIds> : unknown);
 
@@ -498,16 +485,6 @@ export function CoreCellClassFactory<
 			meta: CoreArgMeta<CoreArgIds.Cell, SourceOptions, TargetOptions, CoreCellArgParentIds>;
 		}): CoreCellArg<TargetOptions> {
 			/**
-			 * Core cell args with map.
-			 */
-			type TargetCellWithMap = CoreCellArg<TargetOptions & CoreArgOptionsWithMapUnion>;
-
-			/**
-			 * Core cell args without map.
-			 */
-			type TargetCellWithoutMap = CoreCellArg<CoreArgOptionsOverride<TargetOptions, never, CoreArgOptionIds.Map>>;
-
-			/**
 			 * Cell with nav.
 			 */
 			type TargetCellWithNavMap = CoreCellArg<
@@ -549,15 +526,6 @@ export function CoreCellClassFactory<
 					// Assign default vector
 					Object.assign(targetCell, defaultVector);
 				}
-			}
-
-			// Map
-			if (targetOptions[CoreArgOptionIds.Map]) {
-				// Worlds
-				(targetCell as TargetCellWithMap).worlds = new Set(cell.worlds);
-			} else {
-				// Worlds
-				(targetCell as TargetCellWithoutMap).worlds = Array.from(cell.worlds);
 			}
 
 			// Nav

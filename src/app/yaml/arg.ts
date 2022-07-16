@@ -18,6 +18,8 @@ import {
 	type,
 	TypeOf as typeOf
 } from "io-ts";
+import { CoreShardArg } from "../core/shard";
+import { YamlOptions } from "./options";
 
 /**
  * Structured object that contains id.
@@ -33,10 +35,10 @@ const pathType = partialType({ id: stringType });
 // eslint-disable-next-line @typescript-eslint/typedef
 export const yamlEntityArgType = intersectionType([
 	partialType({
-		kind: stringType,
 		mode: stringType,
 		world: stringType
 	}),
+	type({ kind: stringType }),
 	pathType
 ]);
 

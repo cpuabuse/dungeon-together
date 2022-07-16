@@ -9,7 +9,7 @@
  * @file
  */
 
-import { type } from "io-ts";
+import { array as arrayType, type } from "io-ts";
 import { load } from "js-yaml";
 import { YamlShardArg, yamlShardArgType } from "./arg";
 
@@ -18,7 +18,7 @@ import { YamlShardArg, yamlShardArgType } from "./arg";
  */
 // Infer generic type
 // eslint-disable-next-line @typescript-eslint/typedef
-const rootType = type({ data: yamlShardArgType });
+const rootType = type({ data: type({ shards: arrayType(yamlShardArgType) }) });
 
 /**
  * Compiles binary string to arg.
@@ -33,13 +33,13 @@ export function compile({
 	 * String data.
 	 */
 	data: string;
-}): YamlShardArg {
+}): Array<YamlShardArg> {
 	// Load YAML
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	let loadResult: unknown = load(data);
 
 	if (rootType.is(loadResult)) {
-		return loadResult.data;
+		return loadResult.data.shards;
 	}
 
 	// TODO: Process error
