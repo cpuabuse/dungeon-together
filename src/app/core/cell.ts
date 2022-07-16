@@ -36,22 +36,17 @@ import {
 	coreArgConvertContainerArg,
 	coreArgIdToPathUuidPropertyName
 } from "./arg";
+import { CoreArgOptionsWithKindUnion } from "./arg/kind";
 import { CoreArgNav } from "./arg/nav";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
 import {
-	CommsEntity,
-	CommsEntityArgs,
-	CommsEntityRaw,
 	CoreEntityArg,
 	CoreEntityArgGrandparentIds,
 	CoreEntityArgParentId,
-	CoreEntityArgWithKind,
 	CoreEntityInstance,
-	EntityPathExtended,
-	commsEntityRawToArgs,
 	coreEntityArgParentIdSet
 } from "./entity";
-import { GridPathExtended, coreGridArgParentIds } from "./grid";
+import { coreGridArgParentIds } from "./grid";
 import { CoreUniverse } from "./universe";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
@@ -64,107 +59,6 @@ import {
 	generateCoreUniverseObjectContainerMembers,
 	generateCoreUniverseObjectMembers
 } from "./universe-object";
-
-// #region To be removed
-/**
- * A location-like.
- */
-export interface CommsCellArgs extends CellPathExtended, Vector {
-	/**
-	 * Array of entities.
-	 */
-	entities: Map<Uuid, CommsEntityArgs>;
-
-	/**
-	 * Worlds.
-	 */
-	worlds: Set<Uuid>;
-}
-
-/**
- * Helper for [[CommsCellRaw]].
- */
-type CommCellRawHelper<A, B> = (A & B) | A;
-
-/**
- * Type for physical data exchange.
- * Type is used as this is to be sent over internet.
- * Only JSON compatible member types can be used.
- */
-export type CommsCellRaw = CommCellRawHelper<
-	Omit<CommsCellArgs, "entities" | "worlds" | keyof GridPathExtended> & {
-		/**
-		 * Entities.
-		 */
-		entities: Array<CommsEntityRaw>;
-
-		/**
-		 * Worlds.
-		 */
-		worlds?: Array<Uuid>;
-	},
-	Vector
->;
-
-/**
- * Cell implementable.
- */
-export interface CommsCell extends CommsCellArgs {
-	/**
-	 * Default [[Entity]] UUID.
-	 */
-	defaultEntityUuid: Uuid;
-
-	/**
-	 * Adds [[Entity]].
-	 */
-	addEntity(entity: CommsEntityArgs): void;
-
-	/**
-	 * Gets [[Entity]].
-	 */
-	getEntity(path: EntityPathExtended): CommsEntity;
-
-	/**
-	 * Removes [[Entity]].
-	 */
-	removeEntity(path: EntityPathExtended): void;
-
-	/**
-	 * Terminates `this`.
-	 */
-	terminate(): void;
-}
-
-/**
- * Converts [[CommsCellRaw]] to [[CommsCellArgs]].
- *
- * @param rawSource - Raw source
- * @param path - Path
- * @returns Result of conversion
- */
-export function commsCellRawToArgs(rawSource: CommsCellRaw, path: CellPathExtended): CommsCellArgs {
-	return {
-		...path,
-		cellUuid: rawSource.cellUuid,
-		entities: new Map(
-			rawSource.entities.map(entity => {
-				return [
-					entity.entityUuid,
-					commsEntityRawToArgs(entity, {
-						...path,
-						entityUuid: entity.entityUuid
-					})
-				];
-			})
-		),
-		worlds: new Set(rawSource.worlds),
-		x: rawSource.x,
-		y: rawSource.y,
-		z: rawSource.z
-	};
-}
-// #endregion
 
 /**
  * Cell parent ID.
@@ -502,6 +396,11 @@ export function CoreCellClassFactory<
 		// eslint-disable-next-line @typescript-eslint/typedef
 		public constructor(...[arg, { attachHook, created }, baseParams]: ConstructorParams) {
 			/**
+			 * Entity with kind.
+			 */
+			type ArgWithKind = CoreEntityArg<Options & CoreArgOptionsWithKindUnion>;
+
+			/**
 			 * Cell with nav.
 			 */
 			type CellNav = CoreArgNav<CoreArgIds.Cell, Options & CoreArgOptionsWithNavUnion, CoreCellArgParentIds>;
@@ -528,7 +427,7 @@ export function CoreCellClassFactory<
 				worldUuid: defaultWorldUuid
 			} as CoreEntityArg<Options>;
 			if (options[CoreArgOptionIds.Kind] === true) {
-				(defaultEntityArg as unknown as CoreEntityArgWithKind).kindUuid = defaultKindUuid;
+				(defaultEntityArg as ArgWithKind).kindUuid = defaultKindUuid;
 			}
 
 			// Assign vector

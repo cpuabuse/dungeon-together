@@ -35,17 +35,11 @@ import {
 	coreArgIdToPathUuidPropertyName
 } from "./arg";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
-import { CoreCellInstance } from "./cell";
-import { CoreEntityInstance } from "./entity";
 import {
-	CommsGrid,
-	CommsGridArgs,
-	CommsGridRaw,
 	CoreGridArg,
 	CoreGridArgGrandparentIds,
 	CoreGridArgParentId,
 	CoreGridInstance,
-	GridPathOwn,
 	coreGridArgParentIdSet
 } from "./grid";
 import { CoreUniverse } from "./universe";
@@ -57,77 +51,6 @@ import {
 	generateCoreUniverseObjectContainerMembers,
 	generateCoreUniverseObjectMembers
 } from "./universe-object";
-
-// #region To be removed
-/**
- * Everything-like.
- */
-export interface CommsShardArgs extends ShardPath {
-	/**
-	 * Locations.
-	 */
-	grids: Map<Uuid, CommsGridArgs>;
-}
-
-/**
- * Type for physical data exchange.
- * Type is used as this is to be sent over internet.
- * Only JSON compatible member types can be used.
- */
-export type CommsShardRaw = Omit<CommsShardArgs, "grids"> & {
-	/**
-	 * Legacy.
-	 */
-	grids: Array<CommsGridRaw>;
-};
-
-/**
- * Interface as basis for class implementation.
- */
-export interface CommsShard extends CommsShardArgs {
-	/**
-	 * Default [[Grid]] UUID.
-	 */
-	defaultGridUuid: Uuid;
-
-	/**
-	 * Adds [[CommsGrid]].
-	 */
-	addGrid(grid: CommsGridArgs): void;
-
-	/**
-	 * Gets [[CommsGrid]].
-	 */
-	getGrid(path: GridPathOwn): CommsGrid;
-
-	/**
-	 * Removes [[CommsGrid]].
-	 */
-	removeGrid(path: GridPathOwn): void;
-
-	/**
-	 * Terminates `this`.
-	 */
-	terminate(): void;
-}
-
-/**
- * Core shard args.
- */
-export type CoreShardArgs<Options extends CoreArgOptionsUnion> = (Options[CoreArgOptionIds.Path] extends true
-	? ShardPathExtended
-	: ShardPathOwn) & {
-	/**
-	 * Grids.
-	 */
-	grids: Options[CoreArgOptionIds.Map] extends true ? Map<Uuid, CoreGridArg<Options>> : Array<CoreGridArg<Options>>;
-};
-
-/**
- * Way to get to shard.
- */
-export type ShardPath = ShardPathOwn;
-// #endregion
 
 /**
  * Parent ID of {@link CoreShardArg}.

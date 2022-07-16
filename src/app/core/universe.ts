@@ -13,6 +13,7 @@ import {
 	computedClassInjectPerClass,
 	computedClassInjectPerInstance
 } from "../common/computed-class";
+import { UrlPath } from "../common/url";
 import { ConcreteConstructor, StaticImplements, ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import { Application } from "./application";
@@ -21,17 +22,22 @@ import {
 	CoreArgComplexOptionPathIds,
 	CoreArgContainer,
 	CoreArgIds,
+	CoreArgIndex,
+	CoreArgIndexIds,
+	CoreArgIndexObject,
 	CoreArgObjectWords,
 	CoreArgOptionIds,
 	CoreArgOptionsPathExtended,
 	CoreArgOptionsPathOwn,
 	CoreArgOptionsPathOwnUnion,
+	CoreArgOptionsUnion,
 	CoreArgOptionsWithMapUnion,
 	CoreArgPath,
 	CoreArgPathUuidPropertyName,
 	coreArgComplexOptionSymbolIndex,
 	coreArgIdToPathUuidPropertyName,
-	coreArgObjectWords
+	coreArgObjectWords,
+	getCoreArgIndexObjectPropertyName
 } from "./arg";
 import { coreArgGenerateDefaultUuid } from "./arg/uuid";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
@@ -214,7 +220,101 @@ export type CoreUniverseClass<
 		Grid,
 		Shard
 	>
-> = CoreUniverseObjectContainerClass<
+> = {
+	/**
+	 * Converts ID to UUID.
+	 */
+	convertIdToUuid({
+		id,
+		namespace
+	}: {
+		/**
+		 * Id.
+		 */
+		id: string;
+
+		/**
+		 * Namespace.
+		 */
+		namespace?: UrlPath;
+	}): Uuid;
+
+	/**
+	 * Converts index object.
+	 */
+	convertIndexObject<
+		Property extends CoreArgIndexIds,
+		SourceOptions extends CoreArgOptionsUnion,
+		TargetOptions extends CoreArgOptionsUnion
+	>({
+		obj,
+		name,
+		sourceOptions,
+		targetOptions,
+		namespace
+	}: {
+		/**
+		 * Object.
+		 */
+		obj: CoreArgIndexObject<Property, SourceOptions>;
+
+		/**
+		 * Source options.
+		 */
+		sourceOptions: SourceOptions;
+
+		/**
+		 * Property name.
+		 */
+		name: Property;
+
+		/**
+		 * Target options.
+		 */
+		targetOptions: TargetOptions;
+
+		/**
+		 * Namespace.
+		 */
+		namespace?: UrlPath;
+	}): CoreArgIndexObject<Property, TargetOptions>;
+
+	/**
+	 * Converts UUID to ID.
+	 */
+	convertUuidToId({
+		uuid
+	}: {
+		/**
+		 * UUID.
+		 */
+		uuid: Uuid;
+	}): string;
+
+	/**
+	 * Converts index object to path.
+	 */
+	convertIndexObjectToPath<Property extends CoreArgIndexIds, O extends CoreArgOptionsUnion>({
+		obj,
+		name,
+		options: opts
+	}: {
+		/**
+		 * Object.
+		 */
+		obj: CoreArgIndexObject<Property, O>;
+
+		/**
+		 * Source options.
+		 */
+		options: O;
+
+		/**
+		 * Property name.
+		 */
+		name: Property;
+	}): UrlPath;
+} & CoreUniverseObjectContainerClass<
 	BaseParams,
 	Universe,
 	Shard,
@@ -488,6 +588,168 @@ export function CoreUniverseClassFactory<
 				members: membersWithChild,
 				parameters: []
 			});
+		}
+
+		/**
+		 * Converts ID to UUID.
+		 *
+		 * @param param - Destructured parameter
+		 * @returns UUID
+		 */
+		public static convertIdToUuid({
+			id = "default",
+			namespace = "system/default"
+		}: {
+			/**
+			 * Id.
+			 */
+			id?: string;
+
+			/**
+			 * Namespace.
+			 */
+			namespace?: UrlPath;
+		}): Uuid {
+			// TODO: Replace with correct function
+			return `${namespace}/${id}`;
+		}
+
+		/**
+		 * Converts index object.
+		 *
+		 * @param param - Destructured parameter
+		 * @returns Index object
+		 */
+		public static convertIndexObject<
+			Property extends CoreArgIndexIds,
+			SourceOptions extends CoreArgOptionsUnion,
+			TargetOptions extends CoreArgOptionsUnion
+		>({
+			obj,
+			name,
+			sourceOptions,
+			targetOptions,
+			namespace
+		}: {
+			/**
+			 * Object.
+			 */
+			obj: CoreArgIndexObject<Property, SourceOptions>;
+
+			/**
+			 * Source options.
+			 */
+			sourceOptions: SourceOptions;
+
+			/**
+			 * Property name.
+			 */
+			name: Property;
+
+			/**
+			 * Target options.
+			 */
+			targetOptions: TargetOptions;
+
+			/**
+			 * Namespace.
+			 */
+			namespace?: UrlPath;
+		}): CoreArgIndexObject<Property, TargetOptions> {
+			/**
+			 * Value type for return object.
+			 */
+			type Value = CoreArgIndex<TargetOptions>;
+
+			let value: Value;
+
+			if (
+				sourceOptions.path === coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
+			) {
+				if (
+					targetOptions.path === coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
+				) {
+					// Cast, source and target path options are the same
+					value = obj[getCoreArgIndexObjectPropertyName({ name, options: sourceOptions })] as unknown as Value;
+				} else {
+					value = this.convertUuidToId({
+						uuid: obj[
+							getCoreArgIndexObjectPropertyName({
+								name,
+								options: sourceOptions
+							})
+							// Cast to` Uuid`, return type generic
+						] as unknown as Uuid
+					});
+				}
+			} else if (
+				targetOptions.path === coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
+			) {
+				value = this.convertIdToUuid({
+					id: obj[
+						getCoreArgIndexObjectPropertyName({
+							name,
+							options: sourceOptions
+						})
+						// Cast to `string`, return type generic
+					] as unknown as string | undefined,
+					namespace
+				});
+			} else {
+				// Cast, source and target path options are the same
+				value = obj[getCoreArgIndexObjectPropertyName({ name, options: sourceOptions })] as unknown as Value;
+			}
+
+			return {
+				[getCoreArgIndexObjectPropertyName({ name, options: targetOptions })]: value
+				// Cast, since generic key
+			} as CoreArgIndexObject<Property, TargetOptions>;
+		}
+
+		/**
+		 * Converts index object to path.
+		 *
+		 * @param param - Destructured parameter
+		 * @returns Path
+		 */
+		public static convertIndexObjectToPath<Property extends CoreArgIndexIds, O extends CoreArgOptionsUnion>({
+			obj,
+			name,
+			options: opts
+		}: {
+			/**
+			 * Object.
+			 */
+			obj: CoreArgIndexObject<Property, O>;
+
+			/**
+			 * Source options.
+			 */
+			options: O;
+
+			/**
+			 * Property name.
+			 */
+			name: Property;
+		}): UrlPath {
+			return (obj[getCoreArgIndexObjectPropertyName({ name, options: opts })] ?? "default") as unknown as UrlPath;
+		}
+
+		/**
+		 * Converts UUID to ID.
+		 *
+		 * @param param - Destructured parameter
+		 * @returns ID
+		 */
+		public static convertUuidToId({
+			uuid
+		}: {
+			/**
+			 * UUID.
+			 */
+			uuid: Uuid;
+		}): string {
+			return uuid;
 		}
 
 		/**

@@ -12,22 +12,33 @@ import {
 	computedClassInjectPerClass,
 	computedClassInjectPerInstance
 } from "../common/computed-class";
-import { defaultKindUuid } from "../common/defaults";
+import { defaultKindUuid, defaultModeUuid } from "../common/defaults";
+import { separator } from "../common/url";
 import { StaticImplements, ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import {
 	CoreArg,
 	CoreArgConverter,
 	CoreArgIds,
+	CoreArgIndexIds,
+	CoreArgIndexObject,
 	CoreArgMeta,
 	CoreArgOptionsPathExtended,
 	CoreArgOptionsPathOwn,
 	CoreArgPath,
 	coreArgConvert
 } from "./arg";
-import { CoreArgOptionIds, CoreArgOptionsGenerate, CoreArgOptionsUnion } from "./arg/options";
+import { CoreArgOptionsWithKindUnion } from "./arg/kind";
+import {
+	CoreArgComplexOptionPathIds,
+	CoreArgOptionIds,
+	CoreArgOptionsOverride,
+	CoreArgOptionsUnion,
+	coreArgComplexOptionSymbolIndex
+} from "./arg/options";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
-import { CellPathExtended, coreCellArgParentIds } from "./cell";
+import { coreCellArgParentIds } from "./cell";
+import { CoreUniverseClass } from "./universe";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectClass,
@@ -38,60 +49,6 @@ import {
 	CoreUniverseObjectInstance,
 	generateCoreUniverseObjectMembers
 } from "./universe-object";
-
-// #region To be removed
-/**
- * An object-like.
- */
-export interface CommsEntityArgs extends EntityPathExtended {
-	/**
-	 * Kind of entity.
-	 */
-	kindUuid: Uuid;
-
-	/**
-	 * Mode of the entity.
-	 */
-	modeUuid: Uuid;
-
-	/**
-	 * World in which entity resides.
-	 */
-	worldUuid: Uuid;
-}
-
-/**
- * Type for physical data exchange.
- * Type is used as this is to be sent over internet.
- * Only JSON compatible member types can be used.
- */
-export type CommsEntityRaw = Omit<CommsEntityArgs, keyof CellPathExtended>;
-
-/**
- * Implementable [[CommsEntityArgs]].
- */
-export interface CommsEntity extends CommsEntityArgs {
-	/**
-	 * Terminates `this`.
-	 */
-	terminate(): void;
-}
-
-// TODO: Remove
-/**
- * Legacy.
- *
- * @param rawSource - Legacy
- * @param path - Legacy
- * @returns - Legacy
- */
-export function commsEntityRawToArgs(rawSource: CommsEntityRaw, path: EntityPathExtended): CommsEntityArgs {
-	return {
-		...path,
-		...rawSource
-	};
-}
-// #endregion
 
 /**
  * Entity parent ID.
@@ -111,13 +68,8 @@ export type CoreEntityArgParentIds = typeof coreEntityArgParentIds[number];
 /**
  * Kind part of entity arg.
  */
-type CoreEntityArgKind<O extends CoreArgOptionsUnion> = O[CoreArgOptionIds.Kind] extends true
-	? {
-			/**
-			 * Kind of entity.
-			 */
-			kindUuid: Uuid;
-	  }
+type CoreEntityArgKind<Options extends CoreArgOptionsUnion> = Options extends CoreArgOptionsWithKindUnion
+	? CoreArgIndexObject<CoreArgIndexIds.Kind, Options, true>
 	: object;
 
 /**
@@ -129,21 +81,9 @@ export type CoreEntityArg<Options extends CoreArgOptionsUnion> = CoreArg<
 	CoreArgIds.Entity,
 	Options,
 	CoreEntityArgParentIds
-> & {
-	/**
-	 * Mode of the entity.
-	 */
-	modeUuid: Uuid;
-	/**
-	 * World in which entity resides.
-	 */
-	worldUuid: Uuid;
-} & CoreEntityArgKind<Options>;
-
-/**
- * Entity with kind.
- */
-export type CoreEntityArgWithKind = CoreEntityArg<CoreArgOptionsGenerate<CoreArgOptionIds.Kind>>;
+> &
+	CoreArgIndexObject<CoreArgIndexIds.Mode | CoreArgIndexIds.World, Options> &
+	CoreEntityArgKind<Options>;
 
 /**
  * Path to an entity only.
@@ -366,13 +306,18 @@ export function CoreEntityClassFactory<
 		// ESLint buggy for nested destructured params
 		// eslint-disable-next-line @typescript-eslint/typedef
 		public constructor(...[arg, init, baseParams]: ConstructorParams) {
+			/**
+			 * Entity with kind.
+			 */
+			type ArgWithKind = CoreEntityArg<Options & CoreArgOptionsWithKindUnion>;
+
 			super(baseParams);
 
 			// Assign props from arg
 			this.modeUuid = arg.modeUuid;
 			this.worldUuid = arg.worldUuid;
 			if (options[CoreArgOptionIds.Kind] === true) {
-				(this as CoreEntityArgWithKind).kindUuid = (arg as unknown as CoreEntityArgWithKind).kindUuid;
+				(this as ArgWithKind).kindUuid = (arg as ArgWithKind).kindUuid;
 			}
 
 			computedClassInjectPerInstance({
@@ -417,9 +362,75 @@ export function CoreEntityClassFactory<
 			 */
 			meta: CoreArgMeta<CoreArgIds.Entity, S, T, CoreEntityArgParentIds>;
 		}): CoreEntityArg<T> {
-			// Define source and result, with minimal options
-			const sourceEntity: CoreEntityArg<S> = entity;
-			const sourceEntityAs: Record<string, any> = sourceEntity;
+			/**
+			 * Source options with kind.
+			 */
+			type SourceOptionsWithKind = CoreArgOptionsOverride<S, CoreArgOptionIds.Kind>;
+
+			/**
+			 * Entity with kind.
+			 */
+			type SourceEntityKind = CoreEntityArgKind<SourceOptionsWithKind>;
+
+			const Universe: CoreUniverseClass<BaseClass, BaseParams, Options> = this.universe
+				.constructor as CoreUniverseClass<BaseClass, BaseParams, Options>;
+
+			let targetEntityKind: CoreEntityArgKind<T>;
+			let targetEntityMode: CoreArgIndexObject<CoreArgIndexIds.Mode, T>;
+			let targetEntityWorld: CoreArgIndexObject<CoreArgIndexIds.World, T>;
+
+			// Assign kind
+			if (targetOptions[CoreArgOptionIds.Kind] === true) {
+				if (sourceOptions[CoreArgOptionIds.Kind] === true) {
+					targetEntityKind = (
+						Entity.universe.constructor as CoreUniverseClass<BaseClass, BaseParams, Options>
+					).convertIndexObject({
+						name: CoreArgIndexIds.Kind,
+						obj: entity as SourceEntityKind,
+						sourceOptions: sourceOptions as SourceOptionsWithKind,
+						targetOptions
+					}) as CoreEntityArgKind<T>;
+				} else {
+					targetEntityKind = (
+						targetOptions.path ===
+						coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
+							? {}
+							: {
+									kindUuid: defaultKindUuid
+							  }
+					) as CoreEntityArgKind<T>;
+				}
+			} else {
+				targetEntityKind = {} as CoreEntityArgKind<T>;
+			}
+
+			// Assign mode
+			targetEntityMode = Universe.convertIndexObject({
+				name: CoreArgIndexIds.Mode,
+				// TODO: Use path class
+				namespace:
+					// If kind, then treat as kind, otherwise, just use default mode
+					`${CoreArgIndexIds.Mode}${separator}${
+						targetOptions[CoreArgOptionIds.Kind]
+							? Universe.convertIndexObjectToPath({
+									name: CoreArgIndexIds.Kind,
+									obj: targetEntityKind as CoreArgIndexObject<CoreArgIndexIds.Kind, T>,
+									options: targetOptions
+							  })
+							: defaultModeUuid
+					}`,
+				obj: entity,
+				sourceOptions,
+				targetOptions
+			});
+
+			// Assign world
+			targetEntityWorld = Universe.convertIndexObject({
+				name: CoreArgIndexIds.World,
+				obj: entity,
+				sourceOptions,
+				targetOptions
+			});
 
 			let targetEntity: CoreEntityArg<T> = {
 				// Generate path
@@ -433,26 +444,16 @@ export function CoreEntityClassFactory<
 				}),
 
 				// Generate mode
-				modeUuid: sourceEntity.modeUuid,
+				...targetEntityMode,
 
 				// Generate world
-				worldUuid: sourceEntity.worldUuid,
+				...targetEntityWorld,
 
 				// Generate kind
-				...(function (): CoreEntityArgKind<T> {
-					let argKind: CoreEntityArgKind<T> =
-						targetOptions[CoreArgOptionIds.Kind] === true
-							? {
-									kindUuid:
-										sourceOptions[CoreArgOptionIds.Kind] === true
-											? (sourceEntityAs as CoreEntityArgWithKind).kindUuid
-											: defaultKindUuid
-							  }
-							: ({} as CoreEntityArgKind<T>);
+				...targetEntityKind
 
-					return argKind;
-				})()
-			};
+				// Casting required, as generic keys resolve to string
+			} as CoreEntityArg<T>;
 
 			// Return
 			return targetEntity;

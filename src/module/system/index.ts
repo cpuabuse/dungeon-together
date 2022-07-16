@@ -9,7 +9,7 @@
  * @file
  */
 
-import { ModuleFactoryParams } from "../module";
+import { ModuleFactoryParams } from "../../app/server/module";
 import { ExclusiveKindClass, ExclusiveKindClassFactory } from "./exclusive";
 import { UnitKindClassFactory, UnitStatWords, UnitStats } from "./unit";
 import { WallKindClassFactory } from "./wall";

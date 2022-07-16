@@ -28,22 +28,17 @@ import {
 	CoreArgOptionsPathOwn,
 	CoreArgOptionsUnion,
 	CoreArgPath,
-	CoreArgPathIndex,
 	CoreArgPathReduced,
 	CoreArgPathUuidPropertyName,
 	Nav,
 	coreArgComplexOptionSymbolIndex,
 	coreArgConvertContainerArg,
-	coreArgGetPathIndex,
+	coreArgGetIndex,
 	coreArgIdToPathUuidPropertyName,
 	navIndex
 } from "./arg";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
 import {
-	CellPathExtended,
-	CommsCell,
-	CommsCellArgs,
-	CommsCellRaw,
 	CoreCellArg,
 	CoreCellArgGrandparentIds,
 	CoreCellArgParentId,
@@ -51,7 +46,7 @@ import {
 	CoreCellInstance,
 	coreCellArgParentIdSet
 } from "./cell";
-import { ShardPath, coreShardArgParentIds } from "./shard";
+import { coreShardArgParentIds } from "./shard";
 import { CoreUniverse } from "./universe";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
@@ -61,65 +56,6 @@ import {
 	generateCoreUniverseObjectContainerMembers,
 	generateCoreUniverseObjectMembers
 } from "./universe-object";
-
-// #region To be removed
-/**
- * Word referring to a grid.
- */
-export type CoreGridWord = "Grid";
-
-/**
- * A grid-like.
- */
-export interface CommsGridArgs extends GridPathExtended {
-	/**
-	 * Locations within the grid.
-	 */
-	cells: Map<Uuid, CommsCellArgs>;
-}
-
-/**
- * Type for physical data exchange.
- * Type is used as this is to be sent over internet.
- * Only JSON compatible member types can be used.
- */
-export type CommsGridRaw = Omit<CommsGridArgs, "cells" | keyof ShardPath> & {
-	/**
-	 * Legacy.
-	 */
-	cells: Array<CommsCellRaw>;
-};
-
-/**
- * Implementable [[CommsGridArgs]].
- */
-export interface CommsGrid extends CommsGridArgs {
-	/**
-	 * Default [[Cell]] UUID.
-	 */
-	defaultCellUuid: Uuid;
-
-	/**
-	 * Adds [[CommsCell]].
-	 */
-	addCell(grid: CommsCellArgs): void;
-
-	/**
-	 * Gets [[CommsCell]].
-	 */
-	getCell(path: CellPathExtended): CommsCell;
-
-	/**
-	 * Removes [[CommsCell]].
-	 */
-	removeCell(path: CellPathExtended): void;
-
-	/**
-	 * Terminates `this`.
-	 */
-	terminate(): void;
-}
-// #endregion
 
 // Infer type from `as const` assertion
 /* eslint-disable @typescript-eslint/typedef */
@@ -617,9 +553,9 @@ export function CoreGridClassFactory<
 				if (targetOptions[CoreArgOptionIds.Nav]) {
 					if (sourceOptions[CoreArgOptionIds.Nav]) {
 						// Map of source path indexes to source cells
-						let sourceReducedPathIndex: Map<CoreArgPathIndex<SourceOptions>, CoreCellArg<SourceOptions>> = new Map();
+						let sourceReducedPathIndex: Map<CoreArgIndex<SourceOptions>, CoreCellArg<SourceOptions>> = new Map();
 						grid.cells.forEach(cell => {
-							let i: CoreArgPathIndex<SourceOptions> | undefined = coreArgGetPathIndex<
+							let i: CoreArgIndex<SourceOptions> | undefined = coreArgGetIndex<
 								CoreArgIds.Cell,
 								SourceOptions,
 								CoreCellArgParentIds
@@ -638,7 +574,7 @@ export function CoreGridClassFactory<
 							// For each nav in corresponding cell
 							(sourceCell as unknown as SourceCellWithNavMap).nav.forEach((path, nav) => {
 								// Path index of source's cell corresponding to nav
-								let navSourcePath: CoreArgPathIndex<SourceOptions> | undefined = coreArgGetPathIndex<
+								let navSourcePath: CoreArgIndex<SourceOptions> | undefined = coreArgGetIndex<
 									CoreArgIds.Cell,
 									SourceOptions,
 									CoreCellArgParentIds

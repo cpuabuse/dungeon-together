@@ -21,7 +21,7 @@ import {
 /**
  * Server options type.
  */
-export type YmlOptions = CoreArgOptionsGenerate<
+export type YamlOptions = CoreArgOptionsGenerate<
 	CoreArgOptionIds.Vector | CoreArgOptionIds.Kind | CoreArgOptionIds.Nav,
 	CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
 >;
@@ -31,7 +31,7 @@ export type YmlOptions = CoreArgOptionsGenerate<
  */
 // Infer to save lines
 // eslint-disable-next-line @typescript-eslint/typedef
-export const ymlArgOptions: YmlOptions = coreArgOptionIdsToOptions({
+export const yamlOptions: YamlOptions = coreArgOptionIdsToOptions({
 	idSet: new Set([CoreArgOptionIds.Vector, CoreArgOptionIds.Kind, CoreArgOptionIds.Nav]),
 	symbolSet: new Set([coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]])
 });

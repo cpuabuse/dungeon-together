@@ -127,3 +127,8 @@ export class ServerUniverse extends CoreUniverseClassFactory<
 			});
 	}
 }
+
+/**
+ * Server universe class.
+ */
+export type ServerUniverseClass = typeof ServerUniverse;

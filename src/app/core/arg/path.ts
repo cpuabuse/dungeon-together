@@ -8,7 +8,6 @@
  */
 
 import { Uuid } from "../../common/uuid";
-import { coreArgComplexOptionSymbolIndex } from "./options";
 import {
 	CoreArgComplexOptionPathIds,
 	CoreArgComplexOptionSymbolIndex,
@@ -20,13 +19,6 @@ import {
 	CoreArgOptionsUnionGenerate,
 	coreArgObjectWords
 } from ".";
-
-/**
- * Information if were to index path.
- */
-export type CoreArgPathIndex<Options extends CoreArgOptionsUnion> = Options extends CoreArgOptionsPathIdUnion
-	? string
-	: Uuid;
 
 /**
  * A type for the property name of path UUID.
@@ -181,42 +173,3 @@ export type CoreArgOptionsPathOwnOrExtendedUnion = CoreArgOptionsUnionGenerate<
 	| CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
 	| CoreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Extended]
 >;
-
-/**
- * Gets path's index value from path.
- *
- * @param param - Destructured parameter
- * @returns Path index
- */
-export function coreArgGetPathIndex<
-	Id extends CoreArgIds,
-	Options extends CoreArgOptionsUnion,
-	ParentIds extends CoreArgIds
->({
-	id,
-	path,
-	options
-}: {
-	/**
-	 * Id.
-	 */
-	id: Id;
-
-	/**
-	 * Path.
-	 */
-	path: CoreArgPathReduced<Id, Options, ParentIds>;
-
-	/**
-	 * Options.
-	 */
-	options: Options;
-}): CoreArgPathIndex<Options> | undefined {
-	if (
-		options[CoreArgOptionIds.Path] ===
-		coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Own]
-	) {
-		return (path as CoreArgPath<Id, CoreArgOptionsPathId, ParentIds>).id;
-	}
-	return (path as CoreArgPath<Id, CoreArgOptionsPathOwn, ParentIds>)[coreArgIdToPathUuidPropertyName({ id })];
-}

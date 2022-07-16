@@ -19,6 +19,7 @@ export * from "./convert-arg";
 export * from "./convert-container";
 export * from "./convert-container-arg";
 export * from "./convert";
+export * from "./idx";
 export * from "./map";
 export * from "./meta";
 export * from "./nav";
