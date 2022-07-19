@@ -51,10 +51,10 @@ export type ModuleFactoryRecord<Local extends ModuleList = any, Global extends M
 	 * Factory dependencies.
 	 */
 	depends: {
-		// Value is such a key of global, where local value extends global value
-		[K in keyof Local]: keyof {
+		// Value is such a key of global, where local value extends global value; Extracted through value and not keys, as keys seem to extract `never` values too
+		[K in keyof Local]: {
 			[G in keyof Global]: Local[K] extends Global[G] ? G : never;
-		};
+		}[keyof Global];
 	};
 
 	/**
