@@ -597,13 +597,13 @@ export function CoreUniverseClassFactory<
 		 * @returns UUID
 		 */
 		public static convertIdToUuid({
-			id = "default",
+			id,
 			namespace = "system/default"
 		}: {
 			/**
 			 * Id.
 			 */
-			id?: string;
+			id: string;
 
 			/**
 			 * Namespace.
@@ -612,6 +612,67 @@ export function CoreUniverseClassFactory<
 		}): Uuid {
 			// TODO: Replace with correct function
 			return `${namespace}/${id}`;
+		}
+
+		/**
+		 * Converts index.
+		 *
+		 * @param param - Destructured parameter
+		 * @returns Index object
+		 */
+		public static convertIndex<SourceOptions extends CoreArgOptionsUnion, TargetOptions extends CoreArgOptionsUnion>({
+			idx,
+			sourceOptions,
+			targetOptions,
+			namespace
+		}: {
+			/**
+			 * Object.
+			 */
+			idx: CoreArgIndex<SourceOptions>;
+
+			/**
+			 * Source options.
+			 */
+			sourceOptions: SourceOptions;
+
+			/**
+			 * Target options.
+			 */
+			targetOptions: TargetOptions;
+
+			/**
+			 * Namespace.
+			 */
+			namespace?: UrlPath;
+		}): CoreArgIndex<TargetOptions> {
+			if (
+				sourceOptions.path === coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
+			) {
+				// Id to Id
+				if (
+					targetOptions.path === coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
+				) {
+					// Cast, source and target path options are the same
+					return idx as CoreArgIndex<TargetOptions>;
+				}
+				// Id to Uuid
+				return this.convertIdToUuid({
+					id: idx as string,
+					namespace
+				}) as CoreArgIndex<TargetOptions>;
+			}
+			if (
+				targetOptions.path === coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
+			) {
+				// Uuid to Id
+				return this.convertUuidToId({
+					uuid: idx as unknown as Uuid
+				}) as CoreArgIndex<TargetOptions>;
+			}
+			// Uuid to uuid
+			// Cast, source and target path options are the same
+			return idx as CoreArgIndex<TargetOptions>;
 		}
 
 		/**
@@ -656,52 +717,21 @@ export function CoreUniverseClassFactory<
 			 */
 			namespace?: UrlPath;
 		}): CoreArgIndexObject<Property, TargetOptions> {
-			/**
-			 * Value type for return object.
-			 */
-			type Value = CoreArgIndex<TargetOptions>;
-
-			let value: Value;
-
-			if (
-				sourceOptions.path === coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
-			) {
-				if (
-					targetOptions.path === coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
-				) {
-					// Cast, source and target path options are the same
-					value = obj[getCoreArgIndexObjectPropertyName({ name, options: sourceOptions })] as unknown as Value;
-				} else {
-					value = this.convertUuidToId({
-						uuid: obj[
-							getCoreArgIndexObjectPropertyName({
-								name,
-								options: sourceOptions
-							})
-							// Cast to` Uuid`, return type generic
-						] as unknown as Uuid
-					});
-				}
-			} else if (
-				targetOptions.path === coreArgComplexOptionSymbolIndex[CoreArgOptionIds.Path][CoreArgComplexOptionPathIds.Id]
-			) {
-				value = this.convertIdToUuid({
-					id: obj[
-						getCoreArgIndexObjectPropertyName({
-							name,
-							options: sourceOptions
-						})
-						// Cast to `string`, return type generic
-					] as unknown as string | undefined,
-					namespace
-				});
-			} else {
-				// Cast, source and target path options are the same
-				value = obj[getCoreArgIndexObjectPropertyName({ name, options: sourceOptions })] as unknown as Value;
-			}
+			let sourceValue: CoreArgIndex<SourceOptions> | undefined =
+				obj[
+					getCoreArgIndexObjectPropertyName({
+						name,
+						options: sourceOptions
+					})
+				];
 
 			return {
-				[getCoreArgIndexObjectPropertyName({ name, options: targetOptions })]: value
+				[getCoreArgIndexObjectPropertyName({ name, options: targetOptions })]: this.convertIndex({
+					idx: sourceValue ?? "default",
+					namespace,
+					sourceOptions,
+					targetOptions
+				})
 				// Cast, since generic key
 			} as CoreArgIndexObject<Property, TargetOptions>;
 		}

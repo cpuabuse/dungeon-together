@@ -56,16 +56,18 @@ export type CoreArgIndexObject<
 	Property extends CoreArgIndexIds,
 	Options extends CoreArgOptionsUnion,
 	R extends boolean = false
-> = object &
-	(Options extends CoreArgOptionsPathIdUnion
-		? R extends true
-			? {
-					[K in `${Property}`]: CoreArgIndex<Options>;
-			  }
-			: {
-					[K in `${Property}`]?: CoreArgIndex<Options>;
-			  }
-		: unknown) &
+> = {
+	// Object assertion for correct type in `keyof` extraction
+	[key: string]: CoreArgIndex<Options> | undefined;
+} & (Options extends CoreArgOptionsPathIdUnion
+	? R extends true
+		? {
+				[K in `${Property}`]: CoreArgIndex<Options>;
+		  }
+		: {
+				[K in `${Property}`]?: CoreArgIndex<Options>;
+		  }
+	: unknown) &
 	(Options extends CoreArgOptionsPathOwnOrExtendedUnion
 		? {
 				[K in `${Property}Uuid`]: CoreArgIndex<Options>;
