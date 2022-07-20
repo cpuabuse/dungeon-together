@@ -49,7 +49,7 @@ import {
 	coreCellArgParentIdSet
 } from "./cell";
 import { coreShardArgParentIds } from "./shard";
-import { CoreUniverse } from "./universe";
+import { CoreUniverse, CoreUniverseClass } from "./universe";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectClass,
@@ -491,6 +491,18 @@ export function CoreGridClassFactory<
 				}
 			}
 
+			const Universe: CoreUniverseClass<BaseClass, BaseParams, Options> = this.universe
+				.constructor as CoreUniverseClass<BaseClass, BaseParams, Options>;
+
+			// Basically omitting creating new array, if already an array
+			const sourceWorldsArray: Array<CoreArgIndex<SourceOptions>> = sourceOptions[CoreArgOptionIds.Map]
+				? Array.from(grid.worlds)
+				: grid.worlds;
+
+			const targetWorldsArray: Array<CoreArgIndex<TargetOptions>> = sourceWorldsArray.map(world => {
+				return Universe.convertIndex({ idx: world, namespace: "world", sourceOptions, targetOptions });
+			});
+
 			let link:
 				| CoreArgConvertContainerLink<
 						CoreArgIds.Cell,
@@ -512,10 +524,11 @@ export function CoreGridClassFactory<
 			// Cannot assign to conditional type without casting
 			let targetGrid: CoreGridArg<TargetOptions> = {
 				worlds: (targetOptions[CoreArgOptionIds.Map]
-					? new Set(grid.worlds)
-					: Array.from(grid.worlds)) as unknown as TargetOptions extends CoreArgOptionsWithMapUnion
-					? Set<Uuid>
-					: Array<Uuid>,
+					? new Set(targetWorldsArray)
+					: // Cast to conditional
+					  targetWorldsArray) as TargetOptions extends CoreArgOptionsWithMapUnion
+					? Set<CoreArgIndex<TargetOptions>>
+					: Array<CoreArgIndex<TargetOptions>>,
 				x: grid.x,
 				y: grid.y,
 				z: grid.z,

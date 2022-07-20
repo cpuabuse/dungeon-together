@@ -240,6 +240,36 @@ export type CoreUniverseClass<
 	}): Uuid;
 
 	/**
+	 * Convert index.
+	 */
+	convertIndex<SourceOptions extends CoreArgOptionsUnion, TargetOptions extends CoreArgOptionsUnion>({
+		idx,
+		sourceOptions,
+		targetOptions,
+		namespace
+	}: {
+		/**
+		 * Object.
+		 */
+		idx: CoreArgIndex<SourceOptions>;
+
+		/**
+		 * Source options.
+		 */
+		sourceOptions: SourceOptions;
+
+		/**
+		 * Target options.
+		 */
+		targetOptions: TargetOptions;
+
+		/**
+		 * Namespace.
+		 */
+		namespace?: UrlPath;
+	}): CoreArgIndex<TargetOptions>;
+
+	/**
 	 * Converts index object.
 	 */
 	convertIndexObject<
