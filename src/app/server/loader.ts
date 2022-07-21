@@ -11,10 +11,11 @@
 
 import { readFile } from "fs";
 import axios from "axios";
+import { UrlPath } from "../common/url";
+import { hasOwnProperty } from "../common/utility-types";
 import { Application } from "../core/application";
-import { yamlOptions } from "../yaml/options";
-import { ModuleFactoryRecordList, ModuleFactoryRecordListConstraint, ModuleList } from "./module";
-import { serverOptions } from "./options";
+import { RootType, compile } from "../yaml/compile";
+import { Module, ModuleFactoryRecordList, ModuleFactoryRecordListConstraint, ModuleList } from "./module";
 import { ServerUniverse } from "./universe";
 
 /**
@@ -95,6 +96,7 @@ export class ServerLoader<App extends Application, T extends ModuleFactoryRecord
 		};
 	}) {
 		this.application = application;
+		// Reverting from generic to concrete type
 		this.records = records as unknown as ModuleFactoryRecordList;
 		this.yamlList = new Map(Object.getOwnPropertyNames(yamlList).map(key => [key, yamlList[key]]));
 	}
@@ -116,6 +118,9 @@ export class ServerLoader<App extends Application, T extends ModuleFactoryRecord
 		/**
 		 * Processed yaml.
 		 *
+		 * @remarks
+		 * Has to be an arrow function for `this` context.
+		 *
 		 * @param param - Destructured parameter
 		 */
 		const processYaml: ({
@@ -128,16 +133,69 @@ export class ServerLoader<App extends Application, T extends ModuleFactoryRecord
 			// Type should be inferred from the const
 			// eslint-disable-next-line @typescript-eslint/typedef
 		}) => void = ({ data }) => {
+			/**
+			 * List of kinds to register IDs.
+			 */
+			type KindList = Partial<Record<string, Partial<Record<string, string>>>>;
+
+			const root: RootType = compile({ data });
+
+			// Module to kind name to ID
+			// eslint-disable-next-line @typescript-eslint/typedef
+			const kindList: KindList = Object.entries(root.kinds).reduce((result, [id, { module, name }]) => {
+				let newResult: KindList = result;
+				if (!hasOwnProperty(newResult, module)) {
+					newResult[module] = {
+						[name]: id
+					};
+				} else {
+					newResult[module][name] = id;
+				}
+
+				return newResult;
+			}, {});
+
 			let moduleList: ModuleList = {};
 
 			this.records.forEach(record => {
-				moduleList[record.name] = record.factory({
+				const {
+					name: moduleName
+				}: {
+					/**
+					 * Name of module.
+					 */
+					name: string;
+				} = record;
+				const module: Module = record.factory({
 					// False negative on type inference
 					// eslint-disable-next-line @typescript-eslint/typedef
 					modules: Object.entries(record.depends).reduce((result, [key, value]) => {
 						return { ...result, [key]: moduleList[value] };
 					}, {} as ModuleList),
 					universe
+				});
+				const kindListEntry: KindList[string] = kindList[moduleName];
+				const moduleKinds: Module["kinds"] = module.kinds;
+
+				// Populate module list
+				moduleList[moduleName] = module;
+
+				// Register kinds
+				Object.keys(moduleKinds).forEach(kindName => {
+					let id: string;
+					let namespace: UrlPath;
+					let kindId: string | undefined;
+					// Using assignment inside condition simplifies logic dramatically
+					// eslint-disable-next-line no-cond-assign
+					if (kindListEntry && (kindId = kindListEntry[kindName])) {
+						id = kindId;
+						namespace = "user";
+					} else {
+						id = kindName;
+						namespace = `kind/${moduleName}`;
+					}
+
+					universe.Entity.addKind({ Kind: module.kinds[kindName], id, namespace });
 				});
 			});
 		};

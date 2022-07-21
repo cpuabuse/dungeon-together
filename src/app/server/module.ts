@@ -15,7 +15,7 @@ import { ServerUniverse } from "./universe";
 /**
  * Module.
  */
-type Module = {
+export type Module = {
 	/**
 	 * Kinds.
 	 */

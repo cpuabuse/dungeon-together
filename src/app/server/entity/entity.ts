@@ -7,12 +7,14 @@
  * @file Entity within cells.
  */
 
+import { UrlPath } from "../../common/url";
 import { Uuid } from "../../common/uuid";
 import { CoreArgIds } from "../../core/arg";
 import { CoreEntityArg, CoreEntityArgParentIds, CoreEntityClassFactory } from "../../core/entity";
 import { CoreUniverseObjectConstructorParameters } from "../../core/universe-object";
 import { ServerBaseClass, ServerBaseConstructorParams } from "../base";
 import { ServerOptions, serverOptions } from "../options";
+import { ServerUniverseClass } from "../universe";
 import { BaseEntityKindClassFactory, EntityKind, EntityKindClass } from "./kind";
 
 /**
@@ -113,6 +115,34 @@ export function ServerEntityFactory({
 			kindUuid: Uuid;
 		}): EntityKindClass {
 			return this.kinds.get(kindUuid) ?? this.DefaultKind;
+		}
+
+		/**
+		 * Adds the kind.
+		 *
+		 * @param param - Destructured parameter
+		 */
+		public static addKind({
+			id,
+			Kind,
+			namespace
+		}: {
+			/**
+			 * Path.
+			 */
+			id: string;
+
+			/**
+			 * Kind class.
+			 */
+			Kind: EntityKindClass;
+
+			/**
+			 * Namespace.
+			 */
+			namespace: UrlPath;
+		}): void {
+			this.kinds.set((this.universe.constructor as ServerUniverseClass).convertIdToUuid({ id, namespace }), Kind);
 		}
 	}
 
