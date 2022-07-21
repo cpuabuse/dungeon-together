@@ -18,8 +18,6 @@ import {
 	type,
 	TypeOf as typeOf
 } from "io-ts";
-import { CoreShardArg } from "../core/shard";
-import { YamlOptions } from "./options";
 
 /**
  * Structured object that contains id.
@@ -64,7 +62,11 @@ export const yamlCellArgType = intersectionType([
 // eslint-disable-next-line @typescript-eslint/typedef
 export const yamlGridArgType = intersectionType([
 	type({
-		cells: arrayType(yamlCellArgType)
+		cells: arrayType(yamlCellArgType),
+		worlds: arrayType(stringType),
+		x: numberType,
+		y: numberType,
+		z: numberType
 	}),
 	pathType
 ]);
