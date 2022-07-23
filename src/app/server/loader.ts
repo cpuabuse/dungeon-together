@@ -9,8 +9,9 @@
  * @file
  */
 
-import { readFile } from "fs";
+import { promises as fs } from "fs";
 import axios from "axios";
+import { DeferredPromise } from "../common/async";
 import { UrlPath } from "../common/url";
 import { hasOwnProperty } from "../common/utility-types";
 import { Application } from "../core/application";
@@ -107,131 +108,121 @@ export class ServerLoader<App extends Application, T extends ModuleFactoryRecord
 	 * @param param - Destructured parameter
 	 * @returns Created universe
 	 */
-	public addUniverse({
+	public async addUniverse({
 		yamlId
 	}: {
 		/**
 		 * ID of YAML.
 		 */
 		yamlId: string;
-	}): ServerUniverse {
+	}): Promise<ServerUniverse> {
 		/**
-		 * Processed yaml.
-		 *
-		 * @remarks
-		 * Has to be an arrow function for `this` context.
-		 *
-		 * @param param - Destructured parameter
+		 * List of kinds to register IDs.
 		 */
-		const processYaml: ({
-			data
-		}: {
-			/**
-			 * Yaml data.
-			 */
-			data: string;
-			// Type should be inferred from the const
-			// eslint-disable-next-line @typescript-eslint/typedef
-		}) => void = ({ data }) => {
-			/**
-			 * List of kinds to register IDs.
-			 */
-			type KindList = Partial<Record<string, Partial<Record<string, string>>>>;
-
-			const root: RootType = compile({ data });
-
-			// Module to kind name to ID
-			// eslint-disable-next-line @typescript-eslint/typedef
-			const kindList: KindList = Object.entries(root.kinds).reduce((result, [id, { module, name }]) => {
-				let newResult: KindList = result;
-				if (!hasOwnProperty(newResult, module)) {
-					newResult[module] = {
-						[name]: id
-					};
-				} else {
-					newResult[module][name] = id;
-				}
-
-				return newResult;
-			}, {});
-
-			let moduleList: ModuleList = {};
-
-			this.records.forEach(record => {
-				const {
-					name: moduleName
-				}: {
-					/**
-					 * Name of module.
-					 */
-					name: string;
-				} = record;
-				const module: Module = record.factory({
-					// False negative on type inference
-					// eslint-disable-next-line @typescript-eslint/typedef
-					modules: Object.entries(record.depends).reduce((result, [key, value]) => {
-						return { ...result, [key]: moduleList[value] };
-					}, {} as ModuleList),
-					universe
-				});
-				const kindListEntry: KindList[string] = kindList[moduleName];
-				const moduleKinds: Module["kinds"] = module.kinds;
-
-				// Populate module list
-				moduleList[moduleName] = module;
-
-				// Register kinds
-				Object.keys(moduleKinds).forEach(kindName => {
-					let id: string;
-					let namespace: UrlPath;
-					let kindId: string | undefined;
-					// Using assignment inside condition simplifies logic dramatically
-					// eslint-disable-next-line no-cond-assign
-					if (kindListEntry && (kindId = kindListEntry[kindName])) {
-						id = kindId;
-						namespace = "user";
-					} else {
-						id = kindName;
-						namespace = `kind/${moduleName}`;
-					}
-
-					universe.Entity.addKind({ Kind: module.kinds[kindName], id, namespace });
-				});
-			});
-		};
+		type KindList = Partial<Record<string, Partial<Record<string, string>>>>;
 
 		const universe: ServerUniverse = this.application.addUniverse({ Universe: ServerUniverse, args: [] });
 		const yamlEntry: YamlEntry | undefined = this.yamlList.get(yamlId);
-		const yamlData: Promise<string> = new Promise((resolve, reject) => {
+		let data: string;
+		try {
 			switch (yamlEntry?.type) {
 				case YamlEntryType.File:
-					readFile(yamlEntry.path, (err, data) => {
-						if (err) {
-							reject(err);
-						} else {
-							resolve(data.toString());
-						}
-					});
+					data = await fs.readFile(yamlEntry.path, "utf8");
 					break;
 				case YamlEntryType.Url:
-					axios
-						.get<string>(yamlEntry.path, { responseType: "text" })
-						.then(result => resolve(result.data))
-						.catch(error => reject(error));
+					data = (await axios.get<string>(yamlEntry.path, { responseType: "text" })).data;
 					break;
 				default:
-					reject();
+					throw new Error("YAML entry missing");
 			}
+		} catch {
+			data = (ServerLoader.constructor as typeof ServerLoader).defaultYaml;
+		}
+		const root: RootType = compile({ data });
+		// Module to kind name to ID
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const kindList: KindList = Object.entries(root.kinds).reduce((result, [id, { module, name }]) => {
+			let newResult: KindList = result;
+			if (!hasOwnProperty(newResult, module)) {
+				newResult[module] = {
+					[name]: id
+				};
+			} else {
+				newResult[module][name] = id;
+			}
+
+			return newResult;
+		}, {});
+		let moduleList: ModuleList = {};
+
+		// Iterate through records
+		this.records.forEach(record => {
+			const {
+				name: moduleName
+			}: {
+				/**
+				 * Name of module.
+				 */
+				name: string;
+			} = record;
+			const module: Module = record.factory({
+				// False negative on type inference
+				// eslint-disable-next-line @typescript-eslint/typedef
+				modules: Object.entries(record.depends).reduce((result, [key, value]) => {
+					return { ...result, [key]: moduleList[value] };
+				}, {} as ModuleList),
+				universe
+			});
+			const kindListEntry: KindList[string] = kindList[moduleName];
+			const moduleKinds: Module["kinds"] = module.kinds;
+
+			// Populate module list
+			moduleList[moduleName] = module;
+
+			// Register kinds
+			Object.keys(moduleKinds).forEach(kindName => {
+				let id: string;
+				let namespace: UrlPath;
+				let kindId: string | undefined;
+				// Using assignment inside condition simplifies logic dramatically
+				// eslint-disable-next-line no-cond-assign
+				if (kindListEntry && (kindId = kindListEntry[kindName])) {
+					id = kindId;
+					namespace = "user";
+				} else {
+					id = kindName;
+					namespace = `kind/${moduleName}`;
+				}
+
+				universe.Entity.addKind({ Kind: module.kinds[kindName], id, namespace });
+			});
 		});
 
-		yamlData
-			.then(data => {
-				processYaml({ data });
-			})
-			.catch(() => {
-				// TODO: Process error
-				processYaml({ data: ServerLoader.defaultYaml });
-			});
+		await Promise.all(
+			root.data.shards.map(
+				shard =>
+					new Promise<void>(methodResolve => {
+						// Add shards
+						let attachHook: Promise<void> = new Promise((resolve, reject) => {
+							let created: DeferredPromise<void> = new DeferredPromise<void>();
+							setImmediate(() => {
+								// universe.addShard(shard, { attachHook, created }, []);
+
+								created
+									.then(() => {
+										resolve();
+									})
+									.catch(() => {
+										reject();
+									})
+									.finally(() => {
+										methodResolve();
+									});
+							});
+						});
+					})
+			)
+		);
 
 		return universe;
 	}
