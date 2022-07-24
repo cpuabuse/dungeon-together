@@ -12,11 +12,16 @@
 import { promises as fs } from "fs";
 import axios from "axios";
 import { DeferredPromise } from "../common/async";
+import { appUrl } from "../common/defaults";
 import { UrlPath } from "../common/url";
 import { hasOwnProperty } from "../common/utility-types";
 import { Application } from "../core/application";
+import { CoreArgIds, CoreArgMeta, coreArgMetaGenerate } from "../core/arg";
+import { CoreShardArg } from "../core/shard";
 import { RootType, compile } from "../yaml/compile";
+import { YamlOptions, yamlOptions } from "../yaml/options";
 import { Module, ModuleFactoryRecordList, ModuleFactoryRecordListConstraint, ModuleList } from "./module";
+import { ServerOptions, serverOptions } from "./options";
 import { ServerUniverse } from "./universe";
 
 /**
@@ -200,13 +205,32 @@ export class ServerLoader<App extends Application, T extends ModuleFactoryRecord
 
 		await Promise.all(
 			root.data.shards.map(
-				shard =>
+				(shard, index) =>
 					new Promise<void>(methodResolve => {
 						// Add shards
 						let attachHook: Promise<void> = new Promise((resolve, reject) => {
 							let created: DeferredPromise<void> = new DeferredPromise<void>();
 							setImmediate(() => {
-								// universe.addShard(shard, { attachHook, created }, []);
+								let meta: CoreArgMeta<CoreArgIds.Shard, YamlOptions, ServerOptions> = coreArgMetaGenerate({
+									id: CoreArgIds.Shard,
+									index,
+									meta: {
+										origin: appUrl,
+										paths: {},
+										systemNamespace: "system",
+										userNamespace: "user"
+									},
+									sourceOptions: yamlOptions,
+									targetOptions: serverOptions
+								});
+								let arg: CoreShardArg<ServerOptions> = universe.Shard.convertShard({
+									meta,
+									shard,
+									sourceOptions: yamlOptions,
+									targetOptions: serverOptions
+								});
+
+								universe.addShard(arg, { attachHook, created }, []);
 
 								created
 									.then(() => {

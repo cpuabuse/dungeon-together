@@ -149,8 +149,12 @@ export type CoreGridInstance<
 	CoreCellArg<Options>,
 	CoreArgIds.Cell
 > &
-	Vector &
-	(HasNever extends true ? unknown : CoreGridArg<Options>);
+	Vector & {
+		/**
+		 * Worlds.
+		 */
+		worlds: Set<Uuid>;
+	} & (HasNever extends true ? unknown : CoreGridArg<Options>);
 
 /**
  * Core grid class.
@@ -322,6 +326,8 @@ export function CoreGridClassFactory<
 		 */
 		public static getDefaultCellUuid: (path: GridPathOwn) => Uuid;
 
+		public worlds: Set<Uuid>;
+
 		public x: Vector["x"];
 
 		public y: Vector["y"];
@@ -346,6 +352,9 @@ export function CoreGridClassFactory<
 			this.x = arg.x;
 			this.y = arg.y;
 			this.z = arg.z;
+
+			// Worlds
+			this.worlds = new Set(arg.worlds);
 
 			// Create child arg, then attach conditional props
 			let defaultCellArg: CoreCellArg<Options> = {

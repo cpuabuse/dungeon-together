@@ -17,7 +17,7 @@ import { createStore } from "vuex";
 import { DeferredPromise } from "../common/async";
 import { defaultModeUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
-import { CoreShardArg, ShardPath } from "../core/shard";
+import { CoreShardArg, ShardPathExtended } from "../core/shard";
 import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
 import UniverseComponent from "../vue/universe.vue";
 import { ClientBaseClass, ClientBaseConstructorParams, ClientBaseFactory } from "./base";
@@ -416,7 +416,7 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	 *
 	 * @param param - Destructured parameter
 	 */
-	public doRemoveShard({ shardUuid }: ShardPath): void {
+	public doRemoveShard({ shardUuid }: ShardPathExtended): void {
 		// Checks if there is something to delete in the first place; Then within all the modes associated with the uuid of the shard to delete, we check that they are not within an array made up from all the other mode associations from "modesIndex" to other shards; And if there is no match, then we delete the mode; Finally we delete the shard and the "modesIndex" entry
 		if (this.shards.has(shardUuid)) {
 			// Tell shard it is about to be deleted

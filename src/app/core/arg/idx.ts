@@ -56,10 +56,7 @@ export type CoreArgIndexObject<
 	Property extends CoreArgIndexIds,
 	Options extends CoreArgOptionsUnion,
 	R extends boolean = false
-> = {
-	// Object assertion for correct type in `keyof` extraction
-	[key: string]: CoreArgIndex<Options> | undefined;
-} & (Options extends CoreArgOptionsPathIdUnion
+> = (Options extends CoreArgOptionsPathIdUnion
 	? R extends true
 		? {
 				[K in `${Property}`]: CoreArgIndex<Options>;

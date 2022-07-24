@@ -747,13 +747,13 @@ export function CoreUniverseClassFactory<
 			 */
 			namespace?: UrlPath;
 		}): CoreArgIndexObject<Property, TargetOptions> {
-			let sourceValue: CoreArgIndex<SourceOptions> | undefined =
-				obj[
-					getCoreArgIndexObjectPropertyName({
-						name,
-						options: sourceOptions
-					})
-				];
+			let sourceValue: CoreArgIndex<SourceOptions> | undefined = obj[
+				getCoreArgIndexObjectPropertyName({
+					name,
+					options: sourceOptions
+				})
+				// Conditional generic needs cast
+			] as unknown as CoreArgIndex<SourceOptions> | undefined;
 
 			return {
 				[getCoreArgIndexObjectPropertyName({ name, options: targetOptions })]: this.convertIndex({
