@@ -190,12 +190,18 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	public constructor(
 		superParams: CoreUniverseRequiredConstructorParameter,
 		{
+			created,
 			element
 		}: {
 			/**
 			 * HTML element.
 			 */
 			element: HTMLElement;
+
+			/**
+			 * Created promise.
+			 */
+			created: DeferredPromise<void>;
 		}
 	) {
 		// Call superclass
@@ -239,6 +245,13 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 			{ attachHook: defaultShardAttach, created: defaultShardCreated },
 			[]
 		);
+		defaultShardAttach
+			.catch(() => {
+				// TODO: Process error
+			})
+			.finally(() => {
+				created.resolve();
+			});
 
 		// JavaScript based events
 		element.addEventListener("contextmenu", event => {

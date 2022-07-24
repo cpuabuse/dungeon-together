@@ -44,7 +44,7 @@ export class Application {
 		/**
 		 * Universe class.
 		 */
-		Universe: CoreUniverseClassNonRecursive<U>;
+		Universe: CoreUniverseClassNonRecursive<U, R>;
 	}): U {
 		let universeUuid: Uuid = coreGenerateUuid({ namespace: universeNamespace, path: this.universes.size.toString() });
 		let universe: U = new Universe({ application: this, universeUuid }, ...args);

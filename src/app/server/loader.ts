@@ -50,11 +50,11 @@ export type YamlEntry = {
 /**
  * Loader class.
  */
-export class ServerLoader<App extends Application, T extends ModuleFactoryRecordListConstraint<T>> {
+export class ServerLoader<T extends ModuleFactoryRecordListConstraint<T>> {
 	/**
 	 * Application this resides in.
 	 */
-	private application: App;
+	private application: Application;
 
 	/**
 	 * Default yaml file.
@@ -87,7 +87,7 @@ export class ServerLoader<App extends Application, T extends ModuleFactoryRecord
 		/**
 		 * Application.
 		 */
-		application: App;
+		application: Application;
 
 		/**
 		 * Factory records list.
@@ -126,7 +126,13 @@ export class ServerLoader<App extends Application, T extends ModuleFactoryRecord
 		 */
 		type KindList = Partial<Record<string, Partial<Record<string, string>>>>;
 
-		const universe: ServerUniverse = this.application.addUniverse({ Universe: ServerUniverse, args: [] });
+		const universeCreated: DeferredPromise<void> = new DeferredPromise();
+		const universe: ServerUniverse = this.application.addUniverse({
+			Universe: ServerUniverse,
+			args: [{ created: universeCreated }]
+		});
+		await universeCreated;
+
 		const yamlEntry: YamlEntry | undefined = this.yamlList.get(yamlId);
 		let data: string;
 		try {
