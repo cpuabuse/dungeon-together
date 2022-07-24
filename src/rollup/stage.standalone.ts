@@ -30,6 +30,31 @@ import vue from "rollup-plugin-vue";
  */
 const options: RollupOptions = {
 	input: join(__dirname, "..", "..", "..", "..", "src", "main", "standalone.ts"),
+	/**
+	 * @param warning - The warning
+	 * @param rollupWarn - The rollup warning function
+	 */
+	onwarn: (warning, rollupWarn) => {
+		let conditions: Array<boolean | undefined> = new Array<boolean | undefined>();
+		conditions.push(
+			warning.code === "THIS_IS_UNDEFINED" &&
+				warning.id?.includes("node_modules") &&
+				(warning.id?.includes("io-ts") || warning.id?.includes("fp-ts"))
+		);
+		conditions.push(
+			warning.code === "CIRCULAR_DEPENDENCY" &&
+				// Coalescent required, conditional access false negative
+				(warning.cycle ?? []).some(s => {
+					return s.includes("index.ts") || s.includes("node_modules");
+				})
+		);
+
+		if (conditions.some(c => c)) {
+			return;
+		}
+
+		rollupWarn(warning);
+	},
 	output: {
 		file: join(__dirname, "..", "..", "artifacts", "rollup", "standalone.js"),
 		format: "esm",

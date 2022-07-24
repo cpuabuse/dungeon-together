@@ -3,6 +3,7 @@
 	"editor.insertSpaces": false,
 	"files.eol": "\n",
 	"cSpell.words": [
+		"buble",
 		"builtins",
 		"combinator",
 		"comms",
@@ -18,7 +19,8 @@
 		"trit",
 		"vsocket",
 		"bivariance",
-		"bivariant"
+		"bivariant",
+		"onwarn"
 	],
 	"yaml.schemas": {
 		"./schema/dt.yml.json": ["*.dt.yml"]
