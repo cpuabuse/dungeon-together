@@ -31,7 +31,6 @@ import {
 	processInitWord
 } from "../app/core/connection";
 import { queueProcessCallback as serverQueueProcessCallback } from "../app/server/connection";
-import { YamlEntryType } from "../app/server/loader";
 import { ServerUniverse } from "../app/server/universe";
 
 // Injection
@@ -42,13 +41,15 @@ import "bootstrap";
  * Entrypoint.
  */
 async function main(): Promise<void> {
-	const application: StandaloneApplication = new StandaloneApplication({
+	// Infer for appropriate types
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const application = new StandaloneApplication({
 		element: "client-universe",
 		records: [],
 		yamlList: {
 			cave: {
-				path: "./data/cave.dt.yml",
-				type: YamlEntryType.Url
+				path: "/data/cave.dt.yml",
+				type: "url"
 			}
 		}
 	});

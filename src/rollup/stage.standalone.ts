@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -19,8 +19,8 @@ import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
 import { Plugin, RollupOptions } from "rollup";
 import jscc from "rollup-plugin-jscc";
-import builtins from "rollup-plugin-node-builtins";
 import globals from "rollup-plugin-node-globals";
+import nodePolyfills from "rollup-plugin-node-polyfills";
 import postcss from "rollup-plugin-postcss";
 import typescript from "rollup-plugin-typescript2";
 import vue from "rollup-plugin-vue";
@@ -29,7 +29,7 @@ import vue from "rollup-plugin-vue";
  * Rollup options.
  */
 const options: RollupOptions = {
-	input: join(__dirname, "..", "..", "..", "..", "src", "app", "standalone.ts"),
+	input: join(__dirname, "..", "..", "..", "..", "src", "main", "standalone.ts"),
 	output: {
 		file: join(__dirname, "..", "..", "artifacts", "rollup", "standalone.js"),
 		format: "esm",
@@ -61,20 +61,18 @@ const options: RollupOptions = {
 		}),
 
 		// To resolve some libraries correctly
-		commonjs({
-			namedExports: {}
-		}),
-
-		// Compile for browser
-		resolve({ browser: true, preferBuiltins: true }),
+		commonjs(),
 
 		// For builtins plugin
-		// Casting due to definition conflicts
+		// Polyfill depends on this
 		globals() as Plugin,
 
-		// For things like http
-		// Casting due to definition conflicts
-		builtins() as Plugin,
+		// Polyfill "url", and other modules
+		// Has to come before resolve, to replace the builtin "url"
+		nodePolyfills() as Plugin,
+
+		// Compile for browser
+		resolve({ browser: true }),
 
 		// For debug compilation
 		jscc({

@@ -10,9 +10,42 @@
 import axios from "axios";
 import { LogLevel, processLog } from "../client/error";
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
-import { Envelope, Message, ProcessCallback, VSocket } from "../core/connection";
+import { Uuid } from "../common/uuid";
+import {
+	CoreConnection,
+	CoreConnectionConstructorParams,
+	Envelope,
+	Message,
+	ProcessCallback,
+	VSocket
+} from "../core/connection";
 import { compile } from "../yaml/compile";
 import { ServerUniverse } from "./universe";
+
+/**
+ * Client connection.
+ */
+export class ServerConnection implements CoreConnection<ServerUniverse> {
+	/**
+	 * Client UUIDs.
+	 */
+	public shardUuids: Set<Uuid> = new Set();
+
+	/**
+	 * The target, be it standalone, remote or absent.
+	 */
+	public socket: VSocket<ServerUniverse>;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param target - Socket
+	 */
+	public constructor({ socket }: CoreConnectionConstructorParams<ServerUniverse>) {
+		// Set this target
+		this.socket = socket;
+	}
+}
 
 /**
  * Temp shard to send to client.

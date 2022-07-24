@@ -56,15 +56,16 @@ export type CoreArgIndexObject<
 	Property extends CoreArgIndexIds,
 	Options extends CoreArgOptionsUnion,
 	R extends boolean = false
-> = (Options extends CoreArgOptionsPathIdUnion
-	? R extends true
-		? {
-				[K in `${Property}`]: CoreArgIndex<Options>;
-		  }
-		: {
-				[K in `${Property}`]?: CoreArgIndex<Options>;
-		  }
-	: unknown) &
+> = object &
+	(Options extends CoreArgOptionsPathIdUnion
+		? R extends true
+			? {
+					[K in `${Property}`]: CoreArgIndex<Options>;
+			  }
+			: {
+					[K in `${Property}`]?: CoreArgIndex<Options>;
+			  }
+		: unknown) &
 	(Options extends CoreArgOptionsPathOwnOrExtendedUnion
 		? {
 				[K in `${Property}Uuid`]: CoreArgIndex<Options>;

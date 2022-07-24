@@ -8,14 +8,18 @@
  */
 
 import { ClientLoader } from "../client/loader";
+import { MaybeDefined } from "../common/utility-types";
 import { Application } from "../core/application";
-import { ServerLoader, YamlEntry } from "../server/loader";
+import { Reader, ServerLoader, YamlEntry } from "../server/loader";
 import { ModuleFactoryRecordListConstraint } from "../server/module";
 
 /**
  * Standalone app.
  */
-export class StandaloneApplication<T extends ModuleFactoryRecordListConstraint<T> = any> extends Application {
+export class StandaloneApplication<
+	R extends string = never,
+	T extends ModuleFactoryRecordListConstraint<T> = any
+> extends Application {
 	/**
 	 * Client loader.
 	 */
@@ -24,7 +28,7 @@ export class StandaloneApplication<T extends ModuleFactoryRecordListConstraint<T
 	/**
 	 * Server loader.
 	 */
-	public serverLoader: ServerLoader<T>;
+	public serverLoader: ServerLoader<R, T>;
 
 	/**
 	 * Constructor.
@@ -32,6 +36,7 @@ export class StandaloneApplication<T extends ModuleFactoryRecordListConstraint<T
 	 * @param param - Destructured parameters
 	 */
 	public constructor({
+		readers,
 		records,
 		yamlList,
 		element
@@ -45,19 +50,40 @@ export class StandaloneApplication<T extends ModuleFactoryRecordListConstraint<T
 		 * List of yaml files.
 		 */
 		yamlList: {
-			[key: string]: YamlEntry;
+			[key: string]: YamlEntry<R | "url">;
 		};
 
 		/**
 		 * HTML element name.
 		 */
 		element: string;
-	}) {
+	} & MaybeDefined<
+		[Exclude<R, "url">] extends [never] ? false : true,
+		{
+			/**
+			 * Readers.
+			 */
+			readers: {
+				[K in Exclude<R, "url">]: Reader;
+			} & {
+				/**
+				 * URL reader.
+				 */
+				url?: Reader;
+			};
+		}
+	>) {
 		super();
 		this.clientLoader = new ClientLoader({
 			application: this,
 			element: document.getElementById(element) ?? document.body
 		});
-		this.serverLoader = new ServerLoader({ application: this, records, yamlList });
+		this.serverLoader = new ServerLoader({
+			application: this,
+			readers,
+			records,
+			yamlList
+			// Generic condition needs cast
+		} as ConstructorParameters<typeof ServerLoader>[0]) as ServerLoader<R, T>;
 	}
 }

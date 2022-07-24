@@ -73,7 +73,7 @@ export function hasOwnProperty<K extends string, P>(
 	 */
 	// We actually expect a wide range of types
 	// eslint-disable-next-line @typescript-eslint/ban-types
-	obj: {
+	obj: object & {
 		/**
 		 * Key-value pairs.
 		 */
