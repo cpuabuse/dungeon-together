@@ -7,17 +7,23 @@
  * @file Standalone application.
  */
 
-import { ClientLoader } from "../app/client/loader";
-import { Application } from "../app/core/application";
-import { ServerLoader, YamlEntry } from "../app/server/loader";
-import { ModuleFactoryRecordListConstraint } from "../app/server/module";
+import { ClientLoader } from "../client/loader";
+import { Application } from "../core/application";
+import { ServerLoader, YamlEntry } from "../server/loader";
+import { ModuleFactoryRecordListConstraint } from "../server/module";
 
 /**
  * Standalone app.
  */
-export class StandaloneApplication<T extends ModuleFactoryRecordListConstraint<T>> extends Application {
+export class StandaloneApplication<T extends ModuleFactoryRecordListConstraint<T> = any> extends Application {
+	/**
+	 * Client loader.
+	 */
 	public clientLoader: ClientLoader;
 
+	/**
+	 * Server loader.
+	 */
 	public serverLoader: ServerLoader<T>;
 
 	/**
@@ -27,7 +33,8 @@ export class StandaloneApplication<T extends ModuleFactoryRecordListConstraint<T
 	 */
 	public constructor({
 		records,
-		yamlList
+		yamlList,
+		element
 	}: {
 		/**
 		 * Factory records list.
@@ -40,9 +47,17 @@ export class StandaloneApplication<T extends ModuleFactoryRecordListConstraint<T
 		yamlList: {
 			[key: string]: YamlEntry;
 		};
+
+		/**
+		 * HTML element name.
+		 */
+		element: string;
 	}) {
 		super();
-		this.clientLoader = new ClientLoader({ application: this });
+		this.clientLoader = new ClientLoader({
+			application: this,
+			element: document.getElementById(element) ?? document.body
+		});
 		this.serverLoader = new ServerLoader({ application: this, records, yamlList });
 	}
 }

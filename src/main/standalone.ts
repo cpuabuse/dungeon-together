@@ -18,15 +18,21 @@
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import { StandaloneApplication } from "../app/application/standalone";
 import {
 	initProcessCallback as clientInitProcessCallback,
 	queueProcessCallback as clientQueueProcessCallback
-} from "./client/connection";
-import { ClientUniverse } from "./client/universe";
-import { SocketProcessBase, ToSuperclassProcessCallback, VStandaloneSocket, processInitWord } from "./common/vsocket";
-import { Application } from "./core/application";
-import { queueProcessCallback as serverQueueProcessCallback } from "./server/connection";
-import { ServerUniverse } from "./server/universe";
+} from "../app/client/connection";
+import { ClientUniverse } from "../app/client/universe";
+import {
+	SocketProcessBase,
+	ToSuperclassProcessCallback,
+	VStandaloneSocket,
+	processInitWord
+} from "../app/core/connection";
+import { queueProcessCallback as serverQueueProcessCallback } from "../app/server/connection";
+import { YamlEntryType } from "../app/server/loader";
+import { ServerUniverse } from "../app/server/universe";
 
 // Injection
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -36,18 +42,19 @@ import "bootstrap";
  * Entrypoint.
  */
 async function main(): Promise<void> {
-	// Get the element to attach the universe
-	let clientUniverseElement: HTMLElement | null = document.getElementById("client-universe");
-
-	// Define the application to use
-	let application: Application = new Application();
-
-	// Generate universes/prototype chains
-	let serverUniverse: ServerUniverse = await application.addUniverse({ Universe: ServerUniverse });
-	let clientUniverse: ClientUniverse = await application.addUniverse({
-		Universe: ClientUniverse,
-		args: { element: clientUniverseElement === null ? document.body : clientUniverseElement }
+	const application: StandaloneApplication = new StandaloneApplication({
+		element: "client-universe",
+		records: [],
+		yamlList: {
+			cave: {
+				path: "./data/cave.dt.yml",
+				type: YamlEntryType.Url
+			}
+		}
 	});
+	// Generate universes/prototype chains
+	let serverUniverse: ServerUniverse = await application.serverLoader.addUniverse({ yamlId: "cave" });
+	let clientUniverse: ClientUniverse = await application.clientLoader.addUniverse();
 
 	/**
 	 * Dummy sync function.
@@ -85,5 +92,7 @@ async function main(): Promise<void> {
 main();
 
 // #ifset _DEBUG_ENABLED
+// For testing
+// eslint-disable-next-line no-console
 console.log("debug");
 // #endif

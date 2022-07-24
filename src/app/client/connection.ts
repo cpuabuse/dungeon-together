@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,20 +7,27 @@
  * @file Client connection to server.
  */
 
+import { DeferredPromise } from "../common/async";
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
-import { ProcessCallback, VSocket } from "../common/vsocket";
-import { CoreConnection, CoreConnectionParam, Envelope, Message } from "../core/connection";
-import { CommsShardArgs, CommsShardRaw, commsShardRawToArgs } from "../core/shard";
-import { CoreUniverse } from "../core/universe";
+import {
+	CoreConnection,
+	CoreConnectionConstructorParams,
+	Envelope,
+	Message,
+	ProcessCallback,
+	VSocket
+} from "../core/connection";
+import { CoreShardArg } from "../core/shard";
 import { LogLevel, processLog } from "./error";
+import { ClientOptions } from "./options";
 import { ClientShard } from "./shard";
 import { ClientUniverse } from "./universe";
 
 /**
  * Client connection.
  */
-export class ClientConnection implements CoreConnection {
+export class ClientConnection implements CoreConnection<ClientUniverse> {
 	/**
 	 * Client UUIDs.
 	 */
@@ -29,14 +36,14 @@ export class ClientConnection implements CoreConnection {
 	/**
 	 * The target, be it standalone, remote or absent.
 	 */
-	public socket: VSocket<CoreUniverse>;
+	public socket: VSocket<ClientUniverse>;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param target - Socket
 	 */
-	public constructor({ socket }: CoreConnectionParam) {
+	public constructor({ socket }: CoreConnectionConstructorParams<ClientUniverse>) {
 		// Set this target
 		this.socket = socket;
 	}
@@ -69,7 +76,8 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 
 		// Shard
 		let shard: ClientShard;
-		let shardArgs: CommsShardArgs;
+		let attachHook: Promise<void>;
+		let created: DeferredPromise<void>;
 
 		// Switch message type
 		switch (message.type) {
@@ -80,17 +88,27 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 			// Sync command
 			case MessageTypeWord.Sync:
 				processLog({ error: new Error(`Synchronization started`), level: LogLevel.Info });
-				this.universe.addShard(message.body as CommsShardArgs);
-				shard = this.universe.getShard(message.body as CommsShardArgs);
+				created = new DeferredPromise();
+				// Await is not performed, as it should not block queue, and it should already be guaranteed to be sequential
+				attachHook = new Promise<void>((resolve, reject) => {
+					this.universe.addShard(message.body as CoreShardArg<ClientOptions>, { attachHook, created }, []);
+					created
+						.catch(() => {
+							// TODO: Handle error
+							reject();
+						})
+						.finally(() => {
+							resolve();
+						});
+				});
+				shard = this.universe.getShard(message.body as CoreShardArg<ClientOptions>);
 				shard.addSocket({ socket: this });
-				shard.attach();
 				break;
 
 			// Update command
 			case MessageTypeWord.Update:
 				processLog({ error: new Error(`Update started`), level: LogLevel.Info });
-				shardArgs = commsShardRawToArgs(message.body as CommsShardRaw);
-				this.universe.getShard(shardArgs).update(shardArgs);
+				// TODO: Handle update
 				break;
 
 			// Continue loop on default

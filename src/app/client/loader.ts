@@ -17,6 +17,8 @@ import { ClientUniverse } from "./universe";
  * Client loader class.
  */
 export class ClientLoader {
+	public element: HTMLElement;
+
 	/**
 	 * Application this resides in.
 	 */
@@ -28,13 +30,20 @@ export class ClientLoader {
 	 * @param param - Destructured parameter
 	 */
 	public constructor({
-		application
+		application,
+		element
 	}: {
 		/**
 		 * Application.
 		 */
 		application: Application;
+
+		/**
+		 * HTML element.
+		 */
+		element: HTMLElement;
 	}) {
+		this.element = element;
 		this.application = application;
 	}
 
@@ -43,22 +52,12 @@ export class ClientLoader {
 	 *
 	 * @param param - Destructured parameters
 	 */
-	public async addUniverse({
-		element
-	}: {
-		/**
-		 * HTML element name.
-		 */
-		element: string;
-	}): Promise<ClientUniverse> {
-		// Get the element to attach the universe
-		const clientUniverseElement: HTMLElement | null = document.getElementById(element);
+	public async addUniverse(): Promise<ClientUniverse> {
 		const universeCreated: DeferredPromise<void> = new DeferredPromise();
+		const element: HTMLElement = this.element.appendChild(document.createElement("div"));
 		let universe: ClientUniverse = this.application.addUniverse({
 			Universe: ClientUniverse,
-			args: [
-				{ created: universeCreated, element: clientUniverseElement === null ? document.body : clientUniverseElement }
-			]
+			args: [{ created: universeCreated, element }]
 		});
 
 		await universeCreated;
