@@ -8,7 +8,8 @@
  */
 
 import { CoreArgIds } from "../core/arg";
-import { CoreGridArg, CoreGridArgParentIds, CoreGridClassFactory } from "../core/grid";
+import { CoreGridArg, CoreGridClassFactory } from "../core/grid";
+import { CoreGridArgParentIds } from "../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ServerBaseClass, ServerBaseConstructorParams } from "./base";
 import { ServerCell } from "./cell";

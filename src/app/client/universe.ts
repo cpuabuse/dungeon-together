@@ -249,177 +249,178 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 			.catch(() => {
 				// TODO: Process error
 			})
+			.then(() => {
+				// JavaScript based events
+				element.addEventListener("contextmenu", event => {
+					// Stops showing default context menu
+					event.preventDefault();
+
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(rcSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+
+				// Scroll does not work on mobile phone
+				element.addEventListener("wheel", event => {
+					// Prevent zoom in HTML
+					event.preventDefault();
+
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(scrollSymbol, {
+							x: 0,
+							y: event.deltaY
+						});
+					});
+				});
+				// Keyboard events
+				// Prepare mousetrap instance
+				let mousetrap: Mousetrap.MousetrapInstance = new Mousetrap(element);
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("up", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(upSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("w", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(upSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("down", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(downSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("s", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(downSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("right", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(rightSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("d", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(rightSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("left", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(leftSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("a", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(leftSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+
+				// Touch events
+				let hammer: HammerManager = new Hammer(element);
+
+				// Tap works both for the browser's mouseclick and the mobile tap
+				hammer.on("tap", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(lcSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+
+				// Press works only on mobile phone
+				hammer.on("press", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(rcSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+
+				// Pinch does not work on mouse scroll
+				hammer.on("pinch", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(scrollSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+			})
 			.finally(() => {
 				created.resolve();
 			});
-
-		// JavaScript based events
-		element.addEventListener("contextmenu", event => {
-			// Stops showing default context menu
-			event.preventDefault();
-
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(rcSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-
-		// Scroll does not work on mobile phone
-		element.addEventListener("wheel", event => {
-			// Prevent zoom in HTML
-			event.preventDefault();
-
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(scrollSymbol, {
-					x: 0,
-					y: event.deltaY
-				});
-			});
-		});
-		// Keyboard events
-		// Prepare mousetrap instance
-		let mousetrap: Mousetrap.MousetrapInstance = new Mousetrap(element);
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("up", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(upSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("w", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(upSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("down", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(downSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("s", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(downSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("right", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(rightSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("d", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(rightSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("left", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(leftSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("a", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(leftSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-
-		// Touch events
-		let hammer: HammerManager = new Hammer(element);
-
-		// Tap works both for the browser's mouseclick and the mobile tap
-		hammer.on("tap", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(lcSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-
-		// Press works only on mobile phone
-		hammer.on("press", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(rcSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-
-		// Pinch does not work on mouse scroll
-		hammer.on("pinch", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(scrollSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
 	}
 
 	/**

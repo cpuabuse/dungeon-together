@@ -9,7 +9,8 @@
 
 import { CoreArgIds } from "../core/arg";
 import { CellPathOwn } from "../core/cell";
-import { CoreGridArg, CoreGridArgParentIds, CoreGridClassFactory } from "../core/grid";
+import { CoreGridArg, CoreGridClassFactory } from "../core/grid";
+import { CoreGridArgParentIds } from "../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientCell } from "./cell";

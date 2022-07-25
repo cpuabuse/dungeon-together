@@ -17,10 +17,9 @@ import commonjs from "@rollup/plugin-commonjs";
 import inject from "@rollup/plugin-inject";
 import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
-import { Plugin, RollupOptions } from "rollup";
+import { RollupOptions } from "rollup";
 import jscc from "rollup-plugin-jscc";
-import globals from "rollup-plugin-node-globals";
-import nodePolyfills from "rollup-plugin-node-polyfills";
+import nodePolyfills from "rollup-plugin-polyfill-node";
 import postcss from "rollup-plugin-postcss";
 import typescript from "rollup-plugin-typescript2";
 import vue from "rollup-plugin-vue";
@@ -86,15 +85,15 @@ const options: RollupOptions = {
 		}),
 
 		// To resolve some libraries correctly
+		// Has to come before modules manipulating code, so that import statements can be interpreted
 		commonjs(),
 
-		// For builtins plugin
-		// Polyfill depends on this
-		globals() as Plugin,
-
-		// Polyfill "url", and other modules
-		// Has to come before resolve, to replace the builtin "url"
-		nodePolyfills() as Plugin,
+		/*
+			Polyfill "url", and other modules.
+			Has to come before resolve, to replace the builtin modules, etc.
+			Apparently is combined with globals plugin.
+		*/
+		nodePolyfills(),
 
 		// Compile for browser
 		resolve({ browser: true }),

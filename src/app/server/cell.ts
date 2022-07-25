@@ -8,7 +8,8 @@
  */
 
 import { CoreArgIds } from "../core/arg";
-import { CoreCellArg, CoreCellArgParentIds, CoreCellClassFactory } from "../core/cell";
+import { CoreCellArg, CoreCellClassFactory } from "../core/cell";
+import { CoreCellArgParentIds } from "../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ServerBaseClass, ServerBaseConstructorParams } from "./base";
 import { ServerEntity } from "./entity";

@@ -40,15 +40,19 @@ import {
 	navIndex
 } from "./arg";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
+import { CoreCellArg, CoreCellInstance } from "./cell";
 import {
-	CoreCellArg,
 	CoreCellArgGrandparentIds,
 	CoreCellArgParentId,
 	CoreCellArgParentIds,
-	CoreCellInstance,
-	coreCellArgParentIdSet
-} from "./cell";
-import { coreShardArgParentIds } from "./shard";
+	CoreGridArgGrandparentIds,
+	CoreGridArgParentId,
+	CoreGridArgParentIds,
+	coreCellArgParentIdSet,
+	coreGridArgGrandparentIdSet,
+	coreGridArgParentId,
+	coreGridArgParentIdSet
+} from "./parents";
 import { CoreUniverse, CoreUniverseClass } from "./universe";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
@@ -58,49 +62,6 @@ import {
 	generateCoreUniverseObjectContainerMembers,
 	generateCoreUniverseObjectMembers
 } from "./universe-object";
-
-// Infer type from `as const` assertion
-/* eslint-disable @typescript-eslint/typedef */
-/**
- * Grid parent ID.
- */
-const coreGridArgParentId = CoreArgIds.Shard as const;
-
-/**
- * Tuple with core grid arg grandparent IDS.
- */
-const coreGridArgGrandparentIds = [...coreShardArgParentIds] as const;
-
-/**
- * Tuple with core grid arg parent IDS.
- */
-export const coreGridArgParentIds = [...coreShardArgParentIds, coreGridArgParentId] as const;
-/* eslint-enable @typescript-eslint/typedef */
-
-/**
- * Unique set with grandparent ID's for core cell arg.
- */
-export const coreGridArgGrandparentIdSet: Set<CoreGridArgGrandparentIds> = new Set(coreGridArgGrandparentIds);
-
-/**
- * Unique set with parent ID's for core cell arg.
- */
-export const coreGridArgParentIdSet: Set<CoreGridArgParentIds> = new Set(coreGridArgParentIds);
-
-/**
- * Grid parent Id.
- */
-export type CoreGridArgParentId = typeof coreGridArgParentId;
-
-/**
- * IDs of grandparents of {@link CoreGridArg}.
- */
-export type CoreGridArgGrandparentIds = typeof coreGridArgGrandparentIds[number];
-
-/**
- * IDs of parents of {@link CoreCellArg}.
- */
-export type CoreGridArgParentIds = typeof coreGridArgParentIds[number];
 
 /**
  * Grid's own path.

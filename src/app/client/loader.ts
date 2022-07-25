@@ -3,15 +3,15 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
-import { DeferredPromise } from "../common/async";
-import { Application } from "../core/application";
-import { ClientUniverse } from "./universe";
-
 /**
  * Client loader.
  *
  * @file
  */
+
+import { DeferredPromise } from "../common/async";
+import { Application } from "../core/application";
+import { ClientUniverse } from "./universe";
 
 /**
  * Client loader class.

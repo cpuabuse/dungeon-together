@@ -10,6 +10,7 @@
  */
 
 import axios from "axios";
+import nextTick from "next-tick";
 import { DeferredPromise } from "../common/async";
 import { appUrl } from "../common/defaults";
 import { UrlPath } from "../common/url";
@@ -245,7 +246,7 @@ export class ServerLoader<R extends string, T extends ModuleFactoryRecordListCon
 						// Add shards
 						let attachHook: Promise<void> = new Promise((resolve, reject) => {
 							let created: DeferredPromise<void> = new DeferredPromise<void>();
-							setImmediate(() => {
+							nextTick(() => {
 								let meta: CoreArgMeta<CoreArgIds.Shard, YamlOptions, ServerOptions> = coreArgMetaGenerate({
 									id: CoreArgIds.Shard,
 									index,

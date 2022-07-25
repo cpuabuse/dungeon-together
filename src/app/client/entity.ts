@@ -9,7 +9,8 @@
 
 import { AnimatedSprite } from "pixi.js";
 import { CoreArgIds } from "../core/arg";
-import { CoreEntityArg, CoreEntityArgParentIds, CoreEntityClassFactory } from "../core/entity";
+import { CoreEntityArg, CoreEntityClassFactory } from "../core/entity";
+import { CoreEntityArgParentIds } from "../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientOptions, clientOptions } from "./options";

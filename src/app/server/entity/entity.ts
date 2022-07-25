@@ -10,7 +10,8 @@
 import { UrlPath } from "../../common/url";
 import { Uuid } from "../../common/uuid";
 import { CoreArgIds } from "../../core/arg";
-import { CoreEntityArg, CoreEntityArgParentIds, CoreEntityClassFactory } from "../../core/entity";
+import { CoreEntityArg, CoreEntityClassFactory } from "../../core/entity";
+import { CoreEntityArgParentIds } from "../../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../../core/universe-object";
 import { ServerBaseClass, ServerBaseConstructorParams } from "../base";
 import { ServerOptions, serverOptions } from "../options";

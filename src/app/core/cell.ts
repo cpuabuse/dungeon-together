@@ -39,14 +39,18 @@ import {
 import { CoreArgOptionsWithKindUnion } from "./arg/kind";
 import { CoreArgNav } from "./arg/nav";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
+import { CoreEntityArg, CoreEntityInstance } from "./entity";
 import {
-	CoreEntityArg,
+	CoreCellArgGrandparentIds,
+	CoreCellArgParentId,
+	CoreCellArgParentIds,
 	CoreEntityArgGrandparentIds,
 	CoreEntityArgParentId,
-	CoreEntityInstance,
+	coreCellArgGrandparentIdSet,
+	coreCellArgParentId,
+	coreCellArgParentIdSet,
 	coreEntityArgParentIdSet
-} from "./entity";
-import { coreGridArgParentIds } from "./grid";
+} from "./parents";
 import { CoreUniverse } from "./universe";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
@@ -59,21 +63,6 @@ import {
 	generateCoreUniverseObjectContainerMembers,
 	generateCoreUniverseObjectMembers
 } from "./universe-object";
-
-/**
- * Cell parent ID.
- */
-export type CoreCellArgParentId = typeof coreCellArgParentId;
-
-/**
- * IDs of grandparents of {@link CoreCellArg}.
- */
-export type CoreCellArgGrandparentIds = typeof coreCellArgGrandparentIds[number];
-
-/**
- * IDs of parents of {@link CoreCellArg}.
- */
-export type CoreCellArgParentIds = typeof coreCellArgParentIds[number];
 
 /**
  * Core cell args.
@@ -176,34 +165,6 @@ export type CoreCellClass<
 		>
 	>
 >;
-
-// Infer type from `as const` assertion
-/* eslint-disable @typescript-eslint/typedef */
-/**
- * Cell parent ID.
- */
-const coreCellArgParentId = CoreArgIds.Grid as const;
-
-/**
- * Tuple with core cell arg grandparent IDS.
- */
-const coreCellArgGrandparentIds = [...coreGridArgParentIds] as const;
-
-/**
- * Tuple with core cell arg parent IDS.
- */
-export const coreCellArgParentIds = [...coreGridArgParentIds, coreCellArgParentId] as const;
-/* eslint-enable @typescript-eslint/typedef */
-
-/**
- * Unique set with grandparent ID's for core cell arg.
- */
-export const coreCellArgGrandparentIdSet: Set<CoreCellArgGrandparentIds> = new Set(coreCellArgGrandparentIds);
-
-/**
- * Unique set with parent ID's for core cell arg.
- */
-export const coreCellArgParentIdSet: Set<CoreCellArgParentIds> = new Set(coreCellArgParentIds);
 
 /**
  * Factory for core cell.

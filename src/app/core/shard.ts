@@ -35,13 +35,15 @@ import {
 	coreArgIdToPathUuidPropertyName
 } from "./arg";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
+import { CoreGridArg, CoreGridInstance } from "./grid";
 import {
-	CoreGridArg,
 	CoreGridArgGrandparentIds,
 	CoreGridArgParentId,
-	CoreGridInstance,
+	CoreShardArgGrandparentIds,
+	CoreShardArgParentId,
+	CoreShardArgParentIds,
 	coreGridArgParentIdSet
-} from "./grid";
+} from "./parents";
 import { CoreUniverse } from "./universe";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
@@ -51,21 +53,6 @@ import {
 	generateCoreUniverseObjectContainerMembers,
 	generateCoreUniverseObjectMembers
 } from "./universe-object";
-
-/**
- * Parent ID of {@link CoreShardArg}.
- */
-export type CoreShardArgParentId = never;
-
-/**
- * IDs of grandparents of {@link CoreShardArg}.
- */
-export type CoreShardArgGrandparentIds = never;
-
-/**
- * IDs of parents of {@link CoreShardArg}.
- */
-export type CoreShardArgParentIds = typeof coreShardArgParentIds[number];
 
 /**
  * Grid's own shard.
@@ -152,13 +139,6 @@ export type CoreShardClass<
 		>
 	>
 >;
-
-/**
- * Tuple with core shard arg parent IDS.
- */
-// Infer type from `as const` assertion
-// eslint-disable-next-line @typescript-eslint/typedef
-export const coreShardArgParentIds = [] as const;
 
 /**
  * Core shard class factory.

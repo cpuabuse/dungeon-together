@@ -37,7 +37,14 @@ import {
 	coreArgComplexOptionSymbolIndex
 } from "./arg/options";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
-import { coreCellArgParentIds } from "./cell";
+import {
+	CoreEntityArgGrandparentIds,
+	CoreEntityArgParentId,
+	CoreEntityArgParentIds,
+	coreEntityArgGrandparentIdSet,
+	coreEntityArgParentId,
+	coreEntityArgParentIdSet
+} from "./parents";
 import { CoreUniverseClass } from "./universe";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
@@ -49,21 +56,6 @@ import {
 	CoreUniverseObjectInstance,
 	generateCoreUniverseObjectMembers
 } from "./universe-object";
-
-/**
- * Entity parent ID.
- */
-export type CoreEntityArgParentId = typeof coreEntityArgParentId;
-
-/**
- * {@link CoreEntityArg} grandparent IDs.
- */
-export type CoreEntityArgGrandparentIds = typeof coreEntityArgGrandparentIds[number];
-
-/**
- * {@link CoreEntityArg} parent IDs.
- */
-export type CoreEntityArgParentIds = typeof coreEntityArgParentIds[number];
 
 /**
  * Kind part of entity arg.
@@ -167,34 +159,6 @@ export type CoreEntityClass<
 		>
 	>
 >;
-
-// Infer type from `as const` assertion
-/* eslint-disable @typescript-eslint/typedef */
-/**
- * Entity parent ID.
- */
-const coreEntityArgParentId = CoreArgIds.Cell as const;
-
-/**
- * Tuple with core entity arg grandparent IDS.
- */
-const coreEntityArgGrandparentIds = [...coreCellArgParentIds] as const;
-
-/**
- * Tuple with core entity arg parent IDS.
- */
-export const coreEntityArgParentIds = [...coreCellArgParentIds, coreEntityArgParentId] as const;
-/* eslint-enable @typescript-eslint/typedef */
-
-/**
- * Unique set with parent ID's for core entity arg.
- */
-export const coreEntityArgParentIdSet: Set<CoreEntityArgParentIds> = new Set(coreEntityArgParentIds);
-
-/**
- * Unique set with grandparent ID's for core entity arg.
- */
-export const coreEntityArgGrandparentIdSet: Set<CoreEntityArgGrandparentIds> = new Set(coreEntityArgGrandparentIds);
 
 /**
  * Core entity class factory.

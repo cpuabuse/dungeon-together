@@ -7,6 +7,8 @@
  * @file Deferred promise.
  */
 
+import nextTick from "next-tick";
+
 /**
  * Deferred promise.
  *
@@ -31,8 +33,11 @@ export class DeferredPromise<T = void> extends Promise<T> {
 	 */
 	public constructor() {
 		super((resolve, reject) => {
-			this.resolve = resolve;
-			this.reject = reject;
+			// If not immediate, `this` accessed by super
+			nextTick(() => {
+				this.resolve = resolve;
+				this.reject = reject;
+			});
 		});
 	}
 }

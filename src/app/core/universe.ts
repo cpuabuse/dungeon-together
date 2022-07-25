@@ -41,43 +41,26 @@ import {
 } from "./arg";
 import { coreArgGenerateDefaultUuid } from "./arg/uuid";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
+import { CellPathOwn, CoreCellArg, CoreCellClass, CoreCellInstance } from "./cell";
+import { CoreConnection, CoreConnectionConstructorParams } from "./connection";
+import { CoreEntityArg, CoreEntityClass, CoreEntityInstance, EntityPathOwn } from "./entity";
+import { CoreGridArg, CoreGridClass, CoreGridInstance, GridPathOwn } from "./grid";
+import { CoreArgIndexer } from "./indexable";
 import {
-	CellPathOwn,
-	CoreCellArg,
 	CoreCellArgGrandparentIds,
 	CoreCellArgParentId,
 	CoreCellArgParentIds,
-	CoreCellClass,
-	CoreCellInstance
-} from "./cell";
-import { CoreConnection, CoreConnectionConstructorParams } from "./connection";
-import {
-	CoreEntityArg,
 	CoreEntityArgGrandparentIds,
 	CoreEntityArgParentId,
 	CoreEntityArgParentIds,
-	CoreEntityClass,
-	CoreEntityInstance,
-	EntityPathOwn
-} from "./entity";
-import {
-	CoreGridArg,
 	CoreGridArgGrandparentIds,
 	CoreGridArgParentId,
 	CoreGridArgParentIds,
-	CoreGridClass,
-	CoreGridInstance,
-	GridPathOwn
-} from "./grid";
-import { CoreArgIndexer } from "./indexable";
-import {
-	CoreShardArg,
 	CoreShardArgGrandparentIds,
 	CoreShardArgParentId,
-	CoreShardArgParentIds,
-	CoreShardClass,
-	CoreShardInstance
-} from "./shard";
+	CoreShardArgParentIds
+} from "./parents";
+import { CoreShardArg, CoreShardClass, CoreShardInstance } from "./shard";
 import {
 	CoreUniverseObjectArgsOptionsUnion,
 	CoreUniverseObjectConstructorParameters,

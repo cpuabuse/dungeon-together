@@ -19,7 +19,8 @@ import {
 import { MessageTypeWord, MovementWord } from "../common/defaults/connection";
 import { CoreArgIds } from "../core/arg";
 import { Envelope, VSocket } from "../core/connection";
-import { CoreShardArg, CoreShardArgParentIds, CoreShardClassFactory } from "../core/shard";
+import { CoreShardArgParentIds } from "../core/parents";
+import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientGrid } from "./grid";
