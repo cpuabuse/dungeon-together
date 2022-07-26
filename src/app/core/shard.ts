@@ -284,7 +284,7 @@ export function CoreShardClassFactory<
 				cells: new Map(),
 
 				// Ensures getting uuid from subclass
-				gridUuid: (Shard.constructor as typeof Shard).getDefaultGridUuid(this),
+				gridUuid: Shard.getDefaultGridUuid(this),
 
 				// Vector
 				x: 0,

@@ -177,7 +177,7 @@ export class ServerLoader<R extends string, T extends ModuleFactoryRecordListCon
 			throw new Error("YAML not found");
 		} catch {
 			// TODO: Process error
-			data = (ServerLoader.constructor as typeof ServerLoader).defaultYaml;
+			data = ServerLoader.defaultYaml;
 		}
 		const root: RootType = compile({ data });
 		// Module to kind name to ID
