@@ -32,7 +32,7 @@ export type RootType = TypeOf<typeof rootType>;
  * Compiles binary string to arg.
  *
  * @param param - Destructured parameter
- * @returns Arg id and arg
+ * @returns Compilation result, or empty value if failed
  */
 export function compile({
 	data
@@ -49,7 +49,8 @@ export function compile({
 	if (rootType.is(loadResult)) {
 		return loadResult;
 	}
-
 	// TODO: Process error
-	throw new Error("YAML was malformed");
+
+	// Return default
+	return { data: { shards: [] }, kinds: {} };
 }
