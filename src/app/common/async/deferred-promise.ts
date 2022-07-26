@@ -14,8 +14,9 @@ import nextTick from "next-tick";
  *
  * @remarks
  * This exposes ability to resolve/reject a promise multiple times, but it seems that it will not affect anything, so no guards introduced.
+ * Extending promise produces rejected promises, so a promise is contained instead.
  */
-export class DeferredPromise<T = void> extends Promise<T> {
+export class DeferredPromise<T = void> implements Pick<Promise<T>, "then" | "catch" | "finally"> {
 	/**
 	 * Promise reject.
 	 */
@@ -28,16 +29,47 @@ export class DeferredPromise<T = void> extends Promise<T> {
 	// Initialized immediately inside promise constructor
 	public resolve!: (value: T | PromiseLike<T>) => void;
 
-	/**
-	 * Constructor.
-	 */
-	public constructor() {
-		super((resolve, reject) => {
-			// If not immediate, `this` accessed by super
-			nextTick(() => {
-				this.resolve = resolve;
-				this.reject = reject;
-			});
+	private promise: Promise<T> = new Promise((resolve, reject) => {
+		// If not immediate, `this` accessed by super
+		nextTick(() => {
+			this.resolve = resolve;
+			this.reject = reject;
 		});
+	});
+
+	/**
+	 * `catch` method of a promise.
+	 *
+	 * @param onRejected - Promise on reject function
+	 * @returns Promise
+	 */
+	public catch<TResult = never>(
+		onRejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null | undefined
+	): Promise<T | TResult> {
+		return this.promise.catch(onRejected);
+	}
+
+	/**
+	 * `finally` method of a promise.
+	 *
+	 * @param onFinally - Promise on finally function
+	 * @returns Promise
+	 */
+	public finally(onFinally?: (() => void) | null | undefined): Promise<T> {
+		return this.promise.finally(onFinally);
+	}
+
+	/**
+	 * `then` method of a promise.
+	 *
+	 * @param onResolved - Promise on resolve function
+	 * @param onRejected - Promise on reject function
+	 * @returns Promise
+	 */
+	public then<TResult1 = T, TResult2 = never>(
+		onResolved?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null | undefined,
+		onRejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined
+	): Promise<TResult1 | TResult2> {
+		return this.promise.then(onResolved, onRejected);
 	}
 }
