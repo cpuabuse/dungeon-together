@@ -387,9 +387,8 @@ export function CoreCellClassFactory<
 
 			// Assign nav
 			if (options[CoreArgOptionIds.Nav]) {
-				// False negative
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-				(arg as unknown as CellNav).nav.forEach((v, k) => {
+				// Nav is optional, so check if it exists
+				(arg as unknown as CellNav).nav?.forEach((v, k) => {
 					(this as unknown as CellNav).nav.set(k, v);
 				});
 			}

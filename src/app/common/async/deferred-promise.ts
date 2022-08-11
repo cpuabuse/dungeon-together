@@ -30,11 +30,9 @@ export class DeferredPromise<T = void> implements Pick<Promise<T>, "then" | "cat
 	public resolve!: (value: T | PromiseLike<T>) => void;
 
 	private promise: Promise<T> = new Promise((resolve, reject) => {
-		// If not immediate, `this` accessed by super
-		nextTick(() => {
-			this.resolve = resolve;
-			this.reject = reject;
-		});
+		// Setting methods not delayed, since `this` can be accessed, as class does not extend `Promise` anymore
+		this.resolve = resolve;
+		this.reject = reject;
 	});
 
 	/**

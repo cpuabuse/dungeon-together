@@ -48,7 +48,7 @@ async function main(): Promise<void> {
 		records: [],
 		yamlList: {
 			cave: {
-				path: "/data/cave.dt.yml",
+				path: "/data/shard/cave.dt.yml",
 				type: "url"
 			}
 		}
