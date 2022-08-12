@@ -122,7 +122,7 @@ export function ClientCellFactory({
 	 */
 	ClientCell.prototype.attachEntity = function (this: ClientCell, entity: ClientEntity): void {
 		// Super first
-		(Object.getPrototypeOf(ClientCell.prototype) as ClientCell).attachEntity(entity);
+		(Object.getPrototypeOf(ClientCell.prototype) as ClientCell).attachEntity.call(this, entity);
 
 		// Post-attach (decoration)
 		ClientCell.universe.universeQueue.addCallback({

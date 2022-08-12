@@ -334,7 +334,7 @@ export function ClientShardFactory({
 	 */
 	ClientShard.prototype.attachGrid = function (this: ClientShard, grid: ClientGrid): void {
 		// Super first
-		(Object.getPrototypeOf(ClientShard.prototype) as ClientShard).attachGrid(grid);
+		(Object.getPrototypeOf(ClientShard.prototype) as ClientShard).attachGrid.call(this, grid);
 
 		// Bind to shard as a separate callback, deferred so matches when children show calls
 		ClientShard.universe.universeQueue.addCallback({

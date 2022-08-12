@@ -118,7 +118,7 @@ export function ClientGridClassFactory({
 	 */
 	ClientGrid.prototype.attachCell = function (this: ClientGrid, cell: ClientCell): void {
 		// Super first
-		(Object.getPrototypeOf(ClientGrid.prototype) as ClientGrid).attachCell(cell);
+		(Object.getPrototypeOf(ClientGrid.prototype) as ClientGrid).attachCell.call(this, cell);
 
 		ClientGrid.universe.universeQueue.addCallback({
 			/**
