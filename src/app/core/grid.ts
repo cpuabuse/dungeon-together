@@ -14,7 +14,7 @@ import {
 } from "../common/computed-class";
 import { StaticImplements, ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
-import { Vector, VectorArray } from "../common/vector";
+import { Vector, VectorArray, defaultVector } from "../common/vector";
 import {
 	CoreArgComplexOptionPathIds,
 	CoreArgContainerArg,
@@ -323,6 +323,9 @@ export function CoreGridClassFactory<
 				cellUuid: Grid.getDefaultCellUuid(this),
 
 				entities: new Map(),
+
+				// Add coordinates conditionally
+				...(options[CoreArgOptionIds.Vector] ? defaultVector : {}),
 
 				// Extended path
 				...(options[CoreArgOptionIds.Path] ===

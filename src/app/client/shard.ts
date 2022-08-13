@@ -153,6 +153,9 @@ export function ClientShardFactory({
 			// After attach
 			attachHook
 				.then(() => {
+					// Add canvas to page
+					this.attachShardElement();
+
 					// Add listeners for right-click input
 					this.input.on(rcSymbol, inputInterface => {
 						alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
