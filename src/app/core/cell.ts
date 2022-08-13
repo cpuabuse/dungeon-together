@@ -465,7 +465,9 @@ export function CoreCellClassFactory<
 				arg: cell,
 				// False negative
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-				childConverter: (Cell.universe as CoreUniverse<BaseClass, BaseParams, Options>).Entity.convertEntity,
+				childConverter: (Cell.universe as CoreUniverse<BaseClass, BaseParams, Options>).Entity.convertEntity.bind(
+					(Cell.universe as CoreUniverse<BaseClass, BaseParams, Options>).Entity
+				),
 				childId: CoreArgIds.Entity,
 				id: CoreArgIds.Cell,
 				meta,

@@ -75,9 +75,11 @@ export class VectorArray<T> extends Array<(T | undefined)[][]> implements Vector
 	 */
 	public constructor(vector: Vector) {
 		super(vector.x);
-		this.forEach((x, i) => {
+
+		// Can not iterate through `this`, as it is an empty array
+		for (let i: number = 0; i < this.length; i++) {
 			this[i] = Array.from(new Array(vector.y), () => new Array<T | undefined>(vector.z));
-		});
+		}
 		this.x = vector.x;
 		this.y = vector.y;
 		this.z = vector.z;

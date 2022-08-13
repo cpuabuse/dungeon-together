@@ -517,7 +517,9 @@ export function CoreGridClassFactory<
 					CoreArgIds.Cell
 				>({
 					arg: grid,
-					childConverter: (Grid.universe as CoreUniverse<BaseClass, BaseParams, Options>).Cell.convertCell,
+					childConverter: (Grid.universe as CoreUniverse<BaseClass, BaseParams, Options>).Cell.convertCell.bind(
+						(Grid.universe as CoreUniverse<BaseClass, BaseParams, Options>).Cell
+					),
 					childId: CoreArgIds.Cell,
 					id: CoreArgIds.Grid,
 					link,
