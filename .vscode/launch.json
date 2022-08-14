@@ -1,0 +1,18 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "chrome",
+			"request": "launch",
+			"name": "build-debug",
+			"url": "http://127.0.0.1:5500/build/stage/standalone/index.html",
+			"preLaunchTask": "standalone-build"
+		},
+		{
+			"type": "chrome",
+			"request": "launch",
+			"name": "debug",
+			"url": "http://127.0.0.1:5500/build/stage/standalone/index.html"
+		}
+	]
+}

@@ -7,8 +7,6 @@
  * @file Deferred promise.
  */
 
-import nextTick from "next-tick";
-
 /**
  * Deferred promise.
  *

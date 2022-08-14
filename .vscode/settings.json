@@ -34,5 +34,7 @@
 		"enabled": true,
 		"rules": { "typeParameter": "#22AA22" }
 	},
-	"typescript.tsdk": "node_modules/typescript/lib"
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"liveServer.settings.NoBrowser": true,
+	"liveServer.settings.port": 5500
 }
