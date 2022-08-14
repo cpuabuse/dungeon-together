@@ -76,8 +76,8 @@ export function ClientShardFactory({
 		public readonly app: Application = new Application({
 			antialias: true,
 			autoDensity: true,
+			backgroundAlpha: 0,
 			height: 750,
-			transparent: true,
 			width: 750
 		});
 

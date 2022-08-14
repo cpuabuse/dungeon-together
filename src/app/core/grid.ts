@@ -412,6 +412,13 @@ export function CoreGridClassFactory<
 			/**
 			 * Cell with nav.
 			 */
+			type SourceCellWithNavWithoutMap = CoreCellArg<
+				CoreArgOptionsOverride<SourceOptions, CoreArgOptionIds.Nav, CoreArgOptionIds.Map>
+			>;
+
+			/**
+			 * Cell with nav.
+			 */
 			type TargetCellWithNavMap = CoreCellArg<
 				CoreArgOptionsOverride<TargetOptions, CoreArgOptionIds.Nav | CoreArgOptionIds.Map>
 			>;
@@ -531,7 +538,7 @@ export function CoreGridClassFactory<
 			};
 
 			// Work with link
-			if (link !== undefined) {
+			if (link) {
 				// 3D Array of targets indexed by vector
 				let targetVectorArray: VectorArray<CoreCellArg<TargetOptions>> = new VectorArray<CoreCellArg<TargetOptions>>(
 					grid
@@ -571,30 +578,41 @@ export function CoreGridClassFactory<
 
 						// For each target
 						link.target.forEach((sourceCell, targetCell) => {
-							// For each nav in corresponding cell
-							(sourceCell as unknown as SourceCellWithNavMap).nav.forEach((path, nav) => {
-								// Path index of source's cell corresponding to nav
-								let navSourcePath: CoreArgIndex<SourceOptions> | undefined = coreArgGetIndex<
-									CoreArgIds.Cell,
-									SourceOptions,
-									CoreCellArgParentIds
-								>({
-									id: CoreArgIds.Cell,
-									options: sourceOptions,
-									path: path as CoreCellArg<SourceOptions>
-								});
+							// TODO: Instead of map transformation refactor into function
+							// Transform nav to map
+							(sourceOptions[CoreArgOptionIds.Map]
+								? (sourceCell as unknown as SourceCellWithNavMap).nav
+								: new Map(
+										// Overriding entries key type, expecting load time verification to correctly have `Nav` types keys
+										(Object.entries as <Key extends Nav, T>(...arg: [Partial<Record<Key, T>>]) => Array<[Key, T]>)(
+											(sourceCell as unknown as SourceCellWithNavWithoutMap).nav ?? {}
+										)
+								  )
+							)
+								// For each nav in corresponding cell
+								.forEach((path, nav) => {
+									// Path index of source's cell corresponding to nav
+									let navSourcePath: CoreArgIndex<SourceOptions> | undefined = coreArgGetIndex<
+										CoreArgIds.Cell,
+										SourceOptions,
+										CoreCellArgParentIds
+									>({
+										id: CoreArgIds.Cell,
+										options: sourceOptions,
+										path: path as CoreCellArg<SourceOptions>
+									});
 
-								// Assign target's cell corresponding to nav, into target nav
-								if (navSourcePath !== undefined) {
-									let navSource: CoreCellArg<SourceOptions> | undefined = sourceReducedPathIndex.get(navSourcePath);
-									if (navSource !== undefined) {
-										// Does not infer not undefined
-										// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-										let navTarget: CoreCellArg<TargetOptions> | undefined = link!.source.get(navSource);
-										assignNav({ nav, navTarget, targetCell });
+									// Assign target's cell corresponding to nav, into target nav
+									if (navSourcePath !== undefined) {
+										let navSource: CoreCellArg<SourceOptions> | undefined = sourceReducedPathIndex.get(navSourcePath);
+										if (navSource !== undefined) {
+											// Does not infer not undefined
+											// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+											let navTarget: CoreCellArg<TargetOptions> | undefined = link!.source.get(navSource);
+											assignNav({ nav, navTarget, targetCell });
+										}
 									}
-								}
-							});
+								});
 						});
 					} else {
 						// For each x, y and z
