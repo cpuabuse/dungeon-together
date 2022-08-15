@@ -36,5 +36,6 @@
 	},
 	"typescript.tsdk": "node_modules/typescript/lib",
 	"liveServer.settings.NoBrowser": true,
-	"liveServer.settings.port": 5500
+	"liveServer.settings.port": 5500,
+	"vscode-edge-devtools.timeout": 100000
 }
