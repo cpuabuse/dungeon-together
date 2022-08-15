@@ -91,15 +91,22 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 				created = new DeferredPromise();
 				// Await is not performed, as it should not block queue, and it should already be guaranteed to be sequential
 				attachHook = new Promise<void>((resolve, reject) => {
-					this.universe.addShard(message.body as CoreShardArg<ClientOptions>, { attachHook, created }, []);
-					created
-						.catch(() => {
-							// TODO: Handle error
-							reject();
-						})
-						.finally(() => {
-							resolve();
-						});
+					this.universe.universeQueue.addCallback({
+						/**
+						 * Callback.
+						 */
+						callback: () => {
+							this.universe.addShard(message.body as CoreShardArg<ClientOptions>, { attachHook, created }, []);
+							created
+								.catch(error => {
+									// TODO: Handle error
+									reject(error);
+								})
+								.finally(() => {
+									resolve();
+								});
+						}
+					});
 				});
 				shard = this.universe.getShard(message.body as CoreShardArg<ClientOptions>);
 				shard.addSocket({ socket: this });

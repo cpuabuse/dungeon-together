@@ -9,8 +9,11 @@
 
 import axios from "axios";
 import { LogLevel, processLog } from "../client/error";
+import { ClientOptions, clientOptions } from "../client/options";
+import { appUrl } from "../common/defaults";
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
+import { CoreArgIds, CoreArgMeta, coreArgMetaGenerate } from "../core/arg";
 import {
 	CoreConnection,
 	CoreConnectionConstructorParams,
@@ -20,6 +23,7 @@ import {
 	VSocket
 } from "../core/connection";
 import { compile } from "../yaml/compile";
+import { ServerOptions, serverOptions } from "./options";
 import { ServerUniverse } from "./universe";
 
 /**
@@ -48,33 +52,33 @@ export class ServerConnection implements CoreConnection<ServerUniverse> {
 }
 
 /**
- * Temp shard to send to client.
- */
-// Axios returns an object
-// eslint-disable-next-line @typescript-eslint/ban-types
-const shardDataPromise: Promise<object> = new Promise(resolve => {
-	axios.get("/data/shard/cave.dt.yml").then(
-		result => {
-			// This whole structure to be removed
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-			resolve(compile(result.data));
-		},
-		() => {
-			// Do nothing
-		}
-	);
-});
-
-/**
  * Queue process callback for socket.
  *
  * @returns `true` if the callback was processed, `false` if additional processing is required
  */
 export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = async function () {
+	let meta: CoreArgMeta<CoreArgIds.Shard, ServerOptions, ClientOptions> = coreArgMetaGenerate({
+		id: CoreArgIds.Shard,
+		index: 1,
+		meta: {
+			origin: appUrl,
+			paths: {},
+			systemNamespace: "system",
+			userNamespace: "user"
+		},
+		sourceOptions: serverOptions,
+		targetOptions: clientOptions
+	});
+
 	// Get temp shard data
 	// Axios returns an object
 	// eslint-disable-next-line @typescript-eslint/ban-types
-	let shardData: object = await shardDataPromise;
+	let shardData: object = this.universe.Shard.convertShard({
+		meta,
+		shard: Array.from(this.universe.shards)[1][1],
+		sourceOptions: serverOptions,
+		targetOptions: clientOptions
+	});
 
 	// Message reading loop
 	let counter: number = 0;
