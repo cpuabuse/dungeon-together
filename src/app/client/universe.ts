@@ -10,12 +10,14 @@
 import vueHljs from "@highlightjs/vue-plugin";
 import Hammer from "hammerjs";
 import type HammerManager from "hammerjs";
+import { encode as base64Encode } from "js-base64";
 import Mousetrap from "mousetrap";
-import { BaseTexture, Texture } from "pixi.js";
+import { BaseTexture, SVGResource, Texture } from "pixi.js";
 import { App, createApp } from "vue";
 import { createStore } from "vuex";
 import { DeferredPromise } from "../common/async";
 import { defaultModeUuid } from "../common/defaults";
+import { bunnySvgs } from "../common/images";
 import { Uuid } from "../common/uuid";
 import { CoreShardArg, ShardPathExtended } from "../core/shard";
 import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
@@ -98,11 +100,12 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 		[
 			defaultModeUuid,
 			{
-				textures: [
-					new Texture(new BaseTexture("img/bunny-red.svg")),
-					new Texture(new BaseTexture("img/bunny-green.svg")),
-					new Texture(new BaseTexture("img/bunny-blue.svg"))
-				]
+				textures: Object.values(bunnySvgs).map(
+					/*
+						Even though the source code can load XML element, `SVGResource` documentation (https://github.com/pixijs/pixijs/blob/fdbdc45b6a95bd47145e3a7267fe2a69a1be4ebb/packages/core/src/textures/resources/SVGResource.ts#L90-L98) states that it accepts Base64 encoded SVG. Which apparently means Base64 data URI, which we will use to adhere to documentation.
+					*/
+					bunny => new Texture(new BaseTexture(new SVGResource(`data:image/svg+xml;base64,${base64Encode(bunny)}`)))
+				)
 			}
 		],
 		[
