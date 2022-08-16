@@ -133,6 +133,7 @@
 		"highlight.js": "^11.4.0",
 		"interactjs": "^1.10.11",
 		"io-ts": "^2.2.16",
+		"js-base64": "^3.7.2",
 		"js-yaml": "^4.1.0",
 		"mousetrap": "^1.6.5",
 		"next-tick": "^1.1.0",
