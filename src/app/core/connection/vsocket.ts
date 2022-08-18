@@ -9,9 +9,9 @@
  * Server WS and client Websocket classes to be added.
  */
 
-import { LogLevel, processLog } from "../../client/error";
 import { MessageTypeWord, vSocketMaxQueue, vSocketProcessStackLimit } from "../../common/defaults/connection";
 import { ErroringReturn } from "../../common/error";
+import { LogLevel, processLog } from "../error";
 import { CoreUniverseInstanceNonRecursive } from "../universe";
 import { Envelope, Message } from "./connection";
 

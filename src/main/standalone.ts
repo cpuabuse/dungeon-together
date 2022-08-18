@@ -92,7 +92,7 @@ async function main(): Promise<void> {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 main();
 
-// #ifset _DEBUG_ENABLED
+// #if _DEBUG_ENABLED
 // For testing
 // eslint-disable-next-line no-console
 console.log("debug");

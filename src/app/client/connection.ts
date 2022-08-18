@@ -18,8 +18,8 @@ import {
 	ProcessCallback,
 	VSocket
 } from "../core/connection";
+import { LogLevel, processLog } from "../core/error";
 import { CoreShardArg } from "../core/shard";
-import { LogLevel, processLog } from "./error";
 import { ClientOptions } from "./options";
 import { ClientShard } from "./shard";
 import { ClientUniverse } from "./universe";

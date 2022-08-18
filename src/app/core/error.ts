@@ -18,7 +18,11 @@ import { hasOwnProperty } from "../common/utility-types";
 export enum LogLevel {
 	Info,
 	Warning,
-	Error
+	Error,
+
+	// #if _DEBUG_ENABLED
+	Debug
+	// #endif
 }
 
 /**
@@ -30,6 +34,38 @@ export type SingleErrorArgs = {
 	 */
 	error: Error;
 };
+
+/* eslint-disable prettier/prettier */
+/**
+ * Error type.
+ */
+type ErrorType = {
+	/**
+	 * Error.
+	 */
+	error: Error;
+} & (
+	{
+		/**
+		 * Log level.
+		 */
+		level: LogLevel;
+	}
+	// #if _DEBUG_ENABLED
+	| {
+		/**
+		 * Debug level.
+		 */
+		level: LogLevel.Debug;
+
+		/**
+		 * Extra data to display.
+		 */
+		data: unknown;
+	}
+	// #endif
+	);
+/* eslint-enable prettier/prettier */
 
 /**
  * Handles logging.
@@ -55,7 +91,7 @@ export function processLog(
 				/**
 				 * Error array.
 				 */
-				errors: Array<Error>;
+				errors: Array<ErrorType>;
 		  }
 	)
 ): void {

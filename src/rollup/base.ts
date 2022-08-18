@@ -125,7 +125,7 @@ export function defineOptions({
 			// For debug compilation
 			jscc({
 				include: join(...rootDir, "src", "**", "*"),
-				values: { _DEBUG_ENABLED: null }
+				values: { _DEBUG_ENABLED: !isProduction }
 			}),
 
 			// Required for some library compilations https://github.com/rollup/rollup-plugin-commonjs/issues/28

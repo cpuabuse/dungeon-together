@@ -1,3 +1,12 @@
 {
-	"recommendations": ["ritwickdey.LiveServer", "ms-edgedevtools.vscode-edge-devtools"]
+	"recommendations": [
+		// For launch configs
+		"ritwickdey.LiveServer",
+
+		// For launch configs
+		"ms-edgedevtools.vscode-edge-devtools",
+
+		// For code formatting
+		"dbaeumer.vscode-eslint"
+	]
 }

@@ -7,8 +7,6 @@
  * @file Server connection to client.
  */
 
-import axios from "axios";
-import { LogLevel, processLog } from "../client/error";
 import { ClientOptions, clientOptions } from "../client/options";
 import { appUrl } from "../common/defaults";
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
@@ -22,7 +20,7 @@ import {
 	ProcessCallback,
 	VSocket
 } from "../core/connection";
-import { compile } from "../yaml/compile";
+import { LogLevel, processLog } from "../core/error";
 import { ServerOptions, serverOptions } from "./options";
 import { ServerUniverse } from "./universe";
 

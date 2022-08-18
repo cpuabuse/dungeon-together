@@ -37,5 +37,9 @@
 	"typescript.tsdk": "node_modules/typescript/lib",
 	"liveServer.settings.NoBrowser": true,
 	"liveServer.settings.port": 5500,
-	"vscode-edge-devtools.timeout": 100000
+	"vscode-edge-devtools.timeout": 100000,
+	"[typescript]": {
+		// Overrides prettier extensions, so that it does not auto-format conditional compilation directives
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
+	}
 }
