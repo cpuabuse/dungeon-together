@@ -11,6 +11,7 @@
 
 import { ModuleFactoryParams } from "../../app/server/module";
 import { ExclusiveKindClass, ExclusiveKindClassFactory } from "./exclusive";
+import { TrapKindClass, TrapKindClassFactory } from "./trap";
 import { UnitKindClassFactory, UnitStatWords, UnitStats } from "./unit";
 import { WallKindClassFactory } from "./wall";
 
@@ -40,10 +41,12 @@ export function systemModuleFactory(...[{ universe, props }]: ModuleFactoryParam
 	}
 
 	const ExclusiveKind: ExclusiveKindClass = ExclusiveKindClassFactory({ Base: universe.Entity.BaseKind });
+	const TrapKind: TrapKindClass = TrapKindClassFactory({ Base: universe.Entity.BaseKind });
 
 	return {
 		kinds: {
 			ExclusiveKind,
+			TrapKind,
 			UnitKind: UnitKindClassFactory({ Base: ExclusiveKind, stats }),
 			WallKind: WallKindClassFactory({ Base: ExclusiveKind })
 		}
