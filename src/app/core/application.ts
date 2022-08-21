@@ -22,6 +22,11 @@ export class Application {
 	public state: CoreState = new CoreState();
 
 	/**
+	 * Static state.
+	 */
+	public static state: CoreState = new CoreState();
+
+	/**
 	 * Universes array.
 	 */
 	private universes: Map<Uuid, CoreUniverseInstanceNonRecursive> = new Map();

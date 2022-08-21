@@ -40,6 +40,7 @@ import {
 	CoreBaseNonRecursiveParameters,
 	CoreBaseNonRecursiveStatic
 } from "../base";
+import { LogLevel } from "../error";
 import { CoreUniverseObjectInitializationParameter } from "./parameters";
 import { CoreUniverseObjectContainerInstance, CoreUniverseObjectContainerStatic } from "./universe-objects-container";
 import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectUniverse } from ".";
@@ -509,10 +510,16 @@ export function generateCoreUniverseObjectMembers<
 
 											// Attach
 											attachHook
-												// TODO: Log error
-												// eslint-disable-next-line @typescript-eslint/no-unused-vars
 												.catch(reason => {
-													// Nothing
+													((this.constructor as CoreBaseClassNonRecursive).universe as ChildUniverse).log({
+														error: new Error(
+															`Attachment of child universe object with ID "${childId}" and UUID "${child[childPathUuidPropertyName]} into object with ID "${id}" and UUID "${this[nameUniverseObjectUuid]}" has failed.`,
+															{
+																cause: reason instanceof Error ? reason : undefined
+															}
+														),
+														level: LogLevel.Warning
+													});
 												})
 												.finally(() => {
 													(this as InstanceWithChild)[nameAttachChildUniverseObjects](child);

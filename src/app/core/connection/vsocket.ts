@@ -11,7 +11,7 @@
 
 import { MessageTypeWord, vSocketMaxQueue, vSocketProcessStackLimit } from "../../common/defaults/connection";
 import { ErroringReturn } from "../../common/error";
-import { LogLevel, processLog } from "../error";
+import { CoreLog, LogLevel } from "../error";
 import { CoreUniverseInstanceNonRecursive } from "../universe";
 import { Envelope, Message } from "./connection";
 
@@ -181,7 +181,7 @@ export class SocketProcessBase {
 		let process: ErroringReturn<SocketProcessBaseProcess> = this.getProcess({ word });
 		if (process.isErrored) {
 			// Process undefined
-			processLog({ level: LogLevel.Warning, ...process });
+			CoreLog.global.log({ level: LogLevel.Warning, ...process });
 		} else if (process.value.stackLength === 0) {
 			if ((await process.value.callback.call(this)) === false) {
 				process.value.stackLength = 1;
@@ -190,7 +190,7 @@ export class SocketProcessBase {
 				this.tock({ word }).then(result => {
 					if (result.isErrored) {
 						// Tock error
-						processLog({ level: LogLevel.Warning, ...result });
+						CoreLog.global.log({ level: LogLevel.Warning, ...result });
 					}
 				});
 			}
@@ -343,7 +343,7 @@ export abstract class VSocket<C extends CoreUniverseInstanceNonRecursive> extend
 		if (this.queue.length < vSocketMaxQueue) {
 			this.queue.push(message);
 		} else {
-			processLog({ error: new Error("Queue limit reached"), level: LogLevel.Warning });
+			CoreLog.global.log({ error: new Error("Queue limit reached"), level: LogLevel.Alert });
 			this.sync();
 		}
 	}

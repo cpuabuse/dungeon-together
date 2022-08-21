@@ -11,6 +11,7 @@ import { UrlPath } from "../../common/url";
 import { Uuid } from "../../common/uuid";
 import { CoreArgIds } from "../../core/arg";
 import { CoreEntityArg, CoreEntityClassFactory } from "../../core/entity";
+import { LogLevel } from "../../core/error";
 import { CoreEntityArgParentIds } from "../../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../../core/universe-object";
 import { ServerBaseClass, ServerBaseConstructorParams } from "../base";
@@ -96,8 +97,13 @@ export function ServerEntityFactory({
 				.then(() => {
 					this.kind.onCreateEntity();
 				})
-				.catch(() => {
-					// TODO: Process error
+				.catch(error => {
+					(this.constructor as typeof ServerEntity).universe.log({
+						error: new Error(`Attach hook of entity with UUID "${this.entityUuid}" produced an error.`, {
+							cause: error instanceof Error ? error : undefined
+						}),
+						level: LogLevel.Warning
+					});
 				});
 		}
 

@@ -19,6 +19,7 @@ import { DeferredPromise } from "../common/async";
 import { defaultModeUuid } from "../common/defaults";
 import { bunnySvgs } from "../common/images";
 import { Uuid } from "../common/uuid";
+import { LogLevel } from "../core/error";
 import { CoreShardArg, ShardPathExtended } from "../core/shard";
 import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
 import UniverseComponent from "../vue/universe.vue";
@@ -50,7 +51,7 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	ClientCell,
 	ClientGrid,
 	ClientShard
->({ options: clientOptions }) {
+>({ logSource: "Client", options: clientOptions }) {
 	/**
 	 * Base class.
 	 */
@@ -249,8 +250,13 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 			[]
 		);
 		defaultShardAttach
-			.catch(() => {
-				// TODO: Process error
+			.catch(error => {
+				this.log({
+					error: new Error(`Failed to attach default shard in universe with UUID "${this.universeUuid}".`, {
+						cause: error instanceof Error ? error : undefined
+					}),
+					level: LogLevel.Warning
+				});
 			})
 			.then(() => {
 				// JavaScript based events

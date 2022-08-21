@@ -44,6 +44,7 @@ import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./bas
 import { CellPathOwn, CoreCellArg, CoreCellClass, CoreCellInstance } from "./cell";
 import { CoreConnection, CoreConnectionConstructorParams } from "./connection";
 import { CoreEntityArg, CoreEntityClass, CoreEntityInstance, EntityPathOwn } from "./entity";
+import { CoreLog, LogLevel } from "./error";
 import { CoreGridArg, CoreGridClass, CoreGridInstance, GridPathOwn } from "./grid";
 import { CoreArgIndexer } from "./indexable";
 import {
@@ -356,12 +357,18 @@ export function CoreUniverseClassFactory<
 	Grid extends CoreGridInstance<BaseParams, Options, Cell> = CoreGridInstance<BaseParams, Options, Cell>,
 	Shard extends CoreShardInstance<BaseParams, Options, Grid> = CoreShardInstance<BaseParams, Options, Grid>
 >({
-	options
+	options,
+	logSource
 }: {
 	/**
 	 * Options.
 	 */
 	options: Options;
+
+	/**
+	 * Log source name.
+	 */
+	logSource: string;
 }) {
 	/**
 	 * Shard path.
@@ -430,6 +437,7 @@ export function CoreUniverseClassFactory<
 	// Interface merging
 	// eslint-disable-next-line no-redeclare
 	abstract class Universe
+		extends CoreLog
 		implements
 			StaticImplements<
 				ToAbstract<CoreUniverseClass<BaseClass, BaseParams, Options, Entity, Cell, Grid, Shard>>,
@@ -538,6 +546,8 @@ export function CoreUniverseClassFactory<
 		 * @param baseParams - Base parameters for default shard
 		 */
 		public constructor({ application, universeUuid }: CoreUniverseRequiredConstructorParameter) {
+			super({ source: logSource, timer: application.state });
+
 			// Universe UUID
 			this.universeUuid = universeUuid;
 
@@ -836,8 +846,13 @@ export function CoreUniverseClassFactory<
 
 			// Attach hook, delayed to replicate behavior of attach for other universe objects, when path is own
 			attachHook
-				.catch(() => {
-					// TODO: Log error
+				.catch(error => {
+					this.log({
+						error: new Error(`Error ocurred during shard attachment in universe with UUID "${this.universeUuid}".`, {
+							cause: error instanceof Error ? error : undefined
+						}),
+						level: LogLevel.Error
+					});
 				})
 				.finally(() => {
 					this.attachShard(shard);

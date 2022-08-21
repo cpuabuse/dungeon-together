@@ -20,7 +20,7 @@ import {
 	ProcessCallback,
 	VSocket
 } from "../core/connection";
-import { LogLevel, processLog } from "../core/error";
+import { LogLevel } from "../core/error";
 import { ServerOptions, serverOptions } from "./options";
 import { ServerUniverse } from "./universe";
 
@@ -92,7 +92,10 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 
 			// Sync command
 			case MessageTypeWord.Sync:
-				processLog({ error: new Error(`Server synchronization started`), level: LogLevel.Info });
+				this.universe.log({
+					level: LogLevel.Informational,
+					message: `Synchronization started`
+				});
 				// Await is inside of the loop, but also the switch
 				// eslint-disable-next-line no-await-in-loop
 				await this.send({
@@ -102,7 +105,10 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 
 			// Continue loop on default
 			default:
-				processLog({ error: new Error(`Unknown message type: "${message.type}"`), level: LogLevel.Info });
+				this.universe.log({
+					level: LogLevel.Informational,
+					message: `Unknown message type: "${message.type}"`
+				});
 		}
 	}
 

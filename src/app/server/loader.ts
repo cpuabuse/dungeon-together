@@ -17,6 +17,7 @@ import { UrlPath } from "../common/url";
 import { MaybeDefined, hasOwnProperty } from "../common/utility-types";
 import { Application } from "../core/application";
 import { CoreArgIds, CoreArgMeta, coreArgMetaGenerate } from "../core/arg";
+import { LogLevel } from "../core/error";
 import { CoreShardArg } from "../core/shard";
 import { RootType, compile } from "../yaml/compile";
 import { YamlOptions, yamlOptions } from "../yaml/options";
@@ -175,8 +176,13 @@ export class ServerLoader<R extends string, T extends ModuleFactoryRecordListCon
 			}
 
 			throw new Error("YAML not found");
-		} catch {
-			// TODO: Process error
+		} catch (error) {
+			universe.log({
+				error: new Error(`Could not load YAML file with ID "${yamlId}".`, {
+					cause: error instanceof Error ? error : undefined
+				}),
+				level: LogLevel.Error
+			});
 			data = ServerLoader.defaultYaml;
 		}
 		const root: RootType = compile({ data });

@@ -11,6 +11,7 @@
 
 import { TypeOf, array as arrayType, record as recordType, string as stringType, type } from "io-ts";
 import { load } from "js-yaml";
+import { CoreLog, LogLevel } from "../core/error";
 import { yamlShardArgType } from "./arg";
 
 /**
@@ -49,7 +50,8 @@ export function compile({
 	if (rootType.is(loadResult)) {
 		return loadResult;
 	}
-	// TODO: Process error
+
+	CoreLog.global.log({ error: new Error(`Failed to compile YAML`), level: LogLevel.Error });
 
 	// Return default
 	return { data: { shards: [] }, kinds: {} };

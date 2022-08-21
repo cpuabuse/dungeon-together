@@ -3,6 +3,8 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+import { CoreTimer } from "./timer";
+
 /**
  * @file File for common core state.
  */
@@ -15,18 +17,4 @@
 /**
  * State for core.
  */
-export class CoreState {
-	/**
-	 * Uptime.
-	 *
-	 * @returns Milliseconds since class creation
-	 */
-	public get upTime(): number {
-		return Date.now() - this.startTime;
-	}
-
-	/**
-	 * Class creation time in milliseconds.
-	 */
-	private readonly startTime: number = Date.now();
-}
+export class CoreState extends CoreTimer {}

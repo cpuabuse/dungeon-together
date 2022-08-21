@@ -36,7 +36,7 @@ export class ServerUniverse extends CoreUniverseClassFactory<
 	ServerCell,
 	ServerGrid,
 	ServerShard
->({ options: serverOptions }) {
+>({ logSource: "Server", options: serverOptions }) {
 	/**
 	 * Base class for server objects.
 	 */

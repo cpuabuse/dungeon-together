@@ -18,7 +18,7 @@ import {
 	ProcessCallback,
 	VSocket
 } from "../core/connection";
-import { LogLevel, processLog } from "../core/error";
+import { LogLevel } from "../core/error";
 import { CoreShardArg } from "../core/shard";
 import { ClientOptions } from "./options";
 import { ClientShard } from "./shard";
@@ -87,7 +87,10 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 
 			// Sync command
 			case MessageTypeWord.Sync:
-				processLog({ error: new Error(`Synchronization started`), level: LogLevel.Info });
+				this.universe.log({
+					level: LogLevel.Informational,
+					message: `Synchronization started`
+				});
 				created = new DeferredPromise();
 				// Await is not performed, as it should not block queue, and it should already be guaranteed to be sequential
 				attachHook = new Promise<void>((resolve, reject) => {
@@ -99,8 +102,12 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 							this.universe.addShard(message.body as CoreShardArg<ClientOptions>, { attachHook, created }, []);
 							created
 								.catch(error => {
-									// TODO: Handle error
-									reject(error);
+									reject(
+										new Error(
+											`"Sync" callback failed trying to add shard in universe with uuid "${this.universe.universeUuid}".`,
+											{ cause: error instanceof Error ? error : undefined }
+										)
+									);
 								})
 								.finally(() => {
 									resolve();
@@ -114,13 +121,16 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 
 			// Update command
 			case MessageTypeWord.Update:
-				processLog({ error: new Error(`Update started`), level: LogLevel.Info });
+				this.universe.log({ level: LogLevel.Informational, message: `Update started` });
 				// TODO: Handle update
 				break;
 
 			// Continue loop on default
 			default:
-				processLog({ error: new Error(`Unknown message type: "${message.type}"`), level: LogLevel.Info });
+				this.universe.log({
+					level: LogLevel.Warning,
+					message: `Unknown message type: "${message.type}"`
+				});
 		}
 	}
 

@@ -19,6 +19,7 @@ import {
 import { MessageTypeWord, MovementWord } from "../common/defaults/connection";
 import { CoreArgIds } from "../core/arg";
 import { Envelope, VSocket } from "../core/connection";
+import { LogLevel } from "../core/error";
 import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
@@ -215,8 +216,11 @@ export function ClientShardFactory({
 						});
 					});
 				})
-				.catch(() => {
-					// TODO: Handle error
+				.catch(error => {
+					(this.constructor as typeof ClientShard).universe.log({
+						error: new Error("Error in attach hook execution", { cause: error instanceof Error ? error : undefined }),
+						level: LogLevel.Alert
+					});
 				});
 			/* eslint-enable no-magic-numbers, no-console, no-alert, @typescript-eslint/no-unused-vars */
 		}

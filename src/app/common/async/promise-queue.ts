@@ -3,6 +3,8 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+import { CoreLog, LogLevel } from "../../core/error";
+
 /**
  * Promise queue.
  *
@@ -31,8 +33,13 @@ export class PromiseQueue {
 		this.promise = new Promise(resolve => {
 			// Will be called immediately, `this.promise` is old promise
 			this.promise
-				.catch(() => {
-					// TODO: Handle error
+				.catch(error => {
+					CoreLog.global.log({
+						error: new Error("Execution of promise in queue produced an error.", {
+							cause: error instanceof Error ? error : undefined
+						}),
+						level: LogLevel.Alert
+					});
 				})
 				.then(() => {
 					callback();
