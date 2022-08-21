@@ -82,6 +82,15 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	 */
 	public readonly cellsIndex: Map<Uuid, ClientCell> = new Map();
 
+	public readonly defaultMode: Mode = {
+		textures: Object.values(bunnySvgs).map(
+			/*
+				Even though the source code can load XML element, `SVGResource` documentation (https://github.com/pixijs/pixijs/blob/fdbdc45b6a95bd47145e3a7267fe2a69a1be4ebb/packages/core/src/textures/resources/SVGResource.ts#L90-L98) states that it accepts Base64 encoded SVG. Which apparently means Base64 data URI, which we will use to adhere to documentation.
+			*/
+			bunny => new Texture(new BaseTexture(new SVGResource(`data:image/svg+xml;base64,${base64Encode(bunny)}`)))
+		)
+	};
+
 	public defaultShard: ClientShard;
 
 	/**
@@ -98,17 +107,7 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	 * Modes.
 	 */
 	public modes: Map<Uuid, Mode> = new Map([
-		[
-			defaultModeUuid,
-			{
-				textures: Object.values(bunnySvgs).map(
-					/*
-						Even though the source code can load XML element, `SVGResource` documentation (https://github.com/pixijs/pixijs/blob/fdbdc45b6a95bd47145e3a7267fe2a69a1be4ebb/packages/core/src/textures/resources/SVGResource.ts#L90-L98) states that it accepts Base64 encoded SVG. Which apparently means Base64 data URI, which we will use to adhere to documentation.
-					*/
-					bunny => new Texture(new BaseTexture(new SVGResource(`data:image/svg+xml;base64,${base64Encode(bunny)}`)))
-				)
-			}
-		],
+		[defaultModeUuid, this.defaultMode],
 		[
 			"treasure",
 			{
@@ -252,7 +251,7 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 		defaultShardAttach
 			.catch(error => {
 				this.log({
-					error: new Error(`Failed to attach default shard in universe with UUID "${this.universeUuid}".`, {
+					error: new Error(`Failed to attach default shard in universe(universeUuid="${this.universeUuid}").`, {
 						cause: error instanceof Error ? error : undefined
 					}),
 					level: LogLevel.Warning
@@ -492,8 +491,13 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	}): Mode {
 		let mode: Mode | undefined = this.modes.get(uuid);
 		if (mode === undefined) {
-			// Default mode is always there
-			return this.modes.get(defaultModeUuid) as Mode;
+			this.log({
+				level: LogLevel.Notice,
+				message: `Mode(modeUuid="${uuid}") was not found in universe(universeUuid="${this.universeUuid}"), and was substituted with default mode.`
+			});
+
+			// Return default mode
+			return this.defaultMode;
 		}
 		return mode;
 	}

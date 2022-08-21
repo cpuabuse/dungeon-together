@@ -129,7 +129,7 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 			default:
 				this.universe.log({
 					level: LogLevel.Warning,
-					message: `Unknown message type: "${message.type}"`
+					message: `Unknown message type(type="${message.type}").`
 				});
 		}
 	}

@@ -99,7 +99,7 @@ export function ServerEntityFactory({
 				})
 				.catch(error => {
 					(this.constructor as typeof ServerEntity).universe.log({
-						error: new Error(`Attach hook of entity with UUID "${this.entityUuid}" produced an error.`, {
+						error: new Error(`Attach hook of entity(entityUuid="${this.entityUuid}") produced an error.`, {
 							cause: error instanceof Error ? error : undefined
 						}),
 						level: LogLevel.Warning

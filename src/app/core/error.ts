@@ -202,7 +202,7 @@ export class CoreLog {
 				[level]: ({ messages }: Parameters<CoreLogger>[0]) => {
 					(this.constructor as typeof CoreLog).logger[method](
 						`[${transformer(LogLevel[level])}]`,
-						`[${this.timer.upTime}ms]`,
+						`[${this.timer.upTimeMsWithDelta}]`,
 						`[${this.source}]`,
 						// Spread of `any`
 						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -248,7 +248,7 @@ export class CoreLog {
 		if (!(this.constructor as typeof CoreLog).global) {
 			Object.values(this.loggers).forEach((logger, level) => {
 				logger({
-					messages: [`Testing logging for "${LogLevel[level]}" level...`]
+					messages: [`Testing logging for level(level=${LogLevel[level]})...`]
 				});
 			});
 		}
@@ -266,6 +266,13 @@ export class CoreLog {
 	 *
 	 * - Using `debug`, `info`, `error` and `warn` provided by library. `trace` is not used, as it does not represent severity
 	 * - When universe is not properly initialized or `this` is not bound, should still produce global errors, but it is preferred for this class to be part of universe still
+	 *
+	 * @example - Format for variables in messages and errors
+	 * ```typescript
+	 * if (item.name != "sample") {
+	 * 	coreLog.log({ message: `Item(id="${item.id}", name="${item.name}") name was not "sample".`, level: LogLevel.Informational });
+	 * }
+	 * ```
 	 *
 	 * @param arg - Error or errors and log level
 	 */

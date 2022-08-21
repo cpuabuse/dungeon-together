@@ -848,9 +848,12 @@ export function CoreUniverseClassFactory<
 			attachHook
 				.catch(error => {
 					this.log({
-						error: new Error(`Error ocurred during shard attachment in universe with UUID "${this.universeUuid}".`, {
-							cause: error instanceof Error ? error : undefined
-						}),
+						error: new Error(
+							`Error ocurred during shard attachment in universe(universeUuid="${this.universeUuid}").`,
+							{
+								cause: error instanceof Error ? error : undefined
+							}
+						),
 						level: LogLevel.Error
 					});
 				})

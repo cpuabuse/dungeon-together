@@ -21,7 +21,7 @@ export class CoreTimer {
 	/**
 	 * Class creation time in milliseconds.
 	 */
-	private readonly startTime: number = Date.now();
+	protected readonly startTime: number = Date.now();
 
 	/**
 	 * Uptime.
@@ -30,5 +30,16 @@ export class CoreTimer {
 	 */
 	public get upTime(): number {
 		return Date.now() - this.startTime;
+	}
+
+	/**
+	 * Formatted uptime.
+	 *
+	 * @returns Formatted uptime
+	 */
+	public get upTimeMsWithDelta(): string {
+		let { startTime }: CoreTimer = this;
+		let delta: number = startTime - CoreTimer.global.startTime;
+		return `${(Date.now() - startTime).toString()}${delta < 0 ? "" : "+"}${delta}ms`;
 	}
 }

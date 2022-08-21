@@ -30,6 +30,7 @@ import {
 	VStandaloneSocket,
 	processInitWord
 } from "../app/core/connection";
+import { CoreLog, LogLevel } from "../app/core/error";
 import { queueProcessCallback as serverQueueProcessCallback } from "../app/server/connection";
 import { ServerUniverse } from "../app/server/universe";
 
@@ -95,5 +96,5 @@ main();
 // #if _DEBUG_ENABLED
 // For testing
 // eslint-disable-next-line no-console
-console.log("debug");
+CoreLog.global.log({ level: LogLevel.Debug, message: "Debug enabled." });
 // #endif

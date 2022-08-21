@@ -513,7 +513,7 @@ export function generateCoreUniverseObjectMembers<
 												.catch(reason => {
 													((this.constructor as CoreBaseClassNonRecursive).universe as ChildUniverse).log({
 														error: new Error(
-															`Attachment of child universe object with ID "${childId}" and UUID "${child[childPathUuidPropertyName]} into object with ID "${id}" and UUID "${this[nameUniverseObjectUuid]}" has failed.`,
+															`Attachment of child universe object(id="${childId}", ${childPathUuidPropertyName}="${child[childPathUuidPropertyName]}") into object(id="${id}", ${nameUniverseObjectUuid}="${this[nameUniverseObjectUuid]}") has failed.`,
 															{
 																cause: reason instanceof Error ? reason : undefined
 															}

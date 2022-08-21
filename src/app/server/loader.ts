@@ -178,7 +178,7 @@ export class ServerLoader<R extends string, T extends ModuleFactoryRecordListCon
 			throw new Error("YAML not found");
 		} catch (error) {
 			universe.log({
-				error: new Error(`Could not load YAML file with ID "${yamlId}".`, {
+				error: new Error(`Could not load YAML file with ID(yamlId="${yamlId}").`, {
 					cause: error instanceof Error ? error : undefined
 				}),
 				level: LogLevel.Error
