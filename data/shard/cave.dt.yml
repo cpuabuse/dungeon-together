@@ -2533,6 +2533,7 @@ data:
               entities:
                 - kind: floor
                 - kind: player
+                  id: player
             - x: 2
               y: 2
               z: 2

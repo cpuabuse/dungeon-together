@@ -70,6 +70,8 @@ export const initProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = asy
 export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = async function () {
 	// Message reading loop
 	let counter: number = 0;
+	let results: Array<Promise<void>> = new Array<Promise<void>>();
+
 	while (counter++ < vSocketMaxDequeue) {
 		// Get message
 		const message: Message = this.readQueue();
@@ -121,18 +123,32 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 
 			// Update command
 			case MessageTypeWord.Update:
-				this.universe.log({ level: LogLevel.Informational, message: `Update started` });
-				// TODO: Handle update
+				this.universe.log({ level: LogLevel.Informational, message: `Update started.` });
+				// eslint-disable-next-line no-case-declarations
+				this.universe
+					.getCell({ cellUuid: "default" })
+					.attachEntity(this.universe.getEntity({ entityUuid: "playerUuid" }));
+				break;
+
+			case MessageTypeWord.Movement:
+				results.push(
+					this.send({
+						envelope: new Envelope({ messages: [{ body: message.body, type: MessageTypeWord.Movement }] })
+					})
+				);
 				break;
 
 			// Continue loop on default
 			default:
 				this.universe.log({
 					level: LogLevel.Warning,
-					message: `Unknown message type(type="${message.type}").`
+					// Casting, since if the switch is exhaustive, then type is `never`
+					message: `Unknown message type(type="${message.type as typeof message["type"]}").`
 				});
 		}
 	}
+
+	await Promise.all(results);
 
 	// Return
 	return false;

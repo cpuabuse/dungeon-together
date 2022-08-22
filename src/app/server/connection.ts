@@ -84,6 +84,12 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 		// Get message
 		const message: Message = this.readQueue();
 
+		// #if _DEBUG_ENABLED
+		// For testing
+		// eslint-disable-next-line no-console
+		this.universe.log({ level: LogLevel.Debug, message: `Received message(type="${message.type}").` });
+		// #endif
+
 		// Switch message type
 		switch (message.type) {
 			// Queue is empty
@@ -100,6 +106,14 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 				// eslint-disable-next-line no-await-in-loop
 				await this.send({
 					envelope: new Envelope({ messages: [{ body: shardData, type: MessageTypeWord.Sync }] })
+				});
+				break;
+
+			case MessageTypeWord.Movement:
+				// Await is inside of the loop, but also the switch
+				// eslint-disable-next-line no-await-in-loop
+				await this.send({
+					envelope: new Envelope({ messages: [{ body: message.body, type: MessageTypeWord.Update }] })
 				});
 				break;
 

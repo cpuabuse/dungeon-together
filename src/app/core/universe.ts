@@ -405,7 +405,25 @@ export function CoreUniverseClassFactory<
 	 */
 	// Merging
 	// eslint-disable-next-line @typescript-eslint/no-empty-interface
-	interface Universe extends ComputedClassExtractInstance<typeof membersWithChild, GenerateMembersWithChildParams> {}
+	interface Universe extends ComputedClassExtractInstance<typeof membersWithChild, GenerateMembersWithChildParams> {
+		/**
+		 * Get cell.
+		 *
+		 * @remarks
+		 * Definitively assigned in constructor.
+		 */
+		getCell: (path: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>) => Cell;
+
+		/**
+		 * Get entity.
+		 */
+		getEntity: (path: CoreArgPath<CoreArgIds.Entity, Options, CoreEntityArgParentIds>) => Entity;
+
+		/**
+		 * Get grid.
+		 */
+		getGrid: (path: CoreArgPath<CoreArgIds.Grid, Options, CoreGridArgParentIds>) => Grid;
+	}
 
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const ids = [CoreArgIds.Entity, CoreArgIds.Cell, CoreArgIds.Grid] as const;
@@ -506,18 +524,6 @@ export function CoreUniverseClassFactory<
 		public entities!: Options extends CoreArgOptionsPathOwnUnion
 			? CoreArgIndexer<Entity, CoreArgIds.Entity, Options, CoreEntityArgParentIds>["entities"]
 			: never;
-
-		/**
-		 * Get cell.
-		 *
-		 * @remarks
-		 * Definitively assigned in constructor.
-		 */
-		public getCell!: (path: CoreArgPath<CoreArgIds.Cell, Options, CoreCellArgParentIds>) => Cell;
-
-		public getEntity!: (path: CoreArgPath<CoreArgIds.Entity, Options, CoreEntityArgParentIds>) => Entity;
-
-		public getGrid!: (path: CoreArgPath<CoreArgIds.Grid, Options, CoreGridArgParentIds>) => Grid;
 
 		/**
 		 * Grids.

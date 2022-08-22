@@ -109,49 +109,49 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	public modes: Map<Uuid, Mode> = new Map([
 		[defaultModeUuid, this.defaultMode],
 		[
-			"treasure",
+			"mode/system/default/treasure/default",
 			{
 				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/chest_full_open_anim_f0.png"))]
 			}
 		],
 		[
-			"trap",
+			"mode/system/default/trap/default",
 			{
 				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_spikes_anim_f0.png"))]
 			}
 		],
 		[
-			"door",
+			"mode/system/default/door/default",
 			{
 				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/doors_leaf_closed.png"))]
 			}
 		],
 		[
-			"floor",
+			"mode/system/default/floor/default",
 			{
 				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_1.png"))]
 			}
 		],
 		[
-			"wall",
+			"mode/system/default/wall/default",
 			{
 				textures: [new Texture(new BaseTexture("img/rltiles/dc-dngn/wall/brick_brown2.bmp"))]
 			}
 		],
 		[
-			"enemy",
+			"mode/system/default/enemy/default",
 			{
 				textures: [new Texture(new BaseTexture("img/rltiles/dc-mon64/balrug.bmp"))]
 			}
 		],
 		[
-			"player",
+			"mode/system/default/player/default",
 			{
 				textures: [new Texture(new BaseTexture("img/rltiles/player/base/human_m.bmp"))]
 			}
 		],
 		[
-			"ladder",
+			"mode/system/default/ladder/default",
 			{
 				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_ladder.png"))]
 			}
@@ -289,7 +289,7 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 				});
 				// Keyboard events
 				// Prepare mousetrap instance
-				let mousetrap: Mousetrap.MousetrapInstance = new Mousetrap(element);
+				let mousetrap: Mousetrap.MousetrapInstance = new Mousetrap();
 				// We don't care about return
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 				mousetrap.bind("up", () => {
