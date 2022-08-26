@@ -109,49 +109,49 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	public modes: Map<Uuid, Mode> = new Map([
 		[defaultModeUuid, this.defaultMode],
 		[
-			"mode/system/default/treasure/default",
+			"mode/user/treasure/default",
 			{
 				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/chest_full_open_anim_f0.png"))]
 			}
 		],
 		[
-			"mode/system/default/trap/default",
+			"mode/user/trap/default",
 			{
 				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_spikes_anim_f0.png"))]
 			}
 		],
 		[
-			"mode/system/default/door/default",
+			"mode/user/door/default",
 			{
 				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/doors_leaf_closed.png"))]
 			}
 		],
 		[
-			"mode/system/default/floor/default",
+			"mode/user/floor/default",
 			{
 				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_1.png"))]
 			}
 		],
 		[
-			"mode/system/default/wall/default",
+			"mode/user/wall/default",
 			{
 				textures: [new Texture(new BaseTexture("img/rltiles/dc-dngn/wall/brick_brown2.bmp"))]
 			}
 		],
 		[
-			"mode/system/default/enemy/default",
+			"mode/user/enemy/default",
 			{
 				textures: [new Texture(new BaseTexture("img/rltiles/dc-mon64/balrug.bmp"))]
 			}
 		],
 		[
-			"mode/system/default/player/default",
+			"mode/user/player/default",
 			{
 				textures: [new Texture(new BaseTexture("img/rltiles/player/base/human_m.bmp"))]
 			}
 		],
 		[
-			"mode/system/default/ladder/default",
+			"mode/user/ladder/default",
 			{
 				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_ladder.png"))]
 			}

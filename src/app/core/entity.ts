@@ -350,6 +350,7 @@ export function CoreEntityClassFactory<
 						Entity.universe.constructor as CoreUniverseClass<BaseClass, BaseParams, Options>
 					).convertIndexObject({
 						name: CoreArgIndexIds.Kind,
+						namespace: `user`,
 						obj: entity as SourceEntityKind,
 						sourceOptions: sourceOptions as SourceOptionsWithKind,
 						targetOptions
@@ -369,6 +370,7 @@ export function CoreEntityClassFactory<
 			}
 
 			// Assign mode
+			// When source's mode is undefined, `convertIndexObject` will use "default" as mode value instead
 			targetEntityMode = Universe.convertIndexObject({
 				name: CoreArgIndexIds.Mode,
 				// TODO: Use path class
@@ -381,7 +383,7 @@ export function CoreEntityClassFactory<
 									obj: targetEntityKind as CoreArgIndexObject<CoreArgIndexIds.Kind, T>,
 									options: targetOptions
 							  })
-							: defaultModeUuid
+							: defaultKindUuid
 					}`,
 				obj: entity,
 				sourceOptions,

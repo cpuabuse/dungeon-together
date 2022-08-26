@@ -37,6 +37,7 @@ import { ServerUniverse } from "../app/server/universe";
 // Injection
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
+import { systemModuleFactory } from "../module/system";
 
 /**
  * Entrypoint.
@@ -46,7 +47,7 @@ async function main(): Promise<void> {
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const application = new StandaloneApplication({
 		element: "client-universe",
-		records: [],
+		records: [{ depends: {}, factory: systemModuleFactory, name: "system" }],
 		yamlList: {
 			cave: {
 				path: "/data/shard/cave.dt.yml",

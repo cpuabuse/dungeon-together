@@ -48,7 +48,7 @@ export function systemModuleFactory(...[{ universe, props }]: ModuleFactoryParam
 			ExclusiveKind,
 			TrapKind,
 			UnitKind: UnitKindClassFactory({ Base: ExclusiveKind, stats }),
-			WallKind: WallKindClassFactory({ Base: ExclusiveKind })
+			wall: WallKindClassFactory({ Base: ExclusiveKind })
 		}
 	};
 }

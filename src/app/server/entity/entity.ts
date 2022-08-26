@@ -89,8 +89,24 @@ export function ServerEntityFactory({
 			// Call super constructor
 			super(entity, { attachHook, created }, baseParams);
 
-			// Initialize kind
-			this.kind = new (ServerEntity.kinds.get(this.kindUuid) ?? ServerEntity.DefaultKind)({ entity: this });
+			/**
+			 * Init kind with self executing anonymous function.
+			 */
+			// Infer type as assignment
+			// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+			this.kind = (() => {
+				let Kind: EntityKindClass | undefined = ServerEntity.kinds.get(this.kindUuid);
+				if (!Kind) {
+					Kind = ServerEntity.DefaultKind;
+					// #if _DEBUG_ENABLED
+					(this.constructor as ServerEntityClass).universe.log({
+						level: LogLevel.Debug,
+						message: `Kind(kindUuid="${this.kindUuid}") was not found, and entity(entityUuid=${this.entityUuid}) was created with default kind instead.`
+					});
+					// #endif
+				}
+				return new Kind({ entity: this });
+			})();
 
 			// On attach
 			attachHook
@@ -149,7 +165,12 @@ export function ServerEntityFactory({
 			 */
 			namespace: UrlPath;
 		}): void {
-			this.kinds.set((this.universe.constructor as ServerUniverseClass).convertIdToUuid({ id, namespace }), Kind);
+			let kindUuid: Uuid = (this.universe.constructor as ServerUniverseClass).convertIdToUuid({ id, namespace });
+			this.kinds.set(kindUuid, Kind);
+			this.universe.log({
+				level: LogLevel.Informational,
+				message: `Kind(kindUuid="${kindUuid}") was added.`
+			});
 		}
 	}
 

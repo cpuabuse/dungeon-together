@@ -149,22 +149,55 @@ export function ClientShardFactory({
 			// Add container to renderer
 			this.app.stage.addChild(this.gridContainer);
 
-			// TODO: Remove after change of alert use
-			/* eslint-disable no-magic-numbers, no-console, no-alert, @typescript-eslint/no-unused-vars */
+			/* eslint-disable no-magic-numbers, no-console, @typescript-eslint/no-unused-vars */
 			// After attach
 			attachHook
 				.then(() => {
+					// #if _DEBUG_ENABLED
+					/**
+					 * Type of debug params.
+					 */
+					type InputDebugParam = {
+						/**
+						 * Input symbol.
+						 */
+						symbol: symbol;
+						/**
+						 * Input data.
+						 */
+						input: InputInterface;
+					};
+
+					/**
+					 * Prints some input info.
+					 *
+					 * @param param - Destructured parameter
+					 */
+					let inputDebug: (arg: InputDebugParam) => void = ({ symbol, input }: InputDebugParam) => {
+						(this.constructor as typeof ClientShard).universe.log({
+							level: LogLevel.Debug,
+							message: `Shard received input(description="${symbol.description ?? "No description"}) at location(x="${
+								input.x
+							}", y="${input.y}").`
+						});
+					};
+					// #endif
+
 					// Add canvas to page
 					this.attachShardElement();
 
 					// Add listeners for right-click input
 					this.input.on(rcSymbol, inputInterface => {
-						alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
+						// #if _DEBUG_ENABLED
+						inputDebug({ input: inputInterface as InputInterface, symbol: rcSymbol });
+						// #endif
 					});
 
 					// Add listeners for left-click input
 					this.input.on(lcSymbol, inputInterface => {
-						alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
+						// #if _DEBUG_ENABLED
+						inputDebug({ input: inputInterface as InputInterface, symbol: lcSymbol });
+						// #endif
 					});
 
 					// Add listeners for up input
@@ -185,24 +218,30 @@ export function ClientShardFactory({
 
 					// Add listeners for down input
 					this.input.on(downSymbol, inputInterface => {
-						alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
+						// #if _DEBUG_ENABLED
+						inputDebug({ input: inputInterface as InputInterface, symbol: downSymbol });
+						// #endif
 					});
 
 					// Add listeners for right input
 					this.input.on(rightSymbol, inputInterface => {
-						alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
+						// #if _DEBUG_ENABLED
+						inputDebug({ input: inputInterface as InputInterface, symbol: rightSymbol });
+						// #endif
 					});
 
 					// Add listeners for left input
 					this.input.on(leftSymbol, inputInterface => {
-						alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
+						// #if _DEBUG_ENABLED
+						inputDebug({ input: inputInterface as InputInterface, symbol: leftSymbol });
+						// #endif
 					});
 
 					// Add listeners for scroll input
 					this.input.on(scrollSymbol, inputInterface => {
-						console.log(
-							`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`
-						);
+						// #if _DEBUG_ENABLED
+						inputDebug({ input: inputInterface as InputInterface, symbol: scrollSymbol });
+						// #endif
 
 						// Prototype only
 						this.sceneHeight *= 1 + (inputInterface as InputInterface).y / 1000;

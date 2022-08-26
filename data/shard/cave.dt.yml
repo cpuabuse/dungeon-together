@@ -1,4 +1,7 @@
-kinds: {}
+kinds:
+  wall:
+    module: system
+    name: wall
 data:
   shards:
     - grids:
