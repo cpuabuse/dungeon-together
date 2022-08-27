@@ -14,8 +14,19 @@ import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ServerBaseClass, ServerBaseConstructorParams } from "./base";
 import { ServerConnection } from "./connection";
+import { ServerEntity } from "./entity";
 import { ServerGrid } from "./grid";
 import { ServerOptions, serverOptions } from "./options";
+
+/**
+ * Player data.
+ */
+export type Player = {
+	/**
+	 * Player UUID.
+	 */
+	playerEntity: ServerEntity;
+};
 
 /**
  * Created a Server shard class.
@@ -51,6 +62,11 @@ export function ServerShardFactory({
 		 * Connection to client.
 		 */
 		public connection: Map<Uuid, ServerConnection> = new Map();
+
+		/**
+		 * Player data.
+		 */
+		public players: Set<Player> = new Set();
 
 		// ESLint params bug
 		// eslint-disable-next-line jsdoc/require-param

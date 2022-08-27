@@ -387,6 +387,9 @@ export function CoreCellClassFactory<
 
 			// Assign nav
 			if (options[CoreArgOptionIds.Nav]) {
+				// Set this nav
+				(this as unknown as CellNav).nav = new Map();
+
 				// Nav is optional, so check if it exists
 				(arg as unknown as CellNav).nav?.forEach((v, k) => {
 					(this as unknown as CellNav).nav.set(k, v);

@@ -10,6 +10,7 @@
 import { DeferredPromise } from "../common/async";
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
+import { CellPathOwn } from "../core/cell";
 import {
 	CoreConnection,
 	CoreConnectionConstructorParams,
@@ -18,6 +19,7 @@ import {
 	ProcessCallback,
 	VSocket
 } from "../core/connection";
+import { EntityPathOwn } from "../core/entity";
 import { LogLevel } from "../core/error";
 import { CoreShardArg } from "../core/shard";
 import { ClientOptions } from "./options";
@@ -126,8 +128,8 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 				this.universe.log({ level: LogLevel.Informational, message: `Update started.` });
 				// eslint-disable-next-line no-case-declarations
 				this.universe
-					.getCell({ cellUuid: "default" })
-					.attachEntity(this.universe.getEntity({ entityUuid: "playerUuid" }));
+					.getCell(message.body as CellPathOwn)
+					.attachEntity(this.universe.getEntity(message.body as EntityPathOwn));
 				break;
 
 			case MessageTypeWord.Movement:

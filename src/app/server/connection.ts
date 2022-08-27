@@ -11,7 +11,7 @@ import { ClientOptions, clientOptions } from "../client/options";
 import { appUrl } from "../common/defaults";
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
-import { CoreArgIds, CoreArgMeta, coreArgMetaGenerate } from "../core/arg";
+import { CoreArgIds, CoreArgMeta, Nav, coreArgMetaGenerate } from "../core/arg";
 import {
 	CoreConnection,
 	CoreConnectionConstructorParams,
@@ -113,7 +113,20 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 				// Await is inside of the loop, but also the switch
 				// eslint-disable-next-line no-await-in-loop
 				await this.send({
-					envelope: new Envelope({ messages: [{ body: message.body, type: MessageTypeWord.Update }] })
+					envelope: new Envelope({
+						messages: [
+							{
+								body: {
+									cellUuid: this.universe
+										.getCell(Array.from(Array.from(this.universe.shards)[0][1].players.values())[2].playerEntity)
+										.nav.get(Nav.YUp),
+									entityUuid: Array.from(Array.from(this.universe.shards)[0][1].players.values())[2].playerEntity
+										.entityUuid
+								},
+								type: MessageTypeWord.Update
+							}
+						]
+					})
 				});
 				break;
 

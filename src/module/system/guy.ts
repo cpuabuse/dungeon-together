@@ -9,7 +9,7 @@
  * @file
  */
 
-import { EntityKindConstructorParams } from "../../app/server/entity";
+import { EntityKindConstructorParams, ServerEntityClass } from "../../app/server/entity";
 import { UnitKindClass, UnitStats } from "./unit";
 
 /**
@@ -46,6 +46,11 @@ export function GuyKindClassFactory({
 		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
 			super({ entity, ...rest });
 			this.stats = { ...stats };
+
+			// Register to shard
+			(this.entity.constructor as ServerEntityClass).universe
+				.getShard(this.entity)
+				.players.add({ playerEntity: this.entity });
 		}
 	}
 
