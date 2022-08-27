@@ -2,6 +2,9 @@ kinds:
   wall:
     module: system
     name: wall
+  player:
+    module: system
+    name: guy
 data:
   shards:
     - grids:

@@ -103,6 +103,8 @@ export function UnitKindClassFactory({
 		public strength: number = 1;
 
 		/**
+		 * Public constructor.
+		 *
 		 * @param param - Destructured parameter
 		 */
 		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
@@ -111,3 +113,13 @@ export function UnitKindClassFactory({
 	}
 	return UnitKind;
 }
+
+/**
+ * Unit class.
+ */
+export type UnitKindClass = ReturnType<typeof UnitKindClassFactory>;
+
+/**
+ * Unit kind instance.
+ */
+export type UnitKind = InstanceType<UnitKindClass>;
