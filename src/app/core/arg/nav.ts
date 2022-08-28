@@ -180,7 +180,7 @@ function getDimensionBit({
 	 */
 	shiftAmount: TritCoordinateShiftAmounts;
 }): number {
-	let dimensionBit: number | undefined = vectorCodecInfo[dimensionKey].maskedCoordinateChange.get(shiftAmount);
+	let dimensionBit: number | undefined = vectorCodecInfo[dimensionKey].shift[shiftAmount];
 
 	return dimensionBit === undefined ? CoordinateChanges.Neutral : dimensionBit;
 }

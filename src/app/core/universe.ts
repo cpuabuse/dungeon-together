@@ -939,13 +939,30 @@ export function CoreUniverseClassFactory<
 		}); // UUID property name within a path
 
 		// Important to not be arrow function, to get class context
-		return function (
-			this: CoreArgIndexer<Arg, Id, Options & CoreArgOptionsPathOwn, ParentIds>,
-			path: CoreArgPath<Id, CoreArgOptionsPathOwn, ParentIds>
-		): Arg {
-			let arg: Arg | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
+		return function (this: Universe, path: CoreArgPath<Id, CoreArgOptionsPathOwn, ParentIds>): Arg {
+			let arg: Arg | undefined = // Universe is ID-determined, need casting for generic ID
+				(this as unknown as CoreArgIndexer<Arg, Id, Options & CoreArgOptionsPathOwn, ParentIds>)[
+					nameUniverseObjects
+				].get(path[pathUuidPropertyName]);
 
-			return arg ?? this[nameDefaultUniverseObject];
+			// #if _DEBUG_ENABLED
+			// For testing
+			// eslint-disable-next-line no-console
+			if (!arg) {
+				this.log({
+					level: LogLevel.Debug,
+					message: `Could not find universe object(${pathUuidPropertyName}=${path[pathUuidPropertyName]}).`
+				});
+			}
+			// #endif
+
+			return (
+				arg ??
+				// Universe is ID-determined, need casting for generic ID
+				(this as unknown as CoreArgIndexer<Arg, Id, Options & CoreArgOptionsPathOwn, ParentIds>)[
+					nameDefaultUniverseObject
+				]
+			);
 		};
 	}
 

@@ -3,6 +3,8 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+import { CoreLog, LogLevel } from "../core/error";
+
 /**
  * @file Vectors
  */
@@ -98,12 +100,12 @@ export class VectorArray<T> extends Array<(T | undefined)[][]> implements Vector
 		 */
 		elements: Array<T>;
 	}): void {
-		for (let vector: Vector = defaultVector; vector.x <= this.x; vector.x++) {
-			for (; vector.y <= this.y; vector.y++) {
-				for (; vector.z <= this.z; vector.z++) {
+		for (let { x, y, z }: Vector = defaultVector; x < this.x; x++) {
+			for (; y < this.y; y++) {
+				for (; z < this.z; z++) {
 					this.setElement({
-						element: elements[vector.x * vector.y * vector.z],
-						vector
+						element: elements[x * y * z],
+						vector: { x, y, z }
 					});
 				}
 			}
@@ -116,11 +118,21 @@ export class VectorArray<T> extends Array<(T | undefined)[][]> implements Vector
 	 * @param vector - Vector to retrieve
 	 * @returns Element
 	 */
-	public getElement(vector: Vector): T | undefined {
-		// Z check omitted, as overflow produces undefined
-		if (vector.x <= this.x && vector.y <= this.y) {
-			return this[vector.x][vector.y][vector.z];
+	public getElement({ x, y, z }: Vector): T | undefined {
+		try {
+			// Z check omitted, as overflow produces undefined
+			if (x >= 0 && y >= 0 && x < this.x && y < this.y) {
+				return this[x][y][z];
+			}
+		} catch (error) {
+			CoreLog.global.log({
+				error: new Error(`Vector(x=${x}, y=${y}, z=${z}) out of bounds.`, {
+					cause: error instanceof Error ? error : undefined
+				}),
+				level: LogLevel.Error
+			});
 		}
+
 		return undefined;
 	}
 

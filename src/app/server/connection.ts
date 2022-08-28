@@ -119,7 +119,7 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 								body: {
 									cellUuid: this.universe
 										.getCell(Array.from(Array.from(this.universe.shards)[0][1].players.values())[2].playerEntity)
-										.nav.get(Nav.YUp),
+										.nav.get(Nav.YUp)?.cellUuid,
 									entityUuid: Array.from(Array.from(this.universe.shards)[0][1].players.values())[2].playerEntity
 										.entityUuid
 								},
