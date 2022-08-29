@@ -12,6 +12,7 @@ import { appUrl } from "../common/defaults";
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { CoreArgIds, CoreArgMeta, Nav, coreArgMetaGenerate } from "../core/arg";
+import { CellPathOwn } from "../core/cell";
 import {
 	CoreConnection,
 	CoreConnectionConstructorParams,
@@ -21,7 +22,9 @@ import {
 	VSocket
 } from "../core/connection";
 import { LogLevel } from "../core/error";
+import { ServerCell } from "./cell";
 import { ServerOptions, serverOptions } from "./options";
+import { Player } from "./shard";
 import { ServerUniverse } from "./universe";
 
 /**
@@ -110,6 +113,17 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 				break;
 
 			case MessageTypeWord.Movement:
+				/* eslint-disable no-case-declarations */
+				let { playerEntity }: Player = Array.from(Array.from(this.universe.shards)[0][1].players.values())[2];
+				const { cellUuid }: CellPathOwn =
+					this.universe.getCell(playerEntity).nav.get(Nav.YUp) ?? this.universe.getCell(playerEntity);
+				let targetCell: ServerCell = this.universe
+					.getGrid(playerEntity)
+					.getCell({ cellUuid, gridUuid: playerEntity.gridUuid, shardUuid: playerEntity.shardUuid });
+				/* eslint-enable no-case-declarations */
+
+				playerEntity.kind.moveEntity(targetCell);
+
 				// Await is inside of the loop, but also the switch
 				// eslint-disable-next-line no-await-in-loop
 				await this.send({
@@ -117,11 +131,8 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 						messages: [
 							{
 								body: {
-									cellUuid: this.universe
-										.getCell(Array.from(Array.from(this.universe.shards)[0][1].players.values())[2].playerEntity)
-										.nav.get(Nav.YUp)?.cellUuid,
-									entityUuid: Array.from(Array.from(this.universe.shards)[0][1].players.values())[2].playerEntity
-										.entityUuid
+									cellUuid: targetCell.cellUuid,
+									entityUuid: playerEntity.entityUuid
 								},
 								type: MessageTypeWord.Update
 							}
