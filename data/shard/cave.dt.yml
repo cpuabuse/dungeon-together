@@ -5,6 +5,24 @@ kinds:
   player:
     module: system
     name: guy
+  floor:
+    module: system
+    name: floor
+  trap:
+    module: system
+    name: trap
+  door:
+    module: system
+    name: door
+  ladder:
+    module: system
+    name: ladder
+  treasure:
+    module: system
+    name: treasure
+  enemy:
+    module: system
+    name: monster
 data:
   shards:
     - grids:

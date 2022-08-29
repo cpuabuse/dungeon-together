@@ -10,9 +10,14 @@
  */
 
 import { ModuleFactoryParams } from "../../app/server/module";
+import { DoorKindClassFactory } from "./door";
 import { ExclusiveKindClass, ExclusiveKindClassFactory } from "./exclusive";
+import { FloorKindClassFactory } from "./floor";
 import { GuyKindClassFactory } from "./guy";
+import { LadderKindClassFactory } from "./ladder";
+import { MonsterKindClassFactory } from "./monster";
 import { TrapKindClass, TrapKindClassFactory } from "./trap";
+import { TreasureKindClassFactory } from "./treasure";
 import { UnitKindClass, UnitKindClassFactory, UnitStatWords, UnitStats } from "./unit";
 import { WallKindClassFactory } from "./wall";
 
@@ -50,7 +55,13 @@ export function systemModuleFactory(...[{ universe, props }]: ModuleFactoryParam
 			ExclusiveKind,
 			TrapKind,
 			UnitKind,
+			door: DoorKindClassFactory({ Base: ExclusiveKind }),
+			floor: FloorKindClassFactory({ Base: universe.Entity.BaseKind }),
 			guy: GuyKindClassFactory({ Base: UnitKind, stats }),
+			ladder: LadderKindClassFactory({ Base: universe.Entity.BaseKind }),
+			monster: MonsterKindClassFactory({ Base: UnitKind, stats }),
+			trap: TrapKindClassFactory({ Base: universe.Entity.BaseKind }),
+			treasure: TreasureKindClassFactory({ Base: universe.Entity.BaseKind }),
 			wall: WallKindClassFactory({ Base: ExclusiveKind })
 		}
 	};
