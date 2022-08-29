@@ -217,21 +217,57 @@ export function ClientShardFactory({
 					});
 
 					// Add listeners for down input
-					this.input.on(downSymbol, inputInterface => {
+					// Async callback for event emitter
+					// eslint-disable-next-line @typescript-eslint/no-misused-promises
+					this.input.on(downSymbol, async inputInterface => {
+						let envelope: Envelope = new Envelope({
+							messages: [
+								{
+									body: { direction: MovementWord.Down },
+									type: MessageTypeWord.Movement
+								}
+							]
+						});
+						await Promise.all(this.sockets.map(socket => socket.send({ envelope })));
+
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: downSymbol });
 						// #endif
 					});
 
 					// Add listeners for right input
-					this.input.on(rightSymbol, inputInterface => {
+					// Async callback for event emitter
+					// eslint-disable-next-line @typescript-eslint/no-misused-promises
+					this.input.on(rightSymbol, async inputInterface => {
+						let envelope: Envelope = new Envelope({
+							messages: [
+								{
+									body: { direction: MovementWord.Right },
+									type: MessageTypeWord.Movement
+								}
+							]
+						});
+						await Promise.all(this.sockets.map(socket => socket.send({ envelope })));
+
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: rightSymbol });
 						// #endif
 					});
 
 					// Add listeners for left input
-					this.input.on(leftSymbol, inputInterface => {
+					// Async callback for event emitter
+					// eslint-disable-next-line @typescript-eslint/no-misused-promises
+					this.input.on(leftSymbol, async inputInterface => {
+						let envelope: Envelope = new Envelope({
+							messages: [
+								{
+									body: { direction: MovementWord.Left },
+									type: MessageTypeWord.Movement
+								}
+							]
+						});
+						await Promise.all(this.sockets.map(socket => socket.send({ envelope })));
+
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: leftSymbol });
 						// #endif

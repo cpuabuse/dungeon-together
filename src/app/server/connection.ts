@@ -9,7 +9,7 @@
 
 import { ClientOptions, clientOptions } from "../client/options";
 import { appUrl } from "../common/defaults";
-import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
+import { MessageTypeWord, MovementWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { CoreArgIds, CoreArgMeta, Nav, coreArgMetaGenerate } from "../core/arg";
 import { CellPathOwn } from "../core/cell";
@@ -114,9 +114,30 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 
 			case MessageTypeWord.Movement:
 				/* eslint-disable no-case-declarations */
+				let directions: {
+					[K in MovementWord]: Nav;
+				} = {
+					[MovementWord.Up]: Nav.YUp,
+					[MovementWord.Down]: Nav.YDown,
+					[MovementWord.Left]: Nav.Left,
+					[MovementWord.Right]: Nav.Right,
+					[MovementWord.ZUp]: Nav.ZUp,
+					[MovementWord.ZDown]: Nav.ZDown
+				};
 				let { playerEntity }: Player = Array.from(Array.from(this.universe.shards)[0][1].players.values())[2];
 				const { cellUuid }: CellPathOwn =
-					this.universe.getCell(playerEntity).nav.get(Nav.YUp) ?? this.universe.getCell(playerEntity);
+					this.universe.getCell(playerEntity).nav.get(
+						directions[
+							(
+								message.body as {
+									/**
+									 * Directions.
+									 */
+									direction: MovementWord;
+								}
+							).direction
+						]
+					) ?? this.universe.getCell(playerEntity);
 				let targetCell: ServerCell = this.universe
 					.getGrid(playerEntity)
 					.getCell({ cellUuid, gridUuid: playerEntity.gridUuid, shardUuid: playerEntity.shardUuid });
@@ -131,7 +152,7 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 						messages: [
 							{
 								body: {
-									cellUuid: targetCell.cellUuid,
+									cellUuid: playerEntity.cellUuid,
 									entityUuid: playerEntity.entityUuid
 								},
 								type: MessageTypeWord.Update
