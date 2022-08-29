@@ -104,6 +104,15 @@ export function BaseEntityKindClassFactory({
 		}
 
 		/**
+		 * Action.
+		 */
+		// Dummy function
+		// eslint-disable-next-line class-methods-use-this
+		public action(): void {
+			// Do nothing
+		}
+
+		/**
 		 * Actually moves the server entity.
 		 *
 		 * @param cell - Cell
