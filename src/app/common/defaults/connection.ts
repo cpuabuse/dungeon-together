@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -35,7 +35,9 @@ export enum MessageTypeWord {
 	/**
 	 * Update shard in the client, sent from server.
 	 */
-	Update = "update"
+	Update = "update",
+
+	Action = "action"
 }
 
 /**

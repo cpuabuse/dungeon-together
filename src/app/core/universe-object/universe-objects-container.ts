@@ -22,6 +22,7 @@ import {
 	CoreArgObjectWords,
 	CoreArgOptionIds,
 	CoreArgPath,
+	CoreArgPathReduced,
 	CoreArgPathUuidPropertyName,
 	coreArgComplexOptionSymbolIndex,
 	coreArgIdToPathUuidPropertyName,
@@ -53,6 +54,7 @@ export type CoreUniverseObjectContainerInstance<
 > = ComputedClassOmitConditionalEmptyObject<
 	// Includes container
 	CoreArgIndexer<Instance, Id, Options, ParentId | GrandparentIds> &
+		// Argument will be reduced path in implementation
 		CoreArgIndexableReader<Instance, Id, Options, ParentId | GrandparentIds> & {
 			// Necessary to implement where the created child is known, to call attach
 			[K in `add${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: (
@@ -241,7 +243,7 @@ export function generateCoreUniverseObjectContainerMembers<
 					 */
 					[ComputedClassWords.Value](
 						this: ThisInstance,
-						path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
+						path: CoreArgPathReduced<Id, Options, ParentId | GrandparentIds>
 					): Instance {
 						let universeObject: Instance | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
 						return universeObject === undefined ? this[nameDefaultUniverseObject] : universeObject;

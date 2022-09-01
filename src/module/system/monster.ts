@@ -9,7 +9,8 @@
  * @file
  */
 
-import { EntityKindConstructorParams } from "../../app/server/entity";
+import { ActionWords } from "../../app/server/action";
+import { EntityKindConstructorParams, ServerEntity, ServerEntityClass } from "../../app/server/entity";
 import { UnitKindClass, UnitStats } from "./unit";
 
 /**
@@ -46,6 +47,25 @@ export function MonsterKindClassFactory({
 		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
 			super({ entity, ...rest });
 			this.stats = { ...stats };
+		}
+
+		/**
+		 * Action.
+		 *
+		 * @param param - Destructured parameter
+		 */
+		// Dummy function
+		// eslint-disable-next-line class-methods-use-this
+		public action({
+			action
+		}: {
+			/**
+			 * Action name.
+			 */
+			action: ActionWords;
+		}): void {
+			super.action({ action });
+			(this.entity.constructor as ServerEntityClass).universe.getCell(this.entity).removeEntity(this.entity);
 		}
 	}
 

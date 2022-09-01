@@ -12,7 +12,7 @@ import {
 	computedClassInjectPerClass,
 	computedClassInjectPerInstance
 } from "../common/computed-class";
-import { defaultKindUuid, defaultModeUuid } from "../common/defaults";
+import { defaultKindUuid } from "../common/defaults";
 import { separator } from "../common/url";
 import { StaticImplements, ToAbstract } from "../common/utility-types";
 import { Uuid } from "../common/uuid";

@@ -10,6 +10,7 @@
  */
 
 import { Uuid } from "../../common/uuid";
+import { ActionWords } from "../action";
 import { ServerCell } from "../cell";
 import { ServerEntity, ServerEntityClass } from "./entity";
 
@@ -105,11 +106,20 @@ export function BaseEntityKindClassFactory({
 
 		/**
 		 * Action.
+		 *
+		 * @param param - Destructured parameter
 		 */
 		// Dummy function
 		// eslint-disable-next-line class-methods-use-this
-		public action(): void {
-			// Do nothing
+		public action({
+			action
+		}: {
+			/**
+			 * Action name.
+			 */
+			action: ActionWords;
+		}): void {
+			// Does nothing
 		}
 
 		/**

@@ -22,7 +22,9 @@ import {
 	VSocket
 } from "../core/connection";
 import { LogLevel } from "../core/error";
+import { ActionWords } from "./action";
 import { ServerCell } from "./cell";
+import { ServerEntity } from "./entity";
 import { ServerOptions, serverOptions } from "./options";
 import { Player } from "./shard";
 import { ServerUniverse } from "./universe";
@@ -138,28 +140,53 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 							).direction
 						]
 					) ?? this.universe.getCell(playerEntity);
-				let targetCell: ServerCell = this.universe
-					.getGrid(playerEntity)
-					.getCell({ cellUuid, gridUuid: playerEntity.gridUuid, shardUuid: playerEntity.shardUuid });
+				let targetCell: ServerCell = this.universe.getGrid(playerEntity).getCell({ cellUuid });
+
+				// False negative
+				// eslint-disable-next-line @typescript-eslint/typedef
+				let enemy: ServerEntity | undefined = Array.from(targetCell.entities).filter(([, entity]) => {
+					return entity.kindUuid === "user/enemy";
+				})[0]?.[1];
 				/* eslint-enable no-case-declarations */
 
-				playerEntity.kind.moveEntity(targetCell);
+				if (enemy) {
+					// Await is inside of the loop, but also the switch
+					// eslint-disable-next-line no-await-in-loop
+					await this.send({
+						envelope: new Envelope({
+							messages: [
+								{
+									body: {
+										action: true,
+										entityUuid: enemy.entityUuid
+									},
+									type: MessageTypeWord.Update
+								}
+							]
+						})
+					});
 
-				// Await is inside of the loop, but also the switch
-				// eslint-disable-next-line no-await-in-loop
-				await this.send({
-					envelope: new Envelope({
-						messages: [
-							{
-								body: {
-									cellUuid: playerEntity.cellUuid,
-									entityUuid: playerEntity.entityUuid
-								},
-								type: MessageTypeWord.Update
-							}
-						]
-					})
-				});
+					// Terminating last so that uuid still exists
+					enemy.kind.action({ action: ActionWords.Attack });
+				} else {
+					playerEntity.kind.moveEntity(targetCell);
+
+					// Await is inside of the loop, but also the switch
+					// eslint-disable-next-line no-await-in-loop
+					await this.send({
+						envelope: new Envelope({
+							messages: [
+								{
+									body: {
+										cellUuid: playerEntity.cellUuid,
+										entityUuid: playerEntity.entityUuid
+									},
+									type: MessageTypeWord.Update
+								}
+							]
+						})
+					});
+				}
 				break;
 
 			// Continue loop on default

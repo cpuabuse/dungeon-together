@@ -8,7 +8,7 @@
  */
 
 import { DeferredPromise } from "../common/async";
-import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
+import { MessageTypeWord, MovementWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { CellPathOwn } from "../core/cell";
 import {
@@ -126,10 +126,23 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 			// Update command
 			case MessageTypeWord.Update:
 				this.universe.log({ level: LogLevel.Informational, message: `Update started.` });
-				// eslint-disable-next-line no-case-declarations
-				this.universe
-					.getCell(message.body as CellPathOwn)
-					.attachEntity(this.universe.getEntity(message.body as EntityPathOwn));
+
+				if (
+					(
+						message.body as {
+							/**
+							 * Action.
+							 */
+							action?: boolean;
+						}
+					).action
+				) {
+					this.universe.getEntity(message.body as EntityPathOwn).terminateEntity();
+				} else {
+					this.universe
+						.getCell(message.body as CellPathOwn)
+						.attachEntity(this.universe.getEntity(message.body as EntityPathOwn));
+				}
 				break;
 
 			case MessageTypeWord.Movement:
