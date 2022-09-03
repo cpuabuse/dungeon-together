@@ -18,7 +18,7 @@ import { LadderKindClassFactory } from "./ladder";
 import { MonsterKindClassFactory } from "./monster";
 import { TrapKindClass, TrapKindClassFactory } from "./trap";
 import { TreasureKindClassFactory } from "./treasure";
-import { UnitKindClass, UnitKindClassFactory, UnitStatWords, UnitStats } from "./unit";
+import { UnitKindClass, UnitKindClassFactory, UnitStatWords, UnitStats, defaultStats } from "./unit";
 import { WallKindClassFactory } from "./wall";
 
 // Destructured bug
@@ -32,9 +32,7 @@ import { WallKindClassFactory } from "./wall";
 // Force inference; Destructured type ESLint bug
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/typedef
 export function systemModuleFactory(...[{ universe, props }]: ModuleFactoryParams) {
-	let stats: UnitStats = Object.values(UnitStatWords).reduce((result, value) => {
-		return { ...result, [value]: 0 };
-	}, {} as UnitStats);
+	let stats: UnitStats = defaultStats;
 
 	// Set props
 	if (props) {

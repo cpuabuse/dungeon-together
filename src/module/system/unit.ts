@@ -32,6 +32,77 @@ export type UnitStats = {
 };
 
 /**
+ * Words for unit attributes.
+ */
+enum UnitAttributeWords {
+	Damage = "attack",
+	Rate = "rate",
+	Power = "power"
+}
+
+/**
+ * Roles attributes take.
+ */
+enum UnitAttributeRoleWords {
+	Attack = "attack",
+	Defense = "defense"
+}
+
+/**
+ * Words for damage types.
+ */
+enum UnitAttributeTypeWords {
+	Physical = "physical",
+	Magical = "magical",
+	Ranged = "ranged",
+	Healing = "healing"
+}
+
+/**
+ * Unique unit attributes.
+ */
+enum UnitUniqueAttributeWords {
+	Health = "health",
+	Mana = "mana",
+	Stamina = "stamina"
+}
+
+/**
+ * Unit attributes.
+ */
+export type UnitAttributes = {
+	[Attribute in UnitUniqueAttributeWords]: number;
+} & {
+	[AttributeType in UnitAttributeTypeWords]: {
+		[Role in UnitAttributeRoleWords]: {
+			[Attribute in UnitAttributeWords]: number;
+		};
+	};
+};
+
+/**
+ * Unit level information.
+ */
+type UnitLevel = {
+	/**
+	 * Level.
+	 */
+	level: number;
+
+	/**
+	 * Total experience.
+	 */
+	experience: number;
+};
+
+/**
+ * Default stats.
+ */
+export const defaultStats: UnitStats = Object.values(UnitStatWords).reduce((result, value) => {
+	return { ...result, [value]: 0 };
+}, {} as UnitStats);
+
+/**
  * Unit entity kind.
  *
  * @param param - Destructured parameter
@@ -56,7 +127,7 @@ export function UnitKindClassFactory({
 	/**
 	 * Unit entity kind class.
 	 */
-	class UnitKind extends Base {
+	class UnitKind extends Base implements UnitLevel {
 		/**
 		 * Attack.
 		 */
@@ -73,14 +144,24 @@ export function UnitKindClassFactory({
 		public defense: number = 0;
 
 		/**
+		 * Experience.
+		 * If set from YAML should be reverse calculated from level.
+		 */
+		public experience: number = 0;
+
+		/**
 		 * HP.
 		 */
 		public healthPoints: number = 1;
 
 		/**
 		 * LVL.
+		 *
+		 * @returns Level
 		 */
-		public level: number = 1;
+		public get level(): number {
+			return 1 + this.experience;
+		}
 
 		/**
 		 * MP.
@@ -93,9 +174,16 @@ export function UnitKindClassFactory({
 		public speed: number = 1;
 
 		/**
-		 * Props for unit.
+		 * Factory stats increment.
 		 */
-		public stats: UnitStats = { ...stats };
+		public static stats: UnitStats = { ...stats };
+
+		/**
+		 * Unit specific stats bonuses.
+		 * To be affected by things like equipment.
+		 * Initialized to 0 at first.
+		 */
+		public stats: UnitStats = { ...defaultStats };
 
 		/**
 		 * Strength.

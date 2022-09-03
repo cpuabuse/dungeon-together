@@ -7,6 +7,7 @@
  * @file Client connection to server.
  */
 
+import { Howl } from "howler";
 import { DeferredPromise } from "../common/async";
 import { MessageTypeWord, MovementWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
@@ -25,6 +26,18 @@ import { CoreShardArg } from "../core/shard";
 import { ClientOptions } from "./options";
 import { ClientShard } from "./shard";
 import { ClientUniverse } from "./universe";
+
+// Sound
+/**
+ * Monster death.
+ */
+let splat: Howl = new Howl({
+	html5: true,
+	sprite: {
+		default: [30, 1000]
+	},
+	src: ["sound/effects/splattt-6295.mp3"]
+});
 
 /**
  * Client connection.
@@ -137,6 +150,7 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 						}
 					).action
 				) {
+					splat.play("default");
 					this.universe.getEntity(message.body as EntityPathOwn).terminateEntity();
 				} else {
 					this.universe

@@ -10,12 +10,14 @@
 import vueHljs from "@highlightjs/vue-plugin";
 import Hammer from "hammerjs";
 import type HammerManager from "hammerjs";
+import { Howl, Howler } from "howler";
 import { encode as base64Encode } from "js-base64";
 import Mousetrap from "mousetrap";
 import { BaseTexture, SVGResource, Texture } from "pixi.js";
 import { App, createApp } from "vue";
 import { createStore } from "vuex";
 import { DeferredPromise } from "../common/async";
+import { millisecondsInSecond } from "../common/const";
 import { defaultModeUuid } from "../common/defaults";
 import { bunnySvgs } from "../common/images";
 import { Uuid } from "../common/uuid";
@@ -258,6 +260,71 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 				});
 			})
 			.then(() => {
+				const fadeTime: number = 5000;
+				const bgVolume: number = 0.1;
+
+				// Mute initially
+				Howler.mute(true);
+
+				// Sound
+				let bgSounds: Array<Howl> = [
+					{ endTime: 106000, src: "sound/lexin-music/cinematic-ambient-piano-118668.mp3", startTime: 0 },
+					{ endTime: 131000, src: "sound/lexin-music/cinematic-documentary-115669.mp3", startTime: 0 },
+					{ endTime: 88000, src: "sound/amaranta-music/light-and-darkness-110414.mp3", startTime: 25000 }
+					// False negative
+					// eslint-disable-next-line @typescript-eslint/typedef
+				].map(({ src, startTime, endTime }, index, array) => {
+					let howl: Howl = new Howl({
+						/**
+						 * Queueing.
+						 */
+						onplay: (): void => {
+							setTimeout(() => {
+								// Start fading this
+								howl.fade(bgVolume, 0, fadeTime);
+
+								// Get next
+								let newIndex: number = index + 1;
+								let newHowl: Howl = bgSounds[newIndex < array.length ? newIndex : 0];
+
+								// Play and fade next
+								newHowl.play("default");
+								newHowl.fade(0, bgVolume, fadeTime);
+								// Negative delay should be OK
+							}, endTime - startTime - fadeTime);
+						},
+						sprite: {
+							// *Should* work fine with negative duration
+							default: [startTime, endTime - startTime]
+						},
+						src,
+						volume: bgVolume
+					});
+
+					// Return
+					return howl;
+				});
+
+				bgSounds[0].play("default");
+
+				// Cannot play if user did not interact with page; It seems that playing, even if muted, actually begins after context is acquired; To avoid cacophony from simultaneous sounds on first user interaction, advanced audiovisual effects queue should depend on core state readiness, which this function should initialize (Similar effect would be achieved by making sound queue dequeue based on sound lifecycle callbacks, but in that case visual effects would have to be tied to sounds, but it is better for both to be controlled by an independent queue)
+				if (Howler.ctx.state === "running") {
+					Howler.mute(false);
+				} else {
+					/**
+					 * Plays the sound.
+					 */
+					// eslint-disable-next-line no-inner-declarations
+					let playSound: () => void = () => {
+						if (Howler.ctx.state === "running") {
+							Howler.mute(false);
+							Howler.ctx.removeEventListener("statechange", playSound);
+						}
+					};
+
+					Howler.ctx.addEventListener("statechange", playSound);
+				}
+
 				// JavaScript based events
 				element.addEventListener("contextmenu", event => {
 					// Stops showing default context menu

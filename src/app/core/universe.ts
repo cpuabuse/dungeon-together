@@ -311,7 +311,7 @@ export type CoreUniverseClass<
 	convertIndexObjectToPath<Property extends CoreArgIndexIds, O extends CoreArgOptionsUnion>({
 		obj,
 		name,
-		options: opts
+		options
 	}: {
 		/**
 		 * Object.

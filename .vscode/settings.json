@@ -38,7 +38,7 @@
 	"typescript.tsdk": "node_modules/typescript/lib",
 	"liveServer.settings.NoBrowser": true,
 	"liveServer.settings.port": 5500,
-	"liveServer.settings.ignoreFiles": ["build/**"],
+	"liveServer.settings.ignoreFiles": ["**"],
 	"vscode-edge-devtools.timeout": 100000,
 	"[typescript]": {
 		// Overrides prettier extensions, so that it does not auto-format conditional compilation directives
