@@ -105,7 +105,7 @@ export function defineOptions({
 
 			// To bundle vue correctly
 			alias({
-				entries: { vue: `./node_modules/vue/dist/vue.esm-browser.js` }
+				entries: { vue: join(...rootDir, `./node_modules/vue/dist/vue.esm-browser.js`) }
 			}),
 
 			// To resolve some libraries correctly
