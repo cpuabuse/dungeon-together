@@ -7,6 +7,8 @@ permissions:
   pages: write
   id-token: write
 
+concurrency: ${{ github.ref }}
+
 jobs:
   deploy:
     environment:
