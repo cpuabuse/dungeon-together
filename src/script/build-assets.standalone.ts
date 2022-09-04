@@ -11,6 +11,8 @@
 
 // Build script
 /* eslint-disable import/no-extraneous-dependencies */
+import { writeFile } from "fs";
+import jimp from "jimp";
 import mkdirp from "mkdirp";
 import ncp from "ncp";
 /* eslint-enable import/no-extraneous-dependencies */
@@ -34,6 +36,13 @@ const soundPath: string = "sound";
  * Relative sound path.
  */
 const imagePath: string = "img";
+
+/**
+ * Color to replace.
+ */
+// Infer and declare
+// eslint-disable-next-line @typescript-eslint/typedef, no-magic-numbers
+const replaceColor = [0x47, 0x6c, 0x6c] as const;
 
 /**
  * Entrypoint.
@@ -79,10 +88,7 @@ async function main(): Promise<void> {
 			"dungeontileset-ii/floor_spikes_anim_f0.png",
 			"dungeontileset-ii/doors_leaf_closed.png",
 			"dungeontileset-ii/floor_1.png",
-			"dungeontileset-ii/floor_ladder.png",
-			"rltiles/dc-dngn/wall/brick_brown2.bmp",
-			"rltiles/dc-mon64/balrug.bmp",
-			"rltiles/player/base/human_m.bmp"
+			"dungeontileset-ii/floor_ladder.png"
 		].map(
 			file =>
 				new Promise<void>((resolve, reject) => {
@@ -93,6 +99,44 @@ async function main(): Promise<void> {
 							resolve();
 						}
 					});
+				})
+		)
+	);
+
+	await Promise.all(
+		["rltiles/dc-dngn/wall/brick_brown2", "rltiles/dc-mon64/balrug", "rltiles/player/base/human_m"].map(
+			file =>
+				new Promise<void>((resolve, reject) => {
+					jimp
+						.read(`${assetPath}/${imagePath}/${file}.bmp`)
+						.then(image => {
+							// False positive
+							// eslint-disable-next-line @typescript-eslint/typedef
+							image.scan(0, 0, image.bitmap.width, image.bitmap.height, function (x, y, idx) {
+								if (replaceColor.every((color, cIndex) => color === this.bitmap.data[idx + cIndex])) {
+									this.bitmap.data[replaceColor.length] = 0x00;
+								}
+							});
+
+							// False positive
+							// eslint-disable-next-line @typescript-eslint/typedef
+							image.getBuffer(jimp.MIME_PNG, function (bufferErr, outputBuffer) {
+								if (bufferErr) {
+									reject(bufferErr);
+								} else {
+									writeFile(`${compiledAssetPath}/${imagePath}/${file}.png`, outputBuffer, err => {
+										if (err) {
+											reject(err);
+										} else {
+											resolve();
+										}
+									});
+								}
+							});
+						})
+						.catch(err => {
+							reject(err);
+						});
 				})
 		)
 	);

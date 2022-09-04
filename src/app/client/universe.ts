@@ -139,19 +139,19 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 		[
 			"mode/user/wall/default",
 			{
-				textures: [new Texture(new BaseTexture("img/rltiles/dc-dngn/wall/brick_brown2.bmp"))]
+				textures: [new Texture(new BaseTexture("img/rltiles/dc-dngn/wall/brick_brown2.png"))]
 			}
 		],
 		[
 			"mode/user/enemy/default",
 			{
-				textures: [new Texture(new BaseTexture("img/rltiles/dc-mon64/balrug.bmp"))]
+				textures: [new Texture(new BaseTexture("img/rltiles/dc-mon64/balrug.png"))]
 			}
 		],
 		[
 			"mode/user/player/default",
 			{
-				textures: [new Texture(new BaseTexture("img/rltiles/player/base/human_m.bmp"))]
+				textures: [new Texture(new BaseTexture("img/rltiles/player/base/human_m.png"))]
 			}
 		],
 		[
