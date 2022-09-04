@@ -114,7 +114,7 @@ async function main(): Promise<void> {
 							// eslint-disable-next-line @typescript-eslint/typedef
 							image.scan(0, 0, image.bitmap.width, image.bitmap.height, function (x, y, idx) {
 								if (replaceColor.every((color, cIndex) => color === this.bitmap.data[idx + cIndex])) {
-									this.bitmap.data[replaceColor.length] = 0x00;
+									this.bitmap.data[idx + replaceColor.length] = 0x00;
 								}
 							});
 
