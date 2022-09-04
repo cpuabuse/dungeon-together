@@ -7,11 +7,36 @@
 		<style>
 			body {
 				margin: 0;
+				height: 100vh;
+				width: 100vw;
+			}
+
+			.client-universe {
+				height: 100%;
+				width: 100%;
+			}
+
+			.client-universe > div:first-child {
+				height: 100%;
+				width: 100%;
+			}
+
+			.client-universe > div:first-child > div {
+				height: 100%;
+				width: 100%;
+
+				/* Pixi's `resizeTo` generate rudimentary overflow. */
+				overflow: hidden;
+			}
+
+			.client-universe > div:last-child {
+				position: fixed;
+				bottom: 0;
 			}
 		</style>
 		<script type="module" src="js/index.js"></script>
 	</head>
 	<body>
-		<div id="client-universe" tabindex="0"></div>
+		<div id="client-universe" class="client-universe" tabindex="0"></div>
 	</body>
 </html>

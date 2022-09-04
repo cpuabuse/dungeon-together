@@ -41,6 +41,17 @@ const imagePath: string = "img";
 async function main(): Promise<void> {
 	await mkdirp(`${compiledAssetPath}/${soundPath}`);
 
+	let data: Promise<void> = new Promise((resolve, reject) => {
+		ncp("data", `${compiledAssetPath}/data`, err => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve();
+			}
+		});
+	});
+	await data;
+
 	await Promise.all(
 		["amaranta-music", "effects", "lexin-music"].map(
 			folder =>

@@ -116,7 +116,9 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 						 * Callback.
 						 */
 						callback: () => {
-							this.universe.addShard(message.body as CoreShardArg<ClientOptions>, { attachHook, created }, []);
+							this.universe.addShard(message.body as CoreShardArg<ClientOptions>, { attachHook, created }, [], {
+								doAppend: true
+							});
 							created
 								.catch(error => {
 									reject(

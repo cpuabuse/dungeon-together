@@ -74,13 +74,7 @@ export function ClientShardFactory({
 		/**
 		 * Pixi application.
 		 */
-		public readonly app: Application = new Application({
-			antialias: true,
-			autoDensity: true,
-			backgroundAlpha: 0,
-			height: 750,
-			width: 750
-		});
+		public readonly app: Application;
 
 		/**
 		 * Container for pixi.
@@ -105,7 +99,7 @@ export function ClientShardFactory({
 		/**
 		 * Element for shard container.
 		 */
-		public shardElement: HTMLElement | null = null;
+		public shardElement: HTMLElement = document.createElement("div");
 
 		/**
 		 * An array of sockets.
@@ -143,8 +137,12 @@ export function ClientShardFactory({
 			// Call super constructor
 			super(shard, { attachHook, created }, baseParams);
 
-			// Set scene
-			this.setScene();
+			this.app = new Application({
+				antialias: true,
+				autoDensity: true,
+				backgroundAlpha: 0,
+				resizeTo: this.shardElement
+			});
 
 			// Add container to renderer
 			this.app.stage.addChild(this.gridContainer);
@@ -183,8 +181,12 @@ export function ClientShardFactory({
 					};
 					// #endif
 
-					// Add canvas to page
-					this.attachShardElement();
+					// If we are here, we might already be attached, append shard and one-time resize
+					this.shardElement.appendChild(this.app.view);
+					this.app.resize();
+
+					// Set scene for entity show
+					this.setScene();
 
 					// Add listeners for right-click input
 					this.input.on(rcSymbol, inputInterface => {
@@ -324,27 +326,6 @@ export function ClientShardFactory({
 		}): void {
 			if (!this.sockets.includes(socket)) {
 				this.sockets.push(socket);
-			}
-		}
-
-		/**
-		 * Attach to HTML canvas.
-		 * Can only be attached once, and never detached.
-		 *
-		 * @param element - Any HTML element
-		 */
-		public attachShardElement(): void {
-			// Performing once, as pixi library does not allow to detach
-			if (!this.isAttached) {
-				let element: HTMLElement = ClientShard.universeElement;
-				this.isAttached = true;
-				element.addEventListener("resize", () => {
-					this.app.renderer.resize(element.offsetWidth, element.offsetHeight);
-					this.setScene();
-				});
-
-				// Attach to canvas
-				element.appendChild(this.app.view);
 			}
 		}
 

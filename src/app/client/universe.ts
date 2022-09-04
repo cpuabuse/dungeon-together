@@ -17,13 +17,15 @@ import { BaseTexture, SVGResource, Texture } from "pixi.js";
 import { App, createApp } from "vue";
 import { createStore } from "vuex";
 import { DeferredPromise } from "../common/async";
-import { millisecondsInSecond } from "../common/const";
 import { defaultModeUuid } from "../common/defaults";
 import { bunnySvgs } from "../common/images";
 import { Uuid } from "../common/uuid";
+import { CoreArgIds } from "../core/arg";
 import { LogLevel } from "../core/error";
+import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, ShardPathExtended } from "../core/shard";
 import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
+import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import UniverseComponent from "../vue/universe.vue";
 import { ClientBaseClass, ClientBaseConstructorParams, ClientBaseFactory } from "./base";
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
@@ -181,6 +183,11 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	public readonly shardsIndex: Map<Uuid, ClientShard> = new Map();
 
 	/**
+	 * Universe element.
+	 */
+	public readonly universeElement: HTMLElement;
+
+	/**
 	 * Vue.
 	 */
 	public readonly vue: App;
@@ -212,6 +219,8 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 		// Call superclass
 		// TODO: Add universe UUID
 		super(superParams);
+
+		this.universeElement = element;
 
 		// Generate base class
 		this.Base = ClientBaseFactory({ element, universe: this });
@@ -496,6 +505,57 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 			.finally(() => {
 				created.resolve();
 			});
+	}
+
+	// ESLint params bug
+	// eslint-disable-next-line jsdoc/require-param
+	/**
+	 * Adds a shard.
+	 *
+	 * @remarks
+	 * Appends HTML here, since if there is multiple shards, universe might want to control css.
+	 *
+	 * @param param - Destructured parameter
+	 * @override
+	 */
+	public addShard(
+		// ESLint bug - nested args
+		// eslint-disable-next-line @typescript-eslint/typedef
+		...[shard, { attachHook, created }, baseParams, clientShardOptions]: [
+			...args: CoreUniverseObjectConstructorParameters<
+				ClientBaseConstructorParams,
+				CoreShardArg<ClientOptions>,
+				CoreArgIds.Shard,
+				ClientOptions,
+				CoreShardArgParentIds
+			>,
+			clientShardOptions?: {
+				/**
+				 * Append or not.
+				 */
+				doAppend: boolean;
+			}
+		]
+	): ClientShard {
+		attachHook
+			// Append before other attach hook functionality
+			.then(() => {
+				if (clientShardOptions?.doAppend) {
+					let element: HTMLElement = this.universeElement;
+
+					// Attach shard to universe and update dimensions the css changes
+					element.appendChild(clientShard.shardElement);
+				}
+			})
+			.catch(error => {
+				this.log({
+					error: new Error("Could not append element.", { cause: error instanceof Error ? error : undefined }),
+					level: LogLevel.Critical
+				});
+			});
+		let clientShard: ClientShard = super.addShard(shard, { attachHook, created }, baseParams);
+
+		return clientShard;
 	}
 
 	/**
