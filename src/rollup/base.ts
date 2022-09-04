@@ -97,13 +97,13 @@ export function defineOptions({
 				jsx: "vueJsxPragma"
 			}),
 
-			// Inject jsx transpilation dependencies
-			inject({ vueJsxPragma: ["Vue", "h"] }),
+			// Inject jsx transpilation dependencies (`import { h } from "vue"`);
+			inject({ vueJsxPragma: ["vue", "h"] }),
 
 			// To process css files
 			postcss(),
 
-			// To bundle vue correctly
+			// To bundle Vue correctly, so that can use Vue as modules
 			alias({
 				entries: { vue: join(...rootDir, "node_modules", "vue", "dist", "vue.esm-browser.js") }
 			}),
@@ -113,14 +113,14 @@ export function defineOptions({
 			commonjs(),
 
 			/*
-			Polyfill "url", and other modules.
-			Has to come before resolve, to replace the builtin modules, etc.
-			Apparently is combined with globals plugin.
-		*/
+				Polyfill "url", and other modules.
+				Has to come before resolve, to replace the builtin modules, etc.
+				Apparently is combined with globals plugin.
+			*/
 			nodePolyfills(),
 
 			// Compile for browser
-			resolve({ browser: true }),
+			resolve({ browser: true, rootDir: join(...rootDir) }),
 
 			// For debug compilation
 			jscc({
