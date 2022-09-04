@@ -362,25 +362,22 @@ export function ClientShardFactory({
 		 * Set default scene dimensions.
 		 */
 		private setScene(): void {
+			console.log(this.app.screen);
 			// Set defaults
 			let entityHeight: number = utils.isMobile.any ? defaultMobileEntityHeight : defaultEntityHeight;
 			let entityWidth: number = utils.isMobile.any ? defaultMobileEntityWidth : defaultEntityWidth;
 			let aspectRatio: number = entityHeight / entityWidth;
 
 			// Fix height
-			if (entityHeight > 0) {
-				if (this.app.screen.height / entityHeight < defaultMinimumEntityInColumn) {
-					entityHeight = defaultMinimumEntityInColumn;
-					entityWidth = Math.ceil(entityHeight / aspectRatio);
-				}
+			if (this.app.screen.height / entityHeight < defaultMinimumEntityInColumn) {
+				entityHeight = this.app.screen.height / defaultMinimumEntityInColumn;
+				entityWidth = Math.ceil(entityHeight / aspectRatio);
 			}
 
-			// Fix width
-			if (entityWidth > 0) {
-				if (this.app.screen.width / entityWidth < defaultMinimumEntityInRow) {
-					entityWidth = defaultMinimumEntityInRow;
-					entityHeight = Math.ceil(entityWidth * aspectRatio);
-				}
+			// Fix width, if still does not fit based on height
+			if (this.app.screen.width / entityWidth < defaultMinimumEntityInRow) {
+				entityWidth = this.app.screen.width / defaultMinimumEntityInRow;
+				entityHeight = Math.ceil(entityWidth * aspectRatio);
 			}
 
 			// Set actual values
