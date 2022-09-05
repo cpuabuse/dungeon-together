@@ -43,5 +43,6 @@
 	"[typescript]": {
 		// Overrides prettier extensions, so that it does not auto-format conditional compilation directives
 		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
-	}
+	},
+	"typescript.preferences.autoImportFileExcludePatterns": ["node_modules/io-ts", "node_modules/fp-ts"]
 }

@@ -33,11 +33,11 @@ import {
 import { CoreLog, LogLevel } from "../app/core/error";
 import { queueProcessCallback as serverQueueProcessCallback } from "../app/server/connection";
 import { ServerUniverse } from "../app/server/universe";
+import { systemModuleFactory } from "../module/system";
 
 // Injection
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
-import { systemModuleFactory } from "../module/system";
 
 /**
  * Entrypoint.

@@ -508,6 +508,37 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 			});
 	}
 
+	/**
+	 * Adds shard (Client universe level).
+	 *
+	 * @remarks
+	 * Exists to appropriately verbally implement super.
+	 */
+	public addShard(
+		...shardArgs: [
+			...coreParams: CoreUniverseObjectConstructorParameters<
+				ClientBaseConstructorParams,
+				CoreShardArg<ClientOptions>,
+				CoreArgIds.Shard,
+				ClientOptions,
+				CoreShardArgParentIds
+			>,
+			clientParams?: {
+				/**
+				 * Append or not.
+				 */
+				doAppend: boolean;
+			}
+		]
+	): ClientShard;
+
+	/**
+	 * Adds shard (Pass through extra shard parameters).
+	 *
+	 * If this overload doesn't exist, subclass(just for future-proof if there would be one) doesn't pick up that argument depending on `this` is a tuple, when calling superclass, similarly to calling superclass in {@link CoreUniverse.addShard} implementation.
+	 */
+	public addShard(...shardArgs: ConstructorParameters<this["Shard"]>): ClientShard;
+
 	// ESLint params bug
 	// eslint-disable-next-line jsdoc/require-param
 	/**
@@ -522,22 +553,11 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	public addShard(
 		// ESLint bug - nested args
 		// eslint-disable-next-line @typescript-eslint/typedef
-		...[shard, { attachHook, created }, baseParams, clientShardOptions]: [
-			...args: CoreUniverseObjectConstructorParameters<
-				ClientBaseConstructorParams,
-				CoreShardArg<ClientOptions>,
-				CoreArgIds.Shard,
-				ClientOptions,
-				CoreShardArgParentIds
-			>,
-			clientShardOptions?: {
-				/**
-				 * Append or not.
-				 */
-				doAppend: boolean;
-			}
-		]
+		...shardArgs: ConstructorParameters<this["Shard"]>
 	): ClientShard {
+		// False positive
+		// eslint-disable-next-line @typescript-eslint/typedef
+		let [, { attachHook }, , clientShardOptions]: ConstructorParameters<this["Shard"]> = shardArgs;
 		attachHook
 			// Append before other attach hook functionality
 			.then(() => {
@@ -623,7 +643,7 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 					level: LogLevel.Critical
 				});
 			});
-		let clientShard: ClientShard = super.addShard(shard, { attachHook, created }, baseParams);
+		let clientShard: ClientShard = super.addShard(...shardArgs);
 
 		return clientShard;
 	}

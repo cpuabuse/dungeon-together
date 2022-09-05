@@ -824,11 +824,10 @@ export function CoreUniverseClassFactory<
 		}
 
 		/**
-		 * Adds shard.
+		 * Adds shard (Core level).
 		 *
-		 * @param this - Universe
-		 * @param  shardArgs - Arguments for shard constructor
-		 * @returns Resulting shard
+		 * @remarks
+		 * Exists to appropriately verbally implement super.
 		 */
 		public addShard(
 			...shardArgs: CoreUniverseObjectConstructorParameters<
@@ -838,7 +837,31 @@ export function CoreUniverseClassFactory<
 				Options,
 				CoreShardArgParentIds
 			>
-		): Shard {
+		): Shard;
+
+		/**
+		 * Adds shard (Pass through extra shard parameters).
+		 *
+		 * @remarks
+		 * If this overload doesn't exist, subclass doesn't pick up that argument depending on `this` is a tuple, when calling superclass, similarly to calling superclass in {@link CoreUniverse.addShard} implementation.
+		 */
+		public addShard(...shardArgs: ConstructorParameters<this["Shard"]>): Shard;
+
+		/**
+		 * Adds shard.
+		 *
+		 * @remarks
+		 * Has an overload to be able to call shard constructor with extra optional parameters.
+		 *
+		 * Casting is required(this problem is solved for subclasses, but cannot be solved for this class similarly, due it's types coming from dynamically generated classes) when calling superclass with argument depending on `this`, perhaps due to generics(generics might be producing unions) or unions:
+		 * - https://github.com/microsoft/TypeScript/issues/49700
+		 * - https://github.com/microsoft/TypeScript/issues/49802
+		 *
+		 * @param this - Universe
+		 * @param  shardArgs - Arguments for shard constructor
+		 * @returns Resulting shard
+		 */
+		public addShard(...shardArgs: ConstructorParameters<this["Shard"]>): Shard {
 			let shard: Shard;
 			// ESLint buggy for nested destructured params
 			// eslint-disable-next-line @typescript-eslint/typedef
@@ -868,7 +891,15 @@ export function CoreUniverseClassFactory<
 				});
 
 			// Create shard
-			shard = new this.Shard(...shardArgs);
+			shard = new this.Shard(
+				...(shardArgs as CoreUniverseObjectConstructorParameters<
+					BaseParams,
+					CoreShardArg<Options>,
+					CoreArgIds.Shard,
+					Options,
+					CoreShardArgParentIds
+				>)
+			);
 
 			// Return
 			return shard;

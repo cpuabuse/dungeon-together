@@ -126,13 +126,21 @@ export function ClientShardFactory({
 		public constructor(
 			// ESLint bug - nested args
 			// eslint-disable-next-line @typescript-eslint/typedef
-			...[shard, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
-				ClientBaseConstructorParams,
-				CoreShardArg<ClientOptions>,
-				CoreArgIds.Shard,
-				ClientOptions,
-				CoreShardArgParentIds
-			>
+			...[shard, { attachHook, created }, baseParams]: [
+				...coreParams: CoreUniverseObjectConstructorParameters<
+					ClientBaseConstructorParams,
+					CoreShardArg<ClientOptions>,
+					CoreArgIds.Shard,
+					ClientOptions,
+					CoreShardArgParentIds
+				>,
+				clientParams?: {
+					/**
+					 * Append or not.
+					 */
+					doAppend: boolean;
+				}
+			]
 		) {
 			// Call super constructor
 			super(shard, { attachHook, created }, baseParams);
