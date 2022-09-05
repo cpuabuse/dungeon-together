@@ -13,7 +13,8 @@ import type HammerManager from "hammerjs";
 import { Howl, Howler } from "howler";
 import { encode as base64Encode } from "js-base64";
 import Mousetrap from "mousetrap";
-import { BaseTexture, SVGResource, Texture } from "pixi.js";
+import { JoystickManager, create as createJoystick } from "nipplejs";
+import { BaseTexture, SVGResource, Texture, utils } from "pixi.js";
 import { App, createApp } from "vue";
 import { createStore } from "vuex";
 import { DeferredPromise } from "../common/async";
@@ -545,6 +546,75 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 
 					// Attach shard to universe and update dimensions the css changes
 					element.appendChild(clientShard.shardElement);
+
+					// Work with joystick
+					if (utils.isMobile.any) {
+						const moveDelta: number = 250;
+						let joystickElement: HTMLElement = document.createElement("div");
+						joystickElement.classList.add("joystick");
+						clientShard.shardElement.appendChild(joystickElement);
+						let joystickManager: JoystickManager = createJoystick({
+							color: "slateblue",
+							dynamicPage: true,
+							mode: "static",
+							position: {
+								left: "50%",
+								top: "50%"
+							},
+							threshold: 0.7,
+							zone: joystickElement
+						});
+						let intervalId: ReturnType<typeof setInterval> | undefined;
+
+						// Joystick movements
+						joystickManager.on("dir", (event, joystick) => {
+							if (intervalId !== undefined) {
+								clearInterval(intervalId);
+							}
+
+							intervalId = setInterval(() => {
+								this.shards.forEach(clientShard => {
+									// Up movement
+									if (joystick.direction.angle === "up") {
+										clientShard.fireInput(upSymbol, {
+											x: 0,
+											y: 0
+										});
+									}
+
+									// Down movement
+									if (joystick.direction.angle === "down") {
+										clientShard.fireInput(downSymbol, {
+											x: 0,
+											y: 0
+										});
+									}
+
+									// Right movement
+									if (joystick.direction.angle === "right") {
+										clientShard.fireInput(rightSymbol, {
+											x: 0,
+											y: 0
+										});
+									}
+
+									// Left movement
+									if (joystick.direction.angle === "left") {
+										clientShard.fireInput(leftSymbol, {
+											x: 0,
+											y: 0
+										});
+									}
+								});
+							}, moveDelta);
+						});
+
+						joystickManager.on("end", () => {
+							if (intervalId !== undefined) {
+								clearInterval(intervalId);
+							}
+						});
+					}
 				}
 			})
 			.catch(error => {
