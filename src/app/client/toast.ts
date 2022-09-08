@@ -72,20 +72,33 @@ export class ClientToast {
 			(this.shard.constructor as ClientShardClass).universe.getMode({ uuid: modeUuid }).textures
 		);
 
+		/**
+		 * Animate toast.
+		 */
+		function tick(): void {
+			if (sprite.alpha > 0) {
+				sprite.alpha -= 0.005;
+				sprite.y -= 1;
+			}
+		}
+
 		const sceneWidth: number = this.shard.sceneWidth ?? 0;
 		const sceneHeight: number = this.shard.sceneHeight ?? 0;
 
 		// Update entity position, do it before adding to container, to avoid jumps on screen
-		sprite.x = sceneWidth * x;
-		sprite.y = sceneHeight * y;
+		sprite.x = x;
+		sprite.y = y;
 		sprite.height = sceneWidth;
 		sprite.width = sceneHeight;
 
 		this.shard?.gridContainer.addChild(sprite);
 		sprite.play();
 
+		this.shard?.app.ticker.add(tick);
+
 		// Destroy sprite
 		setTimeout(() => {
+			this.shard?.app.ticker.remove(tick);
 			sprite.destroy();
 		}, this.displayTime);
 	}
