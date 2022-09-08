@@ -160,6 +160,12 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 			{
 				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_ladder.png"))]
 			}
+		],
+		[
+			"death",
+			{
+				textures: [new Texture(new BaseTexture("img/rltiles/nh-mon1/w/wraith.png"))]
+			}
 		]
 	]);
 
