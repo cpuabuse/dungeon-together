@@ -3,16 +3,16 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
-import { AnimatedSprite } from "pixi.js";
-import { Uuid } from "../common/uuid";
-import { Vector } from "../common/vector";
-import { ClientShard, ClientShardClass } from "./shard";
-
 /**
  * Toast animation.
  *
  * @file
  */
+
+import { AnimatedSprite } from "pixi.js";
+import { Uuid } from "../common/uuid";
+import { Vector } from "../common/vector";
+import { ClientShard, ClientShardClass } from "./shard";
 
 /**
  * Creates a temporary toast.
@@ -82,23 +82,20 @@ export class ClientToast {
 			}
 		}
 
-		const sceneWidth: number = this.shard.sceneWidth ?? 0;
-		const sceneHeight: number = this.shard.sceneHeight ?? 0;
-
 		// Update entity position, do it before adding to container, to avoid jumps on screen
 		sprite.x = x;
 		sprite.y = y;
-		sprite.height = sceneWidth;
-		sprite.width = sceneHeight;
+		sprite.height = this.shard.sceneWidth;
+		sprite.width = this.shard.sceneHeight;
 
-		this.shard?.gridContainer.addChild(sprite);
+		this.shard.gridContainer.addChild(sprite);
 		sprite.play();
 
-		this.shard?.app.ticker.add(tick);
+		this.shard.app.ticker.add(tick);
 
 		// Destroy sprite
 		setTimeout(() => {
-			this.shard?.app.ticker.remove(tick);
+			this.shard.app.ticker.remove(tick);
 			sprite.destroy();
 		}, this.displayTime);
 	}
