@@ -81,6 +81,7 @@ async function main(): Promise<void> {
 	await mkdirp(`${compiledAssetPath}/${imagePath}/rltiles/dc-dngn/wall`);
 	await mkdirp(`${compiledAssetPath}/${imagePath}/rltiles/dc-mon64`);
 	await mkdirp(`${compiledAssetPath}/${imagePath}/rltiles/player/base`);
+	await mkdirp(`${compiledAssetPath}/${imagePath}/rltiles/nh-mon1/w`);
 
 	await Promise.all(
 		[
@@ -104,7 +105,12 @@ async function main(): Promise<void> {
 	);
 
 	await Promise.all(
-		["rltiles/dc-dngn/wall/brick_brown2", "rltiles/dc-mon64/balrug", "rltiles/player/base/human_m"].map(
+		[
+			"rltiles/dc-dngn/wall/brick_brown2",
+			"rltiles/dc-mon64/balrug",
+			"rltiles/player/base/human_m",
+			"rltiles/nh-mon1/w/wraith"
+		].map(
 			file =>
 				new Promise<void>((resolve, reject) => {
 					jimp
