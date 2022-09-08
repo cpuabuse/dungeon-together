@@ -4,7 +4,11 @@
 */
 
 /**
- * @file Standalone application.
+ * Standalone application.
+ *
+ * @file
+ * @module standalone
+ * @packageDocumentation
  */
 
 import { ClientLoader } from "../client/loader";

@@ -1,0 +1,8 @@
+{
+	"extends": "../tsconfig.json",
+	"include": ["../src/**/*"],
+	"compilerOptions": {
+		/* Bug in Vue - https://github.com/vuejs/core/issues/6554 */
+		"skipLibCheck": true
+	}
+}

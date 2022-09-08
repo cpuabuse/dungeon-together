@@ -32,4 +32,21 @@ Project root
 
 ## Source tree structure
 
-`app` contents to be separated into folders, by software meaning. Each respective folder, would either contain files, or folders for directory imports.
+- `app` - minimum functionality for the app
+	```mermaid
+	flowchart LR
+		common --- core
+		client --- vue
+		server --- yaml
+		core --- client & server --- application
+	```
+	- `application` - standard apps for fast initialization
+	- `client` - client source
+	- `common` - common shared libraries, unrelated to app itself
+	- `server` - server source
+	- `vue` - Vue GUI for client
+	- `yaml` - source to deal with YAML files
+- `main` - entry points for app distributions
+- `module` - modules for app
+- `rollup` - bundling sources
+- `script` - other scripts

@@ -12,7 +12,7 @@
 import { TypeOf, array as arrayType, record as recordType, string as stringType, type } from "io-ts";
 import { load } from "js-yaml";
 import { CoreLog, LogLevel } from "../core/error";
-import { yamlShardArgType } from "./arg";
+import { yamlShardArgType } from ".";
 
 /**
  * Structured root object.
