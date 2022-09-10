@@ -619,12 +619,19 @@ export function generateCoreUniverseObjectMembers<
 										/**
 										 * Get default universe object UUID.
 										 *
+										 * @remarks
+										 * So that there are no identical UUIDs in between multiple universes, has to depend on the universe UUID, which should be unique.
+										 *
 										 * @param this - Type of class
 										 * @param path - Universe object own path
 										 * @returns Default universe object UUID
 										 */
 										value(this: Class, path: CoreArgPath<Id, Options, ParentId | GrandparentIds>): Uuid {
-											return coreArgGenerateDefaultUuid({ id, uuid: path[nameUniverseObjectUuid] });
+											return coreArgGenerateDefaultUuid({
+												id,
+												universeUuid: (this.universe as Universe).universeUuid,
+												uuid: path[nameUniverseObjectUuid]
+											});
 										}
 									}
 								}

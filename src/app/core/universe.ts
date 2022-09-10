@@ -407,6 +407,21 @@ export function CoreUniverseClassFactory<
 	// eslint-disable-next-line @typescript-eslint/no-empty-interface
 	interface Universe extends ComputedClassExtractInstance<typeof membersWithChild, GenerateMembersWithChildParams> {
 		/**
+		 * Attach cell.
+		 */
+		attachCell: Options extends CoreArgOptionsPathOwnUnion ? (cell: Cell) => void : never;
+
+		/**
+		 * Attach entity.
+		 */
+		attachEntity: Options extends CoreArgOptionsPathOwnUnion ? (entity: Entity) => void : never;
+
+		/**
+		 * Attach grid.
+		 */
+		attachGrid: Options extends CoreArgOptionsPathOwnUnion ? (grid: Grid) => void : never;
+
+		/**
 		 * Get cell.
 		 *
 		 * @remarks
@@ -423,6 +438,21 @@ export function CoreUniverseClassFactory<
 		 * Get grid.
 		 */
 		getGrid: (path: CoreArgPath<CoreArgIds.Grid, Options, CoreGridArgParentIds>) => Grid;
+
+		/**
+		 * Detach cell.
+		 */
+		detachCell: Options extends CoreArgOptionsPathOwnUnion ? (path: CellPathOwn) => void : never;
+
+		/**
+		 * Detach entity.
+		 */
+		detachEntity: Options extends CoreArgOptionsPathOwnUnion ? (path: EntityPathOwn) => void : never;
+
+		/**
+		 * Detach grid.
+		 */
+		detachGrid: Options extends CoreArgOptionsPathOwnUnion ? (path: GridPathOwn) => void : never;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/typedef
@@ -477,12 +507,6 @@ export function CoreUniverseClassFactory<
 		 */
 		public application: Application;
 
-		public attachCell!: Options extends CoreArgOptionsPathOwnUnion ? (cell: Cell) => void : never;
-
-		public attachEntity!: Options extends CoreArgOptionsPathOwnUnion ? (entity: Entity) => void : never;
-
-		public attachGrid!: Options extends CoreArgOptionsPathOwnUnion ? (grid: Grid) => void : never;
-
 		/**
 		 * Grids.
 		 *
@@ -508,12 +532,6 @@ export function CoreUniverseClassFactory<
 		 * Default shard.
 		 */
 		public abstract defaultShard: Shard;
-
-		public detachCell!: Options extends CoreArgOptionsPathOwnUnion ? (path: CellPathOwn) => void : never;
-
-		public detachEntity!: Options extends CoreArgOptionsPathOwnUnion ? (path: EntityPathOwn) => void : never;
-
-		public detachGrid!: Options extends CoreArgOptionsPathOwnUnion ? (path: GridPathOwn) => void : never;
 
 		/**
 		 * Grids.
@@ -922,7 +940,12 @@ export function CoreUniverseClassFactory<
 		// To be potentially overridden
 		// eslint-disable-next-line class-methods-use-this
 		public getDefaultShardUuid(): Uuid {
-			return coreArgGenerateDefaultUuid({ id: CoreArgIds.Shard, uuid: this.universeUuid });
+			return coreArgGenerateDefaultUuid({
+				id: CoreArgIds.Shard,
+				universeUuid: this.universeUuid,
+				// For now, default shard uuid is based on universe uuid
+				uuid: this.universeUuid
+			});
 		}
 	}
 

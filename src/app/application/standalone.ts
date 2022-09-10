@@ -13,7 +13,7 @@
 
 import { ClientLoader } from "../client/loader";
 import { MaybeDefined } from "../common/utility-types";
-import { Application } from "../core/application";
+import { Application, applicationNamespace } from "../core/application";
 import { Reader, ServerLoader, YamlEntry } from "../server/loader";
 import { ModuleFactoryRecordListConstraint } from "../server/module";
 
@@ -77,7 +77,7 @@ export class StandaloneApplication<
 			};
 		}
 	>) {
-		super();
+		super({ path: applicationNamespace });
 		this.clientLoader = new ClientLoader({
 			application: this,
 			element: document.getElementById(element) ?? document.body

@@ -86,7 +86,7 @@ export function ClientEntityFactory({
 		this.sprite.destroy();
 
 		// Super terminate
-		(Object.getPrototypeOf(ClientEntity.prototype) as ClientEntity).terminateEntity();
+		(Object.getPrototypeOf(ClientEntity.prototype) as ClientEntity).terminateEntity.call(this);
 	};
 
 	// Return class

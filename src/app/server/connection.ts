@@ -11,6 +11,7 @@ import { ClientOptions, clientOptions } from "../client/options";
 import { appUrl } from "../common/defaults";
 import { MessageTypeWord, MovementWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
+import { ClientUpdate } from "../comms";
 import { CoreArgIds, CoreArgMeta, Nav, coreArgMetaGenerate } from "../core/arg";
 import { CellPathOwn } from "../core/cell";
 import {
@@ -127,6 +128,7 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 					[MovementWord.ZDown]: Nav.ZDown
 				};
 				let { playerEntity }: Player = Array.from(Array.from(this.universe.shards)[0][1].players.values())[2];
+				let currentCell: ServerCell = this.universe.getCell(playerEntity);
 				const { cellUuid }: CellPathOwn =
 					this.universe.getCell(playerEntity).nav.get(
 						directions[
@@ -139,7 +141,7 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 								}
 							).direction
 						]
-					) ?? this.universe.getCell(playerEntity);
+					) ?? currentCell;
 				let targetCell: ServerCell = this.universe.getGrid(playerEntity).getCell({ cellUuid });
 
 				// False negative
@@ -148,45 +150,70 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 					return entity.kindUuid === "user/enemy";
 				})[0]?.[1];
 				/* eslint-enable no-case-declarations */
+				// Quick fix for switch
+				// eslint-disable-next-line no-case-declarations
+				let enemyEvent: ClientUpdate["cells"][number]["events"][number] | undefined;
 
 				if (enemy) {
-					// Await is inside of the loop, but also the switch
-					// eslint-disable-next-line no-await-in-loop
-					await this.send({
-						envelope: new Envelope({
-							messages: [
-								{
-									body: {
-										action: true,
-										entityUuid: enemy.entityUuid
-									},
-									type: MessageTypeWord.Update
-								}
-							]
-						})
-					});
-
-					// Terminating last so that uuid still exists
+					enemyEvent = { name: "death", target: { entityUuid: enemy.entityUuid } };
+					// Terminating first so that uuid doesn't exist anymore
 					enemy.kind.action({ action: ActionWords.Attack });
 				} else {
 					playerEntity.kind.moveEntity(targetCell);
-
-					// Await is inside of the loop, but also the switch
-					// eslint-disable-next-line no-await-in-loop
-					await this.send({
-						envelope: new Envelope({
-							messages: [
-								{
-									body: {
-										cellUuid: playerEntity.cellUuid,
-										entityUuid: playerEntity.entityUuid
-									},
-									type: MessageTypeWord.Update
-								}
-							]
-						})
-					});
 				}
+
+				// Quick fix for switch
+				// eslint-disable-next-line no-case-declarations
+				let messageBody: ClientUpdate = {
+					cells: [
+						// Target cell
+						{
+							cellUuid: targetCell.cellUuid,
+							entities: Array.from(targetCell.entities)
+								// False negative
+								// eslint-disable-next-line @typescript-eslint/typedef
+								.filter(([entityUuid]) => {
+									return entityUuid !== targetCell.defaultEntity.entityUuid;
+								})
+								// False negative
+								// eslint-disable-next-line @typescript-eslint/typedef
+								.map(([entityUuid]) => {
+									return { entityUuid };
+								}),
+							events: enemyEvent ? [enemyEvent] : []
+						},
+
+						// Current cell
+						{
+							cellUuid: currentCell.cellUuid,
+							entities: Array.from(currentCell.entities)
+								// False negative
+								// eslint-disable-next-line @typescript-eslint/typedef
+								.filter(([entityUuid]) => {
+									return entityUuid !== targetCell.defaultEntity.entityUuid;
+								})
+								// False negative
+								// eslint-disable-next-line @typescript-eslint/typedef
+								.map(([entityUuid]) => {
+									return { entityUuid };
+								}),
+							events: []
+						}
+					]
+				};
+
+				// Await is inside of the loop, but also the switch
+				// eslint-disable-next-line no-await-in-loop
+				await this.send({
+					envelope: new Envelope({
+						messages: [
+							{
+								body: messageBody,
+								type: MessageTypeWord.Update
+							}
+						]
+					})
+				});
 				break;
 
 			// Continue loop on default

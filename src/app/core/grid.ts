@@ -320,7 +320,7 @@ export function CoreGridClassFactory<
 			// Create child arg, then attach conditional props
 			let defaultCellArg: CoreCellArg<Options> = {
 				// Ensures getting uuid from subclass
-				cellUuid: Grid.getDefaultCellUuid(this),
+				cellUuid: Grid.getDefaultCellUuid(arg),
 
 				entities: new Map(),
 

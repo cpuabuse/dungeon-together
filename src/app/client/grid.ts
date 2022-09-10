@@ -120,14 +120,7 @@ export function ClientGridClassFactory({
 		// Super first
 		(Object.getPrototypeOf(ClientGrid.prototype) as ClientGrid).attachCell.call(this, cell);
 
-		ClientGrid.universe.universeQueue.addCallback({
-			/**
-			 * Callback.
-			 */
-			callback: () => {
-				this.showCell(cell);
-			}
-		});
+		this.showCell(cell);
 	};
 
 	/**
@@ -148,7 +141,7 @@ export function ClientGridClassFactory({
 		});
 
 		// Super last
-		(Object.getPrototypeOf(ClientGrid.prototype) as ClientGrid).detachCell(path);
+		(Object.getPrototypeOf(ClientGrid.prototype) as ClientGrid).detachCell.call(this, path);
 	};
 
 	// Return the class

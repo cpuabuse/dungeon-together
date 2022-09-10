@@ -415,27 +415,11 @@ export function ClientShardFactory({
 		// Super first
 		(Object.getPrototypeOf(ClientShard.prototype) as ClientShard).attachGrid.call(this, grid);
 
-		// Bind to shard as a separate callback, deferred so matches when children show calls
-		ClientShard.universe.universeQueue.addCallback({
-			/**
-			 * Callback.
-			 */
-			callback: () => {
-				// Defer, to process cell at a time
-				grid.shard = this;
-			}
-		});
+		// Basically show grid
+		grid.shard = this;
 
 		grid.cells.forEach(cell => {
-			ClientShard.universe.universeQueue.addCallback({
-				/**
-				 * Callback.
-				 */
-				callback: () => {
-					// Defer, to process cell at a time
-					grid.showCell(cell);
-				}
-			});
+			grid.showCell(cell);
 		});
 	};
 

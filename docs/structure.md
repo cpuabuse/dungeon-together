@@ -35,14 +35,14 @@ Project root
 - `app` - minimum functionality for the app
 	```mermaid
 	flowchart LR
-		common --- core
 		client --- vue
 		server --- yaml
-		core --- client & server --- application
+		core[common<br>core<br>comms] --- client & server --- application
 	```
 	- `application` - standard apps for fast initialization
 	- `client` - client source
 	- `common` - common shared libraries, unrelated to app itself
+	- `comms` - client↔️server communication types
 	- `server` - server source
 	- `vue` - Vue GUI for client
 	- `yaml` - source to deal with YAML files

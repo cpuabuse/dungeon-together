@@ -8,6 +8,7 @@
  */
 
 import { PromiseQueue } from "../../common/async/promise-queue";
+import { Uuid } from "../../common/uuid";
 import {
 	CoreArg,
 	CoreArgContainer,
@@ -89,4 +90,9 @@ export type CoreUniverseObjectUniverse<
 		 * Queue for universe.
 		 */
 		universeQueue: PromiseQueue;
+
+		/**
+		 * Universe UUID.
+		 */
+		universeUuid: Uuid;
 	};

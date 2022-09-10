@@ -125,14 +125,7 @@ export function ClientCellFactory({
 		(Object.getPrototypeOf(ClientCell.prototype) as ClientCell).attachEntity.call(this, entity);
 
 		// Post-attach (decoration)
-		ClientCell.universe.universeQueue.addCallback({
-			/**
-			 * Callback.
-			 */
-			callback: () => {
-				this.showEntity(entity);
-			}
-		});
+		this.showEntity(entity);
 	};
 
 	/**
@@ -153,7 +146,7 @@ export function ClientCellFactory({
 		});
 
 		// Super last
-		(Object.getPrototypeOf(ClientCell.prototype) as ClientCell).detachEntity(path);
+		(Object.getPrototypeOf(ClientCell.prototype) as ClientCell).detachEntity.call(this, path);
 	};
 
 	// Return the class

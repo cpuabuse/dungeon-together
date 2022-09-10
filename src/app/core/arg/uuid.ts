@@ -9,6 +9,7 @@
  * @file
  */
 
+import { separator } from "../../common/url";
 import { Uuid } from "../../common/uuid";
 import { coreGenerateUuid } from "../uuid";
 import { CoreArgIds } from "./arg";
@@ -22,7 +23,8 @@ import { coreArgObjectWords } from "./words";
  */
 export function coreArgGenerateDefaultUuid<Id extends CoreArgIds>({
 	id,
-	uuid
+	uuid,
+	universeUuid
 }: {
 	/**
 	 * Id.
@@ -33,6 +35,14 @@ export function coreArgGenerateDefaultUuid<Id extends CoreArgIds>({
 	 * UUID.
 	 */
 	uuid: Uuid;
+
+	/**
+	 * Universe UUID.
+	 */
+	universeUuid: Uuid;
 }): Uuid {
-	return coreGenerateUuid({ namespace: coreArgObjectWords[id].pluralLowercaseWord, path: uuid });
+	return coreGenerateUuid({
+		namespace: coreArgObjectWords[id].pluralLowercaseWord,
+		path: `${universeUuid}${separator}${uuid}`
+	});
 }

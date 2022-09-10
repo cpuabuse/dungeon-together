@@ -11,6 +11,7 @@ import { Howl } from "howler";
 import { DeferredPromise } from "../common/async";
 import { MessageTypeWord, MovementWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
+import { ClientUpdate } from "../comms";
 import { CellPathOwn } from "../core/cell";
 import {
 	CoreConnection,
@@ -23,6 +24,7 @@ import {
 import { EntityPathOwn } from "../core/entity";
 import { LogLevel } from "../core/error";
 import { CoreShardArg } from "../core/shard";
+import { ClientCell } from "./cell";
 import { ClientOptions } from "./options";
 import { ClientShard } from "./shard";
 import { ClientUniverse } from "./universe";
@@ -142,23 +144,29 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 			case MessageTypeWord.Update:
 				this.universe.log({ level: LogLevel.Informational, message: `Update started.` });
 
-				if (
-					(
-						message.body as {
-							/**
-							 * Action.
-							 */
-							action?: boolean;
+				(message.body as ClientUpdate).cells.forEach(sourceCell => {
+					let targetCell: ClientCell = this.universe.getCell(sourceCell);
+					let sourceEntityUuidSet: Set<Uuid> = new Set(sourceCell.entities.map(entity => entity.entityUuid));
+
+					// Terminate missing
+					targetCell.entities.forEach(targetEntity => {
+						if (!sourceEntityUuidSet.has(targetEntity.entityUuid)) {
+							if (targetEntity.modeUuid === "mode/user/enemy/default") {
+								splat.play("default");
+								targetCell.removeEntity(targetEntity);
+							} else if (targetEntity.modeUuid === "mode/user/player/default") {
+								targetCell.detachEntity(targetEntity);
+							}
 						}
-					).action
-				) {
-					splat.play("default");
-					this.universe.getEntity(message.body as EntityPathOwn).terminateEntity();
-				} else {
-					this.universe
-						.getCell(message.body as CellPathOwn)
-						.attachEntity(this.universe.getEntity(message.body as EntityPathOwn));
-				}
+					});
+
+					sourceEntityUuidSet.forEach(sourceEntityUuid => {
+						// Reattach present
+						if (!targetCell.entities.has(sourceEntityUuid)) {
+							targetCell.attachEntity(this.universe.getEntity({ entityUuid: sourceEntityUuid }));
+						}
+					});
+				});
 				break;
 
 			case MessageTypeWord.Movement:

@@ -360,7 +360,7 @@ export function CoreCellClassFactory<
 			// Create child arg, then attach conditional props
 			let defaultEntityArg: CoreEntityArg<Options> = {
 				// Ensures getting uuid from subclass
-				entityUuid: Cell.getDefaultEntityUuid(this),
+				entityUuid: Cell.getDefaultEntityUuid(arg),
 
 				// Extended path
 				...(options[CoreArgOptionIds.Path] ===

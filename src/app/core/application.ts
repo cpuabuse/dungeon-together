@@ -7,10 +7,17 @@
  * @file File for application with a shared state.
  */
 
+import { UrlPath, separator } from "../common/url";
 import { Uuid } from "../common/uuid";
 import { CoreState } from "./state";
 import { CoreUniverseClassNonRecursive, CoreUniverseInstanceNonRecursive, universeNamespace } from "./universe";
 import { coreGenerateUuid } from "./uuid";
+
+/**
+ * Unique universe identifier.
+ */
+// eslint-disable-next-line @typescript-eslint/typedef
+export const applicationNamespace = "universe" as const;
 
 /**
  * An application, to be extended.
@@ -27,9 +34,30 @@ export class Application {
 	public static state: CoreState = new CoreState();
 
 	/**
+	 * Application path.
+	 */
+	private path: UrlPath;
+
+	/**
 	 * Universes array.
 	 */
 	private universes: Map<Uuid, CoreUniverseInstanceNonRecursive> = new Map();
+
+	/**
+	 * Constructor.
+	 *
+	 * @param param - Destructured parameter
+	 */
+	public constructor({
+		path
+	}: {
+		/**
+		 * Application path.
+		 */
+		path: UrlPath;
+	}) {
+		this.path = path;
+	}
 
 	/**
 	 * Adds the universe to the application.
@@ -51,7 +79,11 @@ export class Application {
 		 */
 		Universe: CoreUniverseClassNonRecursive<U, R>;
 	}): U {
-		let universeUuid: Uuid = coreGenerateUuid({ namespace: universeNamespace, path: this.universes.size.toString() });
+		let universeUuid: Uuid = coreGenerateUuid({
+			namespace: universeNamespace,
+			// For path - `{{ unique_pool }}/{{ unique_universe }}`
+			path: `${this.path}${separator}$this.universes.size.toString()`
+		});
 		let universe: U = new Universe({ application: this, universeUuid }, ...args);
 		this.universes.set(universeUuid, universe);
 
