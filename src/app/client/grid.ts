@@ -130,15 +130,8 @@ export function ClientGridClassFactory({
 	 * @param path - Cell path
 	 */
 	ClientGrid.prototype.detachCell = function (this: ClientGrid, path: CellPathOwn): void {
-		// Hide queued first, just for semantical order
-		ClientGrid.universe.universeQueue.addCallback({
-			/**
-			 * Callback.
-			 */
-			callback: () => {
-				this.hideCell(path);
-			}
-		});
+		// Hide queued first
+		this.hideCell(path);
 
 		// Super last
 		(Object.getPrototypeOf(ClientGrid.prototype) as ClientGrid).detachCell.call(this, path);

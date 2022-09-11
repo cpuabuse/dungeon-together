@@ -135,15 +135,8 @@ export function ClientCellFactory({
 	 * @param path - Entity path
 	 */
 	ClientCell.prototype.detachEntity = function (this: ClientCell, path: EntityPathOwn): void {
-		// Queued first for semantical order
-		ClientCell.universe.universeQueue.addCallback({
-			/**
-			 * Callback.
-			 */
-			callback: () => {
-				this.hideEntity(path);
-			}
-		});
+		// Hide first
+		this.hideEntity(path);
 
 		// Super last
 		(Object.getPrototypeOf(ClientCell.prototype) as ClientCell).detachEntity.call(this, path);

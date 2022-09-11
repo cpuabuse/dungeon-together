@@ -159,6 +159,11 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 							}
 						}
 					});
+				});
+
+				(message.body as ClientUpdate).cells.forEach(sourceCell => {
+					let targetCell: ClientCell = this.universe.getCell(sourceCell);
+					let sourceEntityUuidSet: Set<Uuid> = new Set(sourceCell.entities.map(entity => entity.entityUuid));
 
 					sourceEntityUuidSet.forEach(sourceEntityUuid => {
 						// Reattach present
