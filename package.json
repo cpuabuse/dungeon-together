@@ -126,6 +126,9 @@
 		"vue-eslint-parser": "^8.3.0"
 	},
 	"dependencies": {
+		"@fortawesome/fontawesome-svg-core": "^6.2.0",
+		"@fortawesome/free-regular-svg-icons": "^6.2.0",
+		"@fortawesome/free-solid-svg-icons": "^6.2.0",
 		"@highlightjs/vue-plugin": "^2.1.0",
 		"@popperjs/core": "^2.11.6",
 		"axios": "^0.26.1",
