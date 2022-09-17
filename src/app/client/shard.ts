@@ -7,7 +7,7 @@
  * @file Displays server information to canvas
  */
 
-import { Application, Container, Matrix, Renderer, utils } from "pixi.js";
+import { Application, Container, Graphics, Matrix, Renderer, utils } from "pixi.js";
 import {
 	defaultEntityHeight,
 	defaultEntityWidth,
@@ -317,6 +317,25 @@ export function ClientShardFactory({
 					});
 				});
 			/* eslint-enable no-magic-numbers, no-console, no-alert, @typescript-eslint/no-unused-vars */
+		}
+
+		/**
+		 * Add health bar.
+		 */
+		private healthBar(): void {
+			// Add background bar
+			let bgBar: Graphics = new Graphics();
+			bgBar.beginFill(0x000000);
+			bgBar.drawPolygon([0, 0, 0, 50, 500, 50, 500, 0]);
+			bgBar.endFill();
+			this.app.stage.addChild(bgBar);
+
+			// Add for ground bar
+			let fgBar: Graphics = new Graphics();
+			fgBar.beginFill(0xff0000);
+			fgBar.drawPolygon([0, 0, 0, 50, 250, 50, 250, 0]);
+			fgBar.endFill();
+			this.app.stage.addChild(fgBar);
 		}
 
 		/**
