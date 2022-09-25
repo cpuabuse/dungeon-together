@@ -1,14 +1,16 @@
 <template>
 	<statealert v-for="(alert, index) in alerts" :key="index" :message="alert.message" :level="alert.level" />
+	<VAlert border type="success">Alert</VAlert>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { AlertLevel } from "../client/gui/severity";
 import stateAlertComponent from "./state-alert.vue";
+import { VAlert } from "vuetify/components";
 
 export default defineComponent({
-	components: { statealert: stateAlertComponent },
+	components: { statealert: stateAlertComponent, VAlert },
 
 	/**
 	 * Data for component.

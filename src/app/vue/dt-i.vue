@@ -58,10 +58,12 @@ export default defineComponent({
 	},
 
 	props: {
-		color: Color,
 		// If label is undefined, attribute is not rendered
 		// eslint-disable-next-line vue/require-default-prop
-		label: String,
+		color: { required: false, type: Color },
+		// If label is undefined, attribute is not rendered
+		// eslint-disable-next-line vue/require-default-prop
+		label: { required: false, type: String },
 		svg: { required: true, type: Object as PropType<SimpleSvg> }
 	}
 });

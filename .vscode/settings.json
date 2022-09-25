@@ -21,7 +21,8 @@
 		"vsocket",
 		"bivariance",
 		"bivariant",
-		"onwarn"
+		"onwarn",
+		"vuetify"
 	],
 	"yaml.schemas": {
 		"./schema/dt.yml.json": ["*.dt.yml"]

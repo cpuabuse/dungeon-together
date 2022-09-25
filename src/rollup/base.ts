@@ -11,18 +11,17 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import { join } from "path";
-import alias from "@rollup/plugin-alias";
 import buble from "@rollup/plugin-buble";
 import commonjs from "@rollup/plugin-commonjs";
 import inject from "@rollup/plugin-inject";
 import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
-import { RollupOptions } from "rollup";
+import vue from "@vitejs/plugin-vue";
+import { Plugin, RollupOptions } from "rollup";
 import jscc from "rollup-plugin-jscc";
 import nodePolyfills from "rollup-plugin-polyfill-node";
-import postcss from "rollup-plugin-postcss";
+import postcss, { PostCSSPluginConf } from "rollup-plugin-postcss";
 import typescript from "rollup-plugin-typescript2";
-import vue from "rollup-plugin-vue";
 
 /**
  * Relative depth of this file, when compiled to JS.
@@ -87,9 +86,7 @@ export function defineOptions({
 		plugins: [
 			// For typescript; "rollup-plugin-typescript2" preferred over official due to https://github.com/rollup/plugins/issues/608
 			typescript({ tsconfig: join(...rootDir, "tsconfig", "stage", "base.json") }),
-
-			// To process vue
-			vue({}),
+			vue({}) as Plugin,
 
 			// Transpile jsx to vue
 			buble({
@@ -101,11 +98,10 @@ export function defineOptions({
 			inject({ vueJsxPragma: ["vue", "h"] }),
 
 			// To process css files
-			postcss(),
-
-			// To bundle Vue correctly, so that can use Vue as modules
-			alias({
-				entries: { vue: join(...rootDir, "node_modules", "vue", "dist", "vue.esm-browser.js") }
+			postcss({
+				// Disables `less` support, as all enabled by default; Adding path so that `node_modules` resolves
+				// Seems `postcss` not typed correctly
+				use: [["sass", { includePaths: [join(...rootDir, "node_modules")] }]] as unknown as PostCSSPluginConf["use"]
 			}),
 
 			// To resolve some libraries correctly
@@ -120,7 +116,10 @@ export function defineOptions({
 			nodePolyfills(),
 
 			// Compile for browser
-			resolve({ browser: true, rootDir: join(...rootDir) }),
+			resolve({
+				browser: true,
+				rootDir: join(...rootDir)
+			}),
 
 			// For debug compilation
 			jscc({

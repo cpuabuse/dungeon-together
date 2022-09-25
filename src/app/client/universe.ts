@@ -7,6 +7,9 @@
  * @file Client universe
  */
 
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { fas } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import vueHljs from "@highlightjs/vue-plugin";
 import Hammer from "hammerjs";
 import type HammerManager from "hammerjs";
@@ -16,6 +19,8 @@ import Mousetrap from "mousetrap";
 import { JoystickManager, create as createJoystick } from "nipplejs";
 import { BaseTexture, SVGResource, Texture, utils } from "pixi.js";
 import { App, createApp } from "vue";
+import { createVuetify } from "vuetify";
+import { aliases, fa } from "vuetify/iconsets/fa-svg";
 import { createStore } from "vuex";
 import { DeferredPromise } from "../common/async";
 import { defaultModeUuid } from "../common/defaults";
@@ -41,6 +46,8 @@ import { ClientShard, ClientShardClass, ClientShardFactory } from "./shard";
 
 // Static init
 import "./gui/static-init";
+// Global css
+import "./style/vuetify.scss";
 
 /**
  * All instances in client.
@@ -240,6 +247,20 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 
 		// Create vue
 		this.vue = createApp(UniverseComponent);
+		this.vue.component("font-awesome-icon", FontAwesomeIcon);
+		library.add(fas);
+		// Take as is to pass through
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const vuetify = createVuetify({
+			icons: {
+				aliases,
+				defaultSet: "fa",
+				sets: {
+					fa
+				}
+			}
+		});
+		this.vue.use(vuetify);
 
 		// Init vue after initialization
 		this.vue.use(createStore<UniverseState>({ state: { theme: Theme.Dark, universe: this } }));
