@@ -7,10 +7,6 @@
  * @file Client universe
  */
 
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { fas } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import vueHljs from "@highlightjs/vue-plugin";
 import Hammer from "hammerjs";
 import type HammerManager from "hammerjs";
 import { Howl, Howler } from "howler";
@@ -18,10 +14,7 @@ import { encode as base64Encode } from "js-base64";
 import Mousetrap from "mousetrap";
 import { JoystickManager, create as createJoystick } from "nipplejs";
 import { BaseTexture, SVGResource, Texture, utils } from "pixi.js";
-import { App, createApp } from "vue";
-import { createVuetify } from "vuetify";
-import { aliases, fa } from "vuetify/iconsets/fa-svg";
-import { createStore } from "vuex";
+import { App } from "vue";
 import { DeferredPromise } from "../common/async";
 import { defaultModeUuid } from "../common/defaults";
 import { bunnySvgs } from "../common/images";
@@ -37,17 +30,12 @@ import { ClientBaseClass, ClientBaseConstructorParams, ClientBaseFactory } from 
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
 import { ClientEntity, ClientEntityClass, ClientEntityFactory } from "./entity";
 import { ClientGrid, ClientGridClass, ClientGridClassFactory } from "./grid";
-import { UniverseState } from "./gui";
+import { createVueApp } from "./gui";
 import { Theme } from "./gui/themes";
 import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, scrollSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
 import { ClientOptions, clientOptions } from "./options";
 import { ClientShard, ClientShardClass, ClientShardFactory } from "./shard";
-
-// Static init
-import "./gui/static-init";
-// Global css
-import "./style/vuetify.scss";
 
 /**
  * All instances in client.
@@ -245,26 +233,7 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 		this.Cell = ClientCellFactory({ Base: this.Base });
 		this.Entity = ClientEntityFactory({ Base: this.Base });
 
-		// Create vue
-		this.vue = createApp(UniverseComponent);
-		this.vue.component("font-awesome-icon", FontAwesomeIcon);
-		library.add(fas);
-		// Take as is to pass through
-		// eslint-disable-next-line @typescript-eslint/typedef
-		const vuetify = createVuetify({
-			icons: {
-				aliases,
-				defaultSet: "fa",
-				sets: {
-					fa
-				}
-			}
-		});
-		this.vue.use(vuetify);
-
-		// Init vue after initialization
-		this.vue.use(createStore<UniverseState>({ state: { theme: Theme.Dark, universe: this } }));
-		this.vue.use(vueHljs);
+		this.vue = createVueApp({ component: UniverseComponent, state: { theme: Theme.Dark, universe: this } });
 
 		// Mount vue
 		let vueElement: HTMLElement = document.createElement("div");

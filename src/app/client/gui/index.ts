@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,10 +7,14 @@
  * @file File for vue definitions
  */
 
-import { Component, defineComponent } from "@vue/runtime-core";
 import { Store } from "vuex";
 import { ClientUniverse } from "../universe";
 import { Theme } from "./themes";
+
+/**
+ * Reexport.
+ */
+export { createVueApp } from "./vue.app";
 
 /**
  * State type for vuex.
