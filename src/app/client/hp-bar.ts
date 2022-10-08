@@ -53,7 +53,7 @@ export const neutralHpBarColors: HpBarColors = {
 /**
  * Enemy HP bar colors.
  */
-export const EnemyHpBarColors: HpBarColors = {
+export const enemyHpBarColors: HpBarColors = {
 	accent: colord("#e80c05"),
 	background: colord("#3d1600"),
 	border: colord("#1a1c03"),

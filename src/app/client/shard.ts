@@ -7,6 +7,7 @@
  * @file Displays server information to canvas
  */
 
+import { RgbaColor } from "colord";
 import { Application, Container, Graphics, Matrix, Renderer, utils } from "pixi.js";
 import {
 	defaultEntityHeight,
@@ -25,6 +26,7 @@ import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientGrid } from "./grid";
+import { HpBarColors, friendlyHpBarColors, hpBarColorWords } from "./hp-bar";
 import {
 	Input,
 	InputInterface,
@@ -163,6 +165,11 @@ export function ClientShardFactory({
 
 			// Initialize toast
 			this.toast = new ClientToast({ displayTime: 3000, shard: this });
+
+			// Call health bar
+			this.healthBar(friendlyHpBarColors);
+
+			// Visualize friendly, neutral and enemy HP bars
 
 			/* eslint-disable no-magic-numbers, no-console, @typescript-eslint/no-unused-vars */
 			// After attach
@@ -321,11 +328,15 @@ export function ClientShardFactory({
 
 		/**
 		 * Add health bar.
+		 *
+		 * @param param
 		 */
-		private healthBar(): void {
+		private healthBar({ accent, background, border, foregroundMain, foregroundSecondary }: HpBarColors): void {
+			let bgRgb: RgbaColor = background.toRgb();
+			let bgRgbInt: number = (bgRgb.r << 0x10) + (bgRgb.g << 0x8) + bgRgb.r;
 			// Add background bar
 			let bgBar: Graphics = new Graphics();
-			bgBar.beginFill(0x000000);
+			bgBar.beginFill(bgRgbInt);
 			bgBar.drawPolygon([0, 0, 0, 50, 500, 50, 500, 0]);
 			bgBar.endFill();
 			this.app.stage.addChild(bgBar);
