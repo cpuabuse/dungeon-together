@@ -3,11 +3,13 @@
 	<tsxtest />
 	<statealertbox />
 	<debug />
+	<CompactToolbar />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { ThisVueStore } from "../client/gui";
+import CompactToolbar from "./compact-toolbar.vue";
 import debugComponent from "./debug.vue";
 import stateAlertBoxComponent from "./state-alert-box.vue";
 import tsxTestComponent from "./tsx/test.vue";
@@ -16,7 +18,12 @@ import tsxTestComponent from "./tsx/test.vue";
  * Root component.
  */
 export default defineComponent({
-	components: { debug: debugComponent, statealertbox: stateAlertBoxComponent, tsxtest: tsxTestComponent },
+	components: {
+		CompactToolbar,
+		debug: debugComponent,
+		statealertbox: stateAlertBoxComponent,
+		tsxtest: tsxTestComponent
+	},
 
 	/**
 	 * Update timer every second.

@@ -86,7 +86,9 @@ export function defineOptions({
 		plugins: [
 			// For typescript; "rollup-plugin-typescript2" preferred over official due to https://github.com/rollup/plugins/issues/608
 			typescript({ tsconfig: join(...rootDir, "tsconfig", "stage", "base.json") }),
-			vue({}) as Plugin,
+
+			// Vue does not like HTML comments
+			vue({ template: { compilerOptions: { comments: false } } }) as Plugin,
 
 			// Transpile jsx to vue
 			buble({

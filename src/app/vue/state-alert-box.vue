@@ -5,12 +5,12 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { VAlert } from "vuetify/components";
 import { AlertLevel } from "../client/gui/severity";
 import stateAlertComponent from "./state-alert.vue";
-import { VAlert } from "vuetify/components";
 
 export default defineComponent({
-	components: { statealert: stateAlertComponent, VAlert },
+	components: { VAlert, statealert: stateAlertComponent },
 
 	/**
 	 * Data for component.
