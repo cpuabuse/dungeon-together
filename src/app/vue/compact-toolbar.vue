@@ -10,8 +10,7 @@
 				rounded
 				floating
 				class="ma-2"
-				:items="menu.items"
-				:name="menu.name"
+				v-bind="menu"
 			>
 			</CompactToolbarMenu>
 		</VFabTransition>
@@ -42,7 +41,7 @@ export default defineComponent({
 			menus: [
 				{
 					items: [{ name: "One" }, { name: "Two" }, { name: "Three" }, { name: "Four" }, { name: "Five" }],
-					maxPinnedAmount: 1,
+					maxPinnedAmount: 2,
 					name: "First"
 				},
 				{
