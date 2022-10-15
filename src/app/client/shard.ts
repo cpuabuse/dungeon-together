@@ -7,7 +7,8 @@
  * @file Displays server information to canvas
  */
 
-import { Application, Container, Graphics, Matrix, Renderer, utils } from "pixi.js";
+import { tuple } from "fp-ts";
+import { Application, Container, Geometry, Graphics, Matrix, Mesh, Renderer, Shader, utils } from "pixi.js";
 import {
 	defaultEntityHeight,
 	defaultEntityWidth,
@@ -331,19 +332,73 @@ export function ClientShardFactory({
 		 * @param param
 		 */
 		private healthBar({ accent, background, border, foregroundMain, foregroundSecondary }: HpBarColors): void {
+			// Add dynamic size change
+			let sizeMulti: number = 500;
+
+			let maxValue: number = 37;
+
+			let value: number = 5;
+
+			const sideToLengthRatio: number = 0.1;
+
 			// Add background bar
 			let bgBar: Graphics = new Graphics();
 			bgBar.beginFill(background.rgbNumber());
-			bgBar.drawPolygon([0, 0, 0, 50, 500, 50, 500, 0]);
+			bgBar.drawPolygon([0, 0, 0, sideToLengthRatio, 1, sideToLengthRatio, 1, 0].map(element => element * sizeMulti));
 			bgBar.endFill();
 			this.app.stage.addChild(bgBar);
 
 			// Add for ground bar
 			let fgBar: Graphics = new Graphics();
 			fgBar.beginFill(foregroundMain.rgbNumber());
-			fgBar.drawPolygon([0, 0, 0, 50, 250, 50, 250, 0]);
+			fgBar.drawPolygon(
+				[0, 0, 0, sideToLengthRatio, value / maxValue, sideToLengthRatio, value / maxValue, 0].map(
+					element => element * sizeMulti
+				)
+			);
 			fgBar.endFill();
 			this.app.stage.addChild(fgBar);
+
+			const geometry: Geometry = new Geometry().addAttribute(
+				"coord",
+				[0, 0, 0, sideToLengthRatio, value / maxValue, sideToLengthRatio, value / maxValue, 0].map(
+					element => element * sizeMulti
+				),
+				2
+			);
+			geometry.addIndex([0, 1, 2, 0, 2, 3]);
+
+			const shader: Shader = Shader.from(
+				`
+attribute vec2 coord;
+uniform mat3 translationMatrix;
+uniform mat3 projectionMatrix;
+varying float relativeDistance;
+
+void main() {
+	relativeDistance = coord.x / ${Math.floor((sizeMulti * value) / maxValue)}.0;
+	gl_Position = vec4((projectionMatrix * translationMatrix * vec3(coord, 1.0)).xyz, 1.0);
+}
+`,
+				`
+varying float relativeDistance;
+uniform vec3 secondaryColor;
+uniform vec3 mainColor;
+uniform float secondaryColorIntensity;
+
+void main() {
+	gl_FragColor = vec4(mainColor + (secondaryColor - mainColor) * exp((relativeDistance - 1.0) * secondaryColorIntensity) * relativeDistance, 1.0);
+}
+`,
+				{
+					mainColor: [0.25, 1, 0.75],
+					secondaryColor: [0.1, 0, 0.4],
+					secondaryColorIntensity: 10
+				}
+			);
+
+			const bar: Mesh<Shader> = new Mesh(geometry, shader);
+			this.app.stage.addChild(bar);
 		}
 
 		/**
