@@ -3,6 +3,8 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+import Color from "color";
+
 /**
  * Colors.
  *
@@ -19,3 +21,10 @@ export enum HexColors {
 	White = "#FFFFFF",
 	Black = "#000000"
 }
+
+/**
+ * Color palette.
+ */
+export type Palette<Words extends readonly string[]> = {
+	[K in Words[number]]: Color;
+};

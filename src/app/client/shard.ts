@@ -7,7 +7,6 @@
  * @file Displays server information to canvas
  */
 
-import { RgbaColor } from "colord";
 import { Application, Container, Graphics, Matrix, Renderer, utils } from "pixi.js";
 import {
 	defaultEntityHeight,
@@ -332,18 +331,16 @@ export function ClientShardFactory({
 		 * @param param
 		 */
 		private healthBar({ accent, background, border, foregroundMain, foregroundSecondary }: HpBarColors): void {
-			let bgRgb: RgbaColor = background.toRgb();
-			let bgRgbInt: number = (bgRgb.r << 0x10) + (bgRgb.g << 0x8) + bgRgb.r;
 			// Add background bar
 			let bgBar: Graphics = new Graphics();
-			bgBar.beginFill(bgRgbInt);
+			bgBar.beginFill(background.rgbNumber());
 			bgBar.drawPolygon([0, 0, 0, 50, 500, 50, 500, 0]);
 			bgBar.endFill();
 			this.app.stage.addChild(bgBar);
 
 			// Add for ground bar
 			let fgBar: Graphics = new Graphics();
-			fgBar.beginFill(0xff0000);
+			fgBar.beginFill(foregroundMain.rgbNumber());
 			fgBar.drawPolygon([0, 0, 0, 50, 250, 50, 250, 0]);
 			fgBar.endFill();
 			this.app.stage.addChild(fgBar);
