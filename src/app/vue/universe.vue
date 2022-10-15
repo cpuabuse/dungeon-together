@@ -4,6 +4,7 @@
 	<statealertbox />
 	<debug />
 	<CompactToolbar />
+	<OverlayContainer />
 </template>
 
 <script lang="ts">
@@ -11,6 +12,7 @@ import { defineComponent } from "vue";
 import { ThisVueStore } from "../client/gui";
 import CompactToolbar from "./compact-toolbar.vue";
 import debugComponent from "./debug.vue";
+import OverlayContainer from "./overlay-container.vue";
 import stateAlertBoxComponent from "./state-alert-box.vue";
 import tsxTestComponent from "./tsx/test.vue";
 
@@ -20,6 +22,7 @@ import tsxTestComponent from "./tsx/test.vue";
 export default defineComponent({
 	components: {
 		CompactToolbar,
+		OverlayContainer,
 		debug: debugComponent,
 		statealertbox: stateAlertBoxComponent,
 		tsxtest: tsxTestComponent
