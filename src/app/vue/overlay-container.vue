@@ -4,21 +4,24 @@
 	<VBtn @click="dialog = true">Button</VBtn>
 
 	<VDialog v-model="dialog">
-		<VToolbar extended>
-			<VToolbarTitle>Title</VToolbarTitle>
-			<VBtn icon @click="dialog = false">
-				<VIcon icon="fa-close" />
-			</VBtn>
-		</VToolbar>
+		<VCard>
+			<VToolbar>
+				<VToolbarTitle>Title</VToolbarTitle>
+				<VBtn icon @click="dialog = false">
+					<VIcon icon="fa-close" />
+				</VBtn>
+			</VToolbar>
+			<slot name="body"></slot>
+		</VCard>
 	</VDialog>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { VBtn, VDialog, VIcon, VToolbar, VToolbarTitle } from "vuetify/components";
+import { VBtn, VCard, VDialog, VIcon, VToolbar, VToolbarTitle } from "vuetify/components";
 
 export default defineComponent({
-	components: { VBtn, VDialog, VIcon, VToolbar, VToolbarTitle },
+	components: { VBtn, VCard, VDialog, VIcon, VToolbar, VToolbarTitle },
 
 	/**
 	 * Data for component.
