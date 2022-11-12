@@ -7,7 +7,8 @@
  * @file Displays server information to canvas
  */
 
-import { tuple } from "fp-ts";
+import Color from "color";
+import { array, number, tuple } from "fp-ts";
 import { Application, Container, Geometry, Graphics, Matrix, Mesh, Renderer, Shader, utils } from "pixi.js";
 import {
 	defaultEntityHeight,
@@ -341,29 +342,30 @@ export function ClientShardFactory({
 
 			const sideToLengthRatio: number = 0.1;
 
-			// Add background bar
-			let bgBar: Graphics = new Graphics();
-			bgBar.beginFill(background.rgbNumber());
-			bgBar.drawPolygon([0, 0, 0, sideToLengthRatio, 1, sideToLengthRatio, 1, 0].map(element => element * sizeMulti));
-			bgBar.endFill();
-			this.app.stage.addChild(bgBar);
+			// Add color on main bar
+			// eslint-disable-next-line no-magic-numbers
+			let mainColor: Array<number> = foregroundMain
+				.rgb()
+				.array()
+				.map(element => element / 255);
 
-			// Add for ground bar
-			let fgBar: Graphics = new Graphics();
-			fgBar.beginFill(foregroundMain.rgbNumber());
-			fgBar.drawPolygon(
-				[0, 0, 0, sideToLengthRatio, value / maxValue, sideToLengthRatio, value / maxValue, 0].map(
-					element => element * sizeMulti
-				)
-			);
-			fgBar.endFill();
-			this.app.stage.addChild(fgBar);
+			// Add color on secondary bar
+			// eslint-disable-next-line no-magic-numbers
+			let secondaryColor: Array<number> = background
+				.rgb()
+				.array()
+				.map(element => element / 255);
+
+			// Add color on border
+			// eslint-disable-next-line no-magic-numbers
+			let borderColor: Array<number> = border
+				.rgb()
+				.array()
+				.map(element => element / 255);
 
 			const geometry: Geometry = new Geometry().addAttribute(
 				"coord",
-				[0, 0, 0, sideToLengthRatio, value / maxValue, sideToLengthRatio, value / maxValue, 0].map(
-					element => element * sizeMulti
-				),
+				[0, 0, 0, sideToLengthRatio, 1, sideToLengthRatio, 1, 0].map(element => element * sizeMulti),
 				2
 			);
 			geometry.addIndex([0, 1, 2, 0, 2, 3]);
@@ -373,10 +375,11 @@ export function ClientShardFactory({
 attribute vec2 coord;
 uniform mat3 translationMatrix;
 uniform mat3 projectionMatrix;
+uniform float sizeMulti;
 varying float relativeDistance;
 
 void main() {
-	relativeDistance = coord.x / ${Math.floor((sizeMulti * value) / maxValue)}.0;
+	relativeDistance = coord.x / sizeMulti;
 	gl_Position = vec4((projectionMatrix * translationMatrix * vec3(coord, 1.0)).xyz, 1.0);
 }
 `,
@@ -384,16 +387,36 @@ void main() {
 varying float relativeDistance;
 uniform vec3 secondaryColor;
 uniform vec3 mainColor;
+uniform vec3 borderColor;
 uniform float secondaryColorIntensity;
+uniform float maxValue;
+uniform float value;
+uniform float borderRatio;
 
 void main() {
-	gl_FragColor = vec4(mainColor + (secondaryColor - mainColor) * exp((relativeDistance - 1.0) * secondaryColorIntensity) * relativeDistance, 1.0);
+	float ratio = value / maxValue;
+	float effectiveRelativeDistance = (relativeDistance / ratio - borderRatio) / (1.0 - 2.0 * borderRatio);
+
+	if (relativeDistance >= borderRatio && (relativeDistance <= 1.0 - borderRatio)) {
+		if (relativeDistance <= ratio) {
+			gl_FragColor = vec4(mainColor + (secondaryColor - mainColor) * exp((relativeDistance / ratio - 1.0) * secondaryColorIntensity) * relativeDistance / ratio, 1.0);
+		} else {
+			gl_FragColor = vec4(secondaryColor, 1.0);
+		}
+	} else {
+		gl_FragColor = vec4(borderColor, 1.0);
+	}
 }
 `,
 				{
-					mainColor: [0.25, 1, 0.75],
-					secondaryColor: [0.1, 0, 0.4],
-					secondaryColorIntensity: 10
+					borderColor,
+					borderRatio: 0.02,
+					mainColor,
+					maxValue,
+					secondaryColor,
+					secondaryColorIntensity: 10,
+					sizeMulti,
+					value
 				}
 			);
 
