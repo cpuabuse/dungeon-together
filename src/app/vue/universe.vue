@@ -8,8 +8,8 @@
 		<template #body>
 			<OverlayContainerContent
 				:items="[
-					{ name: 'Info1' },
-					{ name: 'Info2' },
+					{ name: 'Info1', data: '14' },
+					{ name: 'Info2', data: '2' },
 					{ name: 'Player', type: ItemType.Uuid, uuid: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }
 				]"
 			/>

@@ -8,8 +8,21 @@
 		<template v-for="(item, itemKey) in items" :key="itemKey">
 			<!-- `v-for` used in `li` so that if conditions fail, the `li` is not rendered -->
 			<VListItem v-if="item.type === undefined || item.type === ItemType.InfoElement">
-				{{ item.name }}
+				<VRow>
+					<VCol>
+						{{ item.name }}
+					</VCol>
+
+					<VSpacer></VSpacer>
+
+					<VCol>
+						<VChip class="ma-2" text-color="white">
+							<VAvatar center>{{ item.data }}</VAvatar>
+						</VChip>
+					</VCol>
+				</VRow>
 			</VListItem>
+
 			<VListItem v-else-if="item.type === ItemType.Uuid">
 				{{ item.name }}
 				{{ item.uuid }}
@@ -20,7 +33,7 @@
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
-import { VList, VListItem } from "vuetify/components";
+import { VAvatar, VCard, VChip, VCol, VList, VListItem, VRow, VSpacer } from "vuetify/components";
 import { OverlayContainerItemType as ItemType } from "../common/front";
 
 /**
@@ -43,6 +56,11 @@ type Item =
 			 * Name to display.
 			 */
 			name: string;
+
+			/**
+			 * Data to display.
+			 */
+			data: string | number;
 	  }
 	| {
 			/**
@@ -62,7 +80,7 @@ type Item =
 	  };
 
 export default defineComponent({
-	components: { VList, VListItem },
+	components: { VAvatar, VCard, VChip, VCol, VList, VListItem, VRow, VSpacer },
 	/**
 	 * Data for component.
 	 *
