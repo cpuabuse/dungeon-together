@@ -6,7 +6,7 @@
 	<VDialog v-model="dialog">
 		<VCard>
 			<VToolbar>
-				<VToolbarTitle>Title</VToolbarTitle>
+				<VToolbarTitle class="text-h5">Title</VToolbarTitle>
 				<VBtn icon @click="dialog = false">
 					<VIcon icon="fa-close" />
 				</VBtn>
