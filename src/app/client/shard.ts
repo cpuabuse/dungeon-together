@@ -334,13 +334,13 @@ export function ClientShardFactory({
 		 */
 		private healthBar({ accent, background, border, foregroundMain, foregroundSecondary }: HpBarColors): void {
 			// Add dynamic size change
-			let sizeMulti: number = 500;
+			let width: number = 5.0;
 
 			let maxValue: number = 37;
 
 			let value: number = 5;
 
-			const sideToLengthRatio: number = 0.1;
+			const height: number = 0.15;
 
 			// Add color on main bar
 			// eslint-disable-next-line no-magic-numbers
@@ -365,26 +365,31 @@ export function ClientShardFactory({
 
 			const geometry: Geometry = new Geometry().addAttribute(
 				"coord",
-				[0, 0, 0, sideToLengthRatio, 1, sideToLengthRatio, 1, 0].map(element => element * sizeMulti),
+				[0, 0, 0, height, 1, height, 1, 0].map(element => element * width),
 				2
 			);
 			geometry.addIndex([0, 1, 2, 0, 2, 3]);
 
 			const shader: Shader = Shader.from(
 				`
+precision mediump float;
 attribute vec2 coord;
 uniform mat3 translationMatrix;
 uniform mat3 projectionMatrix;
-uniform float sizeMulti;
-varying float relativeDistance;
+uniform float width;
+varying float relativeWidth;
+varying float relativeHeight;
 
 void main() {
-	relativeDistance = coord.x / sizeMulti;
+	relativeWidth = coord.x / width;
+	relativeHeight = coord.y / width;
 	gl_Position = vec4((projectionMatrix * translationMatrix * vec3(coord, 1.0)).xyz, 1.0);
 }
 `,
 				`
-varying float relativeDistance;
+precision mediump float;
+varying float relativeWidth;
+varying float relativeHeight;
 uniform vec3 secondaryColor;
 uniform vec3 mainColor;
 uniform vec3 borderColor;
@@ -392,14 +397,14 @@ uniform float secondaryColorIntensity;
 uniform float maxValue;
 uniform float value;
 uniform float borderRatio;
+uniform float height;
 
 void main() {
 	float ratio = value / maxValue;
-	float effectiveRelativeDistance = (relativeDistance / ratio - borderRatio) / (1.0 - 2.0 * borderRatio);
 
-	if (relativeDistance >= borderRatio && (relativeDistance <= 1.0 - borderRatio)) {
-		if (relativeDistance <= ratio) {
-			gl_FragColor = vec4(mainColor + (secondaryColor - mainColor) * exp((relativeDistance / ratio - 1.0) * secondaryColorIntensity) * relativeDistance / ratio, 1.0);
+	if (relativeWidth >= borderRatio && (relativeWidth <= 1.0 - borderRatio) && relativeHeight >= borderRatio && (relativeHeight <= height - borderRatio)) {
+		if (relativeWidth <= ratio) {
+			gl_FragColor = vec4(mainColor + (secondaryColor - mainColor) * exp((relativeWidth / ratio - 1.0) * secondaryColorIntensity) * relativeWidth / ratio, 1.0);
 		} else {
 			gl_FragColor = vec4(secondaryColor, 1.0);
 		}
@@ -410,17 +415,20 @@ void main() {
 `,
 				{
 					borderColor,
-					borderRatio: 0.02,
+					borderRatio: 0.01,
+					height,
 					mainColor,
 					maxValue,
 					secondaryColor,
 					secondaryColorIntensity: 10,
-					sizeMulti,
-					value
+					value,
+					width
 				}
 			);
 
 			const bar: Mesh<Shader> = new Mesh(geometry, shader);
+			bar.position.set(100, 100);
+			bar.scale.set(50);
 			this.app.stage.addChild(bar);
 		}
 
