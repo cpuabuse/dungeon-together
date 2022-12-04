@@ -4,7 +4,7 @@
 	<VBtn @click="dialog = true">Button</VBtn>
 
 	<VDialog v-model="dialog">
-		<VCard>
+		<VCard height="50vh" width="50vw" class="align-self-center">
 			<VToolbar>
 				<VToolbarTitle class="text-h5">Title</VToolbarTitle>
 				<VBtn icon @click="dialog = false">

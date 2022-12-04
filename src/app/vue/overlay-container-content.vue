@@ -8,7 +8,7 @@
 		<template v-for="(item, itemKey) in items" :key="itemKey">
 			<!-- `v-for` used in `li` so that if conditions fail, the `li` is not rendered -->
 			<VListItem v-if="item.type === undefined || item.type === ItemType.InfoElement">
-				<VRow>
+				<VRow class="align-items-center">
 					<VCol>
 						{{ item.name }}
 					</VCol>
@@ -25,7 +25,8 @@
 
 			<VListItem v-else-if="item.type === ItemType.Uuid">
 				{{ item.name }}
-				{{ item.uuid }}
+
+				<highlightjs language="plaintext" :code="item.uuid" />
 			</VListItem>
 		</template>
 	</VList>
@@ -33,7 +34,7 @@
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
-import { VAvatar, VCard, VChip, VCol, VList, VListItem, VRow, VSpacer } from "vuetify/components";
+import { VAvatar, VChip, VCol, VList, VListItem, VRow, VSpacer } from "vuetify/components";
 import { OverlayContainerItemType as ItemType } from "../common/front";
 
 /**
@@ -80,7 +81,7 @@ type Item =
 	  };
 
 export default defineComponent({
-	components: { VAvatar, VCard, VChip, VCol, VList, VListItem, VRow, VSpacer },
+	components: { VAvatar, VChip, VCol, VList, VListItem, VRow, VSpacer },
 	/**
 	 * Data for component.
 	 *
