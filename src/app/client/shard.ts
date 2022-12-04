@@ -27,7 +27,6 @@ import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientGrid } from "./grid";
-import { HpBarColors, friendlyHpBarColors, hpBarColorWords } from "./hp-bar";
 import {
 	Input,
 	InputInterface,
@@ -40,6 +39,7 @@ import {
 	upSymbol
 } from "./input";
 import { ClientOptions, clientOptions } from "./options";
+import { HpBarColors, friendlyHpBarColors, hpBarColorWords } from "./progess-bar";
 import { ClientToast } from "./toast";
 import { ClientUniverse } from "./universe";
 
@@ -334,7 +334,7 @@ export function ClientShardFactory({
 		 */
 		private healthBar({ accent, background, border, foregroundMain, foregroundSecondary }: HpBarColors): void {
 			// Add dynamic size change
-			let width: number = 5.0;
+			let width: number = 1.0;
 
 			let maxValue: number = 37;
 
