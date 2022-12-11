@@ -11,8 +11,8 @@
 		{
 			"type": "chrome",
 			"request": "launch",
-			"name": "chrome-debug",
-			"url": "http://127.0.0.1:5500/build/stage/standalone/index.html"
+			"name": "chrome-dev",
+			"url": "http://127.0.0.1:5500/build/dev/standalone/index.html"
 		},
 		{
 			"type": "msedge",

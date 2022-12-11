@@ -23,11 +23,6 @@ import ncp from "ncp";
 const assetPath: string = "include/dungeon-together-assets/build";
 
 /**
- * Compiled asset folder.
- */
-const compiledAssetPath: string = "build/stage/standalone";
-
-/**
  * Relative sound path.
  */
 const soundPath: string = "sound";
@@ -46,8 +41,26 @@ const replaceColor = [0x47, 0x6c, 0x6c] as const;
 
 /**
  * Entrypoint.
+ *
+ * @param param - Destructured parameter
  */
-async function main(): Promise<void> {
+export async function main({
+	environment,
+	build
+}: {
+	/**
+	 * Environment name.
+	 */
+	environment: string;
+
+	/**
+	 * Build name.
+	 */
+	build: string;
+}): Promise<void> {
+	/** Compiled asset folder. */
+	const compiledAssetPath: string = `build/${environment}/${build}`;
+
 	await mkdirp(`${compiledAssetPath}/${soundPath}`);
 
 	let data: Promise<void> = new Promise((resolve, reject) => {
@@ -147,8 +160,3 @@ async function main(): Promise<void> {
 		)
 	);
 }
-
-// Call main
-// Async entrypoint
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-main();

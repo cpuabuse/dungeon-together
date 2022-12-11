@@ -3,5 +3,5 @@
 		"outDir": "../../build/stage/bin/script"
 	},
 	"extends": "./base.json",
-	"include": ["../../src/script/*"]
+	"include": ["../../src/script/*.stage.*"]
 }

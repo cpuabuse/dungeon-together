@@ -6,10 +6,21 @@
 			"script": "build:run:standalone:browser",
 			"group": {
 				"kind": "build",
-				"isDefault": true
+				"isDefault": false
 			},
 			"problemMatcher": [],
 			"label": "standalone-build",
+			"detail": "npm run build:stage:standalone:browser"
+		},
+		{
+			"type": "shell",
+			"command": "script/environment/Build-DevStandalone.ps1",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": [],
+			"label": "standalone-watch",
 			"detail": "npm run build:stage:standalone:browser"
 		}
 	]

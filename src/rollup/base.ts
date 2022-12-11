@@ -40,12 +40,24 @@ const rootDir: Array<string> = [__dirname, ...new Array<string>(relativeDirDepth
  * @returns Options
  */
 export function defineOptions({
-	isProduction = true
+	isProduction = true,
+	environment = "stage",
+	isIncremental = false
 }: {
 	/**
 	 * Is production build or not.
 	 */
 	isProduction?: boolean;
+
+	/**
+	 * Build target environment name.
+	 */
+	environment?: string;
+
+	/**
+	 * Is incremental build or not.
+	 */
+	isIncremental?: boolean;
 }): RollupOptions {
 	/**
 	 * Rollup options.
@@ -78,14 +90,16 @@ export function defineOptions({
 			rollupWarn(warning);
 		},
 		output: {
-			file: join(...rootDir, "build", "stage", "artifacts", "rollup", "standalone.js"),
+			...(isIncremental
+				? { dir: join(...rootDir, "build", environment, "standalone"), preserveModules: true }
+				: { file: join(...rootDir, "build", environment, "artifacts", "rollup", "standalone.js") }),
 			format: "esm",
 			name: "client",
 			sourcemap: isProduction ? "hidden" : "inline"
 		},
 		plugins: [
 			// For typescript; "rollup-plugin-typescript2" preferred over official due to https://github.com/rollup/plugins/issues/608
-			typescript({ tsconfig: join(...rootDir, "tsconfig", "stage", "base.json") }),
+			typescript({ tsconfig: join(...rootDir, "tsconfig", environment, "base.json") }),
 
 			// Vue does not like HTML comments
 			vue({ template: { compilerOptions: { comments: false } } }) as Plugin,
