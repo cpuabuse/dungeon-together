@@ -17,16 +17,27 @@
 
 					<VCol>
 						<VChip class="ma-2" text-color="white">
-							<VAvatar center>{{ item.data }}</VAvatar>
+							<VAvatar>{{ item.data }}</VAvatar>
 						</VChip>
 					</VCol>
 				</VRow>
 			</VListItem>
 
 			<VListItem v-else-if="item.type === ItemType.Uuid">
-				{{ item.name }}
+				<VCard>
+					<VTabs v-model="tab" bg-color="primary">
+						<VTab value="one">Map</VTab>
+						<VTab value="two">UUID</VTab>
+					</VTabs>
 
-				<highlightjs language="plaintext" :code="item.uuid" />
+					<VCardText>
+						<VWindow v-model="tab">
+							<VWindowItem value="one">MAP</VWindowItem>
+
+							<VWindowItem value="two"> Player </VWindowItem>
+						</VWindow>
+					</VCardText>
+				</VCard>
 			</VListItem>
 		</template>
 	</VList>
@@ -34,7 +45,21 @@
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
-import { VAvatar, VChip, VCol, VList, VListItem, VRow, VSpacer } from "vuetify/components";
+import {
+	VAvatar,
+	VCard,
+	VCardText,
+	VChip,
+	VCol,
+	VList,
+	VListItem,
+	VRow,
+	VSpacer,
+	VTab,
+	VTabs,
+	VWindow,
+	VWindowItem
+} from "vuetify/components";
 import { OverlayContainerItemType as ItemType } from "../common/front";
 
 /**
@@ -81,7 +106,21 @@ type Item =
 	  };
 
 export default defineComponent({
-	components: { VAvatar, VChip, VCol, VList, VListItem, VRow, VSpacer },
+	components: {
+		VAvatar,
+		VCard,
+		VCardText,
+		VChip,
+		VCol,
+		VList,
+		VListItem,
+		VRow,
+		VSpacer,
+		VTab,
+		VTabs,
+		VWindow,
+		VWindowItem
+	},
 	/**
 	 * Data for component.
 	 *
@@ -89,7 +128,8 @@ export default defineComponent({
 	 */
 	data() {
 		return {
-			ItemType
+			ItemType,
+			tab: null
 		};
 	},
 
