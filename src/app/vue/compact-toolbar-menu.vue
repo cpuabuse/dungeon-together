@@ -1,8 +1,7 @@
 <!-- Game control menu -->
 
 <template>
-	<!-- To transition, when menu content is changed -->
-	<VToolbar :key="uniqueKey">
+	<VToolbar>
 		<VToolbarItems>
 			<VBtn icon :stacked="hasLabels" @click="toggleExtended()">
 				<VIcon icon="bars" />
@@ -127,15 +126,6 @@ export default defineComponent({
 
 				return result;
 			}, [] as Array<ItemGroup>);
-		},
-
-		/**
-		 * Unique key account for all data, presentable to user.
-		 *
-		 * @returns Unique key
-		 */
-		uniqueKey(): string {
-			return `${this.name}${this.items.map(item => item.name).join()}`;
 		}
 	},
 
@@ -159,6 +149,8 @@ export default defineComponent({
 			usedQueue: [] as Array<number>
 		};
 	},
+
+	emits: ["extend"],
 
 	methods: {
 		/**
@@ -203,9 +195,13 @@ export default defineComponent({
 				this.pinnedIds = [...this.usedQueue];
 			}
 
-			// Wait for the next tick to update the groups
+			// Wait for the next tick to update the groups, otherwise some items in groups would disappear immediately
 			await nextTick();
+
 			this.isExtended = !this.isExtended;
+			if (this.isExtended) {
+				this.$emit("extend");
+			}
 		}
 	},
 
@@ -214,6 +210,11 @@ export default defineComponent({
 		 * Menu name.
 		 */
 		hasLabels: { default: true, type: Boolean },
+
+		/**
+		 * Menu name.
+		 */
+		isForceCollapsed: { default: false, type: Boolean },
 
 		/**
 		 * Menu items.
@@ -232,12 +233,14 @@ export default defineComponent({
 	},
 
 	watch: {
-		uniqueKey: {
+		isForceCollapsed: {
 			/**
-			 * Handler for props change.
+			 * Makes sure that when another menu is open, this is collapsed, if necessary.
 			 */
-			handler() {
-				this.resetQueues();
+			async handler() {
+				if (this.isForceCollapsed && this.isExtended) {
+					await this.toggleExtended();
+				}
 			}
 		}
 	}
