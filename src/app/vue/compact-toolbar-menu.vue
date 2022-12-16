@@ -1,44 +1,42 @@
 <!-- Game control menu -->
 
 <template>
-	<VToolbar>
-		<VToolbarItems>
-			<VBtn icon :stacked="hasLabels" @click="toggleExtended()">
-				<VIcon icon="bars" />
-				<span v-show="hasLabels">{{ name }}</span>
+	<!-- `compact` makes collapse menus without pinned items equal sides, when not stacked (`default` when stacked); Makes extra large icons fit well in both cases -->
+	<VToolbar :density="hasLabels ? 'default' : 'compact'" rounded="xl">
+		<!-- `tonal` for toggler to stand out -->
+		<VToolbarItems variant="tonal">
+			<VBtn
+				:stacked="hasLabels"
+				:color="isHighlightedOnOpen && isExtended ? 'primary' : 'default'"
+				@click="toggleExtended()"
+			>
+				<VIcon size="x-large" :icon="icon" />
+				<!-- Menu indicator also scales to match icon relative size -->
+				<span v-show="hasLabels" class="text-truncate button-text">{{ name }}</span>
 			</VBtn>
 		</VToolbarItems>
 
 		<VExpandXTransition v-for="(itemGroup, itemGroupKey) in itemGroups" :key="itemGroupKey">
 			<VToolbarItems v-show="itemGroup.isPinned || isExtended">
-				<VBtn
-					v-for="(item, itemKey) in itemGroup.items"
-					:key="itemKey"
-					icon
-					:stacked="hasLabels"
-					@click="itemClick(item)"
-				>
-					<VIcon icon="home" />
-					<span v-show="hasLabels">{{ item.name }}</span>
-				</VBtn>
+				<template v-for="(item, itemKey) in itemGroup.items" :key="itemKey">
+					<VBtn v-if="item.mode === 'click'" :stacked="hasLabels" @click="clickItem(item)">
+						<VIcon :icon="item.icon ?? 'fa-carrot'" size="x-large" />
+						<span v-show="hasLabels" class="button-text">{{ item.name }}</span>
+					</VBtn>
+					<VBtn v-else disabled :stacked="hasLabels">
+						<VIcon :icon="item.icon ?? 'fa-carrot'" size="x-large" />
+						<span v-show="hasLabels" class="button-text">{{ item.name }}</span>
+					</VBtn>
+				</template>
 			</VToolbarItems>
 		</VExpandXTransition>
 	</VToolbar>
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent, nextTick } from "vue";
+import { defineComponent, nextTick } from "vue";
 import { VBtn, VExpandXTransition, VIcon, VToolbar, VToolbarItems } from "vuetify/components";
-
-/**
- * Compact toolbar menu item(button).
- */
-export type CompactToolbarMenuItem = {
-	/**
-	 * Name of the item.
-	 */
-	name: string;
-};
+import { CompactToolbarMenuItem, compactToolbarMenuBaseProps, compactToolbarSharedMenuProps } from "./types";
 
 /**
  * Item with meta.
@@ -150,15 +148,15 @@ export default defineComponent({
 		};
 	},
 
-	emits: ["extend"],
+	emits: ["extend", "click"],
 
 	methods: {
 		/**
-		 * Process item click.
+		 * Process item clicked.
 		 *
 		 * @param id - Item id
 		 */
-		itemClick({
+		clickItem({
 			id
 		}: {
 			/**
@@ -166,14 +164,8 @@ export default defineComponent({
 			 */
 			id: number;
 		}) {
-			if (this.usedQueue.includes(id)) {
-				// Rearrange queue
-				this.usedQueue = [...this.usedQueue.filter(element => element !== id), id];
-			} else {
-				// Add to queue, remove last to preserve count, if 0
-				this.usedQueue.push(id);
-				this.usedQueue.shift();
-			}
+			this.useItem({ id });
+			this.$emit("click", { itemId: id });
 		},
 
 		/**
@@ -202,34 +194,41 @@ export default defineComponent({
 			if (this.isExtended) {
 				this.$emit("extend");
 			}
+		},
+
+		/**
+		 * Process item used.
+		 *
+		 * @param id - Item id
+		 */
+		useItem({
+			id
+		}: {
+			/**
+			 * Item ID.
+			 */
+			id: number;
+		}) {
+			if (this.usedQueue.includes(id)) {
+				// Rearrange queue
+				this.usedQueue = [...this.usedQueue.filter(element => element !== id), id];
+			} else {
+				// Add to queue, remove last to preserve count, if 0
+				this.usedQueue.push(id);
+				this.usedQueue.shift();
+			}
 		}
 	},
 
 	props: {
-		/**
-		 * Menu name.
-		 */
-		hasLabels: { default: true, type: Boolean },
+		...compactToolbarMenuBaseProps,
+
+		...compactToolbarSharedMenuProps,
 
 		/**
 		 * Menu name.
 		 */
-		isForceCollapsed: { default: false, type: Boolean },
-
-		/**
-		 * Menu items.
-		 */
-		items: { required: true, type: Array as PropType<Array<CompactToolbarMenuItem>> },
-
-		/**
-		 * Maximum pinned amount of items, when collapsed.
-		 */
-		maxPinnedAmount: { default: 1, type: Number },
-
-		/**
-		 * Menu name.
-		 */
-		name: { required: true, type: String }
+		isForceCollapsed: { default: false, type: Boolean }
 	},
 
 	watch: {
@@ -246,3 +245,13 @@ export default defineComponent({
 	}
 });
 </script>
+
+<style scoped>
+.button-text {
+	/* Smaller font size for menu, as it is more of a tooltip */
+	font-size: 0.6em;
+
+	/* Max width will be based on font size; Simplest and most robust way to make same length buttons */
+	width: 6em;
+}
+</style>
