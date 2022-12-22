@@ -59,14 +59,14 @@ export function ServerEntityFactory({
 		public kind: EntityKind;
 
 		/**
+		 * Kinds, also generate default kind.
+		 */
+		public static kinds: Map<Uuid, EntityKindClass> = new Map([]);
+
+		/**
 		 * Default kind.
 		 */
 		private static DefaultKind: EntityKindClass = class DefaultKind extends this.BaseKind {};
-
-		/**
-		 * Kinds, also generate default kind.
-		 */
-		private static kinds: Map<Uuid, EntityKindClass> = new Map([]);
 
 		// ESLint params bug
 		// eslint-disable-next-line jsdoc/require-param
@@ -173,6 +173,19 @@ export function ServerEntityFactory({
 			});
 		}
 	}
+
+	/**
+	 * Terminates client entity.
+	 *
+	 * @param this - Client entity
+	 */
+	ServerEntity.prototype.terminateEntity = function (this: ServerEntity): void {
+		// Terminate kind
+		this.kind.onTerminateEntity();
+
+		// Super terminate
+		(Object.getPrototypeOf(ServerEntity.prototype) as ServerEntity).terminateEntity.call(this);
+	};
 
 	// Return class
 	return ServerEntity;

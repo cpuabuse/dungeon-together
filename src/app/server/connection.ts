@@ -162,6 +162,11 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 					playerEntity.kind.moveEntity(targetCell);
 				}
 
+				// Tick
+				this.universe.Entity.kinds.forEach(Kind => {
+					Kind.onTick();
+				});
+
 				// Quick fix for switch
 				// eslint-disable-next-line no-case-declarations
 				let messageBody: ClientUpdate = {
@@ -177,8 +182,8 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 								})
 								// False negative
 								// eslint-disable-next-line @typescript-eslint/typedef
-								.map(([entityUuid]) => {
-									return { entityUuid };
+								.map(([entityUuid, entity]) => {
+									return { emits: entity.kind.emits, entityUuid };
 								}),
 							events: enemyEvent ? [enemyEvent] : []
 						},
@@ -194,8 +199,8 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 								})
 								// False negative
 								// eslint-disable-next-line @typescript-eslint/typedef
-								.map(([entityUuid]) => {
-									return { entityUuid };
+								.map(([entityUuid, entity]) => {
+									return { emits: entity.kind.emits, entityUuid };
 								}),
 							events: []
 						}

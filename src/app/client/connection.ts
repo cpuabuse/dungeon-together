@@ -9,10 +9,9 @@
 
 import { Howl } from "howler";
 import { DeferredPromise } from "../common/async";
-import { MessageTypeWord, MovementWord, vSocketMaxDequeue } from "../common/defaults/connection";
+import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { ClientUpdate } from "../comms";
-import { CellPathOwn } from "../core/cell";
 import {
 	CoreConnection,
 	CoreConnectionConstructorParams,
@@ -21,7 +20,6 @@ import {
 	ProcessCallback,
 	VSocket
 } from "../core/connection";
-import { EntityPathOwn } from "../core/entity";
 import { LogLevel } from "../core/error";
 import { CoreShardArg } from "../core/shard";
 import { ClientCell } from "./cell";
@@ -163,12 +161,14 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 
 				(message.body as ClientUpdate).cells.forEach(sourceCell => {
 					let targetCell: ClientCell = this.universe.getCell(sourceCell);
-					let sourceEntityUuidSet: Set<Uuid> = new Set(sourceCell.entities.map(entity => entity.entityUuid));
-
-					sourceEntityUuidSet.forEach(sourceEntityUuid => {
+					// eslint-disable-next-line @typescript-eslint/typedef
+					sourceCell.entities.forEach(({ entityUuid, emits }) => {
+						if (typeof emits.health === "number") {
+							this.universe.getEntity({ entityUuid }).health = emits.health;
+						}
 						// Reattach present
-						if (!targetCell.entities.has(sourceEntityUuid)) {
-							targetCell.attachEntity(this.universe.getEntity({ entityUuid: sourceEntityUuid }));
+						if (!targetCell.entities.has(entityUuid)) {
+							targetCell.attachEntity(this.universe.getEntity({ entityUuid }));
 						}
 					});
 				});

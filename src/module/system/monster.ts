@@ -40,6 +40,11 @@ export function MonsterKindClassFactory({
 	 */
 	class MonsterKind extends Base {
 		/**
+		 * Entity array to track for ticks.
+		 */
+		public static entities: Set<ServerEntity> = new Set();
+
+		/**
 		 * Public constructor.
 		 *
 		 * @param param - Destructured parameter
@@ -47,6 +52,15 @@ export function MonsterKindClassFactory({
 		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
 			super({ entity, ...rest });
 			this.stats = { ...stats };
+
+			MonsterKind.entities.add(this.entity);
+		}
+
+		/**
+		 * On tick.
+		 */
+		public static onTick(): void {
+			Base.onTick();
 		}
 
 		/**
@@ -65,7 +79,18 @@ export function MonsterKindClassFactory({
 			action: ActionWords;
 		}): void {
 			super.action({ action });
-			(this.entity.constructor as ServerEntityClass).universe.getCell(this.entity).removeEntity(this.entity);
+			this.healthPoints--;
+			if (this.healthPoints <= 0) {
+				(this.entity.constructor as ServerEntityClass).universe.getCell(this.entity).removeEntity(this.entity);
+			}
+		}
+
+		/**
+		 * Terminates monster.
+		 */
+		public onTerminateEntity(): void {
+			super.onTerminateEntity();
+			MonsterKind.entities.delete(this.entity);
 		}
 	}
 

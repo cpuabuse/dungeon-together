@@ -129,6 +129,15 @@ export function UnitKindClassFactory({
 	 */
 	class UnitKind extends Base implements UnitLevel {
 		/**
+		 * Emits health.
+		 *
+		 * @returns Emitted object
+		 */
+		public get emits(): Record<string, any> {
+			return { ...super.emits, health: this.healthPoints };
+		}
+
+		/**
 		 * Attack.
 		 */
 		public attack: number = 1;
@@ -152,7 +161,7 @@ export function UnitKindClassFactory({
 		/**
 		 * HP.
 		 */
-		public healthPoints: number = 1;
+		public healthPoints: number = 3;
 
 		/**
 		 * LVL.

@@ -52,6 +52,11 @@ export type ClientUpdate = {
 			 * Entity UUID.
 			 */
 			entityUuid: Uuid;
+
+			/**
+			 * Health update.
+			 */
+			emits: Record<string, any>;
 		}>;
 	}>;
 };

@@ -83,6 +83,20 @@ export function BaseEntityKindClassFactory({
 		public static Entity: ServerEntityClass = Entity;
 
 		/**
+		 * Per entity emits, that will be sent to client, to be interpreted.
+		 *
+		 * @remarks
+		 * Must be a getter, so that getter inheritance works.
+		 *
+		 * @returns Empty object
+		 */
+		// A dummy
+		// eslint-disable-next-line class-methods-use-this
+		public get emits(): Record<string, any> {
+			return {};
+		}
+
+		/**
 		 * Link to entity.
 		 */
 		public entity: ServerEntity;
@@ -102,6 +116,13 @@ export function BaseEntityKindClassFactory({
 		 */
 		public constructor({ entity }: EntityKindConstructorParams) {
 			this.entity = entity;
+		}
+
+		/**
+		 * Per-kind on tick method.
+		 */
+		public static onTick(): void {
+			// Do nothing
 		}
 
 		/**

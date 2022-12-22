@@ -7,7 +7,7 @@
  * @file Entity that can be rendered.
  */
 
-import { AnimatedSprite } from "pixi.js";
+import { AnimatedSprite, Text } from "pixi.js";
 import { CoreArgIds } from "../core/arg";
 import { CoreEntityArg, CoreEntityClassFactory } from "../core/entity";
 import { CoreEntityArgParentIds } from "../core/parents";
@@ -38,6 +38,27 @@ export function ClientEntityFactory({
 		Base,
 		options: clientOptions
 	}) {
+		/**
+		 * Temporary text, showing health.
+		 */
+		public basicText: Text | null = null;
+
+		/**
+		 * Temporary health.
+		 */
+		public set health(health: number | null) {
+			if (this.basicText) {
+				if (health === null) {
+					this.basicText.destroy();
+				} else {
+					this.basicText.text = health;
+				}
+			} else if (health) {
+				this.basicText = new Text(health);
+				this.sprite.addChild(this.basicText);
+			}
+		}
+
 		/**
 		 * Animated sprite.
 		 */
