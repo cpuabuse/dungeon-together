@@ -3,7 +3,7 @@
 <template>
 	<VBtn @click="dialog = true">Button</VBtn>
 
-	<VDialog v-model="dialog">
+	<VDialog v-model="dialog" persistent no-click-animation :scrim="false">
 		<VCard height="50vh" width="50vw" class="align-self-center">
 			<VToolbar>
 				<VToolbarTitle class="text-h5">Title</VToolbarTitle>

@@ -7,15 +7,15 @@
 	<VList v-show="items.length > 0">
 		<template v-for="(item, itemKey) in items" :key="itemKey">
 			<!-- `v-for` used in `li` so that if conditions fail, the `li` is not rendered -->
-			<VListItem v-if="item.type === undefined || item.type === ItemType.InfoElement">
-				<VRow class="align-items-center">
-					<VCol>
+			<VListItem v-if="item.type === undefined || item.type === ItemType.InfoElement" rounded>
+				<VRow>
+					<VCol class="my-auto">
 						{{ item.name }}
 					</VCol>
 
 					<VSpacer></VSpacer>
 
-					<VCol>
+					<VCol class="my-auto">
 						<VChip class="ma-2" text-color="white">
 							<VAvatar>{{ item.data }}</VAvatar>
 						</VChip>
@@ -23,9 +23,9 @@
 				</VRow>
 			</VListItem>
 
-			<VListItem v-else-if="item.type === ItemType.Uuid">
+			<VListItem v-else-if="item.type === ItemType.Uuid" rounded>
 				<VCard>
-					<VTabs v-model="tab" bg-color="primary">
+					<VTabs v-model="tab">
 						<VTab value="one">Map</VTab>
 						<VTab value="two">UUID</VTab>
 					</VTabs>
@@ -34,7 +34,7 @@
 						<VWindow v-model="tab">
 							<VWindowItem value="one">MAP</VWindowItem>
 
-							<VWindowItem value="two"> Player </VWindowItem>
+							<VWindowItem value="two">Player</VWindowItem>
 						</VWindow>
 					</VCardText>
 				</VCard>
