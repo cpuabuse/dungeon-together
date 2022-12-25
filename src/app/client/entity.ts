@@ -14,6 +14,7 @@ import { CoreEntityArgParentIds } from "../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientOptions, clientOptions } from "./options";
+import { ProgressBar } from "./progess-bar";
 
 /**
  * Generator for the client entity class.
@@ -43,6 +44,8 @@ export function ClientEntityFactory({
 		 */
 		public basicText: Text | null = null;
 
+		public healthBar: ProgressBar | null = null;
+
 		/**
 		 * Temporary health.
 		 */
@@ -53,8 +56,19 @@ export function ClientEntityFactory({
 				} else {
 					this.basicText.text = health;
 				}
+
+				if (this.healthBar) {
+					if (health === null) {
+						// Nothing
+					} else {
+						this.healthBar.shader.uniforms.value = health;
+					}
+				}
 			} else if (health) {
 				this.basicText = new Text(health);
+				this.healthBar = new ProgressBar({ container: this.sprite });
+				this.healthBar.shader.uniforms.maxValue = 3;
+				this.healthBar.shader.uniforms.value = health;
 				this.sprite.addChild(this.basicText);
 			}
 		}

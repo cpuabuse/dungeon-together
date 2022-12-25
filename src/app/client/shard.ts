@@ -39,7 +39,7 @@ import {
 	upSymbol
 } from "./input";
 import { ClientOptions, clientOptions } from "./options";
-import { HpBarColors, friendlyHpBarColors, hpBarColorWords } from "./progess-bar";
+import { HpBarColors, ProgressBar, friendlyHpBarColors, hpBarColorWords } from "./progess-bar";
 import { ClientToast } from "./toast";
 import { ClientUniverse } from "./universe";
 
@@ -168,7 +168,7 @@ export function ClientShardFactory({
 			this.toast = new ClientToast({ displayTime: 3000, shard: this });
 
 			// Call health bar
-			this.healthBar(friendlyHpBarColors);
+			new ProgressBar({ container: this.app.stage });
 
 			// Visualize friendly, neutral and enemy HP bars
 

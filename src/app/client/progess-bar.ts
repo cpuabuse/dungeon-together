@@ -8,7 +8,7 @@
  */
 
 import Color from "color";
-import { Geometry, Program, Shader } from "pixi.js";
+import { Container, Geometry, Mesh, Program, Shader } from "pixi.js";
 import { Palette } from "../common/color";
 import { ClientShard } from "./shard";
 
@@ -143,6 +143,11 @@ export class ProgressBar {
 	public shader: Shader;
 
 	/**
+	 * Container.
+	 */
+	private container: Container;
+
+	/**
 	 *  Geometry for the progress bar.
 	 */
 	private static geometry: Geometry = ((): Geometry => {
@@ -169,30 +174,25 @@ export class ProgressBar {
 	// private mesh: Mesh<Shader>;
 
 	/**
-	 * Client shard.
-	 */
-	private shard: ClientShard;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param param - Destructured parameter
 	 */
 	public constructor({
-		shard,
+		container,
 		colors
 	}: {
 		/**
-		 * Client shard.
+		 * Container.
 		 */
-		shard: ClientShard;
+		container: Container;
 
 		/**
 		 * Colors.
 		 */
 		colors?: HpBarColors;
 	}) {
-		this.shard = shard;
+		this.container = container;
 		this.colors = colors ?? neutralHpBarColors;
 
 		// Add color on main bar
@@ -224,5 +224,10 @@ export class ProgressBar {
 			value,
 			width
 		});
+
+		const bar: Mesh<Shader> = new Mesh(ProgressBar.geometry, this.shader);
+		bar.position.set(0, 0);
+		bar.scale.set(50);
+		this.container.addChild(bar);
 	}
 }
