@@ -7,7 +7,7 @@
  * @file Core universe.
  */
 
-import { PromiseQueue } from "../common/async/promise-queue";
+import { SequenceQueue } from "../common/async/promise-queue";
 import {
 	ComputedClassExtractInstance,
 	computedClassInjectPerClass,
@@ -556,7 +556,7 @@ export function CoreUniverseClassFactory<
 		/**
 		 * Queue for universe.
 		 */
-		public readonly universeQueue: PromiseQueue = new PromiseQueue();
+		public readonly universeQueue: SequenceQueue = new SequenceQueue();
 
 		public universeUuid: Uuid;
 

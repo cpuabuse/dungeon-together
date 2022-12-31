@@ -272,6 +272,14 @@ export function CoreGridClassFactory<
 		implements StaticImplements<ToAbstract<CoreGridClass<BaseParams, Options, Cell>>, typeof Grid>
 	{
 		/**
+		 * Array of vectors to cells.
+		 *
+		 * @remarks
+		 * Accessed as `[z][x][y]` for performance, as operations are done within single z-dimension.
+		 */
+		public cellIndex: Array<Array<Array<Cell>>>;
+
+		/**
 		 * Default entity.
 		 *
 		 * @remarks
@@ -289,11 +297,47 @@ export function CoreGridClassFactory<
 
 		public worlds: Set<Uuid>;
 
+		/**
+		 * Represents max cell x-index, always place for default cell.
+		 */
 		public x: Vector["x"];
 
+		/**
+		 * Represents max cell y-index, always place for default cell.
+		 */
 		public y: Vector["y"];
 
+		/**
+		 * Represents max cell z-index, always place for default cell.
+		 */
 		public z: Vector["z"];
+
+		/**
+		 * X-length.
+		 *
+		 * @returns X-length
+		 */
+		public get xLength(): number {
+			return this.x + 1;
+		}
+
+		/**
+		 * Y-length.
+		 *
+		 * @returns Y-length
+		 */
+		public get yLength(): number {
+			return this.y + 1;
+		}
+
+		/**
+		 * Z-length.
+		 *
+		 * @returns Z-length
+		 */
+		public get zLength(): number {
+			return this.z + 1;
+		}
 
 		// ESLint buggy
 		// eslint-disable-next-line jsdoc/require-param
@@ -313,6 +357,9 @@ export function CoreGridClassFactory<
 			this.x = arg.x;
 			this.y = arg.y;
 			this.z = arg.z;
+			this.cellIndex = Array.from(new Array(this.zLength), () =>
+				Array.from(new Array(this.xLength), () => new Array<Cell>(this.yLength))
+			);
 
 			// Worlds
 			this.worlds = new Set(arg.worlds);
@@ -674,6 +721,33 @@ export function CoreGridClassFactory<
 		parameters: []
 	});
 
+	/**
+	 * Core grid.
+	 *
+	 * @remarks
+	 * Injecting grid specific method overrides.
+	 */
+	abstract class CoreGrid extends Grid {}
+
+	/**
+	 * Attaches client cell.
+	 *
+	 * @param this - Client grid
+	 * @param args - Rest params
+	 * @returns Cell
+	 */
+	(CoreGrid.prototype as Grid).addCell = function (
+		this: CoreGrid,
+		...args: Parameters<Grid["addCell"]>
+	): ReturnType<Grid["addCell"]> {
+		// Super first
+		let cell: Cell = (Object.getPrototypeOf(CoreGrid.prototype) as CoreGrid).addCell.call(this, ...args);
+
+		this.cellIndex[cell.z][cell.x][cell.y] = cell;
+
+		return cell;
+	};
+
 	// Have to re-inject dynamic bits from generic parents
-	return Grid;
+	return CoreGrid;
 }

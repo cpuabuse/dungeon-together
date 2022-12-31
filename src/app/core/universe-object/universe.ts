@@ -7,7 +7,7 @@
  * @file Universe definitions
  */
 
-import { PromiseQueue } from "../../common/async/promise-queue";
+import { SequenceQueue } from "../../common/async/promise-queue";
 import { Uuid } from "../../common/uuid";
 import {
 	CoreArg,
@@ -89,7 +89,7 @@ export type CoreUniverseObjectUniverse<
 		/**
 		 * Queue for universe.
 		 */
-		universeQueue: PromiseQueue;
+		universeQueue: SequenceQueue;
 
 		/**
 		 * Universe UUID.

@@ -9,6 +9,8 @@
  * @file
  */
 
+import { Nav } from "../../app/core/arg";
+import { CellPathOwn } from "../../app/core/cell";
 import { ActionWords } from "../../app/server/action";
 import { EntityKindConstructorParams, ServerEntity, ServerEntityClass } from "../../app/server/entity";
 import { UnitKindClass, UnitStats } from "./unit";
@@ -61,6 +63,17 @@ export function MonsterKindClassFactory({
 		 */
 		public static onTick(): void {
 			Base.onTick();
+			// TODO: Write a better AI
+			this.entities.forEach(entity => {
+				if (Math.random() > 0.5) {
+					let nav: CellPathOwn | undefined = (entity.constructor as ServerEntityClass).universe
+						.getCell(entity)
+						.nav.get([Nav.Left, Nav.Right, Nav.YDown, Nav.YUp, Nav.Left][Math.floor(Math.random() * 4)]);
+					if (nav) {
+						entity.kind.moveEntity((entity.constructor as ServerEntityClass).universe.getGrid(entity).getCell(nav));
+					}
+				}
+			});
 		}
 
 		/**

@@ -10,6 +10,7 @@
  */
 
 import { Uuid } from "../../common/uuid";
+import { Vector } from "../../common/vector";
 
 /**
  * Updating cells.
@@ -18,45 +19,57 @@ export type ClientUpdate = {
 	/**
 	 * Cells.
 	 */
-	cells: Array<{
-		/**
-		 *  Cell UUID.
-		 */
-		cellUuid: Uuid;
-
-		/**
-		 * Cell events.
-		 */
-		events: Array<{
+	cells: Array<
+		Vector & {
 			/**
-			 * Event name.
+			 *  Cell UUID.
 			 */
-			name: string;
+			cellUuid: Uuid;
 
 			/**
-			 * Event target.
+			 * Cell events.
 			 */
-			target?: {
+			events: Array<{
+				/**
+				 * Event name.
+				 */
+				name: string;
+
+				/**
+				 * Event target.
+				 */
+				target?: {
+					/**
+					 * Entity UUID.
+					 */
+					entityUuid: Uuid;
+				};
+			}>;
+
+			/**
+			 * Entities.
+			 */
+			entities: Array<{
 				/**
 				 * Entity UUID.
 				 */
 				entityUuid: Uuid;
-			};
-		}>;
 
-		/**
-		 * Entities.
-		 */
-		entities: Array<{
-			/**
-			 * Entity UUID.
-			 */
-			entityUuid: Uuid;
+				/**
+				 * Health update.
+				 */
+				emits: Record<string, any>;
 
-			/**
-			 * Health update.
-			 */
-			emits: Record<string, any>;
-		}>;
-	}>;
+				/**
+				 * Mode UUID.
+				 */
+				modeUuid: Uuid;
+
+				/**
+				 * World UUID.
+				 */
+				worldUuid: Uuid;
+			}>;
+		}
+	>;
 };

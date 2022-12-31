@@ -7,9 +7,16 @@
  * @file Core args
  */
 
+import { CoreArgOptionIds, CoreArgOptionsOverride } from "../arg";
 import { CoreArgIndexableOptionsUnion } from "../indexable";
 
 /**
  * Args options constraint for core universe objects.
+ *
+ * @remarks
+ * Vector option added to the indexable.
  */
-export type CoreUniverseObjectArgsOptionsUnion = CoreArgIndexableOptionsUnion;
+export type CoreUniverseObjectArgsOptionsUnion = CoreArgOptionsOverride<
+	CoreArgIndexableOptionsUnion,
+	CoreArgOptionIds.Vector
+>;

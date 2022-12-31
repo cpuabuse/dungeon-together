@@ -27,9 +27,9 @@ data:
   shards:
     - grids:
         - worlds: []
-          x: 15
-          y: 15
-          z: 3
+          x: 14
+          y: 14
+          z: 2
           cells:
             - x: 0
               y: 0

@@ -71,20 +71,39 @@ export class VectorArray<T> extends Array<(T | undefined)[][]> implements Vector
 	public z: number;
 
 	/**
+	 * Y-length.
+	 *
+	 * @returns Y-length
+	 */
+	public get yLength(): number {
+		return this.y + 1;
+	}
+
+	/**
+	 * Z-length.
+	 *
+	 * @returns Z-length
+	 */
+	public get zLength(): number {
+		return this.z + 1;
+	}
+
+	/**
 	 * Public constructor.
 	 *
 	 * @param vector - Vector
 	 */
 	public constructor(vector: Vector) {
-		super(vector.x);
+		super(vector.x + 1);
 
-		// Can not iterate through `this`, as it is an empty array
-		for (let i: number = 0; i < this.length; i++) {
-			this[i] = Array.from(new Array(vector.y), () => new Array<T | undefined>(vector.z));
-		}
 		this.x = vector.x;
 		this.y = vector.y;
 		this.z = vector.z;
+
+		// Can not iterate through `this`, as it is an empty array
+		for (let i: number = 0; i < this.length; i++) {
+			this[i] = Array.from(new Array(this.yLength), () => new Array<T | undefined>(this.zLength));
+		}
 	}
 
 	/**
@@ -100,11 +119,11 @@ export class VectorArray<T> extends Array<(T | undefined)[][]> implements Vector
 		 */
 		elements: Array<T>;
 	}): void {
-		for (let { x, y, z }: Vector = defaultVector; x < this.x; x++) {
-			for (; y < this.y; y++) {
-				for (; z < this.z; z++) {
+		for (let { x, y, z }: Vector = defaultVector; x <= this.x; x++) {
+			for (; y <= this.y; y++) {
+				for (; z <= this.z; z++) {
 					this.setElement({
-						element: elements[x * y * z],
+						element: elements[x * this.yLength * this.zLength + y * this.zLength + z],
 						vector: { x, y, z }
 					});
 				}
@@ -121,7 +140,7 @@ export class VectorArray<T> extends Array<(T | undefined)[][]> implements Vector
 	public getElement({ x, y, z }: Vector): T | undefined {
 		try {
 			// Z check omitted, as overflow produces undefined
-			if (x >= 0 && y >= 0 && x < this.x && y < this.y) {
+			if (x >= 0 && y >= 0 && x <= this.x && y <= this.y) {
 				return this[x][y][z];
 			}
 		} catch (error) {

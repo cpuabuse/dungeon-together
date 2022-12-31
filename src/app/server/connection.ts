@@ -23,6 +23,7 @@ import {
 	VSocket
 } from "../core/connection";
 import { LogLevel } from "../core/error";
+import { CoreShardArg } from "../core/shard";
 import { ActionWords } from "./action";
 import { ServerCell } from "./cell";
 import { ServerEntity } from "./entity";
@@ -74,15 +75,26 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 		targetOptions: clientOptions
 	});
 
+	let { playerEntity }: Player = Array.from(Array.from(this.universe.shards)[0][1].players.values())[2];
+	let currentCell: ServerCell = this.universe.getCell(playerEntity);
+
 	// Get temp shard data
 	// Axios returns an object
-	// eslint-disable-next-line @typescript-eslint/ban-types
-	let shardData: object = this.universe.Shard.convertShard({
+	let sd: CoreShardArg<ClientOptions> = this.universe.Shard.convertShard({
 		meta,
 		shard: Array.from(this.universe.shards)[1][1],
 		sourceOptions: serverOptions,
 		targetOptions: clientOptions
 	});
+	// TODO: Use visibility
+	sd.grids.forEach(grid => {
+		grid.cells = new Map(
+			[...grid.cells].filter(([cellUuid, cell]) => {
+				return Math.abs(cell.x - currentCell.x) < 5 && Math.abs(cell.y - currentCell.y) < 5;
+			})
+		);
+	});
+	let shardData: object = sd;
 
 	// Message reading loop
 	let counter: number = 0;
@@ -127,8 +139,6 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 					[MovementWord.ZUp]: Nav.ZUp,
 					[MovementWord.ZDown]: Nav.ZDown
 				};
-				let { playerEntity }: Player = Array.from(Array.from(this.universe.shards)[0][1].players.values())[2];
-				let currentCell: ServerCell = this.universe.getCell(playerEntity);
 				const { cellUuid }: CellPathOwn =
 					this.universe.getCell(playerEntity).nav.get(
 						directions[
@@ -144,6 +154,11 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 					) ?? currentCell;
 				let targetCell: ServerCell = this.universe.getGrid(playerEntity).getCell({ cellUuid });
 
+				// Tick
+				this.universe.Entity.kinds.forEach(Kind => {
+					Kind.onTick();
+				});
+
 				// False negative
 				// eslint-disable-next-line @typescript-eslint/typedef
 				let enemy: ServerEntity | undefined = Array.from(targetCell.entities).filter(([, entity]) => {
@@ -154,18 +169,14 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 				// eslint-disable-next-line no-case-declarations
 				let enemyEvent: ClientUpdate["cells"][number]["events"][number] | undefined;
 
+				// TODO: Entity controlled cell events
 				if (enemy) {
-					enemyEvent = { name: "death", target: { entityUuid: enemy.entityUuid } };
 					// Terminating first so that uuid doesn't exist anymore
 					enemy.kind.action({ action: ActionWords.Attack });
+					enemyEvent = { name: enemy.kind.emits.health > 0 ? "hp" : "death", target: { entityUuid: enemy.entityUuid } };
 				} else {
 					playerEntity.kind.moveEntity(targetCell);
 				}
-
-				// Tick
-				this.universe.Entity.kinds.forEach(Kind => {
-					Kind.onTick();
-				});
 
 				// Quick fix for switch
 				// eslint-disable-next-line no-case-declarations
@@ -183,9 +194,17 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 								// False negative
 								// eslint-disable-next-line @typescript-eslint/typedef
 								.map(([entityUuid, entity]) => {
-									return { emits: entity.kind.emits, entityUuid };
+									return {
+										emits: entity.kind.emits,
+										entityUuid,
+										modeUuid: entity.modeUuid,
+										worldUuid: entity.worldUuid
+									};
 								}),
-							events: enemyEvent ? [enemyEvent] : []
+							events: enemyEvent ? [enemyEvent] : [],
+							x: targetCell.x,
+							y: targetCell.y,
+							z: targetCell.z
 						},
 
 						// Current cell
@@ -200,10 +219,53 @@ export const queueProcessCallback: ProcessCallback<VSocket<ServerUniverse>> = as
 								// False negative
 								// eslint-disable-next-line @typescript-eslint/typedef
 								.map(([entityUuid, entity]) => {
-									return { emits: entity.kind.emits, entityUuid };
+									return {
+										emits: entity.kind.emits,
+										entityUuid,
+										modeUuid: entity.modeUuid,
+										worldUuid: entity.worldUuid
+									};
 								}),
-							events: []
-						}
+							events: [],
+							x: currentCell.x,
+							y: currentCell.y,
+							z: currentCell.z
+						},
+
+						// Rest cells
+						...Array.from(this.universe.getGrid(playerEntity).cells)
+							.filter(
+								// TODO: Change to visibility
+								([, cell]) =>
+									cell.cellUuid !== targetCell.cellUuid &&
+									cell.cellUuid !== currentCell.cellUuid &&
+									Math.abs(cell.x - targetCell.x) < 5 &&
+									Math.abs(cell.y - targetCell.y) < 5 &&
+									cell.z === targetCell.z
+							)
+							.map(([cellUuid, cell]) => ({
+								cellUuid,
+								entities: Array.from(cell.entities)
+									// False negative
+									// eslint-disable-next-line @typescript-eslint/typedef
+									.filter(([entityUuid]) => {
+										return entityUuid !== cell.defaultEntity.entityUuid;
+									})
+									// False negative
+									// eslint-disable-next-line @typescript-eslint/typedef
+									.map(([entityUuid, entity]) => {
+										return {
+											emits: entity.kind.emits,
+											entityUuid,
+											modeUuid: entity.modeUuid,
+											worldUuid: entity.worldUuid
+										};
+									}),
+								events: [],
+								x: cell.x,
+								y: cell.y,
+								z: cell.z
+							}))
 					]
 				};
 

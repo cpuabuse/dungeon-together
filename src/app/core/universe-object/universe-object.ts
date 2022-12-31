@@ -460,7 +460,6 @@ export function generateCoreUniverseObjectMembers<
 						const nameStaticGetDefaultChildUniverseObjectUuid =
 							`getDefault${childWords.singularCapitalizedWord}Uuid` as const; // Name of universe object UUID
 						const nameChildUniverseObjects = `${childWords.pluralLowercaseWord}` as const; // Name of universe objects member
-						const nameAttachChildUniverseObjects = `attach${childWords.singularCapitalizedWord}` as const; // Name of universe objects member
 						const nameAddChildUniverseObject = `add${childWords.singularCapitalizedWord}` as const; // Name of universe objects member
 						const nameChildUniverseObjectClass = `${childWords.singularCapitalizedWord}` as const; // Name of child class
 						const nameAttachChildUniverseObject = `attach${childWords.singularCapitalizedWord}` as const; // Name of attach universe object function
@@ -522,7 +521,7 @@ export function generateCoreUniverseObjectMembers<
 													});
 												})
 												.finally(() => {
-													(this as InstanceWithChild)[nameAttachChildUniverseObjects](child);
+													(this as InstanceWithChild)[nameAttachChildUniverseObject](child);
 												});
 
 											child = new ((this.constructor as CoreBaseClassNonRecursive).universe as ChildUniverse)[
