@@ -4,53 +4,61 @@
 -->
 
 <template>
-	<VList v-show="items.length > 0">
-		<template v-for="(item, itemKey) in items" :key="itemKey">
-			<!-- `v-for` used in `li` so that if conditions fail, the `li` is not rendered -->
-			<VListItem v-if="item.type === undefined || item.type === ItemType.InfoElement" rounded>
-				<VRow>
-					<VCol class="my-auto">
-						{{ item.name }}
-					</VCol>
+	<div v-show="items.length > 0" class="mx-4">
+		<div>
+			<template v-for="(item, itemKey) in items" :key="itemKey">
+				<!-- `v-for` used in `li` so that if conditions fail, the `li` is not rendered -->
 
-					<VSpacer></VSpacer>
+				<VCard v-if="item.type === undefined || item.type === ItemType.InfoElement" class="my-4">
+					<VRow variant="outlined">
+						<VCol cols="auto" class="my-auto">
+							<VCardText>{{ item.name }}</VCardText>
+						</VCol>
 
-					<VCol class="my-auto">
-						<VChip class="ma-2" text-color="white">
-							<VAvatar>{{ item.data }}</VAvatar>
-						</VChip>
-					</VCol>
-				</VRow>
-			</VListItem>
+						<VSpacer />
 
-			<VListItem v-else-if="item.type === ItemType.Uuid" rounded>
-				<VCard>
+						<VCol cols="auto" class="my-auto">
+							<VChip class="ma-2">
+								{{ item.data }}
+							</VChip>
+						</VCol>
+					</VRow>
+				</VCard>
+
+				<VCard v-else-if="item.type === ItemType.Uuid" class="my-4">
 					<VTabs v-model="tab">
 						<VTab value="one">Map</VTab>
 						<VTab value="two">UUID</VTab>
 					</VTabs>
 
-					<VCardText>
-						<VWindow v-model="tab">
-							<VWindowItem value="one">MAP</VWindowItem>
+					<VWindow v-model="tab">
+						<VWindowItem value="one">
+							<VCard>
+								<VCardText>MAP TEXT</VCardText>
+							</VCard>
+						</VWindowItem>
 
-							<VWindowItem value="two">Player</VWindowItem>
-						</VWindow>
-					</VCardText>
+						<VWindowItem value="two">
+							<VCard>
+								<VCardText>TWO TEXT</VCardText>
+							</VCard>
+						</VWindowItem>
+					</VWindow>
 				</VCard>
-			</VListItem>
-		</template>
-	</VList>
+			</template>
+		</div>
+	</div>
 </template>
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import {
-	VAvatar,
 	VCard,
 	VCardText,
 	VChip,
 	VCol,
+	VContainer,
+	VDivider,
 	VList,
 	VListItem,
 	VRow,
@@ -107,11 +115,12 @@ type Item =
 
 export default defineComponent({
 	components: {
-		VAvatar,
 		VCard,
 		VCardText,
 		VChip,
 		VCol,
+		VContainer,
+		VDivider,
 		VList,
 		VListItem,
 		VRow,

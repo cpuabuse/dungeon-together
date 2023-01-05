@@ -4,7 +4,7 @@
 	<statealertbox />
 	<debug />
 	<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
-	<OverlayContainer>
+	<OverlayContainer v-model="debugContainer">
 		<template #body>
 			<OverlayContainerContent
 				:items="[
@@ -129,7 +129,7 @@ export default defineComponent({
 							 * Click debug.
 							 */
 							onClick(): void {
-								alert("Debug clicked!");
+								data.debugContainer = true;
 							}
 						}
 					],
@@ -139,16 +139,20 @@ export default defineComponent({
 			]
 		};
 
-		return {
+		// Infer type
+		// eslint-disable-next-line @typescript-eslint/typedef
+		let data = {
 			ItemType,
+			debugContainer: false,
 			mainToolbar,
 			what: 0
 		};
+		return data;
 	},
 
 	methods: {
 		/**
-		 * Processes click onb main toolbar.
+		 * Processes click on main toolbar.
 		 *
 		 * @param param - Destructured object parameter
 		 */

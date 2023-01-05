@@ -1,13 +1,20 @@
 <!-- Dialog modal -->
 
 <template>
-	<VBtn @click="dialog = true">Button</VBtn>
-
-	<VDialog v-model="dialog" persistent no-click-animation :scrim="false">
-		<VCard height="50vh" width="50vw" class="align-self-center">
+	<!-- Width must be set in dialog, since it defines dialog area -->
+	<VDialog
+		:model-value="modelValue"
+		no-click-animation
+		persistent
+		:scrim="false"
+		width="50vw"
+		height="50vh"
+		@update:model-value="value => $emit('update:modelValue', value)"
+	>
+		<VCard height="100%" width="100%">
 			<VToolbar>
 				<VToolbarTitle class="text-h5">Title</VToolbarTitle>
-				<VBtn icon @click="dialog = false">
+				<VBtn icon @click="$emit('update:modelValue', false)">
 					<VIcon icon="fa-close" />
 				</VBtn>
 			</VToolbar>
@@ -29,7 +36,11 @@ export default defineComponent({
 	 * @returns Component data
 	 */
 	data() {
-		return { dialog: false };
-	}
+		return {};
+	},
+
+	emits: ["update:modelValue"],
+
+	props: { modelValue: { required: true, type: Boolean } }
 });
 </script>
