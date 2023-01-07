@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -166,11 +166,6 @@ export function ClientShardFactory({
 
 			// Initialize toast
 			this.toast = new ClientToast({ displayTime: 3000, shard: this });
-
-			// Call health bar
-			new ProgressBar({ container: this.app.stage });
-
-			// Visualize friendly, neutral and enemy HP bars
 
 			/* eslint-disable no-magic-numbers, no-console, @typescript-eslint/no-unused-vars */
 			// After attach

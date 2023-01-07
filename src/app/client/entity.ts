@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -61,14 +61,14 @@ export function ClientEntityFactory({
 					if (health === null) {
 						// Nothing
 					} else {
-						this.healthBar.shader.uniforms.value = health;
+						this.healthBar.value = health;
 					}
 				}
 			} else if (health) {
 				this.basicText = new Text(health);
 				this.healthBar = new ProgressBar({ container: this.sprite });
-				this.healthBar.shader.uniforms.maxValue = 3;
-				this.healthBar.shader.uniforms.value = health;
+				this.healthBar.maxValue = 3;
+				this.healthBar.value = health;
 				this.sprite.addChild(this.basicText);
 			}
 		}

@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -69,16 +69,6 @@ void main() {
 let width: number = 1.0;
 
 /**
- * Max value.
- */
-let maxValue: number = 37;
-
-/**
- * Value.
- */
-let value: number = 5;
-
-/**
  * Height.
  */
 const height: number = 0.15;
@@ -143,6 +133,60 @@ export class ProgressBar {
 	public shader: Shader;
 
 	/**
+	 * Get max value getter.
+	 *
+	 * @returns Uniform value
+	 */
+	public get maxValue(): number {
+		// Data is received from video card
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		let {
+			maxValue
+		}: {
+			/**
+			 * Bar value.
+			 */
+			maxValue?: any;
+		} = this.shader.uniforms;
+
+		return typeof maxValue === "number" ? maxValue : 0;
+	}
+
+	/**
+	 * Get max value setter.
+	 */
+	public set maxValue(maxValue: number) {
+		this.shader.uniforms.maxValue = maxValue;
+	}
+
+	/**
+	 * Get value getter.
+	 *
+	 * @returns Uniform value
+	 */
+	public get value(): number {
+		// Data is received from video card
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		let {
+			value
+		}: {
+			/**
+			 * Bar value.
+			 */
+			value?: any;
+		} = this.shader.uniforms;
+
+		return typeof value === "number" ? value : 0;
+	}
+
+	/**
+	 * Get value setter.
+	 */
+	public set value(value: number) {
+		this.shader.uniforms.value = value;
+	}
+
+	/**
 	 * Container.
 	 */
 	private container: Container;
@@ -192,6 +236,16 @@ export class ProgressBar {
 		 */
 		colors?: HpBarColors;
 	}) {
+		/**
+		 * Max value.
+		 */
+		let maxValue: number = 37;
+
+		/**
+		 * Value.
+		 */
+		let value: number = 5;
+
 		this.container = container;
 		this.colors = colors ?? neutralHpBarColors;
 
