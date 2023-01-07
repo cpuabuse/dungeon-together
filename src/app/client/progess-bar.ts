@@ -10,7 +10,6 @@
 import Color from "color";
 import { Container, Geometry, Mesh, Program, Shader } from "pixi.js";
 import { Palette } from "../common/color";
-import { ClientShard } from "./shard";
 
 /**
  *  VertexSrc.
@@ -62,16 +61,25 @@ void main() {
 }
 `;
 
-// Add dynamic size change
+/**
+ * RGB integer scale factor.
+ */
+const rgbIntegerScaleFactor: number = 255;
+
 /**
  * Width.
  */
-let width: number = 1.0;
+const width: number = 1;
 
 /**
  * Height.
  */
 const height: number = 0.15;
+
+/**
+ * Default max value.
+ */
+const defaultMaxValue: number = 100;
 
 /**
  * HP bar parts tuple.
@@ -128,12 +136,34 @@ export class ProgressBar {
 	public colors: HpBarColors;
 
 	/**
+	 * Mesh.
+	 */
+	public mesh: Mesh<Shader>;
+
+	/**
 	 *Shader.
 	 */
 	public shader: Shader;
 
 	/**
-	 * Get max value getter.
+	 * Scale getter.
+	 *
+	 * @returns Scale factor
+	 */
+	public get scale(): number {
+		return this.mesh.scale.x;
+	}
+
+	/**
+	 * Scale setter.
+	 */
+	public set scale(scale: number) {
+		// TODO: Add aspect ratio member to class.
+		this.mesh.scale.set(scale);
+	}
+
+	/**
+	 * Max value getter.
 	 *
 	 * @returns Uniform value
 	 */
@@ -153,14 +183,14 @@ export class ProgressBar {
 	}
 
 	/**
-	 * Get max value setter.
+	 * Max value setter.
 	 */
 	public set maxValue(maxValue: number) {
 		this.shader.uniforms.maxValue = maxValue;
 	}
 
 	/**
-	 * Get value getter.
+	 * Value getter.
 	 *
 	 * @returns Uniform value
 	 */
@@ -180,7 +210,7 @@ export class ProgressBar {
 	}
 
 	/**
-	 * Get value setter.
+	 * Value setter.
 	 */
 	public set value(value: number) {
 		this.shader.uniforms.value = value;
@@ -198,8 +228,12 @@ export class ProgressBar {
 		const geometry: Geometry = new Geometry().addAttribute(
 			"coord",
 			[0, 0, 0, height, 1, height, 1, 0].map(element => element * width),
+			// Two values per vertex
+			// eslint-disable-next-line no-magic-numbers
 			2
 		);
+		// Index mapping
+		// eslint-disable-next-line no-magic-numbers
 		geometry.addIndex([0, 1, 2, 0, 2, 3]);
 		return geometry;
 	})();
@@ -224,7 +258,10 @@ export class ProgressBar {
 	 */
 	public constructor({
 		container,
-		colors
+		colors = neutralHpBarColors,
+		maxValue = defaultMaxValue,
+		value = 0,
+		scale = 1
 	}: {
 		/**
 		 * Container.
@@ -235,37 +272,42 @@ export class ProgressBar {
 		 * Colors.
 		 */
 		colors?: HpBarColors;
-	}) {
+
 		/**
 		 * Max value.
 		 */
-		let maxValue: number = 37;
+		maxValue?: number;
 
 		/**
 		 * Value.
 		 */
-		let value: number = 5;
+		value?: number;
 
+		/**
+		 * Scale.
+		 */
+		scale?: number;
+	}) {
 		this.container = container;
-		this.colors = colors ?? neutralHpBarColors;
+		this.colors = colors;
 
 		// Add color on main bar
 		let mainColor: Array<number> = this.colors.foregroundMain
 			.rgb()
 			.array()
-			.map(element => element / 255);
+			.map(element => element / rgbIntegerScaleFactor);
 
 		// Add color on secondary bar
 		let secondaryColor: Array<number> = this.colors.background
 			.rgb()
 			.array()
-			.map(element => element / 255);
+			.map(element => element / rgbIntegerScaleFactor);
 
 		// Add color on border
 		let borderColor: Array<number> = this.colors.border
 			.rgb()
 			.array()
-			.map(element => element / 255);
+			.map(element => element / rgbIntegerScaleFactor);
 
 		this.shader = new Shader(ProgressBar.program, {
 			borderColor,
@@ -279,9 +321,8 @@ export class ProgressBar {
 			width
 		});
 
-		const bar: Mesh<Shader> = new Mesh(ProgressBar.geometry, this.shader);
-		bar.position.set(0, 0);
-		bar.scale.set(50);
-		this.container.addChild(bar);
+		this.mesh = new Mesh(ProgressBar.geometry, this.shader);
+		this.scale = scale;
+		this.container.addChild(this.mesh);
 	}
 }

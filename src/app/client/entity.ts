@@ -7,7 +7,7 @@
  * @file Entity that can be rendered.
  */
 
-import { AnimatedSprite, Text } from "pixi.js";
+import { AnimatedSprite, Container, Text } from "pixi.js";
 import { CoreArgIds } from "../core/arg";
 import { CoreEntityArg, CoreEntityClassFactory } from "../core/entity";
 import { CoreEntityArgParentIds } from "../core/parents";
@@ -66,7 +66,8 @@ export function ClientEntityFactory({
 				}
 			} else if (health) {
 				this.basicText = new Text(health);
-				this.healthBar = new ProgressBar({ container: this.sprite });
+				// TODO: Update scaling on change of entity scale
+				this.healthBar = new ProgressBar({ container: this.sprite, scale: this.sprite.width });
 				this.healthBar.maxValue = 3;
 				this.healthBar.value = health;
 				this.sprite.addChild(this.basicText);
