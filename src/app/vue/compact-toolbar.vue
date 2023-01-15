@@ -151,6 +151,8 @@ export default defineComponent({
 
 		/**
 		 * List of menus.
+		 *
+		 * The callbacks, must not modify data directly, and should call methods, so that the scope is preserved.
 		 */
 		menus: {
 			required: true,
