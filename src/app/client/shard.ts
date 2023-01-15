@@ -26,6 +26,7 @@ import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
+import { ElementBall } from "./element-ball";
 import { ClientGrid } from "./grid";
 import {
 	Input,
@@ -207,6 +208,9 @@ export function ClientShardFactory({
 
 					// Set scene for entity show
 					this.setScene();
+
+					// Element ball display test
+					new ElementBall({ container: this.gridContainer, scale: 500 });
 
 					// Add listeners for right-click input
 					this.input.on(rcSymbol, inputInterface => {
