@@ -5,51 +5,76 @@
 
 <template>
 	<div v-show="items.length > 0" class="mx-4">
-		<div>
-			<VCard v-for="(item, itemKey) in items" :key="itemKey" class="my-4">
-				<!-- Default informational element -->
-				<VRow v-if="item.type === undefined || item.type === ItemType.InfoElement" variant="outlined">
-					<VCol cols="auto" class="my-auto">
-						<VCardText>{{ item.name }}</VCardText>
-					</VCol>
+		<VList>
+			<template v-for="(item, itemKey) in items" :key="itemKey">
+				<VListItem class="my-4">
+					<!-- Default informational element -->
+					<VRow v-if="item.type === undefined || item.type === ItemType.InfoElement" variant="outlined" class="mx-4">
+						<VCol cols="auto" class="my-auto">
+							{{ item.name }}
+						</VCol>
 
-					<VSpacer />
+						<VSpacer />
 
-					<VCol cols="auto" class="my-auto">
-						<VChip class="ma-2">
-							{{ item.data }}
-						</VChip>
-					</VCol>
-				</VRow>
+						<VCol cols="auto" class="my-auto">
+							<VChip class="ma-2">
+								{{ item.data }}
+							</VChip>
+						</VCol>
+					</VRow>
 
-				<!-- Tab element -->
-				<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
-				<div v-else-if="item.type === ItemType.Tab" :key="item.tabs">
-					<VTabs
-						:key="item.tabs"
-						:model-value="getTab({ tabs: item.tabs })"
-						@update:model-value="value => setTab({ tabs: item.tabs, value })"
-					>
-						<VTab v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
-					</VTabs>
+					<!-- UUID element -->
+					<div v-else-if="item.type === ItemType.Uuid">
+						<VCol>
+							{{ item.name }}
+						</VCol>
+						<VCol><highlightjs language="plaintext" :code="item.uuid" /></VCol>
+					</div>
 
-					<VWindow
-						:model-value="getTab({ tabs: item.tabs })"
-						@update:model-value="value => setTab({ tabs: item.tabs, value })"
-					>
-						<VWindowItem v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">
-							<OverlayContainerContent :items="tab.items" />
-						</VWindowItem>
-					</VWindow>
-				</div>
-			</VCard>
-		</div>
+					<!-- Tab element -->
+					<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
+					<div v-else-if="item.type === ItemType.Tab" :key="item.tabs">
+						<VTabs
+							:key="item.tabs"
+							:model-value="getTab({ tabs: item.tabs })"
+							@update:model-value="value => setTab({ tabs: item.tabs, value })"
+						>
+							<VTab v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
+						</VTabs>
+
+						<VWindow
+							:model-value="getTab({ tabs: item.tabs })"
+							@update:model-value="value => setTab({ tabs: item.tabs, value })"
+						>
+							<VWindowItem v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">
+								<OverlayContainerContent :items="tab.items" />
+							</VWindowItem>
+						</VWindow>
+					</div>
+				</VListItem>
+				<template v-if="itemKey < items.length - 1">
+					<VDivider />
+				</template>
+			</template>
+		</VList>
 	</div>
 </template>
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
-import { VCard, VCardText, VChip, VCol, VRow, VSpacer, VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
+import {
+	VChip,
+	VCol,
+	VDivider,
+	VList,
+	VListItem,
+	VRow,
+	VSpacer,
+	VTab,
+	VTabs,
+	VWindow,
+	VWindowItem
+} from "vuetify/components";
 import { OverlayContainerItemType as ItemType } from "../common/front";
 
 /**
@@ -123,10 +148,11 @@ type Item =
 
 export default defineComponent({
 	components: {
-		VCard,
-		VCardText,
 		VChip,
 		VCol,
+		VDivider,
+		VList,
+		VListItem,
 		VRow,
 		VSpacer,
 		VTab,
