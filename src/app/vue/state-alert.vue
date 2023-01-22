@@ -1,37 +1,28 @@
 <!--State alert component is informing the user while the state of the game is altered-->
 
 <template>
-	<div class="alert d-flex align-items-center" role="alert" :class="alertClass">
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			width="24"
-			height="24"
-			fill="currentColor"
-			class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"
-			viewBox="0 0 16 16"
-			role="img"
-			aria-label="Warning:"
-		>
-			<path :d="svgPath" />
-		</svg>
-		<div>{{ message }}</div>
+	<div>
+		<VAlert border :type="alertClass">{{ message }}</VAlert>
 	</div>
 </template>
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
+import { VAlert } from "vuetify/components";
 import { AlertLevel } from "../client/gui/severity";
 
 /**
  * Possible style classes for alert container.
  */
 enum AlertClass {
-	Primary = "alert-primary",
-	Warning = "alert-warning",
-	Danger = "alert-danger"
+	Primary = "info",
+	Warning = "warning",
+	Danger = "error"
 }
 
 export default defineComponent({
+	components: { VAlert },
+
 	/**
 	 * Computed for component.
 	 *

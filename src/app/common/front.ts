@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -19,5 +19,10 @@ export enum OverlayContainerItemType {
 	/**
 	 * Type for UUID representation.
 	 */
-	Uuid
+	Uuid,
+
+	/**
+	 * Type for tab.
+	 */
+	Tab
 }

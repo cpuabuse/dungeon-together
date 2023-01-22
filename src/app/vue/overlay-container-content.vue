@@ -5,14 +5,13 @@
 
 <template>
 	<div v-show="items.length > 0" class="mx-4">
-		<div>
+		<VList>
 			<template v-for="(item, itemKey) in items" :key="itemKey">
-				<!-- `v-for` used in `li` so that if conditions fail, the `li` is not rendered -->
-
-				<VCard v-if="item.type === undefined || item.type === ItemType.InfoElement" class="my-4">
-					<VRow variant="outlined">
+				<VListItem class="my-4">
+					<!-- Default informational element -->
+					<VRow v-if="item.type === undefined || item.type === ItemType.InfoElement" variant="outlined" class="mx-4">
 						<VCol cols="auto" class="my-auto">
-							<VCardText>{{ item.name }}</VCardText>
+							{{ item.name }}
 						</VCol>
 
 						<VSpacer />
@@ -23,41 +22,49 @@
 							</VChip>
 						</VCol>
 					</VRow>
-				</VCard>
 
-				<VCard v-else-if="item.type === ItemType.Uuid" class="my-4">
-					<VTabs v-model="tab">
-						<VTab value="one">Map</VTab>
-						<VTab value="two">UUID</VTab>
-					</VTabs>
+					<!-- UUID element -->
+					<div v-else-if="item.type === ItemType.Uuid">
+						<VCol>
+							{{ item.name }}
+						</VCol>
+						<VCol><highlightjs language="plaintext" :code="item.uuid" /></VCol>
+					</div>
 
-					<VWindow v-model="tab">
-						<VWindowItem value="one">
-							<VCard>
-								<VCardText>MAP TEXT</VCardText>
-							</VCard>
-						</VWindowItem>
+					<!-- Tab element -->
+					<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
+					<div v-else-if="item.type === ItemType.Tab" :key="item.tabs">
+						<VTabs
+							:key="item.tabs"
+							:model-value="getTab({ tabs: item.tabs })"
+							@update:model-value="value => setTab({ tabs: item.tabs, value })"
+						>
+							<VTab v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
+						</VTabs>
 
-						<VWindowItem value="two">
-							<VCard>
-								<VCardText>TWO TEXT</VCardText>
-							</VCard>
-						</VWindowItem>
-					</VWindow>
-				</VCard>
+						<VWindow
+							:model-value="getTab({ tabs: item.tabs })"
+							@update:model-value="value => setTab({ tabs: item.tabs, value })"
+						>
+							<VWindowItem v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">
+								<OverlayContainerContent :items="tab.items" />
+							</VWindowItem>
+						</VWindow>
+					</div>
+				</VListItem>
+				<template v-if="itemKey < items.length - 1">
+					<VDivider />
+				</template>
 			</template>
-		</div>
+		</VList>
 	</div>
 </template>
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import {
-	VCard,
-	VCardText,
 	VChip,
 	VCol,
-	VContainer,
 	VDivider,
 	VList,
 	VListItem,
@@ -69,6 +76,21 @@ import {
 	VWindowItem
 } from "vuetify/components";
 import { OverlayContainerItemType as ItemType } from "../common/front";
+
+/**
+ * Tabs type.
+ */
+type Tabs = Array<{
+	/**
+	 * Name to display.
+	 */
+	name: string;
+
+	/**
+	 * Items to display.
+	 */
+	items: Array<Item>;
+}>;
 
 /**
  * Type for item props.
@@ -111,15 +133,23 @@ type Item =
 			 * Name to display.
 			 */
 			name: string;
+	  }
+	| {
+			/**
+			 * Tab type.
+			 */
+			type: ItemType.Tab;
+
+			/**
+			 * Data to display.
+			 */
+			tabs: Tabs;
 	  };
 
 export default defineComponent({
 	components: {
-		VCard,
-		VCardText,
 		VChip,
 		VCol,
-		VContainer,
 		VDivider,
 		VList,
 		VListItem,
@@ -138,9 +168,54 @@ export default defineComponent({
 	data() {
 		return {
 			ItemType,
-			tab: null
+			tab2: null,
+			tabFallBack: null,
+			tabs: new Map<Tabs, number | null>()
 		};
 	},
+
+	methods: {
+		/**
+		 * Get the tab.
+		 *
+		 * @param param - Tabs
+		 * @returns Tab
+		 */
+		getTab({
+			tabs
+		}: {
+			/**
+			 * Tabs to get active tab for.
+			 */
+			tabs: Tabs;
+		}): number | null {
+			return this.tabs.get(tabs) ?? this.tabFallBack;
+		},
+
+		/**
+		 * Set the key of active tab.
+		 *
+		 * @param param - Tabs and value
+		 */
+		setTab({
+			tabs,
+			value
+		}: {
+			/**
+			 * Tabs.
+			 */
+			tabs: Tabs;
+
+			/**
+			 * Value.
+			 */
+			value: number | null;
+		}): void {
+			this.tabs.set(tabs, value);
+		}
+	},
+
+	name: "OverlayContainerContent",
 
 	/**
 	 * Props for component.

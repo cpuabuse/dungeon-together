@@ -6,13 +6,7 @@
 	<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
 	<OverlayContainer v-model="debugContainer">
 		<template #body>
-			<OverlayContainerContent
-				:items="[
-					{ name: 'Info1', data: '14' },
-					{ name: 'Info2', data: '2' },
-					{ name: 'Player', type: ItemType.Uuid, uuid: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }
-				]"
-			/>
+			<OverlayContainerContent :items="overlayItems" />
 		</template>
 	</OverlayContainer>
 </template>
@@ -145,6 +139,30 @@ export default defineComponent({
 			ItemType,
 			debugContainer: false,
 			mainToolbar,
+			overlayItems: [
+				{ data: "14", name: "Info1" },
+				{ data: "2", name: "Info2" },
+				{ name: "Player", type: ItemType.Uuid, uuid: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" },
+				{
+					tabs: [
+						{
+							items: [
+								{ data: "1", name: "Info1" },
+								{ data: "5", name: "Info2" }
+							],
+							name: "Tab1"
+						},
+						{
+							items: [
+								{ data: "14", name: "Info1" },
+								{ data: "2", name: "Info2" }
+							],
+							name: "Tab2"
+						}
+					],
+					type: ItemType.Tab
+				}
+			],
 			what: 0
 		};
 		return data;
