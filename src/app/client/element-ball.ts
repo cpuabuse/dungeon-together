@@ -35,31 +35,59 @@ void main() {
  */
 // Needs to be adapted to new file
 const fragmentSrc: string = `
+#define PI 3.1415926538
 precision mediump float;
 varying float relativeWidth;
 varying float relativeHeight;
-uniform vec3 secondaryColor;
-uniform vec3 mainColor;
-uniform vec3 borderColor;
-uniform float secondaryColorIntensity;
+uniform vec3 edgeColor;
+uniform vec3 primaryArmColor;
+uniform vec3 secondaryArmColor;
+uniform vec3 centerColor;
+uniform float edgeColorIntensity;
 uniform float maxValue;
 uniform float value;
-uniform float borderRatio;
 uniform float height;
 
+/*
+	Returns an \`x\` coordinate, resulted by axis rotation of cartesian plane by angle.
+*/
+float rotateAxisX(float x, float y, float angle) {
+	return y * cos(angle) - x * sin(angle);
+}
+
+/*
+	Returns an \`y\` coordinate, resulted by axis rotation of cartesian plane by angle.
+*/
+float rotateAxisY(float x, float y, float angle) {
+	return x * cos(angle) + y * sin(angle);
+}
+
+/*
+	Returns a positive \`atan\` component, resulted by axis rotation of cartesian plane by angle.
+	Produces values between \`0\` and \`π\` (produces symmetry, if used as operand of \`sin\`).
+*/
+float getAtanComponent(float x, float y, float angle) {
+	return atan(
+		rotateAxisX(x, y, angle),
+		rotateAxisY(x, y, angle)
+	) + PI;
+}
+
 void main() {
-	float hypotenuse = sqrt(relativeWidth * relativeWidth + relativeHeight * relativeHeight) * 0.8;
+	float hypotenuse = sqrt(relativeWidth * relativeWidth + relativeHeight * relativeHeight);
+	float atanComponent = getAtanComponent(relativeWidth, relativeHeight, hypotenuse * 0.8);
+	float primaryRatio = (1.0 + sin(atanComponent * 8.0 + 10.0)) / 2.0;
+	float secondaryRatio = (1.0 + sin(atanComponent * 13.0)) / 2.0;
+	float opacity = hypotenuse * (primaryRatio + secondaryRatio + 2.0) / 4.0;
+
+	// TODO: Hypotenuse needs to be rescaled to 1.0
+	if (opacity > 1.0) {
+		opacity = 1.0;
+	}
 
 	gl_FragColor = vec4(
-		secondaryColor.x,
-		secondaryColor.y,
-		(1.0 + sin(
-			(2.0 * atan(
-				- relativeWidth * sin(hypotenuse) + relativeHeight * cos(hypotenuse),
-				relativeWidth * cos(hypotenuse) + relativeHeight * sin(hypotenuse)
-			) + 3.1415926538) * 8.0
-		)) / 2.0,
-		1.0
+		(primaryArmColor * primaryRatio + secondaryArmColor * secondaryRatio)/2.0 + (2.0 - primaryRatio - secondaryRatio) / 2.0 * centerColor,
+		opacity
 	);
 }
 `;
@@ -79,7 +107,7 @@ const height: number = 1;
  */
 // Extract type
 // eslint-disable-next-line @typescript-eslint/typedef
-export const elementBallColorWords = ["elementBallCenter", "elementBallEdge"] as const;
+export const elementBallColorWords = ["center", "edge", "primaryArm", "secondaryArm"] as const;
 
 /**
  * Type representing colors in an element ball.
@@ -91,8 +119,10 @@ export type ElementBallColors = Palette<typeof elementBallColorWords>;
  */
 // Example for upcoming element balls such as thunder etc.
 export const fireElementBallColorWords: ElementBallColors = {
-	elementBallCenter: new Color("#d9420b"),
-	elementBallEdge: new Color("#f2a20c")
+	center: new Color("#F2CC0C"),
+	edge: new Color("#8C1F07"),
+	primaryArm: new Color("#d9420b"),
+	secondaryArm: new Color("#F2A20C")
 };
 
 /**
@@ -100,7 +130,7 @@ export const fireElementBallColorWords: ElementBallColors = {
  */
 export class ElementBall {
 	/**
-	 *  Hp bar colors.
+	 *  ElementBall colors.
 	 */
 	public colors: ElementBallColors;
 
@@ -190,14 +220,38 @@ export class ElementBall {
 		this.container = container;
 		this.colors = colors;
 
+		// Center color.
+		const centerColor: Array<number> = this.colors.center
+			.rgb()
+			.array()
+			.map(element => element / 255);
+
+		// Primary arm color.
+		const primaryArmColor: Array<number> = this.colors.primaryArm
+			.rgb()
+			.array()
+			.map(element => element / 255);
+
+		// Secondary arm color.
+		const secondaryArmColor: Array<number> = this.colors.secondaryArm
+			.rgb()
+			.array()
+			.map(element => element / 255);
+
+		// Edge color.
+		const edgeColor: Array<number> = this.colors.edge
+			.rgb()
+			.array()
+			.map(element => element / 255);
+
 		this.shader = new Shader(ElementBall.program, {
-			borderColor: [1, 0, 0],
-			borderRatio: 0.01,
+			centerColor,
+			edgeColor,
+			edgeColorIntensity: 10,
 			height: 0.15,
-			mainColor: [1, 1, 0],
 			maxValue: 100,
-			secondaryColor: [1, 0, 1],
-			secondaryColorIntensity: 10,
+			primaryArmColor,
+			secondaryArmColor,
 			value: 0,
 			width
 		});
