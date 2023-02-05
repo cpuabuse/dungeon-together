@@ -1,4 +1,5 @@
 <template>
+	<StatsBar />
 	<div class="universe">Hello: {{ what }}</div>
 	<tsxtest />
 	<statealertbox />
@@ -21,6 +22,7 @@ import debugComponent from "./debug.vue";
 import OverlayContainerContent from "./overlay-container-content.vue";
 import OverlayContainer from "./overlay-container.vue";
 import stateAlertBoxComponent from "./state-alert-box.vue";
+import StatsBar from "./stats-bar.vue";
 import tsxTestComponent from "./tsx/test.vue";
 import { CompactToolbarData, CompactToolbarMenuBaseProps, compactToolbarDataToMenuBaseProps } from "./types";
 
@@ -32,6 +34,7 @@ export default defineComponent({
 		CompactToolbar,
 		OverlayContainer,
 		OverlayContainerContent,
+		StatsBar,
 		debug: debugComponent,
 		statealertbox: stateAlertBoxComponent,
 		tsxtest: tsxTestComponent
