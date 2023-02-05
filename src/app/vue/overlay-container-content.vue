@@ -4,14 +4,16 @@
 -->
 
 <template>
-	<div v-show="items.length > 0" class="mx-4">
+	<div v-show="items.length > 0">
 		<VList>
 			<template v-for="(item, itemKey) in items" :key="itemKey">
-				<VListItem class="my-4">
+				<VListItem>
 					<!-- Default informational element -->
-					<VRow v-if="item.type === undefined || item.type === ItemType.InfoElement" variant="outlined" class="mx-4">
+					<VRow v-if="item.type === undefined || item.type === ItemType.InfoElement" variant="outlined">
 						<VCol cols="auto" class="my-auto">
-							{{ item.name }}
+							<VListItemTitle>
+								{{ item.name }}
+							</VListItemTitle>
 						</VCol>
 
 						<VSpacer />
@@ -25,15 +27,17 @@
 
 					<!-- UUID element -->
 					<div v-else-if="item.type === ItemType.Uuid">
-						<VCol>
+						<VListItemTitle>
 							{{ item.name }}
-						</VCol>
-						<VCol><highlightjs language="plaintext" :code="item.uuid" /></VCol>
+						</VListItemTitle>
+
+						<highlightjs language="plaintext" :code="item.uuid" />
 					</div>
 
 					<!-- Tab element -->
 					<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
 					<div v-else-if="item.type === ItemType.Tab" :key="item.tabs">
+						<VListItemTitle class="text-center">List title</VListItemTitle>
 						<VTabs
 							:key="item.tabs"
 							:model-value="getTab({ tabs: item.tabs })"
@@ -68,6 +72,7 @@ import {
 	VDivider,
 	VList,
 	VListItem,
+	VListItemTitle,
 	VRow,
 	VSpacer,
 	VTab,
@@ -153,6 +158,7 @@ export default defineComponent({
 		VDivider,
 		VList,
 		VListItem,
+		VListItemTitle,
 		VRow,
 		VSpacer,
 		VTab,
