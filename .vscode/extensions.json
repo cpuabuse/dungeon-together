@@ -7,6 +7,9 @@
 		"ms-edgedevtools.vscode-edge-devtools",
 
 		// For code formatting
-		"dbaeumer.vscode-eslint"
+		"dbaeumer.vscode-eslint",
+
+		// GLSL
+		"raczzalan.webgl-glsl-editor"
 	]
 }

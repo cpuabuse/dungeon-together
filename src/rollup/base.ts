@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -18,6 +18,7 @@ import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
 import vue from "@vitejs/plugin-vue";
 import { Plugin, RollupOptions } from "rollup";
+import glslify from "rollup-plugin-glslify";
 import jscc from "rollup-plugin-jscc";
 import nodePolyfills from "rollup-plugin-polyfill-node";
 import postcss, { PostCSSPluginConf } from "rollup-plugin-postcss";
@@ -119,6 +120,9 @@ export function defineOptions({
 				// Seems `postcss` not typed correctly
 				use: [["sass", { includePaths: [join(...rootDir, "node_modules")] }]] as unknown as PostCSSPluginConf["use"]
 			}),
+
+			// Imports glsl files
+			glslify({ compress: isProduction }),
 
 			// To resolve some libraries correctly
 			// Has to come before modules manipulating code, so that import statements can be interpreted

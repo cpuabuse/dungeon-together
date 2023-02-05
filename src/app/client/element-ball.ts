@@ -7,8 +7,9 @@
  * @file element-ball display.
  */
 import Color from "color";
-import { Container, Geometry, Mesh, Program, Shader } from "pixi.js";
+import { BLEND_MODES, Container, Geometry, Mesh, Program, Shader, Ticker } from "pixi.js";
 import { Palette } from "../common/color";
+import fragmentSrc from "./fragment.glsl";
 
 /**
  *  VertexSrc.
@@ -27,68 +28,6 @@ void main() {
 	relativeWidth = (-0.5 + coord.x / width) * 2.0;
 	relativeHeight = (-0.5 + coord.y / width) * 2.0;
 	gl_Position = vec4((projectionMatrix * translationMatrix * vec3(coord, 1.0)).xyz, 1.0);
-}
-`;
-
-/**
- *  FragmentSrc.
- */
-// Needs to be adapted to new file
-const fragmentSrc: string = `
-#define PI 3.1415926538
-precision mediump float;
-varying float relativeWidth;
-varying float relativeHeight;
-uniform vec3 edgeColor;
-uniform vec3 primaryArmColor;
-uniform vec3 secondaryArmColor;
-uniform vec3 centerColor;
-uniform float edgeColorIntensity;
-uniform float maxValue;
-uniform float value;
-uniform float height;
-
-/*
-	Returns an \`x\` coordinate, resulted by axis rotation of cartesian plane by angle.
-*/
-float rotateAxisX(float x, float y, float angle) {
-	return y * cos(angle) - x * sin(angle);
-}
-
-/*
-	Returns an \`y\` coordinate, resulted by axis rotation of cartesian plane by angle.
-*/
-float rotateAxisY(float x, float y, float angle) {
-	return x * cos(angle) + y * sin(angle);
-}
-
-/*
-	Returns a positive \`atan\` component, resulted by axis rotation of cartesian plane by angle.
-	Produces values between \`0\` and \`π\` (produces symmetry, if used as operand of \`sin\`).
-*/
-float getAtanComponent(float x, float y, float angle) {
-	return atan(
-		rotateAxisX(x, y, angle),
-		rotateAxisY(x, y, angle)
-	) + PI;
-}
-
-void main() {
-	float hypotenuse = sqrt(relativeWidth * relativeWidth + relativeHeight * relativeHeight);
-	float atanComponent = getAtanComponent(relativeWidth, relativeHeight, hypotenuse * 0.8);
-	float primaryRatio = (1.0 + sin(atanComponent * 8.0 + 10.0)) / 2.0;
-	float secondaryRatio = (1.0 + sin(atanComponent * 13.0)) / 2.0;
-	float opacity = hypotenuse * (primaryRatio + secondaryRatio + 2.0) / 4.0;
-
-	// TODO: Hypotenuse needs to be rescaled to 1.0
-	if (opacity > 1.0) {
-		opacity = 1.0;
-	}
-
-	gl_FragColor = vec4(
-		(primaryArmColor * primaryRatio + secondaryArmColor * secondaryRatio)/2.0 + (2.0 - primaryRatio - secondaryRatio) / 2.0 * centerColor,
-		opacity
-	);
 }
 `;
 
@@ -119,8 +58,8 @@ export type ElementBallColors = Palette<typeof elementBallColorWords>;
  */
 // Example for upcoming element balls such as thunder etc.
 export const fireElementBallColorWords: ElementBallColors = {
-	center: new Color("#F2CC0C"),
-	edge: new Color("#8C1F07"),
+	center: new Color("#FFFFFF"),
+	edge: new Color("#FCDFD7"),
 	primaryArm: new Color("#d9420b"),
 	secondaryArm: new Color("#F2A20C")
 };
@@ -251,14 +190,23 @@ export class ElementBall {
 			height: 0.15,
 			maxValue: 100,
 			primaryArmColor,
+			primaryArmRotation: 0,
 			secondaryArmColor,
+			secondaryArmRotation: 0,
 			value: 0,
 			width
 		});
 
+		const ticker: Ticker = Ticker.shared;
+		ticker.add(time => {
+			this.shader.uniforms.primaryArmRotation += 0.1;
+			this.shader.uniforms.secondaryArmRotation += 0.14;
+		});
+
 		this.mesh = new Mesh(ElementBall.geometry, this.shader);
 		this.scale = scale;
-		this.mesh.x = 500;
+
+		this.mesh.x = 250;
 		this.container.addChild(this.mesh);
 	}
 }
