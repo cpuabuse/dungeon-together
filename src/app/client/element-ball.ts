@@ -7,7 +7,7 @@
  * @file element-ball display.
  */
 import Color from "color";
-import { BLEND_MODES, Container, Geometry, Mesh, Program, Shader, Ticker } from "pixi.js";
+import { Container, Geometry, Mesh, Program, Shader, Ticker } from "pixi.js";
 import { Palette } from "../common/color";
 import fragmentSrc from "./fragment.glsl";
 

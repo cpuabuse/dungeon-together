@@ -51,7 +51,7 @@ void main() {
 
 	// Return if outside of circle, to save computation
 	if(hypotenuse > 1.0) {
-		gl_FragColor = vec4(edgeColor, 0.0);
+		gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
 		return;
 	}
 
@@ -59,13 +59,13 @@ void main() {
 	// Proportion of center color dominant area; Positive number, excluding zero; Greater than `0` to `1` increases center area, `1` is linear, greater than `1` decreases center area
 	float centerCurve = 5.0;
 
-	// Curve of primary arm; Any number; Positive values curve right, negative values curve left
+	// Curve of primary arm; Any number; Positive values curve right, negative values curve left; The closer primary/secondary curves are, the more moving arms will look like merging/disappearing/reappearing
 	float primaryArmCurve = 1.4;
 
-	// Curve of secondary arm; Any number; Positive values curve right, negative values curve left
+	// Curve of secondary arm; Any number; Positive values curve right, negative values curve left; The closer primary/secondary curves are, the more moving arms will look like merging/disappearing/reappearing
 	float secondaryArmCurve = 1.4;
 
-	// Positive values, including zero
+	// Positive values, including zero; The higher the curve
 	float primaryArmThicknessCurve = 2.0;
 	float secondaryArmThicknessCurve = 2.0;
 
@@ -76,6 +76,14 @@ void main() {
 
 	// Maximum alpha at edge, before substraction of hollow mask; Changes "thickness" of arms at edges; Values from `0` to `1`
 	float maxEdgeAlpha = 0.5;
+
+	// Number of primary arms; Integer with values of `2` or greater (for symmetry)
+	int primaryArmNumber = 10;
+	// Number of secondary arms; Integer with values of `2` or greater (for symmetry) 
+	int secondaryArmNumber = 16;
+
+	// Baseline alpha curve; Positive values, including `0`; The higher the curve, the more opaque the hollow edges will be; `0` is completely opaque, `1` is linear
+	float baseAlphaCurve = 10.0;
 	//#endregion Uniform block
 
 	//#region Color
@@ -83,20 +91,23 @@ void main() {
 	float curvedHypotenuse = (hypotenuse - 1.0) / ((centerCurve - 1.0) * hypotenuse + 1.0) + 1.0;
 
 	// Atan color components
-	// The closer angles are, the more moving arms will look like merging/disappearing/reappearing
 	float primaryAtanComponent = getAtanComponent(relativeWidth, relativeHeight, hypotenuse * primaryArmCurve);
 	float secondaryAtanComponent = getAtanComponent(relativeWidth, relativeHeight, hypotenuse * secondaryArmCurve);
 
-	// Ration for primary arm presense; Values from `0` to `1`
-	float primaryRatio = (1.0 + sin(primaryAtanComponent * 10.0 + primaryArmRotation)) / 2.0;
-	float secondaryRatio = (1.0 + sin(secondaryAtanComponent * 16.0 + secondaryArmRotation)) / 2.0;
+	// Ratio for primary arm presense; Values from `0` to `1`
+	float primaryRatio = (1.0 + sin(primaryAtanComponent * float(primaryArmNumber) + primaryArmRotation)) / 2.0;
+	float secondaryRatio = (1.0 + sin(secondaryAtanComponent * float(secondaryArmNumber) + secondaryArmRotation)) / 2.0;
 
 	// Shifted ratios, to thicken the arms
 	float shiftedPrimaryRatio = getShiftedRatio(primaryRatio, curvedHypotenuse, primaryArmThicknessCurve);
 	float shiftedSecondaryRatio = getShiftedRatio(secondaryRatio, curvedHypotenuse, secondaryArmThicknessCurve);
 
+	// Effective colors, multiplied by ratio
+	vec3 effectivePrimaryArmColor = primaryArmColor * shiftedPrimaryRatio;
+	vec3 effectiveSecondaryArmColor = secondaryArmColor * shiftedSecondaryRatio;
+
 	// Simple composite for fast compute
-	vec3 armColor = primaryArmColor * shiftedPrimaryRatio + secondaryArmColor * shiftedSecondaryRatio;
+	vec3 notNormalizedArmColor = effectivePrimaryArmColor + effectiveSecondaryArmColor;
 
 	// Set fill color
 	vec3 fillColor = mix(centerColor, edgeColor, hypotenuse);
@@ -105,16 +116,16 @@ void main() {
 	// To optimize speed, colors are added producing extreme burning effect, and then normalized
 	float armColorRatio = (shiftedPrimaryRatio + shiftedSecondaryRatio) * curvedHypotenuse;
 
-	// Non normalized color vectors
-	vec3 notNormalizedBaseColor = mix(fillColor * 2.0, armColor, armColorRatio);
+	// Non normalized color vectors; `fillColor` is multiplied by `2.0` to compensate for arm color having double value
+	vec3 notNormalizedBaseColor = mix(fillColor * 2.0, notNormalizedArmColor, armColorRatio);
 
 	// Normalizing base color
-	vec3 baseColor = min(notNormalizedBaseColor, max(max(fillColor, primaryArmColor * shiftedPrimaryRatio), secondaryArmColor * shiftedSecondaryRatio));
+	vec3 baseColor = min(notNormalizedBaseColor, max(fillColor, max(effectivePrimaryArmColor, effectiveSecondaryArmColor)));
 	//#endregion Color
 
 	//#region Alpha
 	// Base alpha based on hypotenuse; Values from `0` to `1`
-	float boxAlpha = max(0.0, (1.0 - pow(hypotenuse, 10.0)));
+	float boxAlpha = max(0.0, (1.0 - pow(hypotenuse, baseAlphaCurve)));
 
 	// Difference between fadeout start and end; Positive values excluding zero
 	float fadeOutDifference = fadeOutEnd - fadeOutStart;
