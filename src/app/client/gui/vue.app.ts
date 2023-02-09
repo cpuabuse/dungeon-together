@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -24,7 +24,8 @@ import { useVuetifyPlugin } from "./vue.plugin.vuetify";
  */
 export function createVueApp<State extends object>({
 	component,
-	state
+	state,
+	mutations
 }: {
 	/**
 	 * Root component.
@@ -35,13 +36,23 @@ export function createVueApp<State extends object>({
 	 * State.
 	 */
 	state?: State;
+
+	/**
+	 * Mutations.
+	 */
+	mutations?: Record<string, (state: State, payload: any) => void>;
 }): App {
 	let app: App = createApp(component);
 	useVuetifyPlugin({ app });
 	useHljsPlugin({ app });
 
 	if (state) {
-		app.use(createStore<State>({ state }));
+		app.use(
+			createStore<State>({
+				mutations,
+				state
+			})
+		);
 	}
 
 	return app;

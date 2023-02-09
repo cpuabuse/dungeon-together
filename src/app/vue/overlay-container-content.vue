@@ -55,6 +55,25 @@
 							</VWindowItem>
 						</VWindow>
 					</div>
+
+					<!-- Switch element -->
+					<VRow v-if="item.type === ItemType.Switch" variant="outlined">
+						<VCol cols="auto" class="my-auto">
+							<VListItemTitle>
+								{{ item.name }}
+							</VListItemTitle>
+						</VCol>
+
+						<VSpacer />
+
+						<VCol cols="auto" class="my-auto">
+							<VSwitch
+								:model-value="records[item.id]"
+								class="ma-2"
+								@update:model-value="value => setRecord({ id: item.id, value })"
+							/>
+						</VCol>
+					</VRow>
 				</VListItem>
 				<template v-if="itemKey < items.length - 1">
 					<VDivider />
@@ -75,11 +94,13 @@ import {
 	VListItemTitle,
 	VRow,
 	VSpacer,
+	VSwitch,
 	VTab,
 	VTabs,
 	VWindow,
 	VWindowItem
 } from "vuetify/components";
+import { ThisVueStore } from "../client/gui";
 import { OverlayContainerItemType as ItemType } from "../common/front";
 
 /**
@@ -149,6 +170,22 @@ type Item =
 			 * Data to display.
 			 */
 			tabs: Tabs;
+	  }
+	| {
+			/**
+			 * Switch type.
+			 */
+			type: ItemType.Switch;
+
+			/**
+			 * Switch name.
+			 */
+			name: string;
+
+			/**
+			 * Event ID.
+			 */
+			id: string;
 	  };
 
 export default defineComponent({
@@ -161,11 +198,22 @@ export default defineComponent({
 		VListItemTitle,
 		VRow,
 		VSpacer,
+		VSwitch,
 		VTab,
 		VTabs,
 		VWindow,
 		VWindowItem
 	},
+
+	computed: {
+		/**
+		 *
+		 */
+		records(): ThisVueStore["$store"]["state"]["records"] {
+			return (this as unknown as ThisVueStore).$store.state.records;
+		}
+	},
+
 	/**
 	 * Data for component.
 	 *
@@ -196,6 +244,24 @@ export default defineComponent({
 			tabs: Tabs;
 		}): number | null {
 			return this.tabs.get(tabs) ?? this.tabFallBack;
+		},
+
+		/**
+		 * Sets the record in the store.
+		 *
+		 * @param v - Destructured parameter
+		 */
+		setRecord(v: {
+			/**
+			 * ID.
+			 */
+			id: string;
+			/**
+			 * Value.
+			 */
+			value: boolean;
+		}) {
+			(this as unknown as ThisVueStore).$store.commit("recordMutation", v);
 		},
 
 		/**

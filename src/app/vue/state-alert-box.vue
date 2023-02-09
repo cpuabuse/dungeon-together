@@ -1,5 +1,7 @@
 <template>
-	<statealert v-for="(alert, index) in alerts" :key="index" :message="alert.message" :level="alert.level" />
+	<div>
+		<statealert v-for="(alert, index) in alerts" :key="index" :message="alert.message" :level="alert.level" />
+	</div>
 </template>
 
 <script lang="ts">
