@@ -1,12 +1,14 @@
-<!--Stats component displaying character stats ina progress bar-->
+<!--Stats component displaying character stats in a progress bar-->
 
 <template>
 	<div class="progress-container">
 		<span class="text-subtitle-2">HP</span>
-		<VProgressLinear v-model="value" class="rounded-lg progress" height="35" color="#051DE8">
-			<strong>{{ value }}/100</strong>
-		</VProgressLinear>
-		<div class="progress-overlay rounded-lg"></div>
+		<div class="progress-outer-border rounded">
+			<VProgressLinear v-model="value" height="35" color="#051DE8">
+				<strong>{{ value }}/100</strong>
+			</VProgressLinear>
+			<div class="progress-overlay"></div>
+		</div>
 	</div>
 </template>
 
@@ -35,14 +37,15 @@ export default defineComponent({
 	width: 500px;
 	margin: 20px;
 }
+.progress-outer-border {
+	border: 5px solid #30302a;
+}
 .progress-overlay {
 	border: 5px solid rgba(0, 0, 0, 0.1);
 	height: 35px;
 	width: 100%;
 	position: relative;
 	top: -35px;
-}
-.progress >>> .v-progress-linear__determinate {
-	border-radius: 5px;
+	margin-bottom: -35px;
 }
 </style>
