@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -30,7 +30,7 @@ import { ClientBaseClass, ClientBaseConstructorParams, ClientBaseFactory } from 
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
 import { ClientEntity, ClientEntityClass, ClientEntityFactory } from "./entity";
 import { ClientGrid, ClientGridClass, ClientGridClassFactory } from "./grid";
-import { createVueApp } from "./gui";
+import { UniverseState, createVueApp } from "./gui";
 import { Theme } from "./gui/themes";
 import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, scrollSymbol, upSymbol } from "./input";
 import { Mode } from "./mode";
@@ -233,7 +233,37 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 		this.Cell = ClientCellFactory({ Base: this.Base });
 		this.Entity = ClientEntityFactory({ Base: this.Base });
 
-		this.vue = createVueApp({ component: UniverseComponent, state: { theme: Theme.Dark, universe: this } });
+		this.vue = createVueApp<UniverseState>({
+			component: UniverseComponent,
+			mutations: {
+				/**
+				 * @param state - State
+				 * @param param - Destructured parameter
+				 */
+				recordMutation(
+					state: UniverseState,
+					{
+						id,
+						value
+					}: {
+						/**
+						 * ID.
+						 */
+						id: string;
+
+						/**
+						 * Value.
+						 */
+						value: any;
+					}
+				) {
+					// Set record, which is defined as `any``
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					state.records[id] = value;
+				}
+			},
+			state: { records: { alert: true }, theme: Theme.Dark, universe: this }
+		});
 
 		// Mount vue
 		let vueElement: HTMLElement = document.createElement("div");

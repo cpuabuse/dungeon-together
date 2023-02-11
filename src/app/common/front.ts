@@ -24,5 +24,10 @@ export enum OverlayContainerItemType {
 	/**
 	 * Type for tab.
 	 */
-	Tab
+	Tab,
+
+	/**
+	 * Type for switch element.
+	 */
+	Switch
 }

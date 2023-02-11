@@ -2,7 +2,7 @@
 	<StatsBar />
 	<div class="universe">Hello: {{ what }}</div>
 	<tsxtest />
-	<statealertbox />
+	<statealertbox v-show="alert" />
 	<debug />
 	<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
 	<OverlayContainer v-model="debugContainer">
@@ -44,6 +44,16 @@ export default defineComponent({
 	 * Computed props.
 	 */
 	computed: {
+		/**
+		 * To display alert or not.
+		 *
+		 * @returns Alert state
+		 */
+		alert(): boolean {
+			// Casting to boolean from temporary `any`
+			return (this as unknown as ThisVueStore).$store.state.records.alert as boolean;
+		},
+
 		/**
 		 * Menus to be used in main toolbar.
 		 *
@@ -150,7 +160,7 @@ export default defineComponent({
 					tabs: [
 						{
 							items: [
-								{ data: "1", name: "Info1" },
+								{ id: "alert", name: "Info1", type: ItemType.Switch },
 								{ data: "5", name: "Info2" }
 							],
 							name: "Tab1"
