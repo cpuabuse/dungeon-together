@@ -1,19 +1,34 @@
 <template>
-	<StatsBar />
-	<div class="universe">Hello: {{ what }}</div>
-	<tsxtest />
-	<statealertbox v-show="alert" />
-	<debug />
-	<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
-	<OverlayContainer v-model="debugContainer">
-		<template #body>
-			<OverlayContainerContent :items="overlayItems" />
-		</template>
-	</OverlayContainer>
+	<VApp style="background: none">
+		<div class="app-content">
+			<div class="universe">Hello: {{ what }}</div>
+			<tsxtest />
+			<statealertbox v-show="alert" />
+			<debug />
+			<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
+			<OverlayContainer v-model="statsContainer">
+				<template #body>
+					<OverlayContainerContent :items="statsItems">
+						<template #stats>
+							<StatsBar />
+						</template>
+					</OverlayContainerContent>
+				</template>
+			</OverlayContainer>
+			<OverlayContainer v-model="debugContainer">
+				<template #body>
+					<OverlayContainerContent :items="overlayItems">
+						<template #test> test div dom </template>
+					</OverlayContainerContent>
+				</template>
+			</OverlayContainer>
+		</div>
+	</VApp>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { VApp } from "vuetify/components";
 import { ThisVueStore } from "../client/gui";
 import { OverlayContainerItemType as ItemType } from "../common/front";
 import { LogLevel } from "../core/error";
@@ -35,6 +50,7 @@ export default defineComponent({
 		OverlayContainer,
 		OverlayContainerContent,
 		StatsBar,
+		VApp,
 		debug: debugComponent,
 		statealertbox: stateAlertBoxComponent,
 		tsxtest: tsxTestComponent
@@ -93,7 +109,7 @@ export default defineComponent({
 							 * Click handler.
 							 */
 							onClick(): void {
-								alert("Stats clicked!");
+								data.statsContainer = true;
 							}
 						},
 						{ name: "Items" },
@@ -161,7 +177,8 @@ export default defineComponent({
 						{
 							items: [
 								{ id: "alert", name: "Info1", type: ItemType.Switch },
-								{ data: "5", name: "Info2" }
+								{ data: "5", name: "Info2" },
+								{ id: "test", name: "Test", type: ItemType.Slot }
 							],
 							name: "Tab1"
 						},
@@ -175,6 +192,12 @@ export default defineComponent({
 					],
 					type: ItemType.Tab
 				}
+			],
+			statsContainer: false,
+			statsItems: [
+				{ id: "stats", name: "Stats", type: ItemType.Slot },
+				{ data: "1", name: "Attack" },
+				{ data: "3", name: "Attack" }
 			],
 			what: 0
 		};
@@ -222,5 +245,12 @@ export default defineComponent({
 <style lang="css">
 .universe {
 	color: red;
+}
+
+.app-content {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	width: 100%;
 }
 </style>

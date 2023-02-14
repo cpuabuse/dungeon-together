@@ -29,5 +29,10 @@ export enum OverlayContainerItemType {
 	/**
 	 * Type for switch element.
 	 */
-	Switch
+	Switch,
+
+	/**
+	 * Type for slot.
+	 */
+	Slot
 }

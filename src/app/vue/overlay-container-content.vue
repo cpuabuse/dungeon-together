@@ -51,7 +51,11 @@
 							@update:model-value="value => setTab({ tabs: item.tabs, value })"
 						>
 							<VWindowItem v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">
-								<OverlayContainerContent :items="tab.items" />
+								<OverlayContainerContent :items="tab.items">
+									<template v-for="slot in getSlots(tab)" #[slot]>
+										<slot :name="slot" />
+									</template>
+								</OverlayContainerContent>
 							</VWindowItem>
 						</VWindow>
 					</div>
@@ -74,6 +78,14 @@
 							/>
 						</VCol>
 					</VRow>
+
+					<!-- Slot element -->
+					<template v-if="item.type === ItemType.Slot">
+						<VListItemTitle class="text-center">
+							{{ item.name }}
+						</VListItemTitle>
+						<slot :name="item.id" />
+					</template>
 				</VListItem>
 				<template v-if="itemKey < items.length - 1">
 					<VDivider />
@@ -186,6 +198,22 @@ type Item =
 			 * Event ID.
 			 */
 			id: string;
+	  }
+	| {
+			/**
+			 * Slot type.
+			 */
+			type: ItemType.Slot;
+
+			/**
+			 * Slot name.
+			 */
+			id: string;
+
+			/**
+			 * Slot name to display.
+			 */
+			name: string;
 	  };
 
 export default defineComponent({
@@ -207,7 +235,9 @@ export default defineComponent({
 
 	computed: {
 		/**
+		 * Get the records.
 		 *
+		 * @returns Records
 		 */
 		records(): ThisVueStore["$store"]["state"]["records"] {
 			return (this as unknown as ThisVueStore).$store.state.records;
@@ -229,6 +259,44 @@ export default defineComponent({
 	},
 
 	methods: {
+		/**
+		 * Determine necessary slot IDs, to pass through to tabs.
+		 *
+		 * @param param - Destructured object
+		 * @returns Set of IDs, required for all grandchildren
+		 */
+		getSlots({
+			items
+		}: {
+			/**
+			 * Items.
+			 */
+			items: Array<Item>;
+		}): Set<string> {
+			let result: Set<string> = new Set();
+			items
+				.filter(item => item.type === ItemType.Slot || item.type === ItemType.Tab)
+				.forEach(item => {
+					if (item.type === ItemType.Slot) {
+						result.add(item.id);
+						return;
+					}
+
+					// Filter guarantees narrowing
+					(
+						item as Item & {
+							/**
+							 * Tab type.
+							 */
+							type: ItemType.Tab;
+						}
+					).tabs.forEach(tab => {
+						result = new Set([...result, ...this.getSlots(tab)]);
+					});
+				});
+			return result;
+		},
+
 		/**
 		 * Get the tab.
 		 *
