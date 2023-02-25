@@ -2,10 +2,10 @@
 
 <template>
 	<div class="progress-container">
-		<span class="text-subtitle-2">HP</span>
+		<span class="text-subtitle-2">{{ name }}</span>
 		<div class="progress-outer-border rounded">
-			<VProgressLinear v-model="value" height="35" :color="color">
-				<strong>{{ value }}/100</strong>
+			<VProgressLinear :model-value="value" height="35" :color="progressBarColor">
+				<strong>{{ value.toString() }}/{{ maxValue.toString() }}</strong>
 			</VProgressLinear>
 			<div class="progress-overlay"></div>
 		</div>
@@ -13,13 +13,26 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import Color from "color";
+import { PropType, defineComponent } from "vue";
 import { VProgressLinear } from "vuetify/components";
 
 export default defineComponent({
 	components: { VProgressLinear },
 
 	computed: {
+		/**
+		 * The color of the progress bar.
+		 *
+		 * @remarks
+		 * Fed into CSS.
+		 *
+		 * @returns The color of the progress bar in CSS
+		 */
+		progressBarColor(): string {
+			return this.color ? this.color.hex() : "info";
+		},
+
 		/**
 		 * The width of the progress bar.
 		 *
@@ -39,30 +52,41 @@ export default defineComponent({
 	 * @returns - Data object
 	 */
 	data() {
-		return {
-			value: 30
-		};
+		return {};
 	},
 
 	props: {
-		color: { default: "info", type: String },
+		// Prop is not used directly, computed will handle `undefined`
+		// eslint-disable-next-line vue/require-default-prop
+		color: { required: false, type: Object as PropType<Color> },
+
+		/**
+		 * The max value of the progress bar.
+		 */
+		// Prop is not used directly, computed will handle `undefined`
+		// eslint-disable-next-line vue/require-default-prop
+		maxValue: { default: 100, type: Number },
+
+		/**
+		 * The name of the progress bar.
+		 */
+		// Prop is not used directly, computed will handle `undefined`
+		// eslint-disable-next-line vue/require-default-prop
+		name: { required: true, type: String },
+
+		/**
+		 * The value of the progress bar.
+		 */
+		// Prop is not used directly, computed will handle `undefined`
+		// eslint-disable-next-line vue/require-default-prop
+		value: { default: 0, type: Number },
 
 		/**
 		 * The width of the progress bar.
 		 */
 		// Prop is not used directly, computed will handle `undefined`
 		// eslint-disable-next-line vue/require-default-prop
-		width: {
-			/**
-			 * Default value.
-			 */
-			required: false,
-
-			/**
-			 * Type of value.
-			 */
-			type: Number
-		}
+		width: { required: false, type: Number }
 	}
 });
 </script>

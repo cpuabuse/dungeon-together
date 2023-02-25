@@ -10,7 +10,8 @@
 				<template #body>
 					<OverlayContainerContent :items="statsItems">
 						<template #stats>
-							<StatsBar />
+							<StatsBar :color="hpColor" name="HP" value="33" />
+							<StatsBar :color="mpColor" name="MP" />
 						</template>
 					</OverlayContainerContent>
 				</template>
@@ -27,6 +28,7 @@
 </template>
 
 <script lang="ts">
+import Color from "color";
 import { defineComponent } from "vue";
 import { VApp } from "vuetify/components";
 import { ThisVueStore } from "../client/gui";
@@ -167,7 +169,9 @@ export default defineComponent({
 		let data = {
 			ItemType,
 			debugContainer: false,
+			hpColor: new Color("#1F8C2F"),
 			mainToolbar,
+			mpColor: new Color("#051DE8"),
 			overlayItems: [
 				{ data: "14", name: "Info1" },
 				{ data: "2", name: "Info2" },
