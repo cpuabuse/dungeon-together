@@ -17,6 +17,7 @@ import inject from "@rollup/plugin-inject";
 import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
 import vue from "@vitejs/plugin-vue";
+import scss from "postcss-scss";
 import { Plugin, RollupOptions } from "rollup";
 import glslify from "rollup-plugin-glslify";
 import jscc from "rollup-plugin-jscc";
@@ -103,7 +104,15 @@ export function defineOptions({
 			typescript({ tsconfig: join(...rootDir, "tsconfig", environment, "base.json") }),
 
 			// Vue does not like HTML comments
-			vue({ template: { compilerOptions: { comments: false } } }) as Plugin,
+			vue({
+				style: {
+					// Vue has it's own copy of postcss, for SFC-specific transformations, that checks syntax for CSS; It seems that it does not compile to SCSS; So this override is just to pass the syntax check
+					postcssOptions: {
+						syntax: scss
+					}
+				} as unknown as undefined,
+				template: { compilerOptions: { comments: false } }
+			}) as Plugin,
 
 			// Transpile jsx to vue
 			buble({
@@ -115,6 +124,7 @@ export function defineOptions({
 			inject({ vueJsxPragma: ["vue", "h"] }),
 
 			// To process css files
+			// Will convert scss to css from virtual FS `.scss` files generated from `.vue` by vue compiler, and also from direct imports in `.ts`
 			postcss({
 				// Disables `less` support, as all enabled by default; Adding path so that `node_modules` resolves
 				// Seems `postcss` not typed correctly
