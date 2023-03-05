@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -49,6 +49,26 @@ export type CompactToolbarMenuItem = {
 			mode?: "click";
 	  }
 );
+
+/**
+ * Size for the tab.
+ */
+export enum ElementSize {
+	/**
+	 * Small tab.
+	 */
+	Small = "sm",
+
+	/**
+	 * Medium tab.
+	 */
+	Medium = "md",
+
+	/**
+	 * Large tab.
+	 */
+	Large = "lg"
+}
 
 /**
  * Base props for compact toolbar menu.

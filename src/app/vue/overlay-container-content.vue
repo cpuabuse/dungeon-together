@@ -36,7 +36,11 @@
 
 					<!-- Tab element -->
 					<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
-					<div v-else-if="item.type === ItemType.Tab" :key="item.tabs">
+					<div
+						v-else-if="item.type === ItemType.Tab"
+						:key="item.tabs"
+						:class="`overlay-container-content-tabs-size-${item.size ?? ElementSize}`"
+					>
 						<VListItemTitle class="text-center">List title</VListItemTitle>
 						<VTabs
 							:key="item.tabs"
@@ -114,6 +118,7 @@ import {
 } from "vuetify/components";
 import { ThisVueStore } from "../client/gui";
 import { OverlayContainerItemType as ItemType } from "../common/front";
+import { ElementSize } from "./types";
 
 /**
  * Tabs type.
@@ -182,6 +187,11 @@ type Item =
 			 * Data to display.
 			 */
 			tabs: Tabs;
+
+			/**
+			 * Size of the tab.
+			 */
+			size?: ElementSize;
 	  }
 	| {
 			/**
@@ -252,6 +262,7 @@ export default defineComponent({
 	data() {
 		return {
 			ItemType,
+			defaultElementSize: ElementSize.Medium,
 			tab2: null,
 			tabFallBack: null,
 			tabs: new Map<Tabs, number | null>()
@@ -367,3 +378,17 @@ export default defineComponent({
 	}
 });
 </script>
+
+<style scoped>
+.overlay-container-content-tabs-size-sm {
+	height: 300px;
+}
+
+.overlay-container-content-tabs-size-md {
+	height: 500px;
+}
+
+.overlay-container-content-tabs-size-lg {
+	height: 700px;
+}
+</style>
