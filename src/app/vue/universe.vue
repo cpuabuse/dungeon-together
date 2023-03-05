@@ -41,7 +41,12 @@ import OverlayContainer from "./overlay-container.vue";
 import stateAlertBoxComponent from "./state-alert-box.vue";
 import StatsBar from "./stats-bar.vue";
 import tsxTestComponent from "./tsx/test.vue";
-import { CompactToolbarData, CompactToolbarMenuBaseProps, compactToolbarDataToMenuBaseProps } from "./types";
+import {
+	CompactToolbarData,
+	CompactToolbarMenuBaseProps,
+	ElementSize,
+	compactToolbarDataToMenuBaseProps
+} from "./types";
 
 /**
  * Root component.
@@ -177,6 +182,7 @@ export default defineComponent({
 				{ data: "2", name: "Info2" },
 				{ name: "Player", type: ItemType.Uuid, uuid: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" },
 				{
+					size: ElementSize.Medium,
 					tabs: [
 						{
 							items: [
