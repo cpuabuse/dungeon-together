@@ -6,12 +6,17 @@ uniform vec3 edgeColor;
 uniform vec3 primaryArmColor;
 uniform vec3 secondaryArmColor;
 uniform vec3 centerColor;
-uniform float edgeColorIntensity;
-uniform float maxValue;
-uniform float value;
-uniform float height;
 uniform float primaryArmRotation;
 uniform float secondaryArmRotation;
+uniform float centerCurve;
+uniform float primaryArmCurve;
+uniform float secondaryArmCurve;
+uniform float primaryArmThicknessCurve;
+uniform float secondaryArmThicknessCurve;
+uniform float fadeOutStart;
+uniform float fadeOutEnd;
+uniform float maxEdgeAlpha;
+uniform float baseAlphaCurve;
 
 /*
 	Returns an `x` coordinate, resulted by axis rotation of cartesian plane by angle.
@@ -55,35 +60,11 @@ void main() {
 		return;
 	}
 
-	//#region Uniform block
-	// Proportion of center color dominant area; Positive number, excluding zero; Greater than `0` to `1` increases center area, `1` is linear, greater than `1` decreases center area
-	float centerCurve = 5.0;
-
-	// Curve of primary arm; Any number; Positive values curve right, negative values curve left; The closer primary/secondary curves are, the more moving arms will look like merging/disappearing/reappearing
-	float primaryArmCurve = 1.4;
-
-	// Curve of secondary arm; Any number; Positive values curve right, negative values curve left; The closer primary/secondary curves are, the more moving arms will look like merging/disappearing/reappearing
-	float secondaryArmCurve = 1.4;
-
-	// Positive values, including zero; The higher the curve
-	float primaryArmThicknessCurve = 2.0;
-	float secondaryArmThicknessCurve = 2.0;
-
-	// Center fade out start; Values from `0` to `1`
-	float fadeOutStart = 0.6;
-	// Center fade out end; Values from `0` to `1`
-	float fadeOutEnd = 0.9;
-
-	// Maximum alpha at edge, before substraction of hollow mask; Changes "thickness" of arms at edges; Values from `0` to `1`
-	float maxEdgeAlpha = 0.5;
-
 	// Number of primary arms; Integer with values of `2` or greater (for symmetry)
-	int primaryArmNumber = 10;
+	int primaryArmNumber = 5;
 	// Number of secondary arms; Integer with values of `2` or greater (for symmetry) 
 	int secondaryArmNumber = 16;
 
-	// Baseline alpha curve; Positive values, including `0`; The higher the curve, the more opaque the hollow edges will be; `0` is completely opaque, `1` is linear
-	float baseAlphaCurve = 10.0;
 	//#endregion Uniform block
 
 	//#region Color

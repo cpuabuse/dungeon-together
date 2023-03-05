@@ -65,6 +65,36 @@ export const fireElementBallColorWords: ElementBallColors = {
 };
 
 /**
+ * Water element ball colors.
+ */
+export const waterElementBallColorWords: ElementBallColors = {
+	center: new Color("#FFFFFF"),
+	edge: new Color("#C0E0FF"),
+	primaryArm: new Color("#0000FF"),
+	secondaryArm: new Color("#00FFFF")
+};
+
+/**
+ * Thunder element ball colors.
+ */
+export const darkThunderElementBallColorWords: ElementBallColors = {
+	center: new Color("#FFFFFF"),
+	edge: new Color("#F2E852"),
+	primaryArm: new Color("#F2E852"),
+	secondaryArm: new Color("#020E26")
+};
+
+/**
+ * Wind element ball colors.
+ */
+export const windElementBallColorWords: ElementBallColors = {
+	center: new Color("#FFFFFF"),
+	edge: new Color("#7FA646"),
+	primaryArm: new Color("#57731A"),
+	secondaryArm: new Color("#A2BF39")
+};
+
+/**
  * Element ball class.
  */
 export class ElementBall {
@@ -138,7 +168,7 @@ export class ElementBall {
 	// Needs changes to adapt to file
 	public constructor({
 		container,
-		colors = fireElementBallColorWords,
+		colors = darkThunderElementBallColorWords,
 		scale = 1
 	}: {
 		/**
@@ -184,15 +214,33 @@ export class ElementBall {
 			.map(element => element / 255);
 
 		this.shader = new Shader(ElementBall.program, {
+			// Baseline alpha curve; Positive values, including `0`; The higher the curve, the more opaque the hollow edges will be; `0` is completely opaque, `1` is linear
+			baseAlphaCurve: 10.0,
 			centerColor,
+			// #region Uniform block
+			// Proportion of center color dominant area; Positive number, excluding zero; Greater than `0` to `1` increases center area, `1` is linear, greater than `1` decreases center area
+			centerCurve: 5.0,
 			edgeColor,
 			edgeColorIntensity: 10,
+			// Center fade out end; Values from `0` to `1`
+			fadeOutEnd: 0.9,
+			// Center fade out start; Values from `0` to `1`
+			fadeOutStart: 0.6,
 			height: 0.15,
+			// Maximum alpha at edge, before substraction of hollow mask; Changes "thickness" of arms at edges; Values from `0` to `1`
+			maxEdgeAlpha: 0.5,
 			maxValue: 100,
 			primaryArmColor,
+			// Curve of primary arm; Any number; Positive values curve right, negative values curve left; The closer primary/secondary curves are, the more moving arms will look like merging/disappearing/reappearing
+			primaryArmCurve: 1.4,
 			primaryArmRotation: 0,
+			// Positive values, including zero; The higher the curve
+			primaryArmThicknessCurve: 5.0,
 			secondaryArmColor,
+			// Curve of secondary arm; Any number; Positive values curve right, negative values curve left; The closer primary/secondary curves are, the more moving arms will look like merging/disappearing/reappearing
+			secondaryArmCurve: 1.4,
 			secondaryArmRotation: 0,
+			secondaryArmThicknessCurve: 5.0,
 			value: 0,
 			width
 		});
