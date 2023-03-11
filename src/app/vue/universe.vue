@@ -4,7 +4,6 @@
 			<div class="universe">Hello: {{ what }}</div>
 			<tsxtest />
 			<statealertbox v-show="alert" />
-			<debug />
 			<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
 			<OverlayContainer v-model="statsContainer">
 				<template #body>

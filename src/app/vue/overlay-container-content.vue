@@ -36,11 +36,7 @@
 
 					<!-- Tab element -->
 					<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
-					<div
-						v-else-if="item.type === ItemType.Tab"
-						:key="item.tabs"
-						:class="`overlay-container-content-tabs-size-${item.size ?? ElementSize}`"
-					>
+					<div v-else-if="item.type === ItemType.Tab" :key="item.tabs" :style="tabStyle(item)">
 						<VListItemTitle class="text-center">List title</VListItemTitle>
 						<VTabs
 							:key="item.tabs"
@@ -226,6 +222,13 @@ type Item =
 			name: string;
 	  };
 
+/**
+ * Element size pixels.
+ */
+type ElementSizePixels = {
+	[Key in ElementSize]?: number;
+};
+
 export default defineComponent({
 	components: {
 		VChip,
@@ -260,9 +263,18 @@ export default defineComponent({
 	 * @returns Component data
 	 */
 	data() {
+		let sizes: ElementSizePixels = {
+			[ElementSize.Small]: 300,
+			[ElementSize.Medium]: 500,
+			[ElementSize.Large]: 700
+		};
+
 		return {
 			ItemType,
 			defaultElementSize: ElementSize.Medium,
+			// Fallback when the size in pixels is not defined for the element size
+			defaultElementSizePixels: 300,
+			sizes,
 			tab2: null,
 			tabFallBack: null,
 			tabs: new Map<Tabs, number | null>()
@@ -363,6 +375,26 @@ export default defineComponent({
 			value: number | null;
 		}): void {
 			this.tabs.set(tabs, value);
+		},
+
+		/**
+		 * Style for tab.
+		 *
+		 * @param param - Destructured object
+		 * @returns CSS height in pixels
+		 */
+		tabStyle({
+			size
+		}: Item & {
+			/**
+			 * Tab type.
+			 */
+			type: ItemType.Tab;
+		}) {
+			return {
+				// Gets the size in pixels for the element size, or the default size in pixels
+				height: `${this.sizes[size ?? this.defaultElementSize] ?? this.defaultElementSizePixels}px`
+			};
 		}
 	},
 
@@ -374,21 +406,7 @@ export default defineComponent({
 	 * @returns Component props
 	 */
 	props: {
-		items: { required: true, type: Object as PropType<Array<Item>> }
+		items: { required: true, type: Array as PropType<Array<Item>> }
 	}
 });
 </script>
-
-<style scoped>
-.overlay-container-content-tabs-size-sm {
-	height: 300px;
-}
-
-.overlay-container-content-tabs-size-md {
-	height: 500px;
-}
-
-.overlay-container-content-tabs-size-lg {
-	height: 700px;
-}
-</style>
