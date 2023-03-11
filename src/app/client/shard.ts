@@ -210,7 +210,7 @@ export function ClientShardFactory({
 					this.setScene();
 
 					// Element ball display test
-					new ElementBall({ container: this.gridContainer, scale: 500 });
+					new ElementBall({ container: this.gridContainer, scale: 500, ...ElementBall.windBall });
 
 					// Add listeners for right-click input
 					this.input.on(rcSymbol, inputInterface => {
