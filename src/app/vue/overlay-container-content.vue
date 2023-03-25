@@ -4,12 +4,17 @@
 -->
 
 <template>
-	<div v-show="items.length > 0">
+	<div v-show="items.length > 0" class="overflow-auto">
 		<VList>
 			<template v-for="(item, itemKey) in items" :key="itemKey">
 				<VListItem>
 					<!-- Default informational element -->
-					<VRow v-if="item.type === undefined || item.type === ItemType.InfoElement" variant="outlined">
+					<VRow
+						v-if="item.type === undefined || item.type === ItemType.InfoElement"
+						variant="outlined"
+						height="50"
+						align-content="center"
+					>
 						<VCol cols="auto" class="my-auto">
 							<VListItemTitle>
 								{{ item.name }}
@@ -88,7 +93,7 @@
 					</template>
 				</VListItem>
 				<template v-if="itemKey < items.length - 1">
-					<VDivider />
+					<VDivider class="m-0" />
 				</template>
 			</template>
 		</VList>
@@ -114,113 +119,7 @@ import {
 } from "vuetify/components";
 import { ThisVueStore } from "../client/gui";
 import { OverlayContainerItemType as ItemType } from "../common/front";
-import { ElementSize } from "./types";
-
-/**
- * Tabs type.
- */
-type Tabs = Array<{
-	/**
-	 * Name to display.
-	 */
-	name: string;
-
-	/**
-	 * Items to display.
-	 */
-	items: Array<Item>;
-}>;
-
-/**
- * Type for item props.
- */
-type Item =
-	// Informational object, default
-	| {
-			/**
-			 * Informational list type.
-			 */
-			type?: ItemType.InfoElement;
-
-			/**
-			 * Badge value, if any.
-			 */
-			badge?: string | number;
-
-			/**
-			 * Name to display.
-			 */
-			name: string;
-
-			/**
-			 * Data to display.
-			 */
-			data: string | number;
-	  }
-	| {
-			/**
-			 * UUID type.
-			 */
-			type: ItemType.Uuid;
-
-			/**
-			 * UUID value.
-			 */
-			uuid: string;
-
-			/**
-			 * Name to display.
-			 */
-			name: string;
-	  }
-	| {
-			/**
-			 * Tab type.
-			 */
-			type: ItemType.Tab;
-
-			/**
-			 * Data to display.
-			 */
-			tabs: Tabs;
-
-			/**
-			 * Size of the tab.
-			 */
-			size?: ElementSize;
-	  }
-	| {
-			/**
-			 * Switch type.
-			 */
-			type: ItemType.Switch;
-
-			/**
-			 * Switch name.
-			 */
-			name: string;
-
-			/**
-			 * Event ID.
-			 */
-			id: string;
-	  }
-	| {
-			/**
-			 * Slot type.
-			 */
-			type: ItemType.Slot;
-
-			/**
-			 * Slot name.
-			 */
-			id: string;
-
-			/**
-			 * Slot name to display.
-			 */
-			name: string;
-	  };
+import { ElementSize, OverlayContainerContentItem as Item, OverlayContainerContentTabs as Tabs } from "./types";
 
 /**
  * Element size pixels.
@@ -410,3 +309,21 @@ export default defineComponent({
 	}
 });
 </script>
+
+<style scoped>
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #555;
+}
+</style>

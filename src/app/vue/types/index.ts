@@ -9,12 +9,139 @@
  */
 
 import { ExtractDefaultPropTypes, ExtractPropTypes, PropType } from "vue";
+import { OverlayContainerItemType as ItemType } from "../../common/front";
 
 /**
  * Extracts props from prop object, making ones that has default, optional.
  */
 export type ExtractProps<O> = Partial<ExtractDefaultPropTypes<O>> &
 	Omit<ExtractPropTypes<O>, keyof ExtractDefaultPropTypes<O>>;
+
+/**
+ * Tabs type.
+ */
+export type OverlayContainerContentTabs = Array<{
+	/**
+	 * Name to display.
+	 */
+	name: string;
+
+	/**
+	 * Items to display.
+	 */
+	items: Array<OverlayContainerContentItem>;
+}>;
+
+/**
+ * Type for item props.
+ */
+export type OverlayContainerContentItem =
+	// Informational object, default
+	| {
+			/**
+			 * Informational list type.
+			 */
+			type?: ItemType.InfoElement;
+
+			/**
+			 * Badge value, if any.
+			 */
+			badge?: string | number;
+
+			/**
+			 * Name to display.
+			 */
+			name: string;
+
+			/**
+			 * Data to display.
+			 */
+			data: string | number;
+	  }
+	| {
+			/**
+			 * UUID type.
+			 */
+			type: ItemType.Uuid;
+
+			/**
+			 * UUID value.
+			 */
+			uuid: string;
+
+			/**
+			 * Name to display.
+			 */
+			name: string;
+	  }
+	| {
+			/**
+			 * Tab type.
+			 */
+			type: ItemType.Tab;
+
+			/**
+			 * Data to display.
+			 */
+			tabs: OverlayContainerContentTabs;
+
+			/**
+			 * Size of the tab.
+			 */
+			size?: ElementSize;
+	  }
+	| {
+			/**
+			 * Switch type.
+			 */
+			type: ItemType.Switch;
+
+			/**
+			 * Switch name.
+			 */
+			name: string;
+
+			/**
+			 * Event ID.
+			 */
+			id: string;
+	  }
+	| {
+			/**
+			 * Slot type.
+			 */
+			type: ItemType.Slot;
+
+			/**
+			 * Slot name.
+			 */
+			id: string;
+
+			/**
+			 * Slot name to display.
+			 */
+			name: string;
+	  };
+
+/**
+ * Size for the tab.
+ */
+export enum ElementSize {
+	/**
+	 * Small tab.
+	 */
+	Small = "sm",
+
+	/**
+	 * Medium tab.
+	 */
+	Medium = "md",
+
+	/**
+	 * Large tab.
+	 */
+	Large = "lg"
+}
 
 /**
  * Compact toolbar menu item(button).
@@ -49,26 +176,6 @@ export type CompactToolbarMenuItem = {
 			mode?: "click";
 	  }
 );
-
-/**
- * Size for the tab.
- */
-export enum ElementSize {
-	/**
-	 * Small tab.
-	 */
-	Small = "sm",
-
-	/**
-	 * Medium tab.
-	 */
-	Medium = "md",
-
-	/**
-	 * Large tab.
-	 */
-	Large = "lg"
-}
 
 /**
  * Base props for compact toolbar menu.
@@ -123,26 +230,31 @@ export const compactToolbarSharedMenuProps = {
 export type CompactToolbarMenuBaseProps = ExtractProps<typeof compactToolbarMenuBaseProps>;
 
 /**
+ * Compact toolbar menu.
+ */
+export type CompactToolbarMenu = {
+	[K1 in keyof CompactToolbarMenuBaseProps]: K1 extends "items"
+		? CompactToolbarMenuBaseProps[K1] extends Array<infer R>
+			? Array<
+					Omit<R, "mode"> & {
+						/**
+						 * Click callback.
+						 */
+						onClick?: () => void;
+					}
+			  >
+			: never
+		: CompactToolbarMenuBaseProps[K1];
+};
+
+/**
  * Helper type for using compact toolbar.
  */
 export type CompactToolbarData = {
 	/**
 	 * Menus.
 	 */
-	menus: Array<{
-		[K1 in keyof CompactToolbarMenuBaseProps]: K1 extends "items"
-			? CompactToolbarMenuBaseProps[K1] extends Array<infer R>
-				? Array<
-						Omit<R, "mode"> & {
-							/**
-							 * Click callback.
-							 */
-							onClick?: () => void;
-						}
-				  >
-				: never
-			: CompactToolbarMenuBaseProps[K1];
-	}>;
+	menus: Array<CompactToolbarMenu>;
 };
 
 /**

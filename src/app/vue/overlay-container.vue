@@ -11,9 +11,10 @@
 		height="50vh"
 		@update:model-value="value => $emit('update:modelValue', value)"
 	>
-		<VCard height="100%" width="100%">
-			<VToolbar>
-				<VToolbarTitle class="text-h5">Title</VToolbarTitle>
+		<VCard height="100%" width="100%" class="overflow-hidden">
+			<VToolbar height="40">
+				<VIcon icon="fa-tools" class="ml-4" />
+				<VToolbarTitle class="text-h5 font-weight-bold">Title</VToolbarTitle>
 				<VBtn icon @click="$emit('update:modelValue', false)">
 					<VIcon icon="fa-close" />
 				</VBtn>
