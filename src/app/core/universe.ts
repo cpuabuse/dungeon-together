@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -42,7 +42,7 @@ import {
 import { coreArgGenerateDefaultUuid } from "./arg/uuid";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
 import { CellPathOwn, CoreCellArg, CoreCellClass, CoreCellInstance } from "./cell";
-import { CoreConnection, CoreConnectionConstructorParams } from "./connection";
+import { CoreConnection, CoreMessage } from "./connection";
 import { CoreEntityArg, CoreEntityClass, CoreEntityInstance, EntityPathOwn } from "./entity";
 import { CoreLog, LogLevel } from "./error";
 import { CoreGridArg, CoreGridClass, CoreGridInstance, GridPathOwn } from "./grid";
@@ -111,6 +111,16 @@ export type CoreUniverseConstructorParams<R extends any[] = any[]> = [CoreUniver
 export type CoreUniverseInstanceNonRecursive = object;
 
 /**
+ * Helper type to use when accessing connections.
+ */
+export type CoreUniverseInstanceNonRecursiveWithConnections = {
+	/**
+	 * Connections.
+	 */
+	connections: Map<Uuid, CoreConnection<CoreUniverseInstanceNonRecursive, CoreMessage, CoreMessage>>;
+};
+
+/**
  * Placeholder for the universe.
  *
  * @see {@link CoreBaseClassNonRecursive}
@@ -133,20 +143,20 @@ export type CoreUniverse<
 	Cell extends CoreCellInstance<BaseParams, Options, Entity> = CoreCellInstance<BaseParams, Options, Entity>,
 	Grid extends CoreGridInstance<BaseParams, Options, Cell> = CoreGridInstance<BaseParams, Options, Cell>,
 	Shard extends CoreShardInstance<BaseParams, Options, Grid> = CoreShardInstance<BaseParams, Options, Grid>
-> = {
+> = CoreUniverseInstanceNonRecursive & {
 	/**
 	 * Base class.
 	 */
 	Base: BaseClass;
 } & CoreUniverseObjectUniverse<
-	BaseParams,
-	Entity,
-	CoreEntityArg<Options>,
-	CoreArgIds.Entity,
-	Options,
-	CoreEntityArgParentId,
-	CoreEntityArgGrandparentIds
-> &
+		BaseParams,
+		Entity,
+		CoreEntityArg<Options>,
+		CoreArgIds.Entity,
+		Options,
+		CoreEntityArgParentId,
+		CoreEntityArgGrandparentIds
+	> &
 	CoreUniverseObjectUniverse<
 		BaseParams,
 		Cell,
@@ -393,7 +403,7 @@ export function CoreUniverseClassFactory<
 	/**
 	 * Ids.
 	 */
-	type Ids = typeof ids[number];
+	type Ids = (typeof ids)[number];
 
 	/**
 	 * Generate parameters for as shard container.
@@ -490,7 +500,8 @@ export function CoreUniverseClassFactory<
 			StaticImplements<
 				ToAbstract<CoreUniverseClass<BaseClass, BaseParams, Options, Entity, Cell, Grid, Shard>>,
 				typeof Universe
-			>
+			>,
+			CoreUniverseInstanceNonRecursiveWithConnections
 	{
 		public abstract Base: BaseClass;
 
@@ -519,8 +530,11 @@ export function CoreUniverseClassFactory<
 
 		/**
 		 * Connections.
+		 *
+		 * @remarks
+		 * Protected, since managing of sockets to be implemented by universe, thus sockets should not be accessed publicly.
 		 */
-		public connections: Set<CoreConnection<this>> = new Set();
+		public abstract readonly connections: Map<Uuid, CoreConnection<Universe, CoreMessage, CoreMessage>>;
 
 		public defaultCell!: Options extends CoreArgOptionsPathOwnUnion ? Cell : never;
 
@@ -558,6 +572,9 @@ export function CoreUniverseClassFactory<
 		 */
 		public readonly universeQueue: SequenceQueue = new SequenceQueue();
 
+		/**
+		 * Universe UUID.
+		 */
 		public universeUuid: Uuid;
 
 		/**
@@ -830,18 +847,6 @@ export function CoreUniverseClassFactory<
 		}
 
 		/**
-		 * Adds connection to universe.
-		 *
-		 * @param param - Destructured parameter
-		 * @returns Created connection
-		 */
-		public addConnection({ socket }: CoreConnectionConstructorParams<this>): CoreConnection<this> {
-			let connection: CoreConnection<this> = new CoreConnection<this>({ socket });
-			this.connections.add(connection);
-			return connection;
-		}
-
-		/**
 		 * Adds shard (Core level).
 		 *
 		 * @remarks
@@ -893,6 +898,9 @@ export function CoreUniverseClassFactory<
 
 			// Attach hook, delayed to replicate behavior of attach for other universe objects, when path is own
 			attachHook
+				.then(() => {
+					this.attachShard(shard);
+				})
 				.catch(error => {
 					this.log({
 						error: new Error(
@@ -903,9 +911,6 @@ export function CoreUniverseClassFactory<
 						),
 						level: LogLevel.Error
 					});
-				})
-				.finally(() => {
-					this.attachShard(shard);
 				});
 
 			// Create shard

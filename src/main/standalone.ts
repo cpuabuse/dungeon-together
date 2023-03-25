@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -19,19 +19,13 @@
  */
 
 import { StandaloneApplication } from "../app/application/standalone";
-import {
-	initProcessCallback as clientInitProcessCallback,
-	queueProcessCallback as clientQueueProcessCallback
-} from "../app/client/connection";
+import { ClientConnection, ClientMessage } from "../app/client/connection";
 import { ClientUniverse } from "../app/client/universe";
-import {
-	SocketProcessBase,
-	ToSuperclassProcessCallback,
-	VStandaloneSocket,
-	processInitWord
-} from "../app/core/connection";
+import { Uuid } from "../app/common/uuid";
+import { CoreStandaloneSocket, processInitWord } from "../app/core/connection";
 import { CoreLog, LogLevel } from "../app/core/error";
-import { queueProcessCallback as serverQueueProcessCallback } from "../app/server/connection";
+import { ServerConnection, ServerMessage } from "../app/server/connection";
+import { ServerShard } from "../app/server/shard";
 import { ServerUniverse } from "../app/server/universe";
 import { systemModuleFactory } from "../module/system";
 
@@ -59,34 +53,26 @@ async function main(): Promise<void> {
 	let serverUniverse: ServerUniverse = await application.serverLoader.addUniverse({ yamlId: "cave" });
 	let clientUniverse: ClientUniverse = await application.clientLoader.addUniverse();
 
-	/**
-	 * Dummy sync function.
-	 */
-	function sync(): void {
-		// Do nothing
-	}
-
 	// Sockets
-	let clientSocket: VStandaloneSocket<ClientUniverse, ServerUniverse> = new VStandaloneSocket({
-		primary: {
-			callback: clientQueueProcessCallback,
-			sync,
-			universe: clientUniverse
-		},
-		secondary: { callback: serverQueueProcessCallback, sync, universe: serverUniverse }
-	});
+	let clientSocket: CoreStandaloneSocket<ClientMessage, ServerMessage> = new CoreStandaloneSocket({});
 
-	// Add a initialization process
-	clientSocket.addProcess({
-		callback: clientInitProcessCallback as ToSuperclassProcessCallback<
-			typeof clientInitProcessCallback,
-			SocketProcessBase
-		>,
-		word: processInitWord
+	// Connections
+	let clientConnection: ClientConnection = new ClientConnection({
+		connectionUuid: "connect",
+		socket: clientSocket,
+		universe: clientUniverse
 	});
+	let serverConnection: ServerConnection = new ServerConnection({
+		connectionUuid: "connect",
+		socket: clientSocket.target,
+		universe: serverUniverse
+	});
+	let shard: ServerShard = Array.from(serverUniverse.shards)[1][1];
+	let playerUuid: Uuid = Array.from(shard.players)[2][0];
+	serverConnection.registerShard({ playerUuid, shardUuid: shard.shardUuid });
 
 	// Dispatch init process
-	await clientSocket.tick({ word: processInitWord });
+	await clientConnection.tick({ word: processInitWord });
 }
 
 // Call main
@@ -96,6 +82,5 @@ main();
 
 // #if _DEBUG_ENABLED
 // For testing
-// eslint-disable-next-line no-console
 CoreLog.global.log({ level: LogLevel.Debug, message: "Debug enabled." });
 // #endif

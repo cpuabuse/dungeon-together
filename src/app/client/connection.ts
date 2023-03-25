@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -11,22 +11,63 @@ import { Howl } from "howler";
 import nextTick from "next-tick";
 import { DeferredPromise } from "../common/async";
 import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
+import { defaultFadeInMs, defaultFadeOutMs } from "../common/sound";
 import { Uuid } from "../common/uuid";
 import { ClientUpdate } from "../comms";
 import {
 	CoreConnection,
-	CoreConnectionConstructorParams,
-	Envelope,
-	Message,
-	ProcessCallback,
-	VSocket
+	CoreConnectionArgs,
+	CoreEnvelope,
+	CoreMessageEmpty,
+	CoreMessageMovement,
+	CoreMessagePlayerBody,
+	CoreProcessCallback,
+	CoreScheduler,
+	ToSuperclassCoreProcessCallback,
+	processInitWord
 } from "../core/connection";
 import { LogLevel } from "../core/error";
-import { CoreShardArg } from "../core/shard";
+import { CoreShardArg, ShardPathOwn } from "../core/shard";
+import { ServerMessage } from "../server/connection";
 import { ClientCell } from "./cell";
 import { ClientOptions } from "./options";
 import { ClientShard } from "./shard";
 import { ClientUniverse } from "./universe";
+
+/**
+ * Message type client receives.
+ */
+export type ClientMessage =
+	| CoreMessageEmpty
+	| {
+			/**
+			 * Message body.
+			 */
+			body: CoreMessagePlayerBody &
+				CoreShardArg<ClientOptions> & {
+					/**
+					 * Unit Uuids.
+					 */
+					units: Array<Uuid>;
+				};
+
+			/**
+			 * Message type.
+			 */
+			type: MessageTypeWord.Sync;
+	  }
+	| {
+			/**
+			 * Client update body.
+			 */
+			body: ClientUpdate;
+
+			/**
+			 * Update type.
+			 */
+			type: MessageTypeWord.Update;
+	  }
+	| CoreMessageMovement;
 
 // Sound
 /**
@@ -35,7 +76,7 @@ import { ClientUniverse } from "./universe";
 let splat: Howl = new Howl({
 	html5: true,
 	sprite: {
-		default: [30, 1000]
+		default: [defaultFadeInMs, defaultFadeOutMs]
 	},
 	src: ["sound/effects/splattt-6295.mp3"]
 });
@@ -43,25 +84,67 @@ let splat: Howl = new Howl({
 /**
  * Client connection.
  */
-export class ClientConnection implements CoreConnection<ClientUniverse> {
+export class ClientConnection extends CoreConnection<ClientUniverse, ClientMessage, ServerMessage> {
 	/**
 	 * Client UUIDs.
 	 */
-	public shardUuids: Set<Uuid> = new Set();
-
-	/**
-	 * The target, be it standalone, remote or absent.
-	 */
-	public socket: VSocket<ClientUniverse>;
+	public shards: Set<Uuid> = new Set();
 
 	/**
 	 * Constructor.
 	 *
 	 * @param target - Socket
 	 */
-	public constructor({ socket }: CoreConnectionConstructorParams<ClientUniverse>) {
-		// Set this target
-		this.socket = socket;
+	public constructor({
+		universe,
+		socket,
+		connectionUuid
+	}: Omit<CoreConnectionArgs<ClientUniverse, ClientMessage, ServerMessage>, "callback">) {
+		super({
+			callback: queueProcessCallback as ToSuperclassCoreProcessCallback<
+				typeof queueProcessCallback,
+				CoreConnection<ClientUniverse, ClientMessage, ServerMessage>
+			>,
+			connectionUuid,
+			socket,
+			universe
+		});
+
+		this.addProcess({
+			callback: initProcessCallback as ToSuperclassCoreProcessCallback<typeof queueProcessCallback, CoreScheduler>,
+			word: processInitWord
+		});
+	}
+
+	/**
+	 * Calls for each shard.
+	 *
+	 * @param callback - Callback
+	 * @returns Array of return values
+	 */
+	public forEachShard<Return>(callback: (shard: ClientShard) => Return): Array<Return> {
+		return Array.from(this.shards).map(shardUuid => callback(this.universe.getShard({ shardUuid })));
+	}
+
+	/**
+	 * Registers server shard.
+	 *
+	 * @param param - Shard UUID and player UUID
+	 */
+	public registerShard({
+		shardUuid,
+		playerUuid
+	}: {
+		/**
+		 * Player UUID.
+		 */
+		playerUuid: string;
+	} & ShardPathOwn): void {
+		let shard: ClientShard = this.universe.getShard({ shardUuid });
+		this.shards.add(shardUuid);
+		shard.playerUuid = playerUuid;
+		shard.isConnected = true;
+		shard.connectionUuid = this.connectionUuid;
 	}
 }
 
@@ -71,8 +154,8 @@ export class ClientConnection implements CoreConnection<ClientUniverse> {
  * @param this - Socket
  * @returns Promise with `true`
  */
-export const initProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = async function () {
-	await this.send({ envelope: new Envelope({ messages: [{ body: null, type: MessageTypeWord.Sync }] }) });
+export const initProcessCallback: CoreProcessCallback<ClientConnection> = async function () {
+	await this.socket.send(new CoreEnvelope({ messages: [{ body: null, type: MessageTypeWord.Sync }] }));
 	return true;
 };
 
@@ -83,17 +166,14 @@ export const initProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = asy
  */
 // Has to be async to work with VSocket
 // eslint-disable-next-line @typescript-eslint/require-await
-export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = async function () {
+export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async function () {
 	// Message reading loop
 	let counter: number = 0;
 	let results: Array<Promise<void>> = new Array<Promise<void>>();
 
 	while (counter++ < vSocketMaxDequeue) {
 		// Get message
-		const message: Message = this.readQueue();
-
-		// Shard
-		let shard: ClientShard;
+		const message: ClientMessage = this.socket.readQueue();
 
 		// Switch message type
 		switch (message.type) {
@@ -116,7 +196,7 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 						 * Callback.
 						 */
 						callback: () => {
-							this.universe.addShard(message.body as CoreShardArg<ClientOptions>, { attachHook, created }, [], {
+							let shard: ClientShard = this.universe.addShard(message.body, { attachHook, created }, [], {
 								doAppend: true
 							});
 							created
@@ -129,14 +209,29 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 									);
 								})
 								.finally(() => {
+									attachHook
+										.then(() => {
+											// TODO: Shard registration should be last in attach, but moved out of created finally
+											this.registerShard({ playerUuid: message.body.playerUuid, shardUuid: message.body.shardUuid });
+											message.body.units.forEach(unitUuid => {
+												shard.units.add(unitUuid);
+											});
+										})
+										.catch(error => {
+											this.universe.log({
+												error: new Error(
+													`"Sync" callback failed trying to add shard("shardUuid=${message.body.shardUuid}") to player("playerUuid=${message.body.playerUuid}").`,
+													{ cause: error instanceof Error ? error : undefined }
+												),
+												level: LogLevel.Error
+											});
+										});
 									resolve();
 								});
 						}
 					});
 				});
 
-				shard = this.universe.getShard(message.body as CoreShardArg<ClientOptions>);
-				shard.addSocket({ socket: this });
 				break;
 			}
 
@@ -144,7 +239,7 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 			case MessageTypeWord.Update: {
 				this.universe.log({ level: LogLevel.Informational, message: `Update started.` });
 				// Create cells if missing
-				(message.body as ClientUpdate).cells.forEach(sourceCell => {
+				message.body.cells.forEach(sourceCell => {
 					let targetCell: ClientCell = this.universe.getCell(sourceCell);
 
 					if (targetCell.cellUuid !== sourceCell.cellUuid) {
@@ -193,7 +288,7 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 				});
 
 				// Detach
-				(message.body as ClientUpdate).cells.forEach(sourceCell => {
+				message.body.cells.forEach(sourceCell => {
 					let sourceEntityUuidSet: Set<Uuid> = new Set(sourceCell.entities.map(entity => entity.entityUuid));
 					this.universe.universeQueue.addCallback({
 						/**
@@ -229,7 +324,7 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 				});
 
 				// Attach
-				(message.body as ClientUpdate).cells.forEach(sourceCell => {
+				message.body.cells.forEach(sourceCell => {
 					this.universe.universeQueue.addCallback({
 						/**
 						 * Callback.
@@ -297,11 +392,10 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 				break;
 			}
 
+			// Received from client
 			case MessageTypeWord.Movement:
 				results.push(
-					this.send({
-						envelope: new Envelope({ messages: [{ body: message.body, type: MessageTypeWord.Movement }] })
-					})
+					this.socket.send(new CoreEnvelope({ messages: [{ body: message.body, type: MessageTypeWord.Movement }] }))
 				);
 				break;
 
@@ -310,7 +404,7 @@ export const queueProcessCallback: ProcessCallback<VSocket<ClientUniverse>> = as
 				this.universe.log({
 					level: LogLevel.Warning,
 					// Casting, since if the switch is exhaustive, then type is `never`
-					message: `Unknown message type(type="${message.type as typeof message["type"]}").`
+					message: `Unknown message type(type="${(message as ClientMessage).type}").`
 				});
 		}
 	}

@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -14,6 +14,7 @@ import { CoreShardArg } from "../core/shard";
 import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
 import { ServerBaseClass, ServerBaseConstructorParams, ServerBaseFactory } from "./base";
 import { ServerCell, ServerCellClass, ServerCellFactory } from "./cell";
+import { ServerConnection } from "./connection";
 import { ServerEntity, ServerEntityClass, ServerEntityFactory } from "./entity";
 import { ServerGrid, ServerGridClass, ServerGridFactory } from "./grid";
 import { ServerOptions, serverOptions } from "./options";
@@ -61,6 +62,11 @@ export class ServerUniverse extends CoreUniverseClassFactory<
 	 * A shard constructor.
 	 */
 	public readonly Shard: ServerShardClass;
+
+	/**
+	 * Server connections.
+	 */
+	public readonly connections: Map<Uuid, ServerConnection> = new Map();
 
 	/**
 	 * Default shard.

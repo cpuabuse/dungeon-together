@@ -7,9 +7,7 @@
  * @file Displays server information to canvas
  */
 
-import Color from "color";
-import { array, number, tuple } from "fp-ts";
-import { Application, Container, Geometry, Graphics, Matrix, Mesh, Renderer, Shader, utils } from "pixi.js";
+import { Application, Container, Matrix, Renderer, utils } from "pixi.js";
 import {
 	defaultEntityHeight,
 	defaultEntityWidth,
@@ -19,12 +17,14 @@ import {
 	defaultMobileEntityWidth
 } from "../common/defaults";
 import { MessageTypeWord, MovementWord } from "../common/defaults/connection";
+import { Uuid } from "../common/uuid";
 import { CoreArgIds } from "../core/arg";
-import { Envelope, VSocket } from "../core/connection";
+import { CoreEnvelope, CorePlayer } from "../core/connection";
 import { LogLevel } from "../core/error";
 import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
+import { ServerMessage } from "../server/connection";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ElementBall } from "./element-ball";
 import { ClientGrid } from "./grid";
@@ -40,9 +40,7 @@ import {
 	upSymbol
 } from "./input";
 import { ClientOptions, clientOptions } from "./options";
-import { HpBarColors, ProgressBar, friendlyHpBarColors, hpBarColorWords } from "./progess-bar";
 import { ClientToast } from "./toast";
-import { ClientUniverse } from "./universe";
 
 /**
  * Created a client shard class.
@@ -67,19 +65,22 @@ export function ClientShardFactory({
 	 *
 	 * Each shard to not interact with another and be treated as a separate thread.
 	 */
-	class ClientShard extends CoreShardClassFactory<
-		ClientBaseClass,
-		ClientBaseConstructorParams,
-		ClientOptions,
-		ClientGrid
-	>({
-		Base,
-		options: clientOptions
-	}) {
+	class ClientShard
+		extends CoreShardClassFactory<ClientBaseClass, ClientBaseConstructorParams, ClientOptions, ClientGrid>({
+			Base,
+			options: clientOptions
+		})
+		implements CorePlayer
+	{
 		/**
 		 * Pixi application.
 		 */
 		public readonly app: Application;
+
+		/**
+		 * Dict received from server.
+		 */
+		public dictionary: CorePlayer["dictionary"] = {};
 
 		/**
 		 * Container for pixi.
@@ -87,9 +88,20 @@ export function ClientShardFactory({
 		public readonly gridContainer: Container = new Container();
 
 		/**
+		 * Is connected or not.
+		 */
+		public isConnected: boolean = false;
+
+		/**
 		 * Viewport for this client shard.
 		 */
 		public matrix: Matrix = Matrix.IDENTITY;
+
+		/**
+		 * Player UUID.
+		 */
+		// TODO: Use appropriate UUID generator function
+		public playerUuid: Uuid = `player/${this.shardUuid}`;
 
 		/**
 		 * Scene height.
@@ -111,10 +123,8 @@ export function ClientShardFactory({
 		 */
 		public toast: ClientToast;
 
-		/**
-		 * An array of sockets.
-		 */
-		protected sockets: Array<VSocket<ClientUniverse>> = new Array<VSocket<ClientUniverse>>();
+		/** Units. */
+		public units: Set<string> = new Set();
 
 		/**
 		 * Input events.
@@ -195,7 +205,7 @@ export function ClientShardFactory({
 					let inputDebug: (arg: InputDebugParam) => void = ({ symbol, input }: InputDebugParam) => {
 						(this.constructor as typeof ClientShard).universe.log({
 							level: LogLevel.Debug,
-							message: `Shard received input(description="${symbol.description ?? "No description"}) at location(x="${
+							message: `Shard received input(description="${symbol.description ?? "No description"}") at location(x="${
 								input.x
 							}", y="${input.y}").`
 						});
@@ -231,30 +241,49 @@ export function ClientShardFactory({
 					// eslint-disable-next-line @typescript-eslint/no-misused-promises
 					this.input.on(upSymbol, async inputInterface => {
 						// Even though when array is empty an envelope will not be used, in those situations performance is irrelevant, at least on the client side
-						let envelope: Envelope = new Envelope({
+						let envelope: CoreEnvelope<ServerMessage> = new CoreEnvelope({
 							messages: [
 								{
-									body: { direction: MovementWord.Up },
+									body: {
+										direction: MovementWord.Up,
+										playerUuid: this.playerUuid,
+										// TODO: Add active unit system
+										unitUuid: Array.from(this.units)[0]
+									},
 									type: MessageTypeWord.Movement
 								}
 							]
 						});
-						await Promise.all(this.sockets.map(socket => socket.send({ envelope })));
+						await (this.constructor as typeof ClientShard).universe.connections
+							.get(this.connectionUuid)
+							?.socket.send(envelope);
+
+						// #if _DEBUG_ENABLED
+						inputDebug({ input: inputInterface as InputInterface, symbol: upSymbol });
+						// #endif
 					});
 
 					// Add listeners for down input
 					// Async callback for event emitter
 					// eslint-disable-next-line @typescript-eslint/no-misused-promises
 					this.input.on(downSymbol, async inputInterface => {
-						let envelope: Envelope = new Envelope({
+						let envelope: CoreEnvelope<ServerMessage> = new CoreEnvelope({
 							messages: [
 								{
-									body: { direction: MovementWord.Down },
+									body: {
+										direction: MovementWord.Down,
+										playerUuid: this.playerUuid,
+										// TODO: Add active unit system
+										unitUuid: Array.from(this.units)[0]
+									},
 									type: MessageTypeWord.Movement
 								}
 							]
 						});
-						await Promise.all(this.sockets.map(socket => socket.send({ envelope })));
+
+						await (this.constructor as typeof ClientShard).universe.connections
+							.get(this.connectionUuid)
+							?.socket.send(envelope);
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: downSymbol });
@@ -265,15 +294,23 @@ export function ClientShardFactory({
 					// Async callback for event emitter
 					// eslint-disable-next-line @typescript-eslint/no-misused-promises
 					this.input.on(rightSymbol, async inputInterface => {
-						let envelope: Envelope = new Envelope({
+						let envelope: CoreEnvelope<ServerMessage> = new CoreEnvelope({
 							messages: [
 								{
-									body: { direction: MovementWord.Right },
+									body: {
+										direction: MovementWord.Right,
+										playerUuid: this.playerUuid,
+										// TODO: Add active unit system
+										unitUuid: Array.from(this.units)[0]
+									},
 									type: MessageTypeWord.Movement
 								}
 							]
 						});
-						await Promise.all(this.sockets.map(socket => socket.send({ envelope })));
+
+						await (this.constructor as typeof ClientShard).universe.connections
+							.get(this.connectionUuid)
+							?.socket.send(envelope);
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: rightSymbol });
@@ -284,15 +321,23 @@ export function ClientShardFactory({
 					// Async callback for event emitter
 					// eslint-disable-next-line @typescript-eslint/no-misused-promises
 					this.input.on(leftSymbol, async inputInterface => {
-						let envelope: Envelope = new Envelope({
+						let envelope: CoreEnvelope<ServerMessage> = new CoreEnvelope({
 							messages: [
 								{
-									body: { direction: MovementWord.Left },
+									body: {
+										direction: MovementWord.Left,
+										playerUuid: this.playerUuid,
+										// TODO: Add active unit system
+										unitUuid: Array.from(this.units)[0]
+									},
 									type: MessageTypeWord.Movement
 								}
 							]
 						});
-						await Promise.all(this.sockets.map(socket => socket.send({ envelope })));
+
+						await (this.constructor as typeof ClientShard).universe.connections
+							.get(this.connectionUuid)
+							?.socket.send(envelope);
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: leftSymbol });
@@ -336,24 +381,6 @@ export function ClientShardFactory({
 		}
 
 		/**
-		 * Adds socket if does not exist.
-		 *
-		 * @param param - Destructured parameter
-		 */
-		public addSocket({
-			socket
-		}: {
-			/**
-			 * Client socket to add.
-			 */
-			socket: VSocket<ClientUniverse>;
-		}): void {
-			if (!this.sockets.includes(socket)) {
-				this.sockets.push(socket);
-			}
-		}
-
-		/**
 		 * The function that fires the input received.
 		 *
 		 * @param inputSymbol - Input symbol received
@@ -361,25 +388,6 @@ export function ClientShardFactory({
 		 */
 		public fireInput(inputSymbol: symbol, inputInterface: InputInterface): void {
 			this.input.emit(inputSymbol, inputInterface);
-		}
-
-		/**
-		 * Removes socket.
-		 *
-		 * @param param - Destructured parameter
-		 */
-		public removeSocket({
-			socket
-		}: {
-			/**
-			 * Client socket to remove.
-			 */
-			socket: VSocket<ClientUniverse>;
-		}): void {
-			let socketIndex: number = this.sockets.indexOf(socket);
-			if (socketIndex > -1) {
-				this.sockets.splice(socketIndex, 1);
-			}
 		}
 
 		/**

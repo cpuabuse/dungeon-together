@@ -4,114 +4,148 @@
 */
 
 /**
- * @file Connection between server and client.
+ * @file
+ * Virtual socket abstraction.
  */
 
-import { MessageTypeWord } from "../../common/defaults/connection";
 import { Uuid } from "../../common/uuid";
-import { CoreUniverseInstanceNonRecursive } from "../universe";
-import { VSocket } from "./vsocket";
+import { CoreLog, LogLevel } from "../error";
+import { ShardPathOwn } from "../shard";
+import { CoreUniverseInstanceNonRecursive, CoreUniverseInstanceNonRecursiveWithConnections } from "../universe";
+import { CoreMessage, CoreProcessCallback, CoreScheduler, CoreSocket, ToSuperclassCoreProcessCallback } from ".";
 
 /**
- * Constructor params for connection.
+ * Player data.
  */
-export type CoreConnectionConstructorParams<U extends CoreUniverseInstanceNonRecursive> = {
+export type CorePlayer = {
 	/**
-	 * Universe socket.
+	 * Player dictionary.
 	 */
-	socket: VSocket<U>;
+	dictionary: Record<string, string | Array<string> | Record<string, string>>;
+
+	/**
+	 * Whether the player is connected.
+	 */
+	isConnected: boolean;
+
+	/**
+	 * Player controlled units.
+	 */
+	units: Set<Uuid>;
 };
 
 /**
- * Common connection.
+ * Default empty player.
  */
-export class CoreConnection<U extends CoreUniverseInstanceNonRecursive> {
+export const defaultPlayer: CorePlayer = {
+	dictionary: {},
+	isConnected: false,
+	units: new Set()
+};
+
+/**
+ * Players referenced by connection.
+ *
+ * @remarks
+ * Not a set of direct references but a set of UUIDs, since referencing through shard, which is a universe object.
+ */
+type Player = {
 	/**
-	 * Client UUID.
+	 * Player UUID.
 	 */
-	public shardUuids: Set<Uuid> = new Set();
+	playerUuid: Uuid;
+} & ShardPathOwn;
+
+/**
+ * Arguments for constructor of core connection.
+ */
+export type CoreConnectionArgs<
+	Universe extends CoreUniverseInstanceNonRecursive,
+	ReceiveMessage extends CoreMessage,
+	SendMessage extends CoreMessage
+> = {
+	/**
+	 * Optional callback.
+	 */
+	callback: CoreProcessCallback<CoreConnection<Universe, ReceiveMessage, SendMessage>>;
+
+	/**
+	 * Universe to initialize socket with.
+	 */
+	universe: Universe;
+
+	/**
+	 * Socket.
+	 */
+	socket: CoreSocket<ReceiveMessage, SendMessage>;
+
+	/** Connection UUID. */
+	connectionUuid: Uuid;
+};
+
+/**
+ * Virtual socket abstraction.
+ *
+ * Emitter dispatches `tick()`; `tick()` performs processing, if `tock()` is not queued, otherwise `tick()` calls `tock()` asynchronously; `tock()` will requeue itself, if the process is not finished, while counting stack depth.
+ */
+export abstract class CoreConnection<
+	Universe extends CoreUniverseInstanceNonRecursive,
+	ReceiveMessage extends CoreMessage,
+	SendMessage extends CoreMessage
+> extends CoreScheduler {
+	/** Connection UUID. */
+	public connectionUuid: Uuid;
+
+	/**
+	 * Socket.
+	 */
+	public socket: CoreSocket<ReceiveMessage, SendMessage>;
 
 	/**
 	 * Universe socket.
 	 */
-	public socket: VSocket<U>;
+	public universe: Universe;
 
 	/**
-	 * Constructor.
+	 * Public constructor.
 	 *
-	 * @param target - Socket
+	 * @param callback - Callback to call on queue updates
 	 */
-	public constructor({ socket }: CoreConnectionConstructorParams<U>) {
-		// Set this target
+	public constructor({
+		callback,
+		universe,
+		socket,
+		connectionUuid
+	}: CoreConnectionArgs<Universe, ReceiveMessage, SendMessage>) {
+		super({ callback: callback as ToSuperclassCoreProcessCallback<typeof callback, CoreScheduler> });
+		this.universe = universe;
 		this.socket = socket;
-	}
-}
+		// TODO: Replace with game tick
+		this.socket.connection = this;
+		this.connectionUuid = connectionUuid;
 
-/**
- * Client-server command interface.
- */
-export class Message {
-	/**
-	 * Message data.
-	 */
-	public body: unknown;
-
-	/**
-	 * Type of the message.
-	 */
-	public type: MessageTypeWord;
-
-	/**
-	 * Constructor for message.
-	 *
-	 * @param param - Destructured parameter
-	 */
-	public constructor({
-		body,
-		type
-	}: {
-		/**
-		 * Message data to be set.
-		 */
-		body: unknown;
-
-		/**
-		 * Message type to be set.
-		 */
-		type: MessageTypeWord;
-	}) {
-		// Initialize private properties
-		this.body = body;
-		this.type = type;
-	}
-}
-
-/**
- * Envelope, a single transaction.
- */
-export class Envelope {
-	/**
-	 * Message array.
-	 */
-	public messages: Array<Message> = new Array<Message>();
-
-	/**
-	 * Constructor for envelope.
-	 *
-	 * @param param - Destructured parameter
-	 */
-	public constructor({
-		messages
-	}: {
-		/**
-		 * Optional messages to be set.
-		 */
-		messages?: Array<Message>;
-	}) {
-		if (typeof messages !== "undefined") {
-			messages.forEach(message => {
-				this.messages.push(message);
+		if ((this.universe as CoreUniverseInstanceNonRecursiveWithConnections).connections.has(connectionUuid)) {
+			(this.universe as CoreLog).log({
+				level: LogLevel.Warning,
+				message: `Connection UUID ${connectionUuid} already exists.`
 			});
 		}
+
+		(this.universe as CoreUniverseInstanceNonRecursiveWithConnections).connections.set(connectionUuid, this);
 	}
+
+	/**
+	 * Helper function, executes callback for each shard.
+	 *
+	 * @param callback - Callback to execute
+	 * @returns - Array of return values from callback
+	 */
+	public abstract forEachShard<Return>(callback: (shard: ShardPathOwn) => Return): Array<Return>;
+
+	/**
+	 * Starts tracking shard in connection.
+	 *
+	 * @param param - Destructured parameter
+	 */
+	public abstract registerShard({ shardUuid, playerUuid }: Player): void;
 }

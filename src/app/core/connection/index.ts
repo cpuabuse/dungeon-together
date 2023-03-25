@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -9,5 +9,8 @@
  * @file
  */
 
+export * from "./scheduler";
 export * from "./connection";
-export * from "./vsocket";
+export * from "./standalone-socket";
+export * from "./socket";
+export * from "./message";

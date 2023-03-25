@@ -28,6 +28,7 @@ import { CoreUniverseObjectConstructorParameters } from "../core/universe-object
 import UniverseComponent from "../vue/universe.vue";
 import { ClientBaseClass, ClientBaseConstructorParams, ClientBaseFactory } from "./base";
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
+import { ClientConnection } from "./connection";
 import { ClientEntity, ClientEntityClass, ClientEntityFactory } from "./entity";
 import { ClientGrid, ClientGridClass, ClientGridClassFactory } from "./grid";
 import { UniverseState, createVueApp } from "./gui";
@@ -81,6 +82,11 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	 * Cells index.
 	 */
 	public readonly cellsIndex: Map<Uuid, ClientCell> = new Map();
+
+	/**
+	 * Client connections.
+	 */
+	public readonly connections: Map<Uuid, ClientConnection> = new Map();
 
 	public readonly defaultMode: Mode = {
 		textures: Object.values(bunnySvgs).map(

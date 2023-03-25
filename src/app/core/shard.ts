@@ -250,6 +250,11 @@ export function CoreShardClassFactory<
 		implements StaticImplements<ToAbstract<CoreShardClass<BaseParams, Options, Grid>>, typeof Shard>
 	{
 		/**
+		 * Connection uuid.
+		 */
+		public connectionUuid: Uuid;
+
+		/**
 		 * Default entity.
 		 *
 		 * @remarks
@@ -316,6 +321,9 @@ export function CoreShardClassFactory<
 				members,
 				parameters: [{ arg }]
 			});
+
+			// TODO: Use appropriate UUID generator function
+			this.connectionUuid = `connection/${this.shardUuid}`;
 		}
 
 		/**

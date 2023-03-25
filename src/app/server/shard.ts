@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -9,24 +9,14 @@
 
 import { Uuid } from "../common/uuid";
 import { CoreArgIds } from "../core/arg";
+import { CorePlayer } from "../core/connection";
+import { EntityPathExtended } from "../core/entity";
 import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ServerBaseClass, ServerBaseConstructorParams } from "./base";
-import { ServerConnection } from "./connection";
-import { ServerEntity } from "./entity";
 import { ServerGrid } from "./grid";
 import { ServerOptions, serverOptions } from "./options";
-
-/**
- * Player data.
- */
-export type Player = {
-	/**
-	 * Player UUID.
-	 */
-	playerEntity: ServerEntity;
-};
 
 /**
  * Created a Server shard class.
@@ -59,14 +49,17 @@ export function ServerShardFactory({
 		options: serverOptions
 	}) {
 		/**
-		 * Connection to client.
+		 * Player data.
+		 *
+		 * @remarks
+		 * Maps with UUID instead of socket, for access from kind.
 		 */
-		public connection: Map<Uuid, ServerConnection> = new Map();
+		public players: Map<Uuid, CorePlayer> = new Map();
 
 		/**
-		 * Player data.
+		 * Controlled unit list.
 		 */
-		public players: Set<Player> = new Set();
+		public units: Map<Uuid, EntityPathExtended> = new Map();
 
 		// ESLint params bug
 		// eslint-disable-next-line jsdoc/require-param
