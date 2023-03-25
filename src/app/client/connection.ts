@@ -21,6 +21,7 @@ import {
 	CoreMessageEmpty,
 	CoreMessageMovement,
 	CoreMessagePlayerBody,
+	CorePlayer,
 	CoreProcessCallback,
 	CoreScheduler,
 	ToSuperclassCoreProcessCallback,
@@ -49,6 +50,11 @@ export type ClientMessage =
 					 * Unit Uuids.
 					 */
 					units: Array<Uuid>;
+
+					/**
+					 * Player dictionary.
+					 */
+					dictionary: CorePlayer["dictionary"];
 				};
 
 			/**
@@ -215,6 +221,19 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 											this.registerShard({ playerUuid: message.body.playerUuid, shardUuid: message.body.shardUuid });
 											message.body.units.forEach(unitUuid => {
 												shard.units.add(unitUuid);
+											});
+
+											// TODO: Move object link verification to standalone connection
+											// Iterating through keys to prevent assignment of objects for standalone
+											Object.keys(message.body.dictionary).forEach(key => {
+												let entry: string | Array<string> | Record<string, string> = message.body.dictionary[key];
+												if (Array.isArray(entry)) {
+													shard.dictionary[key] = [...entry];
+												} else if (typeof entry === "object") {
+													shard.dictionary[key] = { ...entry };
+												} else {
+													shard.dictionary[key] = entry;
+												}
 											});
 										})
 										.catch(error => {

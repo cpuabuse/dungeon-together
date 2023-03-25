@@ -67,7 +67,7 @@ export function GuyKindClassFactory({
 			this.player.units.add(this.entity.entityUuid);
 
 			// Set dictionary
-			this.player.dictionary.units = [this.playerUuid];
+			this.player.dictionary.units = [this.entity.entityUuid];
 		}
 
 		/**
