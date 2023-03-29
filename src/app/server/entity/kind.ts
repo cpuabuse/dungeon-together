@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -27,6 +27,21 @@ type EntityKindParams = {
 	 * Vars is a record of UUIDs to be used in the kind, converted from IDs in files.
 	 */
 	vars?: Record<string, Uuid>;
+};
+
+/**
+ * Parameters for entity kind action.
+ */
+export type EntityKindActionArgs = {
+	/**
+	 * Action name.
+	 */
+	action: ActionWords;
+
+	/**
+	 * Source server entity.
+	 */
+	entity?: ServerEntity;
 };
 
 /**
@@ -129,18 +144,13 @@ export function BaseEntityKindClassFactory({
 		 * Action.
 		 *
 		 * @param param - Destructured parameter
+		 * @returns Whether action was successful
 		 */
 		// Dummy function
-		// eslint-disable-next-line class-methods-use-this
-		public action({
-			action
-		}: {
-			/**
-			 * Action name.
-			 */
-			action: ActionWords;
-		}): void {
+		// eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+		public action(param: EntityKindActionArgs): boolean {
 			// Does nothing
+			return false;
 		}
 
 		/**

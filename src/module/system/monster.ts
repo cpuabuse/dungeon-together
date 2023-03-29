@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -11,7 +11,6 @@
 
 import { Nav } from "../../app/core/arg";
 import { CellPathOwn } from "../../app/core/cell";
-import { ActionWords } from "../../app/server/action";
 import { EntityKindConstructorParams, ServerEntity, ServerEntityClass } from "../../app/server/entity";
 import { UnitKindClass, UnitStats } from "./unit";
 
@@ -74,28 +73,6 @@ export function MonsterKindClassFactory({
 					}
 				}
 			});
-		}
-
-		/**
-		 * Action.
-		 *
-		 * @param param - Destructured parameter
-		 */
-		// Dummy function
-		// eslint-disable-next-line class-methods-use-this
-		public action({
-			action
-		}: {
-			/**
-			 * Action name.
-			 */
-			action: ActionWords;
-		}): void {
-			super.action({ action });
-			this.healthPoints--;
-			if (this.healthPoints <= 0) {
-				(this.entity.constructor as ServerEntityClass).universe.getCell(this.entity).removeEntity(this.entity);
-			}
 		}
 
 		/**
