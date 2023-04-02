@@ -7,13 +7,14 @@
 	<div v-show="items.length > 0" class="overflow-auto">
 		<VList>
 			<template v-for="(item, itemKey) in items" :key="itemKey">
-				<VListItem>
+				<VListItem class="p-0">
 					<!-- Default informational element -->
 					<VRow
 						v-if="item.type === undefined || item.type === ItemType.InfoElement"
 						variant="outlined"
 						height="50"
 						align-content="center"
+						class="px-3 py-1"
 					>
 						<VCol cols="auto" class="my-auto">
 							<VListItemTitle>
@@ -32,19 +33,20 @@
 
 					<!-- UUID element -->
 					<div v-else-if="item.type === ItemType.Uuid">
-						<VListItemTitle>
+						<VListItemTitle class="px-3">
 							{{ item.name }}
 						</VListItemTitle>
 
-						<highlightjs language="plaintext" :code="item.uuid" />
+						<highlightjs language="plaintext" :code="item.uuid" class="m-0" />
 					</div>
 
 					<!-- Tab element -->
 					<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
-					<div v-else-if="item.type === ItemType.Tab" :key="item.tabs" :style="tabStyle(item)">
+					<div v-else-if="item.type === ItemType.Tab" :key="item.tabs" :style="tabStyle(item)" class="pt-3">
 						<VListItemTitle class="text-center">List title</VListItemTitle>
 						<VTabs
 							:key="item.tabs"
+							height="35px"
 							:model-value="getTab({ tabs: item.tabs })"
 							@update:model-value="value => setTab({ tabs: item.tabs, value })"
 						>
@@ -52,6 +54,7 @@
 						</VTabs>
 
 						<VWindow
+							class="px-3"
 							:model-value="getTab({ tabs: item.tabs })"
 							@update:model-value="value => setTab({ tabs: item.tabs, value })"
 						>

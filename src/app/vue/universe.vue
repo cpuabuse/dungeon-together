@@ -5,7 +5,7 @@
 			<tsxtest />
 			<statealertbox v-show="alert" />
 			<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
-			<OverlayContainer v-model="statsContainer">
+			<OverlayContainer v-model="statsContainer" icon="fa-id-card">
 				<template #body>
 					<OverlayContainerContent :items="statsItems">
 						<template #stats>
@@ -15,7 +15,7 @@
 					</OverlayContainerContent>
 				</template>
 			</OverlayContainer>
-			<OverlayContainer v-model="debugContainer">
+			<OverlayContainer v-model="debugContainer" icon="fa-bug-slash">
 				<template #body>
 					<OverlayContainerContent :items="debugOverlayItems">
 						<template #test> test div dom </template>
