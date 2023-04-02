@@ -17,21 +17,21 @@
 			</OverlayContainer>
 			<OverlayContainer v-model="debugContainer">
 				<template #body>
-					<OverlayContainerContent :items="overlayItems">
+					<OverlayContainerContent :items="debugOverlayItems">
 						<template #test> test div dom </template>
 					</OverlayContainerContent>
 				</template>
 			</OverlayContainer>
 			<template v-for="(shard, shardKey) in shards" :key="shardKey">
 				<OverlayContainer
-					:model-value="showStatContainers.get(shard.shardUuid)"
+					:model-value="showStatContainers.get(shard.shardUuid) ?? false"
 					@update:model-value="value => showStatContainers.set(shard.shardUuid, value)"
 				>
 					<template #body>
 						<OverlayContainerContent :items="statsItems">
 							<template #stats>
 								<template v-for="unitUuid in shard.dictionary.units" :key="unitUuid">
-									<StatsBar :color="hpColor" name="HP" :value="33" />
+									<StatsBar :color="hpColor" name="HP" value="33" />
 									<StatsBar :color="mpColor" name="MP" />
 								</template>
 							</template>
@@ -61,12 +61,12 @@ import StatsBar from "./stats-bar.vue";
 import tsxTestComponent from "./tsx/test.vue";
 import {
 	CompactToolbarData,
+	CompactToolbarMenu,
 	CompactToolbarMenuBaseProps,
 	ElementSize,
-	compactToolbarDataToMenuBaseProps,
-	OverlayContainerContentTabs,
 	OverlayContainerContentItem,
-	CompactToolbarMenu
+	OverlayContainerContentTabs,
+	compactToolbarDataToMenuBaseProps
 } from "./types";
 
 /**
@@ -98,6 +98,11 @@ export default defineComponent({
 			return (this as unknown as ThisVueStore).$store.state.records.alert as boolean;
 		},
 
+		/**
+		 * Tab content for debug for all shards.
+		 *
+		 * @returns Tab content
+		 */
 		debugItemsShardTabs(): OverlayContainerContentTabs {
 			return this.shards.map((shard, index) => {
 				return {
@@ -110,7 +115,13 @@ export default defineComponent({
 			});
 		},
 
-		overlayItems(): Array<OverlayContainerContentItem> {
+		/**
+		 * Overlay container items.
+		 *
+		 * @returns Overlay container items
+		 */
+		debugOverlayItems(): Array<OverlayContainerContentItem> {
+			console.log("debug");
 			return [
 				{ data: "14", name: "Info1" },
 				{ data: "2", name: "Info2" },
@@ -124,11 +135,75 @@ export default defineComponent({
 		},
 
 		/**
+		 * Main toolbar menus.
+		 *
+		 * @returns Main toolbar menus
+		 */
+		mainToolbar(): CompactToolbarData {
+			const data = this.$data;
+			return {
+				menus: [
+					...this.playerMenus,
+					{
+						icon: "fa-globe",
+						items: [{ name: "One" }, { name: "Two" }, { name: "Three" }, { name: "Four" }, { name: "Five" }],
+						maxPinnedAmount: 1,
+						name: "World"
+					},
+					this.systemMenu
+				]
+			};
+		},
+
+		/**
+		 * Menus to be used in main toolbar.
+		 *
+		 * @returns Menu array
+		 */
+		mainToolbarMenus(): Array<CompactToolbarMenuBaseProps> {
+			return compactToolbarDataToMenuBaseProps(this.mainToolbar);
+		},
+
+		/**
+		 * Player menu.
+		 *
+		 * @returns Player menu
+		 */
+		playerMenus(): Array<CompactToolbarMenu> {
+			const data = this.$data;
+			return this.shards.map(shard => {
+				return {
+					icon: "fa-person",
+					items: [
+						{
+							icon: "fa-id-card",
+
+							name: "Stats",
+
+							/**
+							 * Click handler.
+							 */
+							onClick(): void {
+								data.statsContainer = true;
+							}
+						},
+						{ name: "Items" },
+						{ name: "Three" },
+						{ name: "Four" },
+						{ name: shard.shardUuid }
+					],
+					maxPinnedAmount: 2,
+					name: shard.shardUuid
+				};
+			});
+		},
+
+		/**
 		 * Debug menu.
 		 *
 		 * @returns Debug menu
 		 */
-		debugMenu(): CompactToolbarMenu {
+		systemMenu(): CompactToolbarMenu {
 			const data = this.$data;
 			return {
 				icon: "fa-gear",
@@ -162,58 +237,6 @@ export default defineComponent({
 				maxPinnedAmount: 0,
 				name: "System"
 			};
-		},
-
-		shards(): Array<ClientShard> {
-			return Array.from((this as unknown as ThisVueStore).$store.state.universe.shards).map(([, shard]) => shard);
-		},
-
-		mainToolbar(): CompactToolbarData {
-			const data = this.$data;
-			return {
-				menus: [
-					{
-						icon: "fa-person",
-						items: [
-							{
-								icon: "fa-id-card",
-
-								name: "Stats",
-
-								/**
-								 * Click handler.
-								 */
-								onClick(): void {
-									data.statsContainer = true;
-								}
-							},
-							{ name: "Items" },
-							{ name: "Three" },
-							{ name: "Four" },
-							{ name: "Five" }
-						],
-						maxPinnedAmount: 2,
-
-						name: "Player"
-					},
-					{
-						icon: "fa-globe",
-						items: [{ name: "One" }, { name: "Two" }, { name: "Three" }, { name: "Four" }, { name: "Five" }],
-						maxPinnedAmount: 1,
-						name: "World"
-					},
-					this.debugMenu
-				]
-			};
-		},
-
-		/**
-		 * Menus to be used in main toolbar.
-		 *
-		 * @returns Menu array
-		 */
-		mainToolbarMenus(): Array<CompactToolbarMenuBaseProps> {
-			return compactToolbarDataToMenuBaseProps(this.mainToolbar);
 		}
 	},
 
@@ -223,6 +246,16 @@ export default defineComponent({
 	created() {
 		setInterval(() => {
 			this.$data.what = (this as unknown as ThisVueStore).$store.state.universe.application.state.upTime;
+
+			let mp = (this as unknown as ThisVueStore).$store.state.universe.shards;
+
+			if (
+				this.shards.some(shard => !mp.has(shard.shardUuid)) ||
+				Array.from(mp.keys()).some(shardUuid => !this.shards.some(shard => shard.shardUuid === shardUuid))
+			) {
+				console.log("Shards changed");
+				this.shards = Array.from(mp.values());
+			}
 		}, 1000);
 	},
 
@@ -239,14 +272,15 @@ export default defineComponent({
 			debugContainer: false,
 			hpColor: new Color("#1F8C2F"),
 			mpColor: new Color("#051DE8"),
+			shards: new Array<ClientShard>(),
+			showStatContainers: new Map<Uuid, boolean>(),
 			statsContainer: false,
 			statsItems: [
 				{ id: "stats", name: "Stats", type: ItemType.Slot },
 				{ data: "1", name: "Attack" },
 				{ data: "3", name: "Attack" }
 			],
-			what: 0,
-			showStatContainers: new Map<Uuid, boolean>()
+			what: 0
 		};
 
 		return data;
