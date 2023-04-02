@@ -78,6 +78,12 @@ export function ClientShardFactory({
 		public readonly app: Application;
 
 		/**
+		 * Connection uuid.
+		 */
+		// TODO: Use appropriate UUID generator function
+		public connectionUuid: Uuid = `connection/${this.shardUuid}`;
+
+		/**
 		 * Dict received from server.
 		 */
 		public dictionary: CorePlayer["dictionary"] = {};

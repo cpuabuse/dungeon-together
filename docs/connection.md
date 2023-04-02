@@ -21,7 +21,6 @@ classDiagram
 	}
 
 	class CoreShard{
-		+Uuid connectionUuid;
 	}
 
 	class ServerShard{
@@ -32,18 +31,20 @@ classDiagram
 	class ClientShard{
 		+Uuid playerUuid
 		+Set~Uuid~ units
+		+Uuid connectionUuid
 	}
 
 	class Player{
 		+dictionary
+		+Set~Uuid~ units
 	}
 	<<Interface>> Player
 
 	%% Contains
-	CoreUniverse "1" --> "0..*" CoreShard : contains
-	ServerUniverse "1" --> "0..*" ServerShard : contains
-	ClientUniverse "1" --> "0..*" ClientShard : contains
-	ServerShard "1" --|> "0..*" Player : contains
+	CoreUniverse "1" o-- "0..*" CoreShard : contains
+	ServerUniverse "1" o-- "0..*" ServerShard : contains
+	ClientUniverse "1" o-- "0..*" ClientShard : contains
+	ServerShard "1" o-- "0..*" Player : contains
 
 	%% Extends
 	ServerUniverse --|> CoreUniverse : extends
@@ -69,7 +70,6 @@ classDiagram
 	<<Abstract>> CoreUniverse
 
 	class CoreShard{
-		+Uuid connectionUuid;
 	}
 
 	class CoreConnection{
@@ -96,9 +96,9 @@ classDiagram
 	}
 
 	%% Contains
-	CoreUniverse "1" --> "0..*" CoreConnection : contains
-	CoreUniverse "1" --> "0..*" CoreShard : contains
-	CoreConnection "1" --> "1" CoreSocket : contains
+	CoreUniverse "1" o-- "0..*" CoreConnection : contains
+	CoreUniverse "1" o-- "0..*" CoreShard : contains
+	CoreConnection "1" --* "1" CoreSocket : composed of
 
 	%% Extends
 	StandaloneSocket --|> CoreSocket : extends
@@ -131,6 +131,7 @@ classDiagram
 	class ClientShard{
 		+Uuid playerUuid
 		+Set~Uuid~ units
+		+Uuid connectionUuid
 	}
 
 	class CoreConnection{
@@ -151,15 +152,16 @@ classDiagram
 
 	class Player{
 		+dictionary
+		+Set~Uuid~ units
 	}
 	<<Interface>> Player
 
 	%% Contains
-	ServerUniverse "1" --> "0..*" ServerShard : contains
-	ServerUniverse "1" --> "0..*" ServerConnection : contains
-	ClientUniverse "1" --> "0..*" ClientShard : contains
-	ClientUniverse "1" --> "0..*" ClientConnection : contains
-	ServerShard "1" --|> "0..*" Player : contains
+	ServerUniverse "1" o-- "0..*" ServerShard : contains
+	ServerUniverse "1" o-- "0..*" ServerConnection : contains
+	ClientUniverse "1" o-- "0..*" ClientShard : contains
+	ClientUniverse "1" o-- "0..*" ClientConnection : contains
+	ServerShard "1" o-- "0..*" Player : contains
 
 	%% Extends
 	ServerConnection --|> CoreConnection : extends

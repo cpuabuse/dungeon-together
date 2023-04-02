@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -9,7 +9,8 @@
  * @file
  */
 
-import { EntityKindConstructorParams } from "../../app/server/entity";
+import { ActionWords } from "../../app/server/action";
+import { EntityKindActionArgs, EntityKindConstructorParams, ServerEntityClass } from "../../app/server/entity";
 import { ExclusiveKindClass } from "./exclusive";
 
 /**
@@ -134,7 +135,7 @@ export function UnitKindClassFactory({
 		 * @returns Emitted object
 		 */
 		public get emits(): Record<string, any> {
-			return { ...super.emits, health: this.healthPoints };
+			return { ...super.emits, hasAction: true, health: this.healthPoints };
 		}
 
 		/**
@@ -206,6 +207,34 @@ export function UnitKindClassFactory({
 		 */
 		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
 			super({ entity, ...rest });
+		}
+
+		/**
+		 * Action.
+		 *
+		 * @param param - Destructured parameter
+		 * @returns Whether action was successful
+		 */
+		// Dummy function
+		// eslint-disable-next-line class-methods-use-this
+		public action(param: EntityKindActionArgs): boolean {
+			let { action, ...rest }: EntityKindActionArgs = param;
+			switch (action) {
+				case ActionWords.Attack:
+					super.action(param);
+					this.healthPoints--;
+					if (this.healthPoints <= 0) {
+						(this.entity.constructor as ServerEntityClass).universe.getCell(this.entity).removeEntity(this.entity);
+					}
+					return true;
+
+				case ActionWords.Default:
+					return this.action({ action: ActionWords.Attack, ...rest });
+
+				default:
+					// Action was not successful
+					return false;
+			}
 		}
 	}
 	return UnitKind;
