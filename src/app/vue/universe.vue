@@ -22,6 +22,23 @@
 					</OverlayContainerContent>
 				</template>
 			</OverlayContainer>
+			<template v-for="(shard, shardKey) in shards" :key="shardKey">
+				<OverlayContainer
+					:model-value="showStatContainers.get(shard.shardUuid)"
+					@update:model-value="value => showStatContainers.set(shard.shardUuid, value)"
+				>
+					<template #body>
+						<OverlayContainerContent :items="statsItems">
+							<template #stats>
+								<template v-for="unitUuid in shard.dictionary.units" :key="unitUuid">
+									<StatsBar :color="hpColor" name="HP" :value="33" />
+									<StatsBar :color="mpColor" name="MP" />
+								</template>
+							</template>
+						</OverlayContainerContent>
+					</template>
+				</OverlayContainer>
+			</template>
 		</div>
 	</VApp>
 </template>
