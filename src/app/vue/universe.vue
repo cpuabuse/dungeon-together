@@ -110,7 +110,7 @@ export default defineComponent({
 						{ name: "shardUuid", type: ItemType.Uuid, uuid: shard.shardUuid },
 						{ name: "playerUuid", type: ItemType.Uuid, uuid: shard.playerUuid }
 					],
-					name: index.toString()
+					name: shard.shardName
 				};
 			});
 		},
@@ -121,7 +121,6 @@ export default defineComponent({
 		 * @returns Overlay container items
 		 */
 		debugOverlayItems(): Array<OverlayContainerContentItem> {
-			console.log("debug");
 			return [
 				{ data: "14", name: "Info1" },
 				{ data: "2", name: "Info2" },
@@ -171,6 +170,8 @@ export default defineComponent({
 		 */
 		playerMenus(): Array<CompactToolbarMenu> {
 			const data = this.$data;
+			let isNameSubtextToBeSet: boolean = this.shards.length > 0;
+
 			return this.shards.map(shard => {
 				return {
 					icon: "fa-person",
@@ -193,7 +194,8 @@ export default defineComponent({
 						{ name: shard.shardUuid }
 					],
 					maxPinnedAmount: 2,
-					name: shard.shardUuid
+					name: "Player",
+					nameSubtext: isNameSubtextToBeSet ? shard.shardName : undefined
 				};
 			});
 		},
@@ -205,6 +207,7 @@ export default defineComponent({
 		 */
 		systemMenu(): CompactToolbarMenu {
 			const data = this.$data;
+			const store = (this as unknown as ThisVueStore).$store;
 			return {
 				icon: "fa-gear",
 				items: [
@@ -245,17 +248,10 @@ export default defineComponent({
 	 */
 	created() {
 		setInterval(() => {
-			this.$data.what = (this as unknown as ThisVueStore).$store.state.universe.application.state.upTime;
+			this.$data.what = this.universe.application.state.upTime;
 
-			let mp = (this as unknown as ThisVueStore).$store.state.universe.shards;
-
-			if (
-				this.shards.some(shard => !mp.has(shard.shardUuid)) ||
-				Array.from(mp.keys()).some(shardUuid => !this.shards.some(shard => shard.shardUuid === shardUuid))
-			) {
-				console.log("Shards changed");
-				this.shards = Array.from(mp.values());
-			}
+			// TODO: Change to update on message exchange
+			this.watchShards();
 		}, 1000);
 	},
 
@@ -273,6 +269,7 @@ export default defineComponent({
 			hpColor: new Color("#1F8C2F"),
 			mpColor: new Color("#051DE8"),
 			shards: new Array<ClientShard>(),
+			shardUuids: new Array<Uuid>(),
 			showStatContainers: new Map<Uuid, boolean>(),
 			statsContainer: false,
 			statsItems: [
@@ -280,13 +277,34 @@ export default defineComponent({
 				{ data: "1", name: "Attack" },
 				{ data: "3", name: "Attack" }
 			],
-			what: 0
+			what: 0,
+			universe: (this as unknown as ThisVueStore).$store.state.universe
 		};
 
 		return data;
 	},
 
 	methods: {
+		/**
+		 * Checks for changes in universe shards map, and updates if necessary.
+		 *
+		 * @remarks
+		 * Map is controlled by the universe, so we can't just watch it, and have to periodically check for changes.
+		 */
+		watchShards() {
+			const shardsMap = this.universe.shards;
+
+			if (this.shardUuids.some(shardUuid => !shardsMap.has(shardUuid)) || this.shardUuids.length !== shardsMap.size) {
+				this.universe.log({
+					level: LogLevel.Informational,
+					message: `Universe shards changed.`
+				});
+
+				this.shardUuids = Array.from(shardsMap.keys());
+				this.shards = Array.from(shardsMap.values());
+			}
+		},
+
 		/**
 		 * Processes click on main toolbar.
 		 *
@@ -306,7 +324,7 @@ export default defineComponent({
 			 */
 			itemId: number;
 		}) {
-			(this as unknown as ThisVueStore).$store.state.universe.log({
+			this.universe.log({
 				level: LogLevel.Informational,
 				message: `Clicked on main menu(menuId="${menuId}", itemId="${itemId}")`
 			});
@@ -314,7 +332,7 @@ export default defineComponent({
 			if (onClick) {
 				onClick();
 			} else {
-				(this as unknown as ThisVueStore).$store.state.universe.log({
+				this.universe.log({
 					level: LogLevel.Error,
 					message: `Click callback does not exist in menu(menuId="${menuId}", itemId="${itemId}")`
 				});

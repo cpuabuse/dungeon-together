@@ -13,6 +13,7 @@
 				<VIcon size="x-large" :icon="icon" />
 				<!-- Menu indicator also scales to match icon relative size -->
 				<span v-show="hasLabels" class="text-truncate button-text">{{ name }}</span>
+				<span v-show="hasLabels" class="text-truncate button-text" v-if="nameSubtext">{{ nameSubtext }}</span>
 			</VBtn>
 		</VToolbarItems>
 

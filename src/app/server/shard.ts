@@ -9,7 +9,7 @@
 
 import { Uuid } from "../common/uuid";
 import { CoreArgIds } from "../core/arg";
-import { CorePlayer } from "../core/connection";
+import { CoreDictionary, CorePlayer } from "../core/connection";
 import { EntityPathExtended } from "../core/entity";
 import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
@@ -48,6 +48,11 @@ export function ServerShardFactory({
 		Base,
 		options: serverOptions
 	}) {
+		/**
+		 * Shard name.
+		 */
+		public dictionary: CoreDictionary = { shardName: "Initial" };
+
 		/**
 		 * Player data.
 		 *

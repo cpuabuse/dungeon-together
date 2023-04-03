@@ -228,7 +228,7 @@ export function UnitKindClassFactory({
 					}
 					return true;
 
-				case ActionWords.Default:
+				case ActionWords.Interact:
 					return this.action({ action: ActionWords.Attack, ...rest });
 
 				default:

@@ -73,6 +73,15 @@ export function ClientShardFactory({
 		implements CorePlayer
 	{
 		/**
+		 * Shard name for display.
+		 *
+		 * @returns Shard name
+		 */
+		public get shardName(): string {
+			return typeof this.dictionary.shardName === "string" ? this.dictionary.shardName : this.shardUuid.substring(0, 8);
+		}
+
+		/**
 		 * Pixi application.
 		 */
 		public readonly app: Application;

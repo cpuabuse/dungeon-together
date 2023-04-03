@@ -15,13 +15,18 @@ import { CoreUniverseInstanceNonRecursive, CoreUniverseInstanceNonRecursiveWithC
 import { CoreMessage, CoreProcessCallback, CoreScheduler, CoreSocket, ToSuperclassCoreProcessCallback } from ".";
 
 /**
+ * Dictionary to transfer to players.
+ */
+export type CoreDictionary = Record<string, string | Array<string> | Record<string, string>>;
+
+/**
  * Player data.
  */
 export type CorePlayer = {
 	/**
 	 * Player dictionary.
 	 */
-	dictionary: Record<string, string | Array<string> | Record<string, string>>;
+	dictionary: CoreDictionary;
 
 	/**
 	 * Whether the player is connected.

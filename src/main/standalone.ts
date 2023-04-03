@@ -68,6 +68,7 @@ async function main(): Promise<void> {
 		universe: serverUniverse
 	});
 	let shard: ServerShard = Array.from(serverUniverse.shards)[1][1];
+	shard.dictionary.shardName = "Game";
 	let playerUuid: Uuid = Array.from(shard.players)[2][0];
 	serverConnection.registerShard({ playerUuid, shardUuid: shard.shardUuid });
 

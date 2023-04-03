@@ -291,7 +291,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 						return {
 							body: {
 								...body,
-								dictionary: player?.dictionary ?? {},
+								dictionary: { ...shard.dictionary, ...player?.dictionary },
 								playerUuid,
 								units: Array.from(shard.units)
 									// ESLint false negative

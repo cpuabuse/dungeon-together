@@ -41,7 +41,12 @@ export type EntityKindActionArgs = {
 	/**
 	 * Source server entity.
 	 */
-	entity?: ServerEntity;
+	sourceEntity?: ServerEntity;
+
+	/**
+	 * Tool used in action.
+	 */
+	toolEntity?: ServerEntity;
 };
 
 /**

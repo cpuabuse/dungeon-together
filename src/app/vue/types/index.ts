@@ -204,7 +204,12 @@ export const compactToolbarMenuBaseProps = {
 	/**
 	 * Menu name.
 	 */
-	name: { required: true, type: String }
+	name: { required: true, type: String },
+
+	/**
+	 * Name subtext.
+	 */
+	nameSubtext: { required: false, type: String }
 } as const;
 
 /**
