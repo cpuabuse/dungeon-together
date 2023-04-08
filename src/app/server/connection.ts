@@ -42,13 +42,35 @@ import { ServerUniverse } from "./universe";
 export type ServerMessage = CoreMessageMovement | CoreMessageEmpty | CoreMessageSync;
 
 /**
+ * Server player.
+ */
+export class ServerPlayer extends CorePlayer<ServerUniverse, ServerMessage, ClientMessage> {
+	public connection?: ServerConnection = undefined;
+}
+
+/**
+ * Player entry for connection.
+ */
+type PlayerEntry = {
+	/**
+	 * Shard UUID.
+	 */
+	shardUuid: Uuid;
+
+	/**
+	 * Player UUID.
+	 */
+	player: ServerPlayer;
+};
+
+/**
  * Client connection.
  */
 export class ServerConnection extends CoreConnection<ServerUniverse, ServerMessage, ClientMessage> {
 	/**
-	 * Map of shard UUIDs to player UUIDs.
+	 * Map of player UUIDs to player entries.
 	 */
-	public players: Map<Uuid, Uuid> = new Map();
+	public playerEntries: Map<Uuid, PlayerEntry> = new Map();
 
 	/**
 	 * Constructor.
@@ -77,14 +99,33 @@ export class ServerConnection extends CoreConnection<ServerUniverse, ServerMessa
 	 * @param callback - Callback to execute
 	 * @returns - Array of return values from callback
 	 */
-	public forEachShard<Return>(callback: (shard: ServerShard) => Return): Array<Return> {
-		return Array.from(this.players.keys())
-			.map(shardUuid => {
-				return this.universe.getShard({ shardUuid });
-			})
-			.map(shard => {
-				return callback(shard);
-			});
+	public forEachShard<Return>(
+		callback: ({
+			shard,
+			player
+		}: {
+			/**
+			 * Server shard.
+			 */
+			shard: ServerShard;
+
+			/**
+			 * Server player.
+			 */
+			player: ServerPlayer;
+		}) => Return
+	): Array<Return> {
+		return (
+			Array.from(this.playerEntries.values())
+				// ESLint false negative
+				// eslint-disable-next-line @typescript-eslint/typedef
+				.map(({ shardUuid, player }) => {
+					return { player, shard: this.universe.getShard({ shardUuid }) };
+				})
+				.map(shard => {
+					return callback(shard);
+				})
+		);
 	}
 
 	/**
@@ -141,15 +182,7 @@ export class ServerConnection extends CoreConnection<ServerUniverse, ServerMessa
 		 */
 		unitUuid: Uuid;
 	}): Promise<Return | null> {
-		let shardUuid: Uuid | undefined;
-		// TODO: Make players a playerUuid based
-		// ESLint false negative
-		// eslint-disable-next-line @typescript-eslint/typedef
-		this.players.forEach((pUuid, sUuid) => {
-			if (pUuid === playerUuid) {
-				shardUuid = sUuid;
-			}
-		});
+		let shardUuid: Uuid | undefined = this.playerEntries.get(playerUuid)?.shardUuid;
 
 		if (shardUuid) {
 			let shard: ServerShard | undefined = this.universe.shards.get(shardUuid);
@@ -194,10 +227,10 @@ export class ServerConnection extends CoreConnection<ServerUniverse, ServerMessa
 		playerUuid: string;
 	} & ShardPathOwn): void {
 		// Not using universe access, to stay within shard
-		let player: CorePlayer | undefined = this.universe.shards.get(shardUuid)?.players.get(playerUuid);
-		if (player && !player.isConnected) {
-			this.players.set(shardUuid, playerUuid);
-			player.isConnected = true;
+		let player: ServerPlayer | undefined = this.universe.shards.get(shardUuid)?.players.get(playerUuid);
+		if (player && !this.shardUuids.has(playerUuid) && player.connect(this)) {
+			super.registerShard({ playerUuid, shardUuid });
+			this.playerEntries.set(playerUuid, { player, shardUuid });
 		} else {
 			this.universe.log({
 				level: LogLevel.Error,
@@ -250,7 +283,9 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 						targetOptions: clientOptions
 					});
 
-					let messages: Array<ClientMessage> = this.forEachShard(shard => {
+					// ESLint false negative
+					// eslint-disable-next-line @typescript-eslint/typedef
+					let messages: Array<ClientMessage> = this.forEachShard(({ shard, player }) => {
 						// Get temp shard data
 						// Axios returns an object
 						let body: CoreShardArg<ClientOptions> = this.universe.Shard.convertShard({
@@ -285,14 +320,11 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 							);
 						});
 
-						let playerUuid: Uuid = this.players.get(body.shardUuid) ?? "player-not-set";
-						let player: CorePlayer | undefined = shard.players.get(playerUuid);
-
 						return {
 							body: {
 								...body,
 								dictionary: { ...shard.dictionary, ...player?.dictionary },
-								playerUuid,
+								playerUuid: player.playerUuid,
 								units: Array.from(shard.units)
 									// ESLint false negative
 									// eslint-disable-next-line @typescript-eslint/typedef

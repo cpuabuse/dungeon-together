@@ -1,174 +1,137 @@
 # Connection
 
-## Universe and shard
+The more is moved from client/server connections into the core connection, the more we get to the stage, where client connection can support multiple shards, which goes against the design.
 
+## Connection, player and socket
 ```mermaid
 classDiagram
 	class CoreUniverse{
+		<<External>>
 		+Map~Uuid，CoreShard~ shards
 		+Map~Uuid，CoreConnection~ connections
 	}
-	<<Abstract>> CoreUniverse
-
-	class ServerUniverse{
-		+Map~Uuid，ServerShard~ shards
-		+Map~Uuid，ServerConnection~ connections
-	}
-
-	class ClientUniverse{
-		+Map~Uuid，ClientShard~ shards
-		+Map~Uuid，ServerConnection~ connections
-	}
-
-	class CoreShard{
-	}
-
-	class ServerShard{
-		+Map~Uuid，Player~ players
-		+Map~Uuid，EntityPathExtended~ units
-	}
-
-	class ClientShard{
-		+Uuid playerUuid
-		+Set~Uuid~ units
-		+Uuid connectionUuid
-	}
-
-	class Player{
-		+dictionary
-		+Set~Uuid~ units
-	}
-	<<Interface>> Player
-
-	%% Contains
 	CoreUniverse "1" o-- "0..*" CoreShard : contains
-	ServerUniverse "1" o-- "0..*" ServerShard : contains
-	ClientUniverse "1" o-- "0..*" ClientShard : contains
-	ServerShard "1" o-- "0..*" Player : contains
-
-	%% Extends
-	ServerUniverse --|> CoreUniverse : extends
-	ClientUniverse --|> CoreUniverse : extends
-	ServerShard --|> CoreShard : extends
-	ClientShard --|> CoreShard : extends
-
-	%% Implements
-	ClientShard ..|> Player : implements
-
-	%% Note - uses generic comma hack https://github.com/mermaid-js/mermaid/issues/3188
-```
-
-## Core connection
-
-
-```mermaid
-classDiagram
-	class CoreUniverse{
-		+Map~Uuid，CoreShard~ shards
-		+Map~Uuid，CoreConnection~ connections
-	}
-	<<Abstract>> CoreUniverse
+	CoreUniverse "1" o-- "0..*" CoreConnection : contains
 
 	class CoreShard{
+		<<External>>
+		+Map~Uuid，Player~ players
 	}
 
 	class CoreConnection{
 		+Uuid connectionUuid
+		+CoreUniverse universe
 		+CoreSocket socket
-		+registerShard(Uuid shardUuid, Uuid playerUuid)
+		+Set~Uuid~ shardUuids
 	}
 	<<Abstract>> CoreConnection
+	CoreConnection "1" --> "1" CoreUniverse : references
+	CoreConnection "1" *-- "1" CoreSocket : contains
+	CoreConnection "1" --> "0..*" CoreShard: references
+
+	class CorePlayer{
+		<<Abstract>>
+		+dictionary
+		+CoreConnection|undefined connection
+		+isConnected boolean
+		+Uuid playerUuid
+		+Set~Uuid~ units
+		+connect(CoreConnection connection)
+		+disconnect()
+	}
+	CoreConnection "1" <-- "0..1" CorePlayer : references
 
 	class CoreSocket{
+		<<Abstract>> 
 		-queue
 		+send()
 		+readQueue()
 		+writeQueue()
 	}
-	<<Abstract>> CoreSocket
 	
 	class StandaloneSocket{
 		+StandaloneSocket target
 	}
+	CoreSocket --|> StandaloneSocket : extends
 
 	class WebSocket{
-
 	}
-
-	%% Contains
-	CoreUniverse "1" o-- "0..*" CoreConnection : contains
-	CoreUniverse "1" o-- "0..*" CoreShard : contains
-	CoreConnection "1" --* "1" CoreSocket : composed of
-
-	%% Extends
-	StandaloneSocket --|> CoreSocket : extends
-	WebSocket --|> CoreSocket : extends
+	CoreSocket --|> WebSocket : extends
 ```
 
-## Server and client connection
-
-
-The more is moved from client/server connections into the core connection, the more we get to the stage, where client connection can support multiple shards, which goes against the design.
-
+## Server
 
 ```mermaid
 classDiagram
-	class ServerUniverse{
-		+Map~Uuid，ServerShard~ shards
-		+Map~Uuid，ServerConnection~ connections
-	}
-	
 	class ServerShard{
+		<<External>>
 		+Map~Uuid，Player~ players
 		+Map~Uuid，EntityPathExtended~ units
+		+CoreDictionary dictionary
+	}
+	ServerShard "1" o-- "0..*" ServerPlayer : contains
+
+	class CorePlayer{
+		<<External>>
 	}
 
-	class ClientUniverse{
-		+Map~Uuid，ClientShard~ shards
-		+Map~Uuid，ClientConnection~ connections
+	class ServerPlayer{
 	}
-
-	class ClientShard{
-		+Uuid playerUuid
-		+Set~Uuid~ units
-		+Uuid connectionUuid
-	}
+	ServerPlayer --|> CorePlayer : extends
 
 	class CoreConnection{
-		+Uuid connectionUuid
-		+CoreSocket socket
-		+registerShard(Uuid shardUuid, Uuid playerUuid)
+		<<External>>
 	}
-	<<Abstract>> CoreConnection
 
 	class ServerConnection{
-		+Map~Uuid，Uuid~ players
+		+Map~Uuid，PlayerEntry~ playerEntries
 	}
-	note for ServerConnection "`players` is a map of shard Uuids to player Uuids.<br>That map order assures uniqueness of shards.<br>That is OK, since we are connecting shard to shard, that have player in it."
+	CoreConnection <|-- ServerConnection : extends
+	ServerConnection o-- PlayerEntry : contains
 
-	class ClientConnection{
-		+Set~Uuid~ shards
+	class PlayerEntry{
+		<<interface>>
+		+Uuid shardUuid
+		+ServerPlayer player
 	}
+	PlayerEntry "1" --> "1" ServerShard : references
+	PlayerEntry "1" *-- "1" ServerPlayer : composes
+```
 
-	class Player{
-		+dictionary
-		+Set~Uuid~ units
+## Client
+
+```mermaid
+classDiagram
+	class ClientUniverse{
+		+Map~Uuid，ClientShard~ shards
+		+Map~Uuid，ServerConnection~ connections
 	}
-	<<Interface>> Player
-
-	%% Contains
-	ServerUniverse "1" o-- "0..*" ServerShard : contains
-	ServerUniverse "1" o-- "0..*" ServerConnection : contains
 	ClientUniverse "1" o-- "0..*" ClientShard : contains
 	ClientUniverse "1" o-- "0..*" ClientConnection : contains
-	ServerShard "1" o-- "0..*" Player : contains
+	ClientShard "1" o-- "1" ClientPlayer : contains
 
-	%% Extends
-	ServerConnection --|> CoreConnection : extends
+	class ClientShard{
+		+Set~Uuid~ units
+		+Player player
+	}
+
+	class CorePlayer{
+		<<External>>
+	}
+
+	class ClientPlayer{
+
+	}
+	ClientPlayer --|> CorePlayer : extends
+
+	class CoreConnection{
+		<<External>>
+	}
+
+	class ClientConnection{
+
+	}
 	ClientConnection --|> CoreConnection : extends
-
-	%% Implements
-	ClientShard ..|> Player : implements
 ```
 
 ---

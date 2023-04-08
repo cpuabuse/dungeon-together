@@ -9,12 +9,13 @@
 
 import { Uuid } from "../common/uuid";
 import { CoreArgIds } from "../core/arg";
-import { CoreDictionary, CorePlayer } from "../core/connection";
+import { CoreDictionary } from "../core/connection";
 import { EntityPathExtended } from "../core/entity";
 import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ServerBaseClass, ServerBaseConstructorParams } from "./base";
+import { ServerPlayer } from "./connection";
 import { ServerGrid } from "./grid";
 import { ServerOptions, serverOptions } from "./options";
 
@@ -59,7 +60,7 @@ export function ServerShardFactory({
 		 * @remarks
 		 * Maps with UUID instead of socket, for access from kind.
 		 */
-		public players: Map<Uuid, CorePlayer> = new Map();
+		public players: Map<Uuid, ServerPlayer> = new Map();
 
 		/**
 		 * Controlled unit list.

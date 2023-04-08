@@ -108,7 +108,7 @@ export default defineComponent({
 				return {
 					items: [
 						{ name: "shardUuid", type: ItemType.Uuid, uuid: shard.shardUuid },
-						{ name: "playerUuid", type: ItemType.Uuid, uuid: shard.playerUuid }
+						{ name: "playerUuid", type: ItemType.Uuid, uuid: shard.player.playerUuid }
 					],
 					name: shard.shardName
 				};

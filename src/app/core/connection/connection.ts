@@ -22,31 +22,70 @@ export type CoreDictionary = Record<string, string | Array<string> | Record<stri
 /**
  * Player data.
  */
-export type CorePlayer = {
+export class CorePlayer<
+	Universe extends CoreUniverseInstanceNonRecursive,
+	ReceiveMessage extends CoreMessage,
+	SendMessage extends CoreMessage
+> {
+	/** Whether the player is connected. */
+	public connection?: CoreConnection<Universe, ReceiveMessage, SendMessage>;
+
+	/** Player dictionary. */
+	public dictionary: CoreDictionary = {};
+
+	/** Player UUID. */
+	public playerUuid: Uuid;
+
+	/** Player controlled units. */
+	public units: Set<Uuid> = new Set();
+
 	/**
-	 * Player dictionary.
+	 * Constructor.
+	 *
+	 * @param param - Destructured parameter
 	 */
-	dictionary: CoreDictionary;
+	public constructor({
+		playerUuid
+	}: {
+		/**
+		 * Player UUID.
+		 */
+		playerUuid: Uuid;
+	}) {
+		this.playerUuid = playerUuid;
+	}
+
+	/**
+	 * Connect player to connection.
+	 *
+	 * @param connection - Connection to connect to
+	 * @returns Whether the player was connected
+	 */
+	public connect(connection: CoreConnection<Universe, ReceiveMessage, SendMessage>): boolean {
+		if (this.isConnected()) return false;
+		this.connection = connection;
+		return true;
+	}
+
+	/**
+	 * Disconnect player from connection.
+	 *
+	 * @remarks
+	 * Only does the player part, not the connection part.
+	 */
+	public disconnect(): void {
+		this.connection = undefined;
+	}
 
 	/**
 	 * Whether the player is connected.
+	 *
+	 * @returns Whether the player is connected
 	 */
-	isConnected: boolean;
-
-	/**
-	 * Player controlled units.
-	 */
-	units: Set<Uuid>;
-};
-
-/**
- * Default empty player.
- */
-export const defaultPlayer: CorePlayer = {
-	dictionary: {},
-	isConnected: false,
-	units: new Set()
-};
+	public isConnected(): this is Required<Pick<this, "connection">> {
+		return Boolean(this.connection);
+	}
+}
 
 /**
  * Players referenced by connection.
@@ -101,9 +140,10 @@ export abstract class CoreConnection<
 	/** Connection UUID. */
 	public connectionUuid: Uuid;
 
-	/**
-	 * Socket.
-	 */
+	/** Shard UUIDs for registration uniqueness. */
+	public shardUuids: Set<Uuid> = new Set();
+
+	/** Socket. */
 	public socket: CoreSocket<ReceiveMessage, SendMessage>;
 
 	/**
@@ -140,17 +180,11 @@ export abstract class CoreConnection<
 	}
 
 	/**
-	 * Helper function, executes callback for each shard.
-	 *
-	 * @param callback - Callback to execute
-	 * @returns - Array of return values from callback
-	 */
-	public abstract forEachShard<Return>(callback: (shard: ShardPathOwn) => Return): Array<Return>;
-
-	/**
 	 * Starts tracking shard in connection.
 	 *
 	 * @param param - Destructured parameter
 	 */
-	public abstract registerShard({ shardUuid, playerUuid }: Player): void;
+	public registerShard({ shardUuid }: Player): void {
+		this.shardUuids.add(shardUuid);
+	}
 }

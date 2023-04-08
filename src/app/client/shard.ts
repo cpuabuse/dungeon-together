@@ -17,15 +17,15 @@ import {
 	defaultMobileEntityWidth
 } from "../common/defaults";
 import { MessageTypeWord, MovementWord } from "../common/defaults/connection";
-import { Uuid } from "../common/uuid";
 import { CoreArgIds } from "../core/arg";
-import { CoreEnvelope, CorePlayer } from "../core/connection";
+import { CoreEnvelope } from "../core/connection";
 import { LogLevel } from "../core/error";
 import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ServerMessage } from "../server/connection";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
+import { ClientPlayer } from "./connection";
 import { ElementBall } from "./element-ball";
 import { ClientGrid } from "./grid";
 import {
@@ -65,20 +65,24 @@ export function ClientShardFactory({
 	 *
 	 * Each shard to not interact with another and be treated as a separate thread.
 	 */
-	class ClientShard
-		extends CoreShardClassFactory<ClientBaseClass, ClientBaseConstructorParams, ClientOptions, ClientGrid>({
-			Base,
-			options: clientOptions
-		})
-		implements CorePlayer
-	{
+	class ClientShard extends CoreShardClassFactory<
+		ClientBaseClass,
+		ClientBaseConstructorParams,
+		ClientOptions,
+		ClientGrid
+	>({
+		Base,
+		options: clientOptions
+	}) {
 		/**
 		 * Shard name for display.
 		 *
 		 * @returns Shard name
 		 */
 		public get shardName(): string {
-			return typeof this.dictionary.shardName === "string" ? this.dictionary.shardName : this.shardUuid.substring(0, 8);
+			return typeof this.player.dictionary.shardName === "string"
+				? this.player.dictionary.shardName
+				: this.shardUuid.substring(0, 8);
 		}
 
 		/**
@@ -87,36 +91,18 @@ export function ClientShardFactory({
 		public readonly app: Application;
 
 		/**
-		 * Connection uuid.
-		 */
-		// TODO: Use appropriate UUID generator function
-		public connectionUuid: Uuid = `connection/${this.shardUuid}`;
-
-		/**
-		 * Dict received from server.
-		 */
-		public dictionary: CorePlayer["dictionary"] = {};
-
-		/**
 		 * Container for pixi.
 		 */
 		public readonly gridContainer: Container = new Container();
-
-		/**
-		 * Is connected or not.
-		 */
-		public isConnected: boolean = false;
 
 		/**
 		 * Viewport for this client shard.
 		 */
 		public matrix: Matrix = Matrix.IDENTITY;
 
-		/**
-		 * Player UUID.
-		 */
-		// TODO: Use appropriate UUID generator function
-		public playerUuid: Uuid = `player/${this.shardUuid}`;
+		public player: ClientPlayer = new ClientPlayer({
+			playerUuid: `player/${this.shardUuid}`
+		});
 
 		/**
 		 * Scene height.
@@ -261,7 +247,7 @@ export function ClientShardFactory({
 								{
 									body: {
 										direction: MovementWord.Up,
-										playerUuid: this.playerUuid,
+										playerUuid: this.player.playerUuid,
 										// TODO: Add active unit system
 										unitUuid: Array.from(this.units)[0]
 									},
@@ -269,9 +255,7 @@ export function ClientShardFactory({
 								}
 							]
 						});
-						await (this.constructor as typeof ClientShard).universe.connections
-							.get(this.connectionUuid)
-							?.socket.send(envelope);
+						await this.player.connection?.socket.send(envelope);
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: upSymbol });
@@ -287,7 +271,7 @@ export function ClientShardFactory({
 								{
 									body: {
 										direction: MovementWord.Down,
-										playerUuid: this.playerUuid,
+										playerUuid: this.player.playerUuid,
 										// TODO: Add active unit system
 										unitUuid: Array.from(this.units)[0]
 									},
@@ -296,9 +280,7 @@ export function ClientShardFactory({
 							]
 						});
 
-						await (this.constructor as typeof ClientShard).universe.connections
-							.get(this.connectionUuid)
-							?.socket.send(envelope);
+						await this.player.connection?.socket.send(envelope);
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: downSymbol });
@@ -314,7 +296,7 @@ export function ClientShardFactory({
 								{
 									body: {
 										direction: MovementWord.Right,
-										playerUuid: this.playerUuid,
+										playerUuid: this.player.playerUuid,
 										// TODO: Add active unit system
 										unitUuid: Array.from(this.units)[0]
 									},
@@ -323,9 +305,7 @@ export function ClientShardFactory({
 							]
 						});
 
-						await (this.constructor as typeof ClientShard).universe.connections
-							.get(this.connectionUuid)
-							?.socket.send(envelope);
+						await this.player.connection?.socket.send(envelope);
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: rightSymbol });
@@ -341,7 +321,7 @@ export function ClientShardFactory({
 								{
 									body: {
 										direction: MovementWord.Left,
-										playerUuid: this.playerUuid,
+										playerUuid: this.player.playerUuid,
 										// TODO: Add active unit system
 										unitUuid: Array.from(this.units)[0]
 									},
@@ -350,9 +330,7 @@ export function ClientShardFactory({
 							]
 						});
 
-						await (this.constructor as typeof ClientShard).universe.connections
-							.get(this.connectionUuid)
-							?.socket.send(envelope);
+						await this.player.connection?.socket.send(envelope);
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: leftSymbol });

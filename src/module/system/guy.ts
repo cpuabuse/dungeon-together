@@ -9,8 +9,7 @@
  * @file
  */
 
-import { Uuid } from "../../app/common/uuid";
-import { CorePlayer, defaultPlayer } from "../../app/core/connection";
+import { ServerPlayer } from "../../app/server/connection";
 import { EntityKindConstructorParams, ServerEntityClass } from "../../app/server/entity";
 import { ServerShard } from "../../app/server/shard";
 import { UnitKindClass, UnitStats } from "./unit";
@@ -42,14 +41,7 @@ export function GuyKindClassFactory({
 	 */
 	class GuyKind extends Base {
 		/** Player. */
-		public player: CorePlayer = {
-			dictionary: {},
-			isConnected: false,
-			units: new Set()
-		};
-
-		/** Player UUID. */
-		public playerUuid: Uuid;
+		public player: ServerPlayer;
 
 		/**
 		 * Public constructor.
@@ -61,7 +53,7 @@ export function GuyKindClassFactory({
 			this.stats = { ...stats };
 
 			// TODO: Use appropriate UUID generator function
-			this.playerUuid = `player/${this.entity.entityUuid}`;
+			this.player = new ServerPlayer({ playerUuid: `player/${this.entity.entityUuid}` });
 
 			// Set unit (for info exchange)
 			this.player.units.add(this.entity.entityUuid);
@@ -74,12 +66,14 @@ export function GuyKindClassFactory({
 		 * On entity creation.
 		 */
 		public onCreateEntity(): void {
+			// Super
 			super.onCreateEntity();
 
 			// Important to not do it in constructor, since universe will return shard only after that
 			let shard: ServerShard = (this.entity.constructor as ServerEntityClass).universe.getShard(this.entity);
+
 			// Register to shard
-			shard.players.set(this.playerUuid, this.player);
+			shard.players.set(this.player.playerUuid, this.player);
 
 			// Set unit (for screen update/control)
 			shard.units.set(this.entity.entityUuid, this.entity);

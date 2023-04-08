@@ -17,6 +17,7 @@ import { ClientUpdate } from "../comms";
 import {
 	CoreConnection,
 	CoreConnectionArgs,
+	CoreDictionary,
 	CoreEnvelope,
 	CoreMessageEmpty,
 	CoreMessageMovement,
@@ -54,7 +55,7 @@ export type ClientMessage =
 					/**
 					 * Player dictionary.
 					 */
-					dictionary: CorePlayer["dictionary"];
+					dictionary: CoreDictionary;
 				};
 
 			/**
@@ -88,14 +89,19 @@ let splat: Howl = new Howl({
 });
 
 /**
+ * Client player.
+ */
+export class ClientPlayer extends CorePlayer<ClientUniverse, ClientMessage, ServerMessage> {
+	/**
+	 * Client connection.
+	 */
+	public connection?: ClientConnection = undefined;
+}
+
+/**
  * Client connection.
  */
 export class ClientConnection extends CoreConnection<ClientUniverse, ClientMessage, ServerMessage> {
-	/**
-	 * Client UUIDs.
-	 */
-	public shards: Set<Uuid> = new Set();
-
 	/**
 	 * Constructor.
 	 *
@@ -129,7 +135,7 @@ export class ClientConnection extends CoreConnection<ClientUniverse, ClientMessa
 	 * @returns Array of return values
 	 */
 	public forEachShard<Return>(callback: (shard: ClientShard) => Return): Array<Return> {
-		return Array.from(this.shards).map(shardUuid => callback(this.universe.getShard({ shardUuid })));
+		return Array.from(this.shardUuids).map(shardUuid => callback(this.universe.getShard({ shardUuid })));
 	}
 
 	/**
@@ -147,10 +153,10 @@ export class ClientConnection extends CoreConnection<ClientUniverse, ClientMessa
 		playerUuid: string;
 	} & ShardPathOwn): void {
 		let shard: ClientShard = this.universe.getShard({ shardUuid });
-		this.shards.add(shardUuid);
-		shard.playerUuid = playerUuid;
-		shard.isConnected = true;
-		shard.connectionUuid = this.connectionUuid;
+		shard.player.playerUuid = playerUuid;
+		if (shard.player.connect(this)) {
+			super.registerShard({ playerUuid, shardUuid });
+		}
 	}
 }
 
@@ -228,11 +234,11 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 											Object.keys(message.body.dictionary).forEach(key => {
 												let entry: string | Array<string> | Record<string, string> = message.body.dictionary[key];
 												if (Array.isArray(entry)) {
-													shard.dictionary[key] = [...entry];
+													shard.player.dictionary[key] = [...entry];
 												} else if (typeof entry === "object") {
-													shard.dictionary[key] = { ...entry };
+													shard.player.dictionary[key] = { ...entry };
 												} else {
-													shard.dictionary[key] = entry;
+													shard.player.dictionary[key] = entry;
 												}
 											});
 										})
