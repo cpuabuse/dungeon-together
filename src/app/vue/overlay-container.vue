@@ -3,17 +3,18 @@
 <template>
 	<div style="position: absolute; top: 200px; right: 200px; touch-action: none">
 		<!-- Width must be set in dialog, since it defines dialog area -->
-
-		<VCard height="100%" width="100%" class="overflow-hidden">
-			<VToolbar height="40">
-				<VIcon :icon="icon" class="ml-4" />
-				<VToolbarTitle class="text-h5 font-weight-bold">Title</VToolbarTitle>
-				<VBtn icon height="inherit" @click="$emit('update:modelValue', false)">
-					<VIcon icon="fa-close" />
-				</VBtn>
-			</VToolbar>
-			<slot name="body"></slot>
-		</VCard>
+		<div v-if="modelValue">
+			<VCard height="100%" width="100%" class="overflow-hidden">
+				<VToolbar height="40">
+					<VIcon :icon="icon" class="ml-4" />
+					<VToolbarTitle class="text-h5 font-weight-bold">Title</VToolbarTitle>
+					<VBtn icon height="inherit" @click="$emit('update:modelValue', false)">
+						<VIcon icon="fa-close" />
+					</VBtn>
+				</VToolbar>
+				<slot name="body"></slot>
+			</VCard>
+		</div>
 	</div>
 </template>
 
