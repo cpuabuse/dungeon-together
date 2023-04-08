@@ -10,7 +10,7 @@
 /**
  * Possible item types.
  */
-export enum OverlayContainerItemType {
+export enum OverlayWindowItemType {
 	/**
 	 * Informational element.
 	 */

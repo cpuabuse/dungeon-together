@@ -3,36 +3,37 @@
 		<div class="app-content">
 			<div class="universe">Hello: {{ what }}</div>
 			<tsxtest />
+			<OverlayDropdown :z-idx="100" />
 			<statealertbox v-show="alert" />
 			<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
-			<OverlayContainer v-model="debugContainer" icon="fa-bug-slash">
+			<OverlayWindow v-model="debugContainer" icon="fa-bug-slash">
 				<template #body>
-					<OverlayContainerContent :items="debugOverlayItems">
+					<OverlayContent :items="debugOverlayItems">
 						<template #test> test div dom </template>
-					</OverlayContainerContent>
+					</OverlayContent>
 				</template>
-			</OverlayContainer>
+			</OverlayWindow>
 			<template v-for="shard in shards" :key="shard.shardUuid">
-				<OverlayContainer
+				<OverlayWindow
 					:model-value="showStatContainers.get(shard.shardUuid) ?? false"
 					@update:model-value="value => showStatContainers.set(shard.shardUuid, value)"
 				>
 					<template #body>
-						<OverlayContainerContent :items="statsItems">
+						<OverlayContent :items="statsItems">
 							<template #stats>
 								<template v-for="unitUuid in shard.player.dictionary?.units ?? []" :key="unitUuid">
 									<StatsBar
 										:color="hpColor"
 										name="HP"
 										:value="universe.getEntity({ entityUuid: unitUuid }).tempHealth"
-										:maxValue="3"
+										:max-value="3"
 									/>
 									<StatsBar :color="mpColor" name="MP" />
 								</template>
 							</template>
-						</OverlayContainerContent>
+						</OverlayContent>
 					</template>
-				</OverlayContainer>
+				</OverlayWindow>
 			</template>
 		</div>
 	</VApp>
@@ -44,13 +45,14 @@ import { defineComponent } from "vue";
 import { VApp } from "vuetify/components";
 import { ThisVueStore } from "../client/gui";
 import { ClientShard } from "../client/shard";
-import { OverlayContainerItemType as ItemType } from "../common/front";
+import { OverlayWindowItemType as ItemType } from "../common/front";
 import { Uuid } from "../common/uuid";
 import { LogLevel } from "../core/error";
 import CompactToolbar from "./compact-toolbar.vue";
 import debugComponent from "./debug.vue";
-import OverlayContainerContent from "./overlay-container-content.vue";
-import OverlayContainer from "./overlay-container.vue";
+import OverlayContent from "./overlay-content.vue";
+import OverlayDropdown from "./overlay-dropdown.vue";
+import OverlayWindow from "./overlay-window.vue";
 import stateAlertBoxComponent from "./state-alert-box.vue";
 import StatsBar from "./stats-bar.vue";
 import tsxTestComponent from "./tsx/test.vue";
@@ -59,8 +61,8 @@ import {
 	CompactToolbarMenu,
 	CompactToolbarMenuBaseProps,
 	ElementSize,
-	OverlayContainerContentItem,
-	OverlayContainerContentTabs,
+	OverlayContentItem,
+	OverlayContentTabs,
 	compactToolbarDataToMenuBaseProps
 } from "./types";
 
@@ -70,8 +72,9 @@ import {
 export default defineComponent({
 	components: {
 		CompactToolbar,
-		OverlayContainer,
-		OverlayContainerContent,
+		OverlayContent,
+		OverlayDropdown,
+		OverlayWindow,
 		StatsBar,
 		VApp,
 		debug: debugComponent,
@@ -98,7 +101,7 @@ export default defineComponent({
 		 *
 		 * @returns Tab content
 		 */
-		debugItemsShardTabs(): OverlayContainerContentTabs {
+		debugItemsShardTabs(): OverlayContentTabs {
 			return this.shards.map((shard, index) => {
 				return {
 					items: [
@@ -115,7 +118,7 @@ export default defineComponent({
 		 *
 		 * @returns Overlay container items
 		 */
-		debugOverlayItems(): Array<OverlayContainerContentItem> {
+		debugOverlayItems(): Array<OverlayContentItem> {
 			return [
 				{ data: "14", name: "Info1" },
 				{ data: "2", name: "Info2" },
@@ -264,44 +267,22 @@ export default defineComponent({
 			debugContainer: false,
 			hpColor: new Color("#1F8C2F"),
 			mpColor: new Color("#051DE8"),
-			shards: new Array<ClientShard>(),
 			shardUuids: new Array<Uuid>(),
+			shards: new Array<ClientShard>(),
 			showStatContainers: new Map<Uuid, boolean>(),
 			statsItems: [
 				{ id: "stats", name: "Stats", type: ItemType.Slot },
 				{ data: "1", name: "Attack" },
 				{ data: "3", name: "Attack" }
 			],
-			what: 0,
-			universe: (this as unknown as ThisVueStore).$store.state.universe
+			universe: (this as unknown as ThisVueStore).$store.state.universe,
+			what: 0
 		};
 
 		return data;
 	},
 
 	methods: {
-		/**
-		 * Checks for changes in universe shards map, and updates if necessary.
-		 *
-		 * @remarks
-		 * Map is controlled by the universe, so we can't just watch it, and have to periodically check for changes.
-		 */
-		watchShards() {
-			const shardsMap = this.universe.shards;
-
-			if (this.shardUuids.some(shardUuid => !shardsMap.has(shardUuid)) || this.shardUuids.length !== shardsMap.size) {
-				this.universe.log({
-					level: LogLevel.Informational,
-					message: `Universe shards changed.`
-				});
-
-				this.shardUuids = Array.from(shardsMap.keys());
-				this.shards = Array.from(shardsMap.values());
-
-				// TODO: Clear per shard state
-			}
-		},
-
 		/**
 		 * Processes click on main toolbar.
 		 *
@@ -333,6 +314,28 @@ export default defineComponent({
 					level: LogLevel.Error,
 					message: `Click callback does not exist in menu(menuId="${menuId}", itemId="${itemId}")`
 				});
+			}
+		},
+
+		/**
+		 * Checks for changes in universe shards map, and updates if necessary.
+		 *
+		 * @remarks
+		 * Map is controlled by the universe, so we can't just watch it, and have to periodically check for changes.
+		 */
+		watchShards() {
+			const shardsMap = this.universe.shards;
+
+			if (this.shardUuids.some(shardUuid => !shardsMap.has(shardUuid)) || this.shardUuids.length !== shardsMap.size) {
+				this.universe.log({
+					level: LogLevel.Informational,
+					message: `Universe shards changed.`
+				});
+
+				this.shardUuids = Array.from(shardsMap.keys());
+				this.shards = Array.from(shardsMap.values());
+
+				// TODO: Clear per shard state
 			}
 		}
 	}
