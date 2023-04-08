@@ -358,6 +358,9 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 							let targetCell: ClientCell = this.universe.getCell(sourceCell);
 							// eslint-disable-next-line @typescript-eslint/typedef
 							sourceCell.entities.forEach(({ entityUuid, emits, modeUuid, worldUuid }) => {
+								// Set emits
+								this.universe.getEntity({ entityUuid }).emits = emits;
+
 								if (typeof emits.health === "number") {
 									this.universe.getEntity({ entityUuid }).health = emits.health;
 								}

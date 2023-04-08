@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -18,7 +18,12 @@ export enum MovementWord {
 	Left,
 	Right,
 	ZUp,
-	ZDown
+	ZDown,
+
+	/**
+	 * Should not be used for actual movement but should be used to represent relative position.
+	 */
+	Here
 }
 
 /**
@@ -37,7 +42,7 @@ export enum MessageTypeWord {
 	 */
 	Update = "update",
 
-	Action = "action"
+	EntityAction = "action"
 }
 
 /**

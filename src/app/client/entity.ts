@@ -44,6 +44,11 @@ export function ClientEntityFactory({
 		 */
 		public basicText: Text | null = null;
 
+		/**
+		 * Emits received from server.
+		 */
+		public emits: Record<string, any> = {};
+
 		public healthBar: ProgressBar | null = null;
 
 		/**

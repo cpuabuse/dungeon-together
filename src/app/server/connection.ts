@@ -39,7 +39,46 @@ import { ServerUniverse } from "./universe";
 /**
  * Message type server receives.
  */
-export type ServerMessage = CoreMessageMovement | CoreMessageEmpty | CoreMessageSync;
+export type ServerMessage =
+	| CoreMessageMovement
+	| CoreMessageEmpty
+	| CoreMessageSync
+	| {
+			/**
+			 * Message data.
+			 */
+			body: {
+				/**
+				 * Action.
+				 */
+				type: ActionWords;
+
+				/**
+				 * Entity UUID.
+				 */
+				sourceEntityUuid: Uuid;
+
+				/**
+				 * Player UUID.
+				 */
+				playerUuid: Uuid;
+
+				/**
+				 * Target entity UUID.
+				 */
+				targetEntityUuid: Uuid;
+
+				/**
+				 * Tool entity UUID.
+				 */
+				toolEntityUuid?: Uuid;
+			};
+
+			/**
+			 * Type of the message.
+			 */
+			type: MessageTypeWord.EntityAction;
+	  };
 
 /**
  * Server player.
@@ -360,9 +399,12 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 					// eslint-disable-next-line @typescript-eslint/typedef
 					callback: async ({ grid, unit, cell: sourceCell }) => {
 						// Allowed directions
-						const directions: {
-							[K in MovementWord]: Nav;
-						} = {
+						const directions: Omit<
+							{
+								[K in MovementWord]: Nav;
+							},
+							MovementWord.Here
+						> = {
 							[MovementWord.Up]: Nav.YUp,
 							[MovementWord.Down]: Nav.YDown,
 							[MovementWord.Left]: Nav.Left,
@@ -515,6 +557,28 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 					unitUuid: message.body.unitUuid
 				});
 
+				break;
+			}
+
+			// Entity action
+			case MessageTypeWord.EntityAction: {
+				// Await is inside of the loop, but also the switch
+				// eslint-disable-next-line no-await-in-loop
+				await this.forUnit({
+					/**
+					 * Callback function.
+					 *
+					 * @param param - Destructured parameters
+					 * @returns Synchronization promise
+					 */
+					// ESLint false negative
+					// eslint-disable-next-line @typescript-eslint/typedef
+					callback: async ({ grid, unit, cell, shard }) => {
+						// Nothing
+					},
+					playerUuid: message.body.playerUuid,
+					unitUuid: message.body.sourceEntityUuid
+				});
 				break;
 			}
 

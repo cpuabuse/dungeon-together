@@ -48,7 +48,7 @@ export interface CoreMessageMovement extends CoreMessageBase {
 		/**
 		 * Movement direction.
 		 */
-		direction: MovementWord;
+		direction: Exclude<MovementWord, MovementWord.Here>;
 
 		/**
 		 * Unit UUID to move.

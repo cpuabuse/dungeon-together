@@ -215,8 +215,6 @@ export function UnitKindClassFactory({
 		 * @param param - Destructured parameter
 		 * @returns Whether action was successful
 		 */
-		// Dummy function
-		// eslint-disable-next-line class-methods-use-this
 		public action(param: EntityKindActionArgs): boolean {
 			let { action, ...rest }: EntityKindActionArgs = param;
 			switch (action) {
