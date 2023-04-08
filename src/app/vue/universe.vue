@@ -5,16 +5,6 @@
 			<tsxtest />
 			<statealertbox v-show="alert" />
 			<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
-			<OverlayContainer v-model="statsContainer" icon="fa-id-card">
-				<template #body>
-					<OverlayContainerContent :items="statsItems">
-						<template #stats>
-							<StatsBar :color="hpColor" name="HP" value="33" />
-							<StatsBar :color="mpColor" name="MP" />
-						</template>
-					</OverlayContainerContent>
-				</template>
-			</OverlayContainer>
 			<OverlayContainer v-model="debugContainer" icon="fa-bug-slash">
 				<template #body>
 					<OverlayContainerContent :items="debugOverlayItems">
@@ -22,7 +12,7 @@
 					</OverlayContainerContent>
 				</template>
 			</OverlayContainer>
-			<template v-for="(shard, shardKey) in shards" :key="shardKey">
+			<template v-for="shard in shards" :key="shard.shardUuid">
 				<OverlayContainer
 					:model-value="showStatContainers.get(shard.shardUuid) ?? false"
 					@update:model-value="value => showStatContainers.set(shard.shardUuid, value)"
@@ -30,8 +20,13 @@
 					<template #body>
 						<OverlayContainerContent :items="statsItems">
 							<template #stats>
-								<template v-for="unitUuid in shard.dictionary.units" :key="unitUuid">
-									<StatsBar :color="hpColor" name="HP" value="33" />
+								<template v-for="unitUuid in shard.player.dictionary?.units ?? []" :key="unitUuid">
+									<StatsBar
+										:color="hpColor"
+										name="HP"
+										:value="universe.getEntity({ entityUuid: unitUuid }).tempHealth"
+										:maxValue="3"
+									/>
 									<StatsBar :color="mpColor" name="MP" />
 								</template>
 							</template>
@@ -170,6 +165,7 @@ export default defineComponent({
 		 */
 		playerMenus(): Array<CompactToolbarMenu> {
 			const data = this.$data;
+			const that = this;
 			let isNameSubtextToBeSet: boolean = this.shards.length > 0;
 
 			return this.shards.map(shard => {
@@ -185,7 +181,7 @@ export default defineComponent({
 							 * Click handler.
 							 */
 							onClick(): void {
-								data.statsContainer = true;
+								that.showStatContainers.set(shard.shardUuid, true);
 							}
 						},
 						{ name: "Items" },
@@ -271,7 +267,6 @@ export default defineComponent({
 			shards: new Array<ClientShard>(),
 			shardUuids: new Array<Uuid>(),
 			showStatContainers: new Map<Uuid, boolean>(),
-			statsContainer: false,
 			statsItems: [
 				{ id: "stats", name: "Stats", type: ItemType.Slot },
 				{ data: "1", name: "Attack" },
@@ -302,6 +297,8 @@ export default defineComponent({
 
 				this.shardUuids = Array.from(shardsMap.keys());
 				this.shards = Array.from(shardsMap.values());
+
+				// TODO: Clear per shard state
 			}
 		},
 
@@ -349,8 +346,10 @@ export default defineComponent({
 
 .app-content {
 	position: fixed;
-	bottom: 0;
-	right: 0;
+	top: 0;
+	display: flex;
+	flex-direction: column-reverse;
 	width: 100%;
+	height: 100%;
 }
 </style>

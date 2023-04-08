@@ -11,6 +11,8 @@
 import { ExtractDefaultPropTypes, ExtractPropTypes, PropType } from "vue";
 import { OverlayContainerItemType as ItemType } from "../../common/front";
 
+export * from "./overlay-container";
+
 /**
  * Extracts props from prop object, making ones that has default, optional.
  */

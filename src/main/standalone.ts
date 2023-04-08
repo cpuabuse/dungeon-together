@@ -29,10 +29,6 @@ import { ServerShard } from "../app/server/shard";
 import { ServerUniverse } from "../app/server/universe";
 import { systemModuleFactory } from "../module/system";
 
-// Injection
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap";
-
 /**
  * Entrypoint.
  */

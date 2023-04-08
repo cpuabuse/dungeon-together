@@ -47,20 +47,30 @@ export function ClientEntityFactory({
 		public healthBar: ProgressBar | null = null;
 
 		/**
+		 * Storing health.
+		 * TODO: Move to emits.
+		 */
+		public tempHealth: number = 0;
+
+		/**
 		 * Temporary health.
 		 */
 		public set health(health: number | null) {
 			if (this.basicText) {
 				if (health === null) {
 					this.basicText.destroy();
+					this.tempHealth = 0;
 				} else {
+					this.tempHealth = health;
 					this.basicText.text = health;
 				}
 
 				if (this.healthBar) {
 					if (health === null) {
 						// Nothing
+						this.tempHealth = 0;
 					} else {
+						this.tempHealth = health;
 						this.healthBar.value = health;
 					}
 				}
@@ -69,6 +79,7 @@ export function ClientEntityFactory({
 				// TODO: Update scaling on change of entity scale
 				this.healthBar = new ProgressBar({ container: this.sprite, scale: this.sprite.width });
 				this.healthBar.maxValue = 3;
+				this.tempHealth = health;
 				this.healthBar.value = health;
 				this.sprite.addChild(this.basicText);
 			}

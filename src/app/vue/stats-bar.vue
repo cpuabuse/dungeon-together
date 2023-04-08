@@ -4,7 +4,7 @@
 	<div class="progress-container">
 		<span class="text-subtitle-2">{{ name }}</span>
 		<div class="progress-outer-border rounded">
-			<VProgressLinear :model-value="value" height="35" :color="progressBarColor">
+			<VProgressLinear :model-value="value" height="35" :color="progressBarColor" :max="maxValue">
 				<strong>{{ value.toString() }}/{{ maxValue.toString() }}</strong>
 			</VProgressLinear>
 			<div class="progress-overlay"></div>
