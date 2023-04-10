@@ -9,7 +9,8 @@
  */
 
 import { ExtractDefaultPropTypes, ExtractPropTypes, PropType } from "vue";
-import { OverlayContainerItemType as ItemType } from "../../common/front";
+import { OverlayWindowItemType as ItemType } from "../../common/front";
+import { OverlayContentUiActionParam } from "./overlay-container";
 
 export * from "./overlay-container";
 
@@ -22,7 +23,7 @@ export type ExtractProps<O> = Partial<ExtractDefaultPropTypes<O>> &
 /**
  * Tabs type.
  */
-export type OverlayContainerContentTabs = Array<{
+export type OverlayContentTabs = Array<{
 	/**
 	 * Name to display.
 	 */
@@ -31,13 +32,13 @@ export type OverlayContainerContentTabs = Array<{
 	/**
 	 * Items to display.
 	 */
-	items: Array<OverlayContainerContentItem>;
+	items: Array<OverlayContentItem>;
 }>;
 
 /**
  * Type for item props.
  */
-export type OverlayContainerContentItem =
+export type OverlayContentItem =
 	// Informational object, default
 	| {
 			/**
@@ -59,6 +60,11 @@ export type OverlayContainerContentItem =
 			 * Data to display.
 			 */
 			data: string | number;
+
+			/**
+			 * Optional UI actions.
+			 */
+			uiActions?: Array<OverlayContentUiActionParam>;
 	  }
 	| {
 			/**
@@ -85,7 +91,7 @@ export type OverlayContainerContentItem =
 			/**
 			 * Data to display.
 			 */
-			tabs: OverlayContainerContentTabs;
+			tabs: OverlayContentTabs;
 
 			/**
 			 * Size of the tab.

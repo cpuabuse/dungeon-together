@@ -59,11 +59,11 @@
 							@update:model-value="value => setTab({ tabs: item.tabs, value })"
 						>
 							<VWindowItem v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">
-								<OverlayContainerContent :items="tab.items">
+								<OverlayContent :items="tab.items">
 									<template v-for="slot in getSlots(tab)" #[slot]>
 										<slot :name="slot" />
 									</template>
-								</OverlayContainerContent>
+								</OverlayContent>
 							</VWindowItem>
 						</VWindow>
 					</div>
@@ -121,8 +121,8 @@ import {
 	VWindowItem
 } from "vuetify/components";
 import { ThisVueStore } from "../client/gui";
-import { OverlayContainerItemType as ItemType } from "../common/front";
-import { ElementSize, OverlayContainerContentItem as Item, OverlayContainerContentTabs as Tabs } from "./types";
+import { OverlayWindowItemType as ItemType } from "../common/front";
+import { ElementSize, OverlayContentItem as Item, OverlayContentTabs as Tabs } from "./types";
 
 /**
  * Element size pixels.
@@ -300,7 +300,7 @@ export default defineComponent({
 		}
 	},
 
-	name: "OverlayContainerContent",
+	name: "OverlayContent",
 
 	/**
 	 * Props for component.
@@ -308,6 +308,11 @@ export default defineComponent({
 	 * @returns Component props
 	 */
 	props: {
+		isCompact: {
+			default: false,
+			required: false,
+			type: Boolean
+		},
 		items: { required: true, type: Array as PropType<Array<Item>> }
 	}
 });

@@ -5,10 +5,10 @@
 		<!-- Width must be set in dialog, since it defines dialog area -->
 		<div v-if="modelValue">
 			<VCard height="100%" width="100%" class="overflow-hidden">
-				<VToolbar height="40">
+				<VToolbar height="44">
 					<VIcon :icon="icon" class="ml-4" />
 					<VToolbarTitle class="text-h5 font-weight-bold">Title</VToolbarTitle>
-					<VBtn icon height="inherit" @click="$emit('update:modelValue', false)">
+					<VBtn class="circle-btn" @click="$emit('update:modelValue', false)">
 						<VIcon icon="fa-close" />
 					</VBtn>
 				</VToolbar>
@@ -22,7 +22,7 @@
 import { Interactable } from "@interactjs/core/Interactable";
 import interact from "interactjs";
 import { defineComponent } from "vue";
-import { VBtn, VCard, VDialog, VIcon, VToolbar, VToolbarTitle } from "vuetify/components";
+import { VBtn, VCard, VIcon, VToolbar, VToolbarTitle } from "vuetify/components";
 
 /**
  * @param event - Event recieved
@@ -65,7 +65,7 @@ function dragMoveListener(event: {
 }
 
 export default defineComponent({
-	components: { VBtn, VCard, VDialog, VIcon, VToolbar, VToolbarTitle },
+	components: { VBtn, VCard, VIcon, VToolbar, VToolbarTitle },
 
 	/**
 	 * Data for component.
@@ -127,3 +127,13 @@ export default defineComponent({
 	}
 });
 </script>
+
+<style>
+.circle-btn {
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	min-width: 40px;
+	min-height: 40px;
+}
+</style>
