@@ -9,6 +9,7 @@
  * @file
  */
 
+import { ServerCell } from "../../app/server/cell";
 import { ServerPlayer } from "../../app/server/connection";
 import { EntityKindConstructorParams, ServerEntityClass } from "../../app/server/entity";
 import { ServerShard } from "../../app/server/shard";
@@ -40,6 +41,18 @@ export function GuyKindClassFactory({
 	 * Guy class.
 	 */
 	class GuyKind extends Base {
+		/**
+		 * Emits health.
+		 *
+		 * @returns Emitted object
+		 */
+		public get emits(): Record<string, any> {
+			let cell: ServerCell = (this.entity.constructor as ServerEntityClass).universe.getCell(this.entity);
+
+			// TODO: X, Y, Z should be in control unit kind
+			return { ...super.emits, x: cell.x, y: cell.y, z: cell.z };
+		}
+
 		/** Player. */
 		public player: ServerPlayer;
 

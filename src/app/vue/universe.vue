@@ -21,7 +21,7 @@
 					<template #body>
 						<OverlayContent :items="statsItems">
 							<template #stats>
-								<template v-for="unitUuid in shard.player.dictionary?.units ?? []" :key="unitUuid">
+								<template v-for="unitUuid in Array.from(shard.players)[0][1].dictionary?.units ?? []" :key="unitUuid">
 									<StatsBar
 										:color="hpColor"
 										name="HP"
@@ -106,7 +106,11 @@ export default defineComponent({
 				return {
 					items: [
 						{ name: "shardUuid", type: ItemType.Uuid, uuid: shard.shardUuid },
-						{ name: "playerUuid", type: ItemType.Uuid, uuid: shard.player.playerUuid }
+						{
+							name: "playerUuid",
+							type: ItemType.Uuid,
+							uuid: Array.from(shard.players)?.[0]?.[1]?.playerUuid ?? "undefined"
+						}
 					],
 					name: shard.shardName
 				};

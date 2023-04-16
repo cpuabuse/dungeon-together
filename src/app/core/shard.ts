@@ -35,6 +35,7 @@ import {
 	coreArgIdToPathUuidPropertyName
 } from "./arg";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
+import { CorePlayer, CorePlayerContainer } from "./connection";
 import { CoreGridArg, CoreGridInstance } from "./grid";
 import {
 	CoreGridArgGrandparentIds,
@@ -95,7 +96,8 @@ export type CoreShardInstance<
 	CoreGridArg<Options>,
 	CoreArgIds.Grid
 > &
-	(HasNever extends true ? unknown : CoreShardArg<Options>);
+	(HasNever extends true ? unknown : CoreShardArg<Options>) &
+	CorePlayerContainer;
 
 /**
  * Core shard class.
@@ -265,6 +267,8 @@ export function CoreShardClassFactory<
 		 */
 		public static getDefaultGridUuid: (path: ShardPathOwn) => Uuid;
 
+		public abstract players: Map<Uuid, CorePlayer>;
+
 		// ESLint buggy
 		// eslint-disable-next-line jsdoc/require-param
 		/**
@@ -308,6 +312,8 @@ export function CoreShardClassFactory<
 				members: membersWithChild,
 				parameters: []
 			});
+
+			Map<string, any>;
 
 			// Assign properties
 			computedClassInjectPerInstance({

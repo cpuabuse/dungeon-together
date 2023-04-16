@@ -10,7 +10,7 @@
 import { ClientMessage } from "../client/connection";
 import { ClientOptions, clientOptions } from "../client/options";
 import { appUrl } from "../common/defaults";
-import { MessageTypeWord, MovementWord, vSocketMaxDequeue } from "../common/defaults/connection";
+import { DirectionWord, MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { ClientUpdate } from "../comms";
 import { CoreArgIds, CoreArgMeta, Nav, coreArgMetaGenerate } from "../core/arg";
@@ -23,6 +23,7 @@ import {
 	CoreMessageSync,
 	CorePlayer,
 	CoreProcessCallback,
+	MovementWord,
 	ToSuperclassCoreProcessCallback
 } from "../core/connection";
 import { EntityPathExtended } from "../core/entity";
@@ -54,25 +55,15 @@ export type ServerMessage =
 				type: ActionWords;
 
 				/**
-				 * Entity UUID.
-				 */
-				sourceEntityUuid: Uuid;
-
-				/**
 				 * Player UUID.
 				 */
 				playerUuid: Uuid;
 
 				/**
-				 * Target entity UUID.
-				 */
-				targetEntityUuid: Uuid;
-
-				/**
 				 * Tool entity UUID.
 				 */
 				toolEntityUuid?: Uuid;
-			};
+			} & Record<"controlUnitUuid" | "playerUuid" | "targetEntityUuid", Uuid>;
 
 			/**
 			 * Type of the message.
@@ -83,34 +74,12 @@ export type ServerMessage =
 /**
  * Server player.
  */
-export class ServerPlayer extends CorePlayer<ServerUniverse, ServerMessage, ClientMessage> {
-	public connection?: ServerConnection = undefined;
-}
-
-/**
- * Player entry for connection.
- */
-type PlayerEntry = {
-	/**
-	 * Shard UUID.
-	 */
-	shardUuid: Uuid;
-
-	/**
-	 * Player UUID.
-	 */
-	player: ServerPlayer;
-};
+export class ServerPlayer extends CorePlayer<ServerConnection> {}
 
 /**
  * Client connection.
  */
-export class ServerConnection extends CoreConnection<ServerUniverse, ServerMessage, ClientMessage> {
-	/**
-	 * Map of player UUIDs to player entries.
-	 */
-	public playerEntries: Map<Uuid, PlayerEntry> = new Map();
-
+export class ServerConnection extends CoreConnection<ServerUniverse, ServerMessage, ClientMessage, ServerPlayer> {
 	/**
 	 * Constructor.
 	 *
@@ -255,6 +224,7 @@ export class ServerConnection extends CoreConnection<ServerUniverse, ServerMessa
 	 * Registers server shard.
 	 *
 	 * @param param - Shard UUID and player UUID
+	 * @returns Success or not
 	 */
 	public registerShard({
 		shardUuid,
@@ -264,18 +234,8 @@ export class ServerConnection extends CoreConnection<ServerUniverse, ServerMessa
 		 * Player UUID.
 		 */
 		playerUuid: string;
-	} & ShardPathOwn): void {
-		// Not using universe access, to stay within shard
-		let player: ServerPlayer | undefined = this.universe.shards.get(shardUuid)?.players.get(playerUuid);
-		if (player && !this.shardUuids.has(playerUuid) && player.connect(this)) {
-			super.registerShard({ playerUuid, shardUuid });
-			this.playerEntries.set(playerUuid, { player, shardUuid });
-		} else {
-			this.universe.log({
-				level: LogLevel.Error,
-				message: `Could not register player(uuid="${playerUuid}") to shard(uuid="${shardUuid}").`
-			});
-		}
+	} & ShardPathOwn): boolean {
+		return super.registerShard({ playerUuid, shardUuid });
 	}
 }
 
@@ -399,18 +359,15 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 					// eslint-disable-next-line @typescript-eslint/typedef
 					callback: async ({ grid, unit, cell: sourceCell }) => {
 						// Allowed directions
-						const directions: Omit<
-							{
-								[K in MovementWord]: Nav;
-							},
-							MovementWord.Here
-						> = {
-							[MovementWord.Up]: Nav.YUp,
-							[MovementWord.Down]: Nav.YDown,
-							[MovementWord.Left]: Nav.Left,
-							[MovementWord.Right]: Nav.Right,
-							[MovementWord.ZUp]: Nav.ZUp,
-							[MovementWord.ZDown]: Nav.ZDown
+						const directions: {
+							[K in MovementWord]: Nav;
+						} = {
+							[DirectionWord.Up]: Nav.YUp,
+							[DirectionWord.Down]: Nav.YDown,
+							[DirectionWord.Left]: Nav.Left,
+							[DirectionWord.Right]: Nav.Right,
+							[DirectionWord.ZUp]: Nav.ZUp,
+							[DirectionWord.ZDown]: Nav.ZDown
 						};
 
 						let targetCell: ServerCell = grid.getCell(
@@ -577,7 +534,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 						// Nothing
 					},
 					playerUuid: message.body.playerUuid,
-					unitUuid: message.body.sourceEntityUuid
+					unitUuid: message.body.controlUnitUuid
 				});
 				break;
 			}

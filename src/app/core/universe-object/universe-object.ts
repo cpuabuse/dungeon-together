@@ -41,6 +41,7 @@ import {
 	CoreBaseNonRecursiveStatic
 } from "../base";
 import { LogLevel } from "../error";
+import { CoreUniverseInstanceNonRecursiveCast } from "../universe";
 import { CoreUniverseObjectInitializationParameter } from "./parameters";
 import { CoreUniverseObjectContainerInstance, CoreUniverseObjectContainerStatic } from "./universe-objects-container";
 import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectUniverse } from ".";
@@ -83,24 +84,24 @@ export type CoreUniverseObjectInstance<
 	> = never,
 	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
 	ChildId extends CoreArgIds = never
-> = ComputedClassOmitConditionalEmptyObject<
-	CoreArg<Id, Options, ParentId | GrandparentIds, true> & {
-		[K in `terminate${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: () => void;
-		// Preserved for potential future use
-	} & ([ParentId] extends [never] ? ComputedClassEmptyObject : ComputedClassEmptyObject) &
-		([ChildId] extends [never]
-			? // Receives base class from container
-			  CoreBaseNonRecursiveInstance
-			: CoreUniverseObjectContainerInstance<
-					BaseParams,
-					ChildInstance,
-					ChildArg,
-					ChildId,
-					Options,
-					Id,
-					ParentId | GrandparentIds
-			  >)
->;
+> = CoreBaseNonRecursiveInstance &
+	ComputedClassOmitConditionalEmptyObject<
+		CoreArg<Id, Options, ParentId | GrandparentIds, true> & {
+			[K in `terminate${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: () => void;
+			// Preserved for potential future use
+		} & ([ParentId] extends [never] ? ComputedClassEmptyObject : ComputedClassEmptyObject) &
+			([ChildId] extends [never]
+				? unknown
+				: CoreUniverseObjectContainerInstance<
+						BaseParams,
+						ChildInstance,
+						ChildArg,
+						ChildId,
+						Options,
+						Id,
+						ParentId | GrandparentIds
+				  >)
+	>;
 
 /**
  * Static part of universe object class.
@@ -510,7 +511,10 @@ export function generateCoreUniverseObjectMembers<
 											// Attach
 											attachHook
 												.catch(reason => {
-													((this.constructor as CoreBaseClassNonRecursive).universe as ChildUniverse).log({
+													(
+														(this.constructor as CoreBaseClassNonRecursive)
+															.universe as CoreUniverseInstanceNonRecursiveCast
+													).log({
 														error: new Error(
 															`Attachment of child universe object(id="${childId}", ${childPathUuidPropertyName}="${child[childPathUuidPropertyName]}") into object(id="${id}", ${nameUniverseObjectUuid}="${this[nameUniverseObjectUuid]}") has failed.`,
 															{

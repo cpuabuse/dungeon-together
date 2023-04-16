@@ -9,7 +9,7 @@
  * @file
  */
 
-import { MessageTypeWord, MovementWord } from "../../common/defaults/connection";
+import { DirectionWord, MessageTypeWord } from "../../common/defaults/connection";
 import { Uuid } from "../../common/uuid";
 
 /**
@@ -38,6 +38,11 @@ export interface CoreMessagePlayerBody {
 }
 
 /**
+ * Word used for movement.
+ */
+export type MovementWord = Exclude<DirectionWord, DirectionWord.Here>;
+
+/**
  * Movement message interface.
  */
 export interface CoreMessageMovement extends CoreMessageBase {
@@ -48,7 +53,7 @@ export interface CoreMessageMovement extends CoreMessageBase {
 		/**
 		 * Movement direction.
 		 */
-		direction: Exclude<MovementWord, MovementWord.Here>;
+		direction: MovementWord;
 
 		/**
 		 * Unit UUID to move.

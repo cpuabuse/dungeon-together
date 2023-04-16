@@ -12,7 +12,7 @@
 /**
  * Enum representing words used to depict directions.
  */
-export enum MovementWord {
+export enum DirectionWord {
 	Up,
 	Down,
 	Left,

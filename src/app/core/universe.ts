@@ -42,7 +42,7 @@ import {
 import { coreArgGenerateDefaultUuid } from "./arg/uuid";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
 import { CellPathOwn, CoreCellArg, CoreCellClass, CoreCellInstance } from "./cell";
-import { CoreConnection, CoreMessage } from "./connection";
+import { CoreConnection, CorePlayerContainer } from "./connection";
 import { CoreEntityArg, CoreEntityClass, CoreEntityInstance, EntityPathOwn } from "./entity";
 import { CoreLog, LogLevel } from "./error";
 import { CoreGridArg, CoreGridClass, CoreGridInstance, GridPathOwn } from "./grid";
@@ -104,20 +104,39 @@ export type CoreUniverseRequiredConstructorParameter = {
 export type CoreUniverseConstructorParams<R extends any[] = any[]> = [CoreUniverseRequiredConstructorParameter, ...R];
 
 /**
- * Placeholder for the universe.
+ * Placeholder for the universe, to use for generic constraints.
  *
  * @see {@link CoreBaseClassNonRecursive}
  */
 export type CoreUniverseInstanceNonRecursive = object;
 
 /**
- * Helper type to use when accessing connections.
+ * Part to be implemented by core universe.
  */
-export type CoreUniverseInstanceNonRecursiveWithConnections = {
+type CoreUniverseInstanceNonRecursiveCoreImplements = CoreUniverseInstanceNonRecursive & CoreLog;
+
+/**
+ * Placeholder for the universe, to cast when base or options are not known. To be implemented when concrete.
+ */
+export type CoreUniverseInstanceNonRecursiveCast<Connection extends CoreConnection = CoreConnection> =
+	CoreUniverseInstanceNonRecursiveCoreImplements & CoreInstanceNonRecursiveImplements<Connection>;
+
+/**
+ * To be implemented when concrete, to make sure cast is correct.
+ */
+export type CoreInstanceNonRecursiveImplements<Connection extends CoreConnection = CoreConnection> = {
 	/**
 	 * Connections.
 	 */
-	connections: Map<Uuid, CoreConnection<CoreUniverseInstanceNonRecursive, CoreMessage, CoreMessage>>;
+	connections: Map<Uuid, Connection>;
+
+	/**
+	 * Shards containing player container.
+	 */
+	shards: Map<
+		Uuid,
+		Connection extends CoreConnection<any, any, any, infer Player> ? CorePlayerContainer<Player> : never
+	>;
 };
 
 /**
@@ -143,7 +162,7 @@ export type CoreUniverse<
 	Cell extends CoreCellInstance<BaseParams, Options, Entity> = CoreCellInstance<BaseParams, Options, Entity>,
 	Grid extends CoreGridInstance<BaseParams, Options, Cell> = CoreGridInstance<BaseParams, Options, Cell>,
 	Shard extends CoreShardInstance<BaseParams, Options, Grid> = CoreShardInstance<BaseParams, Options, Grid>
-> = CoreUniverseInstanceNonRecursive & {
+> = CoreUniverseInstanceNonRecursiveCoreImplements & {
 	/**
 	 * Base class.
 	 */
@@ -500,8 +519,7 @@ export function CoreUniverseClassFactory<
 			StaticImplements<
 				ToAbstract<CoreUniverseClass<BaseClass, BaseParams, Options, Entity, Cell, Grid, Shard>>,
 				typeof Universe
-			>,
-			CoreUniverseInstanceNonRecursiveWithConnections
+			>
 	{
 		public abstract Base: BaseClass;
 
@@ -527,14 +545,6 @@ export function CoreUniverseClassFactory<
 		public cells!: Options extends CoreArgOptionsPathOwnUnion
 			? CoreArgIndexer<Cell, CoreArgIds.Cell, Options, CoreCellArgParentIds>["cells"]
 			: never;
-
-		/**
-		 * Connections.
-		 *
-		 * @remarks
-		 * Protected, since managing of sockets to be implemented by universe, thus sockets should not be accessed publicly.
-		 */
-		public abstract readonly connections: Map<Uuid, CoreConnection<Universe, CoreMessage, CoreMessage>>;
 
 		public defaultCell!: Options extends CoreArgOptionsPathOwnUnion ? Cell : never;
 

@@ -9,9 +9,9 @@
  */
 
 import { Uuid } from "../../common/uuid";
-import { CoreLog, LogLevel } from "../error";
+import { LogLevel } from "../error";
 import { ShardPathOwn } from "../shard";
-import { CoreUniverseInstanceNonRecursive, CoreUniverseInstanceNonRecursiveWithConnections } from "../universe";
+import { CoreUniverseInstanceNonRecursive, CoreUniverseInstanceNonRecursiveCast } from "../universe";
 import { CoreMessage, CoreProcessCallback, CoreScheduler, CoreSocket, ToSuperclassCoreProcessCallback } from ".";
 
 /**
@@ -20,15 +20,23 @@ import { CoreMessage, CoreProcessCallback, CoreScheduler, CoreSocket, ToSupercla
 export type CoreDictionary = Record<string, string | Array<string> | Record<string, string>>;
 
 /**
+ * Container of players.
+ */
+export type CorePlayerContainer<Player extends CorePlayer = CorePlayer> = {
+	/**
+	 * Players.
+	 */
+	players: Map<Uuid, Player>;
+};
+
+/**
  * Player data.
  */
 export class CorePlayer<
-	Universe extends CoreUniverseInstanceNonRecursive,
-	ReceiveMessage extends CoreMessage,
-	SendMessage extends CoreMessage
+	Connection extends CoreConnection<CoreUniverseInstanceNonRecursive, CoreMessage, CoreMessage> = any
 > {
 	/** Whether the player is connected. */
-	public connection?: CoreConnection<Universe, ReceiveMessage, SendMessage>;
+	public connection?: Connection;
 
 	/** Player dictionary. */
 	public dictionary: CoreDictionary = {};
@@ -61,7 +69,7 @@ export class CorePlayer<
 	 * @param connection - Connection to connect to
 	 * @returns Whether the player was connected
 	 */
-	public connect(connection: CoreConnection<Universe, ReceiveMessage, SendMessage>): boolean {
+	public connect(connection: Connection): boolean {
 		if (this.isConnected()) return false;
 		this.connection = connection;
 		return true;
@@ -93,7 +101,7 @@ export class CorePlayer<
  * @remarks
  * Not a set of direct references but a set of UUIDs, since referencing through shard, which is a universe object.
  */
-type Player = {
+type PlayerArgs = {
 	/**
 	 * Player UUID.
 	 */
@@ -128,17 +136,36 @@ export type CoreConnectionArgs<
 };
 
 /**
+ * Player entry for connection.
+ */
+type PlayerEntry<Player extends CorePlayer = CorePlayer> = {
+	/**
+	 * Shard UUID.
+	 */
+	shardUuid: Uuid;
+
+	/**
+	 * Player UUID.
+	 */
+	player: Player;
+};
+
+/**
  * Virtual socket abstraction.
  *
  * Emitter dispatches `tick()`; `tick()` performs processing, if `tock()` is not queued, otherwise `tick()` calls `tock()` asynchronously; `tock()` will requeue itself, if the process is not finished, while counting stack depth.
  */
 export abstract class CoreConnection<
-	Universe extends CoreUniverseInstanceNonRecursive,
-	ReceiveMessage extends CoreMessage,
-	SendMessage extends CoreMessage
+	Universe extends CoreUniverseInstanceNonRecursive = CoreUniverseInstanceNonRecursive,
+	ReceiveMessage extends CoreMessage = CoreMessage,
+	SendMessage extends CoreMessage = CoreMessage,
+	Player extends CorePlayer<CoreConnection<Universe, ReceiveMessage, SendMessage>> = any
 > extends CoreScheduler {
 	/** Connection UUID. */
 	public connectionUuid: Uuid;
+
+	/** Map of player UUIDs to player entries. */
+	public playerEntries: Map<Uuid, PlayerEntry<Player>> = new Map();
 
 	/** Shard UUIDs for registration uniqueness. */
 	public shardUuids: Set<Uuid> = new Set();
@@ -169,22 +196,37 @@ export abstract class CoreConnection<
 		this.socket.connection = this;
 		this.connectionUuid = connectionUuid;
 
-		if ((this.universe as CoreUniverseInstanceNonRecursiveWithConnections).connections.has(connectionUuid)) {
-			(this.universe as CoreLog).log({
+		if ((this.universe as CoreUniverseInstanceNonRecursiveCast).connections.has(connectionUuid)) {
+			(this.universe as CoreUniverseInstanceNonRecursiveCast).log({
 				level: LogLevel.Warning,
 				message: `Connection UUID ${connectionUuid} already exists.`
 			});
 		}
 
-		(this.universe as CoreUniverseInstanceNonRecursiveWithConnections).connections.set(connectionUuid, this);
+		(this.universe as CoreUniverseInstanceNonRecursiveCast).connections.set(connectionUuid, this);
 	}
 
 	/**
 	 * Starts tracking shard in connection.
 	 *
 	 * @param param - Destructured parameter
+	 * @returns Success
 	 */
-	public registerShard({ shardUuid }: Player): void {
-		this.shardUuids.add(shardUuid);
+	public registerShard({ shardUuid, playerUuid }: PlayerArgs): boolean {
+		let player: Player | undefined = (this.universe as CoreUniverseInstanceNonRecursiveCast<this>).shards
+			.get(shardUuid)
+			?.players.get(playerUuid);
+
+		if (player && player.connect(this)) {
+			this.shardUuids.add(shardUuid);
+			this.playerEntries.set(playerUuid, { player, shardUuid });
+			return true;
+		}
+
+		(this.universe as CoreUniverseInstanceNonRecursiveCast).log({
+			level: LogLevel.Error,
+			message: `Could not register player(uuid="${playerUuid}") to shard(uuid="${shardUuid}").`
+		});
+		return false;
 	}
 }

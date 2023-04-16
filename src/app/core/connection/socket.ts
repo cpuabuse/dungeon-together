@@ -10,7 +10,6 @@
 
 import { MessageTypeWord, vSocketMaxQueue } from "../../common/defaults/connection";
 import { CoreLog, LogLevel } from "../error";
-import { CoreUniverseInstanceNonRecursive } from "../universe";
 import { CoreConnection, CoreMessage } from ".";
 
 /**
@@ -51,7 +50,7 @@ export abstract class CoreSocket<ReceiveMessage extends CoreMessage, SendMessage
 	 * Temporary connection, to be replaced with proper game tick.
 	 */
 	// TODO: Replace with game tick
-	public connection?: CoreConnection<CoreUniverseInstanceNonRecursive, ReceiveMessage, SendMessage>;
+	public connection?: CoreConnection;
 
 	/**
 	 * Queue to use for this socket.

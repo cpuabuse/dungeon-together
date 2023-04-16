@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -11,6 +11,7 @@
 
 import { Uuid } from "../../common/uuid";
 import { Vector } from "../../common/vector";
+import { CoreDictionary } from "../../core/connection";
 
 /**
  * Updating cells.
@@ -58,7 +59,7 @@ export type ClientUpdate = {
 				/**
 				 * Health update.
 				 */
-				emits: Record<string, any>;
+				emits: CoreDictionary;
 
 				/**
 				 * Mode UUID.

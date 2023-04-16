@@ -8,7 +8,7 @@
  */
 
 import * as typing from "io-ts";
-import { MessageTypeWord, MovementWord } from "./defaults/connection";
+import { MessageTypeWord, DirectionWord } from "./defaults/connection";
 
 /**
  * Message type descriptions.
@@ -34,12 +34,12 @@ export const messageType = typing.union([
 	typing.type({
 		body: typing.type({
 			direction: typing.union([
-				typing.literal(MovementWord.Up),
-				typing.literal(MovementWord.Down),
-				typing.literal(MovementWord.Left),
-				typing.literal(MovementWord.Right),
-				typing.literal(MovementWord.ZUp),
-				typing.literal(MovementWord.ZDown)
+				typing.literal(DirectionWord.Up),
+				typing.literal(DirectionWord.Down),
+				typing.literal(DirectionWord.Left),
+				typing.literal(DirectionWord.Right),
+				typing.literal(DirectionWord.ZUp),
+				typing.literal(DirectionWord.ZDown)
 			])
 		}),
 		type: typing.literal(MessageTypeWord.Movement)

@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -18,7 +18,6 @@ import {
 	CoreArgOptionsPathOwnUnion
 } from "../arg";
 import { CoreBaseNonRecursiveParameters } from "../base";
-import { CoreLog } from "../error";
 import { CoreArgIndexableReader, CoreArgIndexer } from "../indexable";
 import { CoreUniverseObjectArgsOptionsUnion } from "./options";
 import { CoreUniverseObjectClass, CoreUniverseObjectInstance } from "./universe-object";
@@ -60,7 +59,7 @@ export type CoreUniverseObjectUniverse<
 	> = never,
 	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
 	ChildId extends CoreArgIds = never
-> = CoreLog & {
+> = {
 	// Cannot use class type, since constructor must return exactly provided generic
 	[K in `${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: CoreUniverseObjectClass<
 		BaseParams,
@@ -75,17 +74,17 @@ export type CoreUniverseObjectUniverse<
 		ChildId
 	>;
 } & ([ParentId] extends [never]
-		? CoreUniverseObjectContainerInstance<BaseParams, Instance, Arg, Id, Options, ParentId, GrandparentIds>
-		: CoreArgIndexableReader<Instance, Id, Options, ParentId | GrandparentIds> & {
-				[K in keyof CoreArgIndexer<
-					Instance,
-					Id,
-					Options,
-					ParentId | GrandparentIds
-				>]: Options extends CoreArgOptionsPathOwnUnion
-					? CoreArgIndexer<Instance, Id, Options, ParentId | GrandparentIds>[K]
-					: never;
-		  }) & {
+	? CoreUniverseObjectContainerInstance<BaseParams, Instance, Arg, Id, Options, ParentId, GrandparentIds>
+	: CoreArgIndexableReader<Instance, Id, Options, ParentId | GrandparentIds> & {
+			[K in keyof CoreArgIndexer<
+				Instance,
+				Id,
+				Options,
+				ParentId | GrandparentIds
+			>]: Options extends CoreArgOptionsPathOwnUnion
+				? CoreArgIndexer<Instance, Id, Options, ParentId | GrandparentIds>[K]
+				: never;
+	  }) & {
 		/**
 		 * Queue for universe.
 		 */

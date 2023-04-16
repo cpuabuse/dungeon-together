@@ -17,17 +17,7 @@ classDiagram
 		<<External>>
 		+Map~Uuid，Player~ players
 	}
-
-	class CoreConnection{
-		+Uuid connectionUuid
-		+CoreUniverse universe
-		+CoreSocket socket
-		+Set~Uuid~ shardUuids
-	}
-	<<Abstract>> CoreConnection
-	CoreConnection "1" --> "1" CoreUniverse : references
-	CoreConnection "1" *-- "1" CoreSocket : contains
-	CoreConnection "1" --> "0..*" CoreShard: references
+	CoreShard "1" o-- "0..*" CorePlayer : contains
 
 	class CorePlayer{
 		<<Abstract>>
@@ -39,7 +29,28 @@ classDiagram
 		+connect(CoreConnection connection)
 		+disconnect()
 	}
+	PlayerEntry --o CorePlayer : contains
 	CoreConnection "1" <-- "0..1" CorePlayer : references
+
+	class PlayerEntry{
+		<<interface>>
+		+Uuid shardUuid
+		+ServerPlayer player
+	}
+	CoreShard "1" <-- "1" PlayerEntry : references
+	PlayerEntry "1" *-- "1" CorePlayer : composes
+
+	class CoreConnection{
+		<<Abstract>>
+		+Map~Uuid，PlayerEntry~ playerEntries
+		+Uuid connectionUuid
+		+CoreUniverse universe
+		+CoreSocket socket
+		+Set~Uuid~ shardUuids
+	}
+	CoreUniverse "1" <-- "1" CoreConnection : references
+	CoreConnection "1" *-- "1" CoreSocket : contains
+	CoreShard "1" <-- "0..*" CoreConnection : references
 
 	class CoreSocket{
 		<<Abstract>> 
@@ -58,82 +69,6 @@ classDiagram
 	}
 	CoreSocket --|> WebSocket : extends
 ```
-
-## Server
-
-```mermaid
-classDiagram
-	class ServerShard{
-		<<External>>
-		+Map~Uuid，Player~ players
-		+Map~Uuid，EntityPathExtended~ units
-		+CoreDictionary dictionary
-	}
-	ServerShard "1" o-- "0..*" ServerPlayer : contains
-
-	class CorePlayer{
-		<<External>>
-	}
-
-	class ServerPlayer{
-	}
-	ServerPlayer --|> CorePlayer : extends
-
-	class CoreConnection{
-		<<External>>
-	}
-
-	class ServerConnection{
-		+Map~Uuid，PlayerEntry~ playerEntries
-	}
-	CoreConnection <|-- ServerConnection : extends
-	ServerConnection o-- PlayerEntry : contains
-
-	class PlayerEntry{
-		<<interface>>
-		+Uuid shardUuid
-		+ServerPlayer player
-	}
-	PlayerEntry "1" --> "1" ServerShard : references
-	PlayerEntry "1" *-- "1" ServerPlayer : composes
-```
-
-## Client
-
-```mermaid
-classDiagram
-	class ClientUniverse{
-		+Map~Uuid，ClientShard~ shards
-		+Map~Uuid，ServerConnection~ connections
-	}
-	ClientUniverse "1" o-- "0..*" ClientShard : contains
-	ClientUniverse "1" o-- "0..*" ClientConnection : contains
-	ClientShard "1" o-- "1" ClientPlayer : contains
-
-	class ClientShard{
-		+Set~Uuid~ units
-		+Player player
-	}
-
-	class CorePlayer{
-		<<External>>
-	}
-
-	class ClientPlayer{
-
-	}
-	ClientPlayer --|> CorePlayer : extends
-
-	class CoreConnection{
-		<<External>>
-	}
-
-	class ClientConnection{
-
-	}
-	ClientConnection --|> CoreConnection : extends
-```
-
 ---
 
 Note - File uses mermaid generic comma hack - https://github.com/mermaid-js/mermaid/issues/3188); Although that makes abstract members impossible

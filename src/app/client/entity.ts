@@ -7,8 +7,9 @@
  * @file Entity that can be rendered.
  */
 
-import { AnimatedSprite, Container, Text } from "pixi.js";
+import { AnimatedSprite, Text } from "pixi.js";
 import { CoreArgIds } from "../core/arg";
+import { CoreDictionary } from "../core/connection";
 import { CoreEntityArg, CoreEntityClassFactory } from "../core/entity";
 import { CoreEntityArgParentIds } from "../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
@@ -45,17 +46,22 @@ export function ClientEntityFactory({
 		public basicText: Text | null = null;
 
 		/**
-		 * Emits received from server.
+		 * Dictionary getter.
+		 *
+		 * @returns Local dictionary
 		 */
-		public emits: Record<string, any> = {};
-
-		public healthBar: ProgressBar | null = null;
+		public get dictionary(): CoreDictionary {
+			return this.internalDictionary;
+		}
 
 		/**
-		 * Storing health.
-		 * TODO: Move to emits.
+		 * Dictionary setter.
 		 */
-		public tempHealth: number = 0;
+		public set dictionary(dictionary: CoreDictionary) {
+			this.internalDictionary = dictionary;
+		}
+
+		public healthBar: ProgressBar | null = null;
 
 		/**
 		 * Temporary health.
@@ -94,6 +100,14 @@ export function ClientEntityFactory({
 		 * Animated sprite.
 		 */
 		public sprite: AnimatedSprite;
+
+		/**
+		 * Storing health.
+		 * TODO: Move to emits.
+		 */
+		public tempHealth: number = 0;
+
+		protected internalDictionary: CoreDictionary = {};
 
 		// ESLint params bug
 		// eslint-disable-next-line jsdoc/require-param

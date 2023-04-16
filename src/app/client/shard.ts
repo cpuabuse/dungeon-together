@@ -16,7 +16,8 @@ import {
 	defaultMobileEntityHeight,
 	defaultMobileEntityWidth
 } from "../common/defaults";
-import { MessageTypeWord, MovementWord } from "../common/defaults/connection";
+import { DirectionWord, MessageTypeWord } from "../common/defaults/connection";
+import { Uuid } from "../common/uuid";
 import { CoreArgIds } from "../core/arg";
 import { CoreEnvelope } from "../core/connection";
 import { LogLevel } from "../core/error";
@@ -80,9 +81,8 @@ export function ClientShardFactory({
 		 * @returns Shard name
 		 */
 		public get shardName(): string {
-			return typeof this.player.dictionary.shardName === "string"
-				? this.player.dictionary.shardName
-				: this.shardUuid.substring(0, 8);
+			// TODO: Add shard dictionary sync
+			return this.shardUuid.substring(0, 8);
 		}
 
 		/**
@@ -100,9 +100,7 @@ export function ClientShardFactory({
 		 */
 		public matrix: Matrix = Matrix.IDENTITY;
 
-		public player: ClientPlayer = new ClientPlayer({
-			playerUuid: `player/${this.shardUuid}`
-		});
+		public readonly players: Map<Uuid, ClientPlayer> = new Map();
 
 		/**
 		 * Scene height.
@@ -246,8 +244,8 @@ export function ClientShardFactory({
 							messages: [
 								{
 									body: {
-										direction: MovementWord.Up,
-										playerUuid: this.player.playerUuid,
+										direction: DirectionWord.Up,
+										playerUuid: Array.from(this.players)[0][1].playerUuid,
 										// TODO: Add active unit system
 										unitUuid: Array.from(this.units)[0]
 									},
@@ -255,7 +253,7 @@ export function ClientShardFactory({
 								}
 							]
 						});
-						await this.player.connection?.socket.send(envelope);
+						await Array.from(this.players)[0][1].connection?.socket.send(envelope);
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: upSymbol });
@@ -270,8 +268,8 @@ export function ClientShardFactory({
 							messages: [
 								{
 									body: {
-										direction: MovementWord.Down,
-										playerUuid: this.player.playerUuid,
+										direction: DirectionWord.Down,
+										playerUuid: Array.from(this.players)[0][1].playerUuid,
 										// TODO: Add active unit system
 										unitUuid: Array.from(this.units)[0]
 									},
@@ -280,7 +278,7 @@ export function ClientShardFactory({
 							]
 						});
 
-						await this.player.connection?.socket.send(envelope);
+						await Array.from(this.players)[0][1].connection?.socket.send(envelope);
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: downSymbol });
@@ -295,8 +293,8 @@ export function ClientShardFactory({
 							messages: [
 								{
 									body: {
-										direction: MovementWord.Right,
-										playerUuid: this.player.playerUuid,
+										direction: DirectionWord.Right,
+										playerUuid: Array.from(this.players)[0][1].playerUuid,
 										// TODO: Add active unit system
 										unitUuid: Array.from(this.units)[0]
 									},
@@ -305,7 +303,7 @@ export function ClientShardFactory({
 							]
 						});
 
-						await this.player.connection?.socket.send(envelope);
+						await Array.from(this.players)[0][1].connection?.socket.send(envelope);
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: rightSymbol });
@@ -320,8 +318,8 @@ export function ClientShardFactory({
 							messages: [
 								{
 									body: {
-										direction: MovementWord.Left,
-										playerUuid: this.player.playerUuid,
+										direction: DirectionWord.Left,
+										playerUuid: Array.from(this.players)[0][1].playerUuid,
 										// TODO: Add active unit system
 										unitUuid: Array.from(this.units)[0]
 									},
@@ -330,7 +328,7 @@ export function ClientShardFactory({
 							]
 						});
 
-						await this.player.connection?.socket.send(envelope);
+						await Array.from(this.players)[0][1].connection?.socket.send(envelope);
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: leftSymbol });

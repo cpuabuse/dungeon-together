@@ -10,10 +10,12 @@
 import { Howl } from "howler";
 import nextTick from "next-tick";
 import { DeferredPromise } from "../common/async";
-import { MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
+import { DirectionWord, MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { defaultFadeInMs, defaultFadeOutMs } from "../common/sound";
 import { Uuid } from "../common/uuid";
+import { Vector, defaultVector } from "../common/vector";
 import { ClientUpdate } from "../comms";
+import { Nav, navIndex } from "../core/arg";
 import {
 	CoreConnection,
 	CoreConnectionArgs,
@@ -25,6 +27,7 @@ import {
 	CorePlayer,
 	CoreProcessCallback,
 	CoreScheduler,
+	MovementWord,
 	ToSuperclassCoreProcessCallback,
 	processInitWord
 } from "../core/connection";
@@ -32,6 +35,7 @@ import { LogLevel } from "../core/error";
 import { CoreShardArg, ShardPathOwn } from "../core/shard";
 import { ServerMessage } from "../server/connection";
 import { ClientCell } from "./cell";
+import { ClientEntity } from "./entity";
 import { ClientOptions } from "./options";
 import { ClientShard } from "./shard";
 import { ClientUniverse } from "./universe";
@@ -74,7 +78,12 @@ export type ClientMessage =
 			 */
 			type: MessageTypeWord.Update;
 	  }
-	| CoreMessageMovement;
+	| (CoreMessageMovement & {
+			/**
+			 * Body.
+			 */
+			body: Record<"gridUuid", Uuid>;
+	  });
 
 // Sound
 /**
@@ -91,7 +100,7 @@ let splat: Howl = new Howl({
 /**
  * Client player.
  */
-export class ClientPlayer extends CorePlayer<ClientUniverse, ClientMessage, ServerMessage> {
+export class ClientPlayer extends CorePlayer<ClientConnection> {
 	/**
 	 * Client connection.
 	 */
@@ -101,7 +110,7 @@ export class ClientPlayer extends CorePlayer<ClientUniverse, ClientMessage, Serv
 /**
  * Client connection.
  */
-export class ClientConnection extends CoreConnection<ClientUniverse, ClientMessage, ServerMessage> {
+export class ClientConnection extends CoreConnection<ClientUniverse, ClientMessage, ServerMessage, ClientPlayer> {
 	/**
 	 * Constructor.
 	 *
@@ -142,6 +151,7 @@ export class ClientConnection extends CoreConnection<ClientUniverse, ClientMessa
 	 * Registers server shard.
 	 *
 	 * @param param - Shard UUID and player UUID
+	 * @returns Success or not
 	 */
 	public registerShard({
 		shardUuid,
@@ -151,12 +161,10 @@ export class ClientConnection extends CoreConnection<ClientUniverse, ClientMessa
 		 * Player UUID.
 		 */
 		playerUuid: string;
-	} & ShardPathOwn): void {
+	} & ShardPathOwn): boolean {
 		let shard: ClientShard = this.universe.getShard({ shardUuid });
-		shard.player.playerUuid = playerUuid;
-		if (shard.player.connect(this)) {
-			super.registerShard({ playerUuid, shardUuid });
-		}
+		shard.players.set(playerUuid, new ClientPlayer({ playerUuid }));
+		return super.registerShard({ playerUuid, shardUuid });
 	}
 }
 
@@ -234,11 +242,11 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 											Object.keys(message.body.dictionary).forEach(key => {
 												let entry: string | Array<string> | Record<string, string> = message.body.dictionary[key];
 												if (Array.isArray(entry)) {
-													shard.player.dictionary[key] = [...entry];
+													Array.from(shard.players)[0][1].dictionary[key] = [...entry];
 												} else if (typeof entry === "object") {
-													shard.player.dictionary[key] = { ...entry };
+													Array.from(shard.players)[0][1].dictionary[key] = { ...entry };
 												} else {
-													shard.player.dictionary[key] = entry;
+													Array.from(shard.players)[0][1].dictionary[key] = entry;
 												}
 											});
 										})
@@ -358,8 +366,19 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 							let targetCell: ClientCell = this.universe.getCell(sourceCell);
 							// eslint-disable-next-line @typescript-eslint/typedef
 							sourceCell.entities.forEach(({ entityUuid, emits, modeUuid, worldUuid }) => {
-								// Set emits
-								this.universe.getEntity({ entityUuid }).emits = emits;
+								let entity: ClientEntity = this.universe.getEntity({ entityUuid });
+								// TODO: Move object link verification to standalone connection
+								// Iterating through keys to prevent assignment of objects for standalone
+								Object.keys(emits).forEach(key => {
+									let entry: string | Array<string> | Record<string, string> = emits[key];
+									if (Array.isArray(entry)) {
+										entity.dictionary[key] = [...entry];
+									} else if (typeof entry === "object") {
+										entity.dictionary[key] = { ...entry };
+									} else {
+										entity.dictionary[key] = entry;
+									}
+								});
 
 								if (typeof emits.health === "number") {
 									this.universe.getEntity({ entityUuid }).health = emits.health;
@@ -421,11 +440,36 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 			}
 
 			// Received from client
-			case MessageTypeWord.Movement:
+			case MessageTypeWord.Movement: {
+				let { direction, unitUuid, gridUuid }: typeof message.body = message.body;
+				let controlUnit: ClientEntity = this.universe.getEntity({ entityUuid: unitUuid });
+				let sourceCell: ClientCell | undefined;
+
+				if (sourceCell) {
+					// Allowed directions
+					const directions: {
+						[K in MovementWord]: Nav;
+					} = {
+						[DirectionWord.Up]: Nav.YUp,
+						[DirectionWord.Down]: Nav.YDown,
+						[DirectionWord.Left]: Nav.Left,
+						[DirectionWord.Right]: Nav.Right,
+						[DirectionWord.ZUp]: Nav.ZUp,
+						[DirectionWord.ZDown]: Nav.ZDown
+					};
+
+					let { x, y, z }: Vector = sourceCell;
+					let vectorChange: Vector = navIndex.get(directions[direction]) ?? defaultVector;
+					x += vectorChange.x;
+					y += vectorChange.y;
+					z += vectorChange.z;
+				}
+
 				results.push(
 					this.socket.send(new CoreEnvelope({ messages: [{ body: message.body, type: MessageTypeWord.Movement }] }))
 				);
 				break;
+			}
 
 			// Continue loop on default
 			default:

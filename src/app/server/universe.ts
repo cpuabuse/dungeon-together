@@ -11,7 +11,11 @@ import { DeferredPromise } from "../common/async";
 import { defaultKindUuid, defaultWorldUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
 import { CoreShardArg } from "../core/shard";
-import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
+import {
+	CoreInstanceNonRecursiveImplements,
+	CoreUniverseClassFactory,
+	CoreUniverseRequiredConstructorParameter
+} from "../core/universe";
 import { ServerBaseClass, ServerBaseConstructorParams, ServerBaseFactory } from "./base";
 import { ServerCell, ServerCellClass, ServerCellFactory } from "./cell";
 import { ServerConnection } from "./connection";
@@ -29,15 +33,18 @@ export type ServerUniverseArgs = CoreUniverseRequiredConstructorParameter;
 /**
  * Server-side shard.
  */
-export class ServerUniverse extends CoreUniverseClassFactory<
-	ServerBaseClass,
-	ServerBaseConstructorParams,
-	ServerOptions,
-	ServerEntity,
-	ServerCell,
-	ServerGrid,
-	ServerShard
->({ logSource: "Server", options: serverOptions }) {
+export class ServerUniverse
+	extends CoreUniverseClassFactory<
+		ServerBaseClass,
+		ServerBaseConstructorParams,
+		ServerOptions,
+		ServerEntity,
+		ServerCell,
+		ServerGrid,
+		ServerShard
+	>({ logSource: "Server", options: serverOptions })
+	implements CoreInstanceNonRecursiveImplements<ServerConnection>
+{
 	/**
 	 * Base class for server objects.
 	 */

@@ -23,7 +23,11 @@ import { CoreArgIds } from "../core/arg";
 import { LogLevel } from "../core/error";
 import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, ShardPathExtended } from "../core/shard";
-import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
+import {
+	CoreInstanceNonRecursiveImplements,
+	CoreUniverseClassFactory,
+	CoreUniverseRequiredConstructorParameter
+} from "../core/universe";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import UniverseComponent from "../vue/universe.vue";
 import { ClientBaseClass, ClientBaseConstructorParams, ClientBaseFactory } from "./base";
@@ -44,15 +48,18 @@ import { ClientShard, ClientShardClass, ClientShardFactory } from "./shard";
  * Termination of the client is impossible, because it is global.
  * For same reason [[Client]] does not store "defaultInstanceUuid" inside.
  */
-export class ClientUniverse extends CoreUniverseClassFactory<
-	ClientBaseClass,
-	ClientBaseConstructorParams,
-	ClientOptions,
-	ClientEntity,
-	ClientCell,
-	ClientGrid,
-	ClientShard
->({ logSource: "Client", options: clientOptions }) {
+export class ClientUniverse
+	extends CoreUniverseClassFactory<
+		ClientBaseClass,
+		ClientBaseConstructorParams,
+		ClientOptions,
+		ClientEntity,
+		ClientCell,
+		ClientGrid,
+		ClientShard
+	>({ logSource: "Client", options: clientOptions })
+	implements CoreInstanceNonRecursiveImplements<ClientConnection>
+{
 	/**
 	 * Base class.
 	 */
