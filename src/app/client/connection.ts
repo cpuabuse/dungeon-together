@@ -33,9 +33,11 @@ import {
 } from "../core/connection";
 import { LogLevel } from "../core/error";
 import { CoreShardArg, ShardPathOwn } from "../core/shard";
+import { ActionWords } from "../server/action";
 import { ServerMessage } from "../server/connection";
 import { ClientCell } from "./cell";
 import { ClientEntity } from "./entity";
+import { ClientGrid } from "./grid";
 import { ClientOptions } from "./options";
 import { ClientShard } from "./shard";
 import { ClientUniverse } from "./universe";
@@ -78,12 +80,7 @@ export type ClientMessage =
 			 */
 			type: MessageTypeWord.Update;
 	  }
-	| (CoreMessageMovement & {
-			/**
-			 * Body.
-			 */
-			body: Record<"gridUuid", Uuid>;
-	  });
+	| CoreMessageMovement;
 
 // Sound
 /**
@@ -96,6 +93,21 @@ let splat: Howl = new Howl({
 	},
 	src: ["sound/effects/splattt-6295.mp3"]
 });
+
+// Allowed directions
+/**
+ * Directions mapping to movement.
+ */
+const directions: {
+	[K in MovementWord]: Nav;
+} = {
+	[DirectionWord.Up]: Nav.YUp,
+	[DirectionWord.Down]: Nav.YDown,
+	[DirectionWord.Left]: Nav.Left,
+	[DirectionWord.Right]: Nav.Right,
+	[DirectionWord.ZUp]: Nav.ZUp,
+	[DirectionWord.ZDown]: Nav.ZDown
+};
 
 /**
  * Client player.
@@ -240,9 +252,13 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 											// TODO: Move object link verification to standalone connection
 											// Iterating through keys to prevent assignment of objects for standalone
 											Object.keys(message.body.dictionary).forEach(key => {
-												let entry: string | Array<string> | Record<string, string> = message.body.dictionary[key];
+												let entry: CoreDictionary[any] = message.body.dictionary[key];
 												if (Array.isArray(entry)) {
-													Array.from(shard.players)[0][1].dictionary[key] = [...entry];
+													// Casting, since array expansion is producing an array of union, instead of union of arrays
+													Array.from(shard.players)[0][1].dictionary[key] = [...entry] as Extract<
+														CoreDictionary[any],
+														Array<any>
+													>;
 												} else if (typeof entry === "object") {
 													Array.from(shard.players)[0][1].dictionary[key] = { ...entry };
 												} else {
@@ -370,9 +386,10 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 								// TODO: Move object link verification to standalone connection
 								// Iterating through keys to prevent assignment of objects for standalone
 								Object.keys(emits).forEach(key => {
-									let entry: string | Array<string> | Record<string, string> = emits[key];
+									let entry: CoreDictionary[any] = emits[key];
 									if (Array.isArray(entry)) {
-										entity.dictionary[key] = [...entry];
+										// Casting, since array expansion is producing an array of union, instead of union of arrays
+										entity.dictionary[key] = [...entry] as Extract<CoreDictionary[any], Array<any>>;
 									} else if (typeof entry === "object") {
 										entity.dictionary[key] = { ...entry };
 									} else {
@@ -441,33 +458,67 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 
 			// Received from client
 			case MessageTypeWord.Movement: {
-				let { direction, unitUuid, gridUuid }: typeof message.body = message.body;
+				let isActionNotDispatched: boolean = true;
+
+				let { direction, unitUuid, playerUuid }: typeof message.body = message.body;
 				let controlUnit: ClientEntity = this.universe.getEntity({ entityUuid: unitUuid });
-				let sourceCell: ClientCell | undefined;
 
-				if (sourceCell) {
-					// Allowed directions
-					const directions: {
-						[K in MovementWord]: Nav;
-					} = {
-						[DirectionWord.Up]: Nav.YUp,
-						[DirectionWord.Down]: Nav.YDown,
-						[DirectionWord.Left]: Nav.Left,
-						[DirectionWord.Right]: Nav.Right,
-						[DirectionWord.ZUp]: Nav.ZUp,
-						[DirectionWord.ZDown]: Nav.ZDown
-					};
+				// TODO: Change to string to uuid conversion function
+				// Destructuring won't be compatible with record type
+				// eslint-disable-next-line prefer-destructuring
+				let gridUuid: any = controlUnit.dictionary.gridUuid;
+				if (typeof gridUuid === "string") {
+					let grid: ClientGrid = this.universe.getGrid({ gridUuid });
+					let { x, y, z }: CoreDictionary = { ...controlUnit.dictionary };
 
-					let { x, y, z }: Vector = sourceCell;
-					let vectorChange: Vector = navIndex.get(directions[direction]) ?? defaultVector;
-					x += vectorChange.x;
-					y += vectorChange.y;
-					z += vectorChange.z;
+					if (typeof x === "number" && typeof y === "number" && typeof z === "number") {
+						let vectorChange: Vector = navIndex.get(directions[direction]) ?? defaultVector;
+						let targetCell: ClientCell | undefined;
+
+						try {
+							// If cell empty, target cell will be undefined
+							targetCell = grid.cellIndex[z + vectorChange.z][x + vectorChange.x][y + vectorChange.y];
+						} catch {
+							targetCell = undefined;
+						}
+
+						if (targetCell) {
+							let targetEntity: ClientEntity | undefined = Array.from(targetCell.entities).find(
+								// ESLint false negative
+								// eslint-disable-next-line @typescript-eslint/typedef
+								([, entity]) => entity.dictionary.hasAction
+							)?.[1];
+							if (targetEntity) {
+								results.push(
+									this.socket.send(
+										new CoreEnvelope({
+											messages: [
+												{
+													body: {
+														controlUnitUuid: unitUuid,
+														playerUuid,
+														targetEntityUuid: targetEntity.entityUuid,
+														type: ActionWords.Interact
+													},
+													type: MessageTypeWord.EntityAction
+												}
+											]
+										})
+									)
+								);
+
+								isActionNotDispatched = false;
+							}
+						}
+					}
 				}
 
-				results.push(
-					this.socket.send(new CoreEnvelope({ messages: [{ body: message.body, type: MessageTypeWord.Movement }] }))
-				);
+				if (isActionNotDispatched) {
+					results.push(
+						this.socket.send(new CoreEnvelope({ messages: [{ body: message.body, type: MessageTypeWord.Movement }] }))
+					);
+				}
+
 				break;
 			}
 

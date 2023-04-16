@@ -50,7 +50,7 @@ export function GuyKindClassFactory({
 			let cell: ServerCell = (this.entity.constructor as ServerEntityClass).universe.getCell(this.entity);
 
 			// TODO: X, Y, Z should be in control unit kind
-			return { ...super.emits, x: cell.x, y: cell.y, z: cell.z };
+			return { ...super.emits, gridUuid: this.entity.gridUuid, x: cell.x, y: cell.y, z: cell.z };
 		}
 
 		/** Player. */

@@ -19,14 +19,14 @@ import {
 import { DirectionWord, MessageTypeWord } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { CoreArgIds } from "../core/arg";
-import { CoreEnvelope } from "../core/connection";
+import { CoreEnvelope, processQueueWord } from "../core/connection";
 import { LogLevel } from "../core/error";
 import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ServerMessage } from "../server/connection";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
-import { ClientPlayer } from "./connection";
+import { ClientConnection, ClientPlayer } from "./connection";
 import { ElementBall } from "./element-ball";
 import { ClientGrid } from "./grid";
 import {
@@ -245,7 +245,7 @@ export function ClientShardFactory({
 								{
 									body: {
 										direction: DirectionWord.Up,
-										playerUuid: Array.from(this.players)[0][1].playerUuid,
+										playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
 										// TODO: Add active unit system
 										unitUuid: Array.from(this.units)[0]
 									},
@@ -253,7 +253,7 @@ export function ClientShardFactory({
 								}
 							]
 						});
-						await Array.from(this.players)[0][1].connection?.socket.send(envelope);
+						await Array.from(this.players)[0]?.[1].connection?.socket.send(envelope);
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: upSymbol });
@@ -269,7 +269,7 @@ export function ClientShardFactory({
 								{
 									body: {
 										direction: DirectionWord.Down,
-										playerUuid: Array.from(this.players)[0][1].playerUuid,
+										playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
 										// TODO: Add active unit system
 										unitUuid: Array.from(this.units)[0]
 									},
@@ -278,7 +278,7 @@ export function ClientShardFactory({
 							]
 						});
 
-						await Array.from(this.players)[0][1].connection?.socket.send(envelope);
+						await Array.from(this.players)[0]?.[1].connection?.socket.send(envelope);
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: downSymbol });
@@ -294,7 +294,7 @@ export function ClientShardFactory({
 								{
 									body: {
 										direction: DirectionWord.Right,
-										playerUuid: Array.from(this.players)[0][1].playerUuid,
+										playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
 										// TODO: Add active unit system
 										unitUuid: Array.from(this.units)[0]
 									},
@@ -303,7 +303,7 @@ export function ClientShardFactory({
 							]
 						});
 
-						await Array.from(this.players)[0][1].connection?.socket.send(envelope);
+						await Array.from(this.players)[0]?.[1].connection?.socket.send(envelope);
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: rightSymbol });
@@ -314,21 +314,17 @@ export function ClientShardFactory({
 					// Async callback for event emitter
 					// eslint-disable-next-line @typescript-eslint/no-misused-promises
 					this.input.on(leftSymbol, async inputInterface => {
-						let envelope: CoreEnvelope<ServerMessage> = new CoreEnvelope({
-							messages: [
-								{
-									body: {
-										direction: DirectionWord.Left,
-										playerUuid: Array.from(this.players)[0][1].playerUuid,
-										// TODO: Add active unit system
-										unitUuid: Array.from(this.units)[0]
-									},
-									type: MessageTypeWord.Movement
-								}
-							]
+						let connection: ClientConnection | undefined = Array.from(this.players)[0]?.[1].connection;
+						connection?.socket.writeQueue({
+							body: {
+								direction: DirectionWord.Left,
+								playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
+								// TODO: Add active unit system
+								unitUuid: Array.from(this.units)[0]
+							},
+							type: MessageTypeWord.Movement
 						});
-
-						await Array.from(this.players)[0][1].connection?.socket.send(envelope);
+						await connection?.tick({ word: processQueueWord });
 
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: leftSymbol });

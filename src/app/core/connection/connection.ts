@@ -17,7 +17,10 @@ import { CoreMessage, CoreProcessCallback, CoreScheduler, CoreSocket, ToSupercla
 /**
  * Dictionary to transfer to players.
  */
-export type CoreDictionary = Record<string, string | Array<string> | Record<string, string>>;
+export type CoreDictionary = Record<
+	string,
+	number | string | Array<string> | Array<number> | Record<string, string | number>
+>;
 
 /**
  * Container of players.
