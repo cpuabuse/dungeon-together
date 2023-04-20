@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -61,12 +61,18 @@ export class ClientToast {
 		x,
 		y,
 		z,
-		modeUuid
+		modeUuid,
+		isFloating = true
 	}: Vector & {
 		/**
 		 * Mode to show.
 		 */
 		modeUuid: Uuid;
+
+		/**
+		 * Whether to float or not.
+		 */
+		isFloating?: boolean;
 	}): void {
 		let sprite: AnimatedSprite = new AnimatedSprite(
 			(this.shard.constructor as ClientShardClass).universe.getMode({ uuid: modeUuid }).textures
@@ -78,7 +84,9 @@ export class ClientToast {
 		function tick(): void {
 			if (sprite.alpha > 0) {
 				sprite.alpha -= 0.005;
-				sprite.y -= 1;
+				if (isFloating) {
+					sprite.y -= 1;
+				}
 			}
 		}
 

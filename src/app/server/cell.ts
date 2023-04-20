@@ -10,6 +10,7 @@
 import { Uuid } from "../common/uuid";
 import { CoreArgIds } from "../core/arg";
 import { CoreCellArg, CoreCellClassFactory } from "../core/cell";
+import { MovementWord } from "../core/connection";
 import { CoreCellArgParentIds } from "../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ServerBaseClass, ServerBaseConstructorParams } from "./base";
@@ -19,17 +20,34 @@ import { ServerOptions, serverOptions } from "./options";
 /**
  * Cell event.
  */
-export type CellEvent = {
-	/**
-	 * Death type.
-	 */
-	name: "death";
+export type CellEvent =
+	| {
+			/**
+			 * Death type.
+			 */
+			name: "death";
 
-	/**
-	 * Target entity UUID.
-	 */
-	targetEntityUuid: Uuid;
-};
+			/**
+			 * Target entity UUID.
+			 */
+			targetEntityUuid: Uuid;
+	  }
+	| {
+			/**
+			 * Trail type.
+			 */
+			name: "trail";
+
+			/**
+			 * Target entity UUID.
+			 */
+			targetEntityUuid: Uuid;
+
+			/**
+			 * Direction.
+			 */
+			direction: MovementWord;
+	  };
 
 /**
  * Generator for the server cell class.

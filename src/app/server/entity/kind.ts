@@ -161,16 +161,16 @@ export function BaseEntityKindClassFactory({
 		/**
 		 * Actually moves the server entity.
 		 *
-		 * @param cell - Cell
+		 * @param targetCell - Cell
 		 */
-		public moveEntity(cell: ServerCell): void {
+		public moveEntity(targetCell: ServerCell): void {
 			// Docs not necessary for const type
 			// eslint-disable-next-line jsdoc/require-jsdoc
 			const { entity }: { entity: ServerEntity } = this;
 
 			// Reattach; Attach will update uuids in core
 			BaseKind.Entity.universe.getCell(entity).detachEntity(entity);
-			cell.attachEntity(entity);
+			targetCell.attachEntity(entity);
 		}
 
 		/**

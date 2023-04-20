@@ -40,6 +40,7 @@ import { ClientEntity } from "./entity";
 import { ClientGrid } from "./grid";
 import { ClientOptions } from "./options";
 import { ClientShard } from "./shard";
+import { ClientToast } from "./toast";
 import { ClientUniverse } from "./universe";
 
 /**
@@ -286,6 +287,9 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 
 			// Update command
 			case MessageTypeWord.Update: {
+				let detachedEntities: Set<ClientEntity> = new Set();
+				let attachedEntities: Set<ClientEntity> = new Set();
+
 				this.universe.log({ level: LogLevel.Informational, message: `Update started.` });
 				// Create cells if missing
 				message.body.cells.forEach(sourceCell => {
@@ -359,12 +363,14 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 											targetCell.removeEntity(targetEntity);
 										} else {
 											targetCell.detachEntity(targetEntity);
+											detachedEntities.add(targetEntity);
 										}
 									} else if (
 										targetEntity.modeUuid === "mode/user/player/default" ||
 										targetEntity.modeUuid === "mode/user/enemy/default"
 									) {
 										targetCell.detachEntity(targetEntity);
+										detachedEntities.add(targetEntity);
 									}
 								}
 							});
@@ -400,6 +406,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 								if (typeof emits.health === "number") {
 									this.universe.getEntity({ entityUuid }).health = emits.health;
 								}
+
 								// Reattach present
 								if (!targetCell.entities.has(entityUuid)) {
 									if (this.universe.getEntity({ entityUuid }).entityUuid !== entityUuid) {
@@ -443,6 +450,8 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 											promise: attachHook
 										});
 									} else {
+										attachedEntities.add(this.universe.getEntity({ entityUuid }));
+
 										// TODO: Delay now, need to refactor attachment block
 										nextTick(() => {
 											targetCell.attachEntity(this.universe.getEntity({ entityUuid }));
@@ -452,6 +461,31 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 							});
 						}
 					});
+				});
+
+				// Mirage and phantom
+				this.universe.universeQueue.addCallback({
+					/**
+					 * Callback.
+					 */
+					callback: () => {
+						detachedEntities.forEach(entity => {
+							if (!attachedEntities.has(entity)) {
+								// Show mirage in case of no event move, or rerendering past visited cell
+								let mirage: ClientToast = new ClientToast({
+									displayTime: 1000,
+									shard: Array.from(this.universe.shards)[1][1]
+								});
+								mirage.show({
+									isFloating: false,
+									modeUuid: entity.modeUuid,
+									x: entity.sprite.x,
+									y: entity.sprite.y,
+									z: 0
+								});
+							}
+						});
+					}
 				});
 				break;
 			}
