@@ -496,6 +496,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 												{
 													body: {
 														controlUnitUuid: unitUuid,
+														direction: message.body.direction,
 														playerUuid,
 														targetEntityUuid: targetEntity.entityUuid,
 														type: ActionWords.Interact

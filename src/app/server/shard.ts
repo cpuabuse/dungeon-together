@@ -65,7 +65,7 @@ export function ServerShardFactory({
 		/**
 		 * Controlled unit list.
 		 */
-		public units: Map<Uuid, EntityPathExtended> = new Map();
+		public readonly units: Map<Uuid, EntityPathExtended> = new Map();
 
 		// ESLint params bug
 		// eslint-disable-next-line jsdoc/require-param

@@ -37,6 +37,21 @@ import { ServerOptions, serverOptions } from "./options";
 import { ServerShard } from "./shard";
 import { ServerUniverse } from "./universe";
 
+// Allowed directions
+/**
+ *
+ */
+const directions: {
+	[K in MovementWord]: Nav;
+} = {
+	[DirectionWord.Up]: Nav.YUp,
+	[DirectionWord.Down]: Nav.YDown,
+	[DirectionWord.Left]: Nav.Left,
+	[DirectionWord.Right]: Nav.Right,
+	[DirectionWord.ZUp]: Nav.ZUp,
+	[DirectionWord.ZDown]: Nav.ZDown
+};
+
 /**
  * Message type server receives.
  */
@@ -55,9 +70,9 @@ export type ServerMessage =
 				type: ActionWords;
 
 				/**
-				 * Player UUID.
+				 * Direction.
 				 */
-				playerUuid: Uuid;
+				direction: DirectionWord;
 
 				/**
 				 * Tool entity UUID.
@@ -358,18 +373,6 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 					// Type infers from definition
 					// eslint-disable-next-line @typescript-eslint/typedef
 					callback: async ({ grid, unit, cell: sourceCell }) => {
-						// Allowed directions
-						const directions: {
-							[K in MovementWord]: Nav;
-						} = {
-							[DirectionWord.Up]: Nav.YUp,
-							[DirectionWord.Down]: Nav.YDown,
-							[DirectionWord.Left]: Nav.Left,
-							[DirectionWord.Right]: Nav.Right,
-							[DirectionWord.ZUp]: Nav.ZUp,
-							[DirectionWord.ZDown]: Nav.ZDown
-						};
-
 						let targetCell: ServerCell = grid.getCell(
 							sourceCell.nav.get(directions[message.body.direction]) ?? sourceCell
 						);
@@ -531,7 +534,21 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 					// ESLint false negative
 					// eslint-disable-next-line @typescript-eslint/typedef
 					callback: async ({ grid, unit, cell, shard }) => {
-						// Nothing
+						let targetCell: ServerCell =
+							message.body.direction === DirectionWord.Here
+								? cell
+								: grid.getCell(cell.nav.get(directions[message.body.direction]) ?? cell);
+						let targetEntity: ServerEntity = targetCell.getEntity({ entityUuid: message.body.targetEntityUuid });
+
+						// TODO: Get tool entity from inventory
+						let { toolEntityUuid }: typeof message.body = message.body;
+						let toolEntity: ServerEntity | undefined;
+
+						targetEntity.kind.action({
+							action: message.body.type,
+							sourceEntity: unit,
+							toolEntity
+						});
 					},
 					playerUuid: message.body.playerUuid,
 					unitUuid: message.body.controlUnitUuid
