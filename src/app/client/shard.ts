@@ -19,12 +19,11 @@ import {
 import { DirectionWord, MessageTypeWord } from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { CoreArgIds } from "../core/arg";
-import { CoreEnvelope, processQueueWord } from "../core/connection";
+import { MovementWord, processQueueWord } from "../core/connection";
 import { LogLevel } from "../core/error";
 import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
-import { ServerMessage } from "../server/connection";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientConnection, ClientPlayer } from "./connection";
 import { ElementBall } from "./element-ball";
@@ -235,100 +234,36 @@ export function ClientShardFactory({
 						// #endif
 					});
 
-					// Add listeners for up input
-					// Async callback for event emitter
-					// eslint-disable-next-line @typescript-eslint/no-misused-promises
-					this.input.on(upSymbol, async inputInterface => {
-						// Even though when array is empty an envelope will not be used, in those situations performance is irrelevant, at least on the client side
-						let envelope: CoreEnvelope<ServerMessage> = new CoreEnvelope({
-							messages: [
-								{
-									body: {
-										direction: DirectionWord.Up,
-										playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
-										// TODO: Add active unit system
-										unitUuid: Array.from(this.units)[0]
-									},
-									type: MessageTypeWord.Movement
-								}
-							]
+					let movementInputEntries: [symbol: symbol, direction: MovementWord][] = [
+						[downSymbol, DirectionWord.Down],
+						[leftSymbol, DirectionWord.Left],
+						[rightSymbol, DirectionWord.Right],
+						[upSymbol, DirectionWord.Up]
+					];
+
+					// Add listeners for movement inputs
+					// ESLint false negative
+					// eslint-disable-next-line @typescript-eslint/typedef
+					movementInputEntries.forEach(([symbol, direction]) => {
+						// Async callback for event emitter
+						// eslint-disable-next-line @typescript-eslint/no-misused-promises
+						this.input.on(symbol, async inputInterface => {
+							let connection: ClientConnection | undefined = Array.from(this.players)[0]?.[1].connection;
+							connection?.socket.writeQueue({
+								body: {
+									direction,
+									playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
+									// TODO: Add active unit system
+									unitUuid: Array.from(this.units)[0]
+								},
+								type: MessageTypeWord.Movement
+							});
+							await connection?.tick({ word: processQueueWord });
+
+							// #if _DEBUG_ENABLED
+							inputDebug({ input: inputInterface as InputInterface, symbol: leftSymbol });
+							// #endif
 						});
-						await Array.from(this.players)[0]?.[1].connection?.socket.send(envelope);
-
-						// #if _DEBUG_ENABLED
-						inputDebug({ input: inputInterface as InputInterface, symbol: upSymbol });
-						// #endif
-					});
-
-					// Add listeners for down input
-					// Async callback for event emitter
-					// eslint-disable-next-line @typescript-eslint/no-misused-promises
-					this.input.on(downSymbol, async inputInterface => {
-						let envelope: CoreEnvelope<ServerMessage> = new CoreEnvelope({
-							messages: [
-								{
-									body: {
-										direction: DirectionWord.Down,
-										playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
-										// TODO: Add active unit system
-										unitUuid: Array.from(this.units)[0]
-									},
-									type: MessageTypeWord.Movement
-								}
-							]
-						});
-
-						await Array.from(this.players)[0]?.[1].connection?.socket.send(envelope);
-
-						// #if _DEBUG_ENABLED
-						inputDebug({ input: inputInterface as InputInterface, symbol: downSymbol });
-						// #endif
-					});
-
-					// Add listeners for right input
-					// Async callback for event emitter
-					// eslint-disable-next-line @typescript-eslint/no-misused-promises
-					this.input.on(rightSymbol, async inputInterface => {
-						let envelope: CoreEnvelope<ServerMessage> = new CoreEnvelope({
-							messages: [
-								{
-									body: {
-										direction: DirectionWord.Right,
-										playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
-										// TODO: Add active unit system
-										unitUuid: Array.from(this.units)[0]
-									},
-									type: MessageTypeWord.Movement
-								}
-							]
-						});
-
-						await Array.from(this.players)[0]?.[1].connection?.socket.send(envelope);
-
-						// #if _DEBUG_ENABLED
-						inputDebug({ input: inputInterface as InputInterface, symbol: rightSymbol });
-						// #endif
-					});
-
-					// Add listeners for left input
-					// Async callback for event emitter
-					// eslint-disable-next-line @typescript-eslint/no-misused-promises
-					this.input.on(leftSymbol, async inputInterface => {
-						let connection: ClientConnection | undefined = Array.from(this.players)[0]?.[1].connection;
-						connection?.socket.writeQueue({
-							body: {
-								direction: DirectionWord.Left,
-								playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
-								// TODO: Add active unit system
-								unitUuid: Array.from(this.units)[0]
-							},
-							type: MessageTypeWord.Movement
-						});
-						await connection?.tick({ word: processQueueWord });
-
-						// #if _DEBUG_ENABLED
-						inputDebug({ input: inputInterface as InputInterface, symbol: leftSymbol });
-						// #endif
 					});
 
 					// Add listeners for scroll input

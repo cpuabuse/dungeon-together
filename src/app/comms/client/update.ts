@@ -12,6 +12,7 @@
 import { Uuid } from "../../common/uuid";
 import { Vector } from "../../common/vector";
 import { CoreDictionary } from "../../core/connection";
+import { CellEvent } from "../../server/cell";
 
 /**
  * Updating cells.
@@ -30,22 +31,7 @@ export type ClientUpdate = {
 			/**
 			 * Cell events.
 			 */
-			events: Array<{
-				/**
-				 * Event name.
-				 */
-				name: string;
-
-				/**
-				 * Event target.
-				 */
-				target?: {
-					/**
-					 * Entity UUID.
-					 */
-					entityUuid: Uuid;
-				};
-			}>;
+			events: Array<CellEvent>;
 
 			/**
 			 * Entities.

@@ -10,6 +10,7 @@
  */
 
 import { ActionWords } from "../../app/server/action";
+import { ServerCell } from "../../app/server/cell";
 import { EntityKindActionArgs, EntityKindConstructorParams, ServerEntityClass } from "../../app/server/entity";
 import { ExclusiveKindClass } from "./exclusive";
 
@@ -218,13 +219,21 @@ export function UnitKindClassFactory({
 		public action(param: EntityKindActionArgs): boolean {
 			let { action, ...rest }: EntityKindActionArgs = param;
 			switch (action) {
-				case ActionWords.Attack:
+				case ActionWords.Attack: {
 					super.action(param);
+
+					let cell: ServerCell = (this.entity.constructor as ServerEntityClass).universe.getCell(this.entity);
+
+					// Update cell, since entity dictionary changed
 					this.healthPoints--;
+					cell.isUpdated = true;
+
 					if (this.healthPoints <= 0) {
-						(this.entity.constructor as ServerEntityClass).universe.getCell(this.entity).removeEntity(this.entity);
+						cell.addEvent({ name: "death", targetEntityUuid: this.entity.entityUuid });
+						cell.removeEntity(this.entity);
 					}
 					return true;
+				}
 
 				case ActionWords.Interact:
 					return this.action({ action: ActionWords.Attack, ...rest });

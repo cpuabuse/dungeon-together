@@ -30,16 +30,15 @@ import { EntityPathExtended } from "../core/entity";
 import { LogLevel } from "../core/error";
 import { CoreShardArg, ShardPathOwn } from "../core/shard";
 import { ActionWords } from "./action";
-import { ServerCell } from "./cell";
+import { CellEvent, ServerCell } from "./cell";
 import { ServerEntity } from "./entity";
 import { ServerGrid } from "./grid";
 import { ServerOptions, serverOptions } from "./options";
 import { ServerShard } from "./shard";
 import { ServerUniverse } from "./universe";
 
-// Allowed directions
 /**
- *
+ * Allowed directions.
  */
 const directions: {
 	[K in MovementWord]: Nav;
@@ -260,6 +259,148 @@ export class ServerConnection extends CoreConnection<ServerUniverse, ServerMessa
  * @returns `true` if the callback was processed, `false` if additional processing is required
  */
 export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async function () {
+	/**
+	 * Send update.
+	 *
+	 * @param param - Destructured parameter
+	 */
+	let sendUpdate: (param: {
+		/** Target cell. */
+		targetCell: ServerCell;
+
+		/** Source cell. */
+		sourceCell: ServerCell;
+
+		/** Grid. */
+		grid: ServerGrid;
+	}) => Promise<void> = async ({
+		targetCell,
+		grid,
+		sourceCell
+	}: {
+		/** Target cell. */
+		targetCell: ServerCell;
+
+		/** Source cell. */
+		sourceCell: ServerCell;
+
+		/** Grid. */
+		grid: ServerGrid;
+	}): Promise<void> => {
+		let events: Array<CellEvent> = [...targetCell.events];
+
+		// TODO: Move to lifecycle
+		targetCell.events = [];
+
+		// Quick fix for switch
+		// eslint-disable-next-line no-case-declarations
+		let messageBody: ClientUpdate = {
+			cells: [
+				// Target cell
+				{
+					cellUuid: targetCell.cellUuid,
+					entities: Array.from(targetCell.entities)
+						// False negative
+						// eslint-disable-next-line @typescript-eslint/typedef
+						.filter(([entityUuid]) => {
+							return entityUuid !== targetCell.defaultEntity.entityUuid;
+						})
+						// False negative
+						// eslint-disable-next-line @typescript-eslint/typedef
+						.map(([entityUuid, entity]) => {
+							return {
+								emits: entity.kind.emits,
+								entityUuid,
+								modeUuid: entity.modeUuid,
+								worldUuid: entity.worldUuid
+							};
+						}),
+					events,
+					x: targetCell.x,
+					y: targetCell.y,
+					z: targetCell.z
+				},
+
+				// Current cell
+				{
+					cellUuid: sourceCell.cellUuid,
+					entities: Array.from(sourceCell.entities)
+						// False negative
+						// eslint-disable-next-line @typescript-eslint/typedef
+						.filter(([entityUuid]) => {
+							return entityUuid !== targetCell.defaultEntity.entityUuid;
+						})
+						// False negative
+						// eslint-disable-next-line @typescript-eslint/typedef
+						.map(([entityUuid, entity]) => {
+							return {
+								emits: entity.kind.emits,
+								entityUuid,
+								modeUuid: entity.modeUuid,
+								worldUuid: entity.worldUuid
+							};
+						}),
+					events: [],
+					x: sourceCell.x,
+					y: sourceCell.y,
+					z: sourceCell.z
+				},
+
+				// Rest cells
+				...Array.from(grid.cells)
+					.filter(
+						// TODO: Change to visibility
+						// False negative
+						// eslint-disable-next-line @typescript-eslint/typedef
+						([, cell]) =>
+							cell.cellUuid !== targetCell.cellUuid &&
+							cell.cellUuid !== sourceCell.cellUuid &&
+							Math.abs(cell.x - targetCell.x) < cellViewDistance &&
+							Math.abs(cell.y - targetCell.y) < cellViewDistance &&
+							cell.z === targetCell.z
+					)
+					// False negative
+					// eslint-disable-next-line @typescript-eslint/typedef
+					.map(([cellUuid, cell]) => ({
+						cellUuid,
+						entities: Array.from(cell.entities)
+							// False negative
+							// eslint-disable-next-line @typescript-eslint/typedef
+							.filter(([entityUuid]) => {
+								return entityUuid !== cell.defaultEntity.entityUuid;
+							})
+							// False negative
+							// eslint-disable-next-line @typescript-eslint/typedef
+							.map(([entityUuid, entity]) => {
+								return {
+									emits: entity.kind.emits,
+									entityUuid,
+									modeUuid: entity.modeUuid,
+									worldUuid: entity.worldUuid
+								};
+							}),
+						events: [],
+						x: cell.x,
+						y: cell.y,
+						z: cell.z
+					}))
+			]
+		};
+
+		// Await is inside of the loop, but also the switch
+		// eslint-disable-next-line no-await-in-loop
+		await this.socket.send(
+			new CoreEnvelope({
+				messages: [
+					{
+						body: messageBody,
+						type: MessageTypeWord.Update
+					}
+				]
+			})
+		);
+	};
+
 	// TODO: Use visibility
 	const cellViewDistance: number = 5;
 
@@ -373,144 +514,18 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 					// Type infers from definition
 					// eslint-disable-next-line @typescript-eslint/typedef
 					callback: async ({ grid, unit, cell: sourceCell }) => {
-						let targetCell: ServerCell = grid.getCell(
-							sourceCell.nav.get(directions[message.body.direction]) ?? sourceCell
-						);
-
-						// Tick
+						// Tick first, so that enemy has upper hand, and later can process ticks while awaiting player input
 						this.universe.Entity.kinds.forEach(Kind => {
 							Kind.onTick();
 						});
 
-						// False negative
-						// eslint-disable-next-line @typescript-eslint/typedef
-						let enemy: ServerEntity | undefined = Array.from(targetCell.entities).filter(([, entity]) => {
-							return entity.kindUuid === "user/enemy";
-						})[0]?.[1];
-
-						// Quick fix for switch
-						// eslint-disable-next-line no-case-declarations
-						let enemyEvent: ClientUpdate["cells"][number]["events"][number] | undefined;
-
-						// TODO: Entity controlled cell events
-						if (enemy) {
-							// Terminating first so that uuid doesn't exist anymore
-							enemy.kind.action({ action: ActionWords.Attack });
-							enemyEvent = {
-								name: enemy.kind.emits.health > 0 ? "hp" : "death",
-								target: { entityUuid: enemy.entityUuid }
-							};
-						} else {
-							unit.kind.moveEntity(targetCell);
-						}
-
-						// Quick fix for switch
-						// eslint-disable-next-line no-case-declarations
-						let messageBody: ClientUpdate = {
-							cells: [
-								// Target cell
-								{
-									cellUuid: targetCell.cellUuid,
-									entities: Array.from(targetCell.entities)
-										// False negative
-										// eslint-disable-next-line @typescript-eslint/typedef
-										.filter(([entityUuid]) => {
-											return entityUuid !== targetCell.defaultEntity.entityUuid;
-										})
-										// False negative
-										// eslint-disable-next-line @typescript-eslint/typedef
-										.map(([entityUuid, entity]) => {
-											return {
-												emits: entity.kind.emits,
-												entityUuid,
-												modeUuid: entity.modeUuid,
-												worldUuid: entity.worldUuid
-											};
-										}),
-									events: enemyEvent ? [enemyEvent] : [],
-									x: targetCell.x,
-									y: targetCell.y,
-									z: targetCell.z
-								},
-
-								// Current cell
-								{
-									cellUuid: sourceCell.cellUuid,
-									entities: Array.from(sourceCell.entities)
-										// False negative
-										// eslint-disable-next-line @typescript-eslint/typedef
-										.filter(([entityUuid]) => {
-											return entityUuid !== targetCell.defaultEntity.entityUuid;
-										})
-										// False negative
-										// eslint-disable-next-line @typescript-eslint/typedef
-										.map(([entityUuid, entity]) => {
-											return {
-												emits: entity.kind.emits,
-												entityUuid,
-												modeUuid: entity.modeUuid,
-												worldUuid: entity.worldUuid
-											};
-										}),
-									events: [],
-									x: sourceCell.x,
-									y: sourceCell.y,
-									z: sourceCell.z
-								},
-
-								// Rest cells
-								...Array.from(grid.cells)
-									.filter(
-										// TODO: Change to visibility
-										// False negative
-										// eslint-disable-next-line @typescript-eslint/typedef
-										([, cell]) =>
-											cell.cellUuid !== targetCell.cellUuid &&
-											cell.cellUuid !== sourceCell.cellUuid &&
-											Math.abs(cell.x - targetCell.x) < cellViewDistance &&
-											Math.abs(cell.y - targetCell.y) < cellViewDistance &&
-											cell.z === targetCell.z
-									)
-									// False negative
-									// eslint-disable-next-line @typescript-eslint/typedef
-									.map(([cellUuid, cell]) => ({
-										cellUuid,
-										entities: Array.from(cell.entities)
-											// False negative
-											// eslint-disable-next-line @typescript-eslint/typedef
-											.filter(([entityUuid]) => {
-												return entityUuid !== cell.defaultEntity.entityUuid;
-											})
-											// False negative
-											// eslint-disable-next-line @typescript-eslint/typedef
-											.map(([entityUuid, entity]) => {
-												return {
-													emits: entity.kind.emits,
-													entityUuid,
-													modeUuid: entity.modeUuid,
-													worldUuid: entity.worldUuid
-												};
-											}),
-										events: [],
-										x: cell.x,
-										y: cell.y,
-										z: cell.z
-									}))
-							]
-						};
-
-						// Await is inside of the loop, but also the switch
-						// eslint-disable-next-line no-await-in-loop
-						await this.socket.send(
-							new CoreEnvelope({
-								messages: [
-									{
-										body: messageBody,
-										type: MessageTypeWord.Update
-									}
-								]
-							})
+						let targetCell: ServerCell = grid.getCell(
+							sourceCell.nav.get(directions[message.body.direction]) ?? sourceCell
 						);
+
+						unit.kind.moveEntity(targetCell);
+
+						await sendUpdate({ grid, sourceCell, targetCell });
 					},
 
 					playerUuid: message.body.playerUuid,
@@ -534,6 +549,11 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 					// ESLint false negative
 					// eslint-disable-next-line @typescript-eslint/typedef
 					callback: async ({ grid, unit, cell, shard }) => {
+						// Tick first, so that enemy has upper hand, and later can process ticks while awaiting player input
+						this.universe.Entity.kinds.forEach(Kind => {
+							Kind.onTick();
+						});
+
 						let targetCell: ServerCell =
 							message.body.direction === DirectionWord.Here
 								? cell
@@ -549,6 +569,8 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 							sourceEntity: unit,
 							toolEntity
 						});
+
+						await sendUpdate({ grid, sourceCell: cell, targetCell });
 					},
 					playerUuid: message.body.playerUuid,
 					unitUuid: message.body.controlUnitUuid

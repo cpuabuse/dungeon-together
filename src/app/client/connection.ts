@@ -352,7 +352,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 									if (targetEntity.modeUuid === "mode/user/enemy/default") {
 										if (
 											sourceCell.events.length > 0 &&
-											sourceCell.events[0].target?.entityUuid === targetEntity.entityUuid &&
+											sourceCell.events[0].targetEntityUuid === targetEntity.entityUuid &&
 											sourceCell.events[0].name === "death"
 										) {
 											splat.play("default");
