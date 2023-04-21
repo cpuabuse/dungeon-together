@@ -9,6 +9,7 @@
 
 import { Howl } from "howler";
 import nextTick from "next-tick";
+import { filters } from "pixi.js";
 import { DeferredPromise } from "../common/async";
 import { DirectionWord, MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { defaultFadeInMs, defaultFadeOutMs } from "../common/sound";
@@ -42,6 +43,12 @@ import { ClientOptions } from "./options";
 import { ClientShard } from "./shard";
 import { ClientToast } from "./toast";
 import { ClientUniverse } from "./universe";
+
+/**
+ * Burn.
+ */
+const contrastFilter: InstanceType<(typeof filters)["ColorMatrixFilter"]> = new filters.ColorMatrixFilter();
+contrastFilter.contrast(1.0, false);
 
 /**
  * Message type client receives.
@@ -124,6 +131,8 @@ export class ClientPlayer extends CorePlayer<ClientConnection> {
  * Client connection.
  */
 export class ClientConnection extends CoreConnection<ClientUniverse, ClientMessage, ServerMessage, ClientPlayer> {
+	public previouslyVisibleCells: Set<ClientCell> = new Set();
+
 	/**
 	 * Constructor.
 	 *
@@ -287,8 +296,9 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 
 			// Update command
 			case MessageTypeWord.Update: {
-				let detachedEntities: Set<ClientEntity> = new Set();
+				let detachedEntities: Set<[ClientEntity, ClientCell]> = new Set();
 				let attachedEntities: Set<ClientEntity> = new Set();
+				let newCells: Set<ClientCell> = new Set();
 
 				this.universe.log({ level: LogLevel.Informational, message: `Update started.` });
 				// Create cells if missing
@@ -349,6 +359,11 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 						 */
 						callback: () => {
 							let targetCell: ClientCell = this.universe.getCell(sourceCell);
+
+							// TODO: Visibility tracing
+							newCells.add(targetCell);
+							targetCell.container.filters = [];
+
 							// Terminate missing
 							targetCell.entities.forEach(targetEntity => {
 								if (!sourceEntityUuidSet.has(targetEntity.entityUuid)) {
@@ -360,17 +375,31 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 											sourceCell.events[0].name === "death"
 										) {
 											splat.play("default");
+
+											let toast: ClientToast = new ClientToast({
+												cell: targetCell,
+												displayTime: 1000
+											});
+
+											// TODO: Should not be using shard
+											toast.show({
+												modeUuid: "death",
+												x: 0,
+												y: 0,
+												z: 0
+											});
+
 											targetCell.removeEntity(targetEntity);
 										} else {
 											targetCell.detachEntity(targetEntity);
-											detachedEntities.add(targetEntity);
+											detachedEntities.add([targetEntity, targetCell]);
 										}
 									} else if (
 										targetEntity.modeUuid === "mode/user/player/default" ||
 										targetEntity.modeUuid === "mode/user/enemy/default"
 									) {
 										targetCell.detachEntity(targetEntity);
-										detachedEntities.add(targetEntity);
+										detachedEntities.add([targetEntity, targetCell]);
 									}
 								}
 							});
@@ -469,22 +498,39 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 					 * Callback.
 					 */
 					callback: () => {
-						detachedEntities.forEach(entity => {
+						// ESLint false negative
+						// eslint-disable-next-line @typescript-eslint/typedef
+						detachedEntities.forEach(([entity, cell]) => {
 							if (!attachedEntities.has(entity)) {
 								// Show mirage in case of no event move, or rerendering past visited cell
 								let mirage: ClientToast = new ClientToast({
-									displayTime: 1000,
-									shard: Array.from(this.universe.shards)[1][1]
+									cell,
+									displayTime: 1000
 								});
 								mirage.show({
 									isFloating: false,
 									modeUuid: entity.modeUuid,
-									x: entity.sprite.x,
-									y: entity.sprite.y,
+									x: 0,
+									y: 0,
 									z: 0
 								});
 							}
 						});
+					}
+				});
+
+				// Fog
+				this.universe.universeQueue.addCallback({
+					/**
+					 * Callback.
+					 */
+					callback: () => {
+						this.previouslyVisibleCells.forEach(cell => {
+							if (!newCells.has(cell)) {
+								cell.container.filters = [contrastFilter];
+							}
+						});
+						this.previouslyVisibleCells = newCells;
 					}
 				});
 				break;

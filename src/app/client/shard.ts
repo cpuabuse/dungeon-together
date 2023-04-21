@@ -40,7 +40,6 @@ import {
 	upSymbol
 } from "./input";
 import { ClientOptions, clientOptions } from "./options";
-import { ClientToast } from "./toast";
 
 /**
  * Created a client shard class.
@@ -116,11 +115,6 @@ export function ClientShardFactory({
 		 */
 		public shardElement: HTMLElement = document.createElement("div");
 
-		/**
-		 * Toast for shard.
-		 */
-		public toast: ClientToast;
-
 		/** Units. */
 		public units: Set<string> = new Set();
 
@@ -172,9 +166,6 @@ export function ClientShardFactory({
 
 			// Add container to renderer
 			this.app.stage.addChild(this.gridContainer);
-
-			// Initialize toast
-			this.toast = new ClientToast({ displayTime: 3000, shard: this });
 
 			/* eslint-disable no-magic-numbers, no-console, @typescript-eslint/no-unused-vars */
 			// After attach

@@ -141,13 +141,6 @@ export function ClientEntityFactory({
 	 * @param this - Client entity
 	 */
 	ClientEntity.prototype.terminateEntity = function (this: ClientEntity): void {
-		Array.from(ClientEntity.universe.shards)[1][1].toast.show({
-			modeUuid: "death",
-			x: this.sprite.x,
-			y: this.sprite.y,
-			z: 0
-		});
-
 		// Stop
 		this.sprite.destroy();
 

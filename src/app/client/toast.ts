@@ -12,7 +12,7 @@
 import { AnimatedSprite } from "pixi.js";
 import { Uuid } from "../common/uuid";
 import { Vector } from "../common/vector";
-import { ClientShard, ClientShardClass } from "./shard";
+import { ClientCell, ClientCellClass } from "./cell";
 
 /**
  * Creates a temporary toast.
@@ -25,9 +25,9 @@ export class ClientToast {
 	public displayTime: number;
 
 	/**
-	 * Client shard.
+	 * Container.
 	 */
-	private shard: ClientShard;
+	private cell: ClientCell;
 
 	/**
 	 * Constructor.
@@ -35,20 +35,20 @@ export class ClientToast {
 	 * @param param - Destructured parameter
 	 */
 	public constructor({
-		shard,
+		cell,
 		displayTime
 	}: {
 		/**
 		 * Client shard.
 		 */
-		shard: ClientShard;
+		cell: ClientCell;
 
 		/**
 		 * Time to display in ms.
 		 */
 		displayTime: number;
 	}) {
-		this.shard = shard;
+		this.cell = cell;
 		this.displayTime = displayTime;
 	}
 
@@ -75,7 +75,7 @@ export class ClientToast {
 		isFloating?: boolean;
 	}): void {
 		let sprite: AnimatedSprite = new AnimatedSprite(
-			(this.shard.constructor as ClientShardClass).universe.getMode({ uuid: modeUuid }).textures
+			(this.cell?.constructor as ClientCellClass).universe.getMode({ uuid: modeUuid }).textures
 		);
 
 		/**
@@ -93,17 +93,18 @@ export class ClientToast {
 		// Update entity position, do it before adding to container, to avoid jumps on screen
 		sprite.x = x;
 		sprite.y = y;
-		sprite.height = this.shard.sceneWidth;
-		sprite.width = this.shard.sceneHeight;
+		sprite.height = this.cell.shard?.sceneWidth ?? 0;
+		sprite.width = this.cell.shard?.sceneHeight ?? 0;
 
-		this.shard.gridContainer.addChild(sprite);
+		// TODO: Must attach to z container
+		this.cell.container.addChild(sprite);
 		sprite.play();
 
-		this.shard.app.ticker.add(tick);
+		this.cell.shard?.app.ticker.add(tick);
 
 		// Destroy sprite
 		setTimeout(() => {
-			this.shard.app.ticker.remove(tick);
+			this.cell.shard?.app.ticker.remove(tick);
 			sprite.destroy();
 		}, this.displayTime);
 	}

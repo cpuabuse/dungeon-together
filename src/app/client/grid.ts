@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -82,6 +82,9 @@ export function ClientGridClassFactory({
 		public hideCell(path: CellPathOwn): void {
 			let cell: ClientCell = this.getCell(path);
 
+			// Add container
+			this.shard?.gridContainer.removeChild(cell.container);
+
 			// Not deferred for performance
 			cell.entities.forEach(entity => {
 				cell.hideEntity(entity);
@@ -102,6 +105,15 @@ export function ClientGridClassFactory({
 
 			// Bind to shard
 			cell.shard = this.shard;
+
+			// Update cell container position, do it before adding to grid container, to avoid jumps on screen
+			const sceneWidth: number = this.shard?.sceneWidth ?? 0;
+			const sceneHeight: number = this.shard?.sceneHeight ?? 0;
+			cell.container.x = sceneWidth * cell.x;
+			cell.container.y = sceneHeight * cell.y;
+
+			// Add container
+			this.shard?.gridContainer.addChild(cell.container);
 
 			// Post-attach (decoration); Not deferred to process a cell at time, for performance
 			cell.entities.forEach(entity => {

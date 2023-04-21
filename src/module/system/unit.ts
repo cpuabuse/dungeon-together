@@ -136,7 +136,7 @@ export function UnitKindClassFactory({
 		 * @returns Emitted object
 		 */
 		public get emits(): Record<string, any> {
-			return { ...super.emits, hasAction: true, health: this.healthPoints };
+			return { ...super.emits, hasAction: true, hasPhantom: true, health: this.healthPoints };
 		}
 
 		/**

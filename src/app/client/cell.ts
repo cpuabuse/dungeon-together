@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,6 +7,7 @@
  * @file Squares on screen.
  */
 
+import { Container, filters } from "pixi.js";
 import { CoreArgIds } from "../core/arg";
 import { CoreCellArg, CoreCellClassFactory } from "../core/cell";
 import { EntityPathOwn } from "../core/entity";
@@ -16,6 +17,12 @@ import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientEntity } from "./entity";
 import { ClientOptions, clientOptions } from "./options";
 import { ClientShard } from "./shard";
+
+/**
+ * Burn.
+ */
+const contrastFilter: InstanceType<(typeof filters)["ColorMatrixFilter"]> = new filters.ColorMatrixFilter();
+contrastFilter.contrast(2, false);
 
 /**
  * Generator for the client cell class.
@@ -45,6 +52,9 @@ export function ClientCellFactory({
 		Base,
 		options: clientOptions
 	}) {
+		/** Cell owned display container. */
+		public container: Container = new Container();
+
 		/**
 		 * Parent shard.
 		 *
@@ -72,6 +82,9 @@ export function ClientCellFactory({
 			>
 		) {
 			super(cell, { attachHook, created }, baseParams);
+
+			// Fog
+			this.container.filters = [contrastFilter];
 		}
 
 		/**
@@ -82,7 +95,7 @@ export function ClientCellFactory({
 		 */
 		public hideEntity(path: EntityPathOwn): void {
 			let entity: ClientEntity = this.getEntity(path);
-			this.shard?.gridContainer.removeChild(entity.sprite);
+			this.container.removeChild(entity.sprite);
 			entity.sprite.stop();
 		}
 
@@ -102,14 +115,11 @@ export function ClientCellFactory({
 			const sceneWidth: number = this.shard?.sceneWidth ?? 0;
 			const sceneHeight: number = this.shard?.sceneHeight ?? 0;
 
-			// Update entity position, do it before adding to container, to avoid jumps on screen
-			entity.sprite.x = sceneWidth * this.x;
-			entity.sprite.y = sceneHeight * this.y;
 			entity.sprite.height = sceneWidth;
 			entity.sprite.width = sceneHeight;
 
 			// Register entity to canvas
-			this.shard?.gridContainer.addChild(entity.sprite);
+			this.container.addChild(entity.sprite);
 			entity.sprite.play();
 		}
 	}
