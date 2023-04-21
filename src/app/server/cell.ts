@@ -8,9 +8,9 @@
  */
 
 import { Uuid } from "../common/uuid";
+import { Vector } from "../common/vector";
 import { CoreArgIds } from "../core/arg";
-import { CoreCellArg, CoreCellClassFactory } from "../core/cell";
-import { MovementWord } from "../core/connection";
+import { CellPathExtended, CoreCellArg, CoreCellClassFactory } from "../core/cell";
 import { CoreCellArgParentIds } from "../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ServerBaseClass, ServerBaseConstructorParams } from "./base";
@@ -44,9 +44,9 @@ export type CellEvent =
 			targetEntityUuid: Uuid;
 
 			/**
-			 * Direction.
+			 * Target cell UUID.
 			 */
-			direction: MovementWord;
+			targetCellUuid: Uuid;
 	  };
 
 /**
@@ -77,9 +77,7 @@ export function ServerCellFactory({
 		Base,
 		options: serverOptions
 	}) {
-		/**
-		 * Cell events.
-		 */
+		/** Cell events. */
 		public events: Array<CellEvent> = new Array<CellEvent>();
 
 		/**
@@ -87,25 +85,6 @@ export function ServerCellFactory({
 		 * Should be updated by kind only when kind specific information must be sent to the client.
 		 */
 		public isUpdated: boolean = false;
-
-		/**
-		 * Whether the cell has events.
-		 *
-		 * @returns Whether the cell has events
-		 */
-		public get hasEvents(): boolean {
-			return this.hasInternalEvents;
-		}
-
-		/**
-		 * Sets whether the cell has events, and flags cell as updated.
-		 */
-		public set hasEvents(value: boolean) {
-			this.isUpdated = true;
-			this.hasInternalEvents = value;
-		}
-
-		protected hasInternalEvents: boolean = false;
 
 		// ESLint params bug
 		// eslint-disable-next-line jsdoc/require-param
@@ -136,7 +115,14 @@ export function ServerCellFactory({
 		 */
 		public addEvent(event: CellEvent): void {
 			this.events.push(event);
-			this.hasEvents = true;
+			this.isUpdated = true;
+		}
+
+		/**
+		 * Clears cell events and other things.
+		 */
+		public clear(): void {
+			this.events = new Array<CellEvent>();
 		}
 	}
 

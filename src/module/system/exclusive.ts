@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -53,8 +53,9 @@ export function ExclusiveKindClassFactory({
 		 * Moves entity to cell.
 		 *
 		 * @param cell - Target cell
+		 * @returns Whether the move was successful
 		 */
-		public moveEntity(cell: ServerCell): void {
+		public moveEntity(cell: ServerCell): boolean {
 			let cellVolume: number = Array.from(cell.entities.values())
 				.filter(
 					(
@@ -73,8 +74,9 @@ export function ExclusiveKindClassFactory({
 				}, 0);
 
 			if (cellVolume + this.volume <= volumeThreshold) {
-				super.moveEntity(cell);
+				return super.moveEntity(cell);
 			}
+			return false;
 		}
 	}
 

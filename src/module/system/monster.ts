@@ -65,12 +65,9 @@ export function MonsterKindClassFactory({
 			// TODO: Write a better AI
 			this.entities.forEach(entity => {
 				if (Math.random() > 0.5) {
-					let nav: CellPathOwn | undefined = (entity.constructor as ServerEntityClass).universe
-						.getCell(entity)
-						.nav.get([Nav.Left, Nav.Right, Nav.YDown, Nav.YUp, Nav.Left][Math.floor(Math.random() * 4)]);
-					if (nav) {
-						entity.kind.moveEntity((entity.constructor as ServerEntityClass).universe.getGrid(entity).getCell(nav));
-					}
+					entity.kind.navigateEntity({
+						nav: [Nav.Left, Nav.Right, Nav.YDown, Nav.YUp, Nav.Left][Math.floor(Math.random() * 4)]
+					});
 				}
 			});
 		}

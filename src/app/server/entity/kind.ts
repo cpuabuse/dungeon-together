@@ -10,8 +10,11 @@
  */
 
 import { Uuid } from "../../common/uuid";
+import { Nav } from "../../core/arg";
 import { ActionWords } from "../action";
 import { ServerCell } from "../cell";
+import { ServerGrid } from "../grid";
+import { ServerUniverse } from "../universe";
 import { ServerEntity, ServerEntityClass } from "./entity";
 
 /**
@@ -162,15 +165,44 @@ export function BaseEntityKindClassFactory({
 		 * Actually moves the server entity.
 		 *
 		 * @param targetCell - Cell
+		 * @returns Whether move was successful
 		 */
-		public moveEntity(targetCell: ServerCell): void {
+		public moveEntity(targetCell: ServerCell): boolean {
 			// Docs not necessary for const type
 			// eslint-disable-next-line jsdoc/require-jsdoc
 			const { entity }: { entity: ServerEntity } = this;
 
 			// Reattach; Attach will update uuids in core
-			BaseKind.Entity.universe.getCell(entity).detachEntity(entity);
+			(this.entity.constructor as ServerEntityClass).universe.getCell(entity).detachEntity(entity);
 			targetCell.attachEntity(entity);
+
+			return true;
+		}
+
+		/**
+		 * Tries to move entity via navigation.
+		 *
+		 * @param param - Destructured parameter
+		 */
+		public navigateEntity({
+			nav
+		}: {
+			/**
+			 * Nav direction.
+			 */
+			nav: Nav;
+		}): void {
+			const { universe }: Record<"universe", ServerUniverse> = this.entity.constructor as ServerEntityClass;
+			const grid: ServerGrid = universe.getGrid(this.entity);
+			const sourceCell: ServerCell = universe.getCell(this.entity);
+			const targetCell: ServerCell = grid.getCell(sourceCell.nav.get(nav) ?? this.entity);
+			if (this.moveEntity(targetCell)) {
+				sourceCell.addEvent({
+					name: "trail",
+					targetCellUuid: targetCell.cellUuid,
+					targetEntityUuid: this.entity.entityUuid
+				});
+			}
 		}
 
 		/**

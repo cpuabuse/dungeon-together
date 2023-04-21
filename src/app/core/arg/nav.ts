@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -186,7 +186,7 @@ function getDimensionBit({
 }
 
 /**
- * Temp placeholder.
+ * Cell navigation.
  */
 export enum Nav {
 	/**

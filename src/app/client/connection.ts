@@ -35,6 +35,7 @@ import {
 import { LogLevel } from "../core/error";
 import { CoreShardArg, ShardPathOwn } from "../core/shard";
 import { ActionWords } from "../server/action";
+import { CellEvent } from "../server/cell";
 import { ServerMessage } from "../server/connection";
 import { ClientCell } from "./cell";
 import { ClientEntity } from "./entity";
@@ -296,7 +297,11 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 
 			// Update command
 			case MessageTypeWord.Update: {
-				let detachedEntities: Set<[ClientEntity, ClientCell]> = new Set();
+				/**
+				 * Cell type in update.
+				 */
+				type UpdateCell = typeof message.body.cells extends Array<infer Cell> ? Cell : never;
+				let detachedEntities: Set<[ClientEntity, UpdateCell, ClientCell]> = new Set();
 				let attachedEntities: Set<ClientEntity> = new Set();
 				let newCells: Set<ClientCell> = new Set();
 
@@ -392,14 +397,14 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 											targetCell.removeEntity(targetEntity);
 										} else {
 											targetCell.detachEntity(targetEntity);
-											detachedEntities.add([targetEntity, targetCell]);
+											detachedEntities.add([targetEntity, sourceCell, targetCell]);
 										}
 									} else if (
 										targetEntity.modeUuid === "mode/user/player/default" ||
 										targetEntity.modeUuid === "mode/user/enemy/default"
 									) {
 										targetCell.detachEntity(targetEntity);
-										detachedEntities.add([targetEntity, targetCell]);
+										detachedEntities.add([targetEntity, sourceCell, targetCell]);
 									}
 								}
 							});
@@ -418,6 +423,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 							// eslint-disable-next-line @typescript-eslint/typedef
 							sourceCell.entities.forEach(({ entityUuid, emits, modeUuid, worldUuid }) => {
 								let entity: ClientEntity = this.universe.getEntity({ entityUuid });
+								// TODO: Must do date update when entities exist, not before creation
 								// TODO: Move object link verification to standalone connection
 								// Iterating through keys to prevent assignment of objects for standalone
 								Object.keys(emits).forEach(key => {
@@ -500,20 +506,29 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 					callback: () => {
 						// ESLint false negative
 						// eslint-disable-next-line @typescript-eslint/typedef
-						detachedEntities.forEach(([entity, cell]) => {
+						detachedEntities.forEach(([entity, sourceCell, targetCell]) => {
 							if (!attachedEntities.has(entity)) {
-								// Show mirage in case of no event move, or rerendering past visited cell
-								let mirage: ClientToast = new ClientToast({
-									cell,
-									displayTime: 1000
-								});
-								mirage.show({
-									isFloating: false,
-									modeUuid: entity.modeUuid,
-									x: 0,
-									y: 0,
-									z: 0
-								});
+								let trailEvent: (Record<"name", "trail"> & CellEvent) | undefined = sourceCell.events.find(event => {
+									return event.name === "trail";
+									// Casting since `find()` does not narrow type
+								}) as (Record<"name", "trail"> & CellEvent) | undefined;
+								if (trailEvent) {
+									// Trail the next location
+									this.universe.getCell({ cellUuid: trailEvent.targetCellUuid }).attachEntity(entity);
+								} else {
+									// Show mirage in case of no event move, or rerendering past visited cell
+									let mirage: ClientToast = new ClientToast({
+										cell: targetCell,
+										displayTime: 1000
+									});
+									mirage.show({
+										isFloating: false,
+										modeUuid: entity.modeUuid,
+										x: 0,
+										y: 0,
+										z: 0
+									});
+								}
 							}
 						});
 					}

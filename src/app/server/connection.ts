@@ -287,10 +287,12 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 		/** Grid. */
 		grid: ServerGrid;
 	}): Promise<void> => {
-		let events: Array<CellEvent> = [...targetCell.events];
+		let targetEvents: Array<CellEvent> = [...targetCell.events];
+		let sourceEvents: Array<CellEvent> = [...sourceCell.events];
 
 		// TODO: Move to lifecycle
-		targetCell.events = [];
+		targetCell.clear();
+		sourceCell.clear();
 
 		// Quick fix for switch
 		// eslint-disable-next-line no-case-declarations
@@ -315,7 +317,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 								worldUuid: entity.worldUuid
 							};
 						}),
-					events,
+					events: targetEvents,
 					x: targetCell.x,
 					y: targetCell.y,
 					z: targetCell.z
@@ -340,7 +342,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 								worldUuid: entity.worldUuid
 							};
 						}),
-					events: [],
+					events: sourceEvents,
 					x: sourceCell.x,
 					y: sourceCell.y,
 					z: sourceCell.z
@@ -361,29 +363,34 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 					)
 					// False negative
 					// eslint-disable-next-line @typescript-eslint/typedef
-					.map(([cellUuid, cell]) => ({
-						cellUuid,
-						entities: Array.from(cell.entities)
-							// False negative
-							// eslint-disable-next-line @typescript-eslint/typedef
-							.filter(([entityUuid]) => {
-								return entityUuid !== cell.defaultEntity.entityUuid;
-							})
-							// False negative
-							// eslint-disable-next-line @typescript-eslint/typedef
-							.map(([entityUuid, entity]) => {
-								return {
-									emits: entity.kind.emits,
-									entityUuid,
-									modeUuid: entity.modeUuid,
-									worldUuid: entity.worldUuid
-								};
-							}),
-						events: [],
-						x: cell.x,
-						y: cell.y,
-						z: cell.z
-					}))
+					.map(([cellUuid, cell]) => {
+						let events: Array<CellEvent> = [...cell.events];
+						cell.clear();
+
+						return {
+							cellUuid,
+							entities: Array.from(cell.entities)
+								// False negative
+								// eslint-disable-next-line @typescript-eslint/typedef
+								.filter(([entityUuid]) => {
+									return entityUuid !== cell.defaultEntity.entityUuid;
+								})
+								// False negative
+								// eslint-disable-next-line @typescript-eslint/typedef
+								.map(([entityUuid, entity]) => {
+									return {
+										emits: entity.kind.emits,
+										entityUuid,
+										modeUuid: entity.modeUuid,
+										worldUuid: entity.worldUuid
+									};
+								}),
+							events,
+							x: cell.x,
+							y: cell.y,
+							z: cell.z
+						};
+					})
 			]
 		};
 
@@ -459,18 +466,17 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 							grid.cells = new Map(
 								// ESLint false negative
 								// eslint-disable-next-line @typescript-eslint/typedef
-								[...grid.cells].filter(([, cell]) => {
-									return (
-										unitCells
+								[...grid.cells].map(([cellUuid, cell]) => {
+									let isEntitiesIncluded: boolean = unitCells
+										// ESLint false negative
+										// eslint-disable-next-line @typescript-eslint/typedef
+										.filter(({ gridUuid }) => gridUuid === grid.gridUuid)
+										.some(
 											// ESLint false negative
 											// eslint-disable-next-line @typescript-eslint/typedef
-											.filter(({ gridUuid }) => gridUuid === grid.gridUuid)
-											.some(
-												// ESLint false negative
-												// eslint-disable-next-line @typescript-eslint/typedef
-												({ x, y }) => Math.abs(cell.x - x) < cellViewDistance && Math.abs(cell.y - y) < cellViewDistance
-											)
-									);
+											({ x, y }) => Math.abs(cell.x - x) < cellViewDistance && Math.abs(cell.y - y) < cellViewDistance
+										);
+									return [cellUuid, isEntitiesIncluded ? cell : { ...cell, entities: new Map() }];
 								})
 							);
 						});
@@ -523,7 +529,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 							sourceCell.nav.get(directions[message.body.direction]) ?? sourceCell
 						);
 
-						unit.kind.moveEntity(targetCell);
+						unit.kind.navigateEntity({ nav: directions[message.body.direction] });
 
 						await sendUpdate({ grid, sourceCell, targetCell });
 					},
