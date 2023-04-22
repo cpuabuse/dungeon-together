@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -99,6 +99,7 @@ export async function main({
 	await Promise.all(
 		[
 			"dungeontileset-ii/chest_full_open_anim_f0.png",
+			"dungeontileset-ii/chest_full_open_anim_f2.png",
 			"dungeontileset-ii/floor_spikes_anim_f0.png",
 			"dungeontileset-ii/doors_leaf_closed.png",
 			"dungeontileset-ii/floor_1.png",

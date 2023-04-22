@@ -128,6 +128,12 @@ export class ClientUniverse
 			}
 		],
 		[
+			"treasure-open",
+			{
+				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/chest_full_open_anim_f2.png"))]
+			}
+		],
+		[
 			"mode/user/trap/default",
 			{
 				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_spikes_anim_f0.png"))]

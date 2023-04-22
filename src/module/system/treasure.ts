@@ -62,6 +62,11 @@ export function TreasureKindClassFactory({
 			switch (action) {
 				case ActionWords.Use: {
 					this.isOpen = !this.isOpen;
+					if (this.isOpen) {
+						this.entity.modeUuid = "treasure-open";
+					} else {
+						this.entity.modeUuid = "mode/user/treasure/default";
+					}
 					return true;
 				}
 

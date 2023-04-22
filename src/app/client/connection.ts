@@ -48,7 +48,7 @@ import { ClientUniverse } from "./universe";
 /**
  * Burn.
  */
-const contrastFilter: InstanceType<(typeof filters)["ColorMatrixFilter"]> = new filters.ColorMatrixFilter();
+const contrastFilter: InstanceType<typeof filters["ColorMatrixFilter"]> = new filters.ColorMatrixFilter();
 contrastFilter.contrast(1.0, false);
 
 /**
@@ -492,6 +492,26 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 											targetCell.attachEntity(this.universe.getEntity({ entityUuid }));
 										});
 									}
+								}
+							});
+						}
+					});
+				});
+
+				// Update modes
+				message.body.cells.forEach(sourceCell => {
+					this.universe.universeQueue.addCallback({
+						/**
+						 * Callback.
+						 */
+						callback: () => {
+							// Update modes
+							sourceCell.entities.forEach(sourceEntity => {
+								let targetEntity: ClientEntity = this.universe.getEntity(sourceEntity);
+								console.log(sourceEntity, targetEntity);
+								if (sourceEntity.modeUuid !== targetEntity.modeUuid) {
+									targetEntity.modeUuid = sourceEntity.modeUuid;
+									targetEntity.sprite.textures = this.universe.getMode({ uuid: sourceEntity.modeUuid }).textures;
 								}
 							});
 						}
