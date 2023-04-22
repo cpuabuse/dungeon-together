@@ -146,6 +146,12 @@ export class ClientUniverse
 			}
 		],
 		[
+			"door-open",
+			{
+				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/doors_leaf_open.png"))]
+			}
+		],
+		[
 			"mode/user/floor/default",
 			{
 				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_1.png"))]

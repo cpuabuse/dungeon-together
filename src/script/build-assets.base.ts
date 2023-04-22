@@ -102,6 +102,7 @@ export async function main({
 			"dungeontileset-ii/chest_full_open_anim_f2.png",
 			"dungeontileset-ii/floor_spikes_anim_f0.png",
 			"dungeontileset-ii/doors_leaf_closed.png",
+			"dungeontileset-ii/doors_leaf_open.png",
 			"dungeontileset-ii/floor_1.png",
 			"dungeontileset-ii/floor_ladder.png"
 		].map(
