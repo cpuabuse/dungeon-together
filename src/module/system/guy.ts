@@ -65,6 +65,9 @@ export function GuyKindClassFactory({
 			super({ entity, ...rest });
 			this.stats = { ...stats };
 
+			// Increase health points
+			this.maxHealthPoints = 10;
+
 			// TODO: Use appropriate UUID generator function
 			this.player = new ServerPlayer({ playerUuid: `player/${this.entity.entityUuid}` });
 

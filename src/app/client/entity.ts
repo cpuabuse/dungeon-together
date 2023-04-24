@@ -89,7 +89,7 @@ export function ClientEntityFactory({
 				this.basicText = new Text(health);
 				// TODO: Update scaling on change of entity scale
 				this.healthBar = new ProgressBar({ container: this.sprite, scale: this.sprite.width });
-				this.healthBar.maxValue = 3;
+				this.healthBar.maxValue = typeof this.dictionary.maxHealth === "number" ? this.dictionary.maxHealth : 3;
 				this.tempHealth = health;
 				this.healthBar.value = health;
 				this.sprite.addChild(this.basicText);

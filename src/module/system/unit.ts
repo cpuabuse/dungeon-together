@@ -142,7 +142,13 @@ export function UnitKindClassFactory({
 		 * @returns Emitted object
 		 */
 		public get emits(): Record<string, any> {
-			return { ...super.emits, hasAction: true, hasPhantom: true, health: this.healthPoints };
+			return {
+				...super.emits,
+				hasAction: true,
+				hasPhantom: true,
+				health: this.healthPoints,
+				maxHealth: this.maxHealthPoints
+			};
 		}
 
 		/**
@@ -185,6 +191,8 @@ export function UnitKindClassFactory({
 		 */
 		public manaPoints: number = 0;
 
+		public maxHealthPoints: number = 3;
+
 		/**
 		 * Speed.
 		 */
@@ -221,6 +229,20 @@ export function UnitKindClassFactory({
 			super({ entity, ...rest });
 
 			UnitKind.units.add(this);
+		}
+
+		/**
+		 * Unit on tick.
+		 */
+		public static onTick(): void {
+			if (this === UnitKind) {
+				UnitKind.units.forEach(unit => {
+					if (unit.healthPoints < unit.maxHealthPoints) {
+						// Regenerate some health
+						unit.healthPoints = Math.round(10 * unit.healthPoints + 2) / 10;
+					}
+				});
+			}
 		}
 
 		/**

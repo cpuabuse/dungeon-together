@@ -147,6 +147,7 @@ export function BaseEntityKindClassFactory({
 		 * @remarks
 		 * Should not call super, as registered kinds will all be ticked, including base.
 		 * Should be called in order of registration.
+		 * Should typically be guarded by class and `this` comparison, to avoid being called twice through classes not overriding.
 		 */
 		public static onTick(): void {
 			// Do nothing

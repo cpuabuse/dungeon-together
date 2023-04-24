@@ -26,7 +26,7 @@
 										:color="hpColor"
 										name="HP"
 										:value="universe.getEntity({ entityUuid: unitUuid }).tempHealth"
-										:max-value="3"
+										:max-value="universe.getEntity({ entityUuid: unitUuid }).dictionary?.maxHealth"
 									/>
 									<StatsBar :color="mpColor" name="MP" />
 								</template>
