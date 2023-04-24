@@ -15,7 +15,7 @@ import { EntityKindClass, EntityKindConstructorParams } from "../../app/server/e
 /**
  * Volume threshold for exclusive kind.
  */
-const volumeThreshold: number = 1 as const;
+export const volumeThreshold: number = 1 as const;
 
 /**
  * Exclusive kind factory.

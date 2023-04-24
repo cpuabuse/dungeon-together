@@ -11,7 +11,7 @@
 
 import { ActionWords } from "../../app/server/action";
 import { EntityKindActionArgs, EntityKindConstructorParams } from "../../app/server/entity";
-import { ExclusiveKindClass } from "./exclusive";
+import { ExclusiveKindClass, volumeThreshold } from "./exclusive";
 
 /**
  * Door entity kind.
@@ -50,8 +50,6 @@ export function DoorKindClassFactory({
 		 */
 		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
 			super({ entity, ...rest });
-			// To open the door
-			this.volume = 0;
 		}
 
 		/**
@@ -65,9 +63,12 @@ export function DoorKindClassFactory({
 			switch (action) {
 				case ActionWords.Use: {
 					this.isOpen = !this.isOpen;
+
 					if (this.isOpen) {
+						this.volume = 0;
 						this.entity.modeUuid = "door-open";
 					} else {
+						this.volume = volumeThreshold;
 						this.entity.modeUuid = "mode/user/door/default";
 					}
 					return true;
