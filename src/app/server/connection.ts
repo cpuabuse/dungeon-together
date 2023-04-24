@@ -525,7 +525,6 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 					callback: async ({ grid, unit, cell: sourceCell }) => {
 						// Tick first, so that enemy has upper hand, and later can process ticks while awaiting player input
 						this.universe.Entity.kinds.forEach(Kind => {
-							console.log(Kind);
 							Kind.onTick();
 						});
 

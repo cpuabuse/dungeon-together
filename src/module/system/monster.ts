@@ -115,7 +115,7 @@ export function MonsterKindClassFactory({
 						// ESLint false negative
 						// eslint-disable-next-line @typescript-eslint/typedef
 						let nav: Nav = (angleIndex.find(([angleLimit]) => {
-							return correctedAngle <= angleLimit;
+							return correctedAngle === angleLimit ? Math.random() > 0.5 : correctedAngle <= angleLimit;
 						}) ?? angleIndex[0])[1];
 
 						if (monsterCell.nav.get(nav)?.cellUuid === targetCell.cellUuid) {
