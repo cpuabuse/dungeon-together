@@ -143,6 +143,10 @@ export function BaseEntityKindClassFactory({
 
 		/**
 		 * Per-kind on tick method.
+		 *
+		 * @remarks
+		 * Should not call super, as registered kinds will all be ticked, including base.
+		 * Should be called in order of registration.
 		 */
 		public static onTick(): void {
 			// Do nothing
@@ -220,6 +224,15 @@ export function BaseEntityKindClassFactory({
 		// Here just to show the function to extending classes
 		// eslint-disable-next-line class-methods-use-this
 		public onCreateEntity(): void {
+			// Does nothing
+		}
+
+		/**
+		 * Will be called on detachment of entity.
+		 */
+		// Here just to show the function to extending classes
+		// eslint-disable-next-line class-methods-use-this
+		public onDetachEntity(): void {
 			// Does nothing
 		}
 

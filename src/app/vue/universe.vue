@@ -21,7 +21,7 @@
 					<template #body>
 						<OverlayContent :items="statsItems">
 							<template #stats>
-								<template v-for="unitUuid in Array.from(shard.players)[0][1].dictionary?.units ?? []" :key="unitUuid">
+								<template v-for="unitUuid in Array.from(shard.players)[0]?.[1].dictionary?.units ?? []" :key="unitUuid">
 									<StatsBar
 										:color="hpColor"
 										name="HP"

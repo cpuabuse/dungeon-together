@@ -9,9 +9,15 @@
  * @file
  */
 
+import { Uuid } from "../../app/common/uuid";
 import { ActionWords } from "../../app/server/action";
 import { ServerCell } from "../../app/server/cell";
-import { EntityKindActionArgs, EntityKindConstructorParams, ServerEntityClass } from "../../app/server/entity";
+import {
+	EntityKindActionArgs,
+	EntityKindConstructorParams,
+	ServerEntity,
+	ServerEntityClass
+} from "../../app/server/entity";
 import { ExclusiveKindClass } from "./exclusive";
 
 /**
@@ -202,12 +208,19 @@ export function UnitKindClassFactory({
 		public strength: number = 1;
 
 		/**
+		 * Entity array to track for ticks.
+		 */
+		public static units: Set<UnitKind> = new Set();
+
+		/**
 		 * Public constructor.
 		 *
 		 * @param param - Destructured parameter
 		 */
 		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
 			super({ entity, ...rest });
+
+			UnitKind.units.add(this);
 		}
 
 		/**
@@ -242,6 +255,14 @@ export function UnitKindClassFactory({
 					// Action was not successful
 					return false;
 			}
+		}
+
+		/**
+		 * Terminates unit.
+		 */
+		public onTerminateEntity(): void {
+			super.onTerminateEntity();
+			UnitKind.units.delete(this);
 		}
 	}
 	return UnitKind;

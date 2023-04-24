@@ -9,10 +9,17 @@
  * @file
  */
 
+// TODO: Use visibility
 import { Nav } from "../../app/core/arg";
-import { CellPathOwn } from "../../app/core/cell";
-import { EntityKindConstructorParams, ServerEntity, ServerEntityClass } from "../../app/server/entity";
-import { UnitKindClass, UnitStats } from "./unit";
+import { ServerCell } from "../../app/server/cell";
+import { EntityKindConstructorParams, ServerEntityClass } from "../../app/server/entity";
+import { UnitKind, UnitKindClass, UnitStats } from "./unit";
+
+/**
+ * Cell view distance.
+ */
+// TODO: Use visibility
+const monsterCellViewDistance: number = 4;
 
 /**
  * Monster kind factory.
@@ -43,7 +50,7 @@ export function MonsterKindClassFactory({
 		/**
 		 * Entity array to track for ticks.
 		 */
-		public static entities: Set<ServerEntity> = new Set();
+		public static monsters: Set<MonsterKind> = new Set();
 
 		/**
 		 * Public constructor.
@@ -54,19 +61,68 @@ export function MonsterKindClassFactory({
 			super({ entity, ...rest });
 			this.stats = { ...stats };
 
-			MonsterKind.entities.add(this.entity);
+			MonsterKind.monsters.add(this);
 		}
 
 		/**
 		 * On tick.
 		 */
 		public static onTick(): void {
-			Base.onTick();
-			// TODO: Write a better AI
-			this.entities.forEach(entity => {
-				if (Math.random() > 0.5) {
-					entity.kind.navigateEntity({
-						nav: [Nav.Left, Nav.Right, Nav.YDown, Nav.YUp, Nav.Left][Math.floor(Math.random() * 4)]
+			// Creation of unit entries is essentially when monsters decide what to do, together at same time; So that if during another monster behavior the units change cells, the monster would now know about it already
+			let unitEntries: Array<[UnitKind, ServerCell]> = Array.from(this.units).map(unitKind => [
+				unitKind,
+				(unitKind.entity.constructor as ServerEntityClass).universe.getCell(unitKind.entity)
+			]);
+
+			this.monsters.forEach(monsterKind => {
+				let monsterCell: ServerCell = (monsterKind.entity.constructor as ServerEntityClass).universe.getCell(
+					monsterKind.entity
+				);
+				// ESLint false negative
+				// eslint-disable-next-line @typescript-eslint/typedef
+				let targetUnitEntry: [UnitKind, ServerCell] | undefined = unitEntries.find(([unitKind, targetCell]) => {
+					if (!(unitKind instanceof this)) {
+						if (
+							Math.abs(monsterCell.x - targetCell.x) < monsterCellViewDistance &&
+							Math.abs(monsterCell.y - targetCell.y) < monsterCellViewDistance &&
+							monsterCell.z === targetCell.z
+						) {
+							// TODO: For now targeting the closest unit
+							return true;
+						}
+					}
+					return false;
+				});
+
+				// Possible movement options, in order of angle to target increase if graphed
+				// Const infer
+				// eslint-disable-next-line @typescript-eslint/typedef
+				let navFreedom = [Nav.Left, Nav.YUp, Nav.Right, Nav.YDown] as const;
+				// Indexes relation between angle to target and nav to take; Remove one π, since the minimal angle is such
+				let angleIndex: Array<[number, Nav]> = navFreedom.map((nav, index) => [(Math.PI / 2) * (index - 2), nav]);
+				// Offset for an angle, since that much of the angle above actual angle should still count for same nav; Essentially rotating
+				const angleOffset: number = Math.PI / 4;
+
+				if (targetUnitEntry) {
+					let [targetUnitKind, targetCell]: [UnitKind, ServerCell] = targetUnitEntry;
+					// Atan sign, position matters
+					let angle: number = Math.atan2(targetCell.y - monsterCell.y, targetCell.x - monsterCell.x);
+					// Direction aligned angle for indexing
+					let correctedAngle: number = angle - angleOffset;
+
+					// ESLint false negative
+					// eslint-disable-next-line @typescript-eslint/typedef
+					let nav: Nav = (angleIndex.find(([angleLimit]) => {
+						return correctedAngle <= angleLimit;
+					}) ?? angleIndex[0])[1];
+
+					// Navigate to target
+					monsterKind.navigateEntity({
+						nav
+					});
+				} else {
+					monsterKind.navigateEntity({
+						nav: [Nav.Left, Nav.Right, Nav.YDown, Nav.YUp][Math.floor(Math.random() * 4)]
 					});
 				}
 			});
@@ -77,7 +133,7 @@ export function MonsterKindClassFactory({
 		 */
 		public onTerminateEntity(): void {
 			super.onTerminateEntity();
-			MonsterKind.entities.delete(this.entity);
+			MonsterKind.monsters.delete(this);
 		}
 	}
 

@@ -474,7 +474,10 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 										.some(
 											// ESLint false negative
 											// eslint-disable-next-line @typescript-eslint/typedef
-											({ x, y }) => Math.abs(cell.x - x) < cellViewDistance && Math.abs(cell.y - y) < cellViewDistance
+											({ x, y, z }) =>
+												Math.abs(cell.x - x) < cellViewDistance &&
+												Math.abs(cell.y - y) < cellViewDistance &&
+												cell.z === z
 										);
 									return [cellUuid, isEntitiesIncluded ? cell : { ...cell, entities: new Map() }];
 								})
