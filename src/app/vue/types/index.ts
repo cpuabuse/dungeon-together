@@ -65,6 +65,11 @@ export type OverlayContentItem =
 			 * Optional UI actions.
 			 */
 			uiActions?: Array<OverlayContentUiActionParam>;
+
+			/**
+			 * Optional icon.
+			 */
+			icon?: string;
 	  }
 	| {
 			/**

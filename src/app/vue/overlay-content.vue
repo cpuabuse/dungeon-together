@@ -4,19 +4,23 @@
 -->
 
 <template>
-	<div v-show="items.length > 0" class="overflow-auto">
-		<VList>
+	<div v-show="items.length > 0" :class="{ 'overlay-content-container-compact': isCompact, 'overflow-auto': true }">
+		<VList :density="isCompact ? 'compact' : 'default'" class="py-0">
 			<template v-for="(item, itemKey) in items" :key="itemKey">
-				<VListItem class="p-0">
+				<!-- The density will be inherited from `VList` -->
+				<VListItem :class="{ 'pa-0': item.type === ItemType.Uuid }">
 					<!-- Default informational element -->
 					<VRow
 						v-if="item.type === undefined || item.type === ItemType.InfoElement"
 						variant="outlined"
-						height="50"
-						align-content="center"
-						class="px-3 py-1"
+						align="center"
+						class="py-0"
 					>
-						<VCol cols="auto" class="my-auto">
+						<VCol v-if="items.some(itemElement => itemElement.icon)" cols="auto">
+							<VIcon :icon="item.icon ?? 'fa-carrot'" :class="{ 'overlay-content-icon-dummy': !item.icon }" />
+						</VCol>
+
+						<VCol cols="auto">
 							<VListItemTitle>
 								{{ item.name }}
 							</VListItemTitle>
@@ -24,8 +28,8 @@
 
 						<VSpacer />
 
-						<VCol cols="auto" class="my-auto">
-							<VChip class="ma-2">
+						<VCol cols="auto">
+							<VChip>
 								{{ item.data }}
 							</VChip>
 						</VCol>
@@ -33,20 +37,20 @@
 
 					<!-- UUID element -->
 					<div v-else-if="item.type === ItemType.Uuid">
-						<VListItemTitle class="px-3">
+						<VListItemTitle>
 							{{ item.name }}
 						</VListItemTitle>
 
-						<highlightjs language="plaintext" :code="item.uuid" class="m-0" />
+						<highlightjs language="plaintext" :code="item.uuid" />
 					</div>
 
 					<!-- Tab element -->
 					<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
-					<div v-else-if="item.type === ItemType.Tab" :key="item.tabs" :style="tabStyle(item)" class="pt-3">
+					<div v-else-if="item.type === ItemType.Tab" :key="item.tabs" :style="tabStyle(item)">
 						<VListItemTitle class="text-center">List title</VListItemTitle>
+
 						<VTabs
 							:key="item.tabs"
-							height="35px"
 							:model-value="getTab({ tabs: item.tabs })"
 							@update:model-value="value => setTab({ tabs: item.tabs, value })"
 						>
@@ -54,7 +58,6 @@
 						</VTabs>
 
 						<VWindow
-							class="px-3"
 							:model-value="getTab({ tabs: item.tabs })"
 							@update:model-value="value => setTab({ tabs: item.tabs, value })"
 						>
@@ -69,8 +72,8 @@
 					</div>
 
 					<!-- Switch element -->
-					<VRow v-if="item.type === ItemType.Switch" variant="outlined">
-						<VCol cols="auto" class="my-auto">
+					<VRow v-if="item.type === ItemType.Switch" variant="outlined" class="py-0">
+						<VCol cols="auto">
 							<VListItemTitle>
 								{{ item.name }}
 							</VListItemTitle>
@@ -78,10 +81,9 @@
 
 						<VSpacer />
 
-						<VCol cols="auto" class="my-auto">
+						<VCol cols="auto">
 							<VSwitch
 								:model-value="records[item.id]"
-								class="ma-2"
 								@update:model-value="value => setRecord({ id: item.id, value })"
 							/>
 						</VCol>
@@ -89,14 +91,14 @@
 
 					<!-- Slot element -->
 					<template v-if="item.type === ItemType.Slot">
-						<VListItemTitle class="text-center">
+						<VListItemTitle>
 							{{ item.name }}
 						</VListItemTitle>
 						<slot :name="item.id" />
 					</template>
 				</VListItem>
 				<template v-if="itemKey < items.length - 1">
-					<VDivider class="m-0" />
+					<VDivider />
 				</template>
 			</template>
 		</VList>
@@ -109,6 +111,7 @@ import {
 	VChip,
 	VCol,
 	VDivider,
+	VIcon,
 	VList,
 	VListItem,
 	VListItemTitle,
@@ -136,6 +139,7 @@ export default defineComponent({
 		VChip,
 		VCol,
 		VDivider,
+		VIcon,
 		VList,
 		VListItem,
 		VListItemTitle,
@@ -333,5 +337,9 @@ export default defineComponent({
 
 ::-webkit-scrollbar-thumb:hover {
 	background: #555;
+}
+
+.overlay-content-icon-dummy {
+	visibility: hidden;
 }
 </style>

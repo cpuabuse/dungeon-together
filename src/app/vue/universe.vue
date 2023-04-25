@@ -3,12 +3,17 @@
 		<div class="app-content">
 			<div class="universe">Hello: {{ what }}</div>
 			<tsxtest />
-			<OverlayDropdown :z-idx="100" />
+			<OverlayDropdown v-model="isRightClickOverlayDisplayed">
+				<template #body>
+					<OverlayContent :items="debugOverlayItems" :is-compact="true" />
+				</template>
+			</OverlayDropdown>
+
 			<statealertbox v-show="alert" />
 			<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
 			<OverlayWindow v-model="debugContainer" icon="fa-bug-slash">
 				<template #body>
-					<OverlayContent :items="debugOverlayItems">
+					<OverlayContent :items="debugOverlayItems" :is-compact="false">
 						<template #test> test div dom </template>
 					</OverlayContent>
 				</template>
@@ -124,7 +129,7 @@ export default defineComponent({
 		 */
 		debugOverlayItems(): Array<OverlayContentItem> {
 			return [
-				{ data: "14", name: "Info1" },
+				{ data: "14", icon: "fa-bug-slash", name: "Info1" },
 				{ data: "2", name: "Info2" },
 				{ name: "Player", type: ItemType.Uuid, uuid: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" },
 				{
@@ -270,6 +275,7 @@ export default defineComponent({
 			ItemType,
 			debugContainer: false,
 			hpColor: new Color("#1F8C2F"),
+			isRightClickOverlayDisplayed: true,
 			mpColor: new Color("#051DE8"),
 			shardUuids: new Array<Uuid>(),
 			shards: new Array<ClientShard>(),
