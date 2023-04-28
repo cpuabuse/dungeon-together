@@ -2,7 +2,7 @@
 
 <template>
 	<!-- `compact` makes collapse menus without pinned items equal sides, when not stacked (`default` when stacked); Makes extra large icons fit well in both cases -->
-	<VToolbar :density="hasLabels ? 'default' : 'compact'" rounded="xl">
+	<VToolbar :density="hasLabels ? 'default' : 'compact'" rounded="xl" class="w-auto">
 		<!-- `tonal` for toggler to stand out -->
 		<VToolbarItems variant="tonal">
 			<VBtn
@@ -13,7 +13,7 @@
 				<VIcon size="x-large" :icon="icon" />
 				<!-- Menu indicator also scales to match icon relative size -->
 				<span v-show="hasLabels" class="text-truncate button-text">{{ name }}</span>
-				<span v-show="hasLabels" class="text-truncate button-text" v-if="nameSubtext">{{ nameSubtext }}</span>
+				<span v-show="hasLabels" v-if="nameSubtext" class="text-truncate button-text">{{ nameSubtext }}</span>
 			</VBtn>
 		</VToolbarItems>
 
