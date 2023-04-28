@@ -1,131 +1,112 @@
 <!--
-	Content that goes into overlay-container, and it's sub-components.
-	Accepts props JS object that is conditionally interpreted for rendering. 
+	Content that goes into overlays, and it's sub-components.
+	Accepts items prop JS object that is conditionally interpreted for rendering, determining what goes into which slot.
+
+	This file is the only place where card is added.
+
+	Note - closes grandparent if parent non-menu is clicked(https://github.com/vuetifyjs/vuetify/issues/17004).
 -->
 
 <template>
-	<div v-show="items.length > 0" :class="{ 'overlay-content-container-compact': isCompact, 'overflow-auto': true }">
+	<VCard class="overflow-hidden w-100" :rounded="isMenu ? 'sm' : true">
 		<VList :density="isCompact ? 'compact' : 'default'" class="py-0">
 			<template v-for="(item, itemKey) in items" :key="itemKey">
-				<!-- The density will be inherited from `VList` -->
-				<VListItem :class="{ 'pa-0': item.type === ItemType.Uuid }">
-					<!-- Default informational element -->
-					<VRow
-						v-if="item.type === undefined || item.type === ItemType.InfoElement"
-						variant="outlined"
-						align="center"
-						class="py-0"
-					>
-						<VCol v-if="items.some(itemElement => itemElement.icon)" cols="auto">
-							<VIcon :icon="item.icon ?? 'fa-carrot'" :class="{ 'overlay-content-icon-dummy': !item.icon }" />
-						</VCol>
+				<!-- Force icon show if no name -->
+				<OverlayContentItem
+					:icon="item.icon"
+					:name="item.name"
+					:is-hidden-icon-displayed-if-missing="!!items.some(itemElement => itemElement.icon)"
+					:content-type="contentType"
+					:is-hidden-caret-displayed-if-missing="
+						!!items.some(itemElement => itemElement.type === ItemType.Tab && itemElement.data)
+					"
+				>
+					<!-- Inline slot -->
+					<template v-if="[ItemType.InfoElement, undefined, ItemType.Switch].includes(item.type)" #inline>
+						<!-- Info element -->
+						<VChip v-if="item.type === ItemType.InfoElement || item.type === undefined">
+							{{ item.data }}
+						</VChip>
 
-						<VCol cols="auto">
-							<VListItemTitle>
-								{{ item.name }}
-							</VListItemTitle>
-						</VCol>
-
-						<VSpacer />
-
-						<VCol cols="auto">
-							<VChip>
-								{{ item.data }}
-							</VChip>
-						</VCol>
-					</VRow>
-
-					<!-- UUID element -->
-					<div v-else-if="item.type === ItemType.Uuid">
-						<VListItemTitle>
-							{{ item.name }}
-						</VListItemTitle>
-
-						<highlightjs language="plaintext" :code="item.uuid" />
-					</div>
-
-					<!-- Tab element -->
-					<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
-					<div v-else-if="item.type === ItemType.Tab" :key="item.tabs" :style="tabStyle(item)">
-						<VListItemTitle class="text-center">List title</VListItemTitle>
-
-						<VTabs
-							:key="item.tabs"
-							:model-value="getTab({ tabs: item.tabs })"
-							@update:model-value="value => setTab({ tabs: item.tabs, value })"
-						>
-							<VTab v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
-						</VTabs>
-
-						<VWindow
-							:model-value="getTab({ tabs: item.tabs })"
-							@update:model-value="value => setTab({ tabs: item.tabs, value })"
-						>
-							<VWindowItem v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">
-								<OverlayContent :items="tab.items">
-									<template v-for="slot in getSlots(tab)" #[slot]>
-										<slot :name="slot" />
-									</template>
-								</OverlayContent>
-							</VWindowItem>
-						</VWindow>
-					</div>
-
-					<!-- Switch element -->
-					<VRow v-if="item.type === ItemType.Switch" variant="outlined" class="py-0">
-						<VCol cols="auto">
-							<VListItemTitle>
-								{{ item.name }}
-							</VListItemTitle>
-						</VCol>
-
-						<VSpacer />
-
-						<VCol cols="auto">
-							<VSwitch
-								:model-value="records[item.id]"
-								@update:model-value="value => setRecord({ id: item.id, value })"
-							/>
-						</VCol>
-					</VRow>
-
-					<!-- Slot element -->
-					<template v-if="item.type === ItemType.Slot">
-						<VListItemTitle>
-							{{ item.name }}
-						</VListItemTitle>
-						<slot :name="item.id" />
+						<!-- Switch element -->
+						<VSwitch
+							v-if="item.type === ItemType.Switch"
+							:model-value="records[item.id]"
+							@update:model-value="value => setRecord({ id: item.id, value })"
+						/>
 					</template>
-				</VListItem>
+
+					<!-- Content slot --->
+					<template v-if="[ItemType.Uuid, ItemType.Tab, ItemType.Slot].includes(item.type)" #content>
+						<!-- Uuid element -->
+						<highlightjs v-if="item.type === ItemType.Uuid" language="plaintext" :code="item.uuid" />
+
+						<!-- Tab element -->
+						<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
+						<template v-if="item.type === ItemType.Tab">
+							<!-- Menu -->
+							<template v-if="isMenu">
+								<VList :density="isCompact ? 'compact' : 'default'" class="py-0">
+									<template v-for="(tab, tabKey) in item.tabs" :key="tabKey">
+										<OverlayContentItem :name="tab.name" :content-type="contentType">
+											<template #content>
+												<OverlayContent :items="tab.items" :content-type="contentType">
+													<template v-for="slot in getSlots(tab)" #[slot]>
+														<slot :name="slot" />
+													</template>
+												</OverlayContent>
+											</template>
+										</OverlayContentItem>
+									</template>
+								</VList>
+							</template>
+
+							<!-- Block -->
+							<template v-else>
+								<VTabs
+									:key="item.tabs"
+									:model-value="getTab({ tabs: item.tabs })"
+									@update:model-value="value => setTab({ tabs: item.tabs, value })"
+								>
+									<VTab v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
+								</VTabs>
+
+								<VWindow
+									:model-value="getTab({ tabs: item.tabs })"
+									@update:model-value="value => setTab({ tabs: item.tabs, value })"
+								>
+									<VWindowItem v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">
+										<OverlayContent :items="tab.items" :content-type="contentType">
+											<template v-for="slot in getSlots(tab)" #[slot]>
+												<slot :name="slot" />
+											</template>
+										</OverlayContent>
+									</VWindowItem>
+								</VWindow>
+							</template>
+						</template>
+
+						<!-- Slot element -->
+						<slot v-if="item.type === ItemType.Slot" :name="item.id" />
+					</template>
+				</OverlayContentItem>
+
 				<template v-if="itemKey < items.length - 1">
 					<VDivider />
 				</template>
 			</template>
 		</VList>
-	</div>
+	</VCard>
 </template>
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
-import {
-	VChip,
-	VCol,
-	VDivider,
-	VIcon,
-	VList,
-	VListItem,
-	VListItemTitle,
-	VRow,
-	VSpacer,
-	VSwitch,
-	VTab,
-	VTabs,
-	VWindow,
-	VWindowItem
-} from "vuetify/components";
+import { VCard, VChip, VDivider, VList, VSwitch, VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
 import { ThisVueStore } from "../client/gui";
 import { OverlayWindowItemType as ItemType } from "../common/front";
+import OverlayContentItem from "./overlay-content-item.vue";
 import { ElementSize, OverlayContentItem as Item, OverlayContentTabs as Tabs } from "./types";
+import { OverlayContentType, overlayContentProps } from "./util";
 
 /**
  * Element size pixels.
@@ -136,15 +117,11 @@ type ElementSizePixels = {
 
 export default defineComponent({
 	components: {
+		OverlayContentItem,
+		VCard,
 		VChip,
-		VCol,
 		VDivider,
-		VIcon,
 		VList,
-		VListItem,
-		VListItemTitle,
-		VRow,
-		VSpacer,
 		VSwitch,
 		VTab,
 		VTabs,
@@ -153,6 +130,15 @@ export default defineComponent({
 	},
 
 	computed: {
+		/**
+		 * Whether the item is displayed as a menu.
+		 *
+		 * @returns Whether the item is displayed as a menu
+		 */
+		isMenu(): boolean {
+			return this.contentType === OverlayContentType.Menu;
+		},
+
 		/**
 		 * Get the records.
 		 *
@@ -317,7 +303,8 @@ export default defineComponent({
 			required: false,
 			type: Boolean
 		},
-		items: { required: true, type: Array as PropType<Array<Item>> }
+		items: { required: true, type: Array as PropType<Array<Item>> },
+		...overlayContentProps
 	}
 });
 </script>

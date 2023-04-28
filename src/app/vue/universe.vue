@@ -5,7 +5,7 @@
 			<tsxtest />
 			<OverlayDropdown v-model="isRightClickOverlayDisplayed">
 				<template #body>
-					<OverlayContent :items="debugOverlayItems" :is-compact="true" />
+					<OverlayContent :items="debugOverlayItems" :is-compact="true" content-type="menu" />
 				</template>
 			</OverlayDropdown>
 
@@ -70,6 +70,7 @@ import {
 	OverlayContentTabs,
 	compactToolbarDataToMenuBaseProps
 } from "./types";
+import { OverlayContentType } from "./util";
 
 /**
  * Root component.
@@ -273,6 +274,7 @@ export default defineComponent({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let data = {
 			ItemType,
+			OverlayContentType,
 			debugContainer: false,
 			hpColor: new Color("#1F8C2F"),
 			isRightClickOverlayDisplayed: true,

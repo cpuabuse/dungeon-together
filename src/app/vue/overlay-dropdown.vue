@@ -33,9 +33,6 @@ export default defineComponent({
 	top: 100px;
 	right: 100px;
 	z-index: 100;
-	border: 1px solid #ccc;
-	box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
-	border-radius: 10px;
 	max-height: 50%;
 }
 
