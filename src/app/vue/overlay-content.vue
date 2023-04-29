@@ -6,7 +6,7 @@
 -->
 
 <template>
-	<VCard class="overflow-hidden w-100" :rounded="isMenu ? 'sm' : true">
+	<OverlayListBody :content-type="contentType">
 		<VList :density="isCompact ? 'compact' : 'default'" class="py-0">
 			<template v-for="(item, itemKey) in items" :key="itemKey">
 				<!-- Force icon show if no name -->
@@ -48,11 +48,11 @@
 									<template v-for="(tab, tabKey) in item.tabs" :key="tabKey">
 										<OverlayContentItem :name="tab.name" :content-type="contentType">
 											<template #content>
-												<OverlayContent :items="tab.items" :content-type="contentType">
+												<OverlayList :items="tab.items" :content-type="contentType">
 													<template v-for="slot in getSlots(tab)" #[slot]>
 														<slot :name="slot" />
 													</template>
-												</OverlayContent>
+												</OverlayList>
 											</template>
 										</OverlayContentItem>
 									</template>
@@ -74,11 +74,11 @@
 									@update:model-value="value => setTab({ tabs: item.tabs, value })"
 								>
 									<VWindowItem v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">
-										<OverlayContent :items="tab.items" :content-type="contentType">
+										<OverlayList :items="tab.items" :content-type="contentType">
 											<template v-for="slot in getSlots(tab)" #[slot]>
 												<slot :name="slot" />
 											</template>
-										</OverlayContent>
+										</OverlayList>
 									</VWindowItem>
 								</VWindow>
 							</template>
@@ -94,17 +94,26 @@
 				</template>
 			</template>
 		</VList>
-	</VCard>
+	</OverlayListBody>
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from "vue";
-import { VCard, VChip, VDivider, VList, VSwitch, VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
+import { DefineComponent, PropType, defineAsyncComponent, defineComponent } from "vue";
+import { VChip, VDivider, VList, VSwitch, VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
 import { ThisVueStore } from "../client/gui";
 import { OverlayWindowItemType as ItemType } from "../common/front";
 import OverlayContentItem from "./overlay-content-item.vue";
+import OverlayListBody from "./overlay-list-body.vue";
 import { ElementSize, OverlayContentItem as Item, OverlayContentTabs as Tabs } from "./types";
 import { OverlayContentType, overlayContentProps } from "./util";
+
+/**
+ * Async component for overlay list, since it's circular dependency.
+ */
+// BUG: Vetur doesn't like circular dependencies, so we manually define component type
+const OverlayList: DefineComponent = defineAsyncComponent(
+	() => import("./overlay-list.vue")
+) as unknown as DefineComponent;
 
 /**
  * Element size pixels.
@@ -116,7 +125,8 @@ type ElementSizePixels = {
 export default defineComponent({
 	components: {
 		OverlayContentItem,
-		VCard,
+		OverlayList,
+		OverlayListBody,
 		VChip,
 		VDivider,
 		VList,

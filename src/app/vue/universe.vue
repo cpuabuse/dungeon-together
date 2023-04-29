@@ -5,7 +5,7 @@
 			<tsxtest />
 			<OverlayDropdown v-model="isRightClickOverlayDisplayed">
 				<template #body>
-					<OverlayContent :items="debugOverlayItems" :is-compact="true" content-type="menu" />
+					<OverlayList :items="debugOverlayItems" :is-compact="true" content-type="menu" />
 				</template>
 			</OverlayDropdown>
 
@@ -13,9 +13,9 @@
 			<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
 			<OverlayWindow v-model="debugContainer" icon="fa-bug-slash">
 				<template #body>
-					<OverlayContent :items="debugOverlayItems" :is-compact="false">
+					<OverlayList :items="debugOverlayItems" :is-compact="false">
 						<template #test> test div dom </template>
-					</OverlayContent>
+					</OverlayList>
 				</template>
 			</OverlayWindow>
 			<template v-for="shard in shards" :key="shard.shardUuid">
@@ -24,7 +24,7 @@
 					@update:model-value="value => showStatContainers.set(shard.shardUuid, value)"
 				>
 					<template #body>
-						<OverlayContent :items="statsItems">
+						<OverlayList :items="statsItems">
 							<template #stats>
 								<template v-for="unitUuid in Array.from(shard.players)[0]?.[1].dictionary?.units ?? []" :key="unitUuid">
 									<StatsBar
@@ -36,7 +36,7 @@
 									<StatsBar :color="mpColor" name="MP" />
 								</template>
 							</template>
-						</OverlayContent>
+						</OverlayList>
 					</template>
 				</OverlayWindow>
 			</template>
@@ -55,8 +55,8 @@ import { Uuid } from "../common/uuid";
 import { LogLevel } from "../core/error";
 import CompactToolbar from "./compact-toolbar.vue";
 import debugComponent from "./debug.vue";
-import OverlayContent from "./overlay-content.vue";
 import OverlayDropdown from "./overlay-dropdown.vue";
+import OverlayList from "./overlay-list.vue";
 import OverlayWindow from "./overlay-window.vue";
 import stateAlertBoxComponent from "./state-alert-box.vue";
 import StatsBar from "./stats-bar.vue";
@@ -78,8 +78,8 @@ import { OverlayContentType } from "./util";
 export default defineComponent({
 	components: {
 		CompactToolbar,
-		OverlayContent,
 		OverlayDropdown,
+		OverlayList,
 		OverlayWindow,
 		StatsBar,
 		VApp,
