@@ -2,8 +2,6 @@
 	Content that goes into overlays, and it's sub-components.
 	Accepts items prop JS object that is conditionally interpreted for rendering, determining what goes into which slot.
 
-	This file is the only place where card is added.
-
 	Note - closes grandparent if parent non-menu is clicked(https://github.com/vuetifyjs/vuetify/issues/17004).
 -->
 
