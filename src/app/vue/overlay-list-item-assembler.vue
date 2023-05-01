@@ -40,7 +40,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { VCol, VIcon, VListItemTitle, VRow, VSpacer } from "vuetify/components";
-import OverlayContentItemContainer from "./overlay-content-item-container.vue";
+import OverlayContentItemContainer from "./overlay-list-item-wrapper.vue";
 import { OverlayContentType, overlayContentProps } from "./util";
 
 export default defineComponent({
@@ -130,7 +130,7 @@ export default defineComponent({
 		}
 	},
 
-	name: "OverlayContentItem",
+	name: "OverlayListItemAssembler",
 
 	/**
 	 * Props for component.

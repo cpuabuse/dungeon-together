@@ -3,24 +3,24 @@
 	Note - closes grandparent if parent non-menu is clicked(https://github.com/vuetifyjs/vuetify/issues/17004).
 -->
 <template>
-	<OverlayContent v-bind="$props">
+	<OverlayListItem v-bind="$props">
 		<!-- Rather blank than underscore -->
 		<!-- eslint-disable-next-line vue/valid-v-for -->
-		<template v-for="(, slot) in $slots">
-			<slot :name="slot" />
+		<template v-for="(slot, name) in $slots">
+			<slot :name="name" />
 		</template>
-	</OverlayContent>
+	</OverlayListItem>
 </template>
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
-import OverlayContent from "./overlay-content.vue";
 import { OverlayContentItem } from "./types";
 import { overlayContentProps } from "./util";
+import { OverlayListItem } from ".";
 
 export default defineComponent({
 	components: {
-		OverlayContent
+		OverlayListItem
 	},
 
 	name: "OverlayList",

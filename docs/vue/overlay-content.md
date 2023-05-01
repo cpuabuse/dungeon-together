@@ -7,8 +7,8 @@ flowchart TB
 		window[OverlayWindow<br>Normal UI windows]
 	end
 
-	body[OverlayBody<br>Provides card wrapping if needed]
-	list[OverlayList<br>Simplifies groups<br>Determines item props to pass down]
+	list[OverlayList<br>Simplifies groups<br>Determines slots to pass through]
+	body[OverlayListBody<br>Provides card wrapping if needed]
 	item[OverlayListItem<br>Conditionally provides functional slots]
 	assembler[OverlayListItemAssembler<br>Assembles header and body slots for display]
 	wrapper[OverlayListItemWrapper<br>Wraps slots based on content type]

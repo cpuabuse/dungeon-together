@@ -76,7 +76,7 @@ export default defineComponent({
 		mergeProps
 	},
 
-	name: "OverlayContentItemContent",
+	name: "OverlayListItemWrapper",
 
 	/**
 	 * Props for component.

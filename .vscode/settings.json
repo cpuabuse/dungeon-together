@@ -33,7 +33,6 @@
 		"*.tsconfig.json": "jsonc"
 	},
 	"eslint.probe": ["typescript", "html", "vue"],
-	"vetur.validation.templateProps": true,
 	"editor.semanticTokenColorCustomizations": {
 		"enabled": true,
 		"rules": { "typeParameter": "#22AA22" }
@@ -50,5 +49,7 @@
 	"typescript.preferences.autoImportFileExcludePatterns": ["node_modules/io-ts", "node_modules/fp-ts"],
 	"[glsl]": {
 		"editor.defaultFormatter": "raczzalan.webgl-glsl-editor"
-	}
+	},
+	"vue.codeActions.savingTimeLimit": 20000,
+	"vue.updateImportsOnFileMove.enabled": true
 }

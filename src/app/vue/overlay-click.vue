@@ -17,6 +17,8 @@ export default defineComponent({
 		VCard
 	},
 
+	name: "OverlayClick",
+
 	props: {
 		modelValue: { required: true, type: Boolean },
 		zIdx: {

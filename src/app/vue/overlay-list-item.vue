@@ -10,7 +10,7 @@
 		<VList :density="isCompact ? 'compact' : 'default'" class="py-0">
 			<template v-for="(item, itemKey) in items" :key="itemKey">
 				<!-- Force icon show if no name -->
-				<OverlayContentItem
+				<OverlayListItemAssembler
 					:icon="item.icon"
 					:name="item.name"
 					:is-hidden-icon-displayed-if-missing="!!items.some(itemElement => itemElement.icon)"
@@ -46,7 +46,7 @@
 							<template v-if="isMenu">
 								<VList :density="isCompact ? 'compact' : 'default'" class="py-0">
 									<template v-for="(tab, tabKey) in item.tabs" :key="tabKey">
-										<OverlayContentItem :name="tab.name" :content-type="contentType">
+										<OverlayListItemAssembler :name="tab.name" :content-type="contentType">
 											<template #content>
 												<OverlayList :items="tab.items" :content-type="contentType">
 													<template v-for="slot in getSlots(tab)" #[slot]>
@@ -54,7 +54,7 @@
 													</template>
 												</OverlayList>
 											</template>
-										</OverlayContentItem>
+										</OverlayListItemAssembler>
 									</template>
 								</VList>
 							</template>
@@ -87,7 +87,7 @@
 						<!-- Slot element -->
 						<slot v-if="item.type === ItemType.Slot" :name="item.id" />
 					</template>
-				</OverlayContentItem>
+				</OverlayListItemAssembler>
 
 				<template v-if="itemKey < items.length - 1">
 					<VDivider />
@@ -102,8 +102,8 @@ import { DefineComponent, PropType, defineAsyncComponent, defineComponent } from
 import { VChip, VDivider, VList, VSwitch, VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
 import { ThisVueStore } from "../client/gui";
 import { OverlayWindowItemType as ItemType } from "../common/front";
-import OverlayContentItem from "./overlay-content-item.vue";
 import OverlayListBody from "./overlay-list-body.vue";
+import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 import { ElementSize, OverlayContentItem as Item, OverlayContentTabs as Tabs } from "./types";
 import { OverlayContentType, overlayContentProps } from "./util";
 
@@ -124,9 +124,9 @@ type ElementSizePixels = {
 
 export default defineComponent({
 	components: {
-		OverlayContentItem,
 		OverlayList,
 		OverlayListBody,
+		OverlayListItemAssembler,
 		VChip,
 		VDivider,
 		VList,
@@ -298,7 +298,7 @@ export default defineComponent({
 		}
 	},
 
-	name: "OverlayContent",
+	name: "OverlayListItem",
 
 	/**
 	 * Props for component.

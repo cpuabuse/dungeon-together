@@ -101,6 +101,8 @@ export default defineComponent({
 		}
 	},
 
+	name: "OverlayWindow",
+
 	props: {
 		icon: {
 			default: "fa-carrot",
@@ -108,6 +110,7 @@ export default defineComponent({
 		},
 		modelValue: { required: true, type: Boolean }
 	},
+
 	watch: {
 		modelValue: {
 			/**

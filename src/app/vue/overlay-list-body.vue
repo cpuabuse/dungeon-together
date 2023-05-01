@@ -39,6 +39,8 @@ export default defineComponent({
 		}
 	},
 
+	name: "OverlayListBody",
+
 	props: {
 		...overlayContentProps
 	}

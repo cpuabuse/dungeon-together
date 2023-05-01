@@ -3,11 +3,11 @@
 		<div class="app-content">
 			<div class="universe">Hello: {{ what }}</div>
 			<tsxtest />
-			<OverlayDropdown v-model="isRightClickOverlayDisplayed">
+			<OverlayClick v-model="isRightClickOverlayDisplayed">
 				<template #body>
 					<OverlayList :items="debugOverlayItems" :is-compact="true" content-type="menu" />
 				</template>
-			</OverlayDropdown>
+			</OverlayClick>
 
 			<statealertbox v-show="alert" />
 			<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
@@ -55,7 +55,7 @@ import { Uuid } from "../common/uuid";
 import { LogLevel } from "../core/error";
 import CompactToolbar from "./compact-toolbar.vue";
 import debugComponent from "./debug.vue";
-import OverlayDropdown from "./overlay-dropdown.vue";
+import OverlayClick from "./overlay-click.vue";
 import OverlayList from "./overlay-list.vue";
 import OverlayWindow from "./overlay-window.vue";
 import stateAlertBoxComponent from "./state-alert-box.vue";
@@ -78,7 +78,7 @@ import { OverlayContentType } from "./util";
 export default defineComponent({
 	components: {
 		CompactToolbar,
-		OverlayDropdown,
+		OverlayClick,
 		OverlayList,
 		OverlayWindow,
 		StatsBar,

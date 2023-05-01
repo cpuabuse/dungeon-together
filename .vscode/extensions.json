@@ -1,5 +1,15 @@
 {
 	"recommendations": [
+		// Prettier
+		"esbenp.prettier-vscode",
+
+		// Vue
+		"Vue.volar",
+		"Vue.vscode-typescript-vue-plugin",
+
+		// GLSL
+		"raczzalan.webgl-glsl-editor",
+
 		// For launch configs
 		"ritwickdey.LiveServer",
 
@@ -7,9 +17,6 @@
 		"ms-edgedevtools.vscode-edge-devtools",
 
 		// For code formatting
-		"dbaeumer.vscode-eslint",
-
-		// GLSL
-		"raczzalan.webgl-glsl-editor"
+		"dbaeumer.vscode-eslint"
 	]
 }
