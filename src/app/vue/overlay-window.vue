@@ -1,17 +1,16 @@
 <!-- Dialog modal -->
 
 <template>
-	<div style="position: absolute; top: 200px; right: 200px; touch-action: none">
+	<div ref="overlayWindow" style="position: absolute; top: 200px; right: 200px; touch-action: none">
 		<!-- Width must be set in dialog, since it defines dialog area -->
 		<div v-if="modelValue">
-			<VCard height="100%" width="100%" class="overflow-hidden">
-				<VToolbar height="44">
-					<VIcon :icon="icon" class="ml-4" />
-					<VToolbarTitle class="text-h5 font-weight-bold">Title</VToolbarTitle>
-					<VBtn class="circle-btn" @click="$emit('update:modelValue', false)">
-						<VIcon icon="fa-close" />
-					</VBtn>
+			<VCard class="h-100 w-100 overflow-hidden">
+				<VToolbar density="compact">
+					<VIcon :icon="icon" class="ms-4" />
+					<VToolbarTitle class="font-weight-bold">Title</VToolbarTitle>
+					<VBtn size="small" icon="fa-close" @click="$emit('update:modelValue', false)" />
 				</VToolbar>
+
 				<slot name="body"></slot>
 			</VCard>
 		</div>
@@ -19,13 +18,13 @@
 </template>
 
 <script lang="ts">
-import { Interactable } from "@interactjs/core/Interactable";
+import type { Interactable } from "@interactjs/types";
 import interact from "interactjs";
-import { defineComponent } from "vue";
+import { Ref, defineComponent, ref } from "vue";
 import { VBtn, VCard, VIcon, VToolbar, VToolbarTitle } from "vuetify/components";
 
 /**
- * @param event - Event recieved
+ * @param event - Event received
  */
 function dragMoveListener(event: {
 	/**
@@ -47,7 +46,7 @@ function dragMoveListener(event: {
 		target
 	}: {
 		/**
-		 * HTML element
+		 * HTML element.
 		 */
 		target: HTMLElement;
 	} = event;
@@ -59,7 +58,7 @@ function dragMoveListener(event: {
 	// Translate the element
 	target.style.transform = `translate(${x}px, ${y}px)`;
 
-	// Update the posiion attributes
+	// Update the position attributes
 	target.setAttribute("data-x", x.toString());
 	target.setAttribute("data-y", y.toString());
 }
@@ -74,30 +73,35 @@ export default defineComponent({
 	 */
 	data() {
 		return {
-			interacteale: null as Interactable | null
+			interactable: null as Interactable | null
 		};
 	},
 
 	emits: ["update:modelValue"],
 
+	/**
+	 *
+	 */
 	methods: {
 		/**
 		 * Set interact.
 		 */
 		setInteract(): void {
-			this.interacteale = interact(this.$el).draggable({
-				listeners: {
-					// call this function on every dragmove event
-					move: dragMoveListener
-				},
+			if (this.overlayWindow) {
+				this.interactable = interact(this.overlayWindow).draggable({
+					listeners: {
+						// Call this function on every drag move event
+						move: dragMoveListener
+					},
 
-				// keep the element within the area of it's parent
-				modifiers: [
-					interact.modifiers.restrictRect({
-						endOnly: true
-					})
-				]
-			});
+					// Keep the element within the area of it's parent
+					modifiers: [
+						interact.modifiers.restrictRect({
+							endOnly: true
+						})
+					]
+				});
+			}
 		}
 	},
 
@@ -111,6 +115,17 @@ export default defineComponent({
 		modelValue: { required: true, type: Boolean }
 	},
 
+	/**
+	 * Setup for refs.
+	 *
+	 * @returns Refs
+	 */
+	setup() {
+		const overlayWindow: Ref<HTMLDivElement | null> = ref<HTMLDivElement | null>(null);
+
+		return { overlayWindow };
+	},
+
 	watch: {
 		modelValue: {
 			/**
@@ -121,8 +136,8 @@ export default defineComponent({
 			handler(value: boolean): void {
 				if (value) {
 					this.setInteract();
-				} else if (this.interacteale) {
-					interact(this.$el).unset();
+				} else if (this.interactable && this.overlayWindow) {
+					interact(this.overlayWindow).unset();
 				}
 			},
 			immediate: true
@@ -130,13 +145,3 @@ export default defineComponent({
 	}
 });
 </script>
-
-<style>
-.circle-btn {
-	border-radius: 50%;
-	width: 40px;
-	height: 40px;
-	min-width: 40px;
-	min-height: 40px;
-}
-</style>

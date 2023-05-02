@@ -10,6 +10,7 @@
  */
 
 import { PropType } from "vue";
+import { ExtractProps } from "../types";
 
 /**
  * Content type used in overlay content.
@@ -29,4 +30,28 @@ export const overlayContentProps = {
 		default: OverlayContentType.Block,
 		type: String as PropType<OverlayContentType>
 	}
+} as const;
+
+/**
+ * `this` type for overlay list methods.
+ */
+type OverlayListThis = ExtractProps<typeof overlayContentProps> & typeof overlayListMethods;
+
+/**
+ * Whether the item is displayed as a menu.
+ *
+ * @param this - The component instance
+ * @returns Whether the item is displayed as a menu
+ */
+function isMenu(this: OverlayListThis): boolean {
+	return this.contentType === OverlayContentType.Menu;
+}
+
+/**
+ * Methods for components of overlay list family.
+ */
+// Extract type
+// eslint-disable-next-line @typescript-eslint/typedef
+export const overlayListMethods = {
+	isMenu
 } as const;
