@@ -13,7 +13,6 @@
 /* eslint-disable jsdoc/require-jsdoc */
 
 // Overlay
-export * from "./util/overlay";
 export { default as OverlayClick } from "./overlay-click.vue";
 export { default as OverlayWindow } from "./overlay-window.vue";
 export { default as OverlayList } from "./overlay-list.vue";

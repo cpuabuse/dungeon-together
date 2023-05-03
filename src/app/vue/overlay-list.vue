@@ -19,8 +19,8 @@
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import { VList } from "vuetify/components";
+import { overlayListProps, useOverlayListShared } from "./core/overlay";
 import { OverlayContentItem } from "./types";
-import { overlayContentProps } from "./util";
 import { OverlayListBody, OverlayListItem } from ".";
 
 export default defineComponent({
@@ -38,13 +38,20 @@ export default defineComponent({
 	 * @returns Component props
 	 */
 	props: {
-		isCompact: {
-			default: false,
-			required: false,
-			type: Boolean
-		},
 		items: { required: true, type: Array as PropType<Array<OverlayContentItem>> },
-		...overlayContentProps
+		...overlayListProps
+	},
+
+	/**
+	 * Setup function.
+	 *
+	 * @param props - Reactive props
+	 * @returns Props and other
+	 */
+	// Infer setup
+	// eslint-disable-next-line @typescript-eslint/typedef
+	setup(props) {
+		return useOverlayListShared({ props });
 	}
 });
 </script>

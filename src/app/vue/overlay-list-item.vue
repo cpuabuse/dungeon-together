@@ -28,7 +28,13 @@
 				<VSwitch
 					v-if="item.type === ItemType.Switch"
 					:model-value="records[item.id]"
-					@update:model-value="value => setRecord({ id: item.id, value })"
+					@update:model-value="
+						value => {
+							if (typeof value == 'boolean') {
+								setRecord({ id: item.id, value });
+							}
+						}
+					"
 				/>
 			</template>
 
@@ -62,7 +68,13 @@
 						<VTabs
 							:key="item.tabs"
 							:model-value="getTab({ tabs: item.tabs })"
-							@update:model-value="value => setTab({ tabs: item.tabs, value })"
+							@update:model-value="
+								value => {
+									if (value === null || typeof value === 'number') {
+										setTab({ tabs: item.tabs, value });
+									}
+								}
+							"
 						>
 							<VTab v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
 						</VTabs>
@@ -98,10 +110,9 @@ import { DefineComponent, PropType, defineAsyncComponent, defineComponent } from
 import { VChip, VDivider, VList, VSwitch, VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
 import { ThisVueStore } from "../client/gui";
 import { OverlayWindowItemType as ItemType } from "../common/front";
-import OverlayListBody from "./overlay-list-body.vue";
+import { OverlayListType, overlayListProps, useOverlayListShared } from "./core/overlay";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 import { ElementSize, OverlayContentItem as Item, OverlayContentTabs as Tabs } from "./types";
-import { OverlayContentType, overlayContentProps } from "./util";
 
 /**
  * Async component for overlay list, since it's circular dependency.
@@ -121,7 +132,6 @@ type ElementSizePixels = {
 export default defineComponent({
 	components: {
 		OverlayList,
-		OverlayListBody,
 		OverlayListItemAssembler,
 		VChip,
 		VDivider,
@@ -140,7 +150,7 @@ export default defineComponent({
 		 * @returns Whether the item is displayed as a menu
 		 */
 		isMenu(): boolean {
-			return this.contentType === OverlayContentType.Menu;
+			return this.contentType === OverlayListType.Menu;
 		},
 
 		/**
@@ -308,7 +318,19 @@ export default defineComponent({
 			type: Boolean
 		},
 		items: { required: true, type: Array as PropType<Array<Item>> },
-		...overlayContentProps
+		...overlayListProps
+	},
+
+	/**
+	 * Setup function.
+	 *
+	 * @param props - Reactive props
+	 * @returns Props and other
+	 */
+	// Infer setup
+	// eslint-disable-next-line @typescript-eslint/typedef
+	setup(props) {
+		return useOverlayListShared({ props });
 	}
 });
 </script>

@@ -78,21 +78,16 @@ type OverlayContentItemGenerate<
 	Options extends object,
 	IsTypeOptional extends boolean = false,
 	HasData extends boolean = true
-> = HasData extends true
-	? Options &
-			(IsTypeOptional extends true
-				? Partial<OverlayContentItemGenerateType<Type>>
-				: OverlayContentItemGenerateType<Type>) & {
-				/**
-				 * Data value.
-				 */
-				data?: string | number;
-			}
-	: Options &
-			(IsTypeOptional extends true
-				? Partial<OverlayContentItemGenerateType<Type>>
-				: OverlayContentItemGenerateType<Type>);
-
+> = (HasData extends true
+	? {
+			/**
+			 * Data value.
+			 */
+			data?: string | number;
+	  }
+	: unknown) &
+	Options &
+	(IsTypeOptional extends true ? Partial<OverlayContentItemGenerateType<Type>> : OverlayContentItemGenerateType<Type>);
 /**
  * Type for item props.
  */

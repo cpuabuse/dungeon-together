@@ -63,6 +63,7 @@ import { OverlayWindowItemType as ItemType } from "../common/front";
 import { Uuid } from "../common/uuid";
 import { LogLevel } from "../core/error";
 import CompactToolbar from "./compact-toolbar.vue";
+import { OverlayListType } from "./core/overlay";
 import debugComponent from "./debug.vue";
 import OverlayClick from "./overlay-click.vue";
 import OverlayList from "./overlay-list.vue";
@@ -79,7 +80,6 @@ import {
 	OverlayContentTabs,
 	compactToolbarDataToMenuBaseProps
 } from "./types";
-import { OverlayContentType } from "./util";
 
 /**
  * Root component.
@@ -283,7 +283,7 @@ export default defineComponent({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let data = {
 			ItemType,
-			OverlayContentType,
+			OverlayListType,
 			debugContainer: false,
 			hpColor: new Color("#1F8C2F"),
 			isRightClickOverlayDisplayed: true,
