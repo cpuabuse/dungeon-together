@@ -36,105 +36,149 @@ export type OverlayContentTabs = Array<{
 }>;
 
 /**
+ * Shared options for content type.
+ */
+type OverlayContentTypeSharedOptions = {
+	/**
+	 * Informational list type.
+	 */
+	type?: ItemType;
+
+	/**
+	 * Name to display.
+	 */
+	name?: string;
+
+	/**
+	 * Optional icon.
+	 */
+	icon?: string;
+
+	/**
+	 * Description.
+	 */
+	description?: string;
+};
+
+/**
+ * Helper function for type generation.
+ */
+type OverlayContentItemGenerateType<Type extends ItemType> = {
+	/**
+	 * Type of the item.
+	 */
+	type: Type;
+};
+
+/**
+ * Type for item to generate.
+ */
+type OverlayContentItemGenerate<
+	Type extends ItemType,
+	Options extends object,
+	IsTypeOptional extends boolean = false,
+	HasData extends boolean = true
+> = HasData extends true
+	? Options &
+			(IsTypeOptional extends true
+				? Partial<OverlayContentItemGenerateType<Type>>
+				: OverlayContentItemGenerateType<Type>) & {
+				/**
+				 * Data value.
+				 */
+				data?: string | number;
+			}
+	: Options &
+			(IsTypeOptional extends true
+				? Partial<OverlayContentItemGenerateType<Type>>
+				: OverlayContentItemGenerateType<Type>);
+
+/**
  * Type for item props.
  */
 export type OverlayContentItem =
 	// Informational object, default
-	| {
-			/**
-			 * Informational list type.
-			 */
-			type?: ItemType.InfoElement;
+	OverlayContentTypeSharedOptions &
+		(
+			| OverlayContentItemGenerate<
+					ItemType.InfoElement,
+					{
+						/**
+						 * Badge value, if any.
+						 */
+						badge?: string | number;
 
-			/**
-			 * Badge value, if any.
-			 */
-			badge?: string | number;
+						/**
+						 * Data to display.
+						 */
+						data: string | number;
 
-			/**
-			 * Name to display.
-			 */
-			name: string;
+						/**
+						 * Optional UI actions.
+						 */
+						uiActions?: Array<OverlayContentUiActionParam>;
+					},
+					true
+			  >
+			| OverlayContentItemGenerate<
+					ItemType.Uuid,
+					{
+						/**
+						 * UUID value.
+						 */
+						uuid: string;
+					}
+			  >
+			| OverlayContentItemGenerate<
+					ItemType.Tab,
+					{
+						/**
+						 * Data to display.
+						 */
+						tabs: OverlayContentTabs;
 
-			/**
-			 * Data to display.
-			 */
-			data: string | number;
+						/**
+						 * Size of the tab.
+						 */
+						size?: ElementSize;
+					}
+			  >
+			| OverlayContentItemGenerate<
+					ItemType.Switch,
+					{
+						/**
+						 * Event ID.
+						 */
+						id: string;
+					},
+					false,
+					false
+			  >
+			| OverlayContentItemGenerate<
+					ItemType.Slot,
+					{
+						/**
+						 * Slot name.
+						 */
+						id: string;
+					}
+			  >
+		);
 
-			/**
-			 * Optional UI actions.
-			 */
-			uiActions?: Array<OverlayContentUiActionParam>;
+/**
+ * Overlay list prop.
+ */
+export type OverlayListProp = {
+	/**
+	 * Name of the list.
+	 */
+	name: string;
 
-			/**
-			 * Optional icon.
-			 */
-			icon?: string;
-	  }
-	| {
-			/**
-			 * UUID type.
-			 */
-			type: ItemType.Uuid;
-
-			/**
-			 * UUID value.
-			 */
-			uuid: string;
-
-			/**
-			 * Name to display.
-			 */
-			name: string;
-	  }
-	| {
-			/**
-			 * Tab type.
-			 */
-			type: ItemType.Tab;
-
-			/**
-			 * Data to display.
-			 */
-			tabs: OverlayContentTabs;
-
-			/**
-			 * Size of the tab.
-			 */
-			size?: ElementSize;
-	  }
-	| {
-			/**
-			 * Switch type.
-			 */
-			type: ItemType.Switch;
-
-			/**
-			 * Switch name.
-			 */
-			name: string;
-
-			/**
-			 * Event ID.
-			 */
-			id: string;
-	  }
-	| {
-			/**
-			 * Slot type.
-			 */
-			type: ItemType.Slot;
-
-			/**
-			 * Slot name.
-			 */
-			id: string;
-
-			/**
-			 * Slot name to display.
-			 */
-			name: string;
-	  };
+	/**
+	 * Items to display.
+	 */
+	items: Array<OverlayContentItem>;
+};
 
 /**
  * Size for the tab.
