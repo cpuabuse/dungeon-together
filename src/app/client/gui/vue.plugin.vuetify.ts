@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -10,6 +10,7 @@
  */
 
 import { library } from "@fortawesome/fontawesome-svg-core";
+import { far } from "@fortawesome/free-regular-svg-icons";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { App } from "vue";
@@ -21,6 +22,7 @@ import "../style/vuetify.scss";
 
 // Initialize FA
 library.add(fas);
+library.add(far);
 
 /**
  * Uses Vuetify plugin on app.

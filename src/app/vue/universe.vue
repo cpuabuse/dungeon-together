@@ -1,5 +1,5 @@
 <template>
-	<VApp style="background: none">
+	<VApp style="background: none" full-height>
 		<div class="app-content">
 			<div class="universe">Hello: {{ what }}</div>
 			<tsxtest />
@@ -10,36 +10,45 @@
 			</OverlayClick>
 
 			<statealertbox v-show="alert" />
-			<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
-			<OverlayWindow v-model="debugContainer" icon="fa-bug-slash">
-				<template #body>
-					<OverlayList :items="debugOverlayItems" :is-compact="false">
-						<template #test> test div dom </template>
-					</OverlayList>
-				</template>
-			</OverlayWindow>
-			<template v-for="shard in shards" :key="shard.shardUuid">
-				<OverlayWindow
-					:model-value="showStatContainers.get(shard.shardUuid) ?? false"
-					@update:model-value="value => showStatContainers.set(shard.shardUuid, value)"
-				>
+
+			<!-- Overlays -->
+			<div class="universe-overlay">
+				<OverlayWindow v-model="debugContainer" icon="fa-bug-slash">
 					<template #body>
-						<OverlayList :items="statsItems">
-							<template #stats>
-								<template v-for="unitUuid in Array.from(shard.players)[0]?.[1].dictionary?.units ?? []" :key="unitUuid">
-									<StatsBar
-										:color="hpColor"
-										name="HP"
-										:value="universe.getEntity({ entityUuid: unitUuid }).tempHealth"
-										:max-value="universe.getEntity({ entityUuid: unitUuid }).dictionary?.maxHealth"
-									/>
-									<StatsBar :color="mpColor" name="MP" />
-								</template>
-							</template>
+						<OverlayList :items="debugOverlayItems" :is-compact="false">
+							<template #test> test div dom </template>
 						</OverlayList>
 					</template>
 				</OverlayWindow>
-			</template>
+
+				<template v-for="shard in shards" :key="shard.shardUuid">
+					<OverlayWindow
+						:model-value="showStatContainers.get(shard.shardUuid) ?? false"
+						@update:model-value="value => showStatContainers.set(shard.shardUuid, value)"
+					>
+						<template #body>
+							<OverlayList :items="statsItems">
+								<template #stats>
+									<template
+										v-for="unitUuid in Array.from(shard.players)[0]?.[1].dictionary?.units ?? []"
+										:key="unitUuid"
+									>
+										<StatsBar
+											:color="hpColor"
+											name="HP"
+											:value="universe.getEntity({ entityUuid: unitUuid }).tempHealth"
+											:max-value="universe.getEntity({ entityUuid: unitUuid }).dictionary?.maxHealth"
+										/>
+										<StatsBar :color="mpColor" name="MP" />
+									</template>
+								</template>
+							</OverlayList>
+						</template>
+					</OverlayWindow>
+				</template>
+			</div>
+
+			<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
 		</div>
 	</VApp>
 </template>
@@ -359,8 +368,14 @@ export default defineComponent({
 	color: red;
 }
 
+.universe-overlay {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
+
 .app-content {
-	position: fixed;
+	position: absolute;
 	top: 0;
 	display: flex;
 	flex-direction: column-reverse;
