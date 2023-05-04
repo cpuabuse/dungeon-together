@@ -9,40 +9,22 @@
 	</template>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { defineProps } from "vue";
 import { VCard } from "vuetify/components";
-import { OverlayContentType, overlayContentProps } from "./util";
+import { OverlayListProps, overlayListProps, useOverlayListShared } from "./core/overlay";
 
-export default defineComponent({
-	components: {
-		VCard
-	},
-
-	computed: {
-		/**
-		 * Whether the content is wrapped in a card.
-		 *
-		 * @returns Whether the content is wrapped in a card
-		 */
-		isCardWrapped(): boolean {
-			return this.isMenu;
-		},
-
-		/**
-		 * Whether the item is displayed as a menu.
-		 *
-		 * @returns Whether the item is displayed as a menu
-		 */
-		isMenu(): boolean {
-			return this.contentType === OverlayContentType.Menu;
-		}
-	},
-
-	name: "OverlayListBody",
-
-	props: {
-		...overlayContentProps
-	}
+/**
+ * Props.
+ */
+const props: OverlayListProps = defineProps({
+	...overlayListProps
 });
+
+/**
+ * Shared logic.
+ */
+// Infer type
+// eslint-disable-next-line @typescript-eslint/typedef
+const { isCardWrapped, isMenu } = useOverlayListShared({ props });
 </script>

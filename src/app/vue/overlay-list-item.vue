@@ -6,90 +6,98 @@
 -->
 
 <template>
-	<template v-for="(item, itemKey) in items" :key="itemKey">
-		<!-- Force icon show if no name -->
-		<OverlayListItemAssembler
-			:icon="item.icon"
-			:name="item.name"
-			:is-hidden-icon-displayed-if-missing="!!items.some(itemElement => itemElement.icon)"
-			:content-type="contentType"
-			:is-hidden-caret-displayed-if-missing="
-				!!items.some(itemElement => itemElement.type === ItemType.Tab && itemElement?.data)
-			"
-		>
-			<!-- Inline slot -->
-			<template v-if="[ItemType.InfoElement, undefined, ItemType.Switch].includes(item.type)" #inline>
-				<!-- Info element -->
-				<VChip v-if="item.type === ItemType.InfoElement || item.type === undefined">
-					{{ item.data }}
-				</VChip>
+	<!-- Force icon show if no name -->
+	<OverlayListItemAssembler
+		:icon="item.icon"
+		:name="item.name"
+		:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
+		:content-type="contentType"
+		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
+	>
+		<!-- Inline slot -->
+		<template v-if="[ItemType.InfoElement, undefined, ItemType.Switch].includes(item.type)" #inline>
+			<!-- Info element -->
+			<VChip v-if="item.type === ItemType.InfoElement || item.type === undefined">
+				{{ item.data }}
+			</VChip>
 
-				<!-- Switch element -->
-				<VSwitch
-					v-if="item.type === ItemType.Switch"
-					:model-value="records[item.id]"
-					@update:model-value="value => setRecord({ id: item.id, value })"
-				/>
-			</template>
+			<!-- Switch element -->
+			<VSwitch
+				v-if="item.type === ItemType.Switch"
+				:model-value="records[item.id]"
+				@update:model-value="
+					value => {
+						if (typeof value == 'boolean') {
+							setRecord({ id: item.id, value });
+						}
+					}
+				"
+			/>
+		</template>
 
-			<!-- Content slot --->
-			<template v-if="[ItemType.Uuid, ItemType.Tab, ItemType.Slot].includes(item.type)" #content>
-				<!-- Uuid element -->
-				<highlightjs v-if="item.type === ItemType.Uuid" language="plaintext" :code="item.uuid" />
+		<!-- Content slot --->
+		<template v-if="[ItemType.Uuid, ItemType.Tab, ItemType.Slot].includes(item.type)" #content>
+			<!-- Uuid element -->
+			<highlightjs v-if="item.type === ItemType.Uuid" language="plaintext" :code="item.uuid" />
 
-				<!-- Tab element -->
-				<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
-				<template v-if="item.type === ItemType.Tab">
-					<!-- Menu -->
-					<template v-if="isMenu">
-						<VList :density="isCompact ? 'compact' : 'default'" class="py-0">
-							<template v-for="(tab, tabKey) in item.tabs" :key="tabKey">
-								<OverlayListItemAssembler :name="tab.name" :content-type="contentType">
-									<template #content>
-										<OverlayList :items="tab.items" :content-type="contentType">
-											<template v-for="slot in getSlots(tab)" #[slot]>
-												<slot :name="slot" />
-											</template>
-										</OverlayList>
-									</template>
-								</OverlayListItemAssembler>
-							</template>
-						</VList>
-					</template>
-
-					<!-- Block -->
-					<template v-else>
-						<VTabs
-							:key="item.tabs"
-							:model-value="getTab({ tabs: item.tabs })"
-							@update:model-value="value => setTab({ tabs: item.tabs, value })"
-						>
-							<VTab v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
-						</VTabs>
-
-						<VWindow
-							:model-value="getTab({ tabs: item.tabs })"
-							@update:model-value="value => setTab({ tabs: item.tabs, value })"
-						>
-							<VWindowItem v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">
-								<OverlayList :items="tab.items" :content-type="contentType">
-									<template v-for="slot in getSlots(tab)" #[slot]>
-										<slot :name="slot" />
-									</template>
-								</OverlayList>
-							</VWindowItem>
-						</VWindow>
-					</template>
+			<!-- Tab element -->
+			<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
+			<template v-if="item.type === ItemType.Tab">
+				<!-- Menu -->
+				<template v-if="isMenu">
+					<VList :density="isCompact ? 'compact' : 'default'" class="py-0">
+						<template v-for="(tab, tabKey) in item.tabs" :key="tabKey">
+							<OverlayListItemAssembler :name="tab.name" :content-type="contentType">
+								<template #content>
+									<OverlayList :items="tab.items" :content-type="contentType">
+										<template v-for="slot in getSlots(tab)" #[slot]>
+											<slot :name="slot" />
+										</template>
+									</OverlayList>
+								</template>
+							</OverlayListItemAssembler>
+						</template>
+					</VList>
 				</template>
 
-				<!-- Slot element -->
-				<slot v-if="item.type === ItemType.Slot" :name="item.id" />
-			</template>
-		</OverlayListItemAssembler>
+				<!-- Block -->
+				<template v-else>
+					<VTabs
+						:key="item.tabs"
+						:model-value="getTab({ tabs: item.tabs })"
+						@update:model-value="
+							value => {
+								if (value === null || typeof value === 'number') {
+									setTab({ tabs: item.tabs, value });
+								}
+							}
+						"
+					>
+						<VTab v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
+					</VTabs>
 
-		<template v-if="itemKey < items.length - 1">
-			<VDivider />
+					<VWindow
+						:model-value="getTab({ tabs: item.tabs })"
+						@update:model-value="value => setTab({ tabs: item.tabs, value })"
+					>
+						<VWindowItem v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">
+							<OverlayList :items="tab.items" :content-type="contentType">
+								<template v-for="slot in getSlots(tab)" #[slot]>
+									<slot :name="slot" />
+								</template>
+							</OverlayList>
+						</VWindowItem>
+					</VWindow>
+				</template>
+			</template>
+
+			<!-- Slot element -->
+			<slot v-if="item.type === ItemType.Slot" :name="item.id" />
 		</template>
+	</OverlayListItemAssembler>
+
+	<template v-if="!isLast">
+		<VDivider />
 	</template>
 </template>
 
@@ -98,10 +106,9 @@ import { DefineComponent, PropType, defineAsyncComponent, defineComponent } from
 import { VChip, VDivider, VList, VSwitch, VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
 import { ThisVueStore } from "../client/gui";
 import { OverlayWindowItemType as ItemType } from "../common/front";
-import OverlayListBody from "./overlay-list-body.vue";
+import { OverlayListType, overlayListProps, useOverlayListShared } from "./core/overlay";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 import { ElementSize, OverlayContentItem as Item, OverlayContentTabs as Tabs } from "./types";
-import { OverlayContentType, overlayContentProps } from "./util";
 
 /**
  * Async component for overlay list, since it's circular dependency.
@@ -121,7 +128,6 @@ type ElementSizePixels = {
 export default defineComponent({
 	components: {
 		OverlayList,
-		OverlayListBody,
 		OverlayListItemAssembler,
 		VChip,
 		VDivider,
@@ -140,7 +146,7 @@ export default defineComponent({
 		 * @returns Whether the item is displayed as a menu
 		 */
 		isMenu(): boolean {
-			return this.contentType === OverlayContentType.Menu;
+			return this.contentType === OverlayListType.Menu;
 		},
 
 		/**
@@ -307,8 +313,27 @@ export default defineComponent({
 			required: false,
 			type: Boolean
 		},
+		isHiddenCaretDisplayedIfMissing: { default: false, type: Boolean },
+		isHiddenIconDisplayedIfMissing: { default: false, type: Boolean },
+		isLast: { default: false, type: Boolean },
+		item: {
+			required: true,
+			type: Object as PropType<Item>
+		},
 		items: { required: true, type: Array as PropType<Array<Item>> },
-		...overlayContentProps
+		...overlayListProps
+	},
+
+	/**
+	 * Setup function.
+	 *
+	 * @param props - Reactive props
+	 * @returns Props and other
+	 */
+	// Infer setup
+	// eslint-disable-next-line @typescript-eslint/typedef
+	setup(props) {
+		return useOverlayListShared({ props });
 	}
 });
 </script>

@@ -40,8 +40,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { VCol, VIcon, VListItemTitle, VRow, VSpacer } from "vuetify/components";
+import { OverlayListType, overlayListProps } from "./core/overlay";
 import OverlayContentItemContainer from "./overlay-list-item-wrapper.vue";
-import { OverlayContentType, overlayContentProps } from "./util";
 
 export default defineComponent({
 	components: {
@@ -81,7 +81,7 @@ export default defineComponent({
 		 */
 		hasHeader(): boolean {
 			// Skips empty blocks
-			return !(this.contentType === OverlayContentType.Block && this.isHeaderEmpty);
+			return !(this.contentType === OverlayListType.Block && this.isHeaderEmpty);
 		},
 
 		/**
@@ -126,7 +126,7 @@ export default defineComponent({
 		 * @returns Whether the item is displayed as a menu
 		 */
 		isMenu(): boolean {
-			return this.contentType === OverlayContentType.Menu;
+			return this.contentType === OverlayListType.Menu;
 		}
 	},
 
@@ -145,7 +145,7 @@ export default defineComponent({
 			default: undefined,
 			type: String
 		},
-		...overlayContentProps
+		...overlayListProps
 	}
 });
 </script>

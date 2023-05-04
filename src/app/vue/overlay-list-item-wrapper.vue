@@ -47,7 +47,7 @@
 <script lang="ts">
 import { PropType, defineComponent, mergeProps } from "vue";
 import { VListItem, VMenu } from "vuetify/components";
-import { OverlayContentType, overlayContentProps } from "./util";
+import { OverlayListType, overlayListProps } from "./core/overlay";
 
 export default defineComponent({
 	components: { VListItem, VMenu },
@@ -59,7 +59,7 @@ export default defineComponent({
 		 * @returns Whether the item is displayed as a menu
 		 */
 		isMenu(): boolean {
-			return this.contentType === OverlayContentType.Menu;
+			return this.contentType === OverlayListType.Menu;
 		}
 	},
 
@@ -84,7 +84,7 @@ export default defineComponent({
 	 * @returns Component props
 	 */
 	props: {
-		...overlayContentProps,
+		...overlayListProps,
 
 		listItemClass: {
 			default: new Object(),
