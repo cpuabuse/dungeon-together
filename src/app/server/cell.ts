@@ -8,9 +8,9 @@
  */
 
 import { Uuid } from "../common/uuid";
-import { Vector } from "../common/vector";
 import { CoreArgIds } from "../core/arg";
-import { CellPathExtended, CoreCellArg, CoreCellClassFactory } from "../core/cell";
+import { CoreCellArg, CoreCellClassFactory } from "../core/cell";
+import { EntityPathExtended } from "../core/entity";
 import { CoreCellArgParentIds } from "../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ServerBaseClass, ServerBaseConstructorParams } from "./base";
@@ -125,6 +125,53 @@ export function ServerCellFactory({
 			this.events = new Array<CellEvent>();
 		}
 	}
+
+	/**
+	 * Detaches server entity.
+	 *
+	 * @param this - Server cell
+	 * @param path - Entity path
+	 */
+	ServerCell.prototype.detachEntity = function (this: ServerCell, path: EntityPathExtended): void {
+		let entityToDetach: ServerEntity = this.getEntity(path);
+
+		// Notify other entities in cell; Done first so that other entities can locate the entity
+		this.entities.forEach(entityToNotify => {
+			// Skip this entity because it will be notified separately, and it is still not detached
+			if (entityToNotify.entityUuid !== entityToDetach.entityUuid) {
+				entityToNotify.kind.onCellDetachEntity(entityToDetach);
+			}
+		});
+
+		// Notify entity itself of detachment
+		entityToDetach.kind.onDetachEntity();
+
+		// Super last
+		(Object.getPrototypeOf(ServerCell.prototype) as ServerCell).detachEntity.call(this, path);
+	};
+
+	/**
+	 * Attaches server entity.
+	 *
+	 * @param this - Server cell
+	 * @param path - Entity path
+	 * @param entityToAttach - Entity to attach
+	 */
+	ServerCell.prototype.attachEntity = function (this: ServerCell, entityToAttach: ServerEntity): void {
+		// Super first
+		(Object.getPrototypeOf(ServerCell.prototype) as ServerCell).attachEntity.call(this, entityToAttach);
+
+		// Notify entity itself of attachment
+		entityToAttach.kind.onAttachEntity();
+
+		// Notify other entities in cell
+		this.entities.forEach(entityToNotify => {
+			// Skip this entity because it will be notified separately
+			if (entityToNotify.entityUuid !== entityToAttach.entityUuid) {
+				entityToNotify.kind.onCellAttachEntity(entityToAttach);
+			}
+		});
+	};
 
 	// Return class
 	return ServerCell;

@@ -220,6 +220,28 @@ export function BaseEntityKindClassFactory({
 		}
 
 		/**
+		 * Will be called once another entity is attached to the same cell.
+		 *
+		 * @param entity - Entity that was attached to the cell
+		 */
+		// Here just to show the function to extending classes
+		// eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+		public onCellAttachEntity(entity: ServerEntity): void {
+			// Does nothing
+		}
+
+		/**
+		 * Will be called once another entity is detached from the same cell.
+		 *
+		 * @param entity - Entity that will be detached from the cell
+		 */
+		// Here just to show the function to extending classes
+		// eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+		public onCellDetachEntity(entity: ServerEntity): void {
+			// Does nothing
+		}
+
+		/**
 		 * Will be called on creation of entity.
 		 */
 		// Here just to show the function to extending classes
