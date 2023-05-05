@@ -1,12 +1,14 @@
 <!-- Provides a card wrapper -->
 <template>
-	<VCard v-if="isCardWrapped" class="overflow-hidden w-100" :rounded="isMenu ? 'sm' : true">
-		<slot />
-	</VCard>
+	<div>
+		<VCard v-if="isCardWrapped" class="overflow-hidden w-100" :rounded="isMenu ? 'sm' : true">
+			<slot />
+		</VCard>
 
-	<template v-else>
-		<slot />
-	</template>
+		<template v-else>
+			<slot />
+		</template>
+	</div>
 </template>
 
 <script setup lang="ts">

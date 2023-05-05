@@ -10,15 +10,13 @@
 					:item="item"
 					:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
 					:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
-					:items="items"
 					:content-type="contentType"
 					:is-last="itemKey + 1 >= items.length"
 					:is-compact="isCompact"
 				>
-					<!-- Rather blank than underscore -->
-					<!-- eslint-disable-next-line vue/valid-v-for -->
-					<template v-for="(slot, name) in $slots">
-						<slot :name="name" />
+					<!-- Since slots would need to be further filtered down the line, pass all -->
+					<template v-for="(slot, name) in $slots" #[name]="props">
+						<slot :name="name" v-bind="props" />
 					</template>
 				</OverlayListItem>
 			</template>
@@ -31,7 +29,7 @@ import { PropType, defineComponent } from "vue";
 import { VList } from "vuetify/components";
 import { OverlayWindowItemType as ItemType } from "../common/front";
 import { overlayListProps, useOverlayListShared } from "./core/overlay";
-import { OverlayContentItem } from "./types";
+import { OverlayContentItem as Item } from "./types";
 import { OverlayListBody, OverlayListItem } from ".";
 
 export default defineComponent({
@@ -69,7 +67,7 @@ export default defineComponent({
 	 * @returns Component props
 	 */
 	props: {
-		items: { required: true, type: Array as PropType<Array<OverlayContentItem>> },
+		items: { required: true, type: Array as PropType<Array<Item>> },
 
 		...overlayListProps
 	},

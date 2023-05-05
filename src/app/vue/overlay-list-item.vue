@@ -320,7 +320,6 @@ export default defineComponent({
 			required: true,
 			type: Object as PropType<Item>
 		},
-		items: { required: true, type: Array as PropType<Array<Item>> },
 		...overlayListProps
 	},
 
