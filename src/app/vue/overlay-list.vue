@@ -7,12 +7,13 @@
 		<VList :density="isCompact ? 'compact' : 'default'" class="py-0">
 			<template v-for="(item, itemKey) in items" :key="itemKey">
 				<OverlayListItem
-					:item="item"
-					:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
-					:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
-					:content-type="contentType"
-					:is-last="itemKey + 1 >= items.length"
-					:is-compact="isCompact"
+					v-bind="{
+						...staticProps,
+						item,
+						isHiddenIconDisplayedIfMissing,
+						isHiddenCaretDisplayedIfMissing,
+						isLast: itemKey + 1 >= items.length
+					}"
 				>
 					<!-- Since slots would need to be further filtered down the line, pass all -->
 					<template v-for="(slot, name) in $slots" #[name]="props">
@@ -28,7 +29,7 @@
 import { PropType, defineComponent } from "vue";
 import { VList } from "vuetify/components";
 import { OverlayWindowItemType as ItemType } from "../common/front";
-import { overlayListProps, useOverlayListShared } from "./core/overlay";
+import { overlayListSharedProps, useOverlayListShared } from "./core/overlay";
 import { OverlayContentItem as Item } from "./types";
 import { OverlayListBody, OverlayListItem } from ".";
 
@@ -69,7 +70,7 @@ export default defineComponent({
 	props: {
 		items: { required: true, type: Array as PropType<Array<Item>> },
 
-		...overlayListProps
+		...overlayListSharedProps
 	},
 
 	/**

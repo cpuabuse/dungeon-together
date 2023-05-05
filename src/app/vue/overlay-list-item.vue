@@ -106,14 +106,19 @@ import { DefineComponent, PropType, defineAsyncComponent, defineComponent } from
 import { VChip, VDivider, VList, VSwitch, VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
 import { ThisVueStore } from "../client/gui";
 import { OverlayWindowItemType as ItemType } from "../common/front";
-import { OverlayListType, overlayListProps, useOverlayListShared } from "./core/overlay";
+import {
+	OverlayListType,
+	overlayListChildSharedProps,
+	overlayListSharedProps,
+	useOverlayListShared
+} from "./core/overlay";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 import { ElementSize, OverlayContentItem as Item, OverlayContentTabs as Tabs } from "./types";
 
 /**
  * Async component for overlay list, since it's circular dependency.
  */
-// BUG: Vetur doesn't like circular dependencies, so we manually define component type
+// BUG: Inference doesn't like circular dependencies, so we manually define component type
 const OverlayList: DefineComponent = defineAsyncComponent(
 	() => import("./overlay-list.vue")
 ) as unknown as DefineComponent;
@@ -313,14 +318,12 @@ export default defineComponent({
 			required: false,
 			type: Boolean
 		},
-		isHiddenCaretDisplayedIfMissing: { default: false, type: Boolean },
-		isHiddenIconDisplayedIfMissing: { default: false, type: Boolean },
-		isLast: { default: false, type: Boolean },
 		item: {
 			required: true,
 			type: Object as PropType<Item>
 		},
-		...overlayListProps
+		...overlayListSharedProps,
+		...overlayListChildSharedProps
 	},
 
 	/**

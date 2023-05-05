@@ -26,7 +26,7 @@ export enum OverlayListType {
  */
 // Extract type
 // eslint-disable-next-line @typescript-eslint/typedef
-export const overlayListProps = {
+export const overlayListSharedProps = {
 	contentType: {
 		default: OverlayListType.Block,
 		type: String as PropType<OverlayListType>
@@ -34,9 +34,25 @@ export const overlayListProps = {
 } as const;
 
 /**
+ * Base props for overlay list item, body and descendants.
+ */
+// Extract type
+// eslint-disable-next-line @typescript-eslint/typedef
+export const overlayListChildSharedProps = {
+	/** Do not fill by default. */
+	isHiddenCaretDisplayedIfMissing: { default: false, type: Boolean },
+
+	/** Do not fill by default. */
+	isHiddenIconDisplayedIfMissing: { default: false, type: Boolean },
+
+	/** Default to single element. */
+	isLast: { default: true, type: Boolean }
+};
+
+/**
  * Prop types for overlay list family.
  */
-export type OverlayListProps = ExtractPropTypes<typeof overlayListProps>;
+export type OverlayListSharedProps = ExtractPropTypes<typeof overlayListSharedProps>;
 
 /**
  * Methods for overlay components.
@@ -52,7 +68,7 @@ export function useOverlayListShared({
 	/**
 	 * Props used.
 	 */
-	props: OverlayListProps;
+	props: OverlayListSharedProps;
 }) {
 	const isMenu: ComputedRef<boolean> = computed((): boolean => {
 		return [OverlayListType.Menu, OverlayListType.MenuCompact].includes(props.contentType);
@@ -67,9 +83,16 @@ export function useOverlayListShared({
 		return isMenu.value;
 	});
 
+	// Infer complex type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const staticProps = computed(() => {
+		return { contentType: props.contentType };
+	});
+
 	return {
 		isCardWrapped,
 		isCompact,
-		isMenu
+		isMenu,
+		staticProps
 	};
 }

@@ -12,15 +12,14 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from "vue";
 import { VCard } from "vuetify/components";
-import { OverlayListProps, overlayListProps, useOverlayListShared } from "./core/overlay";
+import { OverlayListSharedProps, overlayListSharedProps, useOverlayListShared } from "./core/overlay";
 
 /**
  * Props.
  */
-const props: OverlayListProps = defineProps({
-	...overlayListProps
+const props: OverlayListSharedProps = defineProps({
+	...overlayListSharedProps
 });
 
 /**

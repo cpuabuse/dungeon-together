@@ -47,7 +47,7 @@
 <script lang="ts">
 import { PropType, defineComponent, mergeProps } from "vue";
 import { VListItem, VMenu } from "vuetify/components";
-import { OverlayListType, overlayListProps } from "./core/overlay";
+import { OverlayListType, overlayListSharedProps } from "./core/overlay";
 
 export default defineComponent({
 	components: { VListItem, VMenu },
@@ -84,7 +84,7 @@ export default defineComponent({
 	 * @returns Component props
 	 */
 	props: {
-		...overlayListProps,
+		...overlayListSharedProps,
 
 		listItemClass: {
 			default: new Object(),
