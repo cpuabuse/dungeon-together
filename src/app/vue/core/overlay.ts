@@ -10,11 +10,205 @@
  */
 
 import { ComputedRef, ExtractPropTypes, PropType, computed } from "vue";
+import { OverlayContentUiActionParam } from "../types";
+
+/**
+ * Size for the tab.
+ */
+export enum ElementSize {
+	/**
+	 * Small tab.
+	 */
+	Small = "sm",
+
+	/**
+	 * Medium tab.
+	 */
+	Medium = "md",
+
+	/**
+	 * Large tab.
+	 */
+	Large = "lg"
+}
+
+/**
+ * Possible item types.
+ */
+export enum OverlayListItemEntryType {
+	/**
+	 * Informational element.
+	 */
+	InfoElement,
+
+	/**
+	 * Type for UUID representation.
+	 */
+	Uuid,
+
+	/**
+	 * Type for tab.
+	 */
+	Tab,
+
+	/**
+	 * Type for switch element.
+	 */
+	Switch,
+
+	/**
+	 * Type for slot.
+	 */
+	Slot
+}
+
+/**
+ * Shared options for content type.
+ */
+type OverlayListItemEntrySharedRecords = {
+	/**
+	 * Informational list type.
+	 */
+	type?: OverlayListItemEntryType;
+
+	/**
+	 * Name to display.
+	 */
+	name?: string;
+
+	/**
+	 * Optional icon.
+	 */
+	icon?: string;
+
+	/**
+	 * Description.
+	 */
+	description?: string;
+};
+
+/**
+ * Tabs type.
+ */
+export type OverlayContentTabs = Array<{
+	/**
+	 * Name to display.
+	 */
+	name: string;
+
+	/**
+	 * Items to display.
+	 */
+	items: Array<OverlayListItemEntry>;
+}>;
+
+/**
+ * Helper function for type generation.
+ */
+type OverlayListItemEntryGenerateTypeRecord<Type extends OverlayListItemEntryType> = {
+	/**
+	 * Type of the item.
+	 */
+	type: Type;
+};
+
+/**
+ * Type for item to generate.
+ */
+export type OverlayContentItemEntryGenerate<
+	Type extends OverlayListItemEntryType,
+	Options extends object,
+	IsTypeOptional extends boolean = false,
+	HasData extends boolean = true
+> = (HasData extends true
+	? {
+			/**
+			 * Data value.
+			 */
+			data?: string | number;
+	  }
+	: unknown) &
+	Options &
+	(IsTypeOptional extends true
+		? Partial<OverlayListItemEntryGenerateTypeRecord<Type>>
+		: OverlayListItemEntryGenerateTypeRecord<Type>);
+
+/**
+ * Type for item props.
+ */
+export type OverlayListItemEntry =
+	// Informational object, default
+	OverlayListItemEntrySharedRecords &
+		(
+			| OverlayContentItemEntryGenerate<
+					OverlayListItemEntryType.InfoElement,
+					{
+						/**
+						 * Badge value, if any.
+						 */
+						badge?: string | number;
+
+						/**
+						 * Data to display.
+						 */
+						data: string | number;
+
+						/**
+						 * Optional UI actions.
+						 */
+						uiActions?: Array<OverlayContentUiActionParam>;
+					},
+					true
+			  >
+			| OverlayContentItemEntryGenerate<
+					OverlayListItemEntryType.Uuid,
+					{
+						/**
+						 * UUID value.
+						 */
+						uuid: string;
+					}
+			  >
+			| OverlayContentItemEntryGenerate<
+					OverlayListItemEntryType.Tab,
+					{
+						/**
+						 * Data to display.
+						 */
+						tabs: OverlayContentTabs;
+
+						/**
+						 * Size of the tab.
+						 */
+						size?: ElementSize;
+					}
+			  >
+			| OverlayContentItemEntryGenerate<
+					OverlayListItemEntryType.Switch,
+					{
+						/**
+						 * Event ID.
+						 */
+						id: string;
+					},
+					false,
+					false
+			  >
+			| OverlayContentItemEntryGenerate<
+					OverlayListItemEntryType.Slot,
+					{
+						/**
+						 * Slot name.
+						 */
+						id: string;
+					}
+			  >
+		);
 
 /**
  * Content type used in overlay content.
  */
-export enum OverlayListType {
+export enum OverlayType {
 	Block = "block",
 	BlockCompact = "block-compact",
 	Menu = "menu",
@@ -28,8 +222,8 @@ export enum OverlayListType {
 // eslint-disable-next-line @typescript-eslint/typedef
 export const overlayListSharedProps = {
 	contentType: {
-		default: OverlayListType.Block,
-		type: String as PropType<OverlayListType>
+		default: OverlayType.Block,
+		type: String as PropType<OverlayType>
 	}
 } as const;
 
@@ -71,12 +265,12 @@ export function useOverlayListShared({
 	props: OverlayListSharedProps;
 }) {
 	const isMenu: ComputedRef<boolean> = computed((): boolean => {
-		return [OverlayListType.Menu, OverlayListType.MenuCompact].includes(props.contentType);
+		return [OverlayType.Menu, OverlayType.MenuCompact].includes(props.contentType);
 	});
 
 	// Infer type
 	const isCompact: ComputedRef<boolean> = computed((): boolean => {
-		return [OverlayListType.BlockCompact, OverlayListType.MenuCompact].includes(props.contentType);
+		return [OverlayType.BlockCompact, OverlayType.MenuCompact].includes(props.contentType);
 	});
 
 	const isCardWrapped: ComputedRef<boolean> = computed((): boolean => {

@@ -31,7 +31,7 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { VBtn, VCard, VIcon, VToolbar, VToolbarTitle } from "vuetify/components";
-import { useDraggable } from "./core/draggable";
+import { useDraggable } from "../core/draggable";
 
 export default defineComponent({
 	components: { VBtn, VCard, VIcon, VToolbar, VToolbarTitle },

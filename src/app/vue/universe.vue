@@ -59,15 +59,18 @@ import { defineComponent } from "vue";
 import { VApp } from "vuetify/components";
 import { ThisVueStore } from "../client/gui";
 import { ClientShard } from "../client/shard";
-import { OverlayWindowItemType as ItemType } from "../common/front";
 import { Uuid } from "../common/uuid";
 import { LogLevel } from "../core/error";
 import CompactToolbar from "./compact-toolbar.vue";
-import { OverlayListType } from "./core/overlay";
+import { OverlayClick, OverlayList, OverlayWindow } from "./components";
+import {
+	ElementSize,
+	OverlayContentTabs,
+	OverlayListItemEntry,
+	OverlayListItemEntryType,
+	OverlayType
+} from "./core/overlay";
 import debugComponent from "./debug.vue";
-import OverlayClick from "./overlay-click.vue";
-import OverlayList from "./overlay-list.vue";
-import OverlayWindow from "./overlay-window.vue";
 import stateAlertBoxComponent from "./state-alert-box.vue";
 import StatsBar from "./stats-bar.vue";
 import tsxTestComponent from "./tsx/test.vue";
@@ -75,9 +78,6 @@ import {
 	CompactToolbarData,
 	CompactToolbarMenu,
 	CompactToolbarMenuBaseProps,
-	ElementSize,
-	OverlayContentItem,
-	OverlayContentTabs,
 	compactToolbarDataToMenuBaseProps
 } from "./types";
 
@@ -120,10 +120,10 @@ export default defineComponent({
 			return this.shards.map((shard, index) => {
 				return {
 					items: [
-						{ name: "shardUuid", type: ItemType.Uuid, uuid: shard.shardUuid },
+						{ name: "shardUuid", type: OverlayListItemEntryType.Uuid, uuid: shard.shardUuid },
 						{
 							name: "playerUuid",
-							type: ItemType.Uuid,
+							type: OverlayListItemEntryType.Uuid,
 							uuid: Array.from(shard.players)?.[0]?.[1]?.playerUuid ?? "undefined"
 						}
 					],
@@ -137,15 +137,15 @@ export default defineComponent({
 		 *
 		 * @returns Overlay container items
 		 */
-		debugOverlayItems(): Array<OverlayContentItem> {
+		debugOverlayItems(): Array<OverlayListItemEntry> {
 			return [
 				{ data: "14", icon: "fa-bug-slash", name: "Info1" },
 				{ data: "2", name: "Info2" },
-				{ name: "Player", type: ItemType.Uuid, uuid: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" },
+				{ name: "Player", type: OverlayListItemEntryType.Uuid, uuid: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" },
 				{
 					size: ElementSize.Medium,
 					tabs: this.debugItemsShardTabs,
-					type: ItemType.Tab
+					type: OverlayListItemEntryType.Tab
 				}
 			];
 		},
@@ -282,8 +282,8 @@ export default defineComponent({
 		// Infer type
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let data = {
-			ItemType,
-			OverlayListType,
+			ItemType: OverlayListItemEntryType,
+			OverlayListType: OverlayType,
 			debugContainer: false,
 			hpColor: new Color("#1F8C2F"),
 			isRightClickOverlayDisplayed: true,
@@ -292,7 +292,7 @@ export default defineComponent({
 			shards: new Array<ClientShard>(),
 			showStatContainers: new Map<Uuid, boolean>(),
 			statsItems: [
-				{ id: "stats", name: "Stats", type: ItemType.Slot },
+				{ id: "stats", name: "Stats", type: OverlayListItemEntryType.Slot },
 				{ data: "1", name: "Attack" },
 				{ data: "3", name: "Attack" }
 			],

@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { VCard } from "vuetify/components";
-import { OverlayListSharedProps, overlayListSharedProps, useOverlayListShared } from "./core/overlay";
+import { OverlayListSharedProps, overlayListSharedProps, useOverlayListShared } from "../core/overlay";
 
 /**
  * Props.

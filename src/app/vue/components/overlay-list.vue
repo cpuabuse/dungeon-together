@@ -28,9 +28,12 @@
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import { VList } from "vuetify/components";
-import { OverlayWindowItemType as ItemType } from "../common/front";
-import { overlayListSharedProps, useOverlayListShared } from "./core/overlay";
-import { OverlayContentItem as Item } from "./types";
+import {
+	OverlayListItemEntry as Item,
+	OverlayListItemEntryType,
+	overlayListSharedProps,
+	useOverlayListShared
+} from "../core/overlay";
 import { OverlayListBody, OverlayListItem } from ".";
 
 export default defineComponent({
@@ -47,7 +50,7 @@ export default defineComponent({
 		 * @returns Whether if hidden caret is displayed if missing
 		 */
 		isHiddenCaretDisplayedIfMissing(): boolean {
-			return this.items.some(itemElement => itemElement.type === ItemType.Tab && itemElement?.data);
+			return this.items.some(itemElement => itemElement.type === OverlayListItemEntryType.Tab && itemElement?.data);
 		},
 
 		/**

@@ -15,15 +15,18 @@
 		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
 	>
 		<!-- Inline slot -->
-		<template v-if="[ItemType.InfoElement, undefined, ItemType.Switch].includes(item.type)" #inline>
+		<template
+			v-if="[OverlayListItemEntryType.InfoElement, undefined, OverlayListItemEntryType.Switch].includes(item.type)"
+			#inline
+		>
 			<!-- Info element -->
-			<VChip v-if="item.type === ItemType.InfoElement || item.type === undefined">
+			<VChip v-if="item.type === OverlayListItemEntryType.InfoElement || item.type === undefined">
 				{{ item.data }}
 			</VChip>
 
 			<!-- Switch element -->
 			<VSwitch
-				v-if="item.type === ItemType.Switch"
+				v-if="item.type === OverlayListItemEntryType.Switch"
 				:model-value="records[item.id]"
 				@update:model-value="
 					value => {
@@ -36,13 +39,18 @@
 		</template>
 
 		<!-- Content slot --->
-		<template v-if="[ItemType.Uuid, ItemType.Tab, ItemType.Slot].includes(item.type)" #content>
+		<template
+			v-if="
+				[OverlayListItemEntryType.Uuid, OverlayListItemEntryType.Tab, OverlayListItemEntryType.Slot].includes(item.type)
+			"
+			#content
+		>
 			<!-- Uuid element -->
-			<highlightjs v-if="item.type === ItemType.Uuid" language="plaintext" :code="item.uuid" />
+			<highlightjs v-if="item.type === OverlayListItemEntryType.Uuid" language="plaintext" :code="item.uuid" />
 
 			<!-- Tab element -->
 			<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
-			<template v-if="item.type === ItemType.Tab">
+			<template v-if="item.type === OverlayListItemEntryType.Tab">
 				<!-- Menu -->
 				<template v-if="isMenu">
 					<VList :density="isCompact ? 'compact' : 'default'" class="py-0">
@@ -92,7 +100,7 @@
 			</template>
 
 			<!-- Slot element -->
-			<slot v-if="item.type === ItemType.Slot" :name="item.id" />
+			<slot v-if="item.type === OverlayListItemEntryType.Slot" :name="item.id" />
 		</template>
 	</OverlayListItemAssembler>
 
@@ -104,16 +112,18 @@
 <script lang="ts">
 import { DefineComponent, PropType, defineAsyncComponent, defineComponent } from "vue";
 import { VChip, VDivider, VList, VSwitch, VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
-import { ThisVueStore } from "../client/gui";
-import { OverlayWindowItemType as ItemType } from "../common/front";
+import { ThisVueStore } from "../../client/gui";
 import {
-	OverlayListType,
+	ElementSize,
+	OverlayListItemEntry as Item,
+	OverlayListItemEntryType,
+	OverlayType,
+	OverlayContentTabs as Tabs,
 	overlayListChildSharedProps,
 	overlayListSharedProps,
 	useOverlayListShared
-} from "./core/overlay";
+} from "../core/overlay";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
-import { ElementSize, OverlayContentItem as Item, OverlayContentTabs as Tabs } from "./types";
 
 /**
  * Async component for overlay list, since it's circular dependency.
@@ -151,7 +161,7 @@ export default defineComponent({
 		 * @returns Whether the item is displayed as a menu
 		 */
 		isMenu(): boolean {
-			return this.contentType === OverlayListType.Menu;
+			return this.contentType === OverlayType.Menu;
 		},
 
 		/**
@@ -177,7 +187,7 @@ export default defineComponent({
 		};
 
 		return {
-			ItemType,
+			OverlayListItemType: OverlayListItemEntryType,
 			defaultElementSize: ElementSize.Medium,
 			// Fallback when the size in pixels is not defined for the element size
 			defaultElementSizePixels: 300,
@@ -205,9 +215,9 @@ export default defineComponent({
 		}): Set<string> {
 			let result: Set<string> = new Set();
 			items
-				.filter(item => item.type === ItemType.Slot || item.type === ItemType.Tab)
+				.filter(item => item.type === OverlayListItemEntryType.Slot || item.type === OverlayListItemEntryType.Tab)
 				.forEach(item => {
-					if (item.type === ItemType.Slot) {
+					if (item.type === OverlayListItemEntryType.Slot) {
 						result.add(item.id);
 						return;
 					}
@@ -218,7 +228,7 @@ export default defineComponent({
 							/**
 							 * Tab type.
 							 */
-							type: ItemType.Tab;
+							type: OverlayListItemEntryType.Tab;
 						}
 					).tabs.forEach(tab => {
 						result = new Set([...result, ...this.getSlots(tab)]);
@@ -296,7 +306,7 @@ export default defineComponent({
 			/**
 			 * Tab type.
 			 */
-			type: ItemType.Tab;
+			type: OverlayListItemEntryType.Tab;
 		}) {
 			return {
 				// Gets the size in pixels for the element size, or the default size in pixels
