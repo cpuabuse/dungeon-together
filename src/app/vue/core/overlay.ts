@@ -206,6 +206,12 @@ export type OverlayListItemEntry =
 		);
 
 /**
+ * Extract entry from a type.
+ */
+export type OverlayListItemEntryExtract<Type extends OverlayListItemEntryType> = OverlayListItemEntry &
+	OverlayListItemEntryGenerateTypeRecord<Type>;
+
+/**
  * Content type used in overlay content.
  */
 export enum OverlayType {
