@@ -187,7 +187,7 @@ export default defineComponent({
 		};
 
 		return {
-			OverlayListItemType: OverlayListItemEntryType,
+			OverlayListItemEntryType,
 			defaultElementSize: ElementSize.Medium,
 			// Fallback when the size in pixels is not defined for the element size
 			defaultElementSizePixels: 300,
