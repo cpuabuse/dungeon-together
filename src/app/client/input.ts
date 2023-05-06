@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -20,7 +20,7 @@ export const upSymbol: symbol = Symbol("up");
 export const downSymbol: symbol = Symbol("down");
 
 /**
- * Identifier for the righ movement input.
+ * Identifier for the right movement input.
  */
 export const rightSymbol: symbol = Symbol("right");
 

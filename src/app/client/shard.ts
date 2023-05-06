@@ -345,6 +345,9 @@ export function ClientShardFactory({
 
 		// Basically show grid
 		grid.shard = this;
+		grid.levelIndex.forEach(container => {
+			this.gridContainer.addChild(container);
+		});
 
 		grid.cells.forEach(cell => {
 			grid.showCell(cell);

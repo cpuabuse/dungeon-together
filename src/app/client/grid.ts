@@ -7,6 +7,7 @@
  * @file Cells on screen.
  */
 
+import { Container } from "pixi.js";
 import { CoreArgIds } from "../core/arg";
 import { CellPathOwn } from "../core/cell";
 import { CoreGridArg, CoreGridClassFactory } from "../core/grid";
@@ -46,6 +47,16 @@ export function ClientGridClassFactory({
 		options: clientOptions
 	}) {
 		/**
+		 * Display of current level.
+		 */
+		public currentLevel: number = 0;
+
+		/**
+		 * An array of containers sorted by the depth.
+		 */
+		public levelIndex: Array<Container>;
+
+		/**
 		 * Parent shard.
 		 *
 		 * @remarks
@@ -72,6 +83,33 @@ export function ClientGridClassFactory({
 			>
 		) {
 			super(grid, { attachHook, created }, baseParams);
+
+			// Initialize zIndex
+			this.levelIndex = Array.from(new Array(this.zLength), () => {
+				let container: Container = new Container();
+				return container;
+			});
+		}
+
+		/**
+		 * Change level visibility.
+		 *
+		 * @param param - Change level
+		 */
+		public changeLevel({
+			level
+		}: {
+			/**
+			 * Target level.
+			 */
+			level: number;
+		}): void {
+			if (this.currentLevel !== level) {
+				// Enable visibility first to avoid blank screen
+				this.levelIndex[level].visible = true;
+				this.levelIndex[this.currentLevel].visible = false;
+				this.currentLevel = level;
+			}
 		}
 
 		/**
@@ -83,7 +121,7 @@ export function ClientGridClassFactory({
 			let cell: ClientCell = this.getCell(path);
 
 			// Add container
-			this.shard?.gridContainer.removeChild(cell.container);
+			this.levelIndex[cell.z].removeChild(cell.container);
 
 			// Not deferred for performance
 			cell.entities.forEach(entity => {
@@ -113,7 +151,7 @@ export function ClientGridClassFactory({
 			cell.container.y = sceneHeight * cell.y;
 
 			// Add container
-			this.shard?.gridContainer.addChild(cell.container);
+			this.levelIndex[cell.z].addChild(cell.container);
 
 			// Post-attach (decoration); Not deferred to process a cell at time, for performance
 			cell.entities.forEach(entity => {
