@@ -21,7 +21,7 @@ import { ClientShard } from "./shard";
 /**
  * Burn.
  */
-const contrastFilter: InstanceType<(typeof filters)["ColorMatrixFilter"]> = new filters.ColorMatrixFilter();
+const contrastFilter: InstanceType<typeof filters["ColorMatrixFilter"]> = new filters.ColorMatrixFilter();
 contrastFilter.contrast(2, false);
 
 /**
@@ -139,7 +139,7 @@ export function ClientCellFactory({
 	};
 
 	/**
-	 * Attaches client entity.
+	 * Detaches client entity.
 	 *
 	 * @param this - Client cell
 	 * @param path - Entity path

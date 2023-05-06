@@ -140,6 +140,12 @@ export class ClientUniverse
 			}
 		],
 		[
+			"trap-activate",
+			{
+				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_spikes_anim_f3.png"))]
+			}
+		],
+		[
 			"mode/user/door/default",
 			{
 				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/doors_leaf_closed.png"))]

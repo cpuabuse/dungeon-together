@@ -9,7 +9,14 @@
  * @file
  */
 
-import { EntityKindClass, EntityKindConstructorParams } from "../../app/server/entity";
+import { ActionWords } from "../../app/server/action";
+import {
+	EntityKindActionArgs,
+	EntityKindClass,
+	EntityKindConstructorParams,
+	ServerEntity
+} from "../../app/server/entity";
+import { UnitKindClass } from "./unit";
 
 /**
  * Trap kind factory.
@@ -20,21 +27,39 @@ import { EntityKindClass, EntityKindConstructorParams } from "../../app/server/e
 // Force inference
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function TrapKindClassFactory({
+	Targets = [],
 	Base
 }: {
 	/**
 	 * Server entity.
 	 */
 	Base: EntityKindClass;
+
+	/**
+	 * Targets for the trap.
+	 */
+	Targets?: Array<UnitKindClass>;
 }) {
 	/**
 	 * Actual trap. The player can fall or loose HP depending on the trap class (spike/hole)
 	 */
 	class TrapKind extends Base {
 		/**
+		 * Emits health.
+		 *
+		 * @returns Emitted object
+		 */
+		public get emits(): Record<string, any> {
+			return { ...super.emits };
+		}
+
+		/**
 		 * The damage the trap can cause to the player.
 		 */
 		public damage: number = 0;
+
+		/** Whether the trap activates. */
+		public isActive: boolean = false;
 
 		/**
 		 * The visibility of trap, wether its visible or not.
@@ -46,6 +71,31 @@ export function TrapKindClassFactory({
 		 */
 		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
 			super({ entity, ...rest });
+		}
+
+		/**
+		 * Will be called once another entity is attached to the same cell.
+		 *
+		 * @param entity - Entity that was attached to the cell
+		 */
+		// Here just to show the function to extending classes
+		// eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+		public onCellAttachEntity(entity: ServerEntity): void {
+			super.onCellAttachEntity(entity);
+
+			if (!this.isActive && Targets.some(Target => entity.kind instanceof Target)) {
+				// Activate trap
+				this.isActive = true;
+
+				// Change the mode of the trap
+				this.entity.modeUuid = "trap-activate";
+
+				// Attack the target entity
+				entity.kind.action({
+					action: ActionWords.Attack,
+					sourceEntity: this.entity
+				});
+			}
 		}
 	}
 	return TrapKind;
