@@ -19,6 +19,7 @@
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
+import { VChip } from "vuetify/components";
 import {
 	OverlayListItemEntryExtract,
 	OverlayListItemEntryType,
@@ -29,7 +30,8 @@ import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 
 export default defineComponent({
 	components: {
-		OverlayListItemAssembler
+		OverlayListItemAssembler,
+		VChip
 	},
 	props: {
 		item: {

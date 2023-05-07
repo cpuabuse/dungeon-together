@@ -6,38 +6,34 @@
 -->
 
 <template>
+	<!-- Info -->
+	<component
+		:is="component.is"
+		v-bind="component.props"
+		v-if="
+			item.type === OverlayListItemEntryType.InfoElement ||
+			item.type === undefined ||
+			item.type === OverlayListItemEntryType.Switch ||
+			item.type === OverlayListItemEntryType.Slot
+		"
+	>
+		<!-- Slots would still need to be further filtered down the line, but can at least skip when it is known they won't be used -->
+		<!-- Preserve parent component for slots -->
+		<!-- eslint-disable-next-line vue/no-use-v-if-with-v-for -->
+		<template v-for="name in component.slots" #[name]="props">
+			<slot :name="name" v-bind="props" />
+		</template>
+	</component>
+
 	<!-- Force icon show if no name -->
 	<OverlayListItemAssembler
+		v-else
 		:icon="item.icon"
 		:name="item.name"
 		:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
 		:content-type="contentType"
 		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
 	>
-		<!-- Inline slot -->
-		<template
-			v-if="[OverlayListItemEntryType.InfoElement, undefined, OverlayListItemEntryType.Switch].includes(item.type)"
-			#inline
-		>
-			<!-- Info element -->
-			<VChip v-if="item.type === OverlayListItemEntryType.InfoElement || item.type === undefined">
-				{{ item.data }}
-			</VChip>
-
-			<!-- Switch element -->
-			<VSwitch
-				v-if="item.type === OverlayListItemEntryType.Switch"
-				:model-value="records[item.id]"
-				@update:model-value="
-					value => {
-						if (typeof value == 'boolean') {
-							setRecord({ id: item.id, value });
-						}
-					}
-				"
-			/>
-		</template>
-
 		<!-- Content slot --->
 		<template
 			v-if="
@@ -98,9 +94,6 @@
 					</VWindow>
 				</template>
 			</template>
-
-			<!-- Slot element -->
-			<slot v-if="item.type === OverlayListItemEntryType.Slot" :name="item.id" />
 		</template>
 	</OverlayListItemAssembler>
 
@@ -110,7 +103,7 @@
 </template>
 
 <script lang="ts">
-import { DefineComponent, PropType, defineAsyncComponent, defineComponent } from "vue";
+import { ComponentOptions, DefineComponent, PropType, defineAsyncComponent, defineComponent } from "vue";
 import { VChip, VDivider, VList, VSwitch, VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
 import { ThisVueStore } from "../../client/gui";
 import {
@@ -123,7 +116,7 @@ import {
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
-import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
+import { OverlayListItemAssembler, OverlayListItemInfo, OverlayListItemSlot, OverlayListItemSwitch } from ".";
 
 /**
  * Async component for overlay list, since it's circular dependency.
@@ -140,10 +133,32 @@ type ElementSizePixels = {
 	[Key in ElementSize]?: number;
 };
 
+/**
+ * Components indexed by type.
+ */
+type ComponentIndex = {
+	/**
+	 * Info.
+	 */
+	[OverlayListItemEntryType.InfoElement]: typeof OverlayListItemInfo;
+
+	/**
+	 * Switch.
+	 */
+	[OverlayListItemEntryType.Switch]: typeof OverlayListItemSwitch;
+
+	/**
+	 * Slot.
+	 */
+	[OverlayListItemEntryType.Slot]: typeof OverlayListItemSlot;
+};
+
 export default defineComponent({
 	components: {
 		OverlayList,
 		OverlayListItemAssembler,
+		OverlayListItemInfo,
+		OverlayListItemSwitch,
 		VChip,
 		VDivider,
 		VList,
@@ -155,6 +170,94 @@ export default defineComponent({
 	},
 
 	computed: {
+		/**
+		 * Component information to use.
+		 *
+		 * @remarks
+		 * Implicit exhaustiveness is checked by item type, and prop type consistency is checked by return type.
+		 *
+		 * @returns Component object with `is` and props
+		 */
+		// ts(2366) will guarantee return
+		// eslint-disable-next-line vue/return-in-computed-property, consistent-return
+		component(): {
+			[K in keyof ComponentIndex]: {
+				/**
+				 * Component itself.
+				 */
+				is: ComponentIndex[K];
+
+				/**
+				 * Props to provide to component.
+				 */
+				props: ComponentIndex[K] extends ComponentOptions<infer R> ? R : never;
+
+				/**
+				 * Slots to pass.
+				 */
+				slots: Array<string>;
+			};
+		}[keyof ComponentIndex] {
+			/**
+			 * Narrows props object.
+			 */
+			type NarrowProps<Type extends typeof item> = typeof props & {
+				/**
+				 * Item.
+				 */
+				item: Type;
+			};
+
+			// Infer for return
+			/* eslint-disable @typescript-eslint/typedef */
+			const props = {
+				contentType: this.contentType,
+				isHiddenCaretDisplayedIfMissing: this.isHiddenCaretDisplayedIfMissing,
+				isHiddenIconDisplayedIfMissing: this.isHiddenIconDisplayedIfMissing,
+				isLast: this.isLast,
+				item: this.item
+			};
+			const { item } = props;
+			/* eslint-enable @typescript-eslint/typedef */
+			switch (item.type) {
+				case undefined:
+				case OverlayListItemEntryType.InfoElement:
+					return {
+						is: OverlayListItemInfo,
+						props: props as NarrowProps<typeof item>,
+						slots: []
+					};
+
+				case OverlayListItemEntryType.Switch:
+					return {
+						is: OverlayListItemSwitch,
+						props: props as NarrowProps<typeof item>,
+						slots: []
+					};
+
+				case OverlayListItemEntryType.Tab:
+					return {
+						is: {},
+						props: {}
+					} as never;
+
+				case OverlayListItemEntryType.Slot:
+					return {
+						is: OverlayListItemSlot,
+						props: props as NarrowProps<typeof item>,
+						slots: [item.id]
+					};
+
+				case OverlayListItemEntryType.Uuid:
+					return {
+						is: {},
+						props: {}
+					} as never;
+
+				// no default
+			}
+		},
+
 		/**
 		 * Whether the item is displayed as a menu.
 		 *

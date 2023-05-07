@@ -16,6 +16,7 @@
 		"destructured",
 		"endregion",
 		"errored",
+		"highlightjs",
 		"interactable",
 		"interactjs",
 		"jscc",
@@ -55,5 +56,7 @@
 		"editor.defaultFormatter": "raczzalan.webgl-glsl-editor"
 	},
 	"vue.codeActions.savingTimeLimit": 20000,
-	"vue.updateImportsOnFileMove.enabled": true
+	"vue.updateImportsOnFileMove.enabled": true,
+	"vue.inlayHints.inlineHandlerLeading": true,
+	"vue.inlayHints.missingProps": true
 }

@@ -105,12 +105,20 @@ export type OverlayContentTabs = Array<{
 /**
  * Helper function for type generation.
  */
-type OverlayListItemEntryGenerateTypeRecord<Type extends OverlayListItemEntryType> = {
+type OverlayListItemEntryGenerateTypeRecordRequired<Type extends OverlayListItemEntryType> = {
 	/**
 	 * Type of the item.
 	 */
 	type: Type;
 };
+
+/**
+ * Helper function for type generation.
+ */
+type OverlayListItemEntryGenerateTypeRecord<Type extends OverlayListItemEntryType> =
+	Type extends OverlayListItemEntryType.InfoElement
+		? Partial<OverlayListItemEntryGenerateTypeRecordRequired<Type>>
+		: OverlayListItemEntryGenerateTypeRecordRequired<Type>;
 
 /**
  * Type for item to generate.
@@ -129,9 +137,7 @@ export type OverlayContentItemEntryGenerate<
 	  }
 	: unknown) &
 	Options &
-	(IsTypeOptional extends true
-		? Partial<OverlayListItemEntryGenerateTypeRecord<Type>>
-		: OverlayListItemEntryGenerateTypeRecord<Type>);
+	OverlayListItemEntryGenerateTypeRecord<Type>;
 
 /**
  * Type for item props.
