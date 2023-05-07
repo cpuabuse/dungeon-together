@@ -53,6 +53,26 @@ export default defineComponent({
 		}
 	},
 
+	methods: {
+		/**
+		 * Sets the record in the store.
+		 *
+		 * @param v - Destructured parameter
+		 */
+		setRecord(v: {
+			/**
+			 * ID.
+			 */
+			id: string;
+			/**
+			 * Value.
+			 */
+			value: boolean;
+		}) {
+			(this as unknown as ThisVueStore).$store.commit("recordMutation", v);
+		}
+	},
+
 	props: {
 		item: {
 			required: true,
@@ -60,24 +80,6 @@ export default defineComponent({
 		},
 		...overlayListSharedProps,
 		...overlayListChildSharedProps
-	},
-
-	/**
-	 * Sets the record in the store.
-	 *
-	 * @param v - Destructured parameter
-	 */
-	setRecord(v: {
-		/**
-		 * ID.
-		 */
-		id: string;
-		/**
-		 * Value.
-		 */
-		value: boolean;
-	}) {
-		(this as unknown as ThisVueStore).$store.commit("recordMutation", v);
 	}
 });
 </script>
