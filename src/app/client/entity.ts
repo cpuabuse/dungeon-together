@@ -7,7 +7,7 @@
  * @file Entity that can be rendered.
  */
 
-import { AnimatedSprite, Text } from "pixi.js";
+import { AnimatedSprite, Container, Text } from "pixi.js";
 import { CoreArgIds } from "../core/arg";
 import { CoreDictionary } from "../core/connection";
 import { CoreEntityArg, CoreEntityClassFactory } from "../core/entity";
@@ -15,7 +15,7 @@ import { CoreEntityArgParentIds } from "../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientOptions, clientOptions } from "./options";
-import { ProgressBar } from "./progess-bar";
+import { ProgressBar, enemyHpBarColors, friendlyHpBarColors } from "./progess-bar";
 
 /**
  * Generator for the client entity class.
@@ -44,6 +44,8 @@ export function ClientEntityFactory({
 		 * Temporary text, showing health.
 		 */
 		public basicText: Text | null = null;
+
+		public container: Container = new Container();
 
 		/**
 		 * Dictionary getter.
@@ -87,8 +89,15 @@ export function ClientEntityFactory({
 				}
 			} else if (health) {
 				this.basicText = new Text(health);
-				// TODO: Update scaling on change of entity scale
-				this.healthBar = new ProgressBar({ container: this.sprite, scale: this.sprite.width });
+				// TODO: Determining of bar color should not be mode
+				// TODO: Centering should be done more elegantly
+				this.healthBar = new ProgressBar({
+					colors: this.modeUuid === "mode/user/player/default" ? friendlyHpBarColors : enemyHpBarColors,
+					container: this.container,
+					scale: this.sprite.width * 0.9
+				});
+				this.healthBar.mesh.x = this.sprite.width * 0.05;
+				this.healthBar.mesh.y = this.sprite.height * 0.025;
 				this.healthBar.maxValue = typeof this.dictionary.maxHealth === "number" ? this.dictionary.maxHealth : 3;
 				this.tempHealth = health;
 				this.healthBar.value = health;
@@ -132,6 +141,8 @@ export function ClientEntityFactory({
 
 			// Create a new Sprite from texture
 			this.sprite = new AnimatedSprite(ClientEntity.universe.getMode({ uuid: this.modeUuid }).textures);
+
+			this.container.addChild(this.sprite);
 		}
 	}
 
@@ -143,6 +154,8 @@ export function ClientEntityFactory({
 	ClientEntity.prototype.terminateEntity = function (this: ClientEntity): void {
 		// Stop
 		this.sprite.destroy();
+
+		this.container.destroy();
 
 		// Super terminate
 		(Object.getPrototypeOf(ClientEntity.prototype) as ClientEntity).terminateEntity.call(this);

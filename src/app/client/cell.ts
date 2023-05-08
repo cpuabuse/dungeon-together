@@ -21,7 +21,7 @@ import { ClientShard } from "./shard";
 /**
  * Burn.
  */
-const contrastFilter: InstanceType<typeof filters["ColorMatrixFilter"]> = new filters.ColorMatrixFilter();
+const contrastFilter: InstanceType<(typeof filters)["ColorMatrixFilter"]> = new filters.ColorMatrixFilter();
 contrastFilter.contrast(2, false);
 
 /**
@@ -119,7 +119,7 @@ export function ClientCellFactory({
 			entity.sprite.width = sceneHeight;
 
 			// Register entity to canvas
-			this.container.addChild(entity.sprite);
+			this.container.addChild(entity.container);
 			entity.sprite.play();
 		}
 	}

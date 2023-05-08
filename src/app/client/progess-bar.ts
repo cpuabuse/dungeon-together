@@ -40,7 +40,8 @@ varying float relativeHeight;
 uniform vec3 secondaryColor;
 uniform vec3 mainColor;
 uniform vec3 borderColor;
-uniform float secondaryColorIntensity;
+uniform vec3 accentColor;
+uniform float accentColorIntensity;
 uniform float maxValue;
 uniform float value;
 uniform float borderRatio;
@@ -51,7 +52,7 @@ void main() {
 
 	if (relativeWidth >= borderRatio && (relativeWidth <= 1.0 - borderRatio) && relativeHeight >= borderRatio && (relativeHeight <= height - borderRatio)) {
 		if (relativeWidth <= ratio) {
-			gl_FragColor = vec4(mainColor + (secondaryColor - mainColor) * exp((relativeWidth / ratio - 1.0) * secondaryColorIntensity) * relativeWidth / ratio, 1.0);
+			gl_FragColor = vec4(mainColor + (accentColor - mainColor) * exp((relativeWidth / ratio - 1.0) * accentColorIntensity), 1.0);
 		} else {
 			gl_FragColor = vec4(secondaryColor, 1.0);
 		}
@@ -309,14 +310,22 @@ export class ProgressBar {
 			.array()
 			.map(element => element / rgbIntegerScaleFactor);
 
+		// Accent color
+		let accentColor: Array<number> = this.colors.accent
+			.rgb()
+			.array()
+			.map(element => element / rgbIntegerScaleFactor);
+
 		this.shader = new Shader(ProgressBar.program, {
+			accentColor,
+			// Lower is more intense
+			accentColorIntensity: 8,
 			borderColor,
 			borderRatio: 0.01,
 			height,
 			mainColor,
 			maxValue,
 			secondaryColor,
-			secondaryColorIntensity: 10,
 			value,
 			width
 		});
