@@ -2,26 +2,21 @@
 <template>
 	<!-- Force icon show if no name -->
 	<OverlayListItemAssembler
-		:icon="item.icon"
-		:name="item.name"
+		:icon="icon"
+		:name="name"
 		:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
 		:content-type="contentType"
 		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
 	>
 		<template #content>
-			<slot :name="item.id" />
+			<slot :name="id" />
 		</template>
 	</OverlayListItemAssembler>
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from "vue";
-import {
-	OverlayListItemEntryExtract,
-	OverlayListItemEntryType,
-	overlayListChildSharedProps,
-	overlayListSharedProps
-} from "../core/overlay";
+import { defineComponent } from "vue";
+import { overlayListChildSharedProps, overlayListItemNarrowProps, overlayListSharedProps } from "../core/overlay";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 
 export default defineComponent({
@@ -29,12 +24,14 @@ export default defineComponent({
 		OverlayListItemAssembler
 	},
 	props: {
-		item: {
-			required: true,
-			type: Object as PropType<OverlayListItemEntryExtract<OverlayListItemEntryType.Slot>>
-		},
 		...overlayListSharedProps,
-		...overlayListChildSharedProps
+		...overlayListChildSharedProps,
+		...overlayListItemNarrowProps,
+
+		id: {
+			required: true,
+			type: String
+		}
 	}
 });
 </script>

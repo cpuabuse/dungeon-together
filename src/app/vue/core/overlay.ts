@@ -10,7 +10,7 @@
  */
 
 import { ComputedRef, ExtractPropTypes, PropType, computed } from "vue";
-import { OverlayContentUiActionParam } from "../types";
+import { ExtractProps, OverlayContentUiActionParam } from "../types";
 
 /**
  * Size for the tab.
@@ -63,6 +63,28 @@ export enum OverlayListItemEntryType {
 }
 
 /**
+ * Props for discriminated items.
+ */
+// Inferring type for props
+// eslint-disable-next-line @typescript-eslint/typedef
+export const overlayListItemNarrowProps = {
+	description: {
+		required: false,
+		type: String
+	},
+
+	icon: {
+		required: false,
+		type: String
+	},
+
+	name: {
+		required: false,
+		type: String
+	}
+} as const;
+
+/**
  * Shared options for content type.
  */
 type OverlayListItemEntrySharedRecords = {
@@ -70,22 +92,7 @@ type OverlayListItemEntrySharedRecords = {
 	 * Informational list type.
 	 */
 	type?: OverlayListItemEntryType;
-
-	/**
-	 * Name to display.
-	 */
-	name?: string;
-
-	/**
-	 * Optional icon.
-	 */
-	icon?: string;
-
-	/**
-	 * Description.
-	 */
-	description?: string;
-};
+} & ExtractProps<typeof overlayListItemNarrowProps>;
 
 /**
  * Tabs type.

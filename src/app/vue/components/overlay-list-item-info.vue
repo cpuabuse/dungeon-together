@@ -2,8 +2,8 @@
 <template>
 	<!-- Force icon show if no name -->
 	<OverlayListItemAssembler
-		:icon="item.icon"
-		:name="item.name"
+		:icon="icon"
+		:name="name"
 		:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
 		:content-type="contentType"
 		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
@@ -11,21 +11,16 @@
 		<!-- Inline slot -->
 		<template #inline>
 			<VChip>
-				{{ item.data }}
+				{{ data }}
 			</VChip>
 		</template>
 	</OverlayListItemAssembler>
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from "vue";
+import { defineComponent } from "vue";
 import { VChip } from "vuetify/components";
-import {
-	OverlayListItemEntryExtract,
-	OverlayListItemEntryType,
-	overlayListChildSharedProps,
-	overlayListSharedProps
-} from "../core/overlay";
+import { overlayListChildSharedProps, overlayListItemNarrowProps, overlayListSharedProps } from "../core/overlay";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 
 export default defineComponent({
@@ -34,12 +29,14 @@ export default defineComponent({
 		VChip
 	},
 	props: {
-		item: {
-			required: true,
-			type: Object as PropType<OverlayListItemEntryExtract<OverlayListItemEntryType.InfoElement>>
-		},
 		...overlayListSharedProps,
-		...overlayListChildSharedProps
+		...overlayListChildSharedProps,
+		...overlayListItemNarrowProps,
+
+		data: {
+			required: true,
+			type: [String, Number]
+		}
 	}
 });
 </script>

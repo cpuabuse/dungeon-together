@@ -117,11 +117,13 @@ export default defineComponent({
 			/* eslint-disable @typescript-eslint/typedef */
 			const props = {
 				contentType: this.contentType,
+				icon: this.item.icon,
 				isCompact: this.isCompact,
 				isHiddenCaretDisplayedIfMissing: this.isHiddenCaretDisplayedIfMissing,
 				isHiddenIconDisplayedIfMissing: this.isHiddenIconDisplayedIfMissing,
 				isLast: this.isLast,
-				item: this.item
+				item: this.item,
+				name: this.item.name
 			};
 			const { item } = props;
 			/* eslint-enable @typescript-eslint/typedef */
@@ -130,7 +132,7 @@ export default defineComponent({
 				case OverlayListItemEntryType.InfoElement:
 					return {
 						is: OverlayListItemInfo,
-						props: props as NarrowProps<typeof item>,
+						props: { ...props, data: item.data },
 						slots: []
 					};
 
@@ -151,7 +153,7 @@ export default defineComponent({
 				case OverlayListItemEntryType.Slot:
 					return {
 						is: OverlayListItemSlot,
-						props: props as NarrowProps<typeof item>,
+						props: { ...props, id: item.id },
 						slots: [item.id]
 					};
 
