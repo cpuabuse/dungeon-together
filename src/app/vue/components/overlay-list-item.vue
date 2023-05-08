@@ -7,16 +7,7 @@
 
 <template>
 	<!-- Info -->
-	<component
-		:is="component.is"
-		v-bind="component.props"
-		v-if="
-			item.type === OverlayListItemEntryType.InfoElement ||
-			item.type === undefined ||
-			item.type === OverlayListItemEntryType.Switch ||
-			item.type === OverlayListItemEntryType.Slot
-		"
-	>
+	<component :is="component.is" v-bind="component.props">
 		<!-- Slots would still need to be further filtered down the line, but can at least skip when it is known they won't be used -->
 		<!-- Preserve parent component for slots -->
 		<!-- eslint-disable-next-line vue/no-use-v-if-with-v-for -->
@@ -24,114 +15,29 @@
 			<slot :name="name" v-bind="props" />
 		</template>
 	</component>
-
-	<!-- Force icon show if no name -->
-	<OverlayListItemAssembler
-		v-else
-		:icon="item.icon"
-		:name="item.name"
-		:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
-		:content-type="contentType"
-		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
-	>
-		<!-- Content slot --->
-		<template
-			v-if="
-				[OverlayListItemEntryType.Uuid, OverlayListItemEntryType.Tab, OverlayListItemEntryType.Slot].includes(item.type)
-			"
-			#content
-		>
-			<!-- Uuid element -->
-			<highlightjs v-if="item.type === OverlayListItemEntryType.Uuid" language="plaintext" :code="item.uuid" />
-
-			<!-- Tab element -->
-			<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
-			<template v-if="item.type === OverlayListItemEntryType.Tab">
-				<!-- Menu -->
-				<template v-if="isMenu">
-					<VList :density="isCompact ? 'compact' : 'default'" class="py-0">
-						<template v-for="(tab, tabKey) in item.tabs" :key="tabKey">
-							<OverlayListItemAssembler :name="tab.name" :content-type="contentType">
-								<template #content>
-									<OverlayList :items="tab.items" :content-type="contentType">
-										<template v-for="slot in getSlots(tab)" #[slot]>
-											<slot :name="slot" />
-										</template>
-									</OverlayList>
-								</template>
-							</OverlayListItemAssembler>
-						</template>
-					</VList>
-				</template>
-
-				<!-- Block -->
-				<template v-else>
-					<VTabs
-						:key="item.tabs"
-						:model-value="getTab({ tabs: item.tabs })"
-						@update:model-value="
-							value => {
-								if (value === null || typeof value === 'number') {
-									setTab({ tabs: item.tabs, value });
-								}
-							}
-						"
-					>
-						<VTab v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
-					</VTabs>
-
-					<VWindow
-						:model-value="getTab({ tabs: item.tabs })"
-						@update:model-value="value => setTab({ tabs: item.tabs, value })"
-					>
-						<VWindowItem v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">
-							<OverlayList :items="tab.items" :content-type="contentType">
-								<template v-for="slot in getSlots(tab)" #[slot]>
-									<slot :name="slot" />
-								</template>
-							</OverlayList>
-						</VWindowItem>
-					</VWindow>
-				</template>
-			</template>
-		</template>
-	</OverlayListItemAssembler>
-
 	<template v-if="!isLast">
 		<VDivider />
 	</template>
 </template>
 
 <script lang="ts">
-import { ComponentOptions, DefineComponent, PropType, defineAsyncComponent, defineComponent } from "vue";
-import { VChip, VDivider, VList, VSwitch, VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
-import { ThisVueStore } from "../../client/gui";
+import { ComponentOptions, PropType, defineComponent } from "vue";
+import { VDivider } from "vuetify/components";
 import {
-	ElementSize,
 	OverlayListItemEntry as Item,
 	OverlayListItemEntryType,
 	OverlayType,
-	OverlayContentTabs as Tabs,
 	overlayListChildSharedProps,
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
-import { OverlayListItemAssembler, OverlayListItemInfo, OverlayListItemSlot, OverlayListItemSwitch } from ".";
-
-/**
- * Async component for overlay list, since it's circular dependency.
- */
-// BUG: Inference doesn't like circular dependencies, so we manually define component type
-const OverlayList: DefineComponent = defineAsyncComponent(
-	() => import("./overlay-list.vue")
-) as unknown as DefineComponent;
-
-/**
- * Element size pixels.
- */
-type ElementSizePixels = {
-	[Key in ElementSize]?: number;
-};
+import {
+	OverlayListItemInfo,
+	OverlayListItemSlot,
+	OverlayListItemSwitch,
+	OverlayListItemTab,
+	OverlayListItemUuid
+} from ".";
 
 /**
  * Components indexed by type.
@@ -151,22 +57,21 @@ type ComponentIndex = {
 	 * Slot.
 	 */
 	[OverlayListItemEntryType.Slot]: typeof OverlayListItemSlot;
+
+	/**
+	 * UUID.
+	 */
+	[OverlayListItemEntryType.Uuid]: typeof OverlayListItemUuid;
+
+	/**
+	 * Tab.
+	 */
+	[OverlayListItemEntryType.Tab]: typeof OverlayListItemTab;
 };
 
 export default defineComponent({
 	components: {
-		OverlayList,
-		OverlayListItemAssembler,
-		OverlayListItemInfo,
-		OverlayListItemSwitch,
-		VChip,
-		VDivider,
-		VList,
-		VSwitch,
-		VTab,
-		VTabs,
-		VWindow,
-		VWindowItem
+		VDivider
 	},
 
 	computed: {
@@ -212,6 +117,7 @@ export default defineComponent({
 			/* eslint-disable @typescript-eslint/typedef */
 			const props = {
 				contentType: this.contentType,
+				isCompact: this.isCompact,
 				isHiddenCaretDisplayedIfMissing: this.isHiddenCaretDisplayedIfMissing,
 				isHiddenIconDisplayedIfMissing: this.isHiddenIconDisplayedIfMissing,
 				isLast: this.isLast,
@@ -237,9 +143,10 @@ export default defineComponent({
 
 				case OverlayListItemEntryType.Tab:
 					return {
-						is: {},
-						props: {}
-					} as never;
+						is: OverlayListItemTab,
+						props: props as NarrowProps<typeof item>,
+						slots: []
+					};
 
 				case OverlayListItemEntryType.Slot:
 					return {
@@ -250,9 +157,10 @@ export default defineComponent({
 
 				case OverlayListItemEntryType.Uuid:
 					return {
-						is: {},
-						props: {}
-					} as never;
+						is: OverlayListItemUuid,
+						props: props as NarrowProps<typeof item>,
+						slots: []
+					};
 
 				// no default
 			}
@@ -265,160 +173,8 @@ export default defineComponent({
 		 */
 		isMenu(): boolean {
 			return this.contentType === OverlayType.Menu;
-		},
-
-		/**
-		 * Get the records.
-		 *
-		 * @returns Records
-		 */
-		records(): ThisVueStore["$store"]["state"]["records"] {
-			return (this as unknown as ThisVueStore).$store.state.records;
 		}
 	},
-
-	/**
-	 * Data for component.
-	 *
-	 * @returns Component data
-	 */
-	data() {
-		let sizes: ElementSizePixels = {
-			[ElementSize.Small]: 300,
-			[ElementSize.Medium]: 500,
-			[ElementSize.Large]: 700
-		};
-
-		return {
-			OverlayListItemEntryType,
-			defaultElementSize: ElementSize.Medium,
-			// Fallback when the size in pixels is not defined for the element size
-			defaultElementSizePixels: 300,
-			sizes,
-			tab2: null,
-			tabFallBack: null,
-			tabs: new Map<Tabs, number | null>()
-		};
-	},
-
-	methods: {
-		/**
-		 * Determine necessary slot IDs, to pass through to tabs.
-		 *
-		 * @param param - Destructured object
-		 * @returns Set of IDs, required for all grandchildren
-		 */
-		getSlots({
-			items
-		}: {
-			/**
-			 * Items.
-			 */
-			items: Array<Item>;
-		}): Set<string> {
-			let result: Set<string> = new Set();
-			items
-				.filter(item => item.type === OverlayListItemEntryType.Slot || item.type === OverlayListItemEntryType.Tab)
-				.forEach(item => {
-					if (item.type === OverlayListItemEntryType.Slot) {
-						result.add(item.id);
-						return;
-					}
-
-					// Filter guarantees narrowing
-					(
-						item as Item & {
-							/**
-							 * Tab type.
-							 */
-							type: OverlayListItemEntryType.Tab;
-						}
-					).tabs.forEach(tab => {
-						result = new Set([...result, ...this.getSlots(tab)]);
-					});
-				});
-			return result;
-		},
-
-		/**
-		 * Get the tab.
-		 *
-		 * @param param - Tabs
-		 * @returns Tab
-		 */
-		getTab({
-			tabs
-		}: {
-			/**
-			 * Tabs to get active tab for.
-			 */
-			tabs: Tabs;
-		}): number | null {
-			return this.tabs.get(tabs) ?? this.tabFallBack;
-		},
-
-		/**
-		 * Sets the record in the store.
-		 *
-		 * @param v - Destructured parameter
-		 */
-		setRecord(v: {
-			/**
-			 * ID.
-			 */
-			id: string;
-			/**
-			 * Value.
-			 */
-			value: boolean;
-		}) {
-			(this as unknown as ThisVueStore).$store.commit("recordMutation", v);
-		},
-
-		/**
-		 * Set the key of active tab.
-		 *
-		 * @param param - Tabs and value
-		 */
-		setTab({
-			tabs,
-			value
-		}: {
-			/**
-			 * Tabs.
-			 */
-			tabs: Tabs;
-
-			/**
-			 * Value.
-			 */
-			value: number | null;
-		}): void {
-			this.tabs.set(tabs, value);
-		},
-
-		/**
-		 * Style for tab.
-		 *
-		 * @param param - Destructured object
-		 * @returns CSS height in pixels
-		 */
-		tabStyle({
-			size
-		}: Item & {
-			/**
-			 * Tab type.
-			 */
-			type: OverlayListItemEntryType.Tab;
-		}) {
-			return {
-				// Gets the size in pixels for the element size, or the default size in pixels
-				height: `${this.sizes[size ?? this.defaultElementSize] ?? this.defaultElementSizePixels}px`
-			};
-		}
-	},
-
-	name: "OverlayListItem",
 
 	/**
 	 * Props for component.
