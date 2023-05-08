@@ -40,6 +40,7 @@
 											:max-value="universe.getEntity({ entityUuid: unitUuid }).dictionary?.maxHealth"
 										/>
 										<StatsBar :color="mpColor" name="MP" />
+										Stats: {{ universe.getEntity({ entityUuid: unitUuid }).dictionary?.stats }}
 									</template>
 								</template>
 							</OverlayList>

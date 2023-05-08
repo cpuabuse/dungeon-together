@@ -9,15 +9,9 @@
  * @file
  */
 
-import { Uuid } from "../../app/common/uuid";
 import { ActionWords } from "../../app/server/action";
 import { ServerCell } from "../../app/server/cell";
-import {
-	EntityKindActionArgs,
-	EntityKindConstructorParams,
-	ServerEntity,
-	ServerEntityClass
-} from "../../app/server/entity";
+import { EntityKindActionArgs, EntityKindConstructorParams, ServerEntityClass } from "../../app/server/entity";
 import { ExclusiveKindClass } from "./exclusive";
 
 /**
@@ -147,14 +141,19 @@ export function UnitKindClassFactory({
 				hasAction: true,
 				hasPhantom: true,
 				health: this.healthPoints,
-				maxHealth: this.maxHealthPoints
+				maxHealth: this.maxHealthPoints,
+				stats: this.stats
 			};
 		}
 
 		/**
 		 * Attack.
+		 *
+		 * @returns Attack this does
 		 */
-		public attack: number = 1;
+		public get attack(): number {
+			return 1 + this.stats.str;
+		}
 
 		/**
 		 * CP.
@@ -191,7 +190,14 @@ export function UnitKindClassFactory({
 		 */
 		public manaPoints: number = 0;
 
-		public maxHealthPoints: number = 3;
+		/**
+		 * Calc max health based on constitution.
+		 *
+		 * @returns Max health
+		 */
+		public get maxHealthPoints(): number {
+			return 3 + this.stats.con * 2;
+		}
 
 		/**
 		 * Speed.
@@ -252,15 +258,22 @@ export function UnitKindClassFactory({
 		 * @returns Whether action was successful
 		 */
 		public action(param: EntityKindActionArgs): boolean {
-			let { action, ...rest }: EntityKindActionArgs = param;
+			let { action, sourceEntity, ...rest }: EntityKindActionArgs = param;
 			switch (action) {
 				case ActionWords.Attack: {
 					super.action(param);
 
 					let cell: ServerCell = (this.entity.constructor as ServerEntityClass).universe.getCell(this.entity);
 
+					// Only do damage when attacked by unit
+					if (sourceEntity && sourceEntity.kind instanceof UnitKind) {
+						this.healthPoints -= sourceEntity.kind.attack;
+					} else {
+						// Temporary do some damage from non units source
+						this.healthPoints--;
+					}
+
 					// Update cell, since entity dictionary changed
-					this.healthPoints--;
 					cell.isUpdated = true;
 
 					if (this.healthPoints <= 0) {
@@ -271,7 +284,7 @@ export function UnitKindClassFactory({
 				}
 
 				case ActionWords.Interact:
-					return this.action({ action: ActionWords.Attack, ...rest });
+					return this.action({ action: ActionWords.Attack, sourceEntity, ...rest });
 
 				default:
 					// Action was not successful
