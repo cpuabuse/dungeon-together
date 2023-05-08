@@ -33,6 +33,7 @@ import {
 } from "../core/overlay";
 import {
 	OverlayListItemInfo,
+	OverlayListItemList,
 	OverlayListItemSlot,
 	OverlayListItemSwitch,
 	OverlayListItemTab,
@@ -67,6 +68,11 @@ type ComponentIndex = {
 	 * Tab.
 	 */
 	[OverlayListItemEntryType.Tab]: typeof OverlayListItemTab;
+
+	/**
+	 * List.
+	 */
+	[OverlayListItemEntryType.List]: typeof OverlayListItemList;
 };
 
 export default defineComponent({
@@ -162,6 +168,13 @@ export default defineComponent({
 						is: OverlayListItemUuid,
 						props: props as NarrowProps<typeof item>,
 						slots: []
+					};
+
+				case OverlayListItemEntryType.List:
+					return {
+						is: OverlayListItemList,
+						props: { ...props, items: item.items },
+						slots: Object.keys(this.$slots)
 					};
 
 				// no default

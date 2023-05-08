@@ -59,7 +59,12 @@ export enum OverlayListItemEntryType {
 	/**
 	 * Type for slot.
 	 */
-	Slot
+	Slot,
+
+	/**
+	 * Type for list.
+	 */
+	List
 }
 
 /**
@@ -214,6 +219,15 @@ export type OverlayListItemEntry =
 						 * Slot name.
 						 */
 						id: string;
+					}
+			  >
+			| OverlayContentItemEntryGenerate<
+					OverlayListItemEntryType.List,
+					{
+						/**
+						 * Items.
+						 */
+						items: Array<OverlayListItemEntry>;
 					}
 			  >
 		);

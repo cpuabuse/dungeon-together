@@ -6,70 +6,65 @@
 -->
 
 <template>
+	<!-- Tab element -->
+	<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
+	<!-- Menu -->
+	<template v-if="isMenu">
+		<OverlayListItemList
+			:items="menuItems"
+			:icon="item.icon"
+			:name="item.name"
+			:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
+			:content-type="contentType"
+			:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
+		></OverlayListItemList>
+	</template>
+
 	<OverlayListItemAssembler
+		v-else
 		:icon="item.icon"
 		:name="item.name"
 		:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
 		:content-type="contentType"
 		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
 	>
+		tab
 		<!-- Content slot --->
 		<template #content>
-			<!-- Tab element -->
-			<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
-			<!-- Menu -->
-			<template v-if="isMenu">
-				<VList :density="isCompact ? 'compact' : 'default'" class="py-0">
-					<template v-for="(tab, tabKey) in item.tabs" :key="tabKey">
-						<OverlayListItemAssembler :name="tab.name" :content-type="contentType">
-							<template #content>
-								<OverlayList :items="tab.items" :content-type="contentType">
-									<template v-for="slot in getSlots(tab)" #[slot]>
-										<slot :name="slot" />
-									</template>
-								</OverlayList>
-							</template>
-						</OverlayListItemAssembler>
-					</template>
-				</VList>
-			</template>
-
 			<!-- Block -->
-			<template v-else>
-				<VTabs
-					:key="item.tabs"
-					:model-value="getTab({ tabs: item.tabs })"
-					@update:model-value="
-						value => {
-							if (value === null || typeof value === 'number') {
-								setTab({ tabs: item.tabs, value });
-							}
+			<VTabs
+				:key="item.tabs"
+				:model-value="getTab({ tabs: item.tabs })"
+				@update:model-value="
+					value => {
+						if (value === null || typeof value === 'number') {
+							setTab({ tabs: item.tabs, value });
 						}
-					"
-				>
-					<VTab v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
-				</VTabs>
+					}
+				"
+			>
+				<VTab v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
+			</VTabs>
 
-				<VWindow
-					:model-value="getTab({ tabs: item.tabs })"
-					@update:model-value="value => setTab({ tabs: item.tabs, value })"
-				>
-					<VWindowItem v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">
-						<OverlayList :items="tab.items" :content-type="contentType">
-							<template v-for="slot in getSlots(tab)" #[slot]>
-								<slot :name="slot" />
-							</template>
-						</OverlayList>
-					</VWindowItem>
-				</VWindow>
-			</template>
+			<VWindow
+				:model-value="getTab({ tabs: item.tabs })"
+				@update:model-value="value => setTab({ tabs: item.tabs, value })"
+			>
+				<VWindowItem v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">
+					<OverlayList :items="tab.items" :content-type="contentType">
+						<template v-for="slot in getSlots(tab)" #[slot]>
+							<slot :name="slot" />
+						</template>
+					</OverlayList>
+				</VWindowItem>
+			</VWindow>
 		</template>
 	</OverlayListItemAssembler>
 </template>
 
 <script lang="ts">
-import { DefineComponent, PropType, defineAsyncComponent, defineComponent } from "vue";
-import { VList, VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
+import { PropType, defineAsyncComponent, defineComponent } from "vue";
+import { VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
 import {
 	ElementSize,
 	OverlayListItemEntry as Item,
@@ -81,15 +76,14 @@ import {
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
-import { OverlayListItemAssembler } from ".";
+import { OverlayListItemAssembler, OverlayListItemList } from ".";
 
 /**
  * Async component for overlay list, since it's circular dependency.
  */
-// BUG: Inference doesn't like circular dependencies, so we manually define component type
-const OverlayList: DefineComponent = defineAsyncComponent(
-	() => import("./overlay-list.vue")
-) as unknown as DefineComponent;
+// Infer component type
+// eslint-disable-next-line @typescript-eslint/typedef
+const OverlayList = defineAsyncComponent(async () => (await import(".")).OverlayList);
 
 /**
  * Element size pixels.
@@ -102,7 +96,7 @@ export default defineComponent({
 	components: {
 		OverlayList,
 		OverlayListItemAssembler,
-		VList,
+		OverlayListItemList,
 		VTab,
 		VTabs,
 		VWindow,
@@ -117,6 +111,15 @@ export default defineComponent({
 		 */
 		isMenu(): boolean {
 			return this.contentType === OverlayType.Menu;
+		},
+
+		/**
+		 * Items for menu.
+		 *
+		 * @returns Items for menu
+		 */
+		menuItems(): Array<Item> {
+			return this.item.tabs.map(tab => ({ ...tab, type: OverlayListItemEntryType.List }));
 		}
 	},
 
