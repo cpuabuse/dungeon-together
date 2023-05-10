@@ -2,8 +2,8 @@
 <template>
 	<!-- Force icon show if no name -->
 	<OverlayListItemAssembler
-		:icon="item.icon"
-		:name="item.name"
+		:icon="icon"
+		:name="name"
 		:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
 		:content-type="contentType"
 		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
@@ -11,11 +11,11 @@
 		<!-- Inline slot -->
 		<template #inline>
 			<VSwitch
-				:model-value="records[item.id]"
+				:model-value="records[id]"
 				@update:model-value="
 					value => {
 						if (typeof value == 'boolean') {
-							setRecord({ id: item.id, value });
+							setRecord({ id: id, value });
 						}
 					}
 				"
@@ -25,15 +25,10 @@
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from "vue";
+import { defineComponent } from "vue";
 import { VSwitch } from "vuetify/components";
 import { ThisVueStore } from "../../client/gui";
-import {
-	OverlayListItemEntryExtract,
-	OverlayListItemEntryType,
-	overlayListChildSharedProps,
-	overlayListSharedProps
-} from "../core/overlay";
+import { overlayListChildSharedProps, overlayListItemNarrowProps, overlayListSharedProps } from "../core/overlay";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 
 export default defineComponent({
@@ -74,12 +69,14 @@ export default defineComponent({
 	},
 
 	props: {
-		item: {
-			required: true,
-			type: Object as PropType<OverlayListItemEntryExtract<OverlayListItemEntryType.Switch>>
-		},
 		...overlayListSharedProps,
-		...overlayListChildSharedProps
+		...overlayListChildSharedProps,
+		...overlayListItemNarrowProps,
+
+		id: {
+			required: true,
+			type: String
+		}
 	}
 });
 </script>

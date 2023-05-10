@@ -145,8 +145,8 @@ export default defineComponent({
 				case OverlayListItemEntryType.Switch:
 					return {
 						is: OverlayListItemSwitch,
-						props: props as NarrowProps<typeof item>,
-						slots: []
+						props: { ...props, id: item.id },
+						slots: [item.id]
 					};
 
 				case OverlayListItemEntryType.Tab:
@@ -166,8 +166,8 @@ export default defineComponent({
 				case OverlayListItemEntryType.Uuid:
 					return {
 						is: OverlayListItemUuid,
-						props: props as NarrowProps<typeof item>,
-						slots: []
+						props: { ...props, uuid: item.uuid },
+						slots: [item.uuid]
 					};
 
 				case OverlayListItemEntryType.List:
