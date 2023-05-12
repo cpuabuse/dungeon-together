@@ -32,21 +32,11 @@
 		<!-- Content slot --->
 		<template #content>
 			<!-- Block -->
-			<VTabs
-				:key="tabs"
-				:model-value="getTab({ tabs })"
-				@update:model-value="
-					value => {
-						if (value === null || typeof value === 'number') {
-							setTab({ tabs, value });
-						}
-					}
-				"
-			>
+			<VTabs v-model="activeTabId">
 				<VTab v-for="(tab, tabKey) in tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
 			</VTabs>
 
-			<VWindow :model-value="getTab({ tabs })" @update:model-value="value => setTab({ tabs, value })">
+			<VWindow v-model="activeTabId">
 				<VWindowItem v-for="(tab, tabKey) in tabs" :key="tabKey" :value="tabKey">
 					<OverlayList :items="tab.items" :content-type="contentType">
 						<template v-for="slot in getSlots(tab)" #[slot]>
@@ -66,9 +56,9 @@ import {
 	ElementSize,
 	OverlayListItemEntry as Item,
 	OverlayContentTabs,
+	OverlayListItemEntryExtract,
 	OverlayListItemEntryType,
 	OverlayType,
-	OverlayContentTabs as Tabs,
 	overlayListChildSharedProps,
 	overlayListItemNarrowProps,
 	overlayListSharedProps,
@@ -134,13 +124,11 @@ export default defineComponent({
 		};
 
 		return {
-			OverlayListItemEntryType,
+			activeTabId: 0,
 			defaultElementSize: ElementSize.Medium,
 			// Fallback when the size in pixels is not defined for the element size
 			defaultElementSizePixels: 300,
-			internalTabs: new Map<Tabs, number | null>(),
-			sizes,
-			tabFallBack: null
+			sizes
 		};
 	},
 
@@ -161,7 +149,10 @@ export default defineComponent({
 		}): Set<string> {
 			let result: Set<string> = new Set();
 			items
-				.filter(item => item.type === OverlayListItemEntryType.Slot || item.type === OverlayListItemEntryType.Tab)
+				.filter(
+					(item): item is OverlayListItemEntryExtract<OverlayListItemEntryType.Tab | OverlayListItemEntryType.Slot> =>
+						item.type === OverlayListItemEntryType.Slot || item.type === OverlayListItemEntryType.Tab
+				)
 				.forEach(item => {
 					if (item.type === OverlayListItemEntryType.Slot) {
 						result.add(item.id);
@@ -169,57 +160,11 @@ export default defineComponent({
 					}
 
 					// Filter guarantees narrowing
-					(
-						item as Item & {
-							/**
-							 * Tab type.
-							 */
-							type: OverlayListItemEntryType.Tab;
-						}
-					).tabs.forEach(tab => {
+					item.tabs.forEach(tab => {
 						result = new Set([...result, ...this.getSlots(tab)]);
 					});
 				});
 			return result;
-		},
-
-		/**
-		 * Get the tab.
-		 *
-		 * @param param - Tabs
-		 * @returns Tab
-		 */
-		getTab({
-			tabs
-		}: {
-			/**
-			 * Tabs to get active tab for.
-			 */
-			tabs: Tabs;
-		}): number | null {
-			return this.internalTabs.get(tabs) ?? this.tabFallBack;
-		},
-
-		/**
-		 * Set the key of active tab.
-		 *
-		 * @param param - Tabs and value
-		 */
-		setTab({
-			tabs,
-			value
-		}: {
-			/**
-			 * Tabs.
-			 */
-			tabs: Tabs;
-
-			/**
-			 * Value.
-			 */
-			value: number | null;
-		}): void {
-			this.internalTabs.set(tabs, value);
 		},
 
 		/**
