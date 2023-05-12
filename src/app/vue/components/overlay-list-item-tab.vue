@@ -12,8 +12,8 @@
 	<template v-if="isMenu">
 		<OverlayListItemList
 			:items="menuItems"
-			:icon="item.icon"
-			:name="item.name"
+			:icon="icon"
+			:name="name"
 			:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
 			:content-type="contentType"
 			:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
@@ -22,8 +22,8 @@
 
 	<OverlayListItemAssembler
 		v-else
-		:icon="item.icon"
-		:name="item.name"
+		:icon="icon"
+		:name="name"
 		:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
 		:content-type="contentType"
 		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
@@ -33,24 +33,21 @@
 		<template #content>
 			<!-- Block -->
 			<VTabs
-				:key="item.tabs"
-				:model-value="getTab({ tabs: item.tabs })"
+				:key="tabs"
+				:model-value="getTab({ tabs })"
 				@update:model-value="
 					value => {
 						if (value === null || typeof value === 'number') {
-							setTab({ tabs: item.tabs, value });
+							setTab({ tabs, value });
 						}
 					}
 				"
 			>
-				<VTab v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
+				<VTab v-for="(tab, tabKey) in tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
 			</VTabs>
 
-			<VWindow
-				:model-value="getTab({ tabs: item.tabs })"
-				@update:model-value="value => setTab({ tabs: item.tabs, value })"
-			>
-				<VWindowItem v-for="(tab, tabKey) in item.tabs" :key="tabKey" :value="tabKey">
+			<VWindow :model-value="getTab({ tabs })" @update:model-value="value => setTab({ tabs, value })">
+				<VWindowItem v-for="(tab, tabKey) in tabs" :key="tabKey" :value="tabKey">
 					<OverlayList :items="tab.items" :content-type="contentType">
 						<template v-for="slot in getSlots(tab)" #[slot]>
 							<slot :name="slot" />
@@ -68,11 +65,12 @@ import { VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
 import {
 	ElementSize,
 	OverlayListItemEntry as Item,
-	OverlayListItemEntryExtract,
+	OverlayContentTabs,
 	OverlayListItemEntryType,
 	OverlayType,
 	OverlayContentTabs as Tabs,
 	overlayListChildSharedProps,
+	overlayListItemNarrowProps,
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
@@ -119,7 +117,7 @@ export default defineComponent({
 		 * @returns Items for menu
 		 */
 		menuItems(): Array<Item> {
-			return this.item.tabs.map(tab => ({ ...tab, type: OverlayListItemEntryType.List }));
+			return this.tabs.map(tab => ({ ...tab, type: OverlayListItemEntryType.List }));
 		}
 	},
 
@@ -140,9 +138,9 @@ export default defineComponent({
 			defaultElementSize: ElementSize.Medium,
 			// Fallback when the size in pixels is not defined for the element size
 			defaultElementSizePixels: 300,
+			internalTabs: new Map<Tabs, number | null>(),
 			sizes,
-			tabFallBack: null,
-			tabs: new Map<Tabs, number | null>()
+			tabFallBack: null
 		};
 	},
 
@@ -199,7 +197,7 @@ export default defineComponent({
 			 */
 			tabs: Tabs;
 		}): number | null {
-			return this.tabs.get(tabs) ?? this.tabFallBack;
+			return this.internalTabs.get(tabs) ?? this.tabFallBack;
 		},
 
 		/**
@@ -221,7 +219,7 @@ export default defineComponent({
 			 */
 			value: number | null;
 		}): void {
-			this.tabs.set(tabs, value);
+			this.internalTabs.set(tabs, value);
 		},
 
 		/**
@@ -256,12 +254,15 @@ export default defineComponent({
 			required: false,
 			type: Boolean
 		},
-		item: {
+
+		tabs: {
 			required: true,
-			type: Object as PropType<OverlayListItemEntryExtract<OverlayListItemEntryType.Tab>>
+			type: Array as PropType<OverlayContentTabs>
 		},
+
 		...overlayListSharedProps,
-		...overlayListChildSharedProps
+		...overlayListChildSharedProps,
+		...overlayListItemNarrowProps
 	},
 
 	/**

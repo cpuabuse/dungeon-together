@@ -146,14 +146,14 @@ export default defineComponent({
 					return {
 						is: OverlayListItemSwitch,
 						props: { ...props, id: item.id },
-						slots: [item.id]
+						slots: []
 					};
 
 				case OverlayListItemEntryType.Tab:
 					return {
 						is: OverlayListItemTab,
-						props: props as NarrowProps<typeof item>,
-						slots: []
+						props: { ...props, tabs: item.tabs },
+						slots: Object.keys(this.$slots)
 					};
 
 				case OverlayListItemEntryType.Slot:
@@ -167,7 +167,7 @@ export default defineComponent({
 					return {
 						is: OverlayListItemUuid,
 						props: { ...props, uuid: item.uuid },
-						slots: [item.uuid]
+						slots: []
 					};
 
 				case OverlayListItemEntryType.List:
