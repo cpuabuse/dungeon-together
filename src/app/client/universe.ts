@@ -37,7 +37,17 @@ import { ClientEntity, ClientEntityClass, ClientEntityFactory } from "./entity";
 import { ClientGrid, ClientGridClass, ClientGridClassFactory } from "./grid";
 import { UniverseState, createVueApp } from "./gui";
 import { Theme } from "./gui/themes";
-import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, scrollSymbol, upSymbol } from "./input";
+import {
+	downSymbol,
+	lcSymbol,
+	leftSymbol,
+	levelDownSymbol,
+	levelUpSymbol,
+	rcSymbol,
+	rightSymbol,
+	scrollSymbol,
+	upSymbol
+} from "./input";
 import { Mode } from "./mode";
 import { ClientOptions, clientOptions } from "./options";
 import { ClientShard, ClientShardClass, ClientShardFactory } from "./shard";
@@ -515,6 +525,26 @@ export class ClientUniverse
 					this.shards.forEach(clientShard => {
 						// Send events to the relevant shards
 						clientShard.fireInput(leftSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("o", () => {
+					this.shards.forEach(clientShard => {
+						clientShard.fireInput(levelUpSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("p", () => {
+					this.shards.forEach(clientShard => {
+						clientShard.fireInput(levelDownSymbol, {
 							x: 0,
 							y: 0
 						});

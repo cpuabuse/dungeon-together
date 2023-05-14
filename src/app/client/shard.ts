@@ -34,6 +34,8 @@ import {
 	downSymbol,
 	lcSymbol,
 	leftSymbol,
+	levelDownSymbol,
+	levelUpSymbol,
 	rcSymbol,
 	rightSymbol,
 	scrollSymbol,
@@ -223,6 +225,20 @@ export function ClientShardFactory({
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: lcSymbol });
 						// #endif
+					});
+
+					// Add listeners for level up input
+					this.input.on(levelUpSymbol, inputInterface => {
+						this.grids.forEach(grid => {
+							grid.changeLevel({ level: grid.currentLevel + 1 });
+						});
+					});
+
+					// Add listeners for level down input
+					this.input.on(levelDownSymbol, inputInterface => {
+						this.grids.forEach(grid => {
+							grid.changeLevel({ level: grid.currentLevel - 1 });
+						});
 					});
 
 					let movementInputEntries: [symbol: symbol, direction: MovementWord][] = [

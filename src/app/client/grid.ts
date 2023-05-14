@@ -104,7 +104,7 @@ export function ClientGridClassFactory({
 			 */
 			level: number;
 		}): void {
-			if (this.currentLevel !== level) {
+			if (level < this.zLength && level >= 0 && this.currentLevel !== level) {
 				// Enable visibility first to avoid blank screen
 				this.levelIndex[level].visible = true;
 				this.levelIndex[this.currentLevel].visible = false;

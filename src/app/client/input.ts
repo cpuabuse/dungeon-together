@@ -45,6 +45,16 @@ export const lcSymbol: symbol = Symbol("left-click");
 export const scrollSymbol: symbol = Symbol("scroll");
 
 /**
+ * Identifier for the level up input.
+ */
+export const levelUpSymbol: symbol = Symbol("level-up");
+
+/**
+ * Identifier for the level down input.
+ */
+export const levelDownSymbol: symbol = Symbol("level-down");
+
+/**
  * An interface representing the input event.
  */
 export interface InputInterface {
