@@ -42,7 +42,9 @@ export enum MessageTypeWord {
 	 */
 	Update = "update",
 
-	EntityAction = "action"
+	EntityAction = "action",
+
+	LocalAction = "local-action"
 }
 
 /**

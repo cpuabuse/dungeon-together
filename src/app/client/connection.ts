@@ -48,7 +48,7 @@ import { ClientUniverse } from "./universe";
 /**
  * Burn.
  */
-const contrastFilter: InstanceType<(typeof filters)["ColorMatrixFilter"]> = new filters.ColorMatrixFilter();
+const contrastFilter: InstanceType<typeof filters["ColorMatrixFilter"]> = new filters.ColorMatrixFilter();
 contrastFilter.contrast(1.0, false);
 
 /**
@@ -89,7 +89,28 @@ export type ClientMessage =
 			 */
 			type: MessageTypeWord.Update;
 	  }
-	| CoreMessageMovement;
+	| CoreMessageMovement
+	| {
+			/**
+			 * Local action body.
+			 */
+			body: {
+				/**
+				 * Player UUID.
+				 */
+				playerUuid: Uuid;
+
+				/**
+				 * Unit UUID.
+				 */
+				unitUuid: Uuid;
+			};
+
+			/**
+			 * Local action type.
+			 */
+			type: MessageTypeWord.LocalAction;
+	  };
 
 // Sound
 /**
@@ -634,6 +655,61 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 					);
 				}
 
+				break;
+			}
+
+			// Client to client local action process
+			case MessageTypeWord.LocalAction: {
+				let { unitUuid, playerUuid }: typeof message.body = message.body;
+				let controlUnit: ClientEntity = this.universe.getEntity({ entityUuid: unitUuid });
+
+				// TODO: Change to string to uuid conversion function
+				// Destructuring won't be compatible with record type
+				// eslint-disable-next-line prefer-destructuring
+				let gridUuid: any = controlUnit.dictionary.gridUuid;
+				if (typeof gridUuid === "string") {
+					let grid: ClientGrid = this.universe.getGrid({ gridUuid });
+					let { x, y, z }: CoreDictionary = { ...controlUnit.dictionary };
+
+					if (typeof x === "number" && typeof y === "number" && typeof z === "number") {
+						let targetCell: ClientCell | undefined;
+
+						try {
+							// If cell empty, target cell will be undefined
+							targetCell = grid.cellIndex[z][x][y];
+						} catch {
+							targetCell = undefined;
+						}
+
+						if (targetCell) {
+							let targetEntity: ClientEntity | undefined = Array.from(targetCell.entities).find(
+								// ESLint false negative
+								// eslint-disable-next-line @typescript-eslint/typedef
+								([, entity]) => entity.dictionary.hasLocalAction
+							)?.[1];
+							if (targetEntity) {
+								results.push(
+									this.socket.send(
+										new CoreEnvelope({
+											messages: [
+												{
+													body: {
+														controlUnitUuid: unitUuid,
+														direction: DirectionWord.Here,
+														playerUuid,
+														targetEntityUuid: targetEntity.entityUuid,
+														type: ActionWords.Use
+													},
+													type: MessageTypeWord.EntityAction
+												}
+											]
+										})
+									)
+								);
+							}
+						}
+					}
+				}
 				break;
 			}
 

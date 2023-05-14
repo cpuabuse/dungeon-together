@@ -43,6 +43,7 @@ import {
 	leftSymbol,
 	levelDownSymbol,
 	levelUpSymbol,
+	localActionSymbol,
 	rcSymbol,
 	rightSymbol,
 	scrollSymbol,
@@ -545,6 +546,16 @@ export class ClientUniverse
 				mousetrap.bind("p", () => {
 					this.shards.forEach(clientShard => {
 						clientShard.fireInput(levelDownSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("e", () => {
+					this.shards.forEach(clientShard => {
+						clientShard.fireInput(localActionSymbol, {
 							x: 0,
 							y: 0
 						});

@@ -10,6 +10,11 @@
 import { EventEmitter } from "events";
 
 /**
+ * Identifier for a local action.
+ */
+export const localActionSymbol: symbol = Symbol("local-action");
+
+/**
  * Identifier for the up movement input.
  */
 export const upSymbol: symbol = Symbol("up");

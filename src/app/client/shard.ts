@@ -36,6 +36,7 @@ import {
 	leftSymbol,
 	levelDownSymbol,
 	levelUpSymbol,
+	localActionSymbol,
 	rcSymbol,
 	rightSymbol,
 	scrollSymbol,
@@ -271,6 +272,21 @@ export function ClientShardFactory({
 							inputDebug({ input: inputInterface as InputInterface, symbol: leftSymbol });
 							// #endif
 						});
+					});
+
+					// Add listeners for local action
+					// Async callback for event emitter
+					// eslint-disable-next-line @typescript-eslint/no-misused-promises
+					this.input.on(localActionSymbol, async inputInterface => {
+						let connection: ClientConnection | undefined = Array.from(this.players)[0]?.[1].connection;
+						connection?.socket.writeQueue({
+							body: {
+								playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
+								unitUuid: Array.from(this.units)[0]
+							},
+							type: MessageTypeWord.LocalAction
+						});
+						await connection?.tick({ word: processQueueWord });
 					});
 
 					// Add listeners for scroll input
