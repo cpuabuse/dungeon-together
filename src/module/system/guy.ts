@@ -66,7 +66,7 @@ export function GuyKindClassFactory({
 			this.stats = { ...stats };
 
 			// Set base stats
-			this.stats.con = 3;
+			this.stats.con = 5;
 
 			// TODO: Use appropriate UUID generator function
 			this.player = new ServerPlayer({ playerUuid: `player/${this.entity.entityUuid}` });

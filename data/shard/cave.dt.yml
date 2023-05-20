@@ -586,1978 +586,1975 @@ data:
               entities:
                 - kind: floor
                 - kind: player
-            - x: 2
-              y: 7
-              z: 0
-              entities:
-                - kind: floor
-            - x: 3
-              y: 7
-              z: 0
-              entities:
-                - kind: floor
-            - x: 4
-              y: 7
-              z: 0
-              entities:
-                - kind: wall
-            - x: 5
-              y: 7
-              z: 0
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 6
-              y: 7
-              z: 0
-              entities:
-                - kind: wall
-            - x: 7
-              y: 7
-              z: 0
-              entities:
-                - kind: floor
-            - x: 8
-              y: 7
-              z: 0
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 9
-              y: 7
-              z: 0
-              entities:
-                - kind: floor
-            - x: 10
-              y: 7
-              z: 0
-              entities:
-                - kind: wall
-            - x: 11
-              y: 7
-              z: 0
-              entities:
-                - kind: wall
-            - x: 12
-              y: 7
-              z: 0
-              entities:
-                - kind: floor
-                - kind: door
-            - x: 13
-              y: 7
-              z: 0
-              entities:
-                - kind: wall
-            - x: 14
-              y: 7
-              z: 0
-              entities:
-                - kind: wall
-            - x: 0
-              y: 8
-              z: 0
-              entities:
-                - kind: wall
-            - x: 1
-              y: 8
-              z: 0
-              entities:
-                - kind: wall
-            - x: 2
-              y: 8
-              z: 0
-              entities:
-                - kind: wall
-            - x: 3
-              y: 8
-              z: 0
-              entities:
-                - kind: floor
-            - x: 4
-              y: 8
-              z: 0
-              entities:
-                - kind: floor
-            - x: 5
-              y: 8
-              z: 0
-              entities:
-                - kind: floor
-            - x: 6
-              y: 8
-              z: 0
-              entities:
-                - kind: wall
-            - x: 7
-              y: 8
-              z: 0
-              entities:
-                - kind: floor
-            - x: 8
-              y: 8
-              z: 0
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 9
-              y: 8
-              z: 0
-              entities:
-                - kind: floor
-            - x: 10
-              y: 8
-              z: 0
-              entities:
-                - kind: wall
-            - x: 11
-              y: 8
-              z: 0
-              entities:
-                - kind: floor
-            - x: 12
-              y: 8
-              z: 0
-              entities:
-                - kind: floor
-            - x: 13
-              y: 8
-              z: 0
-              entities:
-                - kind: floor
-            - x: 14
-              y: 8
-              z: 0
-              entities:
-                - kind: wall
-            - x: 0
-              y: 9
-              z: 0
-              entities:
-                - kind: wall
-            - x: 1
-              y: 9
-              z: 0
-              entities:
-                - kind: wall
-            - x: 2
-              y: 9
-              z: 0
-              entities:
-                - kind: floor
-                - kind: door
-            - x: 3
-              y: 9
-              z: 0
-              entities:
-                - kind: floor
-            - x: 4
-              y: 9
-              z: 0
-              entities:
-                - kind: floor
-            - x: 5
-              y: 9
-              z: 0
-              entities:
-                - kind: floor
-            - x: 6
-              y: 9
-              z: 0
-              entities:
-                - kind: floor
-            - x: 7
-              y: 9
-              z: 0
-              entities:
-                - kind: floor
-                - kind: door
-            - x: 8
-              y: 9
-              z: 0
-              entities:
-                - kind: wall
-            - x: 9
-              y: 9
-              z: 0
-              entities:
-                - kind: wall
-            - x: 10
-              y: 9
-              z: 0
-              entities:
-                - kind: wall
-            - x: 11
-              y: 9
-              z: 0
-              entities:
-                - kind: floor
-            - x: 12
-              y: 9
-              z: 0
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 13
-              y: 9
-              z: 0
-              entities:
-                - kind: door
-            - x: 14
-              y: 9
-              z: 0
-              entities:
-                - kind: wall
-            - x: 0
-              y: 10
-              z: 0
-              entities:
-                - kind: wall
-            - x: 1
-              y: 10
-              z: 0
-              entities:
-                - kind: wall
-            - x: 2
-              y: 10
-              z: 0
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 3
-              y: 10
-              z: 0
-              entities:
-                - kind: wall
-            - x: 4
-              y: 10
-              z: 0
-              entities:
-                - kind: wall
-            - x: 5
-              y: 10
-              z: 0
-              entities:
-                - kind: wall
-            - x: 6
-              y: 10
-              z: 0
-              entities:
-                - kind: floor
-                - kind: door
-            - x: 7
-              y: 10
-              z: 0
-              entities:
-                - kind: wall
-            - x: 8
-              y: 10
-              z: 0
-              entities:
-                - kind: floor
-                - kind: treasure
-            - x: 9
-              y: 10
-              z: 0
-              entities:
-                - kind: floor
-            - x: 10
-              y: 10
-              z: 0
-              entities:
-                - kind: floor
-            - x: 11
-              y: 10
-              z: 0
-              entities:
-                - kind: floor
-            - x: 12
-              y: 10
-              z: 0
-              entities:
-                - kind: wall
-            - x: 13
-              y: 10
-              z: 0
-              entities:
-                - kind: wall
-            - x: 14
-              y: 10
-              z: 0
-              entities:
-                - kind: wall
-            - x: 0
-              y: 11
-              z: 0
-              entities:
-                - kind: wall
-            - x: 1
-              y: 11
-              z: 0
-              entities:
-                - kind: wall
-            - x: 2
-              y: 11
-              z: 0
-              entities:
-                - kind: floor
-                - kind: door
-            - x: 3
-              y: 11
-              z: 0
-              entities:
-                - kind: wall
-            - x: 4
-              y: 11
-              z: 0
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 5
-              y: 11
-              z: 0
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 6
-              y: 11
-              z: 0
-              entities:
-                - kind: floor
-            - x: 7
-              y: 11
-              z: 0
-              entities:
-                - kind: wall
-            - x: 8
-              y: 11
-              z: 0
-              entities:
-                - kind: floor
-            - x: 9
-              y: 11
-              z: 0
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 10
-              y: 11
-              z: 0
-              entities:
-                - kind: floor
-            - x: 11
-              y: 11
-              z: 0
-              entities:
-                - kind: floor
-            - x: 12
-              y: 11
-              z: 0
-              entities:
-                - kind: floor
-            - x: 13
-              y: 11
-              z: 0
-              entities:
-                - kind: floor
-            - x: 14
-              y: 11
-              z: 0
-              entities:
-                - kind: wall
-            - x: 0
-              y: 12
-              z: 0
-              entities:
-                - kind: wall
-            - x: 1
-              y: 12
-              z: 0
-              entities:
-                - kind: wall
-            - x: 2
-              y: 12
-              z: 0
-              entities:
-                - kind: floor
-            - x: 3
-              y: 12
-              z: 0
-              entities:
-                - kind: wall
-            - x: 4
-              y: 12
-              z: 0
-              entities:
-                - kind: floor
-                - kind: treasure
-            - x: 5
-              y: 12
-              z: 0
-              entities:
-                - kind: floor
-            - x: 6
-              y: 12
-              z: 0
-              entities:
-                - kind: floor
-            - x: 7
-              y: 12
-              z: 0
-              entities:
-                - kind: wall
-            - x: 8
-              y: 12
-              z: 0
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 9
-              y: 12
-              z: 0
-              entities:
-                - kind: floor
-            - x: 10
-              y: 12
-              z: 0
-              entities:
-                - kind: floor
-            - x: 11
-              y: 12
-              z: 0
-              entities:
-                - kind: floor
-            - x: 12
-              y: 12
-              z: 0
-              entities:
-                - kind: wall
-            - x: 13
-              y: 12
-              z: 0
-              entities:
-                - kind: floor
-            - x: 14
-              y: 12
-              z: 0
-              entities:
-                - kind: wall
-            - x: 0
-              y: 13
-              z: 0
-              entities:
-                - kind: wall
-            - x: 1
-              y: 13
-              z: 0
-              entities:
-                - kind: floor
-                - kind: treasure
-            - x: 2
-              y: 13
-              z: 0
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 0
-              y: 13
-              z: 0
-              entities:
-                - kind: wall
-            - x: 1
-              y: 13
-              z: 0
-              entities:
-                - kind: floor
-                - kind: treasure
-            - x: 2
-              y: 13
-              z: 0
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 3
-              y: 13
-              z: 0
-              entities:
-                - kind: wall
-            - x: 4
-              y: 13
-              z: 0
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 5
-              y: 13
-              z: 0
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 6
-              y: 13
-              z: 0
-              entities:
-                - kind: floor
-            - x: 7
-              y: 13
-              z: 0
-              entities:
-                - kind: wall
-            - x: 8
-              y: 13
-              z: 0
-              entities:
-                - kind: floor
-                - kind: treasure
-            - x: 9
-              y: 13
-              z: 0
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 10
-              y: 13
-              z: 0
-              entities:
-                - kind: floor
-            - x: 11
-              y: 13
-              z: 0
-              entities:
-                - kind: floor
-            - x: 12
-              y: 13
-              z: 0
-              entities:
-                - kind: wall
-            - x: 13
-              y: 13
-              z: 0
-              entities:
-                - kind: floor
-                - kind: ladder
-            - x: 14
-              y: 13
-              z: 0
-              entities:
-                - kind: wall
-            - x: 0
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 1
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 2
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 3
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 4
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 5
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 6
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 7
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 8
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 9
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 10
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 11
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 12
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 13
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 14
-              y: 14
-              z: 0
-              entities:
-                - kind: wall
-            - x: 0
-              y: 0
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 0
-              z: 1
-              entities:
-                - kind: wall
-            - x: 2
-              y: 0
-              z: 1
-              entities:
-                - kind: wall
-            - x: 3
-              y: 0
-              z: 1
-              entities:
-                - kind: wall
-            - x: 4
-              y: 0
-              z: 1
-              entities:
-                - kind: wall
-            - x: 5
-              y: 0
-              z: 1
-              entities:
-                - kind: wall
-            - x: 6
-              y: 0
-              z: 1
-              entities:
-                - kind: wall
-            - x: 7
-              y: 0
-              z: 1
-              entities:
-                - kind: wall
-            - x: 8
-              y: 0
-              z: 1
-              entities:
-                - kind: wall
-            - x: 9
-              y: 0
-              z: 1
-              entities:
-                - kind: wall
-            - x: 10
-              y: 0
-              z: 1
-              entities:
-                - kind: wall
-            - x: 11
-              y: 0
-              z: 1
-              entities:
-                - kind: floor
-                - kind: wall
-            - x: 12
-              y: 0
-              z: 1
-              entities:
-                - kind: wall
-            - x: 13
-              y: 0
-              z: 1
-              entities:
-                - kind: wall
-            - x: 14
-              y: 0
-              z: 1
-              entities:
-                - kind: wall
-            - x: 0
-              y: 1
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 1
-              z: 1
-              entities:
-                - kind: floor
-                - kind: treasure
-            - x: 2
-              y: 1
-              z: 1
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 3
-              y: 1
-              z: 1
-              entities:
-                - kind: floor
-            - x: 4
-              y: 1
-              z: 1
-              entities:
-                - kind: floor
-            - x: 5
-              y: 1
-              z: 1
-              entities:
-                - kind: floor
-            - x: 6
-              y: 1
-              z: 1
-              entities:
-                - kind: floor
-            - x: 7
-              y: 1
-              z: 1
-              entities:
-                - kind: floor
-                - kind: wall
-            - x: 8
-              y: 1
-              z: 1
-              entities:
-                - kind: floor
-            - x: 9
-              y: 1
-              z: 1
-              entities:
-                - kind: floor
-            - x: 10
-              y: 1
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 11
-              y: 1
-              z: 1
-              entities:
-                - kind: floor
-            - x: 12
-              y: 1
-              z: 1
-              entities:
-                - kind: floor
-            - x: 13
-              y: 1
-              z: 1
-              entities:
-                - kind: floor
-                - kind: treasure
-            - x: 14
-              y: 1
-              z: 1
-              entities:
-                - kind: wall
-            - x: 0
-              y: 2
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 2
-              z: 1
-              entities:
-                - kind: floor
-                - kind: ladder
-            - x: 2
-              y: 2
-              z: 1
-              entities:
-                - kind: floor
-            - x: 3
-              y: 2
-              z: 1
-              entities:
-                - kind: floor
-            - x: 4
-              y: 2
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 5
-              y: 2
-              z: 1
-              entities:
-                - kind: floor
-            - x: 6
-              y: 2
-              z: 1
-              entities:
-                - kind: floor
-            - x: 7
-              y: 2
-              z: 1
-              entities:
-                - kind: wall
-            - x: 8
-              y: 2
-              z: 1
-              entities:
-                - kind: floor
-            - x: 9
-              y: 2
-              z: 1
-              entities:
-                - kind: floor
-            - x: 10
-              y: 2
-              z: 1
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 11
-              y: 2
-              z: 1
-              entities:
-                - kind: floor
-            - x: 12
-              y: 2
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 13
-              y: 2
-              z: 1
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 14
-              y: 2
-              z: 1
-              entities:
-                - kind: wall
-            - x: 0
-              y: 3
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 3
-              z: 1
-              entities:
-                - kind: floor
-            - x: 2
-              y: 3
-              z: 1
-              entities:
-                - kind: floor
-                - kind: treasure
-            - x: 3
-              y: 3
-              z: 1
-              entities:
-                - kind: floor
-            - x: 4
-              y: 3
-              z: 1
-              entities:
-                - kind: floor
-            - x: 5
-              y: 3
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 6
-              y: 3
-              z: 1
-              entities:
-                - kind: floor
-            - x: 7
-              y: 3
-              z: 1
-              entities:
-                - kind: floor
-                - kind: door
-            - x: 8
-              y: 3
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 9
-              y: 3
-              z: 1
-              entities:
-                - kind: floor
-            - x: 10
-              y: 3
-              z: 1
-              entities:
-                - kind: floor
-            - x: 11
-              y: 3
-              z: 1
-              entities:
-                - kind: floor
-            - x: 12
-              y: 3
-              z: 1
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 13
-              y: 3
-              z: 1
-              entities:
-                - kind: floor
-            - x: 14
-              y: 3
-              z: 1
-              entities:
-                - kind: wall
-            - x: 0
-              y: 4
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 4
-              z: 1
-              entities:
-                - kind: floor
-                - kind: treasure
-            - x: 2
-              y: 4
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 3
-              y: 4
-              z: 1
-              entities:
-                - kind: floor
-            - x: 4
-              y: 4
-              z: 1
-              entities:
-                - kind: floor
-            - x: 5
-              y: 4
-              z: 1
-              entities:
-                - kind: floor
-            - x: 6
-              y: 4
-              z: 1
-              entities:
-                - kind: floor
-            - x: 7
-              y: 4
-              z: 1
-              entities:
-                - kind: wall
-            - x: 8
-              y: 4
-              z: 1
-              entities:
-                - kind: floor
-            - x: 9
-              y: 4
-              z: 1
-              entities:
-                - kind: floor
-            - x: 10
-              y: 4
-              z: 1
-              entities:
-                - kind: floor
-            - x: 11
-              y: 4
-              z: 1
-              entities:
-                - kind: floor
-            - x: 12
-              y: 4
-              z: 1
-              entities:
-                - kind: floor
-            - x: 13
-              y: 4
-              z: 1
-              entities:
-                - kind: floor
-            - x: 14
-              y: 4
-              z: 1
-              entities:
-                - kind: wall
-            - x: 0
-              y: 5
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 5
-              z: 1
-              entities:
-                - kind: wall
-            - x: 2
-              y: 5
-              z: 1
-              entities:
-                - kind: wall
-            - x: 3
-              y: 5
-              z: 1
-              entities:
-                - kind: wall
-            - x: 4
-              y: 5
-              z: 1
-              entities:
-                - kind: wall
-            - x: 5
-              y: 5
-              z: 1
-              entities:
-                - kind: wall
-            - x: 6
-              y: 5
-              z: 1
-              entities:
-                - kind: wall
-            - x: 7
-              y: 5
-              z: 1
-              entities:
-                - kind: wall
-            - x: 8
-              y: 5
-              z: 1
-              entities:
-                - kind: wall
-            - x: 9
-              y: 5
-              z: 1
-              entities:
-                - kind: wall
-            - x: 10
-              y: 5
-              z: 1
-              entities:
-                - kind: floor
-            - x: 11
-              y: 5
-              z: 1
-              entities:
-                - kind: wall
-            - x: 12
-              y: 5
-              z: 1
-              entities:
-                - kind: wall
-            - x: 13
-              y: 5
-              z: 1
-              entities:
-                - kind: wall
-            - x: 14
-              y: 5
-              z: 1
-              entities:
-                - kind: wall
-            - x: 0
-              y: 6
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 6
-              z: 1
-              entities:
-                - kind: floor
-                - kind: treasure
-            - x: 2
-              y: 6
-              z: 1
-              entities:
-                - kind: floor
-                - kind: wall
-            - x: 3
-              y: 6
-              z: 1
-              entities:
-                - kind: wall
-            - x: 4
-              y: 6
-              z: 1
-              entities:
-                - kind: wall
-            - x: 5
-              y: 6
-              z: 1
-              entities:
-                - kind: wall
-            - x: 6
-              y: 6
-              z: 1
-              entities:
-                - kind: wall
-            - x: 7
-              y: 6
-              z: 1
-              entities:
-                - kind: wall
-            - x: 8
-              y: 6
-              z: 1
-              entities:
-                - kind: wall
-            - x: 9
-              y: 6
-              z: 1
-              entities:
-                - kind: wall
-            - x: 10
-              y: 6
-              z: 1
-              entities:
-                - kind: floor
-                - kind: door
-            - x: 11
-              y: 6
-              z: 1
-              entities:
-                - kind: wall
-            - x: 12
-              y: 6
-              z: 1
-              entities:
-                - kind: wall
-            - x: 13
-              y: 6
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 14
-              y: 6
-              z: 1
-              entities:
-                - kind: wall
-            - x: 0
-              y: 7
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 7
-              z: 1
-              entities:
-                - kind: floor
-            - x: 2
-              y: 7
-              z: 1
-              entities:
-                - kind: wall
-            - x: 3
-              y: 7
-              z: 1
-              entities:
-                - kind: floor
-            - x: 4
-              y: 7
-              z: 1
-              entities:
-                - kind: floor
-            - x: 5
-              y: 7
-              z: 1
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 6
-              y: 7
-              z: 1
-              entities:
-                - kind: floor
-            - x: 7
-              y: 7
-              z: 1
-              entities:
-                - kind: floor
-            - x: 8
-              y: 7
-              z: 1
-              entities:
-                - kind: floor
-            - x: 9
-              y: 7
-              z: 1
-              entities:
-                - kind: floor
-            - x: 10
-              y: 7
-              z: 1
-              entities:
-                - kind: floor
-            - x: 11
-              y: 7
-              z: 1
-              entities:
-                - kind: floor
-            - x: 12
-              y: 7
-              z: 1
-              entities:
-                - kind: wall
-            - x: 13
-              y: 7
-              z: 1
-              entities:
-                - kind: floor
-            - x: 14
-              y: 7
-              z: 1
-              entities:
-                - kind: wall
-            - x: 0
-              y: 8
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 8
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 2
-              y: 8
-              z: 1
-              entities:
-                - kind: wall
-            - x: 3
-              y: 8
-              z: 1
-              entities:
-                - kind: floor
-            - x: 4
-              y: 8
-              z: 1
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 5
-              y: 8
-              z: 1
-              entities:
-                - kind: floor
-            - x: 6
-              y: 8
-              z: 1
-              entities:
-                - kind: floor
-            - x: 7
-              y: 8
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 8
-              y: 8
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 9
-              y: 8
-              z: 1
-              entities:
-                - kind: floor
-            - x: 10
-              y: 8
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 11
-              y: 8
-              z: 1
-              entities:
-                - kind: floor
-            - x: 12
-              y: 8
-              z: 1
-              entities:
-                - kind: wall
-            - x: 13
-              y: 8
-              z: 1
-              entities:
-                - kind: floor
-            - x: 14
-              y: 8
-              z: 1
-              entities:
-                - kind: wall
-            - x: 0
-              y: 9
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 9
-              z: 1
-              entities:
-                - kind: floor
-            - x: 2
-              y: 9
-              z: 1
-              entities:
-                - kind: floor
-                - kind: wall
-            - x: 3
-              y: 9
-              z: 1
-              entities:
-                - kind: floor
-            - x: 4
-              y: 9
-              z: 1
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 5
-              y: 9
-              z: 1
-              entities:
-                - kind: floor
-            - x: 6
-              y: 9
-              z: 1
-              entities:
-                - kind: floor
-            - x: 7
-              y: 9
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 8
-              y: 9
-              z: 1
-              entities:
-                - kind: floor
-            - x: 9
-              y: 9
-              z: 1
-              entities:
-                - kind: floor
-            - x: 10
-              y: 9
-              z: 1
-              entities:
-                - kind: floor
-            - x: 11
-              y: 9
-              z: 1
-              entities:
-                - kind: floor
-            - x: 12
-              y: 9
-              z: 1
-              entities:
-                - kind: wall
-            - x: 13
-              y: 9
-              z: 1
-              entities:
-                - kind: floor
-                - kind: door
-            - x: 14
-              y: 9
-              z: 1
-              entities:
-                - kind: wall
-            - x: 0
-              y: 10
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 10
-              z: 1
-              entities:
-                - kind: floor
-            - x: 2
-              y: 10
-              z: 1
-              entities:
-                - kind: floor
-                - kind: door
-            - x: 3
-              y: 10
-              z: 1
-              entities:
-                - kind: floor
-            - x: 4
-              y: 10
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 5
-              y: 10
-              z: 1
-              entities:
-                - kind: floor
-            - x: 6
-              y: 10
-              z: 1
-              entities:
-                - kind: floor
-            - x: 7
-              y: 10
-              z: 1
-              entities:
-                - kind: floor
-                - kind: treasure
-            - x: 8
-              y: 10
-              z: 1
-              entities:
-                - kind: floor
-            - x: 9
-              y: 10
-              z: 1
-              entities:
-                - kind: floor
-            - x: 10
-              y: 10
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 11
-              y: 10
-              z: 1
-              entities:
-                - kind: floor
-            - x: 12
-              y: 10
-              z: 1
-              entities:
-                - kind: floor
-            - x: 13
-              y: 10
-              z: 1
-              entities:
-                - kind: floor
-            - x: 14
-              y: 10
-              z: 1
-              entities:
-                - kind: floor
-                - kind: wall
-            - x: 0
-              y: 11
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 11
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 2
-              y: 11
-              z: 1
-              entities:
-                - kind: wall
-            - x: 3
-              y: 11
-              z: 1
-              entities:
-                - kind: floor
-            - x: 4
-              y: 11
-              z: 1
-              entities:
-                - kind: floor
-            - x: 5
-              y: 11
-              z: 1
-              entities:
-                - kind: floor
-            - x: 6
-              y: 11
-              z: 1
-              entities:
-                - kind: floor
-            - x: 7
-              y: 11
-              z: 1
-              entities:
-                - kind: floor
-            - x: 8
-              y: 11
-              z: 1
-              entities:
-                - kind: floor
-            - x: 9
-              y: 11
-              z: 1
-              entities:
-                - kind: floor
-            - x: 10
-              y: 11
-              z: 1
-              entities:
-                - kind: floor
-            - x: 11
-              y: 11
-              z: 1
-              entities:
-                - kind: floor
-            - x: 12
-              y: 11
-              z: 1
-              entities:
-                - kind: wall
-            - x: 13
-              y: 11
-              z: 1
-              entities:
-                - kind: floor
-                - kind: door
-            - x: 14
-              y: 11
-              z: 1
-              entities:
-                - kind: wall
-            - x: 0
-              y: 12
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 12
-              z: 1
-              entities:
-                - kind: floor
-            - x: 2
-              y: 12
-              z: 1
-              entities:
-                - kind: wall
-            - x: 3
-              y: 12
-              z: 1
-              entities:
-                - kind: floor
-            - x: 4
-              y: 12
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 5
-              y: 12
-              z: 1
-              entities:
-                - kind: floor
-            - x: 6
-              y: 12
-              z: 1
-              entities:
-                - kind: floor
-            - x: 7
-              y: 12
-              z: 1
-              entities:
-                - kind: floor
-                - kind: treasure
-            - x: 8
-              y: 12
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 9
-              y: 12
-              z: 1
-              entities:
-                - kind: floor
-            - x: 10
-              y: 12
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 11
-              y: 12
-              z: 1
-              entities:
-                - kind: floor
-            - x: 12
-              y: 12
-              z: 1
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 13
-              y: 12
-              z: 1
-              entities:
-                - kind: floor
-                - kind: enemy
-            - x: 14
-              y: 12
-              z: 1
-              entities:
-                - kind: wall
-            - x: 0
-              y: 13
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 13
-              z: 1
-              entities:
-                - kind: floor
-                - kind: treasure
-            - x: 2
-              y: 13
-              z: 1
-              entities:
-                - kind: floor
-                - kind: wall
-            - x: 3
-              y: 13
-              z: 1
-              entities:
-                - kind: floor
-            - x: 4
-              y: 13
-              z: 1
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 5
-              y: 13
-              z: 1
-              entities:
-                - kind: floor
-            - x: 6
-              y: 13
-              z: 1
-              entities:
-                - kind: floor
-            - x: 7
-              y: 13
-              z: 1
-              entities:
-                - kind: floor
-            - x: 8
-              y: 13
-              z: 1
-              entities:
-                - kind: floor
-            - x: 9
-              y: 13
-              z: 1
-              entities:
-                - kind: floor
-            - x: 10
-              y: 13
-              z: 1
-              entities:
-                - kind: floor
-            - x: 11
-              y: 13
-              z: 1
-              entities:
-                - kind: floor
-            - x: 12
-              y: 13
-              z: 1
-              entities:
-                - kind: wall
-            - x: 13
-              y: 13
-              z: 1
-              entities:
-                - kind: floor
-                - kind: player
-            - x: 14
-              y: 13
-              z: 1
-              entities:
-                - kind: wall
-            - x: 0
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 1
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 2
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 3
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 4
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 5
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 6
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 7
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 8
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 9
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 10
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 11
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 12
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 13
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 14
-              y: 14
-              z: 1
-              entities:
-                - kind: wall
-            - x: 0
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 1
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 2
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 3
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 4
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 5
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 6
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 7
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 8
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 9
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 10
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 11
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 12
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 13
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 14
-              y: 0
-              z: 2
-              entities:
-                - kind: wall
-            - x: 0
-              y: 1
-              z: 2
-              entities:
-                - kind: wall
-            - x: 1
-              y: 1
-              z: 2
-              entities:
-                - kind: floor
-            - x: 2
-              y: 1
-              z: 2
-              entities:
-                - kind: floor
-            - x: 3
-              y: 1
-              z: 2
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 4
-              y: 1
-              z: 2
-              entities:
-                - kind: floor
-            - x: 5
-              y: 1
-              z: 2
-              entities:
-                - kind: floor
-                - kind: door
-            - x: 6
-              y: 1
-              z: 2
-              entities:
-                - kind: floor
-            - x: 7
-              y: 1
-              z: 2
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 8
-              y: 1
-              z: 2
-              entities:
-                - kind: floor
-            - x: 9
-              y: 1
-              z: 2
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 10
-              y: 1
-              z: 2
-              entities:
-                - kind: floor
-            - x: 11
-              y: 1
-              z: 2
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 12
-              y: 1
-              z: 2
-              entities:
-                - kind: floor
-            - x: 13
-              y: 1
-              z: 2
-              entities:
-                - kind: floor
-                - kind: trap
-            - x: 14
-              y: 1
-              z: 2
-              entities:
-                - kind: wall
-            - x: 0
-              y: 2
-              z: 2
-              entities:
-                - kind: wall
-            - x: 1
-              y: 2
-              z: 2
-              entities:
-                - kind: floor
-                - kind: player
                   id: player
+            - x: 2
+              y: 7
+              z: 0
+              entities:
+                - kind: floor
+            - x: 3
+              y: 7
+              z: 0
+              entities:
+                - kind: floor
+            - x: 4
+              y: 7
+              z: 0
+              entities:
+                - kind: wall
+            - x: 5
+              y: 7
+              z: 0
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 6
+              y: 7
+              z: 0
+              entities:
+                - kind: wall
+            - x: 7
+              y: 7
+              z: 0
+              entities:
+                - kind: floor
+            - x: 8
+              y: 7
+              z: 0
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 9
+              y: 7
+              z: 0
+              entities:
+                - kind: floor
+            - x: 10
+              y: 7
+              z: 0
+              entities:
+                - kind: wall
+            - x: 11
+              y: 7
+              z: 0
+              entities:
+                - kind: wall
+            - x: 12
+              y: 7
+              z: 0
+              entities:
+                - kind: floor
+                - kind: door
+            - x: 13
+              y: 7
+              z: 0
+              entities:
+                - kind: wall
+            - x: 14
+              y: 7
+              z: 0
+              entities:
+                - kind: wall
+            - x: 0
+              y: 8
+              z: 0
+              entities:
+                - kind: wall
+            - x: 1
+              y: 8
+              z: 0
+              entities:
+                - kind: wall
+            - x: 2
+              y: 8
+              z: 0
+              entities:
+                - kind: wall
+            - x: 3
+              y: 8
+              z: 0
+              entities:
+                - kind: floor
+            - x: 4
+              y: 8
+              z: 0
+              entities:
+                - kind: floor
+            - x: 5
+              y: 8
+              z: 0
+              entities:
+                - kind: floor
+            - x: 6
+              y: 8
+              z: 0
+              entities:
+                - kind: wall
+            - x: 7
+              y: 8
+              z: 0
+              entities:
+                - kind: floor
+            - x: 8
+              y: 8
+              z: 0
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 9
+              y: 8
+              z: 0
+              entities:
+                - kind: floor
+            - x: 10
+              y: 8
+              z: 0
+              entities:
+                - kind: wall
+            - x: 11
+              y: 8
+              z: 0
+              entities:
+                - kind: floor
+            - x: 12
+              y: 8
+              z: 0
+              entities:
+                - kind: floor
+            - x: 13
+              y: 8
+              z: 0
+              entities:
+                - kind: floor
+            - x: 14
+              y: 8
+              z: 0
+              entities:
+                - kind: wall
+            - x: 0
+              y: 9
+              z: 0
+              entities:
+                - kind: wall
+            - x: 1
+              y: 9
+              z: 0
+              entities:
+                - kind: wall
+            - x: 2
+              y: 9
+              z: 0
+              entities:
+                - kind: floor
+                - kind: door
+            - x: 3
+              y: 9
+              z: 0
+              entities:
+                - kind: floor
+            - x: 4
+              y: 9
+              z: 0
+              entities:
+                - kind: floor
+            - x: 5
+              y: 9
+              z: 0
+              entities:
+                - kind: floor
+            - x: 6
+              y: 9
+              z: 0
+              entities:
+                - kind: floor
+            - x: 7
+              y: 9
+              z: 0
+              entities:
+                - kind: floor
+                - kind: door
+            - x: 8
+              y: 9
+              z: 0
+              entities:
+                - kind: wall
+            - x: 9
+              y: 9
+              z: 0
+              entities:
+                - kind: wall
+            - x: 10
+              y: 9
+              z: 0
+              entities:
+                - kind: wall
+            - x: 11
+              y: 9
+              z: 0
+              entities:
+                - kind: floor
+            - x: 12
+              y: 9
+              z: 0
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 13
+              y: 9
+              z: 0
+              entities:
+                - kind: floor
+            - x: 14
+              y: 9
+              z: 0
+              entities:
+                - kind: wall
+            - x: 0
+              y: 10
+              z: 0
+              entities:
+                - kind: wall
+            - x: 1
+              y: 10
+              z: 0
+              entities:
+                - kind: wall
+            - x: 2
+              y: 10
+              z: 0
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 3
+              y: 10
+              z: 0
+              entities:
+                - kind: wall
+            - x: 4
+              y: 10
+              z: 0
+              entities:
+                - kind: wall
+            - x: 5
+              y: 10
+              z: 0
+              entities:
+                - kind: wall
+            - x: 6
+              y: 10
+              z: 0
+              entities:
+                - kind: floor
+                - kind: door
+            - x: 7
+              y: 10
+              z: 0
+              entities:
+                - kind: wall
+            - x: 8
+              y: 10
+              z: 0
+              entities:
+                - kind: floor
+                - kind: treasure
+            - x: 9
+              y: 10
+              z: 0
+              entities:
+                - kind: floor
+            - x: 10
+              y: 10
+              z: 0
+              entities:
+                - kind: floor
+            - x: 11
+              y: 10
+              z: 0
+              entities:
+                - kind: floor
+            - x: 12
+              y: 10
+              z: 0
+              entities:
+                - kind: wall
+            - x: 13
+              y: 10
+              z: 0
+              entities:
+                - kind: wall
+            - x: 14
+              y: 10
+              z: 0
+              entities:
+                - kind: wall
+            - x: 0
+              y: 11
+              z: 0
+              entities:
+                - kind: wall
+            - x: 1
+              y: 11
+              z: 0
+              entities:
+                - kind: wall
+            - x: 2
+              y: 11
+              z: 0
+              entities:
+                - kind: floor
+                - kind: door
+            - x: 3
+              y: 11
+              z: 0
+              entities:
+                - kind: wall
+            - x: 4
+              y: 11
+              z: 0
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 5
+              y: 11
+              z: 0
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 6
+              y: 11
+              z: 0
+              entities:
+                - kind: floor
+            - x: 7
+              y: 11
+              z: 0
+              entities:
+                - kind: wall
+            - x: 8
+              y: 11
+              z: 0
+              entities:
+                - kind: floor
+            - x: 9
+              y: 11
+              z: 0
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 10
+              y: 11
+              z: 0
+              entities:
+                - kind: floor
+            - x: 11
+              y: 11
+              z: 0
+              entities:
+                - kind: floor
+            - x: 12
+              y: 11
+              z: 0
+              entities:
+                - kind: floor
+            - x: 13
+              y: 11
+              z: 0
+              entities:
+                - kind: floor
+            - x: 14
+              y: 11
+              z: 0
+              entities:
+                - kind: wall
+            - x: 0
+              y: 12
+              z: 0
+              entities:
+                - kind: wall
+            - x: 1
+              y: 12
+              z: 0
+              entities:
+                - kind: wall
+            - x: 2
+              y: 12
+              z: 0
+              entities:
+                - kind: floor
+            - x: 3
+              y: 12
+              z: 0
+              entities:
+                - kind: wall
+            - x: 4
+              y: 12
+              z: 0
+              entities:
+                - kind: floor
+                - kind: treasure
+            - x: 5
+              y: 12
+              z: 0
+              entities:
+                - kind: floor
+            - x: 6
+              y: 12
+              z: 0
+              entities:
+                - kind: floor
+            - x: 7
+              y: 12
+              z: 0
+              entities:
+                - kind: wall
+            - x: 8
+              y: 12
+              z: 0
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 9
+              y: 12
+              z: 0
+              entities:
+                - kind: floor
+            - x: 10
+              y: 12
+              z: 0
+              entities:
+                - kind: floor
+            - x: 11
+              y: 12
+              z: 0
+              entities:
+                - kind: floor
+            - x: 12
+              y: 12
+              z: 0
+              entities:
+                - kind: wall
+            - x: 13
+              y: 12
+              z: 0
+              entities:
+                - kind: floor
+            - x: 14
+              y: 12
+              z: 0
+              entities:
+                - kind: wall
+            - x: 0
+              y: 13
+              z: 0
+              entities:
+                - kind: wall
+            - x: 1
+              y: 13
+              z: 0
+              entities:
+                - kind: floor
+                - kind: treasure
+            - x: 2
+              y: 13
+              z: 0
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 0
+              y: 13
+              z: 0
+              entities:
+                - kind: wall
+            - x: 1
+              y: 13
+              z: 0
+              entities:
+                - kind: floor
+                - kind: treasure
+            - x: 2
+              y: 13
+              z: 0
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 3
+              y: 13
+              z: 0
+              entities:
+                - kind: wall
+            - x: 4
+              y: 13
+              z: 0
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 5
+              y: 13
+              z: 0
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 6
+              y: 13
+              z: 0
+              entities:
+                - kind: floor
+            - x: 7
+              y: 13
+              z: 0
+              entities:
+                - kind: wall
+            - x: 8
+              y: 13
+              z: 0
+              entities:
+                - kind: floor
+                - kind: treasure
+            - x: 9
+              y: 13
+              z: 0
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 10
+              y: 13
+              z: 0
+              entities:
+                - kind: floor
+            - x: 11
+              y: 13
+              z: 0
+              entities:
+                - kind: floor
+            - x: 12
+              y: 13
+              z: 0
+              entities:
+                - kind: wall
+            - x: 13
+              y: 13
+              z: 0
+              entities:
+                - kind: floor
+                - kind: ladder
+            - x: 14
+              y: 13
+              z: 0
+              entities:
+                - kind: wall
+            - x: 0
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 1
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 2
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 3
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 4
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 5
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 6
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 7
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 8
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 9
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 10
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 11
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 12
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 13
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 14
+              y: 14
+              z: 0
+              entities:
+                - kind: wall
+            - x: 0
+              y: 0
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 0
+              z: 1
+              entities:
+                - kind: wall
+            - x: 2
+              y: 0
+              z: 1
+              entities:
+                - kind: wall
+            - x: 3
+              y: 0
+              z: 1
+              entities:
+                - kind: wall
+            - x: 4
+              y: 0
+              z: 1
+              entities:
+                - kind: wall
+            - x: 5
+              y: 0
+              z: 1
+              entities:
+                - kind: wall
+            - x: 6
+              y: 0
+              z: 1
+              entities:
+                - kind: wall
+            - x: 7
+              y: 0
+              z: 1
+              entities:
+                - kind: wall
+            - x: 8
+              y: 0
+              z: 1
+              entities:
+                - kind: wall
+            - x: 9
+              y: 0
+              z: 1
+              entities:
+                - kind: wall
+            - x: 10
+              y: 0
+              z: 1
+              entities:
+                - kind: wall
+            - x: 11
+              y: 0
+              z: 1
+              entities:
+                - kind: floor
+                - kind: wall
+            - x: 12
+              y: 0
+              z: 1
+              entities:
+                - kind: wall
+            - x: 13
+              y: 0
+              z: 1
+              entities:
+                - kind: wall
+            - x: 14
+              y: 0
+              z: 1
+              entities:
+                - kind: wall
+            - x: 0
+              y: 1
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 1
+              z: 1
+              entities:
+                - kind: floor
+                - kind: treasure
+            - x: 2
+              y: 1
+              z: 1
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 3
+              y: 1
+              z: 1
+              entities:
+                - kind: floor
+            - x: 4
+              y: 1
+              z: 1
+              entities:
+                - kind: floor
+            - x: 5
+              y: 1
+              z: 1
+              entities:
+                - kind: floor
+            - x: 6
+              y: 1
+              z: 1
+              entities:
+                - kind: floor
+            - x: 7
+              y: 1
+              z: 1
+              entities:
+                - kind: floor
+                - kind: wall
+            - x: 8
+              y: 1
+              z: 1
+              entities:
+                - kind: floor
+            - x: 9
+              y: 1
+              z: 1
+              entities:
+                - kind: floor
+            - x: 10
+              y: 1
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 11
+              y: 1
+              z: 1
+              entities:
+                - kind: floor
+            - x: 12
+              y: 1
+              z: 1
+              entities:
+                - kind: floor
+            - x: 13
+              y: 1
+              z: 1
+              entities:
+                - kind: floor
+                - kind: treasure
+            - x: 14
+              y: 1
+              z: 1
+              entities:
+                - kind: wall
+            - x: 0
+              y: 2
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 2
+              z: 1
+              entities:
+                - kind: floor
+            - x: 2
+              y: 2
+              z: 1
+              entities:
+                - kind: floor
+            - x: 3
+              y: 2
+              z: 1
+              entities:
+                - kind: floor
+            - x: 4
+              y: 2
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 5
+              y: 2
+              z: 1
+              entities:
+                - kind: floor
+            - x: 6
+              y: 2
+              z: 1
+              entities:
+                - kind: floor
+            - x: 7
+              y: 2
+              z: 1
+              entities:
+                - kind: wall
+            - x: 8
+              y: 2
+              z: 1
+              entities:
+                - kind: floor
+            - x: 9
+              y: 2
+              z: 1
+              entities:
+                - kind: floor
+            - x: 10
+              y: 2
+              z: 1
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 11
+              y: 2
+              z: 1
+              entities:
+                - kind: floor
+            - x: 12
+              y: 2
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 13
+              y: 2
+              z: 1
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 14
+              y: 2
+              z: 1
+              entities:
+                - kind: wall
+            - x: 0
+              y: 3
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 3
+              z: 1
+              entities:
+                - kind: floor
+            - x: 2
+              y: 3
+              z: 1
+              entities:
+                - kind: floor
+                - kind: treasure
+            - x: 3
+              y: 3
+              z: 1
+              entities:
+                - kind: floor
+            - x: 4
+              y: 3
+              z: 1
+              entities:
+                - kind: floor
+            - x: 5
+              y: 3
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 6
+              y: 3
+              z: 1
+              entities:
+                - kind: floor
+            - x: 7
+              y: 3
+              z: 1
+              entities:
+                - kind: floor
+                - kind: door
+            - x: 8
+              y: 3
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 9
+              y: 3
+              z: 1
+              entities:
+                - kind: floor
+            - x: 10
+              y: 3
+              z: 1
+              entities:
+                - kind: floor
+            - x: 11
+              y: 3
+              z: 1
+              entities:
+                - kind: floor
+            - x: 12
+              y: 3
+              z: 1
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 13
+              y: 3
+              z: 1
+              entities:
+                - kind: floor
+            - x: 14
+              y: 3
+              z: 1
+              entities:
+                - kind: wall
+            - x: 0
+              y: 4
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 4
+              z: 1
+              entities:
+                - kind: floor
+                - kind: ladder
+            - x: 2
+              y: 4
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 3
+              y: 4
+              z: 1
+              entities:
+                - kind: floor
+            - x: 4
+              y: 4
+              z: 1
+              entities:
+                - kind: floor
+            - x: 5
+              y: 4
+              z: 1
+              entities:
+                - kind: floor
+            - x: 6
+              y: 4
+              z: 1
+              entities:
+                - kind: floor
+            - x: 7
+              y: 4
+              z: 1
+              entities:
+                - kind: wall
+            - x: 8
+              y: 4
+              z: 1
+              entities:
+                - kind: floor
+            - x: 9
+              y: 4
+              z: 1
+              entities:
+                - kind: floor
+            - x: 10
+              y: 4
+              z: 1
+              entities:
+                - kind: floor
+            - x: 11
+              y: 4
+              z: 1
+              entities:
+                - kind: floor
+            - x: 12
+              y: 4
+              z: 1
+              entities:
+                - kind: floor
+            - x: 13
+              y: 4
+              z: 1
+              entities:
+                - kind: floor
+            - x: 14
+              y: 4
+              z: 1
+              entities:
+                - kind: wall
+            - x: 0
+              y: 5
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 5
+              z: 1
+              entities:
+                - kind: wall
+            - x: 2
+              y: 5
+              z: 1
+              entities:
+                - kind: wall
+            - x: 3
+              y: 5
+              z: 1
+              entities:
+                - kind: wall
+            - x: 4
+              y: 5
+              z: 1
+              entities:
+                - kind: wall
+            - x: 5
+              y: 5
+              z: 1
+              entities:
+                - kind: wall
+            - x: 6
+              y: 5
+              z: 1
+              entities:
+                - kind: wall
+            - x: 7
+              y: 5
+              z: 1
+              entities:
+                - kind: wall
+            - x: 8
+              y: 5
+              z: 1
+              entities:
+                - kind: wall
+            - x: 9
+              y: 5
+              z: 1
+              entities:
+                - kind: wall
+            - x: 10
+              y: 5
+              z: 1
+              entities:
+                - kind: floor
+            - x: 11
+              y: 5
+              z: 1
+              entities:
+                - kind: wall
+            - x: 12
+              y: 5
+              z: 1
+              entities:
+                - kind: wall
+            - x: 13
+              y: 5
+              z: 1
+              entities:
+                - kind: wall
+            - x: 14
+              y: 5
+              z: 1
+              entities:
+                - kind: wall
+            - x: 0
+              y: 6
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 6
+              z: 1
+              entities:
+                - kind: floor
+                - kind: treasure
+            - x: 2
+              y: 6
+              z: 1
+              entities:
+                - kind: floor
+                - kind: wall
+            - x: 3
+              y: 6
+              z: 1
+              entities:
+                - kind: wall
+            - x: 4
+              y: 6
+              z: 1
+              entities:
+                - kind: wall
+            - x: 5
+              y: 6
+              z: 1
+              entities:
+                - kind: wall
+            - x: 6
+              y: 6
+              z: 1
+              entities:
+                - kind: wall
+            - x: 7
+              y: 6
+              z: 1
+              entities:
+                - kind: wall
+            - x: 8
+              y: 6
+              z: 1
+              entities:
+                - kind: wall
+            - x: 9
+              y: 6
+              z: 1
+              entities:
+                - kind: wall
+            - x: 10
+              y: 6
+              z: 1
+              entities:
+                - kind: floor
+                - kind: door
+            - x: 11
+              y: 6
+              z: 1
+              entities:
+                - kind: wall
+            - x: 12
+              y: 6
+              z: 1
+              entities:
+                - kind: wall
+            - x: 13
+              y: 6
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 14
+              y: 6
+              z: 1
+              entities:
+                - kind: wall
+            - x: 0
+              y: 7
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 7
+              z: 1
+              entities:
+                - kind: floor
+            - x: 2
+              y: 7
+              z: 1
+              entities:
+                - kind: wall
+            - x: 3
+              y: 7
+              z: 1
+              entities:
+                - kind: floor
+            - x: 4
+              y: 7
+              z: 1
+              entities:
+                - kind: floor
+            - x: 5
+              y: 7
+              z: 1
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 6
+              y: 7
+              z: 1
+              entities:
+                - kind: floor
+            - x: 7
+              y: 7
+              z: 1
+              entities:
+                - kind: floor
+            - x: 8
+              y: 7
+              z: 1
+              entities:
+                - kind: floor
+            - x: 9
+              y: 7
+              z: 1
+              entities:
+                - kind: floor
+            - x: 10
+              y: 7
+              z: 1
+              entities:
+                - kind: floor
+            - x: 11
+              y: 7
+              z: 1
+              entities:
+                - kind: floor
+            - x: 12
+              y: 7
+              z: 1
+              entities:
+                - kind: wall
+            - x: 13
+              y: 7
+              z: 1
+              entities:
+                - kind: floor
+            - x: 14
+              y: 7
+              z: 1
+              entities:
+                - kind: wall
+            - x: 0
+              y: 8
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 8
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 2
+              y: 8
+              z: 1
+              entities:
+                - kind: wall
+            - x: 3
+              y: 8
+              z: 1
+              entities:
+                - kind: floor
+            - x: 4
+              y: 8
+              z: 1
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 5
+              y: 8
+              z: 1
+              entities:
+                - kind: floor
+            - x: 6
+              y: 8
+              z: 1
+              entities:
+                - kind: floor
+            - x: 7
+              y: 8
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 8
+              y: 8
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 9
+              y: 8
+              z: 1
+              entities:
+                - kind: floor
+            - x: 10
+              y: 8
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 11
+              y: 8
+              z: 1
+              entities:
+                - kind: floor
+            - x: 12
+              y: 8
+              z: 1
+              entities:
+                - kind: wall
+            - x: 13
+              y: 8
+              z: 1
+              entities:
+                - kind: floor
+            - x: 14
+              y: 8
+              z: 1
+              entities:
+                - kind: wall
+            - x: 0
+              y: 9
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 9
+              z: 1
+              entities:
+                - kind: floor
+            - x: 2
+              y: 9
+              z: 1
+              entities:
+                - kind: floor
+                - kind: wall
+            - x: 3
+              y: 9
+              z: 1
+              entities:
+                - kind: floor
+            - x: 4
+              y: 9
+              z: 1
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 5
+              y: 9
+              z: 1
+              entities:
+                - kind: floor
+            - x: 6
+              y: 9
+              z: 1
+              entities:
+                - kind: floor
+            - x: 7
+              y: 9
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 8
+              y: 9
+              z: 1
+              entities:
+                - kind: floor
+            - x: 9
+              y: 9
+              z: 1
+              entities:
+                - kind: floor
+            - x: 10
+              y: 9
+              z: 1
+              entities:
+                - kind: floor
+            - x: 11
+              y: 9
+              z: 1
+              entities:
+                - kind: floor
+            - x: 12
+              y: 9
+              z: 1
+              entities:
+                - kind: wall
+            - x: 13
+              y: 9
+              z: 1
+              entities:
+                - kind: floor
+                - kind: door
+            - x: 14
+              y: 9
+              z: 1
+              entities:
+                - kind: wall
+            - x: 0
+              y: 10
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 10
+              z: 1
+              entities:
+                - kind: floor
+            - x: 2
+              y: 10
+              z: 1
+              entities:
+                - kind: floor
+                - kind: door
+            - x: 3
+              y: 10
+              z: 1
+              entities:
+                - kind: floor
+            - x: 4
+              y: 10
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 5
+              y: 10
+              z: 1
+              entities:
+                - kind: floor
+            - x: 6
+              y: 10
+              z: 1
+              entities:
+                - kind: floor
+            - x: 7
+              y: 10
+              z: 1
+              entities:
+                - kind: floor
+                - kind: treasure
+            - x: 8
+              y: 10
+              z: 1
+              entities:
+                - kind: floor
+            - x: 9
+              y: 10
+              z: 1
+              entities:
+                - kind: floor
+            - x: 10
+              y: 10
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 11
+              y: 10
+              z: 1
+              entities:
+                - kind: floor
+            - x: 12
+              y: 10
+              z: 1
+              entities:
+                - kind: floor
+            - x: 13
+              y: 10
+              z: 1
+              entities:
+                - kind: floor
+            - x: 14
+              y: 10
+              z: 1
+              entities:
+                - kind: floor
+                - kind: wall
+            - x: 0
+              y: 11
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 11
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 2
+              y: 11
+              z: 1
+              entities:
+                - kind: wall
+            - x: 3
+              y: 11
+              z: 1
+              entities:
+                - kind: floor
+            - x: 4
+              y: 11
+              z: 1
+              entities:
+                - kind: floor
+            - x: 5
+              y: 11
+              z: 1
+              entities:
+                - kind: floor
+            - x: 6
+              y: 11
+              z: 1
+              entities:
+                - kind: floor
+            - x: 7
+              y: 11
+              z: 1
+              entities:
+                - kind: floor
+            - x: 8
+              y: 11
+              z: 1
+              entities:
+                - kind: floor
+            - x: 9
+              y: 11
+              z: 1
+              entities:
+                - kind: floor
+            - x: 10
+              y: 11
+              z: 1
+              entities:
+                - kind: floor
+            - x: 11
+              y: 11
+              z: 1
+              entities:
+                - kind: floor
+            - x: 12
+              y: 11
+              z: 1
+              entities:
+                - kind: wall
+            - x: 13
+              y: 11
+              z: 1
+              entities:
+                - kind: floor
+                - kind: door
+            - x: 14
+              y: 11
+              z: 1
+              entities:
+                - kind: wall
+            - x: 0
+              y: 12
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 12
+              z: 1
+              entities:
+                - kind: floor
+            - x: 2
+              y: 12
+              z: 1
+              entities:
+                - kind: wall
+            - x: 3
+              y: 12
+              z: 1
+              entities:
+                - kind: floor
+            - x: 4
+              y: 12
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 5
+              y: 12
+              z: 1
+              entities:
+                - kind: floor
+            - x: 6
+              y: 12
+              z: 1
+              entities:
+                - kind: floor
+            - x: 7
+              y: 12
+              z: 1
+              entities:
+                - kind: floor
+                - kind: treasure
+            - x: 8
+              y: 12
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 9
+              y: 12
+              z: 1
+              entities:
+                - kind: floor
+            - x: 10
+              y: 12
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 11
+              y: 12
+              z: 1
+              entities:
+                - kind: floor
+            - x: 12
+              y: 12
+              z: 1
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 13
+              y: 12
+              z: 1
+              entities:
+                - kind: floor
+                - kind: enemy
+            - x: 14
+              y: 12
+              z: 1
+              entities:
+                - kind: wall
+            - x: 0
+              y: 13
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 13
+              z: 1
+              entities:
+                - kind: floor
+                - kind: treasure
+            - x: 2
+              y: 13
+              z: 1
+              entities:
+                - kind: floor
+                - kind: wall
+            - x: 3
+              y: 13
+              z: 1
+              entities:
+                - kind: floor
+            - x: 4
+              y: 13
+              z: 1
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 5
+              y: 13
+              z: 1
+              entities:
+                - kind: floor
+            - x: 6
+              y: 13
+              z: 1
+              entities:
+                - kind: floor
+            - x: 7
+              y: 13
+              z: 1
+              entities:
+                - kind: floor
+            - x: 8
+              y: 13
+              z: 1
+              entities:
+                - kind: floor
+            - x: 9
+              y: 13
+              z: 1
+              entities:
+                - kind: floor
+            - x: 10
+              y: 13
+              z: 1
+              entities:
+                - kind: floor
+            - x: 11
+              y: 13
+              z: 1
+              entities:
+                - kind: floor
+            - x: 12
+              y: 13
+              z: 1
+              entities:
+                - kind: wall
+            - x: 13
+              y: 13
+              z: 1
+              entities:
+                - kind: floor
+            - x: 14
+              y: 13
+              z: 1
+              entities:
+                - kind: wall
+            - x: 0
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 1
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 2
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 3
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 4
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 5
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 6
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 7
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 8
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 9
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 10
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 11
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 12
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 13
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 14
+              y: 14
+              z: 1
+              entities:
+                - kind: wall
+            - x: 0
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 1
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 2
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 3
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 4
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 5
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 6
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 7
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 8
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 9
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 10
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 11
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 12
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 13
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 14
+              y: 0
+              z: 2
+              entities:
+                - kind: wall
+            - x: 0
+              y: 1
+              z: 2
+              entities:
+                - kind: wall
+            - x: 1
+              y: 1
+              z: 2
+              entities:
+                - kind: floor
+            - x: 2
+              y: 1
+              z: 2
+              entities:
+                - kind: floor
+            - x: 3
+              y: 1
+              z: 2
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 4
+              y: 1
+              z: 2
+              entities:
+                - kind: floor
+            - x: 5
+              y: 1
+              z: 2
+              entities:
+                - kind: floor
+                - kind: door
+            - x: 6
+              y: 1
+              z: 2
+              entities:
+                - kind: floor
+            - x: 7
+              y: 1
+              z: 2
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 8
+              y: 1
+              z: 2
+              entities:
+                - kind: floor
+            - x: 9
+              y: 1
+              z: 2
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 10
+              y: 1
+              z: 2
+              entities:
+                - kind: floor
+            - x: 11
+              y: 1
+              z: 2
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 12
+              y: 1
+              z: 2
+              entities:
+                - kind: floor
+            - x: 13
+              y: 1
+              z: 2
+              entities:
+                - kind: floor
+                - kind: trap
+            - x: 14
+              y: 1
+              z: 2
+              entities:
+                - kind: wall
+            - x: 0
+              y: 2
+              z: 2
+              entities:
+                - kind: wall
+            - x: 1
+              y: 2
+              z: 2
+              entities:
+                - kind: floor
             - x: 2
               y: 2
               z: 2

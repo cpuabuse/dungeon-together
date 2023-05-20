@@ -87,8 +87,11 @@ export function ClientGridClassFactory({
 			// Initialize zIndex
 			this.levelIndex = Array.from(new Array(this.zLength), () => {
 				let container: Container = new Container();
+				container.visible = false;
 				return container;
 			});
+			// Make only the surface level visible
+			this.levelIndex[0].visible = true;
 		}
 
 		/**
