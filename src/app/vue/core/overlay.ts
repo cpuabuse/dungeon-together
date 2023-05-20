@@ -9,7 +9,8 @@
  * @file
  */
 
-import { ComputedRef, ExtractPropTypes, PropType, computed } from "vue";
+import { ComponentOptions, ComputedRef, ExtractPropTypes, PropType, computed } from "vue";
+import { OverlayListItemAssembler } from "../components";
 import { ExtractProps, OverlayContentUiActionParam } from "../types";
 
 /**
@@ -88,6 +89,11 @@ export const overlayListItemNarrowProps = {
 		type: String
 	}
 } as const;
+
+/**
+ * Props for discriminated items.
+ */
+export type OverlayListItemNarrowProps = ExtractProps<typeof overlayListItemNarrowProps>;
 
 /**
  * Shared options for content type.
@@ -277,6 +283,11 @@ export const overlayListChildSharedProps = {
 };
 
 /**
+ * Prop types for overlay list item, body and descendants.
+ */
+export type OverlayListChildSharedProps = ExtractPropTypes<typeof overlayListChildSharedProps>;
+
+/**
  * Prop types for overlay list family.
  */
 export type OverlayListSharedProps = ExtractPropTypes<typeof overlayListSharedProps>;
@@ -322,4 +333,40 @@ export function useOverlayListShared({
 		isMenu,
 		staticProps
 	};
+}
+
+/**
+ * Methods for overlay list item variations.
+ *
+ * @param param - Props
+ * @returns Methods for overlay list item variations
+ */
+// Infer composable type
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function useOverlayListItemShared({
+	props
+}: {
+	/**
+	 * Component props.
+	 *
+	 * @remarks
+	 * Reactive.
+	 */
+	props: OverlayListChildSharedProps & OverlayListSharedProps & OverlayListItemNarrowProps;
+}) {
+	// Infer type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const assemblerProps = computed(
+		(): typeof OverlayListItemAssembler extends ComponentOptions<infer Props> ? Props : never => {
+			return {
+				contentType: props.contentType,
+				icon: props.icon,
+				isHiddenCaretDisplayedIfMissing: props.isHiddenCaretDisplayedIfMissing,
+				isHiddenIconDisplayedIfMissing: props.isHiddenIconDisplayedIfMissing,
+				name: props.name
+			};
+		}
+	);
+
+	return { assemblerProps };
 }
