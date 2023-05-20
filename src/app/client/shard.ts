@@ -377,9 +377,14 @@ export function ClientShardFactory({
 
 		// Basically show grid
 		grid.shard = this;
-		grid.levelIndex.forEach(container => {
-			this.gridContainer.addChild(container);
-		});
+
+		// Adding to container reversed, so that surface level is rendered last
+		// TODO: Change to `toReversed()` when migrate to Node.js 20 - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toReversed#browser_compatibility
+		Array.from(grid.levelIndex)
+			.reverse()
+			.forEach(container => {
+				this.gridContainer.addChild(container);
+			});
 
 		grid.cells.forEach(cell => {
 			grid.showCell(cell);

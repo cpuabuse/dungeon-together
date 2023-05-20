@@ -803,7 +803,7 @@ data:
               y: 9
               z: 0
               entities:
-                - kind: door
+                - kind: floor
             - x: 14
               y: 9
               z: 0
@@ -2309,7 +2309,6 @@ data:
               z: 1
               entities:
                 - kind: floor
-                - kind: player
             - x: 14
               y: 13
               z: 1
@@ -2712,7 +2711,6 @@ data:
               z: 2
               entities:
                 - kind: floor
-                - kind: player
             - x: 2
               y: 4
               z: 2

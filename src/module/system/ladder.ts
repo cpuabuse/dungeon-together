@@ -61,7 +61,7 @@ export function LadderKindClassFactory({
 			switch (action) {
 				case ActionWords.Use:
 					if (sourceEntity) {
-						sourceEntity.kind.navigateEntity({ nav: Nav.ZUp });
+						sourceEntity.kind.navigateEntity({ nav: Nav.ZDown });
 					} else {
 						return false;
 					}
