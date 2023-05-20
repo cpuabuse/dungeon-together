@@ -19,8 +19,8 @@
 
 				<VSpacer />
 
-				<!-- Caret forces data move right -->
-				<VCol v-if="$slots.inline" cols="auto" :class="{ 'pr-0': isCaretDisplayed }">
+				<!-- Caret forces data move right; Small margin needed for to compensate for row's negative margin -->
+				<VCol v-if="$slots.inline" cols="auto" :class="{ 'pr-0': isCaretDisplayed, 'mr-1': true }">
 					<slot name="inline" />
 				</VCol>
 

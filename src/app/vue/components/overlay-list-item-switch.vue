@@ -11,6 +11,7 @@
 		<!-- Inline slot -->
 		<template #inline>
 			<VSwitch
+				hide-details
 				:model-value="records[id]"
 				@update:model-value="
 					value => {
@@ -27,8 +28,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { VSwitch } from "vuetify/components";
-import { ThisVueStore } from "../../client/gui";
 import { overlayListChildSharedProps, overlayListItemNarrowProps, overlayListSharedProps } from "../core/overlay";
+import { useRecords } from "../core/store";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 
 export default defineComponent({
@@ -37,37 +38,9 @@ export default defineComponent({
 		VSwitch
 	},
 
-	computed: {
-		/**
-		 * Get the records.
-		 *
-		 * @returns Records
-		 */
-		records(): ThisVueStore["$store"]["state"]["records"] {
-			return (this as unknown as ThisVueStore).$store.state.records;
-		}
-	},
-
-	methods: {
-		/**
-		 * Sets the record in the store.
-		 *
-		 * @param v - Destructured parameter
-		 */
-		setRecord(v: {
-			/**
-			 * ID.
-			 */
-			id: string;
-			/**
-			 * Value.
-			 */
-			value: boolean;
-		}) {
-			(this as unknown as ThisVueStore).$store.commit("recordMutation", v);
-		}
-	},
-
+	/**
+	 * Props.
+	 */
 	props: {
 		...overlayListSharedProps,
 		...overlayListChildSharedProps,
@@ -77,6 +50,15 @@ export default defineComponent({
 			required: true,
 			type: String
 		}
+	},
+
+	/**
+	 * Setup hook.
+	 *
+	 * @returns Record operations
+	 */
+	setup() {
+		return useRecords();
 	}
 });
 </script>

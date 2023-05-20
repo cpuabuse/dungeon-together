@@ -142,6 +142,7 @@ export default defineComponent({
 			return [
 				{ data: "14", icon: "fa-bug-slash", name: "Info1" },
 				{ data: "2", name: "Info2" },
+				{ id: "switch1", name: "Switch", type: OverlayListItemEntryType.Switch },
 				{ name: "Player", type: OverlayListItemEntryType.Uuid, uuid: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" },
 				{
 					size: ElementSize.Medium,

@@ -30,4 +30,5 @@ export { default as OverlayListItemTab } from "./overlay-list-item-tab.vue";
 export { default as OverlayListItemAssembler } from "./overlay-list-item-assembler.vue";
 export { default as OverlayListItemUuid } from "./overlay-list-item-uuid.vue";
 export { default as OverlayListItemWrapper } from "./overlay-list-item-wrapper.vue";
+export { default as OverlayListItemSlider } from "./overlay-list-item-slider.vue";
 /* eslint-enable jsdoc/require-jsdoc */
