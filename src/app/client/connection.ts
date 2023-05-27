@@ -48,7 +48,7 @@ import { ClientUniverse } from "./universe";
 /**
  * Burn.
  */
-const contrastFilter: InstanceType<typeof filters["ColorMatrixFilter"]> = new filters.ColorMatrixFilter();
+const contrastFilter: InstanceType<(typeof filters)["ColorMatrixFilter"]> = new filters.ColorMatrixFilter();
 contrastFilter.contrast(1.0, false);
 
 /**
@@ -420,10 +420,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 											targetCell.detachEntity(targetEntity);
 											detachedEntities.add([targetEntity, sourceCell, targetCell]);
 										}
-									} else if (
-										targetEntity.modeUuid === "mode/user/player/default" ||
-										targetEntity.modeUuid === "mode/user/enemy/default"
-									) {
+									} else if (targetEntity.modeUuid === "mode/user/player/default") {
 										targetCell.detachEntity(targetEntity);
 										detachedEntities.add([targetEntity, sourceCell, targetCell]);
 									}
@@ -506,6 +503,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 											promise: attachHook
 										});
 									} else {
+										// Register reattached
 										attachedEntities.add(this.universe.getEntity({ entityUuid }));
 
 										// TODO: Delay now, need to refactor attachment block
@@ -547,11 +545,14 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 						// ESLint false negative
 						// eslint-disable-next-line @typescript-eslint/typedef
 						detachedEntities.forEach(([entity, sourceCell, targetCell]) => {
-							if (!attachedEntities.has(entity)) {
+							// `entity.isInUniverse` to make sure we do special effects for entities that exist
+							if (!attachedEntities.has(entity) && entity.isInUniverse) {
 								let trailEvent: (Record<"name", "trail"> & CellEvent) | undefined = sourceCell.events.find(event => {
-									return event.name === "trail";
+									// TODO: Trail can be recursive
+									return event.name === "trail" && event.targetEntityUuid === entity.entityUuid;
 									// Casting since `find()` does not narrow type
 								}) as (Record<"name", "trail"> & CellEvent) | undefined;
+
 								if (trailEvent) {
 									// Trail the next location
 									this.universe.getCell({ cellUuid: trailEvent.targetCellUuid }).attachEntity(entity);

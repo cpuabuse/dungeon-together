@@ -95,8 +95,10 @@ export function ClientCellFactory({
 		 */
 		public hideEntity(path: EntityPathOwn): void {
 			let entity: ClientEntity = this.getEntity(path);
-			this.container.removeChild(entity.sprite);
-			entity.sprite.stop();
+			if (entity.isInUniverse) {
+				this.container.removeChild(entity.sprite);
+				entity.sprite.stop();
+			}
 		}
 
 		/**
@@ -111,16 +113,17 @@ export function ClientCellFactory({
 		 */
 		public showEntity(path: EntityPathOwn): void {
 			let entity: ClientEntity = this.getEntity(path);
+			if (entity.isInUniverse) {
+				const sceneWidth: number = this.shard?.sceneWidth ?? 0;
+				const sceneHeight: number = this.shard?.sceneHeight ?? 0;
 
-			const sceneWidth: number = this.shard?.sceneWidth ?? 0;
-			const sceneHeight: number = this.shard?.sceneHeight ?? 0;
+				entity.sprite.height = sceneWidth;
+				entity.sprite.width = sceneHeight;
 
-			entity.sprite.height = sceneWidth;
-			entity.sprite.width = sceneHeight;
-
-			// Register entity to canvas
-			this.container.addChild(entity.container);
-			entity.sprite.play();
+				// Register entity to canvas
+				this.container.addChild(entity.container);
+				entity.sprite.play();
+			}
 		}
 	}
 
@@ -133,6 +136,8 @@ export function ClientCellFactory({
 	ClientCell.prototype.attachEntity = function (this: ClientCell, entity: ClientEntity): void {
 		// Super first
 		(Object.getPrototypeOf(ClientCell.prototype) as ClientCell).attachEntity.call(this, entity);
+
+		entity.isInUniverse = true;
 
 		// Post-attach (decoration)
 		this.showEntity(entity);

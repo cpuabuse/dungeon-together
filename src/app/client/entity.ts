@@ -106,6 +106,14 @@ export function ClientEntityFactory({
 		}
 
 		/**
+		 * Wether universe contains this.
+		 *
+		 * @remarks
+		 * Basically with this we are allowing cells to contain entities that are not part of the universe or are already terminated, at least for now.
+		 */
+		public isInUniverse: boolean = false;
+
+		/**
 		 * Animated sprite.
 		 */
 		public sprite: AnimatedSprite;
@@ -156,6 +164,9 @@ export function ClientEntityFactory({
 		this.sprite.destroy();
 
 		this.container.destroy();
+
+		// Remove from universe
+		this.isInUniverse = false;
 
 		// Super terminate
 		(Object.getPrototypeOf(ClientEntity.prototype) as ClientEntity).terminateEntity.call(this);

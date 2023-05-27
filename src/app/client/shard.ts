@@ -89,7 +89,7 @@ export function ClientShardFactory({
 		/**
 		 * Pixi application.
 		 */
-		public readonly app: Application;
+		public readonly app: Application<HTMLCanvasElement>;
 
 		/**
 		 * Container for pixi.
@@ -205,7 +205,11 @@ export function ClientShardFactory({
 					// #endif
 
 					// If we are here, we might already be attached, append shard and one-time resize
+					// ESLint false negative
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 					this.shardElement.appendChild(this.app.view);
+					// ESLint false negative
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
 					this.app.resize();
 
 					// Set scene for entity show
