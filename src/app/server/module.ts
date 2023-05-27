@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -107,6 +107,11 @@ export type ModuleFactoryParams<Depends extends ModuleList = EmptyModuleList> = 
 		 * Potential props.
 		 */
 		props?: Record<string, unknown>;
+
+		/**
+		 * Module name, as registered into universe.
+		 */
+		moduleName: string;
 	}
 ];
 

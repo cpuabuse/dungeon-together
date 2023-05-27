@@ -14,7 +14,7 @@ import { Nav } from "../../app/core/arg";
 import { ActionWords } from "../../app/server/action";
 import { ServerCell } from "../../app/server/cell";
 import { EntityKindConstructorParams, ServerEntityClass } from "../../app/server/entity";
-import { UnitKind, UnitKindClass, UnitStats } from "./unit";
+import { UnitFaction, UnitKind, UnitKindClass, UnitStats } from "./unit";
 
 /**
  * Cell view distance.
@@ -48,6 +48,9 @@ export function MonsterKindClassFactory({
 	 * Monster class.
 	 */
 	class MonsterKind extends Base {
+		/** Monster faction. */
+		public static faction: UnitFaction = new UnitFaction();
+
 		/**
 		 * Entity array to track for ticks.
 		 */
@@ -61,6 +64,9 @@ export function MonsterKindClassFactory({
 		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
 			super({ entity, ...rest });
 			this.stats = { ...stats };
+
+			// Override faction
+			this.faction = MonsterKind.faction;
 
 			MonsterKind.monsters.add(this);
 		}

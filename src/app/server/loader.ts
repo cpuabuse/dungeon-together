@@ -212,6 +212,7 @@ export class ServerLoader<R extends string, T extends ModuleFactoryRecordListCon
 				name: string;
 			} = record;
 			const module: Module = record.factory({
+				moduleName,
 				// False negative on type inference
 				// eslint-disable-next-line @typescript-eslint/typedef
 				modules: Object.entries(record.depends).reduce((result, [key, value]) => {

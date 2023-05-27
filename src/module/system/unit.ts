@@ -105,6 +105,85 @@ export const defaultStats: UnitStats = Object.values(UnitStatWords).reduce((resu
 }, {} as UnitStats);
 
 /**
+ * Unit factions.
+ */
+export class UnitFaction extends Set<UnitFaction> {
+	/**
+	 * Checks if unit belongs to a faction.
+	 *
+	 * @param param - Destructured parameter
+	 * @returns True if unit belongs to a faction
+	 */
+	public deepHas({
+		faction
+	}: {
+		/**
+		 * Faction to check.
+		 */
+		faction: UnitFaction;
+	}): boolean {
+		// Quick return if this is the faction we are checking for; Done only on the root call, as subsequent calls will check children first
+		if (this === faction) {
+			return true;
+		}
+
+		// Do we even need to iterate over empty set
+		if (this.size === 0) {
+			return false;
+		}
+
+		return this.internalDeepHas({ faction, factionsChecked: new Set([this]) });
+	}
+
+	/**
+	 * Checks if unit recursively belongs to a faction.
+	 *
+	 * @remarks
+	 * Written in such a way to minimize recursion deepening.
+	 *
+	 * @param param - Destructured parameter
+	 * @returns True if unit belongs to a faction recursively
+	 */
+	protected internalDeepHas({
+		faction,
+		factionsChecked
+	}: {
+		/**
+		 * Faction to check.
+		 */
+		faction: UnitFaction;
+
+		/**
+		 * Factions that have been checked so far in the recursion.
+		 */
+		factionsChecked: Set<UnitFaction>;
+	}): boolean {
+		// Have to iterate over set and return method
+		// eslint-disable-next-line no-restricted-syntax
+		for (let factionToCheck of this) {
+			// If faction to check was not checked before
+			if (!factionsChecked.has(factionToCheck)) {
+				// Quick return if child is target
+				if (factionToCheck === faction) {
+					return true;
+				}
+				factionsChecked.add(factionToCheck);
+
+				// Only deepen recursion when there is need to
+				if (factionToCheck.size > 0) {
+					if (factionToCheck.internalDeepHas({ faction, factionsChecked })) {
+						return true;
+					}
+				}
+			}
+		}
+
+		// Match not found
+		return false;
+	}
+}
+
+/**
  * Unit entity kind.
  *
  * @param param - Destructured parameter
@@ -184,6 +263,15 @@ export function UnitKindClassFactory({
 		public get level(): number {
 			return 1 + this.experience;
 		}
+
+		// Order is important
+		/* eslint-disable @typescript-eslint/member-ordering */
+		/** Default faction created once to save on cycles. */
+		public static defaultFaction: UnitFaction = new UnitFaction();
+
+		/** A faction unit belongs to. */
+		public faction: UnitFaction = UnitKind.defaultFaction;
+		/* eslint-enable @typescript-eslint/member-ordering */
 
 		/**
 		 * MP.
