@@ -17,6 +17,12 @@
 		"ms-edgedevtools.vscode-edge-devtools",
 
 		// For code formatting
-		"dbaeumer.vscode-eslint"
+		"dbaeumer.vscode-eslint",
+
+		// For scripts
+		"denoland.vscode-deno",
+
+		// Vite server
+		"antfu.vite"
 	]
 }

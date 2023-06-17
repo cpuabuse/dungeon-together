@@ -1,0 +1,10 @@
+{
+	"lint": {
+		"rules": {
+			"tags": ["recommended"],
+			// Preferring explicit types
+			"exclude": ["no-inferrable-types"]
+		}
+	},
+	"lock": false
+}

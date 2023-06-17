@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -109,7 +109,7 @@ export class SequenceQueue {
 	private dequeue(): void {
 		let callback: SequenceQueueCallback | Promise<void> | undefined = this.sequences.pop();
 		if (callback) {
-			if (callback instanceof Promise<void>) {
+			if (callback instanceof Promise) {
 				let promise: Promise<void> = new Promise(resolve => {
 					const timeout: ReturnType<typeof setTimeout> = setTimeout(() => {
 						CoreLog.global.log({

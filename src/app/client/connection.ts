@@ -121,7 +121,7 @@ let splat: Howl = new Howl({
 	sprite: {
 		default: [defaultFadeInMs, defaultFadeOutMs]
 	},
-	src: ["sound/effects/splattt-6295.mp3"]
+	src: ["/sound/effects/splattt-6295.mp3"]
 });
 
 // Allowed directions

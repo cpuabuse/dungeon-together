@@ -49,21 +49,10 @@
 <script lang="ts">
 import { PropType, defineComponent, mergeProps } from "vue";
 import { VListItem, VMenu } from "vuetify/components";
-import { OverlayType, overlayListSharedProps } from "../core/overlay";
+import { overlayListSharedProps, useOverlayListShared } from "../core/overlay";
 
 export default defineComponent({
 	components: { VListItem, VMenu },
-
-	computed: {
-		/**
-		 * Whether the item is displayed as a menu.
-		 *
-		 * @returns Whether the item is displayed as a menu
-		 */
-		isMenu(): boolean {
-			return this.contentType === OverlayType.Menu;
-		}
-	},
 
 	/**
 	 * Data.
@@ -92,6 +81,18 @@ export default defineComponent({
 			default: new Object(),
 			type: Object as PropType<Record<string, boolean>>
 		}
+	},
+
+	/**
+	 * Setup.
+	 *
+	 * @param props - Props
+	 * @returns Composable methods
+	 */
+	// Infer props
+	// eslint-disable-next-line @typescript-eslint/typedef
+	setup(props) {
+		return useOverlayListShared({ props });
 	}
 });
 </script>

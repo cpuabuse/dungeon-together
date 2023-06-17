@@ -16,7 +16,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { overlayListChildSharedProps, overlayListItemNarrowProps, overlayListSharedProps } from "../core/overlay";
-import { OverlayListItemAssembler } from ".";
+import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 
 export default defineComponent({
 	components: {

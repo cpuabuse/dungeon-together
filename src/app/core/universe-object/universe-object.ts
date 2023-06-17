@@ -22,11 +22,13 @@ import {
 	CoreArgContainerArg,
 	CoreArgConverterConstraint,
 	CoreArgIds,
+	CoreArgNever,
 	CoreArgObjectWords,
 	CoreArgOptionIds,
 	CoreArgOptionsPathExtended,
 	CoreArgOptionsPathOwn,
 	CoreArgPath,
+	CoreArgPathNever,
 	CoreArgPathOwnOrExtended,
 	CoreArgPathUuidPropertyName,
 	coreArgComplexOptionSymbolIndex,
@@ -86,7 +88,53 @@ export type CoreUniverseObjectInstance<
 	ChildId extends CoreArgIds = never
 > = CoreBaseNonRecursiveInstance &
 	ComputedClassOmitConditionalEmptyObject<
-		CoreArg<Id, Options, ParentId | GrandparentIds, true> & {
+		CoreArgNever<Id, Options, ParentId | GrandparentIds> & {
+			[K in `terminate${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: () => void;
+			// Preserved for potential future use
+		} & ([ParentId] extends [never] ? ComputedClassEmptyObject : ComputedClassEmptyObject) &
+			([ChildId] extends [never]
+				? unknown
+				: CoreUniverseObjectContainerInstance<
+						BaseParams,
+						ChildInstance,
+						ChildArg,
+						ChildId,
+						Options,
+						Id,
+						ParentId | GrandparentIds
+				  >)
+	>;
+
+/**
+ * Universe object instance members type.
+ *
+ * @remarks
+ * Using `this.constructor` to access static base information.
+ *
+ * Constraint is not dependent on the base, due to the fact that the non-recursive core base used, should not be a generic {@link CoreBaseClassNonRecursive}.
+ */
+export type CoreUniverseObjectInstanceNever<
+	BaseParams extends CoreBaseNonRecursiveParameters,
+	// Future
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	Arg extends CoreArgContainerArg<Id, Options, ParentId | GrandparentIds, ChildArg, ChildId>,
+	Id extends CoreArgIds,
+	Options extends CoreUniverseObjectArgsOptionsUnion,
+	ParentId extends CoreArgIds = never,
+	GrandparentIds extends CoreArgIds = never,
+	ChildInstance extends CoreUniverseObjectInstance<
+		BaseParams,
+		ChildArg,
+		ChildId,
+		Options,
+		Id,
+		ParentId | GrandparentIds
+	> = never,
+	ChildArg extends CoreArg<ChildId, Options, Id | ParentId | GrandparentIds> = never,
+	ChildId extends CoreArgIds = never
+> = CoreBaseNonRecursiveInstance &
+	ComputedClassOmitConditionalEmptyObject<
+		CoreArg<Id, Options, ParentId | GrandparentIds> & {
 			[K in `terminate${CoreArgObjectWords[Id]["singularCapitalizedWord"]}`]: () => void;
 			// Preserved for potential future use
 		} & ([ParentId] extends [never] ? ComputedClassEmptyObject : ComputedClassEmptyObject) &
@@ -373,7 +421,7 @@ export function generateCoreUniverseObjectMembers<
 	 * This type must produce all properties unconditionally, for it's result to be able to be merged with resulting class.
 	 */
 	type PathMembers = {
-		[K in keyof CoreArgPath<Id, Options, ParentId | GrandparentIds, true> as `universeObjectUuidExtended${K}`]: {
+		[K in keyof CoreArgPathNever<Id, Options, ParentId | GrandparentIds>]: {
 			/**
 			 * Extended path UUID property name.
 			 */
@@ -382,7 +430,7 @@ export function generateCoreUniverseObjectMembers<
 			/**
 			 * Extended path UUID value.
 			 */
-			value: (...arg: GenerateParams) => CoreArgPath<Id, Options, ParentId | GrandparentIds, true>[K];
+			value: (...arg: GenerateParams) => CoreArgPathNever<Id, Options, ParentId | GrandparentIds>[K];
 		};
 	};
 
@@ -421,7 +469,7 @@ export function generateCoreUniverseObjectMembers<
 									 *
 									 * @param this - This instance
 									 */
-									value(this: Instance): void {
+									value(): void {
 										// Nothing, debug info can be added later
 									}
 								}
@@ -488,7 +536,6 @@ export function generateCoreUniverseObjectMembers<
 										// Promise used for delay
 										// eslint-disable-next-line @typescript-eslint/require-await
 										value(
-											this: Instance,
 											...childArgs: CoreUniverseObjectConstructorParameters<
 												BaseParams,
 												ChildArg,
@@ -516,7 +563,11 @@ export function generateCoreUniverseObjectMembers<
 															.universe as CoreUniverseInstanceNonRecursiveCast
 													).log({
 														error: new Error(
-															`Attachment of child universe object(id="${childId}", ${childPathUuidPropertyName}="${child[childPathUuidPropertyName]}") into object(id="${id}", ${nameUniverseObjectUuid}="${this[nameUniverseObjectUuid]}") has failed.`,
+															`Attachment of child universe object(id="${childId}", ${childPathUuidPropertyName}="${
+																child[childPathUuidPropertyName]
+															}") into object(id="${id}", ${nameUniverseObjectUuid}="${
+																(this as unknown as Instance)[nameUniverseObjectUuid]
+															}") has failed.`,
 															{
 																cause: reason instanceof Error ? reason : undefined
 															}
@@ -525,7 +576,7 @@ export function generateCoreUniverseObjectMembers<
 													});
 												})
 												.finally(() => {
-													(this as InstanceWithChild)[nameAttachChildUniverseObject](child);
+													(this as unknown as InstanceWithChild)[nameAttachChildUniverseObject](child);
 												});
 
 											child = new ((this.constructor as CoreBaseClassNonRecursive).universe as ChildUniverse)[
@@ -549,9 +600,9 @@ export function generateCoreUniverseObjectMembers<
 													 * @param universeObject - Child universe object
 													 * @param initializationParameter - Initialization parameter
 													 */
-													[ComputedClassWords.Value](this: Instance, universeObject: ChildInstance): void {
+													[ComputedClassWords.Value](universeObject: ChildInstance): void {
 														// Deal with universe object
-														(this as InstanceWithChild)[nameChildUniverseObjects].set(
+														(this as unknown as InstanceWithChild)[nameChildUniverseObjects].set(
 															universeObject[childPathUuidPropertyName],
 															universeObject
 														);
@@ -572,7 +623,7 @@ export function generateCoreUniverseObjectMembers<
 													 * @param universeObject - Child universe object
 													 * @param initializationParameter - Initialization parameter
 													 */
-													[ComputedClassWords.Value](this: Instance, universeObject: ChildInstance): void {
+													[ComputedClassWords.Value](universeObject: ChildInstance): void {
 														// Set UUIDs
 														// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 														[id, ...(parentId === undefined ? [] : [parentId, ...grandparentIds!])].forEach(i => {
@@ -581,12 +632,12 @@ export function generateCoreUniverseObjectMembers<
 																	id: i
 																});
 															(universeObject as CoreArgPathOwnOrExtended<typeof i>)[uuidPropertyName] = (
-																this as CoreArgPathOwnOrExtended<typeof i>
+																this as unknown as Instance
 															)[uuidPropertyName];
 														});
 
 														// Add to container
-														(this as InstanceWithChild)[nameChildUniverseObjects].set(
+														(this as unknown as InstanceWithChild)[nameChildUniverseObjects].set(
 															universeObject[childPathUuidPropertyName],
 															universeObject
 														);
@@ -604,8 +655,8 @@ export function generateCoreUniverseObjectMembers<
 										 *
 										 * @param this - Core universe object instance
 										 */
-										value(this: Instance): void {
-											(this as InstanceWithChild)[nameChildUniverseObjects].forEach(universeObject => {
+										value(): void {
+											(this as unknown as InstanceWithChild)[nameChildUniverseObjects].forEach(universeObject => {
 												universeObject[nameTerminateChildUniverseObject]();
 											});
 										}
@@ -708,7 +759,7 @@ export function generateCoreUniverseObjectMembers<
 										// ESLint nested destructured bug
 										// eslint-disable-next-line @typescript-eslint/typedef
 										[ComputedClassWords.Value](...[{ arg }]: GenerateParams): Uuid {
-											return (arg as CoreArgPath<Id, CoreArgOptionsPathExtended, ParentId | GrandparentIds>)[
+											return (arg as CoreArgPathNever<Id, CoreArgOptionsPathExtended, ParentId | GrandparentIds>)[
 												uuidPropertyName
 											];
 										}
@@ -780,7 +831,13 @@ export function generateCoreUniverseObjectMembers<
 								Id | ParentId | GrandparentIds
 							>
 						) => ChildInstance
-					)(defaultChildArg, { attachHook, created: defaultChildCreated }, superParams);
+					)(
+						// `childId` is defined, since it would not reach this code otherwise
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+						defaultChildArg!,
+						{ attachHook, created: defaultChildCreated },
+						superParams
+					);
 
 				// Deal with normal children
 				Promise.all([

@@ -5,7 +5,7 @@
 			<tsxtest />
 			<OverlayClick v-model="isRightClickOverlayDisplayed">
 				<template #body>
-					<OverlayList :items="debugOverlayItems" :is-compact="true" content-type="menu" />
+					<OverlayList :items="debugOverlayItems" content-type="menu-compact" />
 				</template>
 			</OverlayClick>
 

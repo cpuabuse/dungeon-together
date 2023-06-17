@@ -58,5 +58,17 @@
 	"vue.codeActions.savingTimeLimit": 20000,
 	"vue.updateImportsOnFileMove.enabled": true,
 	"vue.inlayHints.inlineHandlerLeading": true,
-	"vue.inlayHints.missingProps": true
+	"vue.inlayHints.missingProps": true,
+	"deno.enable": true,
+	"deno.enablePaths": ["script"],
+	"deno.documentPreloadLimit": 1000,
+
+	// Does not open embedded browser
+	"vite.browserType": "system",
+	// Port for server
+	"vite.port": 8080,
+	// Start manually
+	"vite.autoStart": false,
+	// Do not switch to terminal
+	"vite.showTerminal": false
 }

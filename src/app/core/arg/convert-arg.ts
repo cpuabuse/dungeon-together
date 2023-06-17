@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -17,6 +17,7 @@ import {
 	CoreArgConvertDoc,
 	CoreArgIds,
 	CoreArgMeta,
+	CoreArgNever,
 	CoreArgOptionIds,
 	CoreArgOptionsPathExtended,
 	CoreArgOptionsPathId,
@@ -96,17 +97,17 @@ export function coreArgConvert<
 	/**
 	 * Arg with path when common.
 	 */
-	type ChildArgPathId = CoreArg<I, CoreArgOptionsPathId, P>;
+	type ChildArgPathId = CoreArgNever<I, CoreArgOptionsPathId, P>;
 
 	/**
 	 * Arg with path when own.
 	 */
-	type ChildArgPathOwn = CoreArg<I, CoreArgOptionsPathOwn, P>;
+	type ChildArgPathOwn = CoreArgNever<I, CoreArgOptionsPathOwn, P>;
 
 	/**
 	 * Arg with path when own.
 	 */
-	type ChildArgPathExtended = CoreArg<I, CoreArgOptionsPathExtended, P>;
+	type ChildArgPathExtended = CoreArgNever<I, CoreArgOptionsPathExtended, P>;
 
 	/**
 	 * Options in case the path is common.

@@ -2,26 +2,44 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "npm",
-			"script": "build:run:standalone:browser",
-			"group": {
-				"kind": "build",
-				"isDefault": false
-			},
-			"problemMatcher": [],
-			"label": "standalone-build",
-			"detail": "npm run build:stage:standalone:browser"
-		},
-		{
+			"label": "dev-standalone-build-assets",
 			"type": "shell",
-			"command": "script/environment/Build-DevStandalone.ps1",
+			"command": "./script/environment/Build-Assets.ps1 -Environment dev -Build standalone",
 			"group": {
 				"kind": "build",
 				"isDefault": true
 			},
-			"problemMatcher": [],
-			"label": "standalone-watch",
-			"detail": "npm run build:stage:standalone:browser"
+			"detail": "Build standalone dev environment"
+		},
+		{
+			"label": "dev-standalone-launch-vite-hmr",
+			"type": "shell",
+			"command": "npx vite dev",
+			"group": {
+				"kind": "none",
+				"isDefault": false
+			},
+			"detail": "Launch vite HMR"
+		},
+		{
+			"label": "dev-standalone-vite-build",
+			"type": "shell",
+			"command": "npx vite build",
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"detail": "Build Vite"
+		},
+		{
+			"label": "dev-standalone-vite-preview",
+			"type": "shell",
+			"command": "npx vite preview",
+			"group": {
+				"kind": "none",
+				"isDefault": false
+			},
+			"detail": "Serve Vite"
 		}
 	]
 }

@@ -1,7 +1,0 @@
-{
-	"compilerOptions": {
-		"outDir": "../../build/stage/bin/rollup"
-	},
-	"extends": "./base.json",
-	"include": ["../../src/rollup/stage*"]
-}

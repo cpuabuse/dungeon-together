@@ -35,7 +35,7 @@ import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
  */
 // Infer component type
 // eslint-disable-next-line @typescript-eslint/typedef
-const OverlayList = defineAsyncComponent(async () => (await import(".")).OverlayList);
+const OverlayList = defineAsyncComponent(async () => import("./overlay-list.vue"));
 
 export default defineComponent({
 	components: {

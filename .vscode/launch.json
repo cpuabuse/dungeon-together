@@ -4,57 +4,8 @@
 		{
 			"type": "chrome",
 			"request": "launch",
-			"name": "chrome-build-debug",
-			"url": "http://127.0.0.1:5500/build/stage/standalone/index.html",
-			"preLaunchTask": "standalone-build"
-		},
-		{
-			"type": "chrome",
-			"request": "launch",
 			"name": "chrome-dev",
-			"url": "http://127.0.0.1:5500/build/dev/standalone/index.html"
-		},
-		{
-			"type": "msedge",
-			"version": "stable",
-			"name": "headless-edge-build-debug-hidden",
-			"request": "launch",
-			"runtimeArgs": ["--headless", "--remote-debugging-port=9222"],
-			"url": "http://127.0.0.1:5500/build/stage/standalone/index.html",
-			"presentation": {
-				"hidden": true
-			},
-			"preLaunchTask": "standalone-build"
-		},
-		{
-			"type": "msedge",
-			"version": "stable",
-			"name": "headless-edge-debug-hidden",
-			"request": "launch",
-			"runtimeArgs": ["--headless", "--remote-debugging-port=9222"],
-			"url": "http://127.0.0.1:5500/build/stage/standalone/index.html",
-			"presentation": {
-				"hidden": true
-			}
-		},
-		{
-			"type": "vscode-edge-devtools.debug",
-			"name": "headless-edge-devtools-hidden",
-			"request": "attach",
-			"url": "http://127.0.0.1:5500/build/stage/standalone/index.html",
-			"presentation": {
-				"hidden": true
-			}
-		}
-	],
-	"compounds": [
-		{
-			"name": "headless-edge-build-debug",
-			"configurations": ["headless-edge-build-debug-hidden", "headless-edge-devtools-hidden"]
-		},
-		{
-			"name": "headless-edge-debug",
-			"configurations": ["headless-edge-debug-hidden", "headless-edge-devtools-hidden"]
+			"url": "http://localhost:8080/src/html/standalone.html"
 		}
 	]
 }

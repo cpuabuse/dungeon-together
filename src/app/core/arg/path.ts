@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -56,12 +56,13 @@ export type CoreArgPathReduced<
  *
  * @remarks
  * In TS 4.6, with more changes in 4.7, when ID or parent IDs are generic, partial path members are not inferred.
+ * In TS 4.9, conditional key types can be used to infer partial path members, but only in non-generics. For generic use, "never" path is used, and has to be used separately.
  */
-type Path<I extends CoreArgIds, O extends CoreArgOptionsUnion, P extends CoreArgIds = never> =
+export type CoreArgPath<I extends CoreArgIds, O extends CoreArgOptionsUnion, P extends CoreArgIds = never> =
 	// `object` does not change result, but definitively marks as object, so for example spread can happen, when generic; Not present for never-path, not to interfere with universe object
 	object &
 		CoreArgPathReduced<I, O, P> &
-		(O extends CoreArgOptionsPathExtendedUnion ? CoreArgPathOwnOrExtended<I | P> : unknown);
+		(O extends CoreArgOptionsPathExtendedUnion ? CoreArgPathOwnOrExtended<P> : unknown);
 
 /**
  * Path, with all keys statically known, but absent ones are set to never.
@@ -72,28 +73,25 @@ type Path<I extends CoreArgIds, O extends CoreArgOptionsUnion, P extends CoreArg
  * When ID-determined, cannot infer that never-path extends path.
  *
  * Cannot be never, as then it would be assignable to all.
+ *
+ * @see {@link CoreArgPath}
  */
-type PathNever<I extends CoreArgIds, O extends CoreArgOptionsUnion, P extends CoreArgIds = never> = {
-	[K in CoreArgPathUuidPropertyName<I>]: O extends CoreArgOptionsPathOwnOrExtendedUnion ? Uuid : unknown;
+export type CoreArgPathNever<I extends CoreArgIds, O extends CoreArgOptionsUnion, P extends CoreArgIds = never> = {
+	[K in CoreArgPathUuidPropertyName<I>]: O extends CoreArgOptionsPathOwnOrExtendedUnion ? Uuid : never;
 } & {
-	[K in CoreArgPathUuidPropertyName<I | P>]: O extends CoreArgOptionsPathExtendedUnion ? Uuid : unknown;
+	[K in CoreArgPathUuidPropertyName<I | P>]: K extends CoreArgPathUuidPropertyName<I>
+		? O extends CoreArgOptionsPathOwnOrExtendedUnion
+			? Uuid
+			: never
+		: O extends CoreArgOptionsPathExtendedUnion
+		? Uuid
+		: never;
 } & {
 	/**
 	 * Id.
 	 */
-	id?: O extends CoreArgOptionsPathIdUnion ? string : unknown;
+	id?: O extends CoreArgOptionsPathIdUnion ? string : never;
 };
-
-/**
- * Path part of core arg.
- *
- */
-export type CoreArgPath<
-	I extends CoreArgIds,
-	O extends CoreArgOptionsUnion,
-	P extends CoreArgIds = never,
-	HasNever extends boolean = false
-> = HasNever extends true ? PathNever<I, O, P> : Path<I, O, P>;
 
 /**
  * Generate a name for path property.

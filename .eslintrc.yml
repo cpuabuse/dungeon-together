@@ -3,3 +3,17 @@ rules:
   # Prevents using exports if a file has one or more tests in it
   # Mocha will be compiled for browsers as well
   mocha/no-exports: off
+overrides:
+  - files: ["*.deno.*"]
+    parserOptions:
+      project: "./tsconfig/deno.tsconfig.json"
+    rules:
+      "import/extensions": off
+      "import/no-unresolved": off
+      "@typescript-eslint/no-unsafe-member-access": off
+      "@typescript-eslint/no-unsafe-call": off
+      "no-undef": off
+      "@typescript-eslint/no-unsafe-assignment": off
+      "@typescript-eslint/no-unsafe-argument": off
+      "@typescript-eslint/restrict-template-expressions": off
+      "@typescript-eslint/restrict-plus-operands": off

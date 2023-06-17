@@ -8,9 +8,18 @@
  * Types for vue.
  */
 
-import { ExtractDefaultPropTypes, ExtractPropTypes, PropType } from "vue";
+import { AllowedComponentProps, Component, ExtractDefaultPropTypes, ExtractPropTypes, PropType, VNodeProps } from "vue";
+import { ConcreteConstructorConstraint } from "../../common/utility-types";
 
 export * from "./overlay-container";
+
+/**
+ * Extracts props from component class.
+ */
+export type ExtractPropsFromComponentClass<ComponentClass extends Component> =
+	ComponentClass extends ConcreteConstructorConstraint
+		? Omit<InstanceType<ComponentClass>["$props"], keyof VNodeProps | keyof AllowedComponentProps>
+		: never;
 
 /**
  * Extracts props from prop object, making ones that has default, optional.

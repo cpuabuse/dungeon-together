@@ -9,9 +9,9 @@
  * @file
  */
 
-import { ComponentOptions, ComputedRef, ExtractPropTypes, PropType, computed } from "vue";
-import { OverlayListItemAssembler } from "../components";
-import { ExtractProps, OverlayContentUiActionParam } from "../types";
+import { ComputedRef, ExtractPropTypes, PropType, computed } from "vue";
+import type OverlayListItemAssembler from "../components/overlay-list-item-assembler.vue";
+import { ExtractProps, ExtractPropsFromComponentClass, OverlayContentUiActionParam } from "../types";
 
 /**
  * Size for the tab.
@@ -356,17 +356,15 @@ export function useOverlayListItemShared({
 }) {
 	// Infer type
 	// eslint-disable-next-line @typescript-eslint/typedef
-	const assemblerProps = computed(
-		(): typeof OverlayListItemAssembler extends ComponentOptions<infer Props> ? Props : never => {
-			return {
-				contentType: props.contentType,
-				icon: props.icon,
-				isHiddenCaretDisplayedIfMissing: props.isHiddenCaretDisplayedIfMissing,
-				isHiddenIconDisplayedIfMissing: props.isHiddenIconDisplayedIfMissing,
-				name: props.name
-			};
-		}
-	);
+	const assemblerProps = computed((): ExtractPropsFromComponentClass<typeof OverlayListItemAssembler> => {
+		return {
+			contentType: props.contentType,
+			icon: props.icon,
+			isHiddenCaretDisplayedIfMissing: props.isHiddenCaretDisplayedIfMissing,
+			isHiddenIconDisplayedIfMissing: props.isHiddenIconDisplayedIfMissing,
+			name: props.name
+		};
+	});
 
 	return { assemblerProps };
 }

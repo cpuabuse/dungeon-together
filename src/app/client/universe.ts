@@ -12,7 +12,8 @@ import type HammerManager from "hammerjs";
 import { Howl, Howler } from "howler";
 import { encode as base64Encode } from "js-base64";
 import Mousetrap from "mousetrap";
-import { JoystickManager, create as createJoystick } from "nipplejs";
+import type { JoystickManager } from "nipplejs";
+import joystickLib from "nipplejs";
 import { BaseTexture, SVGResource, Texture, utils } from "pixi.js";
 import { App } from "vue";
 import { DeferredPromise } from "../common/async";
@@ -52,6 +53,13 @@ import {
 import { Mode } from "./mode";
 import { ClientOptions, clientOptions } from "./options";
 import { ClientShard, ClientShardClass, ClientShardFactory } from "./shard";
+
+/**
+ * Joystick create function.
+ */
+// Infer import destructuring
+// eslint-disable-next-line @typescript-eslint/typedef
+const { create: createJoystick } = joystickLib;
 
 /**
  * All instances in client.
@@ -135,73 +143,73 @@ export class ClientUniverse
 		[
 			"mode/user/treasure/default",
 			{
-				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/chest_full_open_anim_f0.png"))]
+				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/chest_full_open_anim_f0.png"))]
 			}
 		],
 		[
 			"treasure-open",
 			{
-				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/chest_full_open_anim_f2.png"))]
+				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/chest_full_open_anim_f2.png"))]
 			}
 		],
 		[
 			"mode/user/trap/default",
 			{
-				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_spikes_anim_f0.png"))]
+				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/floor_spikes_anim_f0.png"))]
 			}
 		],
 		[
 			"trap-activate",
 			{
-				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_spikes_anim_f3.png"))]
+				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/floor_spikes_anim_f3.png"))]
 			}
 		],
 		[
 			"mode/user/door/default",
 			{
-				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/doors_leaf_closed.png"))]
+				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/doors_leaf_closed.png"))]
 			}
 		],
 		[
 			"door-open",
 			{
-				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/doors_leaf_open.png"))]
+				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/doors_leaf_open.png"))]
 			}
 		],
 		[
 			"mode/user/floor/default",
 			{
-				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_1.png"))]
+				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/floor_1.png"))]
 			}
 		],
 		[
 			"mode/user/wall/default",
 			{
-				textures: [new Texture(new BaseTexture("img/rltiles/dc-dngn/wall/brick_brown2.png"))]
+				textures: [new Texture(new BaseTexture("/img/rltiles/dc-dngn/wall/brick_brown2.png"))]
 			}
 		],
 		[
 			"mode/user/enemy/default",
 			{
-				textures: [new Texture(new BaseTexture("img/rltiles/dc-mon64/balrug.png"))]
+				textures: [new Texture(new BaseTexture("/img/rltiles/dc-mon64/balrug.png"))]
 			}
 		],
 		[
 			"mode/user/player/default",
 			{
-				textures: [new Texture(new BaseTexture("img/rltiles/player/base/human_m.png"))]
+				textures: [new Texture(new BaseTexture("/img/rltiles/player/base/human_m.png"))]
 			}
 		],
 		[
 			"mode/user/ladder/default",
 			{
-				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_ladder.png"))]
+				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/floor_ladder.png"))]
 			}
 		],
 		[
 			"death",
 			{
-				textures: [new Texture(new BaseTexture("img/rltiles/nh-mon1/w/wraith.png"))]
+				textures: [new Texture(new BaseTexture("/img/rltiles/nh-mon1/w/wraith.png"))]
 			}
 		]
 	]);
@@ -346,9 +354,9 @@ export class ClientUniverse
 
 				// Sound
 				let bgSounds: Array<Howl> = [
-					{ endTime: 106000, src: "sound/lexin-music/cinematic-ambient-piano-118668.mp3", startTime: 0 },
-					{ endTime: 131000, src: "sound/lexin-music/cinematic-documentary-115669.mp3", startTime: 0 },
-					{ endTime: 88000, src: "sound/amaranta-music/light-and-darkness-110414.mp3", startTime: 25000 }
+					{ endTime: 106000, src: "/sound/lexin-music/cinematic-ambient-piano-118668.mp3", startTime: 0 },
+					{ endTime: 131000, src: "/sound/lexin-music/cinematic-documentary-115669.mp3", startTime: 0 },
+					{ endTime: 88000, src: "/sound/amaranta-music/light-and-darkness-110414.mp3", startTime: 25000 }
 					// False negative
 					// eslint-disable-next-line @typescript-eslint/typedef
 				].map(({ src, startTime, endTime }, index, array) => {

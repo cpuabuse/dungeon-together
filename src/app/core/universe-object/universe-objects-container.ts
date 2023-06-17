@@ -30,7 +30,11 @@ import {
 } from "../arg";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "../base";
 import { CoreArgIndexableReader, CoreArgIndexer } from "../indexable";
-import { CoreUniverseObjectConstructorParameters, CoreUniverseObjectInstance } from "./universe-object";
+import {
+	CoreUniverseObjectConstructorParameters,
+	CoreUniverseObjectInstance,
+	CoreUniverseObjectInstanceNever
+} from "./universe-object";
 import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectUniverse } from ".";
 
 /**
@@ -45,7 +49,7 @@ import { CoreUniverseObjectArgsOptionsUnion, CoreUniverseObjectUniverse } from "
 export type CoreUniverseObjectContainerInstance<
 	BaseParams extends CoreBaseNonRecursiveParameters,
 	// We do not care what class is base class for child
-	Instance extends CoreUniverseObjectInstance<BaseParams, Arg, Id, Options, ParentId, GrandparentIds>,
+	Instance extends CoreUniverseObjectInstanceNever<BaseParams, Arg, Id, Options, ParentId, GrandparentIds>,
 	Arg extends CoreArg<Id, Options, ParentId | GrandparentIds>,
 	Id extends CoreArgIds,
 	Options extends CoreUniverseObjectArgsOptionsUnion,
@@ -221,11 +225,8 @@ export function generateCoreUniverseObjectContainerMembers<
 					 * @param this - This instance
 					 * @param path - Child universe object
 					 */
-					[ComputedClassWords.Value](
-						this: ThisInstance,
-						path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
-					): void {
-						this[nameUniverseObjects].delete(path[pathUuidPropertyName]);
+					[ComputedClassWords.Value](path: CoreArgPath<Id, Options, ParentId | GrandparentIds>): void {
+						(this as unknown as ThisInstance)[nameUniverseObjects].delete(path[pathUuidPropertyName]);
 					}
 				},
 
@@ -241,12 +242,13 @@ export function generateCoreUniverseObjectContainerMembers<
 					 * @param path - Path to search for
 					 * @returns Universe object
 					 */
-					[ComputedClassWords.Value](
-						this: ThisInstance,
-						path: CoreArgPathReduced<Id, Options, ParentId | GrandparentIds>
-					): Instance {
-						let universeObject: Instance | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
-						return universeObject === undefined ? this[nameDefaultUniverseObject] : universeObject;
+					[ComputedClassWords.Value](path: CoreArgPathReduced<Id, Options, ParentId | GrandparentIds>): Instance {
+						let universeObject: Instance | undefined = (this as unknown as ThisInstance)[nameUniverseObjects].get(
+							path[pathUuidPropertyName]
+						);
+						return universeObject === undefined
+							? (this as unknown as ThisInstance)[nameDefaultUniverseObject]
+							: universeObject;
 					}
 				},
 
@@ -261,11 +263,10 @@ export function generateCoreUniverseObjectContainerMembers<
 					 * @param this - Universe object container
 					 * @param path - Path to search for
 					 */
-					[ComputedClassWords.Value](
-						this: ThisInstance,
-						path: CoreArgPath<Id, Options, ParentId | GrandparentIds>
-					): void {
-						let universeObject: Instance | undefined = this[nameUniverseObjects].get(path[pathUuidPropertyName]);
+					[ComputedClassWords.Value](path: CoreArgPath<Id, Options, ParentId | GrandparentIds>): void {
+						let universeObject: Instance | undefined = (this as unknown as ThisInstance)[nameUniverseObjects].get(
+							path[pathUuidPropertyName]
+						);
 
 						// Detach from universe
 						if (isOwnPath) {
@@ -276,7 +277,7 @@ export function generateCoreUniverseObjectContainerMembers<
 						}
 
 						// Detach
-						this[nameDetachUniverseObject](path);
+						(this as unknown as ThisInstance)[nameDetachUniverseObject](path);
 
 						// Terminate if we can
 						if (universeObject !== undefined) {

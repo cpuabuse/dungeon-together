@@ -15,5 +15,5 @@
 		/* From pixi, affects assets script compilation - https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/64302 */
 		"skipLibCheck": true
 	},
-	"include": ["src/**/*", "test/**/*", "src/**/*.vue", "test/**/*.vue", "**/*vite.config.ts"]
+	"include": ["**/*.deno.ts"]
 }

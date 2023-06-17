@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { ComponentOptions, PropType, defineComponent } from "vue";
+import { PropType, defineComponent } from "vue";
 import { VDivider } from "vuetify/components";
 import {
 	OverlayListItemEntry as Item,
@@ -31,14 +31,13 @@ import {
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
-import {
-	OverlayListItemInfo,
-	OverlayListItemList,
-	OverlayListItemSlot,
-	OverlayListItemSwitch,
-	OverlayListItemTab,
-	OverlayListItemUuid
-} from ".";
+import { ExtractPropsFromComponentClass } from "../types";
+import OverlayListItemInfo from "./overlay-list-item-info.vue";
+import OverlayListItemList from "./overlay-list-item-list.vue";
+import OverlayListItemSlot from "./overlay-list-item-slot.vue";
+import OverlayListItemSwitch from "./overlay-list-item-switch.vue";
+import OverlayListItemTab from "./overlay-list-item-tab.vue";
+import OverlayListItemUuid from "./overlay-list-item-uuid.vue";
 
 /**
  * Components indexed by type.
@@ -75,6 +74,27 @@ type ComponentIndex = {
 	[OverlayListItemEntryType.List]: typeof OverlayListItemList;
 };
 
+/**
+ * Cannot return this type directly, as it will introduce recursive type reference, but alias works.
+ */
+type ComponentReturn = {
+	[K in keyof ComponentIndex]: {
+		/**
+		 * Component itself.
+		 */
+		is: ComponentIndex[K];
+
+		/**
+		 * Props to provide to component.
+		 */
+		props: ExtractPropsFromComponentClass<ComponentIndex[K]>;
+
+		/**
+		 * Slots to pass.
+		 */
+		slots: Array<string>;
+	};
+}[keyof ComponentIndex];
 export default defineComponent({
 	components: {
 		VDivider
@@ -91,27 +111,12 @@ export default defineComponent({
 		 */
 		// ts(2366) will guarantee return
 		// eslint-disable-next-line vue/return-in-computed-property, consistent-return
-		component(): {
-			[K in keyof ComponentIndex]: {
-				/**
-				 * Component itself.
-				 */
-				is: ComponentIndex[K];
-
-				/**
-				 * Props to provide to component.
-				 */
-				props: ComponentIndex[K] extends ComponentOptions<infer R> ? R : never;
-
-				/**
-				 * Slots to pass.
-				 */
-				slots: Array<string>;
-			};
-		}[keyof ComponentIndex] {
+		component(): ComponentReturn {
 			/**
 			 * Narrows props object.
 			 */
+			// Helper preserved for future
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			type NarrowProps<Type extends typeof item> = typeof props & {
 				/**
 				 * Item.

@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -19,6 +19,5 @@ export type CoreArgContainerArg<
 	Options extends CoreArgOptionsUnion,
 	ParentIds extends CoreArgIds = never,
 	ChildArg extends CoreArg<ChildId, Options, Id | ParentIds> = never,
-	ChildId extends CoreArgIds = never,
-	HasNever extends boolean = false
-> = CoreArg<Id, Options, ParentIds, HasNever> & CoreArgContainer<ChildArg, ChildId, Options, Id | ParentIds>;
+	ChildId extends CoreArgIds = never
+> = CoreArg<Id, Options, ParentIds> & CoreArgContainer<ChildArg, ChildId, Options, Id | ParentIds>;

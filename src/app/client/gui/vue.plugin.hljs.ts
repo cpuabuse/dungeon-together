@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -13,8 +13,8 @@ import vueHljs from "@highlightjs/vue-plugin";
 import { App } from "vue";
 
 // Statically initialize css
-injectLinkCss({ path: "css/hljs/a11y-light.css", title: "a11y-light" });
-injectLinkCss({ path: "css/hljs/a11y-dark.css", title: "a11y-dark" }).disabled = false;
+injectLinkCss({ path: "/css/hljs/a11y-light.css", title: "a11y-light" });
+injectLinkCss({ path: "/css/hljs/a11y-dark.css", title: "a11y-dark" }).disabled = false;
 
 /**
  * Uses HLJS plugin on app.

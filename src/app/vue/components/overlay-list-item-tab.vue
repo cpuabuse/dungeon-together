@@ -64,14 +64,15 @@ import {
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
-import { OverlayListItemAssembler, OverlayListItemList } from ".";
+import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
+import OverlayListItemList from "./overlay-list-item-list.vue";
 
 /**
  * Async component for overlay list, since it's circular dependency.
  */
 // Infer component type
 // eslint-disable-next-line @typescript-eslint/typedef
-const OverlayList = defineAsyncComponent(async () => (await import(".")).OverlayList);
+const OverlayList = defineAsyncComponent(async () => import("./overlay-list.vue"));
 
 /**
  * Element size pixels.

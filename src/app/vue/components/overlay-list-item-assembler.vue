@@ -40,7 +40,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { VCol, VIcon, VListItemTitle, VRow, VSpacer } from "vuetify/components";
-import { OverlayType, overlayListSharedProps } from "../core/overlay";
+import { OverlayType, overlayListSharedProps, useOverlayListShared } from "../core/overlay";
 import OverlayContentItemContainer from "./overlay-list-item-wrapper.vue";
 
 export default defineComponent({
@@ -118,15 +118,6 @@ export default defineComponent({
 		 */
 		isIconVisible(): boolean {
 			return !!this.icon;
-		},
-
-		/**
-		 * Whether the item is displayed as a menu.
-		 *
-		 * @returns Whether the item is displayed as a menu
-		 */
-		isMenu(): boolean {
-			return this.contentType === OverlayType.Menu;
 		}
 	},
 
@@ -146,6 +137,18 @@ export default defineComponent({
 			type: String
 		},
 		...overlayListSharedProps
+	},
+
+	/**
+	 * Setup.
+	 *
+	 * @param props - Component props
+	 * @returns Composable methods
+	 */
+	// Infer prop type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	setup(props) {
+		return useOverlayListShared({ props });
 	}
 });
 </script>

@@ -40,7 +40,7 @@ async function main(): Promise<void> {
 		records: [{ depends: {}, factory: systemModuleFactory, name: "system" }],
 		yamlList: {
 			cave: {
-				path: "data/shard/cave.dt.yml",
+				path: "/data/shard/cave.dt.yml",
 				type: "url"
 			}
 		}

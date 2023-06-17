@@ -34,7 +34,8 @@ import {
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
-import { OverlayListBody, OverlayListItem } from ".";
+import OverlayListBody from "./overlay-list-body.vue";
+import OverlayListItem from "./overlay-list-item.vue";
 
 export default defineComponent({
 	components: {

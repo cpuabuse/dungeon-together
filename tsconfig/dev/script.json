@@ -1,7 +1,0 @@
-{
-	"compilerOptions": {
-		"outDir": "../../build/dev/artifacts/script"
-	},
-	"extends": "./base.json",
-	"include": ["../../src/script/*.dev.*"]
-}

@@ -1,7 +1,0 @@
-{
-	"compilerOptions": {
-		"outDir": "../../build/stage/bin/script"
-	},
-	"extends": "./base.json",
-	"include": ["../../src/script/*.stage.*"]
-}

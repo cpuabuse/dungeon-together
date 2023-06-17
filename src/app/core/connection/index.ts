@@ -11,6 +11,8 @@
 
 export * from "./scheduler";
 export * from "./connection";
-export * from "./standalone-socket";
-export * from "./socket";
 export * from "./message";
+
+// Order is important due to circular dependency
+export * from "./socket";
+export * from "./standalone-socket";

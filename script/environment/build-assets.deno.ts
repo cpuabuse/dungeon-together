@@ -10,61 +10,49 @@
  */
 
 // Build script
-/* eslint-disable import/no-extraneous-dependencies */
-import { writeFile } from "fs";
-import jimp from "jimp";
-import mkdirp from "mkdirp";
-import ncp from "ncp";
-/* eslint-enable import/no-extraneous-dependencies */
+import { writeFile } from "node:fs";
+import { join } from "node:path";
+import { parse } from "https://deno.land/std/flags/mod.ts";
+import jimp from "npm:jimp@0";
+import { mkdirp } from "npm:mkdirp@3";
+// @deno-types="npm:@types/ncp@2"
+import ncp from "npm:ncp@2";
 
-/**
- * Path to assets.
- */
-const assetPath: string = "include/dungeon-together-assets/build";
+/** CLI parameters. */
+// Infer type
+// eslint-disable-next-line @typescript-eslint/typedef
+const { environment, build, rootDir } = parse<{ [Key in string]?: string }>(Deno.args);
 
-/**
- * Relative sound path.
- */
-const soundPath: string = "sound";
-
-/**
- * Relative sound path.
- */
-const imagePath: string = "img";
-
-/**
- * Color to replace.
- */
-// Infer and declare
-// eslint-disable-next-line @typescript-eslint/typedef, no-magic-numbers
-const replaceColor = [0x47, 0x6c, 0x6c] as const;
-
-/**
- * Entrypoint.
- *
- * @param param - Destructured parameter
- */
-export async function main({
-	environment,
-	build
-}: {
+if (environment && build && rootDir) {
 	/**
-	 * Environment name.
+	 * Path to assets.
 	 */
-	environment: string;
+	const assetPath: string = join(rootDir, "include", "dungeon-together-assets", "build");
 
 	/**
-	 * Build name.
+	 * Relative sound path.
 	 */
-	build: string;
-}): Promise<void> {
+	const soundPath: string = "sound";
+
+	/**
+	 * Relative sound path.
+	 */
+	const imagePath: string = "img";
+
+	/**
+	 * Color to replace.
+	 */
+	// Infer and declare
+	// eslint-disable-next-line @typescript-eslint/typedef, no-magic-numbers
+	const replaceColor = [0x47, 0x6c, 0x6c] as const;
+
 	/** Compiled asset folder. */
-	const compiledAssetPath: string = `build/${environment}/${build}`;
+	const compiledAssetPath: string = join(rootDir, "build", environment, `${build}-public`);
 
-	await mkdirp(`${compiledAssetPath}/${soundPath}`);
+	await mkdirp(join(compiledAssetPath, soundPath));
 
-	let data: Promise<void> = new Promise((resolve, reject) => {
-		ncp("data", `${compiledAssetPath}/data`, err => {
+	const data: Promise<void> = new Promise((resolve, reject) => {
+		ncp("data", join(compiledAssetPath, "data"), err => {
 			if (err) {
 				reject(err);
 			} else {
@@ -78,7 +66,7 @@ export async function main({
 		["amaranta-music", "effects", "lexin-music"].map(
 			folder =>
 				new Promise<void>((resolve, reject) => {
-					ncp(`${assetPath}/${soundPath}/${folder}`, `${compiledAssetPath}/${soundPath}/${folder}`, err => {
+					ncp(`${assetPath}/${soundPath}/${folder}`, join(compiledAssetPath, soundPath, folder), err => {
 						if (err) {
 							reject(err);
 						} else {
@@ -89,12 +77,12 @@ export async function main({
 		)
 	);
 
-	await mkdirp(`${compiledAssetPath}/${imagePath}`);
-	await mkdirp(`${compiledAssetPath}/${imagePath}/dungeontileset-ii`);
-	await mkdirp(`${compiledAssetPath}/${imagePath}/rltiles/dc-dngn/wall`);
-	await mkdirp(`${compiledAssetPath}/${imagePath}/rltiles/dc-mon64`);
-	await mkdirp(`${compiledAssetPath}/${imagePath}/rltiles/player/base`);
-	await mkdirp(`${compiledAssetPath}/${imagePath}/rltiles/nh-mon1/w`);
+	await mkdirp(join(compiledAssetPath, imagePath));
+	await mkdirp(join(compiledAssetPath, imagePath, "dungeontileset-ii"));
+	await mkdirp(join(compiledAssetPath, imagePath, "rltiles/dc-dngn/wall"));
+	await mkdirp(join(compiledAssetPath, imagePath, "rltiles/dc-mon64"));
+	await mkdirp(join(compiledAssetPath, imagePath, "rltiles/player/base"));
+	await mkdirp(join(compiledAssetPath, imagePath, "rltiles/nh-mon1/w"));
 
 	await Promise.all(
 		[
@@ -109,7 +97,7 @@ export async function main({
 		].map(
 			file =>
 				new Promise<void>((resolve, reject) => {
-					ncp(`${assetPath}/${imagePath}/${file}`, `${compiledAssetPath}/${imagePath}/${file}`, err => {
+					ncp(`${assetPath}/${imagePath}/${file}`, join(compiledAssetPath, imagePath, file), err => {
 						if (err) {
 							reject(err);
 						} else {
@@ -134,7 +122,7 @@ export async function main({
 						.then(image => {
 							// False positive
 							// eslint-disable-next-line @typescript-eslint/typedef
-							image.scan(0, 0, image.bitmap.width, image.bitmap.height, function (x, y, idx) {
+							image.scan(0, 0, image.bitmap.width, image.bitmap.height, function (...[, , idx]) {
 								if (replaceColor.every((color, cIndex) => color === this.bitmap.data[idx + cIndex])) {
 									this.bitmap.data[idx + replaceColor.length] = 0x00;
 								}
@@ -146,7 +134,7 @@ export async function main({
 								if (bufferErr) {
 									reject(bufferErr);
 								} else {
-									writeFile(`${compiledAssetPath}/${imagePath}/${file}.png`, outputBuffer, err => {
+									writeFile(join(compiledAssetPath, imagePath, `${file}.png`), outputBuffer, err => {
 										if (err) {
 											reject(err);
 										} else {
@@ -162,4 +150,6 @@ export async function main({
 				})
 		)
 	);
+} else {
+	throw new Error("Parameters are missing.");
 }
