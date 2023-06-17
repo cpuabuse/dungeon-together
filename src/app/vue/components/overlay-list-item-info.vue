@@ -10,7 +10,8 @@
 	>
 		<!-- Inline slot -->
 		<template #inline>
-			<VChip>
+			<!-- Density from list is not passed through into chip -->
+			<VChip :density="isCompact ? 'compact' : 'default'">
 				{{ data }}
 			</VChip>
 		</template>
@@ -20,7 +21,12 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { VChip } from "vuetify/components";
-import { overlayListChildSharedProps, overlayListItemNarrowProps, overlayListSharedProps } from "../core/overlay";
+import {
+	overlayListChildSharedProps,
+	overlayListItemNarrowProps,
+	overlayListSharedProps,
+	useOverlayListShared
+} from "../core/overlay";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 
 export default defineComponent({
@@ -37,6 +43,18 @@ export default defineComponent({
 			required: true,
 			type: [String, Number]
 		}
+	},
+
+	/**
+	 * Setup hook.
+	 *
+	 * @param props - Props
+	 * @returns shared props
+	 */
+	// Infer setup
+	// eslint-disable-next-line @typescript-eslint/typedef
+	setup(props) {
+		return useOverlayListShared({ props });
 	}
 });
 </script>
