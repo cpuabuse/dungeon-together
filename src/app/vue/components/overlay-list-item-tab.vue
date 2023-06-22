@@ -52,8 +52,8 @@
 <script lang="ts">
 import { PropType, defineAsyncComponent, defineComponent } from "vue";
 import { VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
+import { ElementSize } from "../common/element";
 import {
-	ElementSize,
 	OverlayListItemEntry as Item,
 	OverlayContentTabs,
 	OverlayListItemEntryExtract,

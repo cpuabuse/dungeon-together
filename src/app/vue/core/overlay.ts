@@ -14,26 +14,6 @@ import type OverlayListItemAssembler from "../components/overlay-list-item-assem
 import { ExtractProps, ExtractPropsFromComponentClass, OverlayContentUiActionParam } from "../types";
 
 /**
- * Size for the tab.
- */
-export enum ElementSize {
-	/**
-	 * Small tab.
-	 */
-	Small = "sm",
-
-	/**
-	 * Medium tab.
-	 */
-	Medium = "md",
-
-	/**
-	 * Large tab.
-	 */
-	Large = "lg"
-}
-
-/**
  * Possible item types.
  */
 export enum OverlayListItemEntryType {

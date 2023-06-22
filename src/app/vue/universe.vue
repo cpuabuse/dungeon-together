@@ -62,15 +62,10 @@ import { ThisVueStore } from "../client/gui";
 import { ClientShard } from "../client/shard";
 import { Uuid } from "../common/uuid";
 import { LogLevel } from "../core/error";
+import { ElementSize } from "./common/element";
 import CompactToolbar from "./compact-toolbar.vue";
 import { OverlayClick, OverlayList, OverlayWindow } from "./components";
-import {
-	ElementSize,
-	OverlayContentTabs,
-	OverlayListItemEntry,
-	OverlayListItemEntryType,
-	OverlayType
-} from "./core/overlay";
+import { OverlayContentTabs, OverlayListItemEntry, OverlayListItemEntryType, OverlayType } from "./core/overlay";
 import debugComponent from "./debug.vue";
 import stateAlertBoxComponent from "./state-alert-box.vue";
 import StatsBar from "./stats-bar.vue";
