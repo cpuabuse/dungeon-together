@@ -4,28 +4,13 @@
 */
 
 /**
+ * Utilities for compact toolbar components.
+ *
  * @file
- * Types for vue.
  */
 
-import { AllowedComponentProps, Component, ExtractDefaultPropTypes, ExtractPropTypes, PropType, VNodeProps } from "vue";
-import { ConcreteConstructorConstraint } from "../../common/utility-types";
-
-export * from "./overlay-container";
-
-/**
- * Extracts props from component class.
- */
-export type ExtractPropsFromComponentClass<ComponentClass extends Component> =
-	ComponentClass extends ConcreteConstructorConstraint
-		? Omit<InstanceType<ComponentClass>["$props"], keyof VNodeProps | keyof AllowedComponentProps>
-		: never;
-
-/**
- * Extracts props from prop object, making ones that has default, optional.
- */
-export type ExtractProps<O> = Partial<ExtractDefaultPropTypes<O>> &
-	Omit<ExtractPropTypes<O>, keyof ExtractDefaultPropTypes<O>>;
+import { PropType } from "vue";
+import { ExtractProps } from "../common/utility-types";
 
 /**
  * Compact toolbar menu item(button).

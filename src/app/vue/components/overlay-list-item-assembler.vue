@@ -6,7 +6,8 @@
 <template>
 	<OverlayContentItemContainer :content-type="contentType" :list-item-class="{ 'pr-1': isCaretDisplayed }">
 		<template v-if="hasHeader" #header>
-			<VRow align="center">
+			<!-- `VRow` doesn't receive list's density -->
+			<VRow align="center" :dense="isCompact">
 				<VCol v-if="effectiveIcon" cols="auto">
 					<VIcon :icon="effectiveIcon" class="overlay-content-item-icon" />
 				</VCol>
@@ -19,8 +20,7 @@
 
 				<VSpacer />
 
-				<!-- Caret forces data move right; Small margin needed for to compensate for row's negative margin -->
-				<VCol v-if="$slots.inline" cols="auto" :class="{ 'pr-0': isCaretDisplayed, 'mr-1': true }">
+				<VCol v-if="$slots.inline" cols="auto" :class="{ 'pr-0': isCaretDisplayed }">
 					<slot name="inline" />
 				</VCol>
 

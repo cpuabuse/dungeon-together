@@ -37,7 +37,11 @@
 <script lang="ts">
 import { defineComponent, nextTick } from "vue";
 import { VBtn, VExpandXTransition, VIcon, VToolbar, VToolbarItems } from "vuetify/components";
-import { CompactToolbarMenuItem, compactToolbarMenuBaseProps, compactToolbarSharedMenuProps } from "./types";
+import {
+	CompactToolbarMenuItem,
+	compactToolbarMenuBaseProps,
+	compactToolbarSharedMenuProps
+} from "./core/compact-toolbar";
 
 /**
  * Item with meta.
@@ -256,3 +260,4 @@ export default defineComponent({
 	width: 6em;
 }
 </style>
+./core ./core/compact-toolbar

@@ -10,8 +10,11 @@
  */
 
 import { ComputedRef, ExtractPropTypes, PropType, computed } from "vue";
+import { Uuid } from "../../common/uuid";
+import { ActionWords } from "../../server/action";
+import { ElementSize } from "../common/element";
+import { ExtractProps, ExtractPropsFromComponentClass } from "../common/utility-types";
 import type OverlayListItemAssembler from "../components/overlay-list-item-assembler.vue";
-import { ExtractProps, ExtractPropsFromComponentClass, OverlayContentUiActionParam } from "../types";
 
 /**
  * Possible item types.
@@ -348,3 +351,56 @@ export function useOverlayListItemShared({
 
 	return { assemblerProps };
 }
+
+/**
+ * Words used for UI action.
+ */
+export enum OverlayContainerUiActionWords {
+	EntityAction = "entityAction",
+	EntityInfo = "entityInfo"
+}
+
+/**
+ * Helper type for UI action, guarantees exhaustiveness, and constraints.
+ */
+type OverlayContentUiActionHelper<
+	T extends {
+		/**
+		 * UI action.
+		 */
+		uiActionType: OverlayContainerUiActionWords;
+	}
+> = OverlayContainerUiActionWords extends T["uiActionType"] ? T : never;
+
+/**
+ * Possible word/parameters combination for UI action.
+ */
+export type OverlayContentUiActionParam = OverlayContentUiActionHelper<
+	| {
+			/**
+			 * UI action.
+			 */
+			uiActionType: OverlayContainerUiActionWords.EntityAction;
+
+			/**
+			 * Action type.
+			 */
+			entityActionType: ActionWords;
+
+			/**
+			 * Target entity UUID.
+			 */
+			targetEntityUuid: Uuid;
+	  }
+	| {
+			/**
+			 * Entity info.
+			 */
+			uiActionType: OverlayContainerUiActionWords.EntityInfo;
+
+			/**
+			 * Information to display.
+			 */
+			targetEntityUuid: Uuid;
+	  }
+>;

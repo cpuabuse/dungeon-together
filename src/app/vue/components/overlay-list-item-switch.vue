@@ -10,11 +10,23 @@
 	>
 		<!-- Inline slot -->
 		<template #inline>
-			<!-- Density from list is not passed through into switch -->
+			<!-- 
+				Various problems are addressed here, as source of problems is switch itself:
+				- Vertical height:
+						- Negative margin to fix switch vertically expanding list item
+				- Clipping:
+						- Inset, to fix clipping of switch handle with negative margins of parents
+						- For non compact switch handle hover shadow and ripple are scaled down with CSS
+				- Density:
+						- Density from list is not passed through to switch automatically
+						- Density doesn't do anything for inset as of now, so CSS scales it down
+			-->
 			<VSwitch
 				:density="isCompact ? 'compact' : 'default'"
 				hide-details
 				:model-value="records[id]"
+				inset
+				:class="{ 'my-n2': true, 'overlay-list-item-switch-compact': isCompact }"
 				@update:model-value="
 					value => {
 						if (typeof value == 'boolean') {
@@ -74,8 +86,15 @@ export default defineComponent({
 </script>
 
 <style scoped lang="css">
-/* Override with CSS is performed because `VSwitch` does not work well with `VList` */
-.v-switch {
-	margin: -1em 0;
+/* Compact switch is too large */
+.overlay-list-item-switch-compact {
+	transform-origin: center right;
+	scale: 0.75;
+}
+
+/* Non compact density should have smaller switch hover shadow not to be clipped, also for ripple */
+:not(.overlay-list-item-switch-compact) :deep(.v-selection-control__input:hover::before),
+:deep(.v-selection-control__input .v-ripple__container) {
+	scale: 0.5;
 }
 </style>

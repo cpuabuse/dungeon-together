@@ -75,7 +75,7 @@ import {
 	CompactToolbarMenu,
 	CompactToolbarMenuBaseProps,
 	compactToolbarDataToMenuBaseProps
-} from "./types";
+} from "./core/compact-toolbar";
 
 /**
  * Root component.
@@ -380,3 +380,4 @@ export default defineComponent({
 	height: 100%;
 }
 </style>
+./core ./core/compact-toolbar

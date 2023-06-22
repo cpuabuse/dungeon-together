@@ -23,6 +23,7 @@
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import { VDivider } from "vuetify/components";
+import { ExtractPropsFromComponentClass } from "../common/utility-types";
 import {
 	OverlayListItemEntry as Item,
 	OverlayListItemEntryType,
@@ -31,7 +32,6 @@ import {
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
-import { ExtractPropsFromComponentClass } from "../types";
 import OverlayListItemInfo from "./overlay-list-item-info.vue";
 import OverlayListItemList from "./overlay-list-item-list.vue";
 import OverlayListItemSlot from "./overlay-list-item-slot.vue";

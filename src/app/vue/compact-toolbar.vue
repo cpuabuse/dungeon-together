@@ -4,17 +4,20 @@
 	<div class="d-flex justify-center">
 		<!-- To have an effect of "update" of a menu when key changes, applying absolute in CSS, since `leave-absolute` removes leave animation -->
 		<VFabTransition group>
-			<!-- Change of key will recreate the DOM -->
+			<!--
+				Change of key will recreate the DOM.
+				Casting as `menuIds` and `menuKeys` are generated from menus.
+			-->
 			<CompactToolbarMenu
 				v-for="menuId in menuIds"
 				:key="menuKeys[menuId]"
-				v-bind="menus[menuId]"
+				v-bind="menus[menuId] as CompactToolbarMenuBaseProps"
 				floating
 				class="ma-2"
 				:is-force-collapsed="autoCollapse && activeMenu !== menuKeys[menuId]"
 				:has-labels="hasLabels"
 				:is-highlighted-on-open="isHighlightedOnOpen"
-				@extend="setActiveMenu({ key: menuKeys[menuId] })"
+				@extend="setActiveMenu({ key: menuKeys[menuId] as string })"
 				@click="({ itemId }) => clickItem({ menuId, itemId })"
 			>
 			</CompactToolbarMenu>
@@ -26,7 +29,7 @@
 import { PropType, defineComponent } from "vue";
 import { VFabTransition } from "vuetify/components";
 import CompactToolbarMenu from "./compact-toolbar-menu.vue";
-import { CompactToolbarMenuBaseProps, compactToolbarSharedMenuProps } from "./types";
+import { CompactToolbarMenuBaseProps, compactToolbarSharedMenuProps } from "./core/compact-toolbar";
 
 /**
  * Root component.
@@ -168,3 +171,4 @@ export default defineComponent({
 	position: absolute;
 }
 </style>
+./core ./core/compact-toolbar
