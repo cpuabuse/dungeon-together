@@ -3,7 +3,7 @@
 		<div class="app-content">
 			<div class="universe">Hello: {{ what }}</div>
 			<tsxtest />
-			<OverlayClick v-model="isRightClickOverlayDisplayed">
+			<OverlayClick v-model="isRightClickOverlayDisplayed" x="1000" y="200">
 				<template #body>
 					<OverlayList :items="debugOverlayItems" content-type="menu-compact" />
 				</template>
@@ -65,17 +65,17 @@ import { LogLevel } from "../core/error";
 import { ElementSize } from "./common/element";
 import CompactToolbar from "./compact-toolbar.vue";
 import { OverlayClick, OverlayList, OverlayWindow } from "./components";
-import { OverlayContentTabs, OverlayListItemEntry, OverlayListItemEntryType, OverlayType } from "./core/overlay";
-import debugComponent from "./debug.vue";
-import stateAlertBoxComponent from "./state-alert-box.vue";
-import StatsBar from "./stats-bar.vue";
-import tsxTestComponent from "./tsx/test.vue";
 import {
 	CompactToolbarData,
 	CompactToolbarMenu,
 	CompactToolbarMenuBaseProps,
 	compactToolbarDataToMenuBaseProps
 } from "./core/compact-toolbar";
+import { OverlayContentTabs, OverlayListItemEntry, OverlayListItemEntryType, OverlayType } from "./core/overlay";
+import debugComponent from "./debug.vue";
+import stateAlertBoxComponent from "./state-alert-box.vue";
+import StatsBar from "./stats-bar.vue";
+import tsxTestComponent from "./tsx/test.vue";
 
 /**
  * Root component.
