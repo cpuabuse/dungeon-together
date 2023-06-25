@@ -19,6 +19,15 @@ export default defineComponent({
 
 	props: {
 		modelValue: { required: true, type: Boolean },
+		x: {
+			default: 0,
+			type: Number
+		},
+		y: {
+			default: 0,
+			type: Number
+		},
+
 		zIdx: {
 			default: 0,
 			type: Number
@@ -30,8 +39,8 @@ export default defineComponent({
 <style scoped lang="css">
 .overlay-click {
 	position: absolute;
-	top: 100px;
-	right: 100px;
+	top: calc(v-bind(y) * 1px);
+	left: calc(v-bind(x) * 1px);
 	z-index: 100;
 	max-height: 50%;
 }
