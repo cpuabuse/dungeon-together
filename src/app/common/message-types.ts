@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -8,7 +8,7 @@
  */
 
 import * as typing from "io-ts";
-import { MessageTypeWord, DirectionWord } from "./defaults/connection";
+import { DirectionWord, MessageTypeWord } from "./defaults/connection";
 
 /**
  * Message type descriptions.
