@@ -28,6 +28,8 @@ export enum OverlayListItemEntryType {
 	/**
 	 * Type for UUID representation.
 	 */
+	// False negative
+	// eslint-disable-next-line @typescript-eslint/no-shadow
 	Uuid,
 
 	/**
@@ -89,21 +91,6 @@ type OverlayListItemEntrySharedRecords = {
 } & ExtractProps<typeof overlayListItemNarrowProps>;
 
 /**
- * Tabs type.
- */
-export type OverlayContentTabs = Array<{
-	/**
-	 * Name to display.
-	 */
-	name: string;
-
-	/**
-	 * Items to display.
-	 */
-	items: Array<OverlayListItemEntry>;
-}>;
-
-/**
  * Helper function for type generation.
  */
 type OverlayListItemEntryGenerateTypeRecordRequired<Type extends OverlayListItemEntryType> = {
@@ -139,6 +126,21 @@ export type OverlayContentItemEntryGenerate<
 	: unknown) &
 	Options &
 	OverlayListItemEntryGenerateTypeRecord<Type>;
+
+/**
+ * Tabs type.
+ */
+export type OverlayContentTabs = Array<{
+	/**
+	 * Name to display.
+	 */
+	name: string;
+
+	/**
+	 * Items to display.
+	 */
+	items: Array<OverlayListItemEntry>;
+}>;
 
 /**
  * Type for item props.
@@ -255,13 +257,13 @@ export const overlayListSharedProps = {
 // Extract type
 // eslint-disable-next-line @typescript-eslint/typedef
 export const overlayListChildSharedProps = {
-	/** Do not fill by default. */
+	/* Do not fill by default. */
 	isHiddenCaretDisplayedIfMissing: { default: false, type: Boolean },
 
-	/** Do not fill by default. */
+	/* Do not fill by default. */
 	isHiddenIconDisplayedIfMissing: { default: false, type: Boolean },
 
-	/** Default to single element. */
+	/* Default to single element. */
 	isLast: { default: true, type: Boolean }
 };
 

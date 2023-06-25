@@ -3,13 +3,13 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
-import { defineBase } from "./base.vite.config";
-
 /**
  * Vite config for dev standalone.
  *
  * @file
  */
+
+import { defineBase } from "./base.vite.config";
 
 // This is file for compilation
 /* eslint-disable import/no-extraneous-dependencies */
