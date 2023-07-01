@@ -4,7 +4,7 @@
 -->
 
 <template>
-	<OverlayContentItemContainer :content-type="contentType" :list-item-class="{ 'pr-1': isCaretDisplayed }">
+	<OverlayContentItemWrapper :content-type="contentType" :list-item-class="{ 'pr-1': isCaretDisplayed }">
 		<template v-if="hasHeader" #header>
 			<!-- `VRow` doesn't receive list's density -->
 			<VRow align="center" :dense="isCompact">
@@ -12,9 +12,9 @@
 					<VIcon :icon="effectiveIcon" class="overlay-content-item-icon" />
 				</VCol>
 
-				<VCol v-if="name" cols="auto">
+				<VCol cols="auto">
 					<VListItemTitle>
-						{{ name }}
+						{{ name ? name : "🥕🐇" }}
 					</VListItemTitle>
 				</VCol>
 
@@ -34,18 +34,18 @@
 		<template v-if="$slots.content" #content>
 			<slot v-if="$slots.content" name="content" />
 		</template>
-	</OverlayContentItemContainer>
+	</OverlayContentItemWrapper>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { VCol, VIcon, VListItemTitle, VRow, VSpacer } from "vuetify/components";
-import { OverlayType, overlayListSharedProps, useOverlayListShared } from "../core/overlay";
-import OverlayContentItemContainer from "./overlay-list-item-wrapper.vue";
+import { OverlayListType, overlayListSharedProps, useOverlayListShared } from "../core/overlay";
+import OverlayContentItemWrapper from "./overlay-list-item-wrapper.vue";
 
 export default defineComponent({
 	components: {
-		OverlayContentItemContainer,
+		OverlayContentItemWrapper,
 		VCol,
 		VIcon,
 		VListItemTitle,
@@ -81,7 +81,7 @@ export default defineComponent({
 		 */
 		hasHeader(): boolean {
 			// Skips empty blocks
-			return !(this.contentType === OverlayType.Block && this.isHeaderEmpty);
+			return !(this.contentType === OverlayListType.Block && this.isHeaderEmpty);
 		},
 
 		/**

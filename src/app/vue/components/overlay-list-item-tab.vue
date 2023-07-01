@@ -55,10 +55,10 @@ import { VTab, VTabs, VWindow, VWindowItem } from "vuetify/components";
 import { ElementSize } from "../common/element";
 import {
 	OverlayListItemEntry as Item,
-	OverlayContentTabs,
 	OverlayListItemEntryExtract,
 	OverlayListItemEntryType,
-	OverlayType,
+	OverlayListTabs,
+	OverlayListType,
 	overlayListChildSharedProps,
 	overlayListItemNarrowProps,
 	overlayListSharedProps,
@@ -99,7 +99,7 @@ export default defineComponent({
 		 * @returns Whether the item is displayed as a menu
 		 */
 		isMenu(): boolean {
-			return this.contentType === OverlayType.Menu;
+			return this.contentType === OverlayListType.Menu;
 		},
 
 		/**
@@ -203,7 +203,7 @@ export default defineComponent({
 
 		tabs: {
 			required: true,
-			type: Array as PropType<OverlayContentTabs>
+			type: Array as PropType<OverlayListTabs>
 		},
 
 		...overlayListSharedProps,

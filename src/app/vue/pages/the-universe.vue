@@ -1,9 +1,10 @@
 <template>
 	<VApp style="background: none" full-height>
 		<div class="app-content">
+			<UniverseUi />
 			<div class="universe">Hello: {{ what }}</div>
 			<tsxtest />
-			<OverlayClick v-model="isRightClickOverlayDisplayed" x="1000" y="200">
+			<OverlayClick v-model="isRightClickOverlayDisplayed" :x="1000" :y="200">
 				<template #body>
 					<OverlayList :items="debugOverlayItems" content-type="menu-compact" />
 				</template>
@@ -58,24 +59,25 @@
 import Color from "color";
 import { defineComponent } from "vue";
 import { VApp } from "vuetify/components";
-import { ThisVueStore } from "../client/gui";
-import { ClientShard } from "../client/shard";
-import { Uuid } from "../common/uuid";
-import { LogLevel } from "../core/error";
-import { ElementSize } from "./common/element";
-import CompactToolbar from "./compact-toolbar.vue";
-import { OverlayClick, OverlayList, OverlayWindow } from "./components";
+import { ThisVueStore } from "../../client/gui";
+import { ClientShard } from "../../client/shard";
+import { Uuid } from "../../common/uuid";
+import { LogLevel } from "../../core/error";
+import { ElementSize } from "../common/element";
+import CompactToolbar from "../compact-toolbar.vue";
+import { OverlayClick, OverlayList, OverlayWindow } from "../components";
 import {
 	CompactToolbarData,
 	CompactToolbarMenu,
 	CompactToolbarMenuBaseProps,
 	compactToolbarDataToMenuBaseProps
-} from "./core/compact-toolbar";
-import { OverlayContentTabs, OverlayListItemEntry, OverlayListItemEntryType, OverlayType } from "./core/overlay";
-import debugComponent from "./debug.vue";
-import stateAlertBoxComponent from "./state-alert-box.vue";
-import StatsBar from "./stats-bar.vue";
-import tsxTestComponent from "./tsx/test.vue";
+} from "../core/compact-toolbar";
+import { OverlayListItemEntry, OverlayListItemEntryType, OverlayListTabs, OverlayListType } from "../core/overlay";
+import debugComponent from "../debug.vue";
+import stateAlertBoxComponent from "../state-alert-box.vue";
+import StatsBar from "../stats-bar.vue";
+import tsxTestComponent from "../tsx/test.vue";
+import UniverseUi from "../views/universe-ui.vue";
 
 /**
  * Root component.
@@ -87,6 +89,7 @@ export default defineComponent({
 		OverlayList,
 		OverlayWindow,
 		StatsBar,
+		UniverseUi,
 		VApp,
 		debug: debugComponent,
 		statealertbox: stateAlertBoxComponent,
@@ -112,7 +115,7 @@ export default defineComponent({
 		 *
 		 * @returns Tab content
 		 */
-		debugItemsShardTabs(): OverlayContentTabs {
+		debugItemsShardTabs(): OverlayListTabs {
 			return this.shards.map((shard, index) => {
 				return {
 					items: [
@@ -280,7 +283,7 @@ export default defineComponent({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let data = {
 			ItemType: OverlayListItemEntryType,
-			OverlayListType: OverlayType,
+			OverlayListType,
 			debugContainer: false,
 			hpColor: new Color("#1F8C2F"),
 			isRightClickOverlayDisplayed: true,

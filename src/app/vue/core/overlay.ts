@@ -16,6 +16,7 @@ import { ElementSize } from "../common/element";
 import { ExtractProps, ExtractPropsFromComponentClass } from "../common/utility-types";
 import type OverlayListItemAssembler from "../components/overlay-list-item-assembler.vue";
 
+// #region Items
 /**
  * Possible item types.
  */
@@ -54,33 +55,6 @@ export enum OverlayListItemEntryType {
 }
 
 /**
- * Props for discriminated items.
- */
-// Inferring type for props
-// eslint-disable-next-line @typescript-eslint/typedef
-export const overlayListItemNarrowProps = {
-	description: {
-		required: false,
-		type: String
-	},
-
-	icon: {
-		required: false,
-		type: String
-	},
-
-	name: {
-		required: false,
-		type: String
-	}
-} as const;
-
-/**
- * Props for discriminated items.
- */
-export type OverlayListItemNarrowProps = ExtractProps<typeof overlayListItemNarrowProps>;
-
-/**
  * Shared options for content type.
  */
 type OverlayListItemEntrySharedRecords = {
@@ -88,17 +62,23 @@ type OverlayListItemEntrySharedRecords = {
 	 * Informational list type.
 	 */
 	type?: OverlayListItemEntryType;
-} & ExtractProps<typeof overlayListItemNarrowProps>;
+
+	/**
+	 * Data value.
+	 */
+	data?: string | number;
+} & OverlayListItemNarrowProps;
 
 /**
  * Helper function for type generation.
  */
-type OverlayListItemEntryGenerateTypeRecordRequired<Type extends OverlayListItemEntryType> = {
-	/**
-	 * Type of the item.
-	 */
-	type: Type;
-};
+type OverlayListItemEntryGenerateTypeRecordRequired<Type extends OverlayListItemEntryType = OverlayListItemEntryType> =
+	{
+		/**
+		 * Type of the item.
+		 */
+		type: Type;
+	};
 
 /**
  * Helper function for type generation.
@@ -111,36 +91,28 @@ type OverlayListItemEntryGenerateTypeRecord<Type extends OverlayListItemEntryTyp
 /**
  * Type for item to generate.
  */
-export type OverlayContentItemEntryGenerate<
-	Type extends OverlayListItemEntryType,
-	Options extends object,
-	IsTypeOptional extends boolean = false,
-	HasData extends boolean = true
-> = (HasData extends true
-	? {
-			/**
-			 * Data value.
-			 */
-			data?: string | number;
-	  }
-	: unknown) &
-	Options &
+export type OverlayContentItemEntryGenerate<Type extends OverlayListItemEntryType, Options extends object> = Options &
 	OverlayListItemEntryGenerateTypeRecord<Type>;
+
+/**
+ * Items property.
+ */
+export type OverlayListItems = Array<OverlayListItemEntry>;
+
+/**
+ * Object with items property.
+ */
+type OverlayListItemsObject = {
+	/**
+	 * Items.
+	 */
+	items: OverlayListItems;
+};
 
 /**
  * Tabs type.
  */
-export type OverlayContentTabs = Array<{
-	/**
-	 * Name to display.
-	 */
-	name: string;
-
-	/**
-	 * Items to display.
-	 */
-	items: Array<OverlayListItemEntry>;
-}>;
+export type OverlayListTabs = Array<OverlayListItemEntrySharedRecords & OverlayListItemsObject>;
 
 /**
  * Type for item props.
@@ -153,21 +125,10 @@ export type OverlayListItemEntry =
 					OverlayListItemEntryType.InfoElement,
 					{
 						/**
-						 * Badge value, if any.
-						 */
-						badge?: string | number;
-
-						/**
-						 * Data to display.
-						 */
-						data: string | number;
-
-						/**
 						 * Optional UI actions.
 						 */
 						uiActions?: Array<OverlayContentUiActionParam>;
-					},
-					true
+					}
 			  >
 			| OverlayContentItemEntryGenerate<
 					OverlayListItemEntryType.Uuid,
@@ -184,7 +145,7 @@ export type OverlayListItemEntry =
 						/**
 						 * Data to display.
 						 */
-						tabs: OverlayContentTabs;
+						tabs: OverlayListTabs;
 
 						/**
 						 * Size of the tab.
@@ -199,9 +160,7 @@ export type OverlayListItemEntry =
 						 * Event ID.
 						 */
 						id: string;
-					},
-					false,
-					false
+					}
 			  >
 			| OverlayContentItemEntryGenerate<
 					OverlayListItemEntryType.Slot,
@@ -228,16 +187,110 @@ export type OverlayListItemEntry =
  */
 export type OverlayListItemEntryExtract<Type extends OverlayListItemEntryType> = OverlayListItemEntry &
 	OverlayListItemEntryGenerateTypeRecord<Type>;
+// #endregion Items
+
+// #region UI Actions
+/**
+ * Words used for UI action.
+ */
+export enum OverlayContainerUiActionWords {
+	EntityAction = "entityAction",
+	EntityInfo = "entityInfo"
+}
+
+/**
+ * Helper type for UI action, guarantees exhaustiveness, and constraints.
+ */
+type OverlayContentUiActionHelper<
+	T extends {
+		/**
+		 * UI action.
+		 */
+		uiActionWord: OverlayContainerUiActionWords;
+	}
+> = OverlayContainerUiActionWords extends T["uiActionWord"] ? T : never;
+
+/**
+ * Possible word/parameters combination for UI action.
+ */
+export type OverlayContentUiActionParam = OverlayContentUiActionHelper<
+	| {
+			/**
+			 * UI action.
+			 */
+			uiActionWord: OverlayContainerUiActionWords.EntityAction;
+
+			/**
+			 * Action type.
+			 */
+			entityActionWord: ActionWords;
+
+			/**
+			 * Target entity UUID.
+			 */
+			targetEntityUuid: Uuid;
+	  }
+	| {
+			/**
+			 * Entity info.
+			 */
+			uiActionWord: OverlayContainerUiActionWords.EntityInfo;
+
+			/**
+			 * Information to display.
+			 */
+			targetEntityUuid: Uuid;
+	  }
+>;
+// #endregion UI Actions
+
+// #region Props
+/**
+ * Props for discriminated items.
+ */
+export type OverlayListItemNarrowProps = ExtractProps<typeof overlayListItemNarrowProps>;
+
+/**
+ * Prop types for overlay list item, body and descendants.
+ */
+export type OverlayListChildSharedProps = ExtractPropTypes<typeof overlayListChildSharedProps>;
+
+/**
+ * Prop types for overlay list family.
+ */
+export type OverlayListSharedProps = ExtractPropTypes<typeof overlayListSharedProps>;
 
 /**
  * Content type used in overlay content.
  */
-export enum OverlayType {
+export enum OverlayListType {
 	Block = "block",
 	BlockCompact = "block-compact",
 	Menu = "menu",
 	MenuCompact = "menu-compact"
 }
+
+/**
+ * Props for discriminated items.
+ */
+// Inferring type for props
+// eslint-disable-next-line @typescript-eslint/typedef
+export const overlayListItemNarrowProps = {
+	description: {
+		required: false,
+		type: String
+	},
+
+	icon: {
+		required: false,
+		type: String
+	},
+
+	name: {
+		required: false,
+		type: String
+	}
+} as const;
 
 /**
  * Base props for all components of overlay content family.
@@ -246,8 +299,8 @@ export enum OverlayType {
 // eslint-disable-next-line @typescript-eslint/typedef
 export const overlayListSharedProps = {
 	contentType: {
-		default: OverlayType.Block,
-		type: String as PropType<OverlayType>
+		default: OverlayListType.Block,
+		type: String as PropType<OverlayListType>
 	}
 } as const;
 
@@ -266,17 +319,9 @@ export const overlayListChildSharedProps = {
 	/* Default to single element. */
 	isLast: { default: true, type: Boolean }
 };
+// #endregion Props
 
-/**
- * Prop types for overlay list item, body and descendants.
- */
-export type OverlayListChildSharedProps = ExtractPropTypes<typeof overlayListChildSharedProps>;
-
-/**
- * Prop types for overlay list family.
- */
-export type OverlayListSharedProps = ExtractPropTypes<typeof overlayListSharedProps>;
-
+// #region Composables
 /**
  * Methods for overlay components.
  *
@@ -294,12 +339,12 @@ export function useOverlayListShared({
 	props: OverlayListSharedProps;
 }) {
 	const isMenu: ComputedRef<boolean> = computed((): boolean => {
-		return [OverlayType.Menu, OverlayType.MenuCompact].includes(props.contentType);
+		return [OverlayListType.Menu, OverlayListType.MenuCompact].includes(props.contentType);
 	});
 
 	// Infer type
 	const isCompact: ComputedRef<boolean> = computed((): boolean => {
-		return [OverlayType.BlockCompact, OverlayType.MenuCompact].includes(props.contentType);
+		return [OverlayListType.BlockCompact, OverlayListType.MenuCompact].includes(props.contentType);
 	});
 
 	const isCardWrapped: ComputedRef<boolean> = computed((): boolean => {
@@ -353,56 +398,4 @@ export function useOverlayListItemShared({
 
 	return { assemblerProps };
 }
-
-/**
- * Words used for UI action.
- */
-export enum OverlayContainerUiActionWords {
-	EntityAction = "entityAction",
-	EntityInfo = "entityInfo"
-}
-
-/**
- * Helper type for UI action, guarantees exhaustiveness, and constraints.
- */
-type OverlayContentUiActionHelper<
-	T extends {
-		/**
-		 * UI action.
-		 */
-		uiActionType: OverlayContainerUiActionWords;
-	}
-> = OverlayContainerUiActionWords extends T["uiActionType"] ? T : never;
-
-/**
- * Possible word/parameters combination for UI action.
- */
-export type OverlayContentUiActionParam = OverlayContentUiActionHelper<
-	| {
-			/**
-			 * UI action.
-			 */
-			uiActionType: OverlayContainerUiActionWords.EntityAction;
-
-			/**
-			 * Action type.
-			 */
-			entityActionType: ActionWords;
-
-			/**
-			 * Target entity UUID.
-			 */
-			targetEntityUuid: Uuid;
-	  }
-	| {
-			/**
-			 * Entity info.
-			 */
-			uiActionType: OverlayContainerUiActionWords.EntityInfo;
-
-			/**
-			 * Information to display.
-			 */
-			targetEntityUuid: Uuid;
-	  }
->;
+// #endregion Composables

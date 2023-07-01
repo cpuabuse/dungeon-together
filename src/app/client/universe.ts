@@ -30,7 +30,7 @@ import {
 	CoreUniverseRequiredConstructorParameter
 } from "../core/universe";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
-import UniverseComponent from "../vue/universe.vue";
+import UniverseComponent from "../vue/pages/the-universe.vue";
 import { ClientBaseClass, ClientBaseConstructorParams, ClientBaseFactory } from "./base";
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
 import { ClientConnection } from "./connection";

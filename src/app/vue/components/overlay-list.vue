@@ -29,8 +29,8 @@
 import { PropType, defineComponent } from "vue";
 import { VList } from "vuetify/components";
 import {
-	OverlayListItemEntry as Item,
 	OverlayListItemEntryType,
+	OverlayListItems,
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
@@ -72,7 +72,7 @@ export default defineComponent({
 	 * @returns Component props
 	 */
 	props: {
-		items: { required: true, type: Array as PropType<Array<Item>> },
+		items: { required: true, type: Array as PropType<OverlayListItems> },
 
 		...overlayListSharedProps
 	},

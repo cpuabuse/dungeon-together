@@ -23,7 +23,7 @@
 <script lang="ts">
 import { PropType, defineAsyncComponent, defineComponent } from "vue";
 import {
-	OverlayListItemEntry,
+	OverlayListItems,
 	overlayListChildSharedProps,
 	overlayListItemNarrowProps,
 	overlayListSharedProps
@@ -49,7 +49,7 @@ export default defineComponent({
 
 		items: {
 			required: true,
-			type: Array as PropType<Array<OverlayListItemEntry>>
+			type: Array as PropType<OverlayListItems>
 		}
 	}
 });

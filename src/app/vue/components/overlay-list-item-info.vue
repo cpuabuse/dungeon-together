@@ -8,8 +8,8 @@
 		:content-type="contentType"
 		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
 	>
-		<!-- Inline slot -->
-		<template #inline>
+		<!-- Inline slot; Omit from display if no data given -->
+		<template v-if="data" #inline>
 			<!-- Density from list is not passed through into chip -->
 			<VChip :density="isCompact ? 'compact' : 'default'">
 				{{ data }}
@@ -39,8 +39,10 @@ export default defineComponent({
 		...overlayListChildSharedProps,
 		...overlayListItemNarrowProps,
 
+		// Will be omitted from display
+		// eslint-disable-next-line vue/require-default-prop
 		data: {
-			required: true,
+			required: false,
 			type: [String, Number]
 		}
 	},
@@ -49,7 +51,7 @@ export default defineComponent({
 	 * Setup hook.
 	 *
 	 * @param props - Props
-	 * @returns shared props
+	 * @returns Shared props
 	 */
 	// Infer setup
 	// eslint-disable-next-line @typescript-eslint/typedef

@@ -13,6 +13,13 @@ import { PropType } from "vue";
 import { ExtractProps } from "../common/utility-types";
 
 /**
+ * Menu modes.
+ */
+export enum CompactToolbarMenuItemMode {
+	Click = "click"
+}
+
+/**
  * Compact toolbar menu item(button).
  */
 export type CompactToolbarMenuItem = {
@@ -42,9 +49,42 @@ export type CompactToolbarMenuItem = {
 			/**
 			 * Item mode for click.
 			 */
-			mode?: "click";
+			mode?: CompactToolbarMenuItemMode;
 	  }
 );
+
+/**
+ * Base prop type for toolbar menu.
+ */
+export type CompactToolbarMenuBaseProps = ExtractProps<typeof compactToolbarMenuBaseProps>;
+
+/**
+ * Compact toolbar menu.
+ */
+export type CompactToolbarMenu = {
+	[K1 in keyof CompactToolbarMenuBaseProps]: K1 extends "items"
+		? CompactToolbarMenuBaseProps[K1] extends Array<infer R>
+			? Array<
+					Omit<R, "mode"> & {
+						/**
+						 * Click callback.
+						 */
+						onClick?: () => void;
+					}
+			  >
+			: never
+		: CompactToolbarMenuBaseProps[K1];
+};
+
+/**
+ * Helper type for using compact toolbar.
+ */
+export type CompactToolbarData = {
+	/**
+	 * Menus.
+	 */
+	menus: Array<CompactToolbarMenu>;
+};
 
 /**
  * Base props for compact toolbar menu.
@@ -99,39 +139,6 @@ export const compactToolbarSharedMenuProps = {
 } as const;
 
 /**
- * Base prop type for toolbar menu.
- */
-export type CompactToolbarMenuBaseProps = ExtractProps<typeof compactToolbarMenuBaseProps>;
-
-/**
- * Compact toolbar menu.
- */
-export type CompactToolbarMenu = {
-	[K1 in keyof CompactToolbarMenuBaseProps]: K1 extends "items"
-		? CompactToolbarMenuBaseProps[K1] extends Array<infer R>
-			? Array<
-					Omit<R, "mode"> & {
-						/**
-						 * Click callback.
-						 */
-						onClick?: () => void;
-					}
-			  >
-			: never
-		: CompactToolbarMenuBaseProps[K1];
-};
-
-/**
- * Helper type for using compact toolbar.
- */
-export type CompactToolbarData = {
-	/**
-	 * Menus.
-	 */
-	menus: Array<CompactToolbarMenu>;
-};
-
-/**
  * Converts compact toolbar data to menus to use as props.
  *
  * @param param - Toolbar data
@@ -142,7 +149,11 @@ export function compactToolbarDataToMenuBaseProps({ menus }: CompactToolbarData)
 		const { items, ...rest }: typeof menu = menu;
 		return {
 			items: items.map(item => {
-				return { icon: item.icon, name: item.name, ...(item.onClick ? { mode: "click" } : {}) };
+				return {
+					icon: item.icon,
+					name: item.name,
+					...(item.onClick ? { mode: CompactToolbarMenuItemMode.Click } : {})
+				};
 			}),
 			...rest
 		};

@@ -29,7 +29,7 @@ export default defineComponent({
 		},
 
 		zIdx: {
-			default: 0,
+			default: 100,
 			type: Number
 		}
 	}
@@ -41,7 +41,7 @@ export default defineComponent({
 	position: absolute;
 	top: calc(v-bind(y) * 1px);
 	left: calc(v-bind(x) * 1px);
-	z-index: 100;
+	z-index: v-bind(zIdx);
 	max-height: 50%;
 }
 </style>

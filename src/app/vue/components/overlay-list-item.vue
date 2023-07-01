@@ -27,7 +27,7 @@ import { ExtractPropsFromComponentClass } from "../common/utility-types";
 import {
 	OverlayListItemEntry as Item,
 	OverlayListItemEntryType,
-	OverlayType,
+	OverlayListType,
 	overlayListChildSharedProps,
 	overlayListSharedProps,
 	useOverlayListShared
@@ -143,7 +143,7 @@ export default defineComponent({
 				case OverlayListItemEntryType.InfoElement:
 					return {
 						is: OverlayListItemInfo,
-						props: { ...props, data: item.data },
+						props: { ...props },
 						slots: []
 					};
 
@@ -192,7 +192,7 @@ export default defineComponent({
 		 * @returns Whether the item is displayed as a menu
 		 */
 		isMenu(): boolean {
-			return this.contentType === OverlayType.Menu;
+			return this.contentType === OverlayListType.Menu;
 		}
 	},
 
