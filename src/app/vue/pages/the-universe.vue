@@ -41,7 +41,9 @@
 											:max-value="universe.getEntity({ entityUuid: unitUuid }).dictionary?.maxHealth"
 										/>
 										<StatsBar :color="mpColor" name="MP" />
-										Stats: {{ universe.getEntity({ entityUuid: unitUuid }).dictionary?.stats }}
+										<span> Stats: {{ universe.getEntity({ entityUuid: unitUuid }).dictionary?.stats }} </span>
+										<span> Experience: {{ universe.getEntity({ entityUuid: unitUuid }).dictionary?.experience }}</span>
+										<span> Level: {{ universe.getEntity({ entityUuid: unitUuid }).dictionary?.level }}</span>
 									</template>
 								</template>
 							</OverlayList>

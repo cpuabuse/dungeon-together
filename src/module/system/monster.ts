@@ -48,7 +48,9 @@ export function MonsterKindClassFactory({
 	 * Monster class.
 	 */
 	class MonsterKind extends Base {
-		/** Monster faction. */
+		/**
+		 *  Monster faction.
+		 */
 		public static faction: UnitFaction = new UnitFaction();
 
 		/**
@@ -67,6 +69,9 @@ export function MonsterKindClassFactory({
 
 			// Override faction
 			this.faction = MonsterKind.faction;
+
+			// Add experience
+			this.experience = 2;
 
 			MonsterKind.monsters.add(this);
 		}
@@ -122,7 +127,9 @@ export function MonsterKindClassFactory({
 						// eslint-disable-next-line @typescript-eslint/typedef
 						let nav: Nav = (angleIndex.find(([angleLimit]) => {
 							return correctedAngle === angleLimit ? Math.random() > 0.5 : correctedAngle <= angleLimit;
-						}) ?? angleIndex[0])[1];
+							// Always defined, from `navFreedom`
+							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+						}) ?? angleIndex[0]!)[1];
 
 						if (monsterCell.nav.get(nav)?.cellUuid === targetCell.cellUuid) {
 							// Attack target
@@ -138,7 +145,9 @@ export function MonsterKindClassFactory({
 						}
 					} else {
 						monsterKind.navigateEntity({
-							nav: [Nav.Left, Nav.Right, Nav.YDown, Nav.YUp][Math.floor(Math.random() * 4)]
+							// Always defined
+							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+							nav: [Nav.Left, Nav.Right, Nav.YDown, Nav.YUp][Math.floor(Math.random() * 4)]!
 						});
 					}
 				});

@@ -11,7 +11,12 @@
 
 import { ActionWords } from "../../app/server/action";
 import { ServerCell } from "../../app/server/cell";
-import { EntityKindActionArgs, EntityKindConstructorParams, ServerEntityClass } from "../../app/server/entity";
+import {
+	EntityKind,
+	EntityKindActionArgs,
+	EntityKindConstructorParams,
+	ServerEntityClass
+} from "../../app/server/entity";
 import { ExclusiveKindClass } from "./exclusive";
 
 /**
@@ -217,9 +222,11 @@ export function UnitKindClassFactory({
 		public get emits(): Record<string, any> {
 			return {
 				...super.emits,
+				experience: this.experience,
 				hasAction: true,
 				hasPhantom: true,
 				health: this.healthPoints,
+				level: this.level,
 				maxHealth: this.maxHealthPoints,
 				stats: this.stats
 			};
@@ -231,7 +238,7 @@ export function UnitKindClassFactory({
 		 * @returns Attack this does
 		 */
 		public get attack(): number {
-			return 1 + this.stats.str;
+			return this.stats.str + this.level;
 		}
 
 		/**
@@ -261,7 +268,7 @@ export function UnitKindClassFactory({
 		 * @returns Level
 		 */
 		public get level(): number {
-			return 1 + this.experience;
+			return 1 + Math.floor(this.experience / 10);
 		}
 
 		// Order is important
@@ -353,9 +360,13 @@ export function UnitKindClassFactory({
 
 					let cell: ServerCell = (this.entity.constructor as ServerEntityClass).universe.getCell(this.entity);
 
-					// Only do damage when attacked by unit
-					if (sourceEntity && sourceEntity.kind instanceof UnitKind) {
-						this.healthPoints -= sourceEntity.kind.attack;
+					const sourceKind: EntityKind | undefined = sourceEntity?.kind;
+					// To infer predicate
+					// eslint-disable-next-line @typescript-eslint/typedef
+					const sourceIsUnit = sourceKind instanceof UnitKind;
+
+					if (sourceIsUnit) {
+						this.healthPoints -= sourceKind.attack;
 					} else {
 						// Temporary do some damage from non units source
 						this.healthPoints--;
@@ -365,6 +376,11 @@ export function UnitKindClassFactory({
 					cell.isUpdated = true;
 
 					if (this.healthPoints <= 0) {
+						// Add experience to attacker
+						if (sourceIsUnit) {
+							sourceKind.experience += this.experience;
+						}
+
 						cell.addEvent({ name: "death", targetEntityUuid: this.entity.entityUuid });
 						cell.removeEntity(this.entity);
 					}

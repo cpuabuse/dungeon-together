@@ -41,7 +41,9 @@ export function TreasureKindClassFactory({
 			return { ...super.emits, hasAction: !this.isOpen };
 		}
 
-		/** Whether the treasure is open. */
+		/**
+		 *  Whether the treasure is open.
+		 */
 		public isOpen: boolean = false;
 
 		/**
