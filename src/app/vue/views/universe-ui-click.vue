@@ -13,7 +13,12 @@ import { Uuid } from "../../common/uuid";
 import { ExtractPropsFromComponentClass } from "../common/utility-types";
 import OverlayClick from "../components/overlay-click.vue";
 import OverlayList from "../components/overlay-list.vue";
-import { OverlayListItemEntryType, OverlayListItems, OverlayListType } from "../core/overlay";
+import {
+	OverlayContainerUiActionWords,
+	OverlayListItemEntryType,
+	OverlayListItems,
+	OverlayListType
+} from "../core/overlay";
 
 export default defineComponent({
 	components: { OverlayClick, OverlayList },
@@ -35,7 +40,13 @@ export default defineComponent({
 	 * @returns Data
 	 */
 	data() {
-		const overlayClickItems: OverlayListItems = [{ name: "First", type: OverlayListItemEntryType.InfoElement }];
+		const overlayClickItems: OverlayListItems = [
+			{
+				name: "Cell",
+				type: OverlayListItemEntryType.InfoElement,
+				uiActions: [{ targetEntityUuid: "1", uiActionWord: OverlayContainerUiActionWords.EntityInfo }]
+			}
+		];
 		return {
 			isOverlayClickDisplayed: true,
 			overlayClickItems

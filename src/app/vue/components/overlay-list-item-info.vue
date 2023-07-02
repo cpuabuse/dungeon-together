@@ -9,19 +9,26 @@
 		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
 	>
 		<!-- Inline slot; Omit from display if no data given -->
-		<template v-if="data" #inline>
+		<template v-if="data || uiActions.length > 0" #inline>
 			<!-- Density from list is not passed through into chip -->
-			<VChip :density="isCompact ? 'compact' : 'default'">
+			<VChip v-if="data" :density="isCompact ? 'compact' : 'default'">
 				{{ data }}
 			</VChip>
+
+			<div v-if="uiActions.length > 0">
+				<VBtn v-for="(uiAction, uiActionKey) in uiActions" :key="uiActionKey" @click="$emit('uiAction', uiAction)"
+					>ok</VBtn
+				>
+			</div>
 		</template>
 	</OverlayListItemAssembler>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { VChip } from "vuetify/components";
+import { PropType, defineComponent } from "vue";
+import { VBtn, VChip } from "vuetify/components";
 import {
+	OverlayContentUiActionParam,
 	overlayListChildSharedProps,
 	overlayListItemNarrowProps,
 	overlayListSharedProps,
@@ -32,18 +39,27 @@ import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 export default defineComponent({
 	components: {
 		OverlayListItemAssembler,
+		VBtn,
 		VChip
 	},
+
+	emits: ["uiAction"],
+
 	props: {
 		...overlayListSharedProps,
 		...overlayListChildSharedProps,
 		...overlayListItemNarrowProps,
-
 		// Will be omitted from display
 		// eslint-disable-next-line vue/require-default-prop
 		data: {
 			required: false,
 			type: [String, Number]
+		},
+
+		uiActions: {
+			default: new Array<OverlayContentUiActionParam>(),
+			required: false,
+			type: Array as PropType<Array<OverlayContentUiActionParam>>
 		}
 	},
 

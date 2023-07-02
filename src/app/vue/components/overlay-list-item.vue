@@ -133,17 +133,16 @@ export default defineComponent({
 				isHiddenCaretDisplayedIfMissing: this.isHiddenCaretDisplayedIfMissing,
 				isHiddenIconDisplayedIfMissing: this.isHiddenIconDisplayedIfMissing,
 				isLast: this.isLast,
-				item: this.item,
 				name: this.item.name
 			};
-			const { item } = props;
+			const { item } = this;
 			/* eslint-enable @typescript-eslint/typedef */
 			switch (item.type) {
 				case undefined:
 				case OverlayListItemEntryType.InfoElement:
 					return {
 						is: OverlayListItemInfo,
-						props: { ...props },
+						props: { ...props, uiActions: item.uiActions },
 						slots: []
 					};
 
