@@ -16,7 +16,10 @@
 			</VChip>
 
 			<div v-if="uiActions.length > 0">
-				<VBtn v-for="(uiAction, uiActionKey) in uiActions" :key="uiActionKey" @click="$emit('uiAction', uiAction)"
+				<VBtn
+					v-for="(uiAction, uiActionKey) in uiActions"
+					:key="uiActionKey"
+					@click="() => handleUiAction({ uiActionKey })"
 					>ok</VBtn
 				>
 			</div>
@@ -44,6 +47,24 @@ export default defineComponent({
 	},
 
 	emits: ["uiAction"],
+
+	methods: {
+		/**
+		 * Dispatch an event with a payload of the UI action.
+		 *
+		 * @param uiAction - UI action key
+		 */
+		handleUiAction({
+			uiActionKey
+		}: {
+			/**
+			 * UI action key.
+			 */
+			uiActionKey: number;
+		}) {
+			this.$emit("uiAction", this.uiActions[uiActionKey]);
+		}
+	},
 
 	props: {
 		...overlayListSharedProps,
