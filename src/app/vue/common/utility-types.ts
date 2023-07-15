@@ -41,3 +41,8 @@ export type ExtractPropsFromComponentClass<ComponentClass extends Component> =
  */
 export type ExtractProps<O> = Partial<ExtractDefaultPropTypes<O>> &
 	Omit<ExtractPropTypes<O>, keyof ExtractDefaultPropTypes<O>>;
+
+/**
+ * Type for setup context emit.
+ */
+export type SetupContextEmit<Event extends string = string> = (event: Event, ...args: any[]) => void;

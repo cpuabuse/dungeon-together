@@ -13,7 +13,7 @@ import { ComputedRef, ExtractPropTypes, PropType, computed } from "vue";
 import { Uuid } from "../../common/uuid";
 import { ActionWords } from "../../server/action";
 import { ElementSize } from "../common/element";
-import { ExtractProps, ExtractPropsFromComponentClass } from "../common/utility-types";
+import { ExtractProps, ExtractPropsFromComponentClass, SetupContextEmit } from "../common/utility-types";
 import type OverlayListItemAssembler from "../components/overlay-list-item-assembler.vue";
 
 // #region Items
@@ -261,6 +261,11 @@ export type OverlayListChildSharedProps = ExtractPropTypes<typeof overlayListChi
 export type OverlayListSharedProps = ExtractPropTypes<typeof overlayListSharedProps>;
 
 /**
+ * Type for emits.
+ */
+export type OverlayListSharedEmitsUnion = (typeof overlayListSharedEmits)[any];
+
+/**
  * Content type used in overlay content.
  */
 export enum OverlayListType {
@@ -291,6 +296,11 @@ export const overlayListItemNarrowProps = {
 		type: String
 	}
 } as const;
+
+/**
+ * Emits for overlay list.
+ */
+export const overlayListSharedEmits: ["uiAction"] = ["uiAction"];
 
 /**
  * Base props for all components of overlay content family.
@@ -331,12 +341,18 @@ export const overlayListChildSharedProps = {
 // Infer composable type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function useOverlayListShared({
-	props
+	props,
+	emit
 }: {
 	/**
 	 * Props used.
 	 */
 	props: OverlayListSharedProps;
+
+	/**
+	 * Context.
+	 */
+	emit: SetupContextEmit<OverlayListSharedEmitsUnion>;
 }) {
 	const isMenu: ComputedRef<boolean> = computed((): boolean => {
 		return [OverlayListType.Menu, OverlayListType.MenuCompact].includes(props.contentType);
@@ -357,7 +373,17 @@ export function useOverlayListShared({
 		return { contentType: props.contentType };
 	});
 
+	/**
+	 * Emits UI action to parent component.
+	 *
+	 * @param uiAction - UI action to emit
+	 */
+	function emitUiAction(uiAction: OverlayContentUiActionParam): void {
+		emit("uiAction", uiAction);
+	}
+
 	return {
+		emitUiAction,
 		isCardWrapped,
 		isCompact,
 		isMenu,

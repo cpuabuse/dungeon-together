@@ -34,6 +34,7 @@ import {
 	OverlayContentUiActionParam,
 	overlayListChildSharedProps,
 	overlayListItemNarrowProps,
+	overlayListSharedEmits,
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
@@ -46,7 +47,7 @@ export default defineComponent({
 		VChip
 	},
 
-	emits: ["uiAction"],
+	emits: overlayListSharedEmits,
 
 	methods: {
 		/**
@@ -62,7 +63,9 @@ export default defineComponent({
 			 */
 			uiActionKey: number;
 		}) {
-			this.$emit("uiAction", this.uiActions[uiActionKey]);
+			// This function is called from a for loop inside of a template, so the value with that key exists
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			this.emitUiAction(this.uiActions[uiActionKey]!);
 		}
 	},
 
@@ -88,12 +91,13 @@ export default defineComponent({
 	 * Setup hook.
 	 *
 	 * @param props - Props
+	 * @param param - Context
 	 * @returns Shared props
 	 */
 	// Infer setup
 	// eslint-disable-next-line @typescript-eslint/typedef
-	setup(props) {
-		return useOverlayListShared({ props });
+	setup(props, { emit }) {
+		return useOverlayListShared({ emit, props });
 	}
 });
 </script>

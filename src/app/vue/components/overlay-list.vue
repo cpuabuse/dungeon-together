@@ -31,6 +31,7 @@ import { VList } from "vuetify/components";
 import {
 	OverlayListItemEntryType,
 	OverlayListItems,
+	overlayListSharedEmits,
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
@@ -64,6 +65,7 @@ export default defineComponent({
 		}
 	},
 
+	emits: overlayListSharedEmits,
 	name: "OverlayList",
 
 	/**
@@ -81,12 +83,13 @@ export default defineComponent({
 	 * Setup function.
 	 *
 	 * @param props - Reactive props
+	 * @param param - Context
 	 * @returns Props and other
 	 */
 	// Infer setup
 	// eslint-disable-next-line @typescript-eslint/typedef
-	setup(props) {
-		return useOverlayListShared({ props });
+	setup(props, { emit }) {
+		return useOverlayListShared({ emit, props });
 	}
 });
 </script>

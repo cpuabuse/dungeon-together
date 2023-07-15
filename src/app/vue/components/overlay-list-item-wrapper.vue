@@ -49,7 +49,7 @@
 <script lang="ts">
 import { PropType, defineComponent, mergeProps } from "vue";
 import { VListItem, VMenu } from "vuetify/components";
-import { overlayListSharedProps, useOverlayListShared } from "../core/overlay";
+import { overlayListSharedEmits, overlayListSharedProps, useOverlayListShared } from "../core/overlay";
 
 export default defineComponent({
 	components: { VListItem, VMenu },
@@ -62,6 +62,8 @@ export default defineComponent({
 	data() {
 		return { isMenuOpen: false };
 	},
+
+	emits: overlayListSharedEmits,
 
 	methods: {
 		mergeProps
@@ -87,12 +89,13 @@ export default defineComponent({
 	 * Setup.
 	 *
 	 * @param props - Props
+	 * @param param - Context
 	 * @returns Composable methods
 	 */
 	// Infer props
 	// eslint-disable-next-line @typescript-eslint/typedef
-	setup(props) {
-		return useOverlayListShared({ props });
+	setup(props, { emit }) {
+		return useOverlayListShared({ emit, props });
 	}
 });
 </script>

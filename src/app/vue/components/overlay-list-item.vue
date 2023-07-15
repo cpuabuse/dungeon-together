@@ -7,7 +7,7 @@
 
 <template>
 	<!-- Info -->
-	<component :is="component.is" v-bind="component.props">
+	<component :is="component.is" v-bind="component.props" @ui-action="emitUiAction">
 		<!-- Slots would still need to be further filtered down the line, but can at least skip when it is known they won't be used -->
 		<!-- Preserve parent component for slots -->
 		<!-- eslint-disable-next-line vue/no-use-v-if-with-v-for -->
@@ -29,6 +29,7 @@ import {
 	OverlayListItemEntryType,
 	OverlayListType,
 	overlayListChildSharedProps,
+	overlayListSharedEmits,
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
@@ -195,6 +196,8 @@ export default defineComponent({
 		}
 	},
 
+	emits: overlayListSharedEmits,
+
 	/**
 	 * Props for component.
 	 *
@@ -218,12 +221,13 @@ export default defineComponent({
 	 * Setup function.
 	 *
 	 * @param props - Reactive props
+	 * @param context - Component context
 	 * @returns Props and other
 	 */
 	// Infer setup
 	// eslint-disable-next-line @typescript-eslint/typedef
-	setup(props) {
-		return useOverlayListShared({ props });
+	setup(props, { emit }) {
+		return useOverlayListShared({ emit, props });
 	}
 });
 </script>

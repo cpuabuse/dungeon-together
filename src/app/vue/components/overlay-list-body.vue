@@ -13,7 +13,12 @@
 
 <script setup lang="ts">
 import { VCard } from "vuetify/components";
-import { OverlayListSharedProps, overlayListSharedProps, useOverlayListShared } from "../core/overlay";
+import {
+	OverlayListSharedProps,
+	overlayListSharedEmits,
+	overlayListSharedProps,
+	useOverlayListShared
+} from "../core/overlay";
 
 /**
  * Props.
@@ -23,9 +28,16 @@ const props: OverlayListSharedProps = defineProps({
 });
 
 /**
+ * Emits.
+ */
+// Force infer
+// eslint-disable-next-line @typescript-eslint/typedef
+const emit = defineEmits(overlayListSharedEmits);
+
+/**
  * Shared logic.
  */
 // Infer type
 // eslint-disable-next-line @typescript-eslint/typedef
-const { isCardWrapped, isMenu } = useOverlayListShared({ props });
+const { isCardWrapped, isMenu } = useOverlayListShared({ emit, props });
 </script>

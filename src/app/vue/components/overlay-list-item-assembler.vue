@@ -40,7 +40,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { VCol, VIcon, VListItemTitle, VRow, VSpacer } from "vuetify/components";
-import { OverlayListType, overlayListSharedProps, useOverlayListShared } from "../core/overlay";
+import { OverlayListType, overlayListSharedEmits, overlayListSharedProps, useOverlayListShared } from "../core/overlay";
 import OverlayContentItemWrapper from "./overlay-list-item-wrapper.vue";
 
 export default defineComponent({
@@ -121,6 +121,8 @@ export default defineComponent({
 		}
 	},
 
+	emits: overlayListSharedEmits,
+
 	name: "OverlayListItemAssembler",
 
 	/**
@@ -143,12 +145,13 @@ export default defineComponent({
 	 * Setup.
 	 *
 	 * @param props - Component props
+	 * @param param - Context
 	 * @returns Composable methods
 	 */
 	// Infer prop type
 	// eslint-disable-next-line @typescript-eslint/typedef
-	setup(props) {
-		return useOverlayListShared({ props });
+	setup(props, { emit }) {
+		return useOverlayListShared({ emit, props });
 	}
 });
 </script>

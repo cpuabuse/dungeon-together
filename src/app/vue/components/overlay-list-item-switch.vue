@@ -45,6 +45,7 @@ import { VSwitch } from "vuetify/components";
 import {
 	overlayListChildSharedProps,
 	overlayListItemNarrowProps,
+	overlayListSharedEmits,
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
@@ -56,6 +57,8 @@ export default defineComponent({
 		OverlayListItemAssembler,
 		VSwitch
 	},
+
+	emits: overlayListSharedEmits,
 
 	/**
 	 * Props.
@@ -75,12 +78,13 @@ export default defineComponent({
 	 * Setup hook.
 	 *
 	 * @param props - Props
+	 * @param param - Context
 	 * @returns Record operations and shared props
 	 */
 	// Infer setup
 	// eslint-disable-next-line @typescript-eslint/typedef
-	setup(props) {
-		return { ...useRecords(), ...useOverlayListShared({ props }) };
+	setup(props, { emit }) {
+		return { ...useRecords(), ...useOverlayListShared({ emit, props }) };
 	}
 });
 </script>
