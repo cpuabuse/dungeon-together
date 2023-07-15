@@ -14,6 +14,7 @@
 						isHiddenCaretDisplayedIfMissing,
 						isLast: itemKey + 1 >= items.length
 					}"
+					@ui-action="emitUiAction"
 				>
 					<!-- Since slots would need to be further filtered down the line, pass all -->
 					<template v-for="(slot, name) in $slots" #[name]="props">

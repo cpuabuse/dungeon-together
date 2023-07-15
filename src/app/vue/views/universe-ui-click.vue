@@ -2,7 +2,7 @@
 <template>
 	<OverlayClick v-model="isOverlayClickDisplayed" :x="500" :y="200">
 		<template #body>
-			<OverlayList v-bind="overlayListProps" />
+			<OverlayList v-bind="overlayListProps" @ui-action="onUiAction" />
 		</template>
 	</OverlayClick>
 </template>
@@ -15,6 +15,7 @@ import OverlayClick from "../components/overlay-click.vue";
 import OverlayList from "../components/overlay-list.vue";
 import {
 	OverlayContainerUiActionWords,
+	OverlayContentUiActionParam,
 	OverlayListItemEntryType,
 	OverlayListItems,
 	OverlayListType
@@ -57,6 +58,14 @@ export default defineComponent({
 		cellUuid: {
 			required: true,
 			type: String as PropType<Uuid>
+		}
+	},
+
+	methods: {
+		onUiAction(uiAction: OverlayContentUiActionParam): void {
+			if (uiAction.targetEntityUuid) {
+				console.log(uiAction.targetEntityUuid);
+			}
 		}
 	}
 });
