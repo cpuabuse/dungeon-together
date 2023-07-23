@@ -54,6 +54,11 @@ export function MonsterKindClassFactory({
 		public static faction: UnitFaction = new UnitFaction();
 
 		/**
+		 * Is chasing an enemy or not.
+		 */
+		public isTracing: boolean = true;
+
+		/**
 		 * Entity array to track for ticks.
 		 */
 		public static monsters: Set<MonsterKind> = new Set();
@@ -88,67 +93,69 @@ export function MonsterKindClassFactory({
 				]);
 
 				this.monsters.forEach(monsterKind => {
-					let monsterCell: ServerCell = (monsterKind.entity.constructor as ServerEntityClass).universe.getCell(
-						monsterKind.entity
-					);
-					// ESLint false negative
-					// eslint-disable-next-line @typescript-eslint/typedef
-					let targetUnitEntry: [UnitKind, ServerCell] | undefined = unitEntries.find(([unitKind, targetCell]) => {
-						if (!(unitKind instanceof this)) {
-							if (
-								Math.abs(monsterCell.x - targetCell.x) < monsterCellViewDistance &&
-								Math.abs(monsterCell.y - targetCell.y) < monsterCellViewDistance &&
-								monsterCell.z === targetCell.z
-							) {
-								// TODO: For now targeting the closest unit
-								return true;
-							}
-						}
-						return false;
-					});
-
-					// Possible movement options, in order of angle to target increase if graphed
-					// Const infer
-					// eslint-disable-next-line @typescript-eslint/typedef
-					let navFreedom = [Nav.Left, Nav.YUp, Nav.Right, Nav.YDown] as const;
-					// Indexes relation between angle to target and nav to take; Remove one π, since the minimal angle is such
-					let angleIndex: Array<[number, Nav]> = navFreedom.map((nav, index) => [(Math.PI / 2) * (index - 2), nav]);
-					// Offset for an angle, since that much of the angle above actual angle should still count for same nav; Essentially rotating
-					const angleOffset: number = Math.PI / 4;
-
-					if (targetUnitEntry) {
-						let [targetUnitKind, targetCell]: [UnitKind, ServerCell] = targetUnitEntry;
-						// Atan sign, position matters
-						let angle: number = Math.atan2(targetCell.y - monsterCell.y, targetCell.x - monsterCell.x);
-						// Direction aligned angle for indexing
-						let correctedAngle: number = angle - angleOffset;
-
+					if (monsterKind.isTracing) {
+						let monsterCell: ServerCell = (monsterKind.entity.constructor as ServerEntityClass).universe.getCell(
+							monsterKind.entity
+						);
 						// ESLint false negative
 						// eslint-disable-next-line @typescript-eslint/typedef
-						let nav: Nav = (angleIndex.find(([angleLimit]) => {
-							return correctedAngle === angleLimit ? Math.random() > 0.5 : correctedAngle <= angleLimit;
-							// Always defined, from `navFreedom`
-							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-						}) ?? angleIndex[0]!)[1];
+						let targetUnitEntry: [UnitKind, ServerCell] | undefined = unitEntries.find(([unitKind, targetCell]) => {
+							if (!(unitKind instanceof this)) {
+								if (
+									Math.abs(monsterCell.x - targetCell.x) < monsterCellViewDistance &&
+									Math.abs(monsterCell.y - targetCell.y) < monsterCellViewDistance &&
+									monsterCell.z === targetCell.z
+								) {
+									// TODO: For now targeting the closest unit
+									return true;
+								}
+							}
+							return false;
+						});
 
-						if (monsterCell.nav.get(nav)?.cellUuid === targetCell.cellUuid) {
-							// Attack target
-							targetUnitKind.action({
-								action: ActionWords.Attack,
-								sourceEntity: monsterKind.entity
-							});
+						// Possible movement options, in order of angle to target increase if graphed
+						// Const infer
+						// eslint-disable-next-line @typescript-eslint/typedef
+						let navFreedom = [Nav.Left, Nav.YUp, Nav.Right, Nav.YDown] as const;
+						// Indexes relation between angle to target and nav to take; Remove one π, since the minimal angle is such
+						let angleIndex: Array<[number, Nav]> = navFreedom.map((nav, index) => [(Math.PI / 2) * (index - 2), nav]);
+						// Offset for an angle, since that much of the angle above actual angle should still count for same nav; Essentially rotating
+						const angleOffset: number = Math.PI / 4;
+
+						if (targetUnitEntry) {
+							let [targetUnitKind, targetCell]: [UnitKind, ServerCell] = targetUnitEntry;
+							// Atan sign, position matters
+							let angle: number = Math.atan2(targetCell.y - monsterCell.y, targetCell.x - monsterCell.x);
+							// Direction aligned angle for indexing
+							let correctedAngle: number = angle - angleOffset;
+
+							// ESLint false negative
+							// eslint-disable-next-line @typescript-eslint/typedef
+							let nav: Nav = (angleIndex.find(([angleLimit]) => {
+								return correctedAngle === angleLimit ? Math.random() > 0.5 : correctedAngle <= angleLimit;
+								// Always defined, from `navFreedom`
+								// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+							}) ?? angleIndex[0]!)[1];
+
+							if (monsterCell.nav.get(nav)?.cellUuid === targetCell.cellUuid) {
+								// Attack target
+								targetUnitKind.action({
+									action: ActionWords.Attack,
+									sourceEntity: monsterKind.entity
+								});
+							} else {
+								// Navigate to target
+								monsterKind.navigateEntity({
+									nav
+								});
+							}
 						} else {
-							// Navigate to target
 							monsterKind.navigateEntity({
-								nav
+								// Always defined
+								// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+								nav: [Nav.Left, Nav.Right, Nav.YDown, Nav.YUp][Math.floor(Math.random() * 4)]!
 							});
 						}
-					} else {
-						monsterKind.navigateEntity({
-							// Always defined
-							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-							nav: [Nav.Left, Nav.Right, Nav.YDown, Nav.YUp][Math.floor(Math.random() * 4)]!
-						});
 					}
 				});
 			}
