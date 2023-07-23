@@ -47,6 +47,16 @@ export function TreasureKindClassFactory({
 		public isOpen: boolean = false;
 
 		/**
+		 * Closed mode UUID.
+		 */
+		protected readonly closedModeUuid: string = "mode/user/treasure/default";
+
+		/**
+		 * Open mode UUID.
+		 */
+		protected readonly openModeUuid: string = "treasure-open";
+
+		/**
 		 * @param param - Destructured parameter
 		 */
 		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
@@ -65,9 +75,9 @@ export function TreasureKindClassFactory({
 				case ActionWords.Use: {
 					this.isOpen = !this.isOpen;
 					if (this.isOpen) {
-						this.entity.modeUuid = "treasure-open";
+						this.entity.modeUuid = this.openModeUuid;
 					} else {
-						this.entity.modeUuid = "mode/user/treasure/default";
+						this.entity.modeUuid = this.closedModeUuid;
 					}
 					return true;
 				}
