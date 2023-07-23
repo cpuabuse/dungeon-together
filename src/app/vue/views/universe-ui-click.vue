@@ -20,6 +20,8 @@ import {
 	OverlayListItems,
 	OverlayListType
 } from "../core/overlay";
+import { ThisVueStore } from "../../client/gui";
+import { LogLevel } from "../../core/error";
 
 export default defineComponent({
 	components: { OverlayClick, OverlayList },
@@ -45,12 +47,16 @@ export default defineComponent({
 			{
 				name: "Cell",
 				type: OverlayListItemEntryType.InfoElement,
-				uiActions: [{ targetEntityUuid: "1", uiActionWord: OverlayContainerUiActionWords.EntityInfo }]
+				uiActions: [
+					{ targetEntityUuid: "1", uiActionWord: OverlayContainerUiActionWords.EntityInfo },
+					{ uiActionWord: OverlayContainerUiActionWords.EntityDebugInfo, targetEntityUuid: "1" }
+				]
 			}
 		];
 		return {
 			isOverlayClickDisplayed: true,
-			overlayClickItems
+			overlayClickItems,
+			universe: (this as unknown as ThisVueStore).$store.state.universe
 		};
 	},
 
@@ -63,8 +69,20 @@ export default defineComponent({
 
 	methods: {
 		onUiAction(uiAction: OverlayContentUiActionParam): void {
-			if (uiAction.targetEntityUuid) {
-				console.log(uiAction.targetEntityUuid);
+			switch (uiAction.uiActionWord) {
+				case OverlayContainerUiActionWords.EntityInfo:
+					console.log(uiAction.targetEntityUuid);
+					break;
+
+				case OverlayContainerUiActionWords.EntityDebugInfo: {
+					const targetEntity = this.universe.getEntity({ entityUuid: uiAction.targetEntityUuid });
+					this.universe.log({
+						level: LogLevel.Informational,
+						data: targetEntity,
+						message: `Debug info for entity(entityUuid="${uiAction.targetEntityUuid}")`
+					});
+					break;
+				}
 			}
 		}
 	}
