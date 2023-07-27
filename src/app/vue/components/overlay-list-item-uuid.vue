@@ -1,11 +1,5 @@
 <template>
-	<OverlayListItemAssembler
-		:icon="icon"
-		:name="name"
-		:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
-		:content-type="contentType"
-		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
-	>
+	<OverlayListItemAssembler v-bind="assemblerProps" @ui-action="emitUiAction">
 		<template #content>
 			<!-- Uuid element -->
 			<highlightjs language="plaintext" :code="uuid" />
@@ -15,13 +9,22 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { overlayListChildSharedProps, overlayListItemNarrowProps, overlayListSharedProps } from "../core/overlay";
+import {
+	overlayListChildSharedProps,
+	overlayListItemNarrowProps,
+	overlayListSharedEmits,
+	overlayListSharedProps,
+	useOverlayListItemShared,
+	useOverlayListShared
+} from "../core/overlay";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 
 export default defineComponent({
 	components: {
 		OverlayListItemAssembler
 	},
+
+	emits: overlayListSharedEmits,
 
 	props: {
 		...overlayListSharedProps,
@@ -32,6 +35,19 @@ export default defineComponent({
 			required: true,
 			type: String
 		}
+	},
+
+	/**
+	 * Setup hook.
+	 *
+	 * @param props - Props
+	 * @param param - Context
+	 * @returns Shared props
+	 */
+	// Infer setup
+	// eslint-disable-next-line @typescript-eslint/typedef
+	setup(props, { emit }) {
+		return { ...useOverlayListShared({ emit, props }), ...useOverlayListItemShared({ props }) };
 	}
 });
 </script>

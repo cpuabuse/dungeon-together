@@ -1,16 +1,10 @@
 <!-- Slot element -->
 <template>
 	<!-- Force icon show if no name -->
-	<OverlayListItemAssembler
-		:icon="icon"
-		:name="name"
-		:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
-		:content-type="contentType"
-		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
-	>
+	<OverlayListItemAssembler v-bind="assemblerProps" @ui-action="emitUiAction">
 		<!-- Content slot -->
 		<template #content>
-			<OverlayList :items="items" :content-type="contentType">
+			<OverlayList :items="items" :content-type="contentType" @ui-action="emitUiAction">
 				<!-- Pass all slots through -->
 				<template v-for="(slot, name) in $slots" #[name]="props">
 					<slot :name="name" v-bind="props" />
@@ -26,7 +20,10 @@ import {
 	OverlayListItems,
 	overlayListChildSharedProps,
 	overlayListItemNarrowProps,
-	overlayListSharedProps
+	overlayListSharedEmits,
+	overlayListSharedProps,
+	useOverlayListItemShared,
+	useOverlayListShared
 } from "../core/overlay";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 
@@ -42,6 +39,9 @@ export default defineComponent({
 		OverlayList,
 		OverlayListItemAssembler
 	},
+
+	emits: overlayListSharedEmits,
+
 	props: {
 		...overlayListSharedProps,
 		...overlayListChildSharedProps,
@@ -51,6 +51,20 @@ export default defineComponent({
 			required: true,
 			type: Array as PropType<OverlayListItems>
 		}
+	},
+
+	/**
+	 * Setup hook.
+	 *
+	 * @param props - Props
+	 * @param param - Context
+	 * @returns Shared props
+	 */
+	// Infer setup
+	// eslint-disable-next-line @typescript-eslint/typedef
+	setup(props, { emit }) {
+		// The `useOverlayListShared` is used for events
+		return { ...useOverlayListShared({ emit, props }), ...useOverlayListItemShared({ props }) };
 	}
 });
 </script>

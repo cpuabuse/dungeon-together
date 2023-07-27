@@ -17,17 +17,11 @@
 			:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
 			:content-type="contentType"
 			:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
+			@ui-action="emitUiAction"
 		></OverlayListItemList>
 	</template>
 
-	<OverlayListItemAssembler
-		v-else
-		:icon="icon"
-		:name="name"
-		:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
-		:content-type="contentType"
-		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
-	>
+	<OverlayListItemAssembler v-else v-bind="assemblerProps" @ui-action="emitUiAction">
 		tab
 		<!-- Content slot --->
 		<template #content>
@@ -38,7 +32,7 @@
 
 			<VWindow v-model="activeTabId">
 				<VWindowItem v-for="(tab, tabKey) in tabs" :key="tabKey" :value="tabKey">
-					<OverlayList :items="tab.items" :content-type="contentType">
+					<OverlayList :items="tab.items" :content-type="contentType" @ui-action="emitUiAction">
 						<template v-for="slot in getSlots(tab)" #[slot]>
 							<slot :name="slot" />
 						</template>
@@ -63,6 +57,7 @@ import {
 	overlayListItemNarrowProps,
 	overlayListSharedEmits,
 	overlayListSharedProps,
+	useOverlayListItemShared,
 	useOverlayListShared
 } from "../core/overlay";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
@@ -224,7 +219,7 @@ export default defineComponent({
 	// Infer setup
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, { emit }) {
-		return useOverlayListShared({ emit, props });
+		return { ...useOverlayListShared({ emit, props }), ...useOverlayListItemShared({ props }) };
 	}
 });
 </script>

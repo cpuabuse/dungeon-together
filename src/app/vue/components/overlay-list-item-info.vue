@@ -1,13 +1,7 @@
 <!-- Info element -->
 <template>
 	<!-- Force icon show if no name -->
-	<OverlayListItemAssembler
-		:icon="icon"
-		:name="name"
-		:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
-		:content-type="contentType"
-		:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
-	>
+	<OverlayListItemAssembler v-bind="assemblerProps">
 		<!-- Inline slot; Omit from display if no data given -->
 		<template v-if="data || uiActions.length > 0" #inline>
 			<!-- Density from list is not passed through into chip -->
@@ -15,27 +9,28 @@
 				{{ data }}
 			</VChip>
 
-			<div v-if="uiActions.length > 0">
+			<VBtnGroup v-if="uiActions.length > 0">
 				<VBtn
 					v-for="(uiAction, uiActionKey) in uiActions"
 					:key="uiActionKey"
 					@click="() => handleUiAction({ uiActionKey })"
-					>ok</VBtn
+					><VIcon>{{ icon }}</VIcon> {{ uiAction.uiActionWord }}</VBtn
 				>
-			</div>
+			</VBtnGroup>
 		</template>
 	</OverlayListItemAssembler>
 </template>
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
-import { VBtn, VChip } from "vuetify/components";
+import { VBtn, VBtnGroup, VChip, VIcon } from "vuetify/components";
 import {
 	OverlayContentUiActionParam,
 	overlayListChildSharedProps,
 	overlayListItemNarrowProps,
 	overlayListSharedEmits,
 	overlayListSharedProps,
+	useOverlayListItemShared,
 	useOverlayListShared
 } from "../core/overlay";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
@@ -44,7 +39,9 @@ export default defineComponent({
 	components: {
 		OverlayListItemAssembler,
 		VBtn,
-		VChip
+		VBtnGroup,
+		VChip,
+		VIcon
 	},
 
 	emits: overlayListSharedEmits,
@@ -97,7 +94,7 @@ export default defineComponent({
 	// Infer setup
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, { emit }) {
-		return useOverlayListShared({ emit, props });
+		return { ...useOverlayListShared({ emit, props }), ...useOverlayListItemShared({ props }) };
 	}
 });
 </script>
