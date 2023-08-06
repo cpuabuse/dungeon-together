@@ -40,7 +40,14 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { VCol, VIcon, VListItemTitle, VRow, VSpacer } from "vuetify/components";
-import { OverlayListType, overlayListSharedEmits, overlayListSharedProps, useOverlayListShared } from "../core/overlay";
+import {
+	OverlayListType,
+	overlayListChildSharedProps,
+	overlayListItemNarrowProps,
+	overlayListSharedEmits,
+	overlayListSharedProps,
+	useOverlayListShared
+} from "../core/overlay";
 import OverlayContentItemWrapper from "./overlay-list-item-wrapper.vue";
 
 export default defineComponent({
@@ -131,14 +138,9 @@ export default defineComponent({
 	 * @returns Component props
 	 */
 	props: {
-		icon: { default: undefined, type: String },
-		isHiddenCaretDisplayedIfMissing: { default: false, type: Boolean },
-		isHiddenIconDisplayedIfMissing: { default: false, type: Boolean },
-		name: {
-			default: undefined,
-			type: String
-		},
-		...overlayListSharedProps
+		...overlayListSharedProps,
+		...overlayListChildSharedProps,
+		...overlayListItemNarrowProps
 	},
 
 	/**

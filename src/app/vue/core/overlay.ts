@@ -195,7 +195,8 @@ export type OverlayListItemEntryExtract<Type extends OverlayListItemEntryType> =
  */
 export enum OverlayContainerUiActionWords {
 	EntityAction = "entityAction",
-	EntityInfo = "entityInfo"
+	EntityInfo = "entityInfo",
+	EntityDebugInfo = "entityDebugInfo"
 }
 
 /**
@@ -235,6 +236,17 @@ export type OverlayContentUiActionParam = OverlayContentUiActionHelper<
 			 * Entity info.
 			 */
 			uiActionWord: OverlayContainerUiActionWords.EntityInfo;
+
+			/**
+			 * Information to display.
+			 */
+			targetEntityUuid: Uuid;
+	  }
+	| {
+			/**
+			 * Entity debug info.
+			 */
+			uiActionWord: OverlayContainerUiActionWords.EntityDebugInfo;
 
 			/**
 			 * Information to display.
