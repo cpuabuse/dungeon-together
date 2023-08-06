@@ -9,10 +9,9 @@
  * @file
  */
 import { ActionWords } from "../../app/server/action";
-import { EntityKindActionArgs } from "../../app/server/entity";
-import { MonsterKindClass } from "./monster";
+import { EntityKindActionArgs, EntityKindConstructorParams } from "../../app/server/entity";
+import { MonsterKind, MonsterKindClass } from "./monster";
 import { TreasureKindClassFactory } from "./treasure";
-import { UnitStats } from "./unit";
 
 /**
  * Mimic kind factory.
@@ -26,25 +25,33 @@ import { UnitStats } from "./unit";
 // Force inference
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function MimicKindClassFactory({
-	Base,
-	stats
+	Base
 }: {
 	/**
 	 * Unit entity.
 	 */
 	Base: MonsterKindClass;
+}) {
+	/**
+	 * Merging with monster kind.
+	 */
+	// Force merge
+	// eslint-disable-next-line @typescript-eslint/no-empty-interface
+	interface MimicKindMerge extends MonsterKind {}
 
 	/**
-	 * Unit stats.
+	 * Auxiliary class for interface merge, to include monster into prototype.
 	 */
-	stats: UnitStats;
-}) {
+	// Force merge
+	// eslint-disable-next-line no-redeclare
+	class MimicKindMerge extends TreasureKindClassFactory({ Base }) {}
+
 	/**
 	 * Mimic-monster class.
 	 *
 	 * `isOpen` within this class means whether the monster is revealed.
 	 */
-	class MimicKind extends TreasureKindClassFactory({ Base }) {
+	class MimicKind extends MimicKindMerge {
 		/**
 		 * Emits health.
 		 *
@@ -52,6 +59,33 @@ export function MimicKindClassFactory({
 		 */
 		public get emits(): Record<string, any> {
 			return { ...super.emits, hasAction: true };
+		}
+
+		/**
+		 * Is not hidden property to emit monster specific properties.
+		 */
+		public isNotHidden: boolean = false;
+
+		/**
+		 * Is chasing an enemy or not.
+		 */
+		public isTracing: boolean = false;
+
+		/**
+		 * Open mode UUID.
+		 */
+		protected readonly openModeUuid: string = "mimic-attack";
+
+		/**
+		 * Public constructor.
+		 *
+		 * @param param - Destructured parameter
+		 */
+		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
+			super({ entity, ...rest });
+
+			// Make mimic stronger
+			this.stats.str += 2;
 		}
 
 		/**
@@ -64,20 +98,48 @@ export function MimicKindClassFactory({
 			let { action, ...rest }: EntityKindActionArgs = param;
 			switch (action) {
 				case ActionWords.Interact: {
+					// If mimic is open, then we call monster grandparent attack; Otherwise, let parent treasure redirect into use action
 					if (this.isOpen) {
-						return true; // Placeholder
+						return this.action({ action: ActionWords.Attack, ...rest }); // Placeholder
 					}
-					return false; // Placeholder
+					return super.action({ action, ...rest });
 				}
+
 				case ActionWords.Use: {
+					// If mimic is open, then it can not be used as it is a monster and if it is closed, then we awaken it
 					if (this.isOpen) {
-						return true; // Placeholder
+						return false;
 					}
-					return false; // Placeholder
+
+					// Awaken
+					this.awaken();
+
+					// Attack back if player attempts to use
+					rest.sourceEntity?.kind.action({
+						action: ActionWords.Attack,
+						sourceEntity: this.entity
+					});
+
+					return super.action({ action, ...rest });
 				}
+
+				case ActionWords.Attack: {
+					this.awaken();
+				}
+
+				// We covered all treasure actions so it is safe to pass through the rest
+				// Fall through
 				default:
 					return super.action({ action, ...rest });
 			}
+		}
+
+		/**
+		 * Awaken the mimic. Make it start tracing players and have unit emits appear including health bar.
+		 */
+		private awaken(): void {
+			this.isTracing = true;
+			this.isNotHidden = true;
 		}
 	}
 

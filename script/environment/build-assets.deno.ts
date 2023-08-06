@@ -88,6 +88,7 @@ if (environment && build && rootDir) {
 		[
 			"dungeontileset-ii/chest_full_open_anim_f0.png",
 			"dungeontileset-ii/chest_full_open_anim_f2.png",
+			"dungeontileset-ii/chest_mimic_open_anim_f2.png",
 			"dungeontileset-ii/floor_spikes_anim_f0.png",
 			"dungeontileset-ii/floor_spikes_anim_f3.png",
 			"dungeontileset-ii/doors_leaf_closed.png",

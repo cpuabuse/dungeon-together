@@ -15,7 +15,8 @@ import { ExclusiveKindClass, ExclusiveKindClassFactory } from "./exclusive";
 import { FloorKindClassFactory } from "./floor";
 import { GuyKindClass, GuyKindClassFactory } from "./guy";
 import { LadderKindClassFactory } from "./ladder";
-import { MonsterKindClassFactory } from "./monster";
+import { MimicKindClassFactory } from "./mimic";
+import { MonsterKindClass, MonsterKindClassFactory } from "./monster";
 import { TrapKindClass, TrapKindClassFactory } from "./trap";
 import { TreasureKindClassFactory } from "./treasure";
 import { UnitKindClass, UnitKindClassFactory, UnitStatWords, UnitStats, defaultStats } from "./unit";
@@ -49,6 +50,7 @@ export function systemModuleFactory(...[{ universe, props }]: ModuleFactoryParam
 	const GuyKind: GuyKindClass = GuyKindClassFactory({ Base: UnitKind, stats });
 	// TODO: Target should be allied units
 	const TrapKind: TrapKindClass = TrapKindClassFactory({ Base: universe.Entity.BaseKind, Targets: [GuyKind] });
+	const MonsterKind: MonsterKindClass = MonsterKindClassFactory({ Base: UnitKind, stats });
 
 	return {
 		kinds: {
@@ -58,7 +60,8 @@ export function systemModuleFactory(...[{ universe, props }]: ModuleFactoryParam
 			floor: FloorKindClassFactory({ Base: universe.Entity.BaseKind }),
 			guy: GuyKind,
 			ladder: LadderKindClassFactory({ Base: universe.Entity.BaseKind }),
-			monster: MonsterKindClassFactory({ Base: UnitKind, stats }),
+			mimic: MimicKindClassFactory({ Base: MonsterKind }),
+			monster: MonsterKind,
 			trap: TrapKind,
 			treasure: TreasureKindClassFactory({ Base: universe.Entity.BaseKind }),
 			wall: WallKindClassFactory({ Base: ExclusiveKind })

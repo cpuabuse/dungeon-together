@@ -10,7 +10,7 @@
  */
 
 import { ActionWords } from "../../app/server/action";
-import { EntityKindActionArgs, EntityKindClass, EntityKindConstructorParams } from "../../app/server/entity";
+import { EntityKindActionArgs, EntityKindClass } from "../../app/server/entity";
 
 /**
  * Treasure kind factory.
@@ -33,15 +33,6 @@ export function TreasureKindClassFactory({
 	 */
 	class TreasureKind extends Base {
 		/**
-		 * Emits health.
-		 *
-		 * @returns Emitted object
-		 */
-		public get emits(): Record<string, any> {
-			return { ...super.emits, hasAction: !this.isOpen };
-		}
-
-		/**
 		 *  Whether the treasure is open.
 		 */
 		public isOpen: boolean = false;
@@ -57,10 +48,12 @@ export function TreasureKindClassFactory({
 		protected readonly openModeUuid: string = "treasure-open";
 
 		/**
-		 * @param param - Destructured parameter
+		 * Emits health.
+		 *
+		 * @returns Emitted object
 		 */
-		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
-			super({ entity, ...rest });
+		public get emits(): Record<string, any> {
+			return { ...super.emits, hasAction: !this.isOpen };
 		}
 
 		/**

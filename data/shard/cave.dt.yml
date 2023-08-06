@@ -23,6 +23,10 @@ kinds:
   enemy:
     module: system
     name: monster
+  mimic:
+    module: system
+    name: mimic
+
 data:
   shards:
     - grids:
@@ -126,7 +130,7 @@ data:
               z: 0
               entities:
                 - kind: floor
-                - kind: treasure
+                - kind: mimic
             - x: 4
               y: 1
               z: 0
@@ -181,7 +185,7 @@ data:
               z: 0
               entities:
                 - kind: floor
-                - kind: treasure
+                - kind: mimic
             - x: 14
               y: 1
               z: 0
@@ -274,7 +278,7 @@ data:
               z: 0
               entities:
                 - kind: floor
-                - kind: treasure
+                - kind: mimic
             - x: 2
               y: 3
               z: 0
@@ -1303,7 +1307,7 @@ data:
               z: 1
               entities:
                 - kind: floor
-                - kind: treasure
+                - kind: mimic
             - x: 2
               y: 1
               z: 1
@@ -1694,7 +1698,7 @@ data:
               z: 1
               entities:
                 - kind: floor
-                - kind: treasure
+                - kind: mimic
             - x: 2
               y: 6
               z: 1
@@ -2246,7 +2250,7 @@ data:
               z: 1
               entities:
                 - kind: floor
-                - kind: treasure
+                - kind: mimic
             - x: 2
               y: 13
               z: 1
@@ -2663,7 +2667,7 @@ data:
               z: 2
               entities:
                 - kind: floor
-                - kind: treasure
+                - kind: mimic
             - x: 8
               y: 3
               z: 2
@@ -3285,7 +3289,7 @@ data:
               z: 2
               entities:
                 - kind: floor
-                - kind: treasure
+                - kind: mimic
             - x: 8
               y: 11
               z: 2

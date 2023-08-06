@@ -222,13 +222,17 @@ export function UnitKindClassFactory({
 		public get emits(): Record<string, any> {
 			return {
 				...super.emits,
-				experience: this.experience,
-				hasAction: true,
-				hasPhantom: true,
-				health: this.healthPoints,
-				level: this.level,
-				maxHealth: this.maxHealthPoints,
-				stats: this.stats
+				...(this.isNotHidden
+					? {
+							experience: this.experience,
+							hasAction: true,
+							hasPhantom: true,
+							health: this.healthPoints,
+							level: this.level,
+							maxHealth: this.maxHealthPoints,
+							stats: this.stats
+					  }
+					: {})
 			};
 		}
 
@@ -261,6 +265,11 @@ export function UnitKindClassFactory({
 		 * HP.
 		 */
 		public healthPoints: number = 3;
+
+		/**
+		 * Is not hidden property to emit unit specific properties.
+		 */
+		public isNotHidden: boolean = true;
 
 		/**
 		 * LVL.
