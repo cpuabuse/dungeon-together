@@ -284,17 +284,24 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 											// TODO: Move object link verification to standalone connection
 											// Iterating through keys to prevent assignment of objects for standalone
 											Object.keys(message.body.dictionary).forEach(key => {
-												let entry: CoreDictionary[any] = message.body.dictionary[key];
-												if (Array.isArray(entry)) {
-													// Casting, since array expansion is producing an array of union, instead of union of arrays
-													Array.from(shard.players)[0][1].dictionary[key] = [...entry] as Extract<
-														CoreDictionary[any],
-														Array<any>
-													>;
-												} else if (typeof entry === "object") {
-													Array.from(shard.players)[0][1].dictionary[key] = { ...entry };
+												let entry: CoreDictionary[any] | undefined = message.body.dictionary[key];
+												let player: ClientPlayer | undefined = shard.players.get(message.body.playerUuid);
+												if (player) {
+													if (Array.isArray(entry)) {
+														// Casting, since array expansion is producing an array of union, instead of union of arrays
+														player.dictionary[key] = [...entry] as Extract<CoreDictionary[any], Array<any>>;
+													} else if (typeof entry === "object") {
+														player.dictionary[key] = { ...entry };
+													} else if (entry) {
+														player.dictionary[key] = entry;
+													}
 												} else {
-													Array.from(shard.players)[0][1].dictionary[key] = entry;
+													this.universe.log({
+														error: new Error(
+															`"Sync" callback failed, player("playerUuid=${message.body.playerUuid}") not found in.`
+														),
+														level: LogLevel.Error
+													});
 												}
 											});
 										})
