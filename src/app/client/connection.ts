@@ -9,7 +9,7 @@
 
 import { Howl } from "howler";
 import nextTick from "next-tick";
-import { filters } from "pixi.js";
+import { ColorMatrixFilter } from "pixi.js";
 import { DeferredPromise } from "../common/async";
 import { DirectionWord, MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { defaultFadeInMs, defaultFadeOutMs } from "../common/sound";
@@ -48,7 +48,7 @@ import { ClientUniverse } from "./universe";
 /**
  * Burn.
  */
-const contrastFilter: InstanceType<(typeof filters)["ColorMatrixFilter"]> = new filters.ColorMatrixFilter();
+const contrastFilter: ColorMatrixFilter = new ColorMatrixFilter();
 contrastFilter.contrast(1.0, false);
 
 /**
