@@ -7,7 +7,7 @@
  * @file Squares on screen.
  */
 
-import { Container, filters } from "pixi.js";
+import { ColorMatrixFilter, Container } from "pixi.js";
 import { CoreArgIds } from "../core/arg";
 import { CoreCellArg, CoreCellClassFactory } from "../core/cell";
 import { EntityPathOwn } from "../core/entity";
@@ -21,7 +21,7 @@ import { ClientShard } from "./shard";
 /**
  * Burn.
  */
-const contrastFilter: InstanceType<(typeof filters)["ColorMatrixFilter"]> = new filters.ColorMatrixFilter();
+const contrastFilter: ColorMatrixFilter = new ColorMatrixFilter();
 contrastFilter.contrast(2, false);
 
 /**

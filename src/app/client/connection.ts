@@ -110,6 +110,22 @@ export type ClientMessage =
 			 * Local action type.
 			 */
 			type: MessageTypeWord.LocalAction;
+	  }
+	| {
+			/**
+			 * Local action type.
+			 */
+			type: MessageTypeWord.StatusNotification;
+
+			/**
+			 * Message body.
+			 */
+			body: CoreMessagePlayerBody & {
+				/**
+				 * Notification ID.
+				 */
+				notificationId: string;
+			};
 	  };
 
 // Sound
@@ -147,6 +163,13 @@ export class ClientPlayer extends CorePlayer<ClientConnection> {
 	 * Client connection.
 	 */
 	public connection?: ClientConnection = undefined;
+
+	/**
+	 * Notification ID array.
+	 */
+	// False negative
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+	public notificationIds: Array<string> = new Array();
 }
 
 /**
@@ -245,6 +268,12 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 			case MessageTypeWord.Empty:
 				return true;
 
+			// Status notification update
+			case MessageTypeWord.StatusNotification: {
+				this.getPlayerEntry(message.body)?.player.notificationIds.push(message.body.notificationId);
+				break;
+			}
+
 			// Sync command
 			case MessageTypeWord.Sync: {
 				this.universe.log({
@@ -273,52 +302,61 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 									);
 								})
 								.finally(() => {
-									attachHook
-										.then(() => {
-											// TODO: Shard registration should be last in attach, but moved out of created finally
-											this.registerShard({ playerUuid: message.body.playerUuid, shardUuid: message.body.shardUuid });
-											message.body.units.forEach(unitUuid => {
-												shard.units.add(unitUuid);
-											});
+									resolve();
+								});
 
-											// TODO: Move object link verification to standalone connection
-											// Iterating through keys to prevent assignment of objects for standalone
-											Object.keys(message.body.dictionary).forEach(key => {
-												let entry: CoreDictionary[any] | undefined = message.body.dictionary[key];
-												let player: ClientPlayer | undefined = shard.players.get(message.body.playerUuid);
-												if (player) {
-													if (Array.isArray(entry)) {
-														// Casting, since array expansion is producing an array of union, instead of union of arrays
-														player.dictionary[key] = [...entry] as Extract<CoreDictionary[any], Array<any>>;
-													} else if (typeof entry === "object") {
-														player.dictionary[key] = { ...entry };
-													} else if (entry) {
-														player.dictionary[key] = entry;
-													}
-												} else {
-													this.universe.log({
-														error: new Error(
-															`"Sync" callback failed, player("playerUuid=${message.body.playerUuid}") not found in.`
-														),
-														level: LogLevel.Error
-													});
-												}
-											});
-										})
-										.catch(error => {
+							// Will be added after all attach registrations added within `addShard`
+							attachHook
+								.then(() => {
+									this.registerShard({ playerUuid: message.body.playerUuid, shardUuid: message.body.shardUuid });
+									message.body.units.forEach(unitUuid => {
+										shard.units.add(unitUuid);
+									});
+
+									// TODO: Move object link verification to standalone connection
+									// Iterating through keys to prevent assignment of objects for standalone
+									Object.keys(message.body.dictionary).forEach(key => {
+										let entry: CoreDictionary[any] | undefined = message.body.dictionary[key];
+										let player: ClientPlayer | undefined = shard.players.get(message.body.playerUuid);
+										if (player) {
+											if (Array.isArray(entry)) {
+												// Casting, since array expansion is producing an array of union, instead of union of arrays
+												player.dictionary[key] = [...entry] as Extract<CoreDictionary[any], Array<any>>;
+											} else if (typeof entry === "object") {
+												player.dictionary[key] = { ...entry };
+											} else if (entry) {
+												player.dictionary[key] = entry;
+											}
+										} else {
 											this.universe.log({
 												error: new Error(
-													`"Sync" callback failed trying to add shard("shardUuid=${message.body.shardUuid}") to player("playerUuid=${message.body.playerUuid}").`,
-													{ cause: error instanceof Error ? error : undefined }
+													`"Sync" callback failed, player("playerUuid=${message.body.playerUuid}") not found in.`
 												),
 												level: LogLevel.Error
 											});
-										});
-									resolve();
+										}
+									});
+								})
+								.catch(error => {
+									this.universe.log({
+										error: new Error(
+											`"Sync" callback failed trying to add shard("shardUuid=${message.body.shardUuid}") to player("playerUuid=${message.body.playerUuid}").`,
+											{ cause: error instanceof Error ? error : undefined }
+										),
+										level: LogLevel.Error
+									});
 								});
 						}
 					});
 				});
+
+				// Await not only attach hook, but also registered callbacks coming after attach hook
+				// Treating as switch block rather than part of loop
+				// eslint-disable-next-line no-await-in-loop
+				await attachHook;
+				// Treating as switch block rather than part of loop
+				// eslint-disable-next-line no-await-in-loop
+				await Promise.resolve();
 
 				break;
 			}

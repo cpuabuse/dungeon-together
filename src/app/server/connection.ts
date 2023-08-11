@@ -10,7 +10,12 @@
 import { ClientMessage } from "../client/connection";
 import { ClientOptions, clientOptions } from "../client/options";
 import { appUrl } from "../common/defaults";
-import { DirectionWord, MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
+import {
+	DirectionWord,
+	MessageTypeWord,
+	StatusNotificationWord,
+	vSocketMaxDequeue
+} from "../common/defaults/connection";
 import { Uuid } from "../common/uuid";
 import { ClientUpdate } from "../comms";
 import { CoreArgIds, CoreArgMeta, Nav, coreArgMetaGenerate } from "../core/arg";
@@ -499,22 +504,28 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 							);
 						});
 
-						return {
-							body: {
-								...body,
-								dictionary: { ...shard.dictionary, ...player?.dictionary },
-								playerUuid: player.playerUuid,
-								units: Array.from(shard.units)
-									// ESLint false negative
-									// eslint-disable-next-line @typescript-eslint/typedef
-									.filter(([unitUuid]) => player?.units.has(unitUuid))
-									// ESLint false negative
-									// eslint-disable-next-line @typescript-eslint/typedef
-									.map(([unitUuid]) => unitUuid)
+						return [
+							{
+								body: {
+									...body,
+									dictionary: { ...shard.dictionary, ...player?.dictionary },
+									playerUuid: player.playerUuid,
+									units: Array.from(shard.units)
+										// ESLint false negative
+										// eslint-disable-next-line @typescript-eslint/typedef
+										.filter(([unitUuid]) => player?.units.has(unitUuid))
+										// ESLint false negative
+										// eslint-disable-next-line @typescript-eslint/typedef
+										.map(([unitUuid]) => unitUuid)
+								},
+								type: MessageTypeWord.Sync
 							},
-							type: MessageTypeWord.Sync
-						};
-					});
+							{
+								body: { notificationId: StatusNotificationWord.Sync, playerUuid: player.playerUuid },
+								type: MessageTypeWord.StatusNotification
+							}
+						] as const;
+					}).flat();
 
 					this.universe.log({
 						level: LogLevel.Informational,

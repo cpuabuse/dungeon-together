@@ -210,6 +210,30 @@ export abstract class CoreConnection<
 	}
 
 	/**
+	 * Returns player entry with logging.
+	 *
+	 * @param param - Destructured parameter
+	 * @returns Player entry
+	 */
+	public getPlayerEntry({
+		playerUuid
+	}: {
+		/**
+		 * Player UUID.
+		 */
+		playerUuid: Uuid;
+	}): PlayerEntry<Player> | undefined {
+		let playerEntry: PlayerEntry<Player> | undefined = this.playerEntries.get(playerUuid);
+		if (!playerEntry) {
+			(this.universe as CoreUniverseInstanceNonRecursiveCast).log({
+				error: new Error(`Could not find player("playerUuid=${playerUuid}").`),
+				level: LogLevel.Notice
+			});
+		}
+		return playerEntry;
+	}
+
+	/**
 	 * Starts tracking shard in connection.
 	 *
 	 * @param param - Destructured parameter
@@ -223,6 +247,11 @@ export abstract class CoreConnection<
 		if (player && player.connect(this)) {
 			this.shardUuids.add(shardUuid);
 			this.playerEntries.set(playerUuid, { player, shardUuid });
+
+			(this.universe as CoreUniverseInstanceNonRecursiveCast).log({
+				level: LogLevel.Informational,
+				message: `Registered player(uuid="${playerUuid}") to shard(uuid="${shardUuid}").`
+			});
 			return true;
 		}
 

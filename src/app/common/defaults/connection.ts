@@ -44,7 +44,24 @@ export enum MessageTypeWord {
 
 	EntityAction = "action",
 
-	LocalAction = "local-action"
+	LocalAction = "local-action",
+
+	/**
+	 * Notification about a story progress, which player may spend time to read.
+	 */
+	StoryNotification = "story-notification",
+
+	/**
+	 * Notification about action result, or any turn by turn quick information.
+	 */
+	StatusNotification = "status-notification"
+}
+
+/**
+ * Words for status notification messages.
+ */
+export enum StatusNotificationWord {
+	Sync = "sync"
 }
 
 /**
