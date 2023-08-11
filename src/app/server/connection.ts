@@ -265,26 +265,38 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 	 * @param param - Destructured parameter
 	 */
 	let sendUpdate: (param: {
-		/** Target cell. */
+		/**
+		 * Target cell.
+		 */
 		targetCell: ServerCell;
 
-		/** Source cell. */
+		/**
+		 *  Source cell.
+		 */
 		sourceCell: ServerCell;
 
-		/** Grid. */
+		/**
+		 *  Grid.
+		 */
 		grid: ServerGrid;
 	}) => Promise<void> = async ({
 		targetCell,
 		grid,
 		sourceCell
 	}: {
-		/** Target cell. */
+		/**
+		 *  Target cell.
+		 */
 		targetCell: ServerCell;
 
-		/** Source cell. */
+		/**
+		 *  Source cell.
+		 */
 		sourceCell: ServerCell;
 
-		/** Grid. */
+		/**
+		 *  Grid.
+		 */
 		grid: ServerGrid;
 	}): Promise<void> => {
 		let targetEvents: Array<CellEvent> = [...targetCell.events];
@@ -318,6 +330,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 							};
 						}),
 					events: targetEvents,
+					gridUuid: grid.gridUuid,
 					x: targetCell.x,
 					y: targetCell.y,
 					z: targetCell.z
@@ -343,6 +356,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 							};
 						}),
 					events: sourceEvents,
+					gridUuid: grid.gridUuid,
 					x: sourceCell.x,
 					y: sourceCell.y,
 					z: sourceCell.z
@@ -386,6 +400,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 									};
 								}),
 							events,
+							gridUuid: grid.gridUuid,
 							x: cell.x,
 							y: cell.y,
 							z: cell.z

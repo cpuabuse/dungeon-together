@@ -34,6 +34,11 @@ export type ClientUpdate = {
 			events: Array<CellEvent>;
 
 			/**
+			 * Grid UUID.
+			 */
+			gridUuid: Uuid;
+
+			/**
 			 * Entities.
 			 */
 			entities: Array<{

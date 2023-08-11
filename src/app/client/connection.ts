@@ -347,7 +347,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 								 * Callback.
 								 */
 								callback: () => {
-									Array.from(Array.from(this.universe.shards)[1][1].grids)[1][1].addCell(
+									this.universe.getGrid(sourceCell).addCell(
 										{
 											cellUuid: sourceCell.cellUuid,
 											entities: new Map(),
