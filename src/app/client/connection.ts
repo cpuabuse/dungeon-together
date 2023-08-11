@@ -404,8 +404,8 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 									if (targetEntity.modeUuid === "mode/user/enemy/default" || targetEntity.modeUuid === "mimic-attack") {
 										if (
 											sourceCell.events.length > 0 &&
-											sourceCell.events[0].targetEntityUuid === targetEntity.entityUuid &&
-											sourceCell.events[0].name === "death"
+											sourceCell.events[0]?.targetEntityUuid === targetEntity.entityUuid &&
+											sourceCell.events[0]?.name === "death"
 										) {
 											splat.play("default");
 
@@ -452,13 +452,13 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 								// TODO: Move object link verification to standalone connection
 								// Iterating through keys to prevent assignment of objects for standalone
 								Object.keys(emits).forEach(key => {
-									let entry: CoreDictionary[any] = emits[key];
+									let entry: CoreDictionary[any] | undefined = emits[key];
 									if (Array.isArray(entry)) {
 										// Casting, since array expansion is producing an array of union, instead of union of arrays
 										entity.dictionary[key] = [...entry] as Extract<CoreDictionary[any], Array<any>>;
 									} else if (typeof entry === "object") {
 										entity.dictionary[key] = { ...entry };
-									} else {
+									} else if (entry) {
 										entity.dictionary[key] = entry;
 									}
 								});
@@ -618,12 +618,8 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 						let vectorChange: Vector = navIndex.get(directions[direction]) ?? defaultVector;
 						let targetCell: ClientCell | undefined;
 
-						try {
-							// If cell empty, target cell will be undefined
-							targetCell = grid.cellIndex[z + vectorChange.z][x + vectorChange.x][y + vectorChange.y];
-						} catch {
-							targetCell = undefined;
-						}
+						// If cell empty, target cell will be undefined
+						targetCell = grid.cellIndex[z + vectorChange.z]?.[x + vectorChange.x]?.[y + vectorChange.y];
 
 						if (targetCell) {
 							let targetEntity: ClientEntity | undefined = Array.from(targetCell.entities).find(
@@ -682,12 +678,8 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 					if (typeof x === "number" && typeof y === "number" && typeof z === "number") {
 						let targetCell: ClientCell | undefined;
 
-						try {
-							// If cell empty, target cell will be undefined
-							targetCell = grid.cellIndex[z][x][y];
-						} catch {
-							targetCell = undefined;
-						}
+						// If cell empty, target cell will be undefined
+						targetCell = grid.cellIndex[z]?.[x]?.[y];
 
 						if (targetCell) {
 							let targetEntity: ClientEntity | undefined = Array.from(targetCell.entities).find(
