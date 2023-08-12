@@ -10,7 +10,7 @@
  */
 
 import { App, Component, createApp } from "vue";
-import { createStore } from "vuex";
+import { Store, StoreOptions, createStore } from "vuex";
 import { useHljsPlugin } from "./vue.plugin.hljs";
 
 // Static init
@@ -22,10 +22,11 @@ import { useVuetifyPlugin } from "./vue.plugin.vuetify";
  * @param param - Destructured parameter
  * @returns Created app
  */
-export function createVueApp<State extends object>({
+export function createVueApp<State extends object = object>({
 	component,
 	state,
-	mutations
+	mutations,
+	actions
 }: {
 	/**
 	 * Root component.
@@ -35,25 +36,28 @@ export function createVueApp<State extends object>({
 	/**
 	 * State.
 	 */
-	state?: State;
+	state: State;
+} & Pick<StoreOptions<State>, "actions" | "mutations">): {
+	/**
+	 * Vue app.
+	 */
+	vue: App;
 
 	/**
-	 * Mutations.
+	 * Store.
 	 */
-	mutations?: Record<string, (state: State, payload: any) => void>;
-}): App {
+	store: Store<State>;
+} {
 	let app: App = createApp(component);
 	useVuetifyPlugin({ app });
 	useHljsPlugin({ app });
 
-	if (state) {
-		app.use(
-			createStore<State>({
-				mutations,
-				state
-			})
-		);
-	}
+	const store: Store<State> = createStore<State>({
+		actions,
+		mutations,
+		state
+	});
+	app.use(store);
 
-	return app;
+	return { store, vue: app };
 }

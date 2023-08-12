@@ -16,6 +16,7 @@ import type { JoystickManager } from "nipplejs";
 import joystickLib from "nipplejs";
 import { BaseTexture, SVGResource, Texture, utils } from "pixi.js";
 import { App } from "vue";
+import { Store } from "vuex";
 import { DeferredPromise } from "../common/async";
 import { defaultModeUuid } from "../common/defaults";
 import { bunnySvgs } from "../common/images";
@@ -247,6 +248,11 @@ export class ClientUniverse
 	public readonly shardsIndex: Map<Uuid, ClientShard> = new Map();
 
 	/**
+	 * Vue store.
+	 */
+	public readonly store: Store<UniverseState>;
+
+	/**
 	 * Universe element.
 	 */
 	public readonly universeElement: HTMLElement;
@@ -295,7 +301,33 @@ export class ClientUniverse
 		this.Cell = ClientCellFactory({ Base: this.Base });
 		this.Entity = ClientEntityFactory({ Base: this.Base });
 
-		this.vue = createVueApp<UniverseState>({
+		const {
+			vue,
+			store
+		}: {
+			/**
+			 * App.
+			 */
+			vue: App;
+
+			/**
+			 * Store.
+			 */
+			store: Store<UniverseState>;
+		} = createVueApp<UniverseState>({
+			actions: {
+				/**
+				 * Called when universe changes.
+				 *
+				 * @param param - Destructured parameter
+				 */
+				// Infer argument
+				// eslint-disable-next-line @typescript-eslint/typedef
+				updateUniverse({ state }) {
+					// Do nothing
+					state.universe.log({ level: LogLevel.Debug, message: "Universe store update dispatched" });
+				}
+			},
 			component: UniverseComponent,
 			mutations: {
 				/**
@@ -326,6 +358,8 @@ export class ClientUniverse
 			},
 			state: { records: { alert: true }, theme: Theme.Dark, universe: this }
 		});
+		this.vue = vue;
+		this.store = store;
 
 		// Mount vue
 		let vueElement: HTMLElement = document.createElement("div");
@@ -383,11 +417,13 @@ export class ClientUniverse
 
 								// Get next
 								let newIndex: number = index + 1;
-								let newHowl: Howl = bgSounds[newIndex < array.length ? newIndex : 0];
+								let newHowl: Howl | undefined = bgSounds[newIndex < array.length ? newIndex : 0];
 
-								// Play and fade next
-								newHowl.play("default");
-								newHowl.fade(0, bgVolume, fadeTime);
+								if (newHowl) {
+									// Play and fade next
+									newHowl.play("default");
+									newHowl.fade(0, bgVolume, fadeTime);
+								}
 								// Negative delay should be OK
 							}, endTime - startTime - fadeTime);
 						},
@@ -403,7 +439,7 @@ export class ClientUniverse
 					return howl;
 				});
 
-				bgSounds[0].play("default");
+				bgSounds[0]?.play("default");
 
 				// Cannot play if user did not interact with page; It seems that playing, even if muted, actually begins after context is acquired; To avoid cacophony from simultaneous sounds on first user interaction, advanced audiovisual effects queue should depend on core state readiness, which this function should initialize (Similar effect would be achieved by making sound queue dequeue based on sound lifecycle callbacks, but in that case visual effects would have to be tied to sounds, but it is better for both to be controlled by an independent queue)
 				if (Howler.ctx.state === "running") {
@@ -759,6 +795,17 @@ export class ClientUniverse
 				this.log({
 					error: new Error("Could not append element.", { cause: error instanceof Error ? error : undefined }),
 					level: LogLevel.Critical
+				});
+			})
+			.finally(() => {
+				// Finally notify state
+				this.store.dispatch("updateUniverse").catch(error => {
+					this.log({
+						error: new Error("Could not dispatch universe store.", {
+							cause: error
+						}),
+						level: LogLevel.Critical
+					});
 				});
 			});
 		let clientShard: ClientShard = super.addShard(...shardArgs);
