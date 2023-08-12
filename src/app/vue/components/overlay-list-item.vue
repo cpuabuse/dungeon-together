@@ -129,6 +129,7 @@ export default defineComponent({
 			/* eslint-disable @typescript-eslint/typedef */
 			const props = {
 				contentType: this.contentType,
+				data: this.item.data,
 				icon: this.item.icon,
 				isCompact: this.isCompact,
 				isHiddenCaretDisplayedIfMissing: this.isHiddenCaretDisplayedIfMissing,
