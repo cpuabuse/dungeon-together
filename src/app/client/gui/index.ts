@@ -33,7 +33,7 @@ export interface UniverseState {
 	/**
 	 * Records of various things.
 	 */
-	records: Record<string, any>;
+	records: Record<string | symbol, any>;
 }
 
 /**

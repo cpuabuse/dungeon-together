@@ -14,7 +14,7 @@
 
 			<!-- Overlays -->
 			<div class="universe-overlay">
-				<OverlayWindow v-model="debugContainer" icon="fa-bug-slash">
+				<OverlayWindow v-model="isDebugContainerDisplayed" icon="fa-bug-slash">
 					<template #body>
 						<OverlayList :items="debugOverlayItems" :is-compact="false">
 							<template #test> test div dom </template>
@@ -152,6 +152,37 @@ export default defineComponent({
 			];
 		},
 
+		isDebugContainerDisplayed: {
+			/**
+			 * Gets debug container display record.
+			 *
+			 * @returns Boolean value
+			 */
+			get(): boolean {
+				const symbolValue: unknown = (this as unknown as ThisVueStore).$store.state.records[
+					this.debugContainerDisplayedSymbol
+				];
+
+				if (symbolValue) {
+					return true;
+				}
+
+				return false;
+			},
+
+			/**
+			 * Sets debug container display record.
+			 *
+			 * @param value - Boolean value to set
+			 */
+			set(value: boolean) {
+				(this as unknown as ThisVueStore).$store.commit("recordMutation", {
+					id: this.debugContainerDisplayedSymbol,
+					value
+				});
+			}
+		},
+
 		/**
 		 * Main toolbar menus.
 		 *
@@ -246,7 +277,13 @@ export default defineComponent({
 						}
 					},
 					{
+						/**
+						 * Click debug.
+						 */
+						clickRecordIndex: this.debugContainerDisplayedSymbol,
+
 						icon: "fa-bug-slash",
+
 						name: "Debug",
 
 						/**
@@ -287,6 +324,7 @@ export default defineComponent({
 			ItemType: OverlayListItemEntryType,
 			OverlayListType,
 			debugContainer: false,
+			debugContainerDisplayedSymbol: Symbol("debug-container-displayed"),
 			hpColor: new Color("#1F8C2F"),
 			isRightClickOverlayDisplayed: true,
 			mpColor: new Color("#051DE8"),
@@ -337,6 +375,12 @@ export default defineComponent({
 					level: LogLevel.Error,
 					message: `Click callback does not exist in menu(menuId="${menuId}", itemId="${itemId}")`
 				});
+			}
+
+			const clickRecordIndex: symbol | string | undefined =
+				this.mainToolbar.menus[menuId]?.items[itemId]?.clickRecordIndex;
+			if (clickRecordIndex) {
+				this.isDebugContainerDisplayed = true;
 			}
 		},
 

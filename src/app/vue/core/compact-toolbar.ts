@@ -70,6 +70,11 @@ export type CompactToolbarMenu = {
 						 * Click callback.
 						 */
 						onClick?: () => void;
+
+						/**
+						 * Symbol to index records state to change on click.
+						 */
+						clickRecordIndex?: string | symbol;
 					}
 			  >
 			: never
