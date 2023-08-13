@@ -2,13 +2,8 @@
 <template>
 	<!-- Force icon show if no name -->
 	<OverlayListItemAssembler v-bind="assemblerProps">
-		<!-- Inline slot; Omit from display if no data given -->
-		<template v-if="data || uiActions.length > 0" #inline>
-			<!-- Density from list is not passed through into chip -->
-			<VChip v-if="data" :density="isCompact ? 'compact' : 'default'">
-				{{ data }}
-			</VChip>
-
+		<!-- Inline slot; Omit from display if no actions given -->
+		<template v-if="uiActions.length > 0" #inline>
 			<VBtnGroup v-if="uiActions.length > 0">
 				<VBtn
 					v-for="(uiAction, uiActionKey) in uiActions"
@@ -23,7 +18,7 @@
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
-import { VBtn, VBtnGroup, VChip, VIcon } from "vuetify/components";
+import { VBtn, VBtnGroup, VIcon } from "vuetify/components";
 import {
 	OverlayContentUiActionParam,
 	overlayListChildSharedProps,
@@ -40,7 +35,6 @@ export default defineComponent({
 		OverlayListItemAssembler,
 		VBtn,
 		VBtnGroup,
-		VChip,
 		VIcon
 	},
 
@@ -70,12 +64,6 @@ export default defineComponent({
 		...overlayListSharedProps,
 		...overlayListChildSharedProps,
 		...overlayListItemNarrowProps,
-		// Will be omitted from display
-		// eslint-disable-next-line vue/require-default-prop
-		data: {
-			required: false,
-			type: [String, Number]
-		},
 
 		uiActions: {
 			default: new Array<OverlayContentUiActionParam>(),

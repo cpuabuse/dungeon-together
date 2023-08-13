@@ -32,7 +32,6 @@ import { VList } from "vuetify/components";
 import {
 	OverlayListItemEntryType,
 	OverlayListItems,
-	overlayListSharedEmits,
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
@@ -53,7 +52,15 @@ export default defineComponent({
 		 * @returns Whether if hidden caret is displayed if missing
 		 */
 		isHiddenCaretDisplayedIfMissing(): boolean {
-			return this.items.some(itemElement => itemElement.type === OverlayListItemEntryType.Tab && itemElement?.data);
+			return this.items.some(
+				itemElement =>
+					itemElement?.data &&
+					(
+						[OverlayListItemEntryType.Tab, OverlayListItemEntryType.Uuid, OverlayListItemEntryType.List] as Array<
+							OverlayListItemEntryType | undefined
+						>
+					).includes(itemElement.type)
+			);
 		},
 
 		/**
@@ -66,7 +73,6 @@ export default defineComponent({
 		}
 	},
 
-	emits: overlayListSharedEmits,
 	name: "OverlayList",
 
 	/**

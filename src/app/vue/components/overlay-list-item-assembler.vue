@@ -20,8 +20,15 @@
 
 				<VSpacer />
 
-				<VCol v-if="$slots.inline" cols="auto" :class="{ 'pr-0': isCaretDisplayed }">
+				<VCol v-if="$slots.inline" cols="auto">
 					<slot name="inline" />
+				</VCol>
+
+				<VCol v-if="data" cols="auto">
+					<!-- Density from list is not passed through into chip -->
+					<VChip :density="isCompact ? 'compact' : 'default'">
+						{{ data }}
+					</VChip>
 				</VCol>
 
 				<VCol v-if="isCaretDisplayed" cols="auto" class="overlay-content-item-caret pl-0">
@@ -39,7 +46,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { VCol, VIcon, VListItemTitle, VRow, VSpacer } from "vuetify/components";
+import { VChip, VCol, VIcon, VListItemTitle, VRow, VSpacer } from "vuetify/components";
 import {
 	OverlayListType,
 	overlayListChildSharedProps,
@@ -53,6 +60,7 @@ import OverlayContentItemWrapper from "./overlay-list-item-wrapper.vue";
 export default defineComponent({
 	components: {
 		OverlayContentItemWrapper,
+		VChip,
 		VCol,
 		VIcon,
 		VListItemTitle,
@@ -97,7 +105,7 @@ export default defineComponent({
 		 * @returns Whether the item is displayed as a menu
 		 */
 		isCaretDisplayed(): boolean {
-			return (!!this.$slots.content && this.isMenu) || this.isHiddenCaretDisplayedIfMissing;
+			return (!!this.$slots.content || this.isHiddenCaretDisplayedIfMissing) && this.isMenu;
 		},
 
 		/**
@@ -115,7 +123,7 @@ export default defineComponent({
 		 * @returns Whether header is empty
 		 */
 		isHeaderEmpty(): boolean {
-			return !this.icon && !this.name && !this.$slots.inline;
+			return !this.icon && !this.name && !this.$slots.inline && !this.data;
 		},
 
 		/**

@@ -11,21 +11,15 @@
 	<!-- Menu -->
 	<template v-if="isMenu">
 		<OverlayListItemList
-			:items="menuItems"
-			:icon="icon"
-			:name="name"
-			:is-hidden-icon-displayed-if-missing="isHiddenIconDisplayedIfMissing"
-			:content-type="contentType"
-			:is-hidden-caret-displayed-if-missing="isHiddenCaretDisplayedIfMissing"
+			v-bind="{ items: menuItems, ...assemblerProps }"
 			@ui-action="emitUiAction"
 		></OverlayListItemList>
 	</template>
 
 	<OverlayListItemAssembler v-else v-bind="assemblerProps" @ui-action="emitUiAction">
-		tab
 		<!-- Content slot --->
 		<template #content>
-			<!-- Block -->
+			<!-- Block; Only name is used, rest is ignored -->
 			<VTabs v-model="activeTabId">
 				<VTab v-for="(tab, tabKey) in tabs" :key="tabKey" :value="tabKey">{{ tab.name }}</VTab>
 			</VTabs>

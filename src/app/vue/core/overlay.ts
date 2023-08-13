@@ -62,11 +62,6 @@ type OverlayListItemEntrySharedRecords = {
 	 * Informational list type.
 	 */
 	type?: OverlayListItemEntryType;
-
-	/**
-	 * Data value.
-	 */
-	data?: string | number;
 } & OverlayListItemNarrowProps;
 
 /**
@@ -293,6 +288,11 @@ export enum OverlayListType {
 // Inferring type for props
 // eslint-disable-next-line @typescript-eslint/typedef
 export const overlayListItemNarrowProps = {
+	data: {
+		required: false,
+		type: String
+	},
+
 	description: {
 		required: false,
 		type: String
@@ -427,6 +427,7 @@ export function useOverlayListItemShared({
 	const assemblerProps = computed((): ExtractPropsFromComponentClass<typeof OverlayListItemAssembler> => {
 		return {
 			contentType: props.contentType,
+			data: props.data,
 			icon: props.icon,
 			isHiddenCaretDisplayedIfMissing: props.isHiddenCaretDisplayedIfMissing,
 			isHiddenIconDisplayedIfMissing: props.isHiddenIconDisplayedIfMissing,
