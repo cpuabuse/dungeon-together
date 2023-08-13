@@ -35,6 +35,11 @@ export type CompactToolbarMenuItem = {
 	 * Icon.
 	 */
 	icon?: string;
+
+	/**
+	 * Symbol to index records state to change on click.
+	 */
+	clickRecordIndex?: string | symbol;
 } & (
 	| {
 			/**

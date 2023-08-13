@@ -20,7 +20,7 @@
 		<VExpandXTransition v-for="(itemGroup, itemGroupKey) in itemGroups" :key="itemGroupKey">
 			<VToolbarItems v-show="itemGroup.isPinned || isExtended">
 				<template v-for="(item, itemKey) in itemGroup.items" :key="itemKey">
-					<VBtn v-if="item.mode === 'click'" :stacked="hasLabels" @click="clickItem(item)">
+					<VBtn v-if="item.mode === 'click' || item.clickRecordIndex" :stacked="hasLabels" @click="clickItem(item)">
 						<VIcon :icon="item.icon ?? 'fa-carrot'" size="x-large" />
 						<span v-show="hasLabels" class="button-text">{{ item.name }}</span>
 					</VBtn>
@@ -37,6 +37,7 @@
 <script lang="ts">
 import { defineComponent, nextTick } from "vue";
 import { VBtn, VExpandXTransition, VIcon, VToolbar, VToolbarItems } from "vuetify/components";
+import { ThisVueStore } from "../client/gui";
 import {
 	CompactToolbarMenuItem,
 	compactToolbarMenuBaseProps,
@@ -159,17 +160,14 @@ export default defineComponent({
 		/**
 		 * Process item clicked.
 		 *
-		 * @param id - Item id
+		 * @param param - Destructured parameter
 		 */
-		clickItem({
-			id
-		}: {
-			/**
-			 * Item ID.
-			 */
-			id: number;
-		}) {
+		clickItem({ id, clickRecordIndex }: IndexedItem) {
 			this.useItem({ id });
+			(this as unknown as ThisVueStore).$store.commit("recordMutation", {
+				id: clickRecordIndex,
+				value: true
+			});
 			this.$emit("click", { itemId: id });
 		},
 

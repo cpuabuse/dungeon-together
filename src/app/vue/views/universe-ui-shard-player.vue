@@ -1,8 +1,7 @@
-<!-- Universe UI per player -->
+<!-- Universe UI per shard per player -->
 <template>
 	<div>Player: {{ player.playerUuid }}</div>
 </template>
-
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import { ClientPlayer } from "../../client/connection";

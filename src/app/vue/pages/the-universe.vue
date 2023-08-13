@@ -1,7 +1,6 @@
 <template>
 	<VApp style="background: none" full-height>
 		<div class="app-content">
-			<UniverseUi />
 			<div class="universe">Hello: {{ what }}</div>
 			<tsxtest />
 			<OverlayClick v-model="isRightClickOverlayDisplayed" :x="1000" :y="200">
@@ -52,6 +51,7 @@
 				</template>
 			</div>
 
+			<UniverseUi />
 			<CompactToolbar :menus="mainToolbarMenus" @click="mainToolbarClick" />
 		</div>
 	</VApp>
