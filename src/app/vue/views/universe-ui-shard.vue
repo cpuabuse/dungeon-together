@@ -5,6 +5,7 @@
 		:key="playerUuid"
 		:shard="shard"
 		:player="player"
+		@shift-player-notifications="() => onShiftPlayerNotifications(player)"
 	/>
 </template>
 
@@ -55,6 +56,17 @@ export default defineComponent({
 	emits: ["update:modelValue"],
 
 	methods: {
+		/**
+		 * Method to shift player notifications.
+		 *
+		 * @param player - Player
+		 */
+		onShiftPlayerNotifications(player: ClientPlayer): void {
+			// We are mutating notifications which is not directly a player prop
+			// eslint-disable-next-line vue/no-mutating-props
+			player.notificationIds.shift();
+		},
+
 		/**
 		 * Update player entris data.
 		 */

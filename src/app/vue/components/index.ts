@@ -16,4 +16,7 @@
 export { default as OverlayClick } from "./overlay-click.vue";
 export { default as OverlayList } from "./overlay-list.vue";
 export { default as OverlayWindow } from "./overlay-window.vue";
+
+// Status notification
+export { default as StatusNotification } from "./status-notification.vue";
 /* eslint-enable jsdoc/require-jsdoc */
