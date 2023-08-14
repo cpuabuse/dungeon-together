@@ -7,7 +7,7 @@
 	<OverlayContentItemWrapper :content-type="contentType" :list-item-class="{ 'pr-1': isCaretDisplayed }">
 		<template v-if="hasHeader" #header>
 			<!-- `VRow` doesn't receive list's density -->
-			<VRow align="center" :dense="isCompact">
+			<VRow align="center" :dense="isCompact" :justify="isHeaderCentered ? 'center' : undefined">
 				<VCol v-if="effectiveIcon" cols="auto">
 					<VIcon :icon="effectiveIcon" class="overlay-content-item-icon" />
 				</VCol>
@@ -18,7 +18,7 @@
 					</VListItemTitle>
 				</VCol>
 
-				<VSpacer />
+				<VSpacer v-if="!isHeaderCentered" />
 
 				<VCol v-if="$slots.inline" cols="auto">
 					<slot name="inline" />
@@ -148,7 +148,13 @@ export default defineComponent({
 	props: {
 		...overlayListSharedProps,
 		...overlayListChildSharedProps,
-		...overlayListItemNarrowProps
+		...overlayListItemNarrowProps,
+
+		// Is header centered
+		isHeaderCentered: {
+			default: false,
+			type: Boolean
+		}
 	},
 
 	/**

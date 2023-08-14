@@ -144,7 +144,9 @@ export default defineComponent({
 		mainToolbarMenus(): Array<CompactToolbarMenuBaseProps> {
 			return [
 				{
+					icon: "fa-gear",
 					items: [{ clickRecordIndex: this.debugMenuDisplaySymbol, icon: "fa-bug-slash", name: "Debug" }],
+					maxPinnedAmount: 0,
 					name: "System"
 				}
 			];

@@ -35,7 +35,7 @@ classDiagram
 	class PlayerEntry{
 		<<interface>>
 		+Uuid shardUuid
-		+ServerPlayer player
+		+CorePlayer player
 	}
 	CoreShard "1" <-- "1" PlayerEntry : references
 	PlayerEntry "1" *-- "1" CorePlayer : composes
