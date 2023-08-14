@@ -2,183 +2,28 @@
 <template>
 	<UniverseUiClick cell-uuid="nothing" />
 	<!-- Undefined assertion since index used in iteration -->
+
 	<UniverseUiShard
-		v-for="([shardUuid, {shard}], index) in (shardEntries as ShardEntries)"
+		v-for="([shardUuid, {shard}], index) in (shardEntries as UniverseUiShardEntries)"
 		:key="shardUuid"
-		v-model="(shardEntries as ShardEntries)[index]![1].model"
+		v-model="(shardEntries as UniverseUiShardEntries)[index]![1].model"
 		:shard="shard"
 	/>
-	<CompactToolbar :menus="mainToolbarMenus" />
 
-	<OverlayWindow v-model="isDebugMenuDisplayed" icon="fa-bug-slash">
-		<template #body>
-			<OverlayList :items="debugWindowItems" :is-compact="false">
-				<template #test> test div dom </template>
-			</OverlayList>
-		</template>
-	</OverlayWindow>
+	<UniverseUiToolbar :shard-entries="(shardEntries as UniverseUiShardEntries)" />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { ThisVueStore } from "../../client/gui";
-import { ClientShard } from "../../client/shard";
 import { Uuid } from "../../common/uuid";
-import CompactToolbar from "../compact-toolbar.vue";
-import { OverlayList, OverlayWindow } from "../components";
-import { CompactToolbarMenuBaseProps } from "../core/compact-toolbar";
-import { OverlayListItemEntry, OverlayListItemEntryType, OverlayListTabs } from "../core/overlay";
-import { UniverseUiShardModel } from "../core/universe-ui";
+import { UniverseUiShardEntries, UniverseUiShardModel } from "../core/universe-ui";
 import UniverseUiClick from "./universe-ui-click.vue";
 import UniverseUiShard from "./universe-ui-shard.vue";
-
-/**
- * Shard entries data type, to restore lost unref class type information.
- */
-type ShardEntries = Array<
-	[
-		Uuid,
-		{
-			/**
-			 * Shard.
-			 */
-			shard: ClientShard;
-
-			/**
-			 * Model.
-			 *
-			 * @remarks
-			 * Single model for perhaps multiple values is used, as it is already an iteration, and individual variables would only add complexity.
-			 */
-			model: UniverseUiShardModel;
-		}
-	]
->;
+import UniverseUiToolbar from "./universe-ui-toolbar.vue";
 
 export default defineComponent({
-	components: { CompactToolbar, OverlayList, OverlayWindow, UniverseUiClick, UniverseUiShard },
-
-	computed: {
-		/**
-		 * Tab content for debug for all shards.
-		 *
-		 * @returns Tab content
-		 */
-		debugItemsShardTabs(): OverlayListTabs {
-			// False negative
-			// eslint-disable-next-line @typescript-eslint/typedef
-			return Array.from(this.shardEntries).map(([, { shard, model }]) => {
-				return {
-					items: [
-						{ name: "Shard UUID", type: OverlayListItemEntryType.Uuid, uuid: shard.shardUuid },
-						{
-							data: model.players.length.toString(),
-							items: model.players.map(player => {
-								return {
-									name: player.playerName,
-									type: OverlayListItemEntryType.Uuid,
-									uuid: player.playerUuid
-								};
-							}),
-							name: "Players",
-							type: OverlayListItemEntryType.List
-						}
-					],
-					name: shard.shardName
-				};
-			});
-		},
-
-		/**
-		 * Items for display in debug window.
-		 *
-		 * @returns Window items
-		 */
-		debugWindowItems(): Array<OverlayListItemEntry> {
-			return [
-				{
-					data: this.shardEntries.length.toString(),
-					name: "Shards",
-					tabs: this.debugItemsShardTabs,
-					type: OverlayListItemEntryType.Tab
-				}
-			];
-		},
-
-		isDebugMenuDisplayed: {
-			/**
-			 * Gets debug container display record.
-			 *
-			 * @returns Boolean value
-			 */
-			get(): boolean {
-				const symbolValue: unknown = (this as unknown as ThisVueStore).$store.state.records[
-					this.debugMenuDisplaySymbol
-				];
-
-				if (symbolValue) {
-					return true;
-				}
-
-				return false;
-			},
-
-			/**
-			 * Sets debug container display record.
-			 *
-			 * @param value - Boolean value to set
-			 */
-			set(value: boolean) {
-				(this as unknown as ThisVueStore).$store.commit("recordMutation", {
-					id: this.debugMenuDisplaySymbol,
-					value
-				});
-			}
-		},
-
-		/**
-		 * Menus for main toolbar.
-		 *
-		 * @returns Array of menus
-		 */
-		mainToolbarMenus(): Array<CompactToolbarMenuBaseProps> {
-			return [
-				...this.shardMenus,
-				{
-					icon: "fa-gear",
-					items: [{ clickRecordIndex: this.debugMenuDisplaySymbol, icon: "fa-bug-slash", name: "Debug" }],
-					maxPinnedAmount: 0,
-					name: "System"
-				}
-			];
-		},
-
-		/**
-		 * Menus per shard.
-		 *
-		 * @returns Array of menus
-		 */
-		shardMenus(): Array<CompactToolbarMenuBaseProps> {
-			// False negative
-			// eslint-disable-next-line @typescript-eslint/typedef
-			return this.shardEntries.map(([, { shard, model }]) => {
-				return {
-					icon: "fa-globe",
-					items: model.players.map(player => {
-						return {
-							clickRecordIndex: "test",
-							icon: "fa-person",
-							name: "Player",
-							nameSubtext: player.playerName
-						};
-					}),
-					maxPinnedAmount: 1,
-					name: "Shard",
-					nameSubtext: shard.shardName
-				};
-			});
-		}
-	},
+	components: { UniverseUiClick, UniverseUiShard, UniverseUiToolbar },
 
 	/**
 	 * Created callback.
@@ -205,7 +50,7 @@ export default defineComponent({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let data = {
 			debugMenuDisplaySymbol: Symbol("debug-menu-display"),
-			shardEntries: new Array() as ShardEntries,
+			shardEntries: new Array() as UniverseUiShardEntries,
 			universe: (this as unknown as ThisVueStore).$store.state.universe,
 			unsubscribe: null as (() => void) | null
 		};
@@ -224,12 +69,12 @@ export default defineComponent({
 			const modelMap: Map<Uuid, UniverseUiShardModel> = new Map<Uuid, UniverseUiShardModel>(
 				// False negative
 				// eslint-disable-next-line @typescript-eslint/typedef
-				(this.shardEntries as ShardEntries).map(([shardUuid, { model }]) => {
+				(this.shardEntries as UniverseUiShardEntries).map(([shardUuid, { model }]) => {
 					return [shardUuid, model];
 				})
 			);
 
-			(this.shardEntries as ShardEntries) =
+			(this.shardEntries as UniverseUiShardEntries) =
 				// False negative
 				// eslint-disable-next-line @typescript-eslint/typedef
 				Array.from(this.universe.shards.entries()).map(([shardUuid, shard]) => {

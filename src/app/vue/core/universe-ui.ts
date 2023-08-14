@@ -4,6 +4,8 @@
 */
 
 import { ClientPlayer } from "../../client/connection";
+import { ClientShard } from "../../client/shard";
+import { Uuid } from "../../common/uuid";
 
 /**
  * Universe UI related types.
@@ -20,3 +22,26 @@ export type UniverseUiShardModel = {
 	 */
 	players: Array<ClientPlayer>;
 };
+
+/**
+ * Shard entries data type, to restore lost unref class type information.
+ */
+export type UniverseUiShardEntries = Array<
+	[
+		Uuid,
+		{
+			/**
+			 * Shard.
+			 */
+			shard: ClientShard;
+
+			/**
+			 * Model.
+			 *
+			 * @remarks
+			 * Single model for perhaps multiple values is used, as it is already an iteration, and individual variables would only add complexity.
+			 */
+			model: UniverseUiShardModel;
+		}
+	]
+>;
