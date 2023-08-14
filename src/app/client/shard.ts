@@ -43,6 +43,7 @@ import {
 	upSymbol
 } from "./input";
 import { ClientOptions, clientOptions } from "./options";
+import { uuidToName } from "./text";
 
 /**
  * Created a client shard class.
@@ -83,7 +84,7 @@ export function ClientShardFactory({
 		 */
 		public get shardName(): string {
 			// TODO: Add shard dictionary sync
-			return this.shardUuid.substring(0, 8);
+			return uuidToName({ uuid: this.shardUuid });
 		}
 
 		/**

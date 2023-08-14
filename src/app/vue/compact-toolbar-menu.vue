@@ -22,11 +22,17 @@
 				<template v-for="(item, itemKey) in itemGroup.items" :key="itemKey">
 					<VBtn v-if="item.mode === 'click' || item.clickRecordIndex" :stacked="hasLabels" @click="clickItem(item)">
 						<VIcon :icon="item.icon ?? 'fa-carrot'" size="x-large" />
-						<span v-show="hasLabels" class="button-text">{{ item.name }}</span>
+						<span v-show="hasLabels" class="text-truncate button-text">{{ item.name }}</span>
+						<span v-show="hasLabels" v-if="item.nameSubtext" class="text-truncate button-text">{{
+							item.nameSubtext
+						}}</span>
 					</VBtn>
 					<VBtn v-else disabled :stacked="hasLabels">
 						<VIcon :icon="item.icon ?? 'fa-carrot'" size="x-large" />
-						<span v-show="hasLabels" class="button-text">{{ item.name }}</span>
+						<span v-show="hasLabels" class="text-truncate button-text">{{ item.name }}</span>
+						<span v-show="hasLabels" v-if="item.nameSubtext" class="text-truncate button-text">{{
+							item.nameSubtext
+						}}</span>
 					</VBtn>
 				</template>
 			</VToolbarItems>

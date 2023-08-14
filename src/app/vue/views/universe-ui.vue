@@ -73,9 +73,9 @@ export default defineComponent({
 						{ name: "Shard UUID", type: OverlayListItemEntryType.Uuid, uuid: shard.shardUuid },
 						{
 							data: model.players.length.toString(),
-							items: model.players.map((player, index) => {
+							items: model.players.map(player => {
 								return {
-									name: `Player ${index} UUID`,
+									name: player.playerName,
 									type: OverlayListItemEntryType.Uuid,
 									uuid: player.playerUuid
 								};
@@ -143,6 +143,7 @@ export default defineComponent({
 		 */
 		mainToolbarMenus(): Array<CompactToolbarMenuBaseProps> {
 			return [
+				...this.shardMenus,
 				{
 					icon: "fa-gear",
 					items: [{ clickRecordIndex: this.debugMenuDisplaySymbol, icon: "fa-bug-slash", name: "Debug" }],
@@ -150,6 +151,32 @@ export default defineComponent({
 					name: "System"
 				}
 			];
+		},
+
+		/**
+		 * Menus per shard.
+		 *
+		 * @returns Array of menus
+		 */
+		shardMenus(): Array<CompactToolbarMenuBaseProps> {
+			// False negative
+			// eslint-disable-next-line @typescript-eslint/typedef
+			return this.shardEntries.map(([, { shard, model }]) => {
+				return {
+					icon: "fa-globe",
+					items: model.players.map(player => {
+						return {
+							clickRecordIndex: "test",
+							icon: "fa-person",
+							name: "Player",
+							nameSubtext: player.playerName
+						};
+					}),
+					maxPinnedAmount: 1,
+					name: "Shard",
+					nameSubtext: shard.shardName
+				};
+			});
 		}
 	},
 

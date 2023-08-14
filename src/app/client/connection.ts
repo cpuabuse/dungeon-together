@@ -42,6 +42,7 @@ import { ClientEntity } from "./entity";
 import { ClientGrid } from "./grid";
 import { ClientOptions } from "./options";
 import { ClientShard } from "./shard";
+import { uuidToName } from "./text";
 import { ClientToast } from "./toast";
 import { ClientUniverse } from "./universe";
 
@@ -159,6 +160,16 @@ const directions: {
  * Client player.
  */
 export class ClientPlayer extends CorePlayer<ClientConnection> {
+	/**
+	 * Player name for display.
+	 *
+	 * @returns Player name
+	 */
+	public get playerName(): string {
+		// TODO: Add player dictionary sync
+		return uuidToName({ uuid: this.playerUuid });
+	}
+
 	/**
 	 * Client connection.
 	 */

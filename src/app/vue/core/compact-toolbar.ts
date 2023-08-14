@@ -32,6 +32,11 @@ export type CompactToolbarMenuItem = {
 	name: string;
 
 	/**
+	 * Name subtext.
+	 */
+	nameSubtext?: string;
+
+	/**
 	 * Icon.
 	 */
 	icon?: string;
