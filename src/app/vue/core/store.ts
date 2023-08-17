@@ -40,13 +40,76 @@ export function useRecords() {
 		 * ID.
 		 */
 		id: string | symbol;
+
 		/**
 		 * Value.
 		 */
-		value: boolean;
+		value: any;
 	}): void {
 		return store.commit("recordMutation", v);
 	}
 
-	return { records, setRecord };
+	/**
+	 * Gets the record from the store, or default value.
+	 *
+	 * @param v - Destructured parameter
+	 * @returns Void
+	 */
+	function getBooleanRecord({
+		id,
+		defaultValue = false
+	}: {
+		/**
+		 * ID.
+		 */
+		id: string | symbol | undefined;
+
+		/**
+		 * Value.
+		 */
+		defaultValue?: boolean;
+	}): boolean {
+		return id ? Boolean(records.value[id]) : defaultValue;
+	}
+
+	/**
+	 * Toggles boolean record, or sets the default value.
+	 *
+	 * @param param - Destructured parameter
+	 * @returns Boolean if toggle was successful, false if set to default
+	 */
+	function toggleBooleanRecord({
+		id,
+		defaultValue = true
+	}: {
+		/**
+		 * ID.
+		 */
+		id: string | symbol | undefined;
+
+		/**
+		 * Value.
+		 */
+		defaultValue?: boolean;
+	}): boolean {
+		let value: boolean = defaultValue;
+		let result: boolean = false;
+
+		if (id) {
+			const record: unknown = records.value[id];
+			if (typeof record === "boolean") {
+				value = !record;
+				result = true;
+			}
+
+			setRecord({
+				id,
+				value
+			});
+		}
+
+		return result;
+	}
+
+	return { getBooleanRecord, records, setRecord, toggleBooleanRecord };
 }

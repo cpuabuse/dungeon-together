@@ -27,17 +27,11 @@
 			<VToolbarItems v-show="itemGroup.isPinned || isExtended">
 				<template v-for="(item, itemKey) in itemGroup.items" :key="itemKey">
 					<VBtn
-						v-if="item.mode === 'click' || item.clickRecordIndex"
+						:disabled="!(item.mode === 'click' || item.clickRecordIndex)"
 						:stacked="hasLabels"
+						:color="getBooleanRecord({ id: item.clickRecordIndex }) ? 'secondary' : 'default'"
 						@click="() => clickItem(item)"
 					>
-						<VIcon :icon="item.icon ?? 'fa-carrot'" size="x-large" />
-						<span v-show="hasLabels" class="text-truncate button-text">{{ item.name }}</span>
-						<span v-show="hasLabels" v-if="item.nameSubtext" class="text-truncate button-text">{{
-							item.nameSubtext
-						}}</span>
-					</VBtn>
-					<VBtn v-else disabled :stacked="hasLabels">
 						<VIcon :icon="item.icon ?? 'fa-carrot'" size="x-large" />
 						<span v-show="hasLabels" class="text-truncate button-text">{{ item.name }}</span>
 						<span v-show="hasLabels" v-if="item.nameSubtext" class="text-truncate button-text">{{
@@ -53,7 +47,6 @@
 <script lang="ts">
 import { defineComponent, nextTick } from "vue";
 import { VBtn, VExpandXTransition, VIcon, VToolbar, VToolbarItems, VTooltip } from "vuetify/components";
-import { ThisVueStore, UniverseStore } from "../client/gui";
 import { defaultDelayMs } from "./common/animation";
 import {
 	CompactToolbarMenuItem,
@@ -197,19 +190,7 @@ export default defineComponent({
 		 * @param param - Destructured parameter
 		 */
 		clickItem({ id, clickRecordIndex }: IndexedItem) {
-			const store: UniverseStore = (this as unknown as ThisVueStore).$store;
-			let value: boolean = true;
-			if (clickRecordIndex) {
-				const record: unknown = store.state.records[clickRecordIndex];
-				if (typeof record === "boolean") {
-					value = !record;
-				}
-
-				this.setRecord({
-					id: clickRecordIndex,
-					value
-				});
-			}
+			this.toggleBooleanRecord({ id: clickRecordIndex });
 
 			this.useItem({ id });
 			this.$emit("click", { itemId: id });
@@ -310,7 +291,7 @@ export default defineComponent({
 	font-size: 0.6em;
 
 	/* Max width will be based on font size; Simplest and most robust way to make same length buttons */
-	width: 6em;
+	width: 6.5em;
 }
 </style>
 ./core ./core/compact-toolbar
