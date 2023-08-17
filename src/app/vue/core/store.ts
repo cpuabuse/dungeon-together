@@ -39,7 +39,7 @@ export function useRecords() {
 		/**
 		 * ID.
 		 */
-		id: string;
+		id: string | symbol;
 		/**
 		 * Value.
 		 */

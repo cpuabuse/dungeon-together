@@ -53,13 +53,14 @@
 <script lang="ts">
 import { defineComponent, nextTick } from "vue";
 import { VBtn, VExpandXTransition, VIcon, VToolbar, VToolbarItems, VTooltip } from "vuetify/components";
-import { ThisVueStore } from "../client/gui";
+import { ThisVueStore, UniverseStore } from "../client/gui";
 import { defaultDelayMs } from "./common/animation";
 import {
 	CompactToolbarMenuItem,
 	compactToolbarMenuBaseProps,
 	compactToolbarSharedMenuProps
 } from "./core/compact-toolbar";
+import { useRecords } from "./core/store";
 
 /**
  * Item with meta.
@@ -196,11 +197,21 @@ export default defineComponent({
 		 * @param param - Destructured parameter
 		 */
 		clickItem({ id, clickRecordIndex }: IndexedItem) {
+			const store: UniverseStore = (this as unknown as ThisVueStore).$store;
+			let value: boolean = true;
+			if (clickRecordIndex) {
+				const record: unknown = store.state.records[clickRecordIndex];
+				if (typeof record === "boolean") {
+					value = !record;
+				}
+
+				this.setRecord({
+					id: clickRecordIndex,
+					value
+				});
+			}
+
 			this.useItem({ id });
-			(this as unknown as ThisVueStore).$store.commit("recordMutation", {
-				id: clickRecordIndex,
-				value: true
-			});
 			this.$emit("click", { itemId: id });
 		},
 
@@ -265,6 +276,17 @@ export default defineComponent({
 		 * Menu name.
 		 */
 		isForceCollapsed: { default: false, type: Boolean }
+	},
+
+	/**
+	 * Setup hook.
+	 *
+	 * @returns Record operations and shared props
+	 */
+	// Infer setup
+	// eslint-disable-next-line @typescript-eslint/typedef
+	setup() {
+		return useRecords();
 	},
 
 	watch: {
