@@ -10,10 +10,7 @@
 	<!-- Key is bound to array, so that change of array triggers redraw of tabs, effectively displaying new window item, since the window item previously displayed might have been redrawn due to change of it's own contents -->
 	<!-- Menu -->
 	<template v-if="isMenu">
-		<OverlayListItemList
-			v-bind="{ items: menuItems, ...assemblerProps }"
-			@ui-action="emitUiAction"
-		></OverlayListItemList>
+		<OverlayListItemList :items="menuItems" v-bind="assemblerProps" @ui-action="emitUiAction"></OverlayListItemList>
 	</template>
 
 	<OverlayListItemAssembler v-else v-bind="assemblerProps" is-header-centered @ui-action="emitUiAction">

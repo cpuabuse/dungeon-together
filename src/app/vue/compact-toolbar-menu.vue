@@ -5,22 +5,32 @@
 	<VToolbar :density="hasLabels ? 'default' : 'compact'" rounded="xl" class="w-auto">
 		<!-- `tonal` for toggler to stand out -->
 		<VToolbarItems variant="tonal">
-			<VBtn
-				:stacked="hasLabels"
-				:color="isHighlightedOnOpen && isExtended ? 'primary' : 'default'"
-				@click="toggleExtended()"
-			>
-				<VIcon size="x-large" :icon="icon" />
-				<!-- Menu indicator also scales to match icon relative size -->
-				<span v-show="hasLabels" class="text-truncate button-text">{{ name }}</span>
-				<span v-show="hasLabels" v-if="nameSubtext" class="text-truncate button-text">{{ nameSubtext }}</span>
-			</VBtn>
+			<VTooltip :text="tooltipText" :open-delay="openDelay" :location="tooltipLocation">
+				<template #activator="{ props }">
+					<VBtn
+						:stacked="hasLabels"
+						:color="isHighlightedOnOpen && isExtended ? 'primary' : 'default'"
+						v-bind="props"
+						:disabled="itemGroups.length < 1"
+						@click="toggleExtended"
+					>
+						<VIcon size="x-large" :icon="icon" />
+						<!-- Menu indicator also scales to match icon relative size -->
+						<span v-show="hasLabels" class="text-truncate button-text">{{ name }}</span>
+						<span v-show="hasLabels" v-if="nameSubtext" class="text-truncate button-text">{{ nameSubtext }}</span>
+					</VBtn>
+				</template>
+			</VTooltip>
 		</VToolbarItems>
 
 		<VExpandXTransition v-for="(itemGroup, itemGroupKey) in itemGroups" :key="itemGroupKey">
 			<VToolbarItems v-show="itemGroup.isPinned || isExtended">
 				<template v-for="(item, itemKey) in itemGroup.items" :key="itemKey">
-					<VBtn v-if="item.mode === 'click' || item.clickRecordIndex" :stacked="hasLabels" @click="clickItem(item)">
+					<VBtn
+						v-if="item.mode === 'click' || item.clickRecordIndex"
+						:stacked="hasLabels"
+						@click="() => clickItem(item)"
+					>
 						<VIcon :icon="item.icon ?? 'fa-carrot'" size="x-large" />
 						<span v-show="hasLabels" class="text-truncate button-text">{{ item.name }}</span>
 						<span v-show="hasLabels" v-if="item.nameSubtext" class="text-truncate button-text">{{
@@ -42,8 +52,9 @@
 
 <script lang="ts">
 import { defineComponent, nextTick } from "vue";
-import { VBtn, VExpandXTransition, VIcon, VToolbar, VToolbarItems } from "vuetify/components";
+import { VBtn, VExpandXTransition, VIcon, VToolbar, VToolbarItems, VTooltip } from "vuetify/components";
 import { ThisVueStore } from "../client/gui";
+import { defaultDelayMs } from "./common/animation";
 import {
 	CompactToolbarMenuItem,
 	compactToolbarMenuBaseProps,
@@ -82,7 +93,8 @@ export default defineComponent({
 		VExpandXTransition,
 		VIcon,
 		VToolbar,
-		VToolbarItems
+		VToolbarItems,
+		VTooltip
 	},
 
 	/**
@@ -136,6 +148,15 @@ export default defineComponent({
 
 				return result;
 			}, [] as Array<ItemGroup>);
+		},
+
+		/**
+		 * Text for a menu button tooltip.
+		 *
+		 * @returns Tooltip string
+		 */
+		tooltipText(): string {
+			return `${this.name}${this.nameSubtext ? ` - ${this.nameSubtext}` : ""}`;
 		}
 	},
 
@@ -154,8 +175,14 @@ export default defineComponent({
 	data() {
 		return {
 			isExtended: false,
+
+			openDelay: defaultDelayMs,
 			// Modification of this property should make sure that values which are items indices are not out of bounds, and are unique
 			pinnedIds: [] as Array<number>,
+
+			// Location for tooltip depends on location of menu and direction
+			tooltipLocation: "top" as const,
+
 			usedQueue: [] as Array<number>
 		};
 	},

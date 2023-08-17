@@ -11,7 +11,7 @@
 			<VMenu v-if="$slots.content" v-model="isMenuOpen" location="end" :close-on-content-click="false">
 				<template #activator="{ props }">
 					<!-- The density will be inherited from `VList` -->
-					<VListItem v-bind="mergeProps(props, { class: listItemClass })">
+					<VListItem v-bind="props" :class="listItemClass">
 						<!-- Header slot -->
 						<!-- Produce prop if expanded -->
 						<slot name="header" :is-expanded="isMenuOpen" />
