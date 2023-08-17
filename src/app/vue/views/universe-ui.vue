@@ -50,7 +50,10 @@ export default defineComponent({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let data = {
 			debugMenuDisplaySymbol: Symbol("debug-menu-display"),
+
+			// This value is expected to be rewritten fully on change by child nodes
 			shardEntries: new Array() as UniverseUiShardEntries,
+
 			universe: (this as unknown as ThisVueStore).$store.state.universe,
 			unsubscribe: null as (() => void) | null
 		};
