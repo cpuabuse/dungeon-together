@@ -2,7 +2,12 @@
 
 <template>
 	<!-- `compact` makes collapse menus without pinned items equal sides, when not stacked (`default` when stacked); Makes extra large icons fit well in both cases -->
-	<VToolbar :density="hasLabels ? 'default' : 'compact'" rounded="xl" class="w-auto">
+	<VToolbar
+		:density="hasLabels ? 'default' : 'compact'"
+		rounded="xl"
+		class="w-auto"
+		:class="{ 'compact-toolbar-menu-has-labels': true }"
+	>
 		<!-- `tonal` for toggler to stand out -->
 		<VToolbarItems variant="tonal">
 			<VTooltip :text="tooltipText" :open-delay="openDelay" :location="tooltipLocation">
@@ -29,14 +34,20 @@
 					<VBtn
 						:disabled="!(item.mode === 'click' || item.clickRecordIndex)"
 						:stacked="hasLabels"
-						:color="getBooleanRecord({ id: item.clickRecordIndex }) ? 'secondary' : 'default'"
+						class="compact-toolbar-menu-item"
 						@click="() => clickItem(item)"
 					>
 						<VIcon :icon="item.icon ?? 'fa-carrot'" size="x-large" />
-						<span v-show="hasLabels" class="text-truncate button-text">{{ item.name }}</span>
-						<span v-show="hasLabels" v-if="item.nameSubtext" class="text-truncate button-text">{{
-							item.nameSubtext
-						}}</span>
+
+						<!-- Labels -->
+						<span
+							v-for="(itemEntry, itemTextIndex) in item.labelEntries"
+							:key="itemTextIndex"
+							class="text-truncate button-text"
+							:class="itemEntry.class"
+						>
+							{{ itemEntry.text }}
+						</span>
 					</VBtn>
 				</template>
 			</VToolbarItems>
@@ -58,7 +69,23 @@ import { useRecords } from "./core/store";
 /**
  * Item with meta.
  */
-type IndexedItem = CompactToolbarMenuItem & Record<"id", number>;
+type IndexedItem = CompactToolbarMenuItem &
+	Record<"id", number> & {
+		/**
+		 * Text entries for under the button.
+		 */
+		labelEntries: Array<{
+			/**
+			 * Text to show under button.
+			 */
+			text: string;
+
+			/**
+			 * Classes to attach to each text element.
+			 */
+			class: Array<string>;
+		}>;
+	};
 
 /**
  * Item(button) group to show/hide together.
@@ -103,7 +130,33 @@ export default defineComponent({
 		 * @returns Array of items with index
 		 */
 		indexedItems(): Array<IndexedItem> {
-			return this.items.map((item, index) => ({ ...item, id: index }));
+			return this.items.map((item, itemIndex) => ({
+				...item,
+				id: itemIndex,
+				labelEntries: this.hasLabels
+					? [item.name, item.nameSubtext]
+							.filter<string>((text: string | undefined): text is string => {
+								return Boolean(text && text.length > 0);
+							})
+							.map((text, textIndex, textArray) => {
+								return {
+									class:
+										textIndex + 1 === textArray.length
+											? [
+													// Only produced when active
+													...(this.getBooleanRecord({ id: item.clickRecordIndex })
+														? ["text-decoration-underline"]
+														: []),
+
+													// Always produced
+													"compact-toolbar-menu-unerline"
+											  ]
+											: [],
+									text
+								};
+							})
+					: []
+			}));
 		},
 
 		/**
@@ -292,6 +345,21 @@ export default defineComponent({
 
 	/* Max width will be based on font size; Simplest and most robust way to make same length buttons */
 	width: 6.5em;
+}
+
+.compact-toolbar-menu-unerline {
+	/* Reserve space for potentially active text */
+	padding-bottom: calc(0.25em - 1px);
+}
+.compact-toolbar-menu-has-labels .compact-toolbar-menu-item {
+	/* Reserve space for potentially active text in parent element, only can happen if labels are tehre */
+	padding-top: calc(0.25em - 1px);
+}
+
+/* Override vuetify, only for active labels */
+.text-decoration-underline.compact-toolbar-menu-unerline {
+	text-decoration-color: rgb(var(--v-theme-primary)) !important;
+	text-decoration-thickness: 0.25em !important;
 }
 </style>
 ./core ./core/compact-toolbar
