@@ -14,6 +14,7 @@
 				<template #activator="{ props }">
 					<div v-bind="props" class="compact-toolbar-tooltip-content-wrapper">
 						<VBtn
+							class="px-1"
 							:stacked="hasLabels"
 							:color="isHighlightedOnOpen && isExtended ? 'primary' : 'default'"
 							:disabled="items.length < 1 || (!isExtended && items.length <= maxPinnedAmount)"
@@ -36,7 +37,7 @@
 					<VBtn
 						:disabled="!(item.mode === 'click' || item.clickRecordIndex)"
 						:stacked="hasLabels"
-						class="compact-toolbar-menu-item"
+						class="compact-toolbar-menu-item px-1"
 						@click="() => clickItem(item)"
 					>
 						<VIcon :icon="item.icon ?? 'fa-carrot'" size="x-large" />
