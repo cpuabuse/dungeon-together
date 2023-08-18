@@ -12,18 +12,20 @@
 		<VToolbarItems variant="tonal">
 			<VTooltip :text="tooltipText" :open-delay="openDelay" :location="tooltipLocation">
 				<template #activator="{ props }">
-					<VBtn
-						:stacked="hasLabels"
-						:color="isHighlightedOnOpen && isExtended ? 'primary' : 'default'"
-						v-bind="props"
-						:disabled="itemGroups.length < 1"
-						@click="toggleExtended"
-					>
-						<VIcon size="x-large" :icon="icon" />
-						<!-- Menu indicator also scales to match icon relative size -->
-						<span v-show="hasLabels" class="text-truncate button-text">{{ name }}</span>
-						<span v-show="hasLabels" v-if="nameSubtext" class="text-truncate button-text">{{ nameSubtext }}</span>
-					</VBtn>
+					<div v-bind="props" class="compact-toolbar-tooltip-content-wrapper">
+						<VBtn
+							:stacked="hasLabels"
+							:color="isHighlightedOnOpen && isExtended ? 'primary' : 'default'"
+							:disabled="items.length < 1 || (!isExtended && items.length <= maxPinnedAmount)"
+							@click="toggleExtended"
+						>
+							<VIcon size="x-large" :icon="icon" />
+
+							<!-- Menu indicator also scales to match icon relative size -->
+							<span v-show="hasLabels" class="text-truncate button-text">{{ name }}</span>
+							<span v-show="hasLabels" v-if="nameSubtext" class="text-truncate button-text">{{ nameSubtext }}</span>
+						</VBtn>
+					</div>
 				</template>
 			</VTooltip>
 		</VToolbarItems>
@@ -361,5 +363,9 @@ export default defineComponent({
 	text-decoration-color: rgb(var(--v-theme-primary)) !important;
 	text-decoration-thickness: 0.25em !important;
 }
+
+/* Stretch wrapper to fit content as if wrapper didn't exist; Unlike `contents` positional information for tooltip popup is preserved */
+.compact-toolbar-tooltip-content-wrapper {
+	display: grid;
+}
 </style>
-./core ./core/compact-toolbar
