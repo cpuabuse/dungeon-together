@@ -4,7 +4,7 @@
 	<!-- `compact` makes collapse menus without pinned items equal sides, when not stacked (`default` when stacked); Makes extra large icons fit well in both cases -->
 	<VToolbar
 		:density="hasLabels ? 'default' : 'compact'"
-		rounded="xl"
+		:rounded="true"
 		class="w-auto"
 		:class="{ 'compact-toolbar-menu-has-labels': true }"
 	>
@@ -13,7 +13,9 @@
 			<VTooltip :text="tooltipText" :open-delay="openDelay" :location="tooltipLocation">
 				<template #activator="{ props }">
 					<div v-bind="props" class="compact-toolbar-tooltip-content-wrapper">
+						<!-- Since button is not child of toolbar anymore, remove rounded corners -->
 						<VBtn
+							:rounded="0"
 							class="px-1"
 							:stacked="hasLabels"
 							:color="isHighlightedOnOpen && isExtended ? 'primary' : 'default'"
