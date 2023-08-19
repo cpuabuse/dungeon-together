@@ -3,6 +3,12 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+/**
+ * Icon.
+ *
+ * @file
+ */
+
 import { PropType } from "vue";
 import { Uuid } from "../../common/uuid";
 import { ExtractProps } from "../common/utility-types";

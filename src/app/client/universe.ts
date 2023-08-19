@@ -10,16 +10,14 @@
 import Hammer from "hammerjs";
 import type HammerManager from "hammerjs";
 import { Howl, Howler } from "howler";
-import { encode as base64Encode } from "js-base64";
 import Mousetrap from "mousetrap";
 import type { JoystickManager } from "nipplejs";
 import joystickLib from "nipplejs";
-import { BaseTexture, SVGResource, Texture, utils } from "pixi.js";
+import { utils } from "pixi.js";
 import { App } from "vue";
 import { Store } from "vuex";
 import { DeferredPromise } from "../common/async";
 import { defaultModeUuid } from "../common/defaults";
-import { bunnySvgs } from "../common/images";
 import { Uuid } from "../common/uuid";
 import { CoreArgIds } from "../core/arg";
 import { LogLevel } from "../core/error";
@@ -51,7 +49,7 @@ import {
 	scrollSymbol,
 	upSymbol
 } from "./input";
-import { Mode } from "./mode";
+import { ClientMode } from "./mode";
 import { ClientOptions, clientOptions } from "./options";
 import { ClientShard, ClientShardClass, ClientShardFactory } from "./shard";
 
@@ -115,14 +113,12 @@ export class ClientUniverse
 	 */
 	public readonly connections: Map<Uuid, ClientConnection> = new Map();
 
-	public readonly defaultMode: Mode = {
-		textures: Object.values(bunnySvgs).map(
-			/*
-				Even though the source code can load XML element, `SVGResource` documentation (https://github.com/pixijs/pixijs/blob/fdbdc45b6a95bd47145e3a7267fe2a69a1be4ebb/packages/core/src/textures/resources/SVGResource.ts#L90-L98) states that it accepts Base64 encoded SVG. Which apparently means Base64 data URI, which we will use to adhere to documentation.
-			*/
-			bunny => new Texture(new BaseTexture(new SVGResource(`data:image/svg+xml;base64,${base64Encode(bunny)}`)))
-		)
-	};
+	// Order is important
+	/* eslint-disable @typescript-eslint/member-ordering */
+	public defaultModeUuid: Uuid = defaultModeUuid;
+
+	public defaultMode: ClientMode = new ClientMode({ modeUuid: this.defaultModeUuid });
+	/* eslint-enable @typescript-eslint/member-ordering */
 
 	public defaultShard: ClientShard;
 
@@ -139,92 +135,35 @@ export class ClientUniverse
 	/**
 	 * Modes.
 	 */
-	public modes: Map<Uuid, Mode> = new Map([
+	public modes: Map<Uuid, ClientMode> = new Map([
 		[defaultModeUuid, this.defaultMode],
-		[
-			"mode/user/treasure/default",
-			{
-				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/chest_full_open_anim_f0.png"))]
-			}
-		],
-		[
-			"treasure-open",
-			{
-				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/chest_full_open_anim_f2.png"))]
-			}
-		],
-		[
-			"mode/user/mimic/default",
-			{
-				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/chest_full_open_anim_f0.png"))]
-			}
-		],
-		[
-			"mimic-attack",
-			{
-				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/chest_mimic_open_anim_f2.png"))]
-			}
-		],
-		[
-			"mode/user/trap/default",
-			{
-				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/floor_spikes_anim_f0.png"))]
-			}
-		],
-		[
-			"trap-activate",
-			{
-				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/floor_spikes_anim_f3.png"))]
-			}
-		],
-		[
-			"mode/user/door/default",
-			{
-				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/doors_leaf_closed.png"))]
-			}
-		],
-		[
-			"door-open",
-			{
-				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/doors_leaf_open.png"))]
-			}
-		],
-		[
-			"mode/user/floor/default",
-			{
-				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/floor_1.png"))]
-			}
-		],
-		[
-			"mode/user/wall/default",
-			{
-				textures: [new Texture(new BaseTexture("/img/rltiles/dc-dngn/wall/brick_brown2.png"))]
-			}
-		],
-		[
-			"mode/user/enemy/default",
-			{
-				textures: [new Texture(new BaseTexture("/img/rltiles/dc-mon64/balrug.png"))]
-			}
-		],
-		[
-			"mode/user/player/default",
-			{
-				textures: [new Texture(new BaseTexture("/img/rltiles/player/base/human_m.png"))]
-			}
-		],
-		[
-			"mode/user/ladder/default",
-			{
-				textures: [new Texture(new BaseTexture("/img/dungeontileset-ii/floor_ladder.png"))]
-			}
-		],
-		[
-			"death",
-			{
-				textures: [new Texture(new BaseTexture("/img/rltiles/nh-mon1/w/wraith.png"))]
-			}
-		]
+		...(
+			[
+				["mode/user/treasure/default", ["/img/dungeontileset-ii/chest_full_open_anim_f0.png"]],
+				["treasure-open", ["/img/dungeontileset-ii/chest_full_open_anim_f2.png"]],
+				["mode/user/trap/default", ["/img/dungeontileset-ii/floor_spikes_anim_f0.png"]],
+				["trap-activate", ["/img/dungeontileset-ii/floor_spikes_anim_f3.png"]],
+				["mode/user/door/default", ["/img/dungeontileset-ii/doors_leaf_closed.png"]],
+				["door-open", ["/img/dungeontileset-ii/doors_leaf_open.png"]],
+				["mode/user/floor/default", ["/img/dungeontileset-ii/floor_1.png"]],
+				["mode/user/wall/default", ["/img/rltiles/dc-dngn/wall/brick_brown2.png"]],
+				["mode/user/enemy/default", ["/img/rltiles/dc-mon64/balrug.png"]],
+				["mode/user/player/default", ["/img/rltiles/player/base/human_m.png"]],
+				["mode/user/ladder/default", ["/img/dungeontileset-ii/floor_ladder.png"]],
+				["death", ["/img/rltiles/nh-mon1/w/wraith.png"]]
+			] as Array<[string, Array<string>]>
+		).map(
+			// False negative
+			// eslint-disable-next-line @typescript-eslint/typedef
+			([modeUuid, paths]) =>
+				[
+					modeUuid,
+					new ClientMode({
+						modeUuid,
+						paths
+					})
+				] as const
+		)
 	]);
 
 	/**
@@ -391,7 +330,9 @@ export class ClientUniverse
 					level: LogLevel.Warning
 				});
 			})
-			.then(() => {
+			.then(async () => {
+				// Wait for all images to load
+				await Promise.all(Array.from(this.modes.values()).map(mode => mode.isInitialized));
 				const fadeTime: number = 5000;
 				const bgVolume: number = 0.1;
 
@@ -870,8 +811,8 @@ export class ClientUniverse
 		 * Uuid of the mode.
 		 */
 		uuid: Uuid;
-	}): Mode {
-		let mode: Mode | undefined = this.modes.get(uuid);
+	}): ClientMode {
+		let mode: ClientMode | undefined = this.modes.get(uuid);
 		if (mode === undefined) {
 			this.log({
 				level: LogLevel.Notice,
