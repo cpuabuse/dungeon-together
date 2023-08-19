@@ -335,7 +335,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 												player.dictionary[key] = [...entry] as Extract<CoreDictionary[any], Array<any>>;
 											} else if (typeof entry === "object") {
 												player.dictionary[key] = { ...entry };
-											} else if (entry) {
+											} else if (typeof entry !== "undefined") {
 												player.dictionary[key] = entry;
 											}
 										} else {
@@ -507,7 +507,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 										entity.dictionary[key] = [...entry] as Extract<CoreDictionary[any], Array<any>>;
 									} else if (typeof entry === "object") {
 										entity.dictionary[key] = { ...entry };
-									} else if (entry) {
+									} else if (typeof entry !== "undefined") {
 										entity.dictionary[key] = entry;
 									}
 								});
