@@ -141,6 +141,7 @@ export class ClientUniverse
 			[
 				["mode/user/treasure/default", ["/img/dungeontileset-ii/chest_full_open_anim_f0.png"]],
 				["treasure-open", ["/img/dungeontileset-ii/chest_full_open_anim_f2.png"]],
+				["mode/user/mimic/default", ["/img/dungeontileset-ii/chest_full_open_anim_f0.png"]],
 				["mode/user/trap/default", ["/img/dungeontileset-ii/floor_spikes_anim_f0.png"]],
 				["trap-activate", ["/img/dungeontileset-ii/floor_spikes_anim_f3.png"]],
 				["mode/user/door/default", ["/img/dungeontileset-ii/doors_leaf_closed.png"]],
