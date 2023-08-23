@@ -1,8 +1,10 @@
 <!-- Universe UI per shard -->
 <template>
+	<!-- Undefined assertion since index used in iteration -->
 	<UniverseUiShardPlayer
-		v-for="[playerUuid, player ] in (playerEntries as PlayerEntries)"
+		v-for="([playerUuid, { player } ], index) in (playerEntries as PlayerEntries)"
 		:key="playerUuid"
+		v-model="playerEntries[index]![1].model"
 		:shard="shard"
 		:player="player"
 		@shift-player-notifications="() => onShiftPlayerNotifications(player)"
@@ -14,14 +16,8 @@ import { PropType, defineComponent } from "vue";
 import { ClientPlayer } from "../../client/connection";
 import { ThisVueStore, UniverseState } from "../../client/gui";
 import { ClientShard } from "../../client/shard";
-import { Uuid } from "../../common/uuid";
-import { UniverseUiShardModel } from "../core/universe-ui";
+import { PlayerEntries, UniverseUiShardModel } from "../core/universe-ui";
 import UniverseUiShardPlayer from "./universe-ui-shard-player.vue";
-
-/**
- * Player entries data type, to restore lost unref class type information.
- */
-type PlayerEntries = Array<[Uuid, ClientPlayer]>;
 
 export default defineComponent({
 	components: { UniverseUiShardPlayer },
@@ -32,7 +28,7 @@ export default defineComponent({
 	created() {
 		this.updatePlayerEntries();
 
-		this.unsubscribe = (this as unknown as ThisVueStore).$store.subscribeAction(action => {
+		this.unsubscribeUpdatePlayerEntries = (this as unknown as ThisVueStore).$store.subscribeAction(action => {
 			if (action.type === "updateUniverse") {
 				this.updatePlayerEntries();
 			}
@@ -49,7 +45,7 @@ export default defineComponent({
 		return {
 			playerEntries: new Array() as PlayerEntries,
 			universe,
-			unsubscribe: null as (() => void) | null
+			unsubscribeUpdatePlayerEntries: null as (() => void) | null
 		};
 	},
 
@@ -68,15 +64,28 @@ export default defineComponent({
 		},
 
 		/**
-		 * Update player entris data.
+		 * Update player entries data.
 		 */
 		updatePlayerEntries(): void {
-			(this.playerEntries as PlayerEntries) = Array.from(this.shard.players.entries());
+			// False negative
+			// eslint-disable-next-line @typescript-eslint/typedef
+			(this.playerEntries as PlayerEntries) = Array.from(this.shard.players.entries()).map(([playerUuid, player]) => {
+				return [
+					playerUuid,
+					{
+						model: {
+							// Initial dictionary is set correctly
+							dictionary: player.dictionary
+						},
+						player
+					}
+				];
+			});
 
 			this.$emit("update:modelValue", {
 				// False negative
 				// eslint-disable-next-line @typescript-eslint/typedef
-				players: (this.playerEntries as PlayerEntries).map(([, player]) => player)
+				playerEntries: this.playerEntries as PlayerEntries
 			} satisfies UniverseUiShardModel);
 		}
 	},
@@ -94,8 +103,8 @@ export default defineComponent({
 	 * Unmounted callback.
 	 */
 	unmounted() {
-		if (this.unsubscribe) {
-			this.unsubscribe();
+		if (this.unsubscribeUpdatePlayerEntries) {
+			this.unsubscribeUpdatePlayerEntries();
 		}
 	}
 });

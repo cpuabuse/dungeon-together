@@ -257,6 +257,30 @@ export class ClientUniverse
 		} = createVueApp<UniverseState>({
 			actions: {
 				/**
+				 * Called when any entity dictionary changes.
+				 *
+				 * @param param - Destructured parameter
+				 */
+				// Infer argument
+				// eslint-disable-next-line @typescript-eslint/typedef
+				updateEntityDictionary({ state }) {
+					// Do nothing
+					state.universe.log({ level: LogLevel.Debug, message: "Entity dictionary update dispatched" });
+				},
+
+				/**
+				 * Called when any player dictionary changes.
+				 *
+				 * @param param - Destructured parameter
+				 */
+				// Infer argument
+				// eslint-disable-next-line @typescript-eslint/typedef
+				updatePlayerDictionary({ state }) {
+					// Do nothing
+					state.universe.log({ level: LogLevel.Debug, message: "Player dictionary update dispatched" });
+				},
+
+				/**
 				 * Called when universe changes.
 				 *
 				 * @param param - Destructured parameter
@@ -743,7 +767,7 @@ export class ClientUniverse
 				// Finally notify state
 				this.store.dispatch("updateUniverse").catch(error => {
 					this.log({
-						error: new Error("Could not dispatch universe store.", {
+						error: new Error(`Could not dispatch "updateUniverse" to universe store.`, {
 							cause: error
 						}),
 						level: LogLevel.Critical

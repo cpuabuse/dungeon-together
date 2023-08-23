@@ -10,33 +10,47 @@
 
 	<!-- Non null assertion since access from iteration -->
 	<OverlayWindow
-		v-for="([playerUuid], index) in playerEntries"
+		v-for="(
+			[
+				playerUuid,
+				{
+					playerEntry: {
+						model: { dictionary }
+					},
+					items
+				}
+			],
+			index
+		) in playerEntries"
 		:key="playerUuid"
 		v-model="playerEntries[index]![1].isPlayerMenuDisplayed"
 	>
-		<template #body> Test </template>
+		<template #body>
+			Player dictionary: {{ dictionary }}
+			<OverlayList :items="items"></OverlayList>
+		</template>
 	</OverlayWindow>
 </template>
 
 <script lang="ts">
+import Color from "color";
 import { PropType, defineComponent } from "vue";
-import { ClientPlayer } from "../../client/connection";
 import { ThisVueStore, UniverseStore } from "../../client/gui";
 import { Uuid } from "../../common/uuid";
 import CompactToolbar from "../compact-toolbar.vue";
 import { OverlayList, OverlayWindow } from "../components";
 import { CompactToolbarMenuBaseProps } from "../core/compact-toolbar";
-import { OverlayListItemEntry, OverlayListItemEntryType, OverlayListTabs } from "../core/overlay";
-import { UniverseUiShardEntries } from "../core/universe-ui";
+import { OverlayListItemEntry, OverlayListItemEntryType, OverlayListItems, OverlayListTabs } from "../core/overlay";
+import { PlayerEntry, UniverseUiShardEntries } from "../core/universe-ui";
 
 /**
  * Local player entry type.
  */
-type PlayerEntry = {
+type LocalPlayerEntry = {
 	/**
 	 * Client player.
 	 */
-	player: ClientPlayer;
+	playerEntry: PlayerEntry;
 
 	/**
 	 * Record index for player menu.
@@ -47,12 +61,17 @@ type PlayerEntry = {
 	 * To display menu or not.
 	 */
 	isPlayerMenuDisplayed: boolean;
+
+	/**
+	 * Items for player menu.
+	 */
+	items: OverlayListItems;
 };
 
 /**
  * Helper type for casting to player entries array element, as class information lost.
  */
-type PlayerEntriesElement = readonly [string, PlayerEntry];
+type LocalPlayerEntries = Array<[string, LocalPlayerEntry]>;
 
 export default defineComponent({
 	components: { CompactToolbar, OverlayList, OverlayWindow },
@@ -64,28 +83,39 @@ export default defineComponent({
 		 * @returns Tab content
 		 */
 		debugItemsShardTabs(): OverlayListTabs {
-			// False negative
-			// eslint-disable-next-line @typescript-eslint/typedef
-			return Array.from(this.shardEntries).map(([, { shard, model }]) => {
-				return {
-					items: [
-						{ name: "Shard UUID", type: OverlayListItemEntryType.Uuid, uuid: shard.shardUuid },
-						{
-							data: model.players.length.toString(),
-							items: model.players.map(player => {
-								return {
-									name: player.playerName,
-									type: OverlayListItemEntryType.Uuid,
-									uuid: player.playerUuid
-								};
-							}),
-							name: "Players",
-							type: OverlayListItemEntryType.List
-						}
-					],
-					name: shard.shardName
-				};
-			});
+			return Array.from(this.shardEntries).map(
+				// False negative
+				/* eslint-disable @typescript-eslint/typedef */
+				([
+					,
+					{
+						shard,
+						model: { playerEntries }
+					}
+				]) => {
+					/* eslint-enable @typescript-eslint/typedef */
+					return {
+						items: [
+							{ name: "Shard UUID", type: OverlayListItemEntryType.Uuid, uuid: shard.shardUuid },
+							{
+								data: playerEntries.length.toString(),
+								// False negtative
+								// eslint-disable-next-line @typescript-eslint/typedef
+								items: playerEntries.map(([, { player }]) => {
+									return {
+										name: player.playerName,
+										type: OverlayListItemEntryType.Uuid,
+										uuid: player.playerUuid
+									};
+								}),
+								name: "Players",
+								type: OverlayListItemEntryType.List
+							}
+						],
+						name: shard.shardName
+					};
+				}
+			);
 		},
 
 		/**
@@ -158,8 +188,8 @@ export default defineComponent({
 		 *
 		 * @returns Map
 		 */
-		playerEntriesMap(): Map<Uuid, PlayerEntry> {
-			return new Map(this.playerEntries as Array<PlayerEntriesElement>);
+		playerEntriesMap(): Map<Uuid, LocalPlayerEntry> {
+			return new Map(this.playerEntries as LocalPlayerEntries);
 		},
 
 		/**
@@ -175,13 +205,15 @@ export default defineComponent({
 					,
 					{
 						shard,
-						model: { players }
+						model: { playerEntries }
 					}
 					/* eslint-enable @typescript-eslint/typedef */
 				]) => {
 					return {
 						icon: "fa-globe",
-						items: players.map(player => {
+						// False negative
+						// eslint-disable-next-line @typescript-eslint/typedef
+						items: playerEntries.map(([, { player }]) => {
 							return {
 								clickRecordIndex: this.playerEntriesMap.get(player.playerUuid)?.clickRecordIndex,
 								icon: "fa-person",
@@ -195,6 +227,19 @@ export default defineComponent({
 					};
 				}
 			);
+		},
+
+		/**
+		 * Item for stat box.
+		 *
+		 * @returns Item entry
+		 */
+		statItem(): OverlayListItemEntry {
+			return {
+				id: "stats",
+				name: "Stats",
+				type: OverlayListItemEntryType.Slot
+			};
 		}
 	},
 
@@ -208,7 +253,8 @@ export default defineComponent({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let data = {
 			debugMenuDisplaySymbol: Symbol("debug-menu-display"),
-			playerEntries: new Array<PlayerEntriesElement>(),
+			hpColor: new Color("#1F8C2F"),
+			playerEntries: new Array() as LocalPlayerEntries,
 			universe: (this as unknown as ThisVueStore).$store.state.universe,
 			unsubscribe: null as (() => void) | null
 		};
@@ -235,18 +281,20 @@ export default defineComponent({
 			 * @param shardEntries - New value
 			 */
 			handler(shardEntries: UniverseUiShardEntries): void {
-				(this.playerEntries as Array<PlayerEntriesElement>) = shardEntries
+				(this.playerEntries as LocalPlayerEntries) = shardEntries
 					.map(
 						// False negative
 						/* eslint-disable @typescript-eslint/typedef */
 						([
 							,
 							{
-								model: { players }
+								model: { playerEntries }
 							}
 							/* eslint-enable @typescript-eslint/typedef */
 						]) => {
-							return players.map(player => {
+							// False negative
+							// eslint-disable-next-line @typescript-eslint/typedef
+							return playerEntries.map(([playerUuid, playerEntry]) => {
 								/**
 								 * Generates an entry.
 								 *
@@ -255,13 +303,14 @@ export default defineComponent({
 								 *
 								 * @returns An object with index and model getter/setter
 								 */
-								const generateEntryValue: () => PlayerEntriesElement[1] = () => {
+								const generateEntryValue: () => LocalPlayerEntry = () => {
 									const store: UniverseStore = (this as unknown as ThisVueStore).$store;
 
-									let clickRecordIndex: symbol = Symbol(`Menu for player(playerUuid="${player.playerUuid}")`);
+									let clickRecordIndex: symbol = Symbol(`Menu for player(playerUuid="${playerUuid}")`);
 
 									return {
 										clickRecordIndex,
+
 										/**
 										 * Getter for player menu display model.
 										 *
@@ -283,14 +332,18 @@ export default defineComponent({
 											});
 										},
 
-										player
+										items: [this.statItem],
+
+										playerEntry
 									};
 								};
 
-								return [
-									player.playerUuid,
-									this.playerEntriesMap.get(player.playerUuid) ?? generateEntryValue()
-								] as const;
+								let result: [string, LocalPlayerEntry] = [
+									playerUuid,
+									this.playerEntriesMap.get(playerUuid) ?? generateEntryValue()
+								];
+
+								return result;
 							});
 						}
 					)

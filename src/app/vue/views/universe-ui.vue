@@ -1,8 +1,8 @@
 <!-- Universe UI -->
 <template>
 	<UniverseUiClick cell-uuid="nothing" />
-	<!-- Undefined assertion since index used in iteration -->
 
+	<!-- Undefined assertion since index used in iteration -->
 	<UniverseUiShard
 		v-for="([shardUuid, {shard}], index) in (shardEntries as UniverseUiShardEntries)"
 		:key="shardUuid"
@@ -69,7 +69,8 @@ export default defineComponent({
 		 * The source values are modified outside of vue, so to use model within entries, array remapping needs to preserve model values.
 		 */
 		updateShardEntries(): void {
-			const modelMap: Map<Uuid, UniverseUiShardModel> = new Map<Uuid, UniverseUiShardModel>(
+			// This is not a `computed` since it should be watched as well, essentially
+			const modelMap: Map<Uuid, UniverseUiShardModel> = new Map(
 				// False negative
 				// eslint-disable-next-line @typescript-eslint/typedef
 				(this.shardEntries as UniverseUiShardEntries).map(([shardUuid, { model }]) => {
@@ -85,7 +86,7 @@ export default defineComponent({
 						shardUuid,
 						{
 							model: modelMap.get(shardUuid) ?? {
-								players: []
+								playerEntries: []
 							},
 							shard
 						}

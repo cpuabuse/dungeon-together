@@ -265,6 +265,49 @@ export const initProcessCallback: CoreProcessCallback<ClientConnection> = async 
 // Has to be async to work with VSocket
 // eslint-disable-next-line @typescript-eslint/require-await
 export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async function () {
+	/**
+	 * Updates dictionary container.
+	 *
+	 * @remarks
+	 * Rewrites the object on purpose, and other components depend on this behavior.
+	 *
+	 * @param param - Destructured parameter
+	 */
+	// Infer arrow function type, inherit `this`
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const updateDictionaryContainer = ({
+		dictionaryContainer,
+		dictionary
+	}: {
+		/**
+		 * Target container of dictionary.
+		 */
+		dictionaryContainer: Record<"dictionary", CoreDictionary>;
+
+		/**
+		 * Source Dictionary.
+		 */
+		dictionary: CoreDictionary;
+		// False negative
+		// eslint-disable-next-line @typescript-eslint/typedef
+	}): void => {
+		// Iterating through keys to prevent assignment of objects for standalone
+		let newDictionary: CoreDictionary = {};
+		Object.keys(dictionary).forEach(key => {
+			// Undefined values will produce key
+			let entry: CoreDictionary[any] | undefined = dictionary[key];
+			if (Array.isArray(entry)) {
+				// Casting, since array expansion is producing an array of union, instead of union of arrays
+				newDictionary[key] = [...entry] as Extract<CoreDictionary[any], Array<any>>;
+			} else if (typeof entry === "object") {
+				newDictionary[key] = { ...entry };
+			} else if (typeof entry !== "undefined") {
+				newDictionary[key] = entry;
+			}
+		});
+		dictionaryContainer.dictionary = newDictionary;
+	};
+
 	// Message reading loop
 	let counter: number = 0;
 	let results: Array<Promise<void>> = new Array<Promise<void>>();
@@ -324,29 +367,18 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 										shard.units.add(unitUuid);
 									});
 
-									// TODO: Move object link verification to standalone connection
-									// Iterating through keys to prevent assignment of objects for standalone
-									Object.keys(message.body.dictionary).forEach(key => {
-										let entry: CoreDictionary[any] | undefined = message.body.dictionary[key];
-										let player: ClientPlayer | undefined = shard.players.get(message.body.playerUuid);
-										if (player) {
-											if (Array.isArray(entry)) {
-												// Casting, since array expansion is producing an array of union, instead of union of arrays
-												player.dictionary[key] = [...entry] as Extract<CoreDictionary[any], Array<any>>;
-											} else if (typeof entry === "object") {
-												player.dictionary[key] = { ...entry };
-											} else if (typeof entry !== "undefined") {
-												player.dictionary[key] = entry;
-											}
-										} else {
-											this.universe.log({
-												error: new Error(
-													`"Sync" callback failed, player("playerUuid=${message.body.playerUuid}") not found in.`
-												),
-												level: LogLevel.Error
-											});
-										}
-									});
+									const player: ClientPlayer | undefined = shard.players.get(message.body.playerUuid);
+
+									if (player) {
+										updateDictionaryContainer({ dictionary: message.body.dictionary, dictionaryContainer: player });
+									} else {
+										this.universe.log({
+											error: new Error(
+												`"Sync" callback failed, player("playerUuid=${message.body.playerUuid}") not found in shard("shardUuid=${shard.shardUuid}").`
+											),
+											level: LogLevel.Error
+										});
+									}
 								})
 								.catch(error => {
 									this.universe.log({
@@ -368,6 +400,16 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 				// Treating as switch block rather than part of loop
 				// eslint-disable-next-line no-await-in-loop
 				await Promise.resolve();
+
+				// Finally notify state
+				this.universe.store.dispatch("updatePlayerDictionary").catch(error => {
+					this.universe.log({
+						error: new Error(`"Could not dispatch "updatePlayerDictionary" to universe store.`, {
+							cause: error
+						}),
+						level: LogLevel.Critical
+					});
+				});
 
 				break;
 			}
@@ -498,7 +540,6 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 							sourceCell.entities.forEach(({ entityUuid, emits, modeUuid, worldUuid }) => {
 								let entity: ClientEntity = this.universe.getEntity({ entityUuid });
 								// TODO: Must do date update when entities exist, not before creation
-								// TODO: Move object link verification to standalone connection
 								// Iterating through keys to prevent assignment of objects for standalone
 								Object.keys(emits).forEach(key => {
 									let entry: CoreDictionary[any] | undefined = emits[key];
@@ -645,6 +686,24 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 						this.previouslyVisibleCells = newCells;
 					}
 				});
+
+				// Finally notify state
+				this.universe.universeQueue.addCallback({
+					/**
+					 * Callback.
+					 */
+					callback: () => {
+						this.universe.store.dispatch("updateEntityDictionary").catch(error => {
+							this.universe.log({
+								error: new Error(`"Could not dispatch "updateEntityDictionary" to universe store.`, {
+									cause: error
+								}),
+								level: LogLevel.Critical
+							});
+						});
+					}
+				});
+
 				break;
 			}
 

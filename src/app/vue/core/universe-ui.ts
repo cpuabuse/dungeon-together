@@ -3,45 +3,82 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
-import { ClientPlayer } from "../../client/connection";
-import { ClientShard } from "../../client/shard";
-import { Uuid } from "../../common/uuid";
-
 /**
  * Universe UI related types.
  *
  * @file
  */
 
+import { ClientPlayer } from "../../client/connection";
+import { ClientShard } from "../../client/shard";
+import { Uuid } from "../../common/uuid";
+import { CoreDictionary } from "../../core/connection";
+
 /**
- * Model type for universe ui shard component.
+ * Model type for universe UI player component.
+ */
+export type UniverseUiPlayerModel = {
+	/**
+	 * Reactive player dictionary.
+	 */
+	dictionary: CoreDictionary;
+};
+
+/**
+ * Player entry.
+ */
+export type PlayerEntry = {
+	/**
+	 * Raw player entry.
+	 */
+	player: ClientPlayer;
+
+	/**
+	 * Player model.
+	 *
+	 * @remarks
+	 * Single model for perhaps multiple values is used, as it is already an iteration, and individual variables would only add complexity.
+	 */
+	model: UniverseUiPlayerModel;
+};
+
+/**
+ * Player entries data type, to cast and restore lost unref class type information.
+ */
+export type PlayerEntries = Array<[Uuid, PlayerEntry]>;
+
+/**
+ * Model type for universe UI shard component.
  */
 export type UniverseUiShardModel = {
 	/**
 	 * Player list.
 	 */
-	players: Array<ClientPlayer>;
+	playerEntries: PlayerEntries;
 };
 
 /**
- * Shard entries data type, to restore lost unref class type information.
+ * Shard entry.
  */
-export type UniverseUiShardEntries = Array<
-	[
-		Uuid,
-		{
-			/**
-			 * Shard.
-			 */
-			shard: ClientShard;
+export type UniverseUiShardEntry = {
+	/**
+	 * Shard.
+	 */
+	shard: ClientShard;
 
-			/**
-			 * Model.
-			 *
-			 * @remarks
-			 * Single model for perhaps multiple values is used, as it is already an iteration, and individual variables would only add complexity.
-			 */
-			model: UniverseUiShardModel;
-		}
-	]
->;
+	/**
+	 * Model.
+	 *
+	 * @remarks
+	 * Single model for perhaps multiple values is used, as it is already an iteration, and individual variables would only add complexity.
+	 */
+	model: UniverseUiShardModel;
+};
+
+/**
+ * Shard entries data type, to cast and restore lost unref class type information.
+ *
+ * @remarks
+ * To minimize cycles, this object should be passed between linked components directly, and each component that consumes it, would remap this.
+ */
+export type UniverseUiShardEntries = Array<[Uuid, UniverseUiShardEntry]>;
