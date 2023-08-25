@@ -61,7 +61,8 @@ async function main(): Promise<void> {
 	let serverConnection: ServerConnection = new ServerConnection({
 		connectionUuid: "connect",
 		socket: clientSocket.target,
-		universe: serverUniverse
+		universe: serverUniverse,
+		userAlias: { displayName: "CarrotHunter42" }
 	});
 	let shard: ServerShard = Array.from(serverUniverse.shards)[1][1];
 	shard.dictionary.shardName = "Game";

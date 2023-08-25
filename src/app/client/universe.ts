@@ -23,11 +23,7 @@ import { CoreArgIds } from "../core/arg";
 import { LogLevel } from "../core/error";
 import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, ShardPathExtended } from "../core/shard";
-import {
-	CoreInstanceNonRecursiveImplements,
-	CoreUniverseClassFactory,
-	CoreUniverseRequiredConstructorParameter
-} from "../core/universe";
+import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import UniverseComponent from "../vue/pages/the-universe.vue";
 import { ClientBaseClass, ClientBaseConstructorParams, ClientBaseFactory } from "./base";
@@ -66,18 +62,15 @@ const { create: createJoystick } = joystickLib;
  * Termination of the client is impossible, because it is global.
  * For same reason [[Client]] does not store "defaultInstanceUuid" inside.
  */
-export class ClientUniverse
-	extends CoreUniverseClassFactory<
-		ClientBaseClass,
-		ClientBaseConstructorParams,
-		ClientOptions,
-		ClientEntity,
-		ClientCell,
-		ClientGrid,
-		ClientShard
-	>({ logSource: "Client", options: clientOptions })
-	implements CoreInstanceNonRecursiveImplements<ClientConnection>
-{
+export class ClientUniverse extends CoreUniverseClassFactory<
+	ClientBaseClass,
+	ClientBaseConstructorParams,
+	ClientOptions,
+	ClientEntity,
+	ClientCell,
+	ClientGrid,
+	ClientShard
+>({ logSource: "Client", options: clientOptions }) {
 	/**
 	 * Base class.
 	 */

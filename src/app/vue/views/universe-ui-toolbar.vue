@@ -37,20 +37,21 @@ import Color from "color";
 import { PropType, defineComponent } from "vue";
 import { ThisVueStore, UniverseStore } from "../../client/gui";
 import { Uuid } from "../../common/uuid";
+import { CoreDictionary } from "../../core/connection";
 import CompactToolbar from "../compact-toolbar.vue";
 import { OverlayList, OverlayWindow } from "../components";
 import { CompactToolbarMenuBaseProps } from "../core/compact-toolbar";
 import { OverlayListItemEntry, OverlayListItemEntryType, OverlayListItems, OverlayListTabs } from "../core/overlay";
-import { PlayerEntry, UniverseUiShardEntries } from "../core/universe-ui";
+import { UniverseUiPlayerEntry, UniverseUiShardEntries } from "../core/universe-ui";
 
 /**
  * Local player entry type.
  */
-type LocalPlayerEntry = {
+type PlayerEntry = {
 	/**
 	 * Client player.
 	 */
-	playerEntry: PlayerEntry;
+	playerEntry: UniverseUiPlayerEntry;
 
 	/**
 	 * Record index for player menu.
@@ -71,7 +72,7 @@ type LocalPlayerEntry = {
 /**
  * Helper type for casting to player entries array element, as class information lost.
  */
-type LocalPlayerEntries = Array<[string, LocalPlayerEntry]>;
+type PlayerEntries = Array<[string, PlayerEntry]>;
 
 export default defineComponent({
 	components: { CompactToolbar, OverlayList, OverlayWindow },
@@ -188,8 +189,8 @@ export default defineComponent({
 		 *
 		 * @returns Map
 		 */
-		playerEntriesMap(): Map<Uuid, LocalPlayerEntry> {
-			return new Map(this.playerEntries as LocalPlayerEntries);
+		playerEntriesMap(): Map<Uuid, PlayerEntry> {
+			return new Map(this.playerEntries as PlayerEntries);
 		},
 
 		/**
@@ -214,11 +215,16 @@ export default defineComponent({
 						// False negative
 						// eslint-disable-next-line @typescript-eslint/typedef
 						items: playerEntries.map(([, { player }]) => {
+							const { userAliasDisplayName }: CoreDictionary = player.dictionary;
+							let nameSubtext: string = player.playerName;
+							if (typeof userAliasDisplayName === "string" && userAliasDisplayName.length > 0) {
+								nameSubtext = userAliasDisplayName;
+							}
 							return {
 								clickRecordIndex: this.playerEntriesMap.get(player.playerUuid)?.clickRecordIndex,
 								icon: "fa-person",
 								name: "Player",
-								nameSubtext: player.playerName
+								nameSubtext
 							};
 						}),
 						maxPinnedAmount: 1,
@@ -254,7 +260,7 @@ export default defineComponent({
 		let data = {
 			debugMenuDisplaySymbol: Symbol("debug-menu-display"),
 			hpColor: new Color("#1F8C2F"),
-			playerEntries: new Array() as LocalPlayerEntries,
+			playerEntries: new Array() as PlayerEntries,
 			universe: (this as unknown as ThisVueStore).$store.state.universe,
 			unsubscribe: null as (() => void) | null
 		};
@@ -281,7 +287,7 @@ export default defineComponent({
 			 * @param shardEntries - New value
 			 */
 			handler(shardEntries: UniverseUiShardEntries): void {
-				(this.playerEntries as LocalPlayerEntries) = shardEntries
+				(this.playerEntries as PlayerEntries) = shardEntries
 					.map(
 						// False negative
 						/* eslint-disable @typescript-eslint/typedef */
@@ -303,7 +309,7 @@ export default defineComponent({
 								 *
 								 * @returns An object with index and model getter/setter
 								 */
-								const generateEntryValue: () => LocalPlayerEntry = () => {
+								const generateEntryValue: () => PlayerEntry = () => {
 									const store: UniverseStore = (this as unknown as ThisVueStore).$store;
 
 									let clickRecordIndex: symbol = Symbol(`Menu for player(playerUuid="${playerUuid}")`);
@@ -338,7 +344,7 @@ export default defineComponent({
 									};
 								};
 
-								let result: [string, LocalPlayerEntry] = [
+								let result: [string, PlayerEntry] = [
 									playerUuid,
 									this.playerEntriesMap.get(playerUuid) ?? generateEntryValue()
 								];

@@ -113,31 +113,28 @@ export type CoreUniverseInstanceNonRecursive = object;
 /**
  * Part to be implemented by core universe.
  */
-type CoreUniverseInstanceNonRecursiveCoreImplements = CoreUniverseInstanceNonRecursive & CoreLog;
+type CoreUniverseInstanceNonRecursiveCoreImplements<Connection extends CoreConnection = CoreConnection> =
+	CoreUniverseInstanceNonRecursive &
+		CoreLog & {
+			/**
+			 * Connections.
+			 */
+			connections: Map<Uuid, Connection>;
+
+			/**
+			 * Shards containing player container.
+			 */
+			shards: Map<
+				Uuid,
+				Connection extends CoreConnection<any, any, any, infer Player> ? CorePlayerContainer<Player> : never
+			>;
+		};
 
 /**
  * Placeholder for the universe, to cast when base or options are not known. To be implemented when concrete.
  */
 export type CoreUniverseInstanceNonRecursiveCast<Connection extends CoreConnection = CoreConnection> =
-	CoreUniverseInstanceNonRecursiveCoreImplements & CoreInstanceNonRecursiveImplements<Connection>;
-
-/**
- * To be implemented when concrete, to make sure cast is correct.
- */
-export type CoreInstanceNonRecursiveImplements<Connection extends CoreConnection = CoreConnection> = {
-	/**
-	 * Connections.
-	 */
-	connections: Map<Uuid, Connection>;
-
-	/**
-	 * Shards containing player container.
-	 */
-	shards: Map<
-		Uuid,
-		Connection extends CoreConnection<any, any, any, infer Player> ? CorePlayerContainer<Player> : never
-	>;
-};
+	CoreUniverseInstanceNonRecursiveCoreImplements<Connection>;
 
 /**
  * Placeholder for the universe.
@@ -545,6 +542,8 @@ export function CoreUniverseClassFactory<
 		public cells!: Options extends CoreArgOptionsPathOwnUnion
 			? CoreArgIndexer<Cell, CoreArgIds.Cell, Options, CoreCellArgParentIds>["cells"]
 			: never;
+
+		public abstract connections: Map<Uuid, CoreConnection>;
 
 		public defaultCell!: Options extends CoreArgOptionsPathOwnUnion ? Cell : never;
 

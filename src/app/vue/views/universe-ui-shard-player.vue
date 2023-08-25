@@ -26,7 +26,9 @@ export default defineComponent({
 	created() {
 		this.unsubscribeUpdateModel = (this as unknown as ThisVueStore).$store.subscribeAction(action => {
 			if (action.type === "updatePlayerDictionary") {
-				this.updateModel();
+				// Note: If model is epanded, spread this model
+				this.model = { dictionary: this.player.dictionary };
+				this.emitModel();
 			}
 		});
 	},
@@ -39,6 +41,7 @@ export default defineComponent({
 	data() {
 		const { universe }: UniverseState = (this as unknown as ThisVueStore).$store.state;
 		return {
+			model: this.modelValue,
 			universe,
 			unsubscribeUpdateModel: null as (() => void) | null
 		};
@@ -50,11 +53,8 @@ export default defineComponent({
 		/**
 		 * Update player entries data.
 		 */
-		updateModel(): void {
-			this.$emit("update:modelValue", {
-				// Dictionary would have to be a new object, set by connection, so just asssignment is enough
-				dictionary: this.player.dictionary
-			} satisfies UniverseUiPlayerModel);
+		emitModel(): void {
+			this.$emit("update:modelValue", this.model satisfies UniverseUiPlayerModel);
 		}
 	},
 

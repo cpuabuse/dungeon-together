@@ -27,7 +27,7 @@ export type UniverseUiPlayerModel = {
 /**
  * Player entry.
  */
-export type PlayerEntry = {
+export type UniverseUiPlayerEntry = {
 	/**
 	 * Raw player entry.
 	 */
@@ -45,7 +45,7 @@ export type PlayerEntry = {
 /**
  * Player entries data type, to cast and restore lost unref class type information.
  */
-export type PlayerEntries = Array<[Uuid, PlayerEntry]>;
+export type PlayerEntries = Array<[Uuid, UniverseUiPlayerEntry]>;
 
 /**
  * Model type for universe UI shard component.

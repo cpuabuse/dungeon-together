@@ -91,14 +91,41 @@ export type ServerMessage =
 	  };
 
 /**
+ * Server user.
+ */
+export interface ServerUserAlias {
+	/**
+	 * Name how to display the user.
+	 */
+	displayName: string;
+}
+
+/**
  * Server player.
  */
-export class ServerPlayer extends CorePlayer<ServerConnection> {}
+export class ServerPlayer extends CorePlayer<ServerConnection> {
+	/**
+	 * Connections to connection.
+	 *
+	 * @param connection - Connection to connect
+	 * @returns Success
+	 */
+	public connect(connection: ServerConnection): boolean {
+		let result: boolean = super.connect(connection);
+
+		// Set display name in dictionary
+		this.dictionary.userAliasDisplayName = connection.userAlias.displayName;
+
+		return result;
+	}
+}
 
 /**
  * Client connection.
  */
 export class ServerConnection extends CoreConnection<ServerUniverse, ServerMessage, ClientMessage, ServerPlayer> {
+	public userAlias: ServerUserAlias;
+
 	/**
 	 * Constructor.
 	 *
@@ -107,8 +134,10 @@ export class ServerConnection extends CoreConnection<ServerUniverse, ServerMessa
 	public constructor({
 		universe,
 		socket,
-		connectionUuid
-	}: Omit<CoreConnectionArgs<ServerUniverse, ServerMessage, ClientMessage>, "callback">) {
+		connectionUuid,
+		userAlias
+	}: Omit<CoreConnectionArgs<ServerUniverse, ServerMessage, ClientMessage>, "callback"> &
+		Record<"userAlias", ServerUserAlias>) {
 		super({
 			callback: queueProcessCallback as ToSuperclassCoreProcessCallback<
 				typeof queueProcessCallback,
@@ -118,6 +147,8 @@ export class ServerConnection extends CoreConnection<ServerUniverse, ServerMessa
 			socket,
 			universe
 		});
+
+		this.userAlias = userAlias;
 	}
 
 	/**
