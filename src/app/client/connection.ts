@@ -325,6 +325,14 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 			// Status notification update
 			case MessageTypeWord.StatusNotification: {
 				this.getPlayerEntry(message.body)?.player.notificationIds.push(message.body.notificationId);
+				this.universe.store.dispatch("updateNotifications").catch(error => {
+					this.universe.log({
+						error: new Error(`"Could not dispatch "updateNotifications" to universe store.`, {
+							cause: error
+						}),
+						level: LogLevel.Critical
+					});
+				});
 				break;
 			}
 

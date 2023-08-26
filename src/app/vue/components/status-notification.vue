@@ -19,9 +19,27 @@ import { PropType, defineComponent } from "vue";
 import { Uuid } from "../../common/uuid";
 import { statusNotificationEmits, useStatusNotification } from "../core/status-notification";
 import StatusNotificationItem from "./status-notification-item.vue";
+import { ThisVueStore } from "../../client/gui";
 
 export default defineComponent({
 	components: { StatusNotificationItem },
+
+	/**
+	 * Created callback.
+	 *
+	 * @remarks
+	 * Initial model update is not necessary, as parent created model with correct data, but if that changes, model update must be added.
+	 */
+	created() {
+		// Synchronize notifications initially
+		this.synchronizeNotifications();
+
+		this.unsubscribeUpdateNotifications = (this as unknown as ThisVueStore).$store.subscribeAction(action => {
+			if (action.type === "updateNotifications") {
+				this.synchronizeNotifications();
+			}
+		});
+	},
 
 	computed: {
 		/**
@@ -56,7 +74,8 @@ export default defineComponent({
 				 * @returns Uuid
 				 */
 				uuid: Uuid;
-			}>()
+			}>(),
+			unsubscribeUpdateNotifications: null as (() => void) | null
 		};
 	},
 
@@ -118,18 +137,12 @@ export default defineComponent({
 		return useStatusNotification(ctx);
 	},
 
-	watch: {
-		/**
-		 * Watching for length of notification array.
-		 */
-		notificationIdsLength: {
-			/**
-			 * Handler.
-			 */
-			handler(): void {
-				this.synchronizeNotifications();
-			},
-			immediate: true
+	/**
+	 * Unmounted callback.
+	 */
+	unmounted() {
+		if (this.unsubscribeUpdateNotifications) {
+			this.unsubscribeUpdateNotifications();
 		}
 	}
 });
