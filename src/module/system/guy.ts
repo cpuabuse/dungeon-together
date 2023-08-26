@@ -88,9 +88,11 @@ export function GuyKindClassFactory({
 			// Important to not do it in constructor, since universe will return shard only after that
 			let shard: ServerShard = (this.entity.constructor as ServerEntityClass).universe.getShard(this.entity);
 
+			// Initialization of player UUID
+			this.entity.playerUuid = this.player.playerUuid;
+
 			// Register to shard
 			shard.players.set(this.player.playerUuid, this.player);
-
 			// Set unit (for screen update/control)
 			shard.units.set(this.entity.entityUuid, this.entity);
 		}

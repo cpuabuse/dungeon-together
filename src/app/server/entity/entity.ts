@@ -64,6 +64,11 @@ export function ServerEntityFactory({
 		public static kinds: Map<Uuid, EntityKindClass> = new Map([]);
 
 		/**
+		 * Player UUID.
+		 */
+		public playerUuid?: Uuid;
+
+		/**
 		 * Default kind.
 		 */
 		private static DefaultKind: EntityKindClass = class DefaultKind extends this.BaseKind {};

@@ -135,6 +135,7 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 				["mode/user/treasure/default", ["/img/dungeontileset-ii/chest_full_open_anim_f0.png"]],
 				["treasure-open", ["/img/dungeontileset-ii/chest_full_open_anim_f2.png"]],
 				["mode/user/mimic/default", ["/img/dungeontileset-ii/chest_full_open_anim_f0.png"]],
+				["mimic-attack", ["/img/dungeontileset-ii/chest_mimic_open_anim_f2.png"]],
 				["mode/user/trap/default", ["/img/dungeontileset-ii/floor_spikes_anim_f0.png"]],
 				["trap-activate", ["/img/dungeontileset-ii/floor_spikes_anim_f3.png"]],
 				["mode/user/door/default", ["/img/dungeontileset-ii/doors_leaf_closed.png"]],
@@ -259,6 +260,18 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 				updateEntityDictionary({ state }) {
 					// Do nothing
 					state.universe.log({ level: LogLevel.Debug, message: "Entity dictionary update dispatched" });
+				},
+
+				/**
+				 * Called when universe changes.
+				 *
+				 * @param param - Destructured parameter
+				 */
+				// Infer argument
+				// eslint-disable-next-line @typescript-eslint/typedef
+				updateNotifications({ state }) {
+					// Do nothing
+					state.universe.log({ level: LogLevel.Debug, message: "Notifications store update dispatched" });
 				},
 
 				/**

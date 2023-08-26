@@ -8,8 +8,18 @@
  *
  * @file
  */
+import { MessageTypeWord, StatusNotificationWord } from "../../app/common/defaults/connection";
+import { CoreEnvelope } from "../../app/core/connection";
+import { LogLevel } from "../../app/core/error";
 import { ActionWords } from "../../app/server/action";
-import { EntityKindActionArgs, EntityKindConstructorParams } from "../../app/server/entity";
+import { ServerPlayer } from "../../app/server/connection";
+import {
+	EntityKindActionArgs,
+	EntityKindConstructorParams,
+	ServerEntity,
+	ServerEntityClass
+} from "../../app/server/entity";
+import { ServerShard } from "../../app/server/shard";
 import { MonsterKind, MonsterKindClass } from "./monster";
 import { TreasureKindClassFactory } from "./treasure";
 
@@ -114,11 +124,46 @@ export function MimicKindClassFactory({
 					// Awaken
 					this.awaken();
 
-					// Attack back if player attempts to use
-					rest.sourceEntity?.kind.action({
-						action: ActionWords.Attack,
-						sourceEntity: this.entity
-					});
+					const { sourceEntity }: Record<string, ServerEntity | undefined> = rest;
+					if (sourceEntity) {
+						// Send message of notification of mimic awakening/attacking
+						if (sourceEntity.playerUuid) {
+							const shard: ServerShard = (this.entity.constructor as ServerEntityClass).universe.getShard(sourceEntity);
+
+							// Player controlling the source entity
+							const player: ServerPlayer | undefined = shard.players.get(sourceEntity.playerUuid);
+
+							// Check if player exists and if it does, send a message
+							if (player && player.connection) {
+								player.connection.socket
+									.send(
+										new CoreEnvelope({
+											messages: [
+												{
+													body: { notificationId: StatusNotificationWord.MimicAwaken, playerUuid: player.playerUuid },
+													type: MessageTypeWord.StatusNotification
+												}
+											]
+										})
+									)
+									.catch(error => {
+										(this.entity.constructor as ServerEntityClass).universe.log({
+											error: new Error(
+												`Failed to notify about mimic("entityUuid=${this.entity.entityUuid}" to player("playerUuid=${player.playerUuid}").`,
+												{ cause: error instanceof Error ? error : undefined }
+											),
+											level: LogLevel.Warning
+										});
+									});
+							}
+						}
+
+						// Attack back if player attempts to use
+						sourceEntity.kind.action({
+							action: ActionWords.Attack,
+							sourceEntity: this.entity
+						});
+					}
 
 					return super.action({ action, ...rest });
 				}
