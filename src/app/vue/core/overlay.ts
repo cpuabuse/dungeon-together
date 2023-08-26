@@ -15,6 +15,7 @@ import { ActionWords } from "../../server/action";
 import { ElementSize } from "../common/element";
 import { ExtractProps, ExtractPropsFromComponentClass, SetupContextEmit } from "../common/utility-types";
 import type OverlayListItemAssembler from "../components/overlay-list-item-assembler.vue";
+import { iconProps } from "./icon";
 
 // #region Items
 /**
@@ -195,6 +196,11 @@ export enum OverlayContainerUiActionWords {
 }
 
 /**
+ * Extracts props from icon.
+ */
+export type OverlayUiActionIconProps = ExtractProps<typeof iconProps>;
+
+/**
  * Helper type for UI action, guarantees exhaustiveness, and constraints.
  */
 type OverlayContentUiActionHelper<
@@ -210,44 +216,47 @@ type OverlayContentUiActionHelper<
  * Possible word/parameters combination for UI action.
  */
 export type OverlayContentUiActionParam = OverlayContentUiActionHelper<
-	| {
-			/**
-			 * UI action.
-			 */
-			uiActionWord: OverlayContainerUiActionWords.EntityAction;
+	OverlayUiActionIconProps &
+		(
+			| {
+					/**
+					 * UI action.
+					 */
+					uiActionWord: OverlayContainerUiActionWords.EntityAction;
 
-			/**
-			 * Action type.
-			 */
-			entityActionWord: ActionWords;
+					/**
+					 * Action type.
+					 */
+					entityActionWord: ActionWords;
 
-			/**
-			 * Target entity UUID.
-			 */
-			targetEntityUuid: Uuid;
-	  }
-	| {
-			/**
-			 * Entity info.
-			 */
-			uiActionWord: OverlayContainerUiActionWords.EntityInfo;
+					/**
+					 * Target entity UUID.
+					 */
+					targetEntityUuid: Uuid;
+			  }
+			| {
+					/**
+					 * Entity info.
+					 */
+					uiActionWord: OverlayContainerUiActionWords.EntityInfo;
 
-			/**
-			 * Information to display.
-			 */
-			targetEntityUuid: Uuid;
-	  }
-	| {
-			/**
-			 * Entity debug info.
-			 */
-			uiActionWord: OverlayContainerUiActionWords.EntityDebugInfo;
+					/**
+					 * Information to display.
+					 */
+					targetEntityUuid: Uuid;
+			  }
+			| {
+					/**
+					 * Entity debug info.
+					 */
+					uiActionWord: OverlayContainerUiActionWords.EntityDebugInfo;
 
-			/**
-			 * Information to display.
-			 */
-			targetEntityUuid: Uuid;
-	  }
+					/**
+					 * Information to display.
+					 */
+					targetEntityUuid: Uuid;
+			  }
+		)
 >;
 // #endregion UI Actions
 
@@ -260,12 +269,20 @@ export type OverlayListItemNarrowProps = ExtractProps<typeof overlayListItemNarr
 /**
  * Prop types for overlay list item, body and descendants.
  */
-export type OverlayListChildSharedProps = ExtractPropTypes<typeof overlayListChildSharedProps>;
+export type OverlayListChildSharedProps = ExtractProps<typeof overlayListChildSharedProps>;
 
 /**
  * Prop types for overlay list family.
  */
-export type OverlayListSharedProps = ExtractPropTypes<typeof overlayListSharedProps>;
+export type OverlayListSharedProps = ExtractProps<typeof overlayListSharedProps>;
+
+/**
+ * Prop types for overlay list family.
+ *
+ * @remarks
+ * With `this` scope.
+ */
+export type OverlayListSharedPropsReceived = ExtractPropTypes<typeof overlayListSharedProps>;
 
 /**
  * Type for emits.
@@ -359,7 +376,7 @@ export function useOverlayListShared({
 	/**
 	 * Props used.
 	 */
-	props: OverlayListSharedProps;
+	props: OverlayListSharedPropsReceived;
 
 	/**
 	 * Context.

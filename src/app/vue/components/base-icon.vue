@@ -35,9 +35,9 @@ export default defineComponent({
 		 */
 		mode(): ClientMode {
 			return (
-				(this.modeUuid
-					? (this as unknown as ThisVueStore).$store.state.universe.modes.get(this.modeUuid)
-					: undefined) ?? (this as unknown as ThisVueStore).$store.state.universe.defaultMode
+				(this.modeUuid ? this.universe.modes.get(this.modeUuid) : undefined) ??
+				// Casting because of Vue class type erasure
+				(this.universe.defaultMode as ClientMode)
 			);
 		}
 	},
@@ -51,6 +51,12 @@ export default defineComponent({
 			required: false,
 			type: String
 		}
+	},
+
+	data() {
+		return {
+			universe: (this as unknown as ThisVueStore).$store.state.universe
+		};
 	}
 });
 </script>
