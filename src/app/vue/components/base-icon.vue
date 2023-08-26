@@ -20,15 +20,6 @@ export default defineComponent({
 
 	computed: {
 		/**
-		 * Base64 mode source.
-		 *
-		 * @returns Base64 mode source, when mode icon is requested
-		 */
-		base64ModeSrc(): string {
-			return this.mode.base64Src;
-		},
-
-		/**
 		 * Mode.
 		 *
 		 * @returns Mode, when mode icon is requested
@@ -42,6 +33,19 @@ export default defineComponent({
 		}
 	},
 
+	/**
+	 * Data.
+	 *
+	 * @returns Data
+	 */
+	data() {
+		return {
+			// Base64 mode source
+			base64ModeSrc: ClientMode.defaultBase64Src,
+			universe: (this as unknown as ThisVueStore).$store.state.universe
+		};
+	},
+
 	props: {
 		...iconProps,
 
@@ -53,10 +57,26 @@ export default defineComponent({
 		}
 	},
 
-	data() {
-		return {
-			universe: (this as unknown as ThisVueStore).$store.state.universe
-		};
+	watch: {
+		mode: {
+			/**
+			 * Watches for mode changes.
+			 *
+			 * @param mode - Mode for display
+			 */
+			handler(mode: ClientMode): void {
+				// Only update when mode UUID is given
+				if (this.modeUuid) {
+					// Update image with inital value
+					this.base64ModeSrc = mode.base64Src;
+					mode.isInitialized.finally(() => {
+						// Update with promise value
+						this.base64ModeSrc = mode.base64Src;
+					});
+				}
+			},
+			immediate: true
+		}
 	}
 });
 </script>
