@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<VIcon v-if="icon" :icon="icon" />
-		<VAvatar v-else-if="base64ModeSrc" :src="base64ModeSrc" />
+		<VAvatar v-else-if="base64ModeSrc" :image="base64ModeSrc" />
 	</div>
 </template>
 

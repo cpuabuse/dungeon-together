@@ -16,6 +16,7 @@
 export { default as OverlayClick } from "./overlay-click.vue";
 export { default as OverlayList } from "./overlay-list.vue";
 export { default as OverlayWindow } from "./overlay-window.vue";
+export { default as BaseIcon } from "./base-icon.vue";
 
 // Status notification
 export { default as StatusNotification } from "./status-notification.vue";

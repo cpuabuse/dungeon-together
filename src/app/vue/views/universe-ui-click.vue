@@ -49,7 +49,11 @@ export default defineComponent({
 				name: "Cell",
 				type: OverlayListItemEntryType.InfoElement,
 				uiActions: [
-					{ targetEntityUuid: "1", uiActionWord: OverlayContainerUiActionWords.EntityInfo, modeUuid: "1" },
+					{
+						targetEntityUuid: "1",
+						uiActionWord: OverlayContainerUiActionWords.EntityInfo,
+						modeUuid: "mode/user/treasure/default"
+					},
 					{ targetEntityUuid: "1", uiActionWord: OverlayContainerUiActionWords.EntityDebugInfo }
 				]
 			},
@@ -57,7 +61,11 @@ export default defineComponent({
 				name: "Cell",
 				type: OverlayListItemEntryType.InfoElement,
 				uiActions: [
-					{ targetEntityUuid: "1", uiActionWord: OverlayContainerUiActionWords.EntityInfo },
+					{
+						targetEntityUuid: "1",
+						uiActionWord: OverlayContainerUiActionWords.EntityInfo,
+						modeUuid: "mode/user/player/default"
+					},
 					{ targetEntityUuid: "1", uiActionWord: OverlayContainerUiActionWords.EntityDebugInfo }
 				]
 			}

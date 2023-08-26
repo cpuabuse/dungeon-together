@@ -6,11 +6,13 @@
 		<template v-if="uiActions.length > 0" #inline>
 			<VBtnGroup v-if="uiActions.length > 0">
 				<VBtn
-					v-for="(uiAction, uiActionKey) in uiActions"
+					v-for="({ icon: uiActionIcon, modeUuid, uiActionWord }, uiActionKey) in uiActions"
 					:key="uiActionKey"
 					@click="() => handleUiAction({ uiActionKey })"
-					><VIcon>{{ icon }}</VIcon> {{ uiAction.uiActionWord }}</VBtn
 				>
+					<BaseIcon v-if="uiActionIcon || modeUuid" :mode-uuid="modeUuid" :icon="uiActionIcon" />
+					<span v-else>{{ uiActionWord }}</span>
+				</VBtn>
 			</VBtnGroup>
 		</template>
 	</OverlayListItemAssembler>
@@ -18,7 +20,7 @@
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
-import { VBtn, VBtnGroup, VIcon } from "vuetify/components";
+import { VBtn, VBtnGroup } from "vuetify/components";
 import {
 	OverlayContentUiActionParam,
 	overlayListChildSharedProps,
@@ -29,13 +31,14 @@ import {
 	useOverlayListShared
 } from "../core/overlay";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
+import BaseIcon from "./base-icon.vue";
 
 export default defineComponent({
 	components: {
 		OverlayListItemAssembler,
 		VBtn,
 		VBtnGroup,
-		VIcon
+		BaseIcon
 	},
 
 	emits: overlayListSharedEmits,
