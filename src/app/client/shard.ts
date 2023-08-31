@@ -220,10 +220,17 @@ export function ClientShardFactory({
 					new ElementBall({ container: this.gridContainer, scale: 500, ...ElementBall.windBall });
 
 					// Add listeners for right-click input
-					this.input.on(rcSymbol, inputInterface => {
+					this.input.on(rcSymbol, (inputInterface: InputInterface) => {
 						// #if _DEBUG_ENABLED
-						inputDebug({ input: inputInterface as InputInterface, symbol: rcSymbol });
+						inputDebug({ input: inputInterface, symbol: rcSymbol });
 						// #endif
+
+						// TODO: Hold grid offsets; Terminate on first
+						this.grids.forEach(grid => {
+							const x: number = inputInterface.x / this.sceneWidth;
+							const y: number = inputInterface.y / this.sceneHeight;
+							const z: number = grid.currentLevel;
+						});
 					});
 
 					// Add listeners for left-click input

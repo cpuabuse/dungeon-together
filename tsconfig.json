@@ -13,7 +13,9 @@
 		"strict": true,
 		"target": "ES2022",
 		/* From pixi, affects assets script compilation - https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/64302 */
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		/* Will be auto-imported and renamed by Vite's plugin */
+		"jsxFactory": "vueJsxPragma"
 	},
 	"include": ["src/**/*", "test/**/*", "src/**/*.vue", "test/**/*.vue", "**/*vite.config.ts"]
 }

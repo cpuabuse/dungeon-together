@@ -8,6 +8,8 @@
  */
 
 import { Store } from "vuex";
+import { ExhaustiveUnion } from "../../common/utility-types";
+import { ClientCell } from "../cell";
 import { ClientUniverse } from "../universe";
 import { Theme } from "./themes";
 
@@ -15,6 +17,42 @@ import { Theme } from "./themes";
  * Reexport.
  */
 export { createVueApp } from "./vue.app";
+
+/**
+ * Words for right-click menu data type.
+ */
+export enum ClientUniverseStateRcMenuDataWords {
+	Cell = "cell",
+	Empty = "empty"
+}
+
+/**
+ * Right-click menu data.
+ */
+export type ClientUniverseStateRcMenuData = null | ExhaustiveUnion<
+	| {
+			/**
+			 * Cell type.
+			 */
+			type: ClientUniverseStateRcMenuDataWords.Cell;
+
+			/**
+			 * Cell link.
+			 */
+			cell: ClientCell;
+	  }
+	| {
+			/**
+			 * Empty type.
+			 *
+			 * @remarks
+			 * Display when no context given.
+			 */
+			type: ClientUniverseStateRcMenuDataWords.Empty;
+	  },
+	"type",
+	ClientUniverseStateRcMenuDataWords
+>;
 
 /**
  * State type for vuex.
@@ -34,6 +72,11 @@ export interface UniverseState {
 	 * Records of various things.
 	 */
 	records: Record<string | symbol, any>;
+
+	/**
+	 * Right-click menu data.
+	 */
+	rcMenuData: ClientUniverseStateRcMenuData;
 }
 
 /**

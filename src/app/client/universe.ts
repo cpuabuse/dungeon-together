@@ -31,7 +31,7 @@ import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
 import { ClientConnection } from "./connection";
 import { ClientEntity, ClientEntityClass, ClientEntityFactory } from "./entity";
 import { ClientGrid, ClientGridClass, ClientGridClassFactory } from "./grid";
-import { UniverseState, createVueApp } from "./gui";
+import { ClientUniverseStateRcMenuData, UniverseState, createVueApp } from "./gui";
 import { Theme } from "./gui/themes";
 import {
 	downSymbol,
@@ -324,9 +324,19 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 					// Set record, which is defined as `any``
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					state.records[id] = value;
+				},
+
+				/**
+				 * Updates right-click menu data.
+				 *
+				 * @param state - State context
+				 * @param data - Data to set to
+				 */
+				updateRcMenuData(state: UniverseState, data: ClientUniverseStateRcMenuData) {
+					state.rcMenuData = data;
 				}
 			},
-			state: { records: { alert: true }, theme: Theme.Dark, universe: this }
+			state: { rcMenuData: null, records: { alert: true }, theme: Theme.Dark, universe: this }
 		});
 		this.vue = vue;
 		this.store = store;
@@ -438,10 +448,11 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 
 					// Iterates through shards conditionally
 					this.shards.forEach(clientShard => {
+						// TODO: Calculate and store shard offsets; Terminate iteration on first
 						// Send events to the relevant shards
 						clientShard.fireInput(rcSymbol, {
-							x: 0,
-							y: 0
+							x: event.x,
+							y: event.y
 						});
 					});
 				});
@@ -609,6 +620,7 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 				hammer.on("press", () => {
 					// Iterates through shards conditionally
 					this.shards.forEach(clientShard => {
+						// TODO: Add coordinates from Hammer and move dispatching to separate function together with right-click
 						// Send events to the relevant shards
 						clientShard.fireInput(rcSymbol, {
 							x: 0,

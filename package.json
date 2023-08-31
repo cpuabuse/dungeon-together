@@ -40,7 +40,6 @@
 		"@cpuabuse/eslint-config": "^0.0.50",
 		"@istanbuljs/nyc-config-typescript": "^1.0.2",
 		"@rollup/plugin-alias": "^5.0.0",
-		"@rollup/plugin-buble": "^1.0.2",
 		"@rollup/plugin-commonjs": "^25.0.1",
 		"@rollup/plugin-inject": "^5.0.3",
 		"@rollup/plugin-json": "^6.0.0",

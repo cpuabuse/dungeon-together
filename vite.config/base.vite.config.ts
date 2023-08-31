@@ -13,7 +13,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import { join } from "path";
-import buble from "@rollup/plugin-buble";
 import inject from "@rollup/plugin-inject";
 import vue from "@vitejs/plugin-vue";
 import glslify from "rollup-plugin-glslify";
@@ -100,12 +99,6 @@ export function defineBase({
 		plugins: [
 			vue({
 				template: { compilerOptions: { comments: false } }
-			}),
-
-			// Transpile jsx to vue
-			buble({
-				include: ["**/*.tsx"],
-				jsx: "vueJsxPragma"
 			}),
 
 			// Inject jsx transpilation dependencies (`import { h } from "vue"`);

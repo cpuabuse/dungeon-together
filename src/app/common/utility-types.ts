@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -218,3 +218,14 @@ export type ConditionalObject<
  * For intersecting conditional types. Changes to `object` if unknown.
  */
 export type UnknownToObject<T> = unknown extends T ? object : T;
+
+/**
+ * Verifies that object provided is an exhaustive discriminated union.
+ */
+export type ExhaustiveUnion<
+	Type extends Record<DiscriminantKey, DiscriminantValue>,
+	DiscriminantKey extends string | number | symbol,
+	DiscriminantValue,
+	FailedType = ["Type error", "Union should be exhaustive, but is not", Type]
+	// Union to tuple to evade distributive conditional type
+> = [DiscriminantValue] extends [Type[DiscriminantKey]] ? Type : FailedType;
