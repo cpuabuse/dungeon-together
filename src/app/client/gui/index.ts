@@ -29,30 +29,42 @@ export enum ClientUniverseStateRcMenuDataWords {
 /**
  * Right-click menu data.
  */
-export type ClientUniverseStateRcMenuData = null | ExhaustiveUnion<
-	| {
+export type ClientUniverseStateRcMenuData =
+	| null
+	| (ExhaustiveUnion<
+			| {
+					/**
+					 * Cell type.
+					 */
+					type: ClientUniverseStateRcMenuDataWords.Cell;
+
+					/**
+					 * Cell link.
+					 */
+					cell: ClientCell;
+			  }
+			| {
+					/**
+					 * Empty type.
+					 *
+					 * @remarks
+					 * Display when no context given.
+					 */
+					type: ClientUniverseStateRcMenuDataWords.Empty;
+			  },
+			"type",
+			ClientUniverseStateRcMenuDataWords
+	  > & {
 			/**
-			 * Cell type.
+			 * Pixel position on "x".
 			 */
-			type: ClientUniverseStateRcMenuDataWords.Cell;
+			x: number;
 
 			/**
-			 * Cell link.
+			 * Pixel position on "y".
 			 */
-			cell: ClientCell;
-	  }
-	| {
-			/**
-			 * Empty type.
-			 *
-			 * @remarks
-			 * Display when no context given.
-			 */
-			type: ClientUniverseStateRcMenuDataWords.Empty;
-	  },
-	"type",
-	ClientUniverseStateRcMenuDataWords
->;
+			y: number;
+	  });
 
 /**
  * State type for vuex.

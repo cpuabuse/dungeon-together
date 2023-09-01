@@ -236,7 +236,9 @@ export function ClientShardFactory({
 							if (cell) {
 								(this.constructor as ClientShardClass).universe.store.commit("updateRcMenuData", {
 									cell,
-									type: ClientUniverseStateRcMenuDataWords.Cell
+									type: ClientUniverseStateRcMenuDataWords.Cell,
+									x: inputInterface.x,
+									y: inputInterface.y
 								} satisfies ClientUniverseStateRcMenuData);
 							}
 						});

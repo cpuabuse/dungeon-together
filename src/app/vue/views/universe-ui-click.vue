@@ -1,6 +1,6 @@
 <!-- Universe UI Click -->
 <template>
-	<OverlayClick v-if="rcMenuData" v-model="isOverlayClickDisplayed" :x="500" :y="200">
+	<OverlayClick v-if="rcMenuData" v-model="isOverlayClickDisplayed" :x="rcMenuData.x" :y="rcMenuData.y">
 		<template #body>
 			<OverlayList v-bind="overlayListProps" @ui-action="onUiAction" />
 		</template>
