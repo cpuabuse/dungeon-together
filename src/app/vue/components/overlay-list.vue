@@ -69,7 +69,7 @@ export default defineComponent({
 		 * @returns Whether if hidden icon is displayed if missing
 		 */
 		isHiddenIconDisplayedIfMissing(): boolean {
-			return this.items.some(itemElement => itemElement.icon);
+			return this.items.some(itemElement => itemElement.icon || itemElement.modeUuid);
 		}
 	},
 

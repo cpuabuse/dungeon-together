@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="base-icon">
 		<VIcon v-if="icon" :icon="icon" />
 		<VAvatar v-else-if="base64ModeSrc" :image="base64ModeSrc" />
 	</div>
@@ -80,3 +80,13 @@ export default defineComponent({
 	}
 });
 </script>
+
+<style scoped>
+/* Override reduction in size of VIcon inside the VBtn, as sizing is tied to mode  */
+.v-btn .base-icon {
+	font-size: 1rem;
+}
+.v-btn .v-icon {
+	--v-icon-size-multiplier: 1;
+}
+</style>

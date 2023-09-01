@@ -39,11 +39,12 @@ export default defineComponent({
 					// eslint-disable-next-line @typescript-eslint/typedef
 					return Array.from(this.rcMenuData.cell.entities).map(([, entity]) => {
 						return {
+							modeUuid: entity.modeUuid,
 							name: "Cell",
 							type: OverlayListItemEntryType.InfoElement,
 							uiActions: [
 								{
-									modeUuid: entity.modeUuid,
+									icon: "fa-khanda",
 									targetEntityUuid: entity.entityUuid,
 									uiActionWord: OverlayContainerUiActionWords.EntityInfo
 								},

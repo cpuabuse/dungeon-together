@@ -15,7 +15,7 @@ import { ActionWords } from "../../server/action";
 import { ElementSize } from "../common/element";
 import { ExtractProps, ExtractPropsFromComponentClass, SetupContextEmit } from "../common/utility-types";
 import type OverlayListItemAssembler from "../components/overlay-list-item-assembler.vue";
-import { iconProps } from "./icon";
+import { IconProps, iconProps } from "./icon";
 
 // #region Items
 /**
@@ -196,11 +196,6 @@ export enum OverlayContainerUiActionWords {
 }
 
 /**
- * Extracts props from icon.
- */
-export type OverlayUiActionIconProps = ExtractProps<typeof iconProps>;
-
-/**
  * Helper type for UI action, guarantees exhaustiveness, and constraints.
  */
 type OverlayContentUiActionHelper<
@@ -216,7 +211,7 @@ type OverlayContentUiActionHelper<
  * Possible word/parameters combination for UI action.
  */
 export type OverlayContentUiActionParam = OverlayContentUiActionHelper<
-	OverlayUiActionIconProps &
+	IconProps &
 		(
 			| {
 					/**
@@ -315,10 +310,7 @@ export const overlayListItemNarrowProps = {
 		type: String
 	},
 
-	icon: {
-		required: false,
-		type: String
-	},
+	...iconProps,
 
 	name: {
 		required: false,
@@ -448,6 +440,7 @@ export function useOverlayListItemShared({
 			icon: props.icon,
 			isHiddenCaretDisplayedIfMissing: props.isHiddenCaretDisplayedIfMissing,
 			isHiddenIconDisplayedIfMissing: props.isHiddenIconDisplayedIfMissing,
+			modeUuid: props.modeUuid,
 			name: props.name
 		};
 	});

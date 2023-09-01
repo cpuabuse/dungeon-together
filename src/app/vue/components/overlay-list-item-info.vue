@@ -30,15 +30,15 @@ import {
 	useOverlayListItemShared,
 	useOverlayListShared
 } from "../core/overlay";
-import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 import BaseIcon from "./base-icon.vue";
+import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 
 export default defineComponent({
 	components: {
+		BaseIcon,
 		OverlayListItemAssembler,
 		VBtn,
-		VBtnGroup,
-		BaseIcon
+		VBtnGroup
 	},
 
 	emits: overlayListSharedEmits,

@@ -135,6 +135,7 @@ export default defineComponent({
 				isHiddenCaretDisplayedIfMissing: this.isHiddenCaretDisplayedIfMissing,
 				isHiddenIconDisplayedIfMissing: this.isHiddenIconDisplayedIfMissing,
 				isLast: this.isLast,
+				modeUuid: this.item.modeUuid,
 				name: this.item.name
 			};
 			const { item } = this;

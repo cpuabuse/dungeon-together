@@ -8,8 +8,8 @@
 		<template v-if="hasHeader" #header>
 			<!-- `VRow` doesn't receive list's density -->
 			<VRow align="center" :dense="isCompact" :justify="isHeaderCentered ? 'center' : undefined">
-				<VCol v-if="effectiveIcon" cols="auto">
-					<VIcon :icon="effectiveIcon" class="overlay-content-item-icon" />
+				<VCol v-if="effectiveIcon || modeUuid" cols="auto">
+					<BaseIcon :mode-uuid="modeUuid" :icon="effectiveIcon" class="overlay-content-item-icon" />
 				</VCol>
 
 				<VCol cols="auto">
@@ -55,10 +55,12 @@ import {
 	overlayListSharedProps,
 	useOverlayListShared
 } from "../core/overlay";
+import BaseIcon from "./base-icon.vue";
 import OverlayContentItemWrapper from "./overlay-list-item-wrapper.vue";
 
 export default defineComponent({
 	components: {
+		BaseIcon,
 		OverlayContentItemWrapper,
 		VChip,
 		VCol,
@@ -79,7 +81,7 @@ export default defineComponent({
 		 * @returns Effective icon
 		 */
 		effectiveIcon(): string | undefined {
-			if (this.icon) {
+			if (this.icon || this.modeUuid) {
 				return this.icon;
 			}
 			if (this.isHiddenIconDisplayedIfMissing) {
@@ -132,7 +134,7 @@ export default defineComponent({
 		 * @returns Whether icon should be visible
 		 */
 		isIconVisible(): boolean {
-			return !!this.icon;
+			return !!(this.icon || this.modeUuid);
 		}
 	},
 
