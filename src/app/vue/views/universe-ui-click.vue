@@ -1,6 +1,6 @@
 <!-- Universe UI Click -->
 <template>
-	<OverlayClick v-model="isOverlayClickDisplayed" :x="500" :y="200">
+	<OverlayClick v-if="rcMenuData" v-model="isOverlayClickDisplayed" :x="500" :y="200">
 		<template #body>
 			<OverlayList v-bind="overlayListProps" @ui-action="onUiAction" />
 		</template>
@@ -10,8 +10,7 @@
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import { ClientEntity } from "../../client/entity";
-import { ThisVueStore } from "../../client/gui";
-import { Uuid } from "../../common/uuid";
+import { ClientUniverseStateRcMenuDataWords, ThisVueStore, UniverseState } from "../../client/gui";
 import { LogLevel } from "../../core/error";
 import { ExtractPropsFromComponentClass } from "../common/utility-types";
 import OverlayClick from "../components/overlay-click.vue";
@@ -29,6 +28,39 @@ export default defineComponent({
 
 	computed: {
 		/**
+		 * Overlay click items.
+		 *
+		 * @returns Overlay click items
+		 */
+		overlayClickItems(): OverlayListItems {
+			if (this.rcMenuData) {
+				if (this.rcMenuData.type === ClientUniverseStateRcMenuDataWords.Cell) {
+					// False negative
+					// eslint-disable-next-line @typescript-eslint/typedef
+					return Array.from(this.rcMenuData.cell.entities).map(([, entity]) => {
+						return {
+							name: "Cell",
+							type: OverlayListItemEntryType.InfoElement,
+							uiActions: [
+								{
+									modeUuid: entity.modeUuid,
+									targetEntityUuid: entity.entityUuid,
+									uiActionWord: OverlayContainerUiActionWords.EntityInfo
+								},
+								{
+									targetEntityUuid: entity.entityUuid,
+									uiActionWord: OverlayContainerUiActionWords.EntityDebugInfo
+								}
+							]
+						};
+					});
+				}
+			}
+
+			return [];
+		},
+
+		/**
 		 * Props for overlay click.
 		 *
 		 * @returns Props
@@ -44,35 +76,8 @@ export default defineComponent({
 	 * @returns Data
 	 */
 	data() {
-		const overlayClickItems: OverlayListItems = [
-			{
-				name: "Cell",
-				type: OverlayListItemEntryType.InfoElement,
-				uiActions: [
-					{
-						targetEntityUuid: "1",
-						uiActionWord: OverlayContainerUiActionWords.EntityInfo,
-						modeUuid: "mode/user/treasure/default"
-					},
-					{ targetEntityUuid: "1", uiActionWord: OverlayContainerUiActionWords.EntityDebugInfo }
-				]
-			},
-			{
-				name: "Cell",
-				type: OverlayListItemEntryType.InfoElement,
-				uiActions: [
-					{
-						targetEntityUuid: "1",
-						uiActionWord: OverlayContainerUiActionWords.EntityInfo,
-						modeUuid: "mode/user/player/default"
-					},
-					{ targetEntityUuid: "1", uiActionWord: OverlayContainerUiActionWords.EntityDebugInfo }
-				]
-			}
-		];
 		return {
 			isOverlayClickDisplayed: true,
-			overlayClickItems,
 			universe: (this as unknown as ThisVueStore).$store.state.universe
 		};
 	},
@@ -109,9 +114,10 @@ export default defineComponent({
 	},
 
 	props: {
-		cellUuid: {
-			required: true,
-			type: String as PropType<Uuid>
+		rcMenuData: {
+			default: null,
+			required: false,
+			type: Object as PropType<UniverseState["rcMenuData"]>
 		}
 	}
 });

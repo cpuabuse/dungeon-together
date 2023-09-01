@@ -25,9 +25,11 @@ import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
+import { ClientCell } from "./cell";
 import { ClientConnection, ClientPlayer } from "./connection";
 import { ElementBall } from "./element-ball";
 import { ClientGrid } from "./grid";
+import { ClientUniverseStateRcMenuData, ClientUniverseStateRcMenuDataWords } from "./gui";
 import {
 	Input,
 	InputInterface,
@@ -227,9 +229,16 @@ export function ClientShardFactory({
 
 						// TODO: Hold grid offsets; Terminate on first
 						this.grids.forEach(grid => {
-							const x: number = inputInterface.x / this.sceneWidth;
-							const y: number = inputInterface.y / this.sceneHeight;
+							const x: number = Math.floor(inputInterface.x / this.sceneWidth);
+							const y: number = Math.floor(inputInterface.y / this.sceneHeight);
 							const z: number = grid.currentLevel;
+							const cell: ClientCell | undefined = grid.cellIndex[z]?.[x]?.[y];
+							if (cell) {
+								(this.constructor as ClientShardClass).universe.store.commit("updateRcMenuData", {
+									cell,
+									type: ClientUniverseStateRcMenuDataWords.Cell
+								} satisfies ClientUniverseStateRcMenuData);
+							}
 						});
 					});
 

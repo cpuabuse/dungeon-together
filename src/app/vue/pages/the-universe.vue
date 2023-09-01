@@ -1,5 +1,5 @@
 <template>
-	<VApp style="background: none" full-height>
+	<VApp full-height class="the-universe-app">
 		<div class="app-content">
 			<div class="universe">Hello: {{ what }}</div>
 			<tsxtest />
@@ -409,7 +409,14 @@ export default defineComponent({
 });
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
+.the-universe-app {
+	background: none;
+
+	/* To pass clicks to Pixi */
+	pointer-events: none;
+}
+
 .universe {
 	color: red;
 }

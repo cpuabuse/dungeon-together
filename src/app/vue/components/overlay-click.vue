@@ -43,5 +43,7 @@ export default defineComponent({
 	left: calc(v-bind(x) * 1px);
 	z-index: v-bind(zIdx);
 	max-height: 50%;
+
+	pointer-events: auto;
 }
 </style>

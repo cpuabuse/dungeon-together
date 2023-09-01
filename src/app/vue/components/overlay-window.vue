@@ -81,5 +81,7 @@ export default defineComponent({
 
 	height: 500px;
 	width: 300px;
+
+	pointer-events: auto;
 }
 </style>

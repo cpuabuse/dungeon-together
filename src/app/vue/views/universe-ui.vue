@@ -1,6 +1,6 @@
 <!-- Universe UI -->
 <template>
-	<UniverseUiClick cell-uuid="nothing" />
+	<UniverseUiClick :rc-menu-data="rcMenuData" />
 
 	<!-- Undefined assertion since index used in iteration -->
 	<UniverseUiShard
@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { ThisVueStore } from "../../client/gui";
+import { ClientUniverseStateRcMenuData, ThisVueStore, UniverseState, UniverseStore } from "../../client/gui";
 import { Uuid } from "../../common/uuid";
 import { UniverseUiShardEntries, UniverseUiShardModel } from "../core/universe-ui";
 import UniverseUiClick from "./universe-ui-click.vue";
@@ -24,6 +24,18 @@ import UniverseUiToolbar from "./universe-ui-toolbar.vue";
 
 export default defineComponent({
 	components: { UniverseUiClick, UniverseUiShard, UniverseUiToolbar },
+
+	computed: {
+		/**
+		 * Right click menu data.
+		 *
+		 * @returns Right click menu data or `null` when to display nothing
+		 */
+		rcMenuData(): ClientUniverseStateRcMenuData {
+			// Casting since class type information lost
+			return (this.state as unknown as UniverseState).rcMenuData;
+		}
+	},
 
 	/**
 	 * Created callback.
@@ -46,6 +58,8 @@ export default defineComponent({
 	 * @returns Universe data
 	 */
 	data() {
+		const { state }: UniverseStore = (this as unknown as ThisVueStore).$store;
+
 		// Infer type
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let data = {
@@ -53,8 +67,8 @@ export default defineComponent({
 
 			// This value is expected to be rewritten fully on change by child nodes
 			shardEntries: new Array() as UniverseUiShardEntries,
-
-			universe: (this as unknown as ThisVueStore).$store.state.universe,
+			state,
+			universe: state.universe,
 			unsubscribe: null as (() => void) | null
 		};
 

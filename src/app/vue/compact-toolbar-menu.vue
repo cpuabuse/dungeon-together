@@ -6,7 +6,7 @@
 		:density="hasLabels ? 'default' : 'compact'"
 		:rounded="true"
 		class="w-auto"
-		:class="{ 'compact-toolbar-menu-has-labels': true }"
+		:class="{ 'compact-toolbar-menu-has-labels': hasLabels, 'compact-toolbar-menu': true }"
 	>
 		<!-- `tonal` for toggler to stand out -->
 		<VToolbarItems variant="tonal">
@@ -357,7 +357,7 @@ export default defineComponent({
 	padding-bottom: calc(0.25em - 1px);
 }
 .compact-toolbar-menu-has-labels .compact-toolbar-menu-item {
-	/* Reserve space for potentially active text in parent element, only can happen if labels are tehre */
+	/* Reserve space for potentially active text in parent element, only can happen if labels are there */
 	padding-top: calc(0.25em - 1px);
 }
 
@@ -370,5 +370,9 @@ export default defineComponent({
 /* Stretch wrapper to fit content as if wrapper didn't exist; Unlike `contents` positional information for tooltip popup is preserved */
 .compact-toolbar-tooltip-content-wrapper {
 	display: grid;
+}
+
+.compact-toolbar-menu {
+	pointer-events: auto;
 }
 </style>
