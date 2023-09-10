@@ -10,6 +10,7 @@
  */
 
 import { ComputedRef, ExtractPropTypes, PropType, computed } from "vue";
+import { ClientPlayer } from "../../client/connection";
 import { Uuid } from "../../common/uuid";
 import { ActionWords } from "../../server/action";
 import { ElementSize } from "../common/element";
@@ -192,7 +193,8 @@ export type OverlayListItemEntryExtract<Type extends OverlayListItemEntryType> =
 export enum OverlayContainerUiActionWords {
 	EntityAction = "entityAction",
 	EntityInfo = "entityInfo",
-	EntityDebugInfo = "entityDebugInfo"
+	EntityDebugInfo = "entityDebugInfo",
+	ForceMovement = "movement"
 }
 
 /**
@@ -251,6 +253,27 @@ export type OverlayContentUiActionParam = OverlayContentUiActionHelper<
 					 */
 					targetEntityUuid: Uuid;
 			  }
+			| ({
+					/**
+					 * UI action.
+					 */
+					uiActionWord: OverlayContainerUiActionWords.ForceMovement;
+			  } & {
+					/**
+					 * Player.
+					 */
+					player: ClientPlayer;
+
+					/**
+					 * Movement direction.
+					 */
+					targetCellUuid: Uuid;
+
+					/**
+					 * Unit UUID to move.
+					 */
+					unitUuid: Uuid;
+			  })
 		)
 >;
 // #endregion UI Actions

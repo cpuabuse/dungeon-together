@@ -19,7 +19,7 @@ import {
 import { Uuid } from "../common/uuid";
 import { ClientUpdate } from "../comms";
 import { CoreArgIds, CoreArgMeta, Nav, coreArgMetaGenerate } from "../core/arg";
-import { CellPathExtended, CellPathOwn } from "../core/cell";
+import { CellPathOwn } from "../core/cell";
 import {
 	CoreConnection,
 	CoreConnectionArgs,
