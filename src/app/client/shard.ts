@@ -283,6 +283,7 @@ export function ClientShardFactory({
 							connection?.socket.writeQueue({
 								body: {
 									direction,
+									hasDirection: true,
 									playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
 									// TODO: Add active unit system
 									unitUuid: Array.from(this.units)[0]

@@ -586,12 +586,64 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 							Kind.onTick();
 						});
 
-						let targetCell: ServerCell = grid.getCell(
-							sourceCell.nav.get(directions[message.body.direction]) ?? sourceCell
-						);
+						let result:
+							| {
+									/**
+									 * Nav.
+									 */
+									nav: Nav;
 
-						unit.kind.navigateEntity({ nav: directions[message.body.direction] });
-						await sendUpdate({ grid, sourceCell, targetCell });
+									/**
+									 * Target cell.
+									 */
+									targetCell: ServerCell;
+							  }
+							| undefined;
+
+						let direction: MovementWord | undefined;
+						let targetCellUuid: Uuid | undefined;
+						if (message.body.hasDirection) {
+							direction = message.body.direction;
+						} else {
+							targetCellUuid = message.body.targetCellUuid;
+						}
+
+						// Order requested direction to be processed first
+						// Cast since `keys()` produces strings, but prototype should not influence the keys
+						let orderedDirections: Array<MovementWord> = Object.keys(directions) as Array<MovementWord>;
+						if (direction) {
+							orderedDirections = [
+								direction,
+								...orderedDirections.filter(filteredDirection => filteredDirection !== direction)
+							];
+						}
+
+						// Prototype inheritance ignore with `Object.values()`
+						// Need to break, hence loop
+						// eslint-disable-next-line no-restricted-syntax
+						for (let orderedDirection of orderedDirections) {
+							let targetCell: ServerCell | undefined;
+							let nav: Nav = directions[orderedDirection];
+							let targetCellPath: CellPathOwn | undefined = sourceCell.nav.get(nav);
+							if (targetCellPath) {
+								targetCell = grid.getCell(targetCellPath);
+								// Verify that we found correct entity
+								if (!targetCellUuid || targetCell.cellUuid === targetCellUuid) {
+									result = {
+										nav,
+										targetCell
+									};
+									break;
+								}
+							}
+						}
+
+						if (result) {
+							unit.kind.navigateEntity(result);
+							await sendUpdate({ ...result, grid, sourceCell });
+						} else {
+							// TODO: Notify user of no result
+						}
 					},
 
 					playerUuid: message.body.playerUuid,

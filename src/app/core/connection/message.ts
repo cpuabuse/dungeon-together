@@ -51,15 +51,33 @@ export interface CoreMessageMovement extends CoreMessageBase {
 	 */
 	body: CoreMessagePlayerBody & {
 		/**
-		 * Movement direction.
-		 */
-		direction: MovementWord;
-
-		/**
 		 * Unit UUID to move.
 		 */
 		unitUuid: Uuid;
-	};
+	} & (
+			| {
+					/**
+					 * Movement direction.
+					 */
+					direction: MovementWord;
+
+					/**
+					 * Direction movement type.
+					 */
+					hasDirection: true;
+			  }
+			| {
+					/**
+					 * Target cell UUID.
+					 */
+					targetCellUuid: Uuid;
+
+					/**
+					 * Target movement type.
+					 */
+					hasDirection: false;
+			  }
+		);
 
 	/**
 	 * Type of the message.

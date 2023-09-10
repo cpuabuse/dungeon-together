@@ -16,7 +16,7 @@ import { defaultFadeInMs, defaultFadeOutMs } from "../common/sound";
 import { Uuid } from "../common/uuid";
 import { Vector, defaultVector } from "../common/vector";
 import { ClientUpdate } from "../comms";
-import { Nav, navIndex } from "../core/arg";
+import { Nav, NavIndexValue, navIndex } from "../core/arg";
 import {
 	CoreConnection,
 	CoreConnectionArgs,
@@ -719,7 +719,13 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 			case MessageTypeWord.Movement: {
 				let isActionNotDispatched: boolean = true;
 
-				let { direction, unitUuid, playerUuid }: typeof message.body = message.body;
+				// Extract from body
+				let { unitUuid, playerUuid }: typeof message.body = message.body;
+				let direction: MovementWord | undefined;
+				if (message.body.hasDirection) {
+					direction = message.body.direction;
+				}
+
 				let controlUnit: ClientEntity = this.universe.getEntity({ entityUuid: unitUuid });
 
 				// TODO: Change to string to uuid conversion function
@@ -731,7 +737,13 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 					let { x, y, z }: CoreDictionary = { ...controlUnit.dictionary };
 
 					if (typeof x === "number" && typeof y === "number" && typeof z === "number") {
-						let vectorChange: Vector = navIndex.get(directions[direction]) ?? defaultVector;
+						let vectorChange: Vector = defaultVector;
+						if (direction) {
+							let indexedVectorChange: NavIndexValue | undefined = navIndex.get(directions[direction]);
+							if (indexedVectorChange) {
+								vectorChange = indexedVectorChange;
+							}
+						}
 						let targetCell: ClientCell | undefined;
 
 						// If cell empty, target cell will be undefined
@@ -751,7 +763,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 												{
 													body: {
 														controlUnitUuid: unitUuid,
-														direction: message.body.direction,
+														direction,
 														playerUuid,
 														targetEntityUuid: targetEntity.entityUuid,
 														type: ActionWords.Interact
