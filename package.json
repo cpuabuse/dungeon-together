@@ -125,6 +125,7 @@
 		"mousetrap": "^1.6.5",
 		"next-tick": "^1.1.0",
 		"nipplejs": "^0.10.1",
+		"pinia": "^2.1.6",
 		"pixi.js": "^7.2.4",
 		"replace-in-file": "^7.0.1",
 		"uuid": "^9.0.0",

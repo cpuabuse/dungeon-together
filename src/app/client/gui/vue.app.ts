@@ -9,6 +9,7 @@
  * @file
  */
 
+import { Pinia, createPinia } from "pinia";
 import { App, Component, createApp } from "vue";
 import { Store, StoreOptions, createStore } from "vuex";
 import { useHljsPlugin } from "./vue.plugin.hljs";
@@ -57,7 +58,9 @@ export function createVueApp<State extends object = object>({
 		mutations,
 		state
 	});
+	const pinia: Pinia = createPinia();
 	app.use(store);
+	app.use(pinia);
 
 	return { store, vue: app };
 }

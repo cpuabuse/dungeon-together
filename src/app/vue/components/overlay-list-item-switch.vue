@@ -24,7 +24,7 @@
 				@update:model-value="
 					value => {
 						if (typeof value == 'boolean') {
-							setRecord({ id: id, value });
+							records[id] = value;
 						}
 					}
 				"

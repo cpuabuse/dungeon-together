@@ -9,9 +9,24 @@
  * @file
  */
 
-import { computed } from "vue";
-import { useStore } from "vuex";
+import { defineStore } from "pinia";
 import { UniverseStore } from "../../client/gui";
+
+/**
+ * Records store.
+ */
+// Infer from store
+// eslint-disable-next-line @typescript-eslint/typedef
+export const useRecordsStore = defineStore("records", {
+	/**
+	 * State.
+	 *
+	 * @returns State
+	 */
+	state: () => {
+		return { records: {} as UniverseStore["state"]["records"] };
+	}
+});
 
 /**
  * Get the records.
@@ -21,33 +36,9 @@ import { UniverseStore } from "../../client/gui";
 // Infer composable return type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function useRecords() {
-	const store: UniverseStore = useStore();
-
-	// Infer computed
+	// Infer store type
 	// eslint-disable-next-line @typescript-eslint/typedef
-	const records = computed((): UniverseStore["state"]["records"] => {
-		return store.state.records;
-	});
-
-	/**
-	 * Sets the record in the store.
-	 *
-	 * @param v - Destructured parameter
-	 * @returns Void
-	 */
-	function setRecord(v: {
-		/**
-		 * ID.
-		 */
-		id: string | symbol;
-
-		/**
-		 * Value.
-		 */
-		value: any;
-	}): void {
-		return store.commit("recordMutation", v);
-	}
+	const { records } = useRecordsStore();
 
 	/**
 	 * Gets the record from the store, or default value.
@@ -69,7 +60,7 @@ export function useRecords() {
 		 */
 		defaultValue?: boolean;
 	}): boolean {
-		return id ? Boolean(records.value[id]) : defaultValue;
+		return id ? Boolean(records[id]) : defaultValue;
 	}
 
 	/**
@@ -96,20 +87,17 @@ export function useRecords() {
 		let result: boolean = false;
 
 		if (id) {
-			const record: unknown = records.value[id];
+			const record: unknown = records[id];
 			if (typeof record === "boolean") {
 				value = !record;
 				result = true;
 			}
 
-			setRecord({
-				id,
-				value
-			});
+			records[id] = value;
 		}
 
 		return result;
 	}
 
-	return { getBooleanRecord, records, setRecord, toggleBooleanRecord };
+	return { getBooleanRecord, records, toggleBooleanRecord };
 }

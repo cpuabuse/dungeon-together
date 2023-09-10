@@ -42,6 +42,7 @@ import CompactToolbar from "../compact-toolbar.vue";
 import { OverlayList, OverlayWindow } from "../components";
 import { CompactToolbarMenuBaseProps } from "../core/compact-toolbar";
 import { OverlayListItemEntry, OverlayListItemEntryType, OverlayListItems, OverlayListTabs } from "../core/overlay";
+import { useRecords } from "../core/store";
 import { UniverseUiPlayerEntry, UniverseUiShardEntries } from "../core/universe-ui";
 
 /**
@@ -142,9 +143,7 @@ export default defineComponent({
 			 * @returns Boolean value
 			 */
 			get(): boolean {
-				const symbolValue: unknown = (this as unknown as ThisVueStore).$store.state.records[
-					this.debugMenuDisplaySymbol
-				];
+				const symbolValue: unknown = this.records[this.debugMenuDisplaySymbol];
 
 				if (symbolValue) {
 					return true;
@@ -159,10 +158,7 @@ export default defineComponent({
 			 * @param value - Boolean value to set
 			 */
 			set(value: boolean) {
-				(this as unknown as ThisVueStore).$store.commit("recordMutation", {
-					id: this.debugMenuDisplaySymbol,
-					value
-				});
+				this.records[this.debugMenuDisplaySymbol] = value;
 			}
 		},
 
@@ -275,6 +271,15 @@ export default defineComponent({
 		}
 	},
 
+	/**
+	 * Setup script.
+	 *
+	 * @returns Records
+	 */
+	setup() {
+		return useRecords();
+	},
+
 	watch: {
 		shardEntries: {
 			/**
@@ -310,7 +315,7 @@ export default defineComponent({
 								 * @returns An object with index and model getter/setter
 								 */
 								const generateEntryValue: () => PlayerEntry = () => {
-									const store: UniverseStore = (this as unknown as ThisVueStore).$store;
+									const { records }: Record<"records", UniverseStore["state"]["records"]> = this;
 
 									let clickRecordIndex: symbol = Symbol(`Menu for player(playerUuid="${playerUuid}")`);
 
@@ -323,7 +328,7 @@ export default defineComponent({
 										 * @returns To display or not
 										 */
 										get isPlayerMenuDisplayed(): boolean {
-											return !!store.state.records[clickRecordIndex];
+											return !!records[clickRecordIndex];
 										},
 
 										/**
@@ -332,10 +337,7 @@ export default defineComponent({
 										// Infers from getter
 										// eslint-disable-next-line @typescript-eslint/typedef
 										set isPlayerMenuDisplayed(value) {
-											store.commit("recordMutation", {
-												id: clickRecordIndex,
-												value
-											});
+											records[clickRecordIndex] = value;
 										},
 
 										items: [this.statItem],
