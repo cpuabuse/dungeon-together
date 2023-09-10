@@ -13,17 +13,17 @@
  * Enum representing words used to depict directions.
  */
 export enum DirectionWord {
-	Up,
-	Down,
-	Left,
-	Right,
-	ZUp,
-	ZDown,
+	Up = "up",
+	Down = "down",
+	Left = "left",
+	Right = "right",
+	ZUp = "z-up",
+	ZDown = "z-down",
 
 	/**
 	 * Should not be used for actual movement but should be used to represent relative position.
 	 */
-	Here
+	Here = "here"
 }
 
 /**

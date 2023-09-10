@@ -19,6 +19,7 @@ import {
 import { Uuid } from "../common/uuid";
 import { ClientUpdate } from "../comms";
 import { CoreArgIds, CoreArgMeta, Nav, coreArgMetaGenerate } from "../core/arg";
+import { CellPathExtended, CellPathOwn } from "../core/cell";
 import {
 	CoreConnection,
 	CoreConnectionArgs,
@@ -76,7 +77,7 @@ export type ServerMessage =
 				/**
 				 * Direction.
 				 */
-				direction: DirectionWord;
+				direction?: DirectionWord;
 
 				/**
 				 * Tool entity UUID.
@@ -577,8 +578,8 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 					 *
 					 * @param unit - Unit
 					 */
-					// Type infers from definition
-					// eslint-disable-next-line @typescript-eslint/typedef
+					// Type infers from definition; For some reason loop is detected
+					// eslint-disable-next-line @typescript-eslint/typedef, no-loop-func
 					callback: async ({ grid, unit, cell: sourceCell }) => {
 						// Tick first, so that enemy has upper hand, and later can process ticks while awaiting player input
 						this.universe.Entity.kinds.forEach(Kind => {
@@ -590,7 +591,6 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 						);
 
 						unit.kind.navigateEntity({ nav: directions[message.body.direction] });
-
 						await sendUpdate({ grid, sourceCell, targetCell });
 					},
 
@@ -612,31 +612,80 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 					 * @param param - Destructured parameters
 					 * @returns Synchronization promise
 					 */
-					// ESLint false negative
-					// eslint-disable-next-line @typescript-eslint/typedef
+					// ESLint false negative; For some reason detects a loop
+					// eslint-disable-next-line @typescript-eslint/typedef, no-loop-func
 					callback: async ({ grid, unit, cell, shard }) => {
 						// Tick first, so that enemy has upper hand, and later can process ticks while awaiting player input
 						this.universe.Entity.kinds.forEach(Kind => {
 							Kind.onTick();
 						});
 
-						let targetCell: ServerCell =
-							message.body.direction === DirectionWord.Here
-								? cell
-								: grid.getCell(cell.nav.get(directions[message.body.direction]) ?? cell);
-						let targetEntity: ServerEntity = targetCell.getEntity({ entityUuid: message.body.targetEntityUuid });
+						let universeObjects:
+							| {
+									/**
+									 * Target entity.
+									 */
+									targetEntity: ServerEntity;
 
-						// TODO: Get tool entity from inventory
-						let { toolEntityUuid }: typeof message.body = message.body;
-						let toolEntity: ServerEntity | undefined;
+									/**
+									 * Target cell.
+									 */
+									targetCell: ServerCell;
+							  }
+							| undefined;
 
-						targetEntity.kind.action({
-							action: message.body.type,
-							sourceEntity: unit,
-							toolEntity
-						});
+						// Order requested direction to be processed first
+						let orderedDirections: Array<DirectionWord> = Object.values(DirectionWord);
+						if (message.body.direction) {
+							orderedDirections = [
+								message.body.direction,
+								...orderedDirections.filter(direction => direction !== message.body.direction)
+							];
+						}
 
-						await sendUpdate({ grid, sourceCell: cell, targetCell });
+						// Prototype inheritance ignore with `Object.values()`
+						// Need to break, hence loop
+						// eslint-disable-next-line no-restricted-syntax
+						for (let direction of orderedDirections) {
+							let targetCell: ServerCell | undefined;
+
+							if (direction === DirectionWord.Here) {
+								targetCell = cell;
+							} else {
+								let nav: Nav = directions[direction];
+								let targetCellPath: CellPathOwn | undefined = cell.nav.get(nav);
+								if (targetCellPath) {
+									targetCell = grid.getCell(targetCellPath);
+								}
+							}
+
+							if (targetCell) {
+								// Get entity from found cell
+								let targetEntity: ServerEntity = targetCell.getEntity({ entityUuid: message.body.targetEntityUuid });
+
+								// Verify that we found correct entity
+								if (targetEntity.entityUuid === message.body.targetEntityUuid) {
+									universeObjects = { targetCell, targetEntity };
+									break;
+								}
+							}
+						}
+
+						if (universeObjects) {
+							// TODO: Get tool entity from inventory
+							let { toolEntityUuid }: typeof message.body = message.body;
+							let toolEntity: ServerEntity | undefined;
+
+							universeObjects.targetEntity.kind.action({
+								action: message.body.type,
+								sourceEntity: unit,
+								toolEntity
+							});
+
+							await sendUpdate({ ...universeObjects, grid, sourceCell: cell });
+						} else {
+							// TODO: Send status update on action fail
+						}
 					},
 					playerUuid: message.body.playerUuid,
 					unitUuid: message.body.controlUnitUuid
