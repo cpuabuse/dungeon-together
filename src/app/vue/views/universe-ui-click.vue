@@ -65,7 +65,7 @@ export default defineComponent({
 
 					return [
 						{
-							icon: "fa-table-cells-large",
+							icon: "fa-layer-group",
 							name: "Cell",
 							type: OverlayListItemEntryType.InfoElement,
 							uiActions

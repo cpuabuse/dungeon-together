@@ -1,21 +1,27 @@
 <template>
 	<div class="base-icon">
-		<VIcon v-if="icon" :icon="icon" />
-		<VAvatar v-else-if="base64ModeSrc" :image="base64ModeSrc" />
+		<VIcon :icon="icon ?? (base64ModeSrc ? undefined : 'fa-carrot')">
+			<!--
+				Wrap image into icon to duplicate size.
+				Image will keep aspect ratio and fit the icon.
+				Icon itself does not have fixed aspect ratio, but the container does, so both will be the same positionally.
+			-->
+			<VImg v-if="base64ModeSrc" :src="base64ModeSrc" />
+		</VIcon>
 	</div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { VAvatar, VIcon } from "vuetify/components";
+import { VIcon, VImg } from "vuetify/components";
 import { ThisVueStore } from "../../client/gui";
 import { ClientMode } from "../../client/mode";
 import { iconProps } from "../core/icon";
 
 export default defineComponent({
 	components: {
-		VAvatar,
-		VIcon
+		VIcon,
+		VImg
 	},
 
 	computed: {
