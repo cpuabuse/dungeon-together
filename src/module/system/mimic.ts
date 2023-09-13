@@ -170,6 +170,11 @@ export function MimicKindClassFactory({
 
 				case ActionWords.Attack: {
 					this.awaken();
+
+					if (!this.isOpen) {
+						// Visually change appearance/"open" chest; For what it matters, "open" happens before super attack, so one-shot death would happen with correct mode
+						super.action({ action: ActionWords.Use, ...rest });
+					}
 				}
 
 				// We covered all treasure actions so it is safe to pass through the rest
