@@ -71,30 +71,47 @@ export default defineComponent({
 						} satisfies OverlayContentUiActionParam;
 					});
 
-					// eslint-disable-next-line @typescript-eslint/typedef
-					const entityItems = Array.from(this.rcMenuData.cell.entities).map(([targetEntityUuid, entity]) => {
-						let entityAttackUiActions: Array<OverlayContentUiActionParam> = playerUnitEntries.map(
-							// False negative
-							// eslint-disable-next-line @typescript-eslint/typedef
-							([player, unitUuid]) => {
-								return {
-									entityActionWord: ActionWords.Attack,
-									icon: "fa-khanda",
-									player,
-									targetEntityUuid,
-									uiActionWord: OverlayContainerUiActionWords.EntityAction,
-									unitUuid
-								} satisfies OverlayContentUiActionParam;
-							}
-						);
+					const entityItems: OverlayListItems = Array.from(this.rcMenuData.cell.entities).map(
+						// False negative
+						// eslint-disable-next-line @typescript-eslint/typedef
+						([targetEntityUuid, entity]) => {
+							let entityAttackUiActions: Array<OverlayContentUiActionParam> = playerUnitEntries.map(
+								// False negative
+								// eslint-disable-next-line @typescript-eslint/typedef
+								([player, unitUuid]) => {
+									return {
+										entityActionWord: ActionWords.Attack,
+										icon: "fa-khanda",
+										player,
+										targetEntityUuid,
+										uiActionWord: OverlayContainerUiActionWords.EntityAction,
+										unitUuid
+									} satisfies OverlayContentUiActionParam;
+								}
+							);
+							let entityUseUiActions: Array<OverlayContentUiActionParam> = playerUnitEntries.map(
+								// False negative
+								// eslint-disable-next-line @typescript-eslint/typedef
+								([player, unitUuid]) => {
+									return {
+										entityActionWord: ActionWords.Use,
+										icon: "fa-hand",
+										player,
+										targetEntityUuid,
+										uiActionWord: OverlayContainerUiActionWords.EntityAction,
+										unitUuid
+									} satisfies OverlayContentUiActionParam;
+								}
+							);
 
-						return {
-							modeUuid: entity.modeUuid,
-							name: "Entity",
-							type: OverlayListItemEntryType.InfoElement,
-							uiActions: entityAttackUiActions
-						} satisfies OverlayListItemEntry;
-					});
+							return {
+								modeUuid: entity.modeUuid,
+								name: "Entity",
+								type: OverlayListItemEntryType.InfoElement,
+								uiActions: [...entityAttackUiActions, ...entityUseUiActions]
+							} satisfies OverlayListItemEntry;
+						}
+					);
 
 					return [
 						{
