@@ -230,6 +230,16 @@ export type OverlayContentUiActionParam = OverlayContentUiActionHelper<
 					 * Target entity UUID.
 					 */
 					targetEntityUuid: Uuid;
+
+					/**
+					 * Player.
+					 */
+					player: ClientPlayer;
+
+					/**
+					 * UUID.
+					 */
+					unitUuid: Uuid;
 			  }
 			| {
 					/**
@@ -253,12 +263,12 @@ export type OverlayContentUiActionParam = OverlayContentUiActionHelper<
 					 */
 					targetEntityUuid: Uuid;
 			  }
-			| ({
+			| {
 					/**
 					 * UI action.
 					 */
 					uiActionWord: OverlayContainerUiActionWords.ForceMovement;
-			  } & {
+
 					/**
 					 * Player.
 					 */
@@ -273,7 +283,7 @@ export type OverlayContentUiActionParam = OverlayContentUiActionHelper<
 					 * Unit UUID to move.
 					 */
 					unitUuid: Uuid;
-			  })
+			  }
 		)
 >;
 // #endregion UI Actions

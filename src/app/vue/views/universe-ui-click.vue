@@ -16,12 +16,14 @@ import { ClientUniverseStateRcMenuDataWords, ThisVueStore, UniverseState } from 
 import { MessageTypeWord } from "../../common/defaults/connection";
 import { CoreEnvelope, processQueueWord } from "../../core/connection";
 import { LogLevel } from "../../core/error";
+import { ActionWords } from "../../server/action";
 import { ExtractPropsFromComponentClass } from "../common/utility-types";
 import OverlayClick from "../components/overlay-click.vue";
 import OverlayList from "../components/overlay-list.vue";
 import {
 	OverlayContainerUiActionWords,
 	OverlayContentUiActionParam,
+	OverlayListItemEntry,
 	OverlayListItemEntryType,
 	OverlayListItems,
 	OverlayListType
@@ -42,8 +44,8 @@ export default defineComponent({
 					// Get cell
 					const { cell }: Record<"cell", ClientCell> = this.rcMenuData;
 
-					// TODO: Add active unit system, where we will know active player, and active unit; Also, potentially need to receive shard information through `rcMenuData` prop - for now we just iterate through all
-					const uiActions: Array<OverlayContentUiActionParam> = Array.from(this.universe.shards)
+					// TODO: Add active unit system, where we will know active player, and active unit; Also, potentially need to receive shard information through `rcMenuData` prop - for now we just iterate through all; Right now we are iterating through all
+					const playerUnitEntries: Array<[ClientPlayer, string]> = Array.from(this.universe.shards)
 						// False negative
 						// eslint-disable-next-line @typescript-eslint/typedef
 						.map(([, shard]) => {
@@ -51,45 +53,57 @@ export default defineComponent({
 							// eslint-disable-next-line @typescript-eslint/typedef
 							return Array.from(shard.players).map(([, player]) => {
 								return Array.from(shard.units).map(unitUuid => {
-									return {
-										icon: "fa-person-walking-dashed-line-arrow-right",
-										player,
-										targetCellUuid: cell.cellUuid,
-										uiActionWord: OverlayContainerUiActionWords.ForceMovement,
-										unitUuid
-									} satisfies OverlayContentUiActionParam;
+									return [player, unitUuid] satisfies [ClientPlayer, string];
 								});
 							});
 						})
 						.flat(2);
+
+					// False negative
+					// eslint-disable-next-line @typescript-eslint/typedef
+					const cellUiActions: Array<OverlayContentUiActionParam> = playerUnitEntries.map(([player, unitUuid]) => {
+						return {
+							icon: "fa-person-walking-dashed-line-arrow-right",
+							player,
+							targetCellUuid: cell.cellUuid,
+							uiActionWord: OverlayContainerUiActionWords.ForceMovement,
+							unitUuid
+						} satisfies OverlayContentUiActionParam;
+					});
+
+					// eslint-disable-next-line @typescript-eslint/typedef
+					const entityItems = Array.from(this.rcMenuData.cell.entities).map(([targetEntityUuid, entity]) => {
+						let entityAttackUiActions: Array<OverlayContentUiActionParam> = playerUnitEntries.map(
+							// False negative
+							// eslint-disable-next-line @typescript-eslint/typedef
+							([player, unitUuid]) => {
+								return {
+									entityActionWord: ActionWords.Attack,
+									icon: "fa-khanda",
+									player,
+									targetEntityUuid,
+									uiActionWord: OverlayContainerUiActionWords.EntityAction,
+									unitUuid
+								} satisfies OverlayContentUiActionParam;
+							}
+						);
+
+						return {
+							modeUuid: entity.modeUuid,
+							name: "Entity",
+							type: OverlayListItemEntryType.InfoElement,
+							uiActions: entityAttackUiActions
+						} satisfies OverlayListItemEntry;
+					});
 
 					return [
 						{
 							icon: "fa-layer-group",
 							name: "Cell",
 							type: OverlayListItemEntryType.InfoElement,
-							uiActions
+							uiActions: cellUiActions
 						},
-						// False negative
-						// eslint-disable-next-line @typescript-eslint/typedef
-						...(Array.from(this.rcMenuData.cell.entities).map(([, entity]) => {
-							return {
-								modeUuid: entity.modeUuid,
-								name: "Cell",
-								type: OverlayListItemEntryType.InfoElement,
-								uiActions: [
-									{
-										icon: "fa-khanda",
-										targetEntityUuid: entity.entityUuid,
-										uiActionWord: OverlayContainerUiActionWords.EntityInfo
-									},
-									{
-										targetEntityUuid: entity.entityUuid,
-										uiActionWord: OverlayContainerUiActionWords.EntityDebugInfo
-									}
-								]
-							};
-						}) satisfies OverlayListItems)
+						...entityItems
 					];
 				}
 			}
@@ -165,6 +179,37 @@ export default defineComponent({
 							this.universe.log({
 								data: uiAction,
 								error: new Error(`Failed to send movement message from UI action.`, { cause: error }),
+								level: LogLevel.Error
+							});
+						});
+					}
+					break;
+				}
+
+				case OverlayContainerUiActionWords.EntityAction: {
+					let { connection, playerUuid }: ClientPlayer = uiAction.player;
+					if (connection) {
+						Promise.all([
+							connection.socket.send(
+								new CoreEnvelope({
+									messages: [
+										{
+											body: {
+												controlUnitUuid: uiAction.unitUuid,
+												playerUuid,
+												targetEntityUuid: uiAction.targetEntityUuid,
+												type: uiAction.entityActionWord
+											},
+											type: MessageTypeWord.EntityAction
+										}
+									]
+								})
+							),
+							connection.tick({ word: processQueueWord })
+						]).catch(error => {
+							this.universe.log({
+								data: uiAction,
+								error: new Error(`Failed to send action message from UI action.`, { cause: error }),
 								level: LogLevel.Error
 							});
 						});
