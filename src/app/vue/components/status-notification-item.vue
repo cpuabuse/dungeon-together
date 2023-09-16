@@ -1,15 +1,15 @@
 <!-- Status notification item -->
 
 <template>
-	<VSnackbar :timeout="-1" :model-value="true">{{ text }}</VSnackbar>
+	<VAlert class="status-notification-item">{{ text }}</VAlert>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { VSnackbar } from "vuetify/components";
+import { VAlert } from "vuetify/components";
 
 export default defineComponent({
-	components: { VSnackbar },
+	components: { VAlert },
 
 	/**
 	 * Data.
@@ -56,3 +56,8 @@ export default defineComponent({
 	}
 });
 </script>
+
+<style lang="css">
+.status-notification-item {
+}
+</style>

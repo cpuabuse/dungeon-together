@@ -5,24 +5,40 @@
 -->
 
 <template>
-	<StatusNotificationItem
-		v-for="({ text, uuid }, index) in notificationEntries"
-		:key="uuid"
-		:text="text"
-		@timeout="() => timeout({ index })"
-	/>
+	<div class="d-flex status-notification">
+		<VScrollYTransition group>
+			<StatusNotificationItem
+				v-for="({ text, uuid }, index) in notificationEntries"
+				:key="uuid"
+				:text="text"
+				@timeout="() => timeout({ index })"
+			/>
+		</VScrollYTransition>
+	</div>
 </template>
 
 <script lang="ts">
 import { v4 } from "uuid";
 import { PropType, defineComponent } from "vue";
+import { VScrollYTransition } from "vuetify/components";
+import { ThisVueStore } from "../../client/gui";
 import { Uuid } from "../../common/uuid";
 import { statusNotificationEmits, useStatusNotification } from "../core/status-notification";
 import StatusNotificationItem from "./status-notification-item.vue";
-import { ThisVueStore } from "../../client/gui";
 
 export default defineComponent({
-	components: { StatusNotificationItem },
+	components: { StatusNotificationItem, VScrollYTransition },
+
+	computed: {
+		/**
+		 *Notification IDs length.
+		 *
+		 @returns Notification IDs length
+		 */
+		notificationIdsLength(): number {
+			return this.notificationIds.length;
+		}
+	},
 
 	/**
 	 * Created callback.
@@ -39,17 +55,6 @@ export default defineComponent({
 				this.synchronizeNotifications();
 			}
 		});
-	},
-
-	computed: {
-		/**
-		 *Notification IDs length.
-		 *
-		 @returns Notification IDs length
-		 */
-		notificationIdsLength(): number {
-			return this.notificationIds.length;
-		}
 	},
 
 	/**
@@ -147,3 +152,15 @@ export default defineComponent({
 	}
 });
 </script>
+
+<style scoped lang="css">
+.status-notification {
+	flex-direction: column-reverse;
+}
+
+/* `VAlert` by default fills */
+.status-notification > :deep(*) {
+	flex-grow: 0;
+	margin-bottom: 0.5em;
+}
+</style>

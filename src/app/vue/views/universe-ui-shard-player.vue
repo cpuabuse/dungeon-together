@@ -1,6 +1,7 @@
 <!-- Universe UI per shard per player -->
 <template>
 	<StatusNotification
+		class="universe-ui-shard-player-status-notification"
 		:notification-ids="player.notificationIds"
 		@shift-player-notifications="shiftPlayerNotifications"
 	/>
@@ -99,4 +100,15 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang="css"></style>
+<style scoped lang="css">
+.universe-ui-shard-player-status-notification {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	max-width: 20%;
+	max-height: 20%;
+	min-width: 10%;
+	min-height: 10%;
+	margin: 2em;
+}
+</style>
