@@ -167,21 +167,22 @@ export function BaseEntityKindClassFactory({
 		}
 
 		/**
-		 * Actually moves the server entity.
+		 * Attempts to move the server entity.
+		 *
+		 * @remarks
+		 * Not to be overridden, this is a wrapper for {@link this.doMoveEntity}.
 		 *
 		 * @param targetCell - Cell
 		 * @returns Whether move was successful
 		 */
 		public moveEntity(targetCell: ServerCell): boolean {
-			// Docs not necessary for const type
-			// eslint-disable-next-line jsdoc/require-jsdoc
-			const { entity }: { entity: ServerEntity } = this;
-
-			// Reattach; Attach will update uuids in core
-			(this.entity.constructor as ServerEntityClass).universe.getCell(entity).detachEntity(entity);
-			targetCell.attachEntity(entity);
-
-			return true;
+			let result: boolean = this.doMoveEntity(targetCell);
+			targetCell.entities.forEach(targetEntity => {
+				if (targetEntity !== this.entity) {
+					targetEntity.kind.onCellMoveEntity(this.entity);
+				}
+			});
+			return result;
 		}
 
 		/**
@@ -242,6 +243,21 @@ export function BaseEntityKindClassFactory({
 		}
 
 		/**
+		 * Callback to be executed when another entity moves to the cell, this entity occupies.
+		 *
+		 * @remarks
+		 * Should be called after movement was executed so that this method can figure out if it was successful or not by cell contents.
+		 * Should be called regardless of movement being successful or not.
+		 *
+		 * @param entity - Entity that will attempt to move to the cell
+		 */
+		// Here just to show the function to extending classes
+		// eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+		public onCellMoveEntity(entity: ServerEntity): void {
+			// Does nothing
+		}
+
+		/**
 		 * Will be called on creation of entity.
 		 */
 		// Here just to show the function to extending classes
@@ -266,6 +282,24 @@ export function BaseEntityKindClassFactory({
 		// eslint-disable-next-line class-methods-use-this
 		public onTerminateEntity(): void {
 			// Does nothing
+		}
+
+		/**
+		 * Actually moves the server entity.
+		 *
+		 * @param targetCell - Cell
+		 * @returns Whether move was successful
+		 */
+		protected doMoveEntity(targetCell: ServerCell): boolean {
+			// Docs not necessary for const type
+			// eslint-disable-next-line jsdoc/require-jsdoc
+			const { entity }: { entity: ServerEntity } = this;
+
+			// Reattach; Attach will update uuids in core
+			(this.entity.constructor as ServerEntityClass).universe.getCell(entity).detachEntity(entity);
+			targetCell.attachEntity(entity);
+
+			return true;
 		}
 	}
 

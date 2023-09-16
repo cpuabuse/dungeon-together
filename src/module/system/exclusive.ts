@@ -55,7 +55,7 @@ export function ExclusiveKindClassFactory({
 		 * @param cell - Target cell
 		 * @returns Whether the move was successful
 		 */
-		public moveEntity(cell: ServerCell): boolean {
+		protected doMoveEntity(cell: ServerCell): boolean {
 			let cellVolume: number = Array.from(cell.entities.values())
 				.filter(
 					(
@@ -74,7 +74,7 @@ export function ExclusiveKindClassFactory({
 				}, 0);
 
 			if (cellVolume + this.volume <= volumeThreshold) {
-				return super.moveEntity(cell);
+				return super.doMoveEntity(cell);
 			}
 			return false;
 		}

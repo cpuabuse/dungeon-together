@@ -14,6 +14,7 @@ import { LogLevel } from "../../app/core/error";
 import { ActionWords } from "../../app/server/action";
 import { ServerPlayer } from "../../app/server/connection";
 import {
+	EntityKind,
 	EntityKindActionArgs,
 	EntityKindConstructorParams,
 	ServerEntity,
@@ -43,11 +44,17 @@ export function MimicKindClassFactory({
 	Base: MonsterKindClass;
 }) {
 	/**
+	 * Action rest type.
+	 */
+	type ActionRest = Omit<EntityKindActionArgs, "action">;
+
+	/**
 	 * Merging with monster kind.
 	 */
+	// Merge with only own members of monster, to avoid protected members inference mismatch (class vs interface)
 	// Force merge
 	// eslint-disable-next-line @typescript-eslint/no-empty-interface
-	interface MimicKindMerge extends MonsterKind {}
+	interface MimicKindMerge extends Omit<MonsterKind, keyof EntityKind> {}
 
 	/**
 	 * Auxiliary class for interface merge, to include monster into prototype.
@@ -59,7 +66,11 @@ export function MimicKindClassFactory({
 	/**
 	 * Mimic-monster class.
 	 *
+	 * @remarks
 	 * `isOpen` within this class means whether the monster is revealed.
+	 *
+	 * Mimic will attack first if we try to use it and prevent an attack from happening.
+	 * When we attack the mimic, we will damage it first and the mimic will skip the attack.
 	 */
 	class MimicKind extends MimicKindMerge {
 		/**
@@ -116,65 +127,15 @@ export function MimicKindClassFactory({
 				}
 
 				case ActionWords.Use: {
-					// If mimic is open, then it can not be used as it is a monster and if it is closed, then we awaken it
-					if (this.isOpen) {
-						return false;
-					}
-
-					// Awaken
-					this.awaken();
-
-					const { sourceEntity }: Record<string, ServerEntity | undefined> = rest;
-					if (sourceEntity) {
-						// Send message of notification of mimic awakening/attacking
-						if (sourceEntity.playerUuid) {
-							const shard: ServerShard = (this.entity.constructor as ServerEntityClass).universe.getShard(sourceEntity);
-
-							// Player controlling the source entity
-							const player: ServerPlayer | undefined = shard.players.get(sourceEntity.playerUuid);
-
-							// Check if player exists and if it does, send a message
-							if (player && player.connection) {
-								player.connection.socket
-									.send(
-										new CoreEnvelope({
-											messages: [
-												{
-													body: { notificationId: StatusNotificationWord.MimicAwaken, playerUuid: player.playerUuid },
-													type: MessageTypeWord.StatusNotification
-												}
-											]
-										})
-									)
-									.catch(error => {
-										(this.entity.constructor as ServerEntityClass).universe.log({
-											error: new Error(
-												`Failed to notify about mimic("entityUuid=${this.entity.entityUuid}" to player("playerUuid=${player.playerUuid}").`,
-												{ cause: error instanceof Error ? error : undefined }
-											),
-											level: LogLevel.Warning
-										});
-									});
-							}
-						}
-
-						// Attack back if player attempts to use
-						sourceEntity.kind.action({
-							action: ActionWords.Attack,
-							sourceEntity: this.entity
-						});
-					}
-
-					return super.action({ action, ...rest });
+					return this.softAwakenAndAttack(rest);
 				}
 
 				case ActionWords.Attack: {
-					this.awaken();
-
-					if (!this.isOpen) {
-						// Visually change appearance/"open" chest; For what it matters, "open" happens before super attack, so one-shot death would happen with correct mode
-						super.action({ action: ActionWords.Use, ...rest });
-					}
+					this.awaken(rest);
+					return super.action({
+						action: ActionWords.Attack,
+						...rest
+					});
 				}
 
 				// We covered all treasure actions so it is safe to pass through the rest
@@ -185,11 +146,93 @@ export function MimicKindClassFactory({
 		}
 
 		/**
-		 * Awaken the mimic. Make it start tracing players and have unit emits appear including health bar.
+		 * A callback called when another entity is attempting to enter the cell that it occupies, which will awaken the mimic and attack the entity.
+		 *
+		 * @remarks
+		 * Monsters will not pass through the mimic, which is an intentional way for the player to figure out if the treasure is a mimic or not.
+		 *
+		 * @param sourceEntity - Entity to move
 		 */
-		private awaken(): void {
-			this.isTracing = true;
-			this.isNotHidden = true;
+		public onCellMoveEntity(sourceEntity: ServerEntity): void {
+			this.softAwakenAndAttack({ sourceEntity });
+		}
+
+		/**
+		 * Awaken the mimic. Make it start tracing players and have unit emits appear including health bar.
+		 *
+		 * @param rest - Destructured parameter
+		 * @returns Whether the awakening  was successful
+		 */
+		private awaken(rest: ActionRest): boolean {
+			const { sourceEntity }: ActionRest = rest;
+			let result: boolean = false;
+			const wasNotOpen: boolean = !this.isOpen;
+
+			if (wasNotOpen) {
+				// Awaken
+				this.isTracing = true;
+				this.isNotHidden = true;
+
+				// Set mode/open
+				result = super.action({ action: ActionWords.Use, ...rest });
+
+				// Send message of notification of mimic awakening/attacking
+				if (sourceEntity && sourceEntity.playerUuid) {
+					const shard: ServerShard = (this.entity.constructor as ServerEntityClass).universe.getShard(sourceEntity);
+
+					// Player controlling the source entity
+					const player: ServerPlayer | undefined = shard.players.get(sourceEntity.playerUuid);
+
+					// Check if player exists and if it does, send a message
+					if (player && player.connection) {
+						player.connection.socket
+							.send(
+								new CoreEnvelope({
+									messages: [
+										{
+											body: { notificationId: StatusNotificationWord.MimicAwaken, playerUuid: player.playerUuid },
+											type: MessageTypeWord.StatusNotification
+										}
+									]
+								})
+							)
+							.catch(error => {
+								(this.entity.constructor as ServerEntityClass).universe.log({
+									error: new Error(
+										`Failed to notify about mimic("entityUuid=${this.entity.entityUuid}" to player("playerUuid=${player.playerUuid}").`,
+										{ cause: error instanceof Error ? error : undefined }
+									),
+									level: LogLevel.Warning
+								});
+							});
+					}
+				}
+			}
+			return result;
+		}
+
+		/**
+		 * Awakens and attacks back if action was performed by enemy faction.
+		 *
+		 * @param sourceEntity - Destructured parameter
+		 * @returns Whether the action was successful
+		 */
+		private softAwakenAndAttack({ sourceEntity }: ActionRest): boolean {
+			let result: boolean = false;
+			if (sourceEntity) {
+				// TODO: Check enemy faction instead of monster
+				if (!(sourceEntity.kind instanceof Base)) {
+					result = this.awaken({ sourceEntity });
+
+					// Action is reversed, return is ignored
+					sourceEntity.kind.action({
+						action: ActionWords.Attack,
+						sourceEntity: this.entity
+					});
+				}
+			}
+
+			return result;
 		}
 	}
 

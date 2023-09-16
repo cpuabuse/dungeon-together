@@ -53,7 +53,9 @@ export function GuyKindClassFactory({
 			return { ...super.emits, gridUuid: this.entity.gridUuid, x: cell.x, y: cell.y, z: cell.z };
 		}
 
-		/** Player. */
+		/**
+		 * Player.
+		 */
 		public player: ServerPlayer;
 
 		/**
