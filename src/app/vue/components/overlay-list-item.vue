@@ -35,19 +35,30 @@ import {
 } from "../core/overlay";
 import OverlayListItemInfo from "./overlay-list-item-info.vue";
 import OverlayListItemList from "./overlay-list-item-list.vue";
+import OverlayListItemSelect from "./overlay-list-item-select.vue";
 import OverlayListItemSlot from "./overlay-list-item-slot.vue";
 import OverlayListItemSwitch from "./overlay-list-item-switch.vue";
 import OverlayListItemTab from "./overlay-list-item-tab.vue";
 import OverlayListItemUuid from "./overlay-list-item-uuid.vue";
 
 /**
+ * Exhaustive key verification.
+ */
+type ComponentIndexHelper<T extends { [Key in OverlayListItemEntryType]: any }> = T;
+
+/**
  * Components indexed by type.
  */
-type ComponentIndex = {
+type ComponentIndex = ComponentIndexHelper<{
 	/**
 	 * Info.
 	 */
 	[OverlayListItemEntryType.InfoElement]: typeof OverlayListItemInfo;
+
+	/**
+	 * Select.
+	 */
+	[OverlayListItemEntryType.Select]: typeof OverlayListItemSelect;
 
 	/**
 	 * Switch.
@@ -73,7 +84,7 @@ type ComponentIndex = {
 	 * List.
 	 */
 	[OverlayListItemEntryType.List]: typeof OverlayListItemList;
-};
+}>;
 
 /**
  * Cannot return this type directly, as it will introduce recursive type reference, but alias works.
@@ -184,7 +195,14 @@ export default defineComponent({
 						slots: Object.keys(this.$slots)
 					};
 
-				// no default
+				case OverlayListItemEntryType.Select:
+					return {
+						is: OverlayListItemSelect,
+						props: { ...props, id: item.id, items: item.items },
+						slots: Object.keys(this.$slots)
+					};
+
+				// No default
 			}
 		},
 

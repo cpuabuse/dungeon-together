@@ -1,41 +1,17 @@
-<!-- Switch element -->
+<!-- Select element -->
 <template>
 	<!-- Force icon show if no name -->
 	<OverlayListItemAssembler v-bind="assemblerProps" @ui-action="emitUiAction">
 		<!-- Inline slot -->
-		<template #inline>
-			<!-- 
-				Various problems are addressed here, as source of problems is switch itself:
-				- Vertical height:
-						- Negative margin to fix switch vertically expanding list item
-				- Clipping:
-						- Inset, to fix clipping of switch handle with negative margins of parents
-						- For non compact switch handle hover shadow and ripple are scaled down with CSS
-				- Density:
-						- Density from list is not passed through to switch automatically
-						- Density doesn't do anything for inset as of now, so CSS scales it down
-			-->
-			<VSwitch
-				:density="isCompact ? 'compact' : 'default'"
-				hide-details
-				:model-value="records[id]"
-				inset
-				:class="{ 'my-n2': true, 'overlay-list-item-switch-compact': isCompact }"
-				@update:model-value="
-					value => {
-						if (typeof value == 'boolean') {
-							records[id] = value;
-						}
-					}
-				"
-			/>
+		<template #content>
+			<VSelect v-model="model" :items="items" item-title="name" item-value="value" />
 		</template>
 	</OverlayListItemAssembler>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { VSwitch } from "vuetify/components";
+import { PropType, defineComponent } from "vue";
+import { VSelect } from "vuetify/components";
 import {
 	overlayListChildSharedProps,
 	overlayListItemNarrowProps,
@@ -50,7 +26,33 @@ import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 export default defineComponent({
 	components: {
 		OverlayListItemAssembler,
-		VSwitch
+		VSelect
+	},
+
+	computed: {
+		model: {
+			/**
+			 * Model getter.
+			 *
+			 * @returns Model value
+			 */
+			get(): string | undefined {
+				const value: unknown = this.records[this.id];
+				if (typeof value === "string") {
+					return value;
+				}
+				return undefined;
+			},
+
+			/**
+			 * Model setter.
+			 *
+			 * @param value - Value to set to model
+			 */
+			set(value: string): void {
+				this.records[this.id] = value;
+			}
+		}
 	},
 
 	emits: overlayListSharedEmits,
@@ -66,6 +68,11 @@ export default defineComponent({
 		id: {
 			required: true,
 			type: [String, Symbol]
+		},
+
+		items: {
+			required: true,
+			type: Array as PropType<Array<Record<"name" | "value", string>>>
 		}
 	},
 

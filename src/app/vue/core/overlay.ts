@@ -53,7 +53,12 @@ export enum OverlayListItemEntryType {
 	/**
 	 * Type for list.
 	 */
-	List
+	List,
+
+	/**
+	 * Single selection.
+	 */
+	Select
 }
 
 /**
@@ -156,7 +161,7 @@ export type OverlayListItemEntry =
 						/**
 						 * Event ID.
 						 */
-						id: string;
+						id: string | symbol;
 					}
 			  >
 			| OverlayContentItemEntryGenerate<
@@ -175,6 +180,20 @@ export type OverlayListItemEntry =
 						 * Items.
 						 */
 						items: Array<OverlayListItemEntry>;
+					}
+			  >
+			| OverlayContentItemEntryGenerate<
+					OverlayListItemEntryType.Select,
+					{
+						/**
+						 * Event ID.
+						 */
+						items: Array<Record<"name" | "value", string>>;
+
+						/**
+						 * Record ID.
+						 */
+						id: string | symbol;
 					}
 			  >
 		);

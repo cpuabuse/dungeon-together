@@ -2,6 +2,8 @@
 <template>
 	<CompactToolbar :menus="mainToolbarMenus" />
 
+	<UniverseUiToolbarOptions v-model="optionsModel" />
+
 	<OverlayWindow v-model="isDebugMenuDisplayed" icon="fa-bug-slash">
 		<template #body>
 			<OverlayList :items="debugWindowItems" :is-compact="false" />
@@ -21,7 +23,7 @@
 				}
 			],
 			index
-		) in playerEntries"
+		) in (playerEntries as PlayerEntries)"
 		:key="playerUuid"
 		v-model="playerEntries[index]![1].isPlayerMenuDisplayed"
 	>
@@ -41,9 +43,11 @@ import { CoreDictionary } from "../../core/connection";
 import CompactToolbar from "../compact-toolbar.vue";
 import { OverlayList, OverlayWindow } from "../components";
 import { CompactToolbarMenuBaseProps } from "../core/compact-toolbar";
+import { useLocale } from "../core/locale";
 import { OverlayListItemEntry, OverlayListItemEntryType, OverlayListItems, OverlayListTabs } from "../core/overlay";
 import { useRecords } from "../core/store";
 import { UniverseUiPlayerEntry, UniverseUiShardEntries } from "../core/universe-ui";
+import UniverseUiToolbarOptions from "./universe-ui-toolbar-options.vue";
 
 /**
  * Local player entry type.
@@ -76,7 +80,7 @@ type PlayerEntry = {
 type PlayerEntries = Array<[string, PlayerEntry]>;
 
 export default defineComponent({
-	components: { CompactToolbar, OverlayList, OverlayWindow },
+	components: { CompactToolbar, OverlayList, OverlayWindow, UniverseUiToolbarOptions },
 
 	computed: {
 		/**
@@ -172,8 +176,11 @@ export default defineComponent({
 				...this.shardMenus,
 				{
 					icon: "fa-gear",
-					items: [{ clickRecordIndex: this.debugMenuDisplaySymbol, icon: "fa-bug-slash", name: "Debug" }],
-					maxPinnedAmount: 0,
+					items: [
+						...this.optionsModel.menuItems,
+						{ clickRecordIndex: this.debugMenuDisplaySymbol, icon: "fa-bug-slash", name: "Debug" }
+					],
+					maxPinnedAmount: 1,
 					name: "System"
 				}
 			];
@@ -255,9 +262,15 @@ export default defineComponent({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let data = {
 			debugMenuDisplaySymbol: Symbol("debug-menu-display"),
+
 			hpColor: new Color("#1F8C2F"),
+
+			optionsModel: { menuItems: [], windowItems: [] },
+
 			playerEntries: new Array() as PlayerEntries,
+
 			universe: (this as unknown as ThisVueStore).$store.state.universe,
+
 			unsubscribe: null as (() => void) | null
 		};
 
@@ -277,7 +290,7 @@ export default defineComponent({
 	 * @returns Records
 	 */
 	setup() {
-		return useRecords();
+		return { ...useRecords(), ...useLocale() };
 	},
 
 	watch: {
