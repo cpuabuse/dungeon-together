@@ -6,8 +6,11 @@
 <template>
 	<OverlayContentItemWrapper :content-type="contentType" :list-item-class="{ 'pr-1': isCaretDisplayed }">
 		<template v-if="hasHeader" #header>
-			<!-- `VRow` doesn't receive list's density -->
-			<VRow align="center" :dense="isCompact" :justify="isHeaderCentered ? 'center' : undefined">
+			<!--
+				`VRow` doesn't receive list's density.
+				Horizontal padding fixes both icons "eaten" on left, and switch on right.
+			-->
+			<VRow align="center" :dense="isCompact" :justify="isHeaderCentered ? 'center' : undefined" class="px-1">
 				<VCol v-if="effectiveIcon || modeUuid" cols="auto">
 					<BaseIcon :mode-uuid="modeUuid" :icon="effectiveIcon" class="overlay-content-item-icon" />
 				</VCol>
