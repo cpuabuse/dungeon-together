@@ -6,8 +6,9 @@
 		<VCard class="h-100 w-100 overflow-hidden">
 			<div ref="overlayWindowHandle">
 				<VToolbar density="compact">
-					<VIcon :icon="icon" class="ms-4" />
-					<VToolbarTitle class="font-weight-bold">Title</VToolbarTitle>
+					<BaseIcon v-if="icon || modeUuid" :icon="icon" :modeUuid="modeUuid" class="ms-4" />
+					<VToolbarTitle v-if="name" class="font-weight-bold">{{ name }}</VToolbarTitle>
+					<VSpacer />
 					<VBtn
 						size="small"
 						icon="fa-thumbtack"
@@ -30,21 +31,20 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { VBtn, VCard, VIcon, VToolbar, VToolbarTitle } from "vuetify/components";
+import { VBtn, VCard, VIcon, VSpacer, VToolbar, VToolbarTitle } from "vuetify/components";
 import { useDraggable } from "../core/draggable";
+import { overlayListItemNarrowProps } from "../core/overlay";
+import { BaseIcon } from ".";
 
 export default defineComponent({
-	components: { VBtn, VCard, VIcon, VToolbar, VToolbarTitle },
+	components: { VBtn, VCard, VIcon, VToolbar, VToolbarTitle, BaseIcon, VSpacer },
 
 	emits: ["update:modelValue"],
 
 	name: "OverlayWindow",
 
 	props: {
-		icon: {
-			default: "fa-carrot",
-			type: String
-		},
+		...overlayListItemNarrowProps,
 		modelValue: { required: true, type: Boolean }
 	},
 

@@ -4,7 +4,8 @@
 	<OverlayListItemAssembler v-bind="assemblerProps" @ui-action="emitUiAction">
 		<!-- Inline slot -->
 		<template #content>
-			<VSelect v-model="model" :items="items" item-title="name" item-value="value" />
+			<!-- Solo filled is closest to default, while being good for standalone -->
+			<VSelect v-model="model" :items="items" item-title="name" item-value="value" variant="solo-filled" />
 		</template>
 	</OverlayListItemAssembler>
 </template>

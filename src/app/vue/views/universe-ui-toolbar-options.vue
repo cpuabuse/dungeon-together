@@ -1,6 +1,6 @@
 <!-- Universe UI toolbar options menu -->
 <template>
-	<OverlayWindow v-model="isOptionsMenuDisplayed" icon="fa-list-check">
+	<OverlayWindow v-model="isOptionsMenuDisplayed" icon="fa-list-check" :name="name">
 		<template #body>
 			<OverlayList :items="modelValue.windowItems" />
 		</template>
@@ -91,14 +91,14 @@ export default defineComponent({
 					{
 						clickRecordIndex: this.optionsMenuDisplaySymbol,
 						icon: "fa-list-check",
-						name: "Options"
+						name: this.name
 					}
 				],
 				windowItems: [
 					{
-						id: this.languageSymbol,
-
 						icon: "fa-language",
+
+						id: this.languageSymbol,
 
 						// False negative
 						// eslint-disable-next-line @typescript-eslint/typedef
@@ -118,6 +118,15 @@ export default defineComponent({
 					}
 				]
 			};
+		},
+
+		/**
+		 * Options window title.
+		 *
+		 * @returns Title
+		 */
+		name(): string {
+			return "Options";
 		}
 	},
 

@@ -4,7 +4,7 @@
 
 	<UniverseUiToolbarOptions v-model="optionsModel" />
 
-	<OverlayWindow v-model="isDebugMenuDisplayed" icon="fa-bug-slash">
+	<OverlayWindow v-model="isDebugMenuDisplayed" icon="fa-bug-slash" :name="debugName">
 		<template #body>
 			<OverlayList :items="debugWindowItems" :is-compact="false" />
 		</template>
@@ -125,6 +125,15 @@ export default defineComponent({
 		},
 
 		/**
+		 * Debug window title.
+		 *
+		 * @returns Title
+		 */
+		debugName(): string {
+			return "Debug";
+		},
+
+		/**
 		 * Items for display in debug window.
 		 *
 		 * @returns Window items
@@ -178,7 +187,7 @@ export default defineComponent({
 					icon: "fa-gear",
 					items: [
 						...this.optionsModel.menuItems,
-						{ clickRecordIndex: this.debugMenuDisplaySymbol, icon: "fa-bug-slash", name: "Debug" }
+						{ clickRecordIndex: this.debugMenuDisplaySymbol, icon: "fa-bug-slash", name: this.debugName }
 					],
 					maxPinnedAmount: 1,
 					name: "System"
