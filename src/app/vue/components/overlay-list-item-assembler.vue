@@ -5,7 +5,7 @@
 
 <template>
 	<!-- `pe` reduces extra spacing in the end, when terminated by caret. -->
-	<OverlayContentItemWrapper :content-type="contentType" :list-item-class="{ 'pe-1': isCaretDisplayed }">
+	<OverlayListItemWrapper :content-type="contentType" :list-item-class="{ 'pe-1': isCaretDisplayed }">
 		<template v-if="hasHeader" #header>
 			<!--
 				`VRow` doesn't receive list's density.
@@ -45,7 +45,7 @@
 		<template v-if="$slots.content" #content>
 			<slot v-if="$slots.content" name="content" />
 		</template>
-	</OverlayContentItemWrapper>
+	</OverlayListItemWrapper>
 </template>
 
 <script lang="ts">
@@ -61,12 +61,12 @@ import {
 	useOverlayListShared
 } from "../core/overlay";
 import BaseIcon from "./base-icon.vue";
-import OverlayContentItemWrapper from "./overlay-list-item-wrapper.vue";
+import OverlayListItemWrapper from "./overlay-list-item-wrapper.vue";
 
 export default defineComponent({
 	components: {
 		BaseIcon,
-		OverlayContentItemWrapper,
+		OverlayListItemWrapper,
 		VChip,
 		VCol,
 		VIcon,

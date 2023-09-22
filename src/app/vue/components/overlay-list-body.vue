@@ -1,6 +1,7 @@
 <!-- Provides a card wrapper -->
 <template>
 	<div>
+		<!-- Rounded condition is not necessary as `v-if` would be true only when `isMenu` is true, but it is left intentionally -->
 		<VCard v-if="isCardWrapped" class="overflow-hidden w-100" :rounded="isMenu ? 'sm' : true">
 			<slot />
 		</VCard>
@@ -15,6 +16,7 @@
 import { VCard } from "vuetify/components";
 import {
 	OverlayListSharedProps,
+	OverlayListSharedPropsReceived,
 	overlayListSharedEmits,
 	overlayListSharedProps,
 	useOverlayListShared
@@ -23,7 +25,7 @@ import {
 /**
  * Props.
  */
-const props: OverlayListSharedProps = defineProps({
+const props: OverlayListSharedPropsReceived = defineProps({
 	...overlayListSharedProps
 });
 

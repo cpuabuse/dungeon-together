@@ -150,7 +150,7 @@ export default defineComponent({
 			// Symbol to index language in store records.
 			languageSymbol: Symbol("language"),
 
-			// A key to force re-render the list; Used for removing transitions and animations(VSelect), when rtl changes; Assigning to whole list might be a bit crude, but it is minimal impact solution
+			// A key to force re-render the list; Used for removing transitions and animations(VSelect), when rtl changes; Assigning to whole list might be a crude, but it is best performance for code impact; In principle this should be handled by Vuetify, as on language change other overlays would mess up
 			listKey: "tick" as "tick" | "tock",
 
 			optionsMenuDisplaySymbol: Symbol("options-menu-display")
@@ -187,14 +187,13 @@ export default defineComponent({
 			if (this.isValidLocale(value)) {
 				if (this.locale !== value) {
 					const isOldRtl: boolean = this.isRtl;
-					if (this.isRtl !== isOldRtl) {
-						if (this.listKey === "tick") {
-							this.listKey = "tock";
-						} else {
-							this.listKey = "tick";
-						}
-					}
 					this.locale = value;
+					// `this.isRtl !== isOldRtl` check is ommited, to make behavior identical, regardless of locale direction
+					if (this.listKey === "tick") {
+						this.listKey = "tock";
+					} else {
+						this.listKey = "tick";
+					}
 				}
 			}
 		},

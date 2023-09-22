@@ -8,6 +8,7 @@
 			<div v-show="modelValue" ref="overlayWindow" class="overlay-window">
 				<VCard class="h-100 w-100 overflow-hidden">
 					<div ref="overlayWindowHandle">
+						<!-- Compact density always, to preserve intended ratio -->
 						<VToolbar density="compact">
 							<BaseIcon v-if="icon || modeUuid" :icon="icon" :mode-uuid="modeUuid" class="ms-4" />
 							<VToolbarTitle v-if="name" class="font-weight-bold overlay-window-toolbar-title">{{

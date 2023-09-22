@@ -1,8 +1,10 @@
 <template>
 	<OverlayListItemAssembler v-bind="assemblerProps" @ui-action="emitUiAction">
 		<template #content>
-			<!-- Uuid element -->
-			<highlightjs language="plaintext" :code="uuid" />
+			<OverlayListBody :content-type="contentType">
+				<!-- Uuid element -->
+				<highlightjs language="plaintext" :code="uuid" />
+			</OverlayListBody>
 		</template>
 	</OverlayListItemAssembler>
 </template>
@@ -18,10 +20,12 @@ import {
 	useOverlayListShared
 } from "../core/overlay";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
+import OverlayListBody from "./overlay-list-body.vue";
 
 export default defineComponent({
 	components: {
-		OverlayListItemAssembler
+		OverlayListItemAssembler,
+		OverlayListBody
 	},
 
 	emits: overlayListSharedEmits,

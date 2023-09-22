@@ -4,15 +4,36 @@
 	<OverlayListItemAssembler v-bind="assemblerProps" @ui-action="emitUiAction">
 		<!-- Inline slot -->
 		<template #content>
-			<!-- Solo filled flat is closest to default, while being good for standalone -->
-			<VSelect v-model="model" :items="items" item-title="name" item-value="value" variant="solo-filled" flat />
+			<OverlayListBody v-if="isMenu" :content-type="contentType">
+				<VList :density="isCompact ? 'compact' : 'default'" class="py-0">
+					<VListItem
+						v-for="({ name, value }, itemKey) in items"
+						:key="itemKey"
+						:value="value"
+						:title="name"
+						@click="model = value"
+					/>
+				</VList>
+			</OverlayListBody>
+
+			<!-- Solo filled flat is closest to default, while being good for standalone; Density seems not to be inherited. -->
+			<VSelect
+				v-else
+				v-model="model"
+				:items="items"
+				item-title="name"
+				item-value="value"
+				variant="solo-filled"
+				flat
+				:density="isCompact ? 'compact' : 'default'"
+			/>
 		</template>
 	</OverlayListItemAssembler>
 </template>
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
-import { VSelect } from "vuetify/components";
+import { VList, VListItem, VSelect } from "vuetify/components";
 import {
 	overlayListChildSharedProps,
 	overlayListItemNarrowProps,
@@ -23,11 +44,15 @@ import {
 } from "../core/overlay";
 import { useRecords } from "../core/store";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
+import OverlayListBody from "./overlay-list-body.vue";
 
 export default defineComponent({
 	components: {
 		OverlayListItemAssembler,
-		VSelect
+		VSelect,
+		VList,
+		VListItem,
+		OverlayListBody
 	},
 
 	/**
