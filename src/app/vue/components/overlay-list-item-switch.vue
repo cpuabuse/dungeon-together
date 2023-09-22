@@ -36,6 +36,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { VSwitch } from "vuetify/components";
+import { useLocale } from "../core/locale";
 import {
 	overlayListChildSharedProps,
 	overlayListItemNarrowProps,
@@ -51,6 +52,17 @@ export default defineComponent({
 	components: {
 		OverlayListItemAssembler,
 		VSwitch
+	},
+
+	computed: {
+		/**
+		 * Transform origin for compact switch.
+		 *
+		 * @returns Transform origin string
+		 */
+		transformOrigin(): string {
+			return this.isRtl ? "center left" : "center right";
+		}
 	},
 
 	emits: overlayListSharedEmits,
@@ -79,7 +91,12 @@ export default defineComponent({
 	// Infer setup
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, { emit }) {
-		return { ...useRecords(), ...useOverlayListShared({ emit, props }), ...useOverlayListItemShared({ props }) };
+		return {
+			...useRecords(),
+			...useOverlayListShared({ emit, props }),
+			...useOverlayListItemShared({ props }),
+			...useLocale()
+		};
 	}
 });
 </script>
@@ -87,13 +104,7 @@ export default defineComponent({
 <style scoped lang="css">
 /* Compact switch is too large */
 .overlay-list-item-switch-compact {
-	transform-origin: center right;
+	transform-origin: v-bind(transformOrigin);
 	scale: 0.75;
-}
-
-/* Non compact density should have smaller switch hover shadow not to be clipped, also for ripple */
-:not(.overlay-list-item-switch-compact) :deep(.v-selection-control__input:hover::before),
-:deep(.v-selection-control__input .v-ripple__container) {
-	scale: 0.5;
 }
 </style>

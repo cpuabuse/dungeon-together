@@ -2,7 +2,7 @@
 <template>
 	<OverlayWindow v-model="isOptionsMenuDisplayed" icon="fa-list-check" :name="name">
 		<template #body>
-			<OverlayList :items="modelValue.windowItems" />
+			<OverlayList :key="listKey" :items="modelValue.windowItems" />
 		</template>
 	</OverlayWindow>
 </template>
@@ -94,6 +94,7 @@ export default defineComponent({
 						name: this.name
 					}
 				],
+
 				windowItems: [
 					{
 						icon: "fa-language",
@@ -149,6 +150,9 @@ export default defineComponent({
 			// Symbol to index language in store records.
 			languageSymbol: Symbol("language"),
 
+			// A key to force re-render the list; Used for removing transitions and animations(VSelect), when rtl changes; Assigning to whole list might be a bit crude, but it is minimal impact solution
+			listKey: "tick" as "tick" | "tock",
+
 			optionsMenuDisplaySymbol: Symbol("options-menu-display")
 		};
 
@@ -182,6 +186,14 @@ export default defineComponent({
 		language(value: string): void {
 			if (this.isValidLocale(value)) {
 				if (this.locale !== value) {
+					const isOldRtl: boolean = this.isRtl;
+					if (this.isRtl !== isOldRtl) {
+						if (this.listKey === "tick") {
+							this.listKey = "tock";
+						} else {
+							this.listKey = "tick";
+						}
+					}
 					this.locale = value;
 				}
 			}

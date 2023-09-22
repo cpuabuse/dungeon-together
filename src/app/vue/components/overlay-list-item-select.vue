@@ -4,8 +4,8 @@
 	<OverlayListItemAssembler v-bind="assemblerProps" @ui-action="emitUiAction">
 		<!-- Inline slot -->
 		<template #content>
-			<!-- Solo filled is closest to default, while being good for standalone -->
-			<VSelect v-model="model" :items="items" item-title="name" item-value="value" variant="solo-filled" />
+			<!-- Solo filled flat is closest to default, while being good for standalone -->
+			<VSelect v-model="model" :items="items" item-title="name" item-value="value" variant="solo-filled" flat />
 		</template>
 	</OverlayListItemAssembler>
 </template>
@@ -30,6 +30,9 @@ export default defineComponent({
 		VSelect
 	},
 
+	/**
+	 * Computed.
+	 */
 	computed: {
 		model: {
 			/**

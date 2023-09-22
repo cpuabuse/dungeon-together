@@ -11,6 +11,7 @@
 
 import { WritableComputedRef, computed, unref } from "vue";
 import { useI18n } from "vue-i18n";
+import { RtlInstance, useLocale as useVuetifyLocale } from "vuetify";
 
 /**
  * Available locales.
@@ -65,6 +66,7 @@ export function useLocale() {
 	// Infer type as it is not provided by library
 	// eslint-disable-next-line @typescript-eslint/typedef
 	const { t, locale: localeRef } = useI18n();
+	const { isRtl }: RtlInstance = useVuetifyLocale();
 
 	/**
 	 * Checks if string is a valid locale.
@@ -109,5 +111,5 @@ export function useLocale() {
 		}
 	});
 
-	return { Locale, fallbackLocale, isValidLocale, locale, locales, t };
+	return { Locale, fallbackLocale, isRtl, isValidLocale, locale, locales, t };
 }

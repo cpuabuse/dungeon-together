@@ -17,6 +17,7 @@ import { App } from "vue";
 import { createI18n, useI18n } from "vue-i18n";
 import { createVuetify } from "vuetify";
 import { aliases, fa } from "vuetify/iconsets/fa-svg";
+import { ar, en, ja } from "vuetify/locale";
 import { createVueI18nAdapter } from "vuetify/locale/adapters/vue-i18n";
 
 // Initialize Vuetify
@@ -34,14 +35,17 @@ library.add(far);
 // eslint-disable-next-line @typescript-eslint/typedef
 const messages = {
 	ar: {
+		$vuetify: ar,
 		language: "اللغة",
 		locales: locales[Locale.Arabic]
 	},
 	en: {
+		$vuetify: en,
 		language: "Language",
 		locales: locales[Locale.English]
 	},
 	ja: {
+		$vuetify: ja,
 		language: "言語",
 		locales: locales[Locale.Japanese]
 	}

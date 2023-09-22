@@ -4,7 +4,8 @@
 -->
 
 <template>
-	<OverlayContentItemWrapper :content-type="contentType" :list-item-class="{ 'pr-1': isCaretDisplayed }">
+	<!-- `pe` reduces extra spacing in the end, when terminated by caret. -->
+	<OverlayContentItemWrapper :content-type="contentType" :list-item-class="{ 'pe-1': isCaretDisplayed }">
 		<template v-if="hasHeader" #header>
 			<!--
 				`VRow` doesn't receive list's density.
@@ -34,8 +35,8 @@
 					</VChip>
 				</VCol>
 
-				<VCol v-if="isCaretDisplayed" cols="auto" class="overlay-content-item-caret pl-0">
-					<VIcon :icon="'fa-caret-right'" />
+				<VCol v-if="isCaretDisplayed" cols="auto" class="overlay-content-item-caret">
+					<VIcon :icon="isRtl ? 'fa-caret-left' : 'fa-caret-right'" />
 				</VCol>
 			</VRow>
 		</template>
@@ -50,6 +51,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { VChip, VCol, VIcon, VListItemTitle, VRow, VSpacer } from "vuetify/components";
+import { useLocale } from "../core/locale";
 import {
 	OverlayListType,
 	overlayListChildSharedProps,
@@ -172,7 +174,7 @@ export default defineComponent({
 	// Infer prop type
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, { emit }) {
-		return useOverlayListShared({ emit, props });
+		return { ...useOverlayListShared({ emit, props }), ...useLocale() };
 	}
 });
 </script>
