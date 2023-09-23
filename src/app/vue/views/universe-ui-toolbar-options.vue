@@ -116,7 +116,43 @@ export default defineComponent({
 						}`,
 
 						type: OverlayListItemEntryType.Select
+					},
+					{
+						icon: "fa-arrow-right-arrow-left",
+
+						id: "direction",
+
+						items: [
+							{ name: "ltr", value: "ltr" },
+							{ name: "rtl", value: "rtl" },
+							{ name: "auto", value: "auto" }
+						],
+
+						name: "Text direction",
+
+						type: OverlayListItemEntryType.Select
+					},
+					{
+						icon: "fa-circle-half-stroke",
+
+						id: "theme",
+
+						// False negative
+						// eslint-disable-next-line @typescript-eslint/typedef
+						items: [
+							{ name: "dark", value: "dark" },
+							{ name: "light", value: "Light" },
+							{ name: "auto", value: "auto" }
+						],
+
+						name: "Theme",
+
+						type: OverlayListItemEntryType.Select
 					}
+
+					// Color scheme
+
+					// Compact UI
 				]
 			};
 		},

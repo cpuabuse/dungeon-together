@@ -26,6 +26,7 @@
 				variant="solo-filled"
 				flat
 				:density="isCompact ? 'compact' : 'default'"
+				hide-details
 			/>
 		</template>
 	</OverlayListItemAssembler>
