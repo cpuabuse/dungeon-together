@@ -81,74 +81,62 @@ export default defineComponent({
 		},
 
 		/**
+		 * Language change window item.
+		 *
+		 * @returns Language change window item
+		 */
+		languageChangeWindowItem(): OverlayListItemEntry {
+			return {
+				icon: "fa-language",
+
+				id: this.languageSymbol,
+
+				// False negative
+				// eslint-disable-next-line @typescript-eslint/typedef
+				items: Object.entries(this.Locale).map(([name, value]) => {
+					return {
+						name: `${this.locales[value][value]} (${value === this.fallbackLocale ? "" : `${name}, `}${value})`,
+						value
+					};
+				}),
+
+				name: `${this.t("language")}${
+					// Display additionally language in fallback, when not in fallback
+					this.locale === this.fallbackLocale ? "" : ` (${this.t("language", 1, { locale: this.fallbackLocale })})`
+				}`,
+
+				type: OverlayListItemEntryType.Select
+			};
+		},
+
+		/**
+		 * Menu items.
+		 *
+		 * @returns Menu items
+		 */
+		menuItems(): Array<CompactToolbarMenuItem> {
+			return [
+				{
+					clickRecordIndex: this.optionsMenuDisplaySymbol,
+					icon: "fa-list-check",
+					name: this.name
+				}
+			];
+		},
+
+		/**
 		 * Model to emit.
 		 *
 		 * @returns Model helper type
 		 */
 		model(): ModelType {
 			return {
-				menuItems: [
-					{
-						clickRecordIndex: this.optionsMenuDisplaySymbol,
-						icon: "fa-list-check",
-						name: this.name
-					}
-				],
+				menuItems: this.menuItems,
 
 				windowItems: [
-					{
-						icon: "fa-language",
-
-						id: this.languageSymbol,
-
-						// False negative
-						// eslint-disable-next-line @typescript-eslint/typedef
-						items: Object.entries(this.Locale).map(([name, value]) => {
-							return {
-								name: `${this.locales[value][value]} (${value === this.fallbackLocale ? "" : `${name}, `}${value})`,
-								value
-							};
-						}),
-
-						name: `${this.t("language")}${
-							// Display additionally language in fallback, when not in fallback
-							this.locale === this.fallbackLocale ? "" : ` (${this.t("language", 1, { locale: this.fallbackLocale })})`
-						}`,
-
-						type: OverlayListItemEntryType.Select
-					},
-					{
-						icon: "fa-arrow-right-arrow-left",
-
-						id: "direction",
-
-						items: [
-							{ name: "ltr", value: "ltr" },
-							{ name: "rtl", value: "rtl" },
-							{ name: "auto", value: "auto" }
-						],
-
-						name: this.t("menuItem.textDirection"),
-
-						type: OverlayListItemEntryType.Select
-					},
-					{
-						icon: "fa-circle-half-stroke",
-
-						id: "theme",
-
-						// False negative
-						// eslint-disable-next-line @typescript-eslint/typedef
-						items: [
-							{ name: "dark", value: "dark" },
-							{ name: "light", value: "Light" },
-							{ name: "auto", value: "auto" }
-						],
-
-						name: "Theme",
-
-						type: OverlayListItemEntryType.Select
-					}
+					this.languageChangeWindowItem,
+					this.textDirectionWindowItem,
+					this.themeWindowItem
 
 					// Color scheme
 
@@ -164,6 +152,54 @@ export default defineComponent({
 		 */
 		name(): string {
 			return this.t("menuTitle.options");
+		},
+
+		/**
+		 * Text direction window item.
+		 *
+		 * @returns Text direction window item
+		 */
+		textDirectionWindowItem(): OverlayListItemEntry {
+			return {
+				icon: "fa-arrow-right-arrow-left",
+
+				id: "direction",
+
+				items: [
+					{ name: "ltr", value: "ltr" },
+					{ name: "rtl", value: "rtl" },
+					{ name: "auto", value: "auto" }
+				],
+
+				name: this.t("menuItem.textDirection"),
+
+				type: OverlayListItemEntryType.Select
+			};
+		},
+
+		/**
+		 * Theme window item.
+		 *
+		 * @returns Theme window item
+		 */
+		themeWindowItem(): OverlayListItemEntry {
+			return {
+				icon: "fa-circle-half-stroke",
+
+				id: "theme",
+
+				// False negative
+				// eslint-disable-next-line @typescript-eslint/typedef
+				items: [
+					{ name: "dark", value: "dark" },
+					{ name: "light", value: "Light" },
+					{ name: "auto", value: "auto" }
+				],
+
+				name: this.t("menuItem.theme"),
+
+				type: OverlayListItemEntryType.Select
+			};
 		}
 	},
 
