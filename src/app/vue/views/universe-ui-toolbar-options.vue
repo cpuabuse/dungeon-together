@@ -9,6 +9,8 @@
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
+import { useTheme } from "vuetify/lib/framework.mjs";
+import { Theme } from "../../client/gui/themes";
 import { OverlayList, OverlayWindow } from "../components";
 import { CompactToolbarMenuItem } from "../core/compact-toolbar";
 import { useLocale } from "../core/locale";
@@ -178,6 +180,37 @@ export default defineComponent({
 		},
 
 		/**
+		 * Theme.
+		 *
+		 * @returns Theme name
+		 */
+		theme: {
+			/**
+			 * Gets theme string.
+			 *
+			 * @returns Boolean value
+			 */
+			get(): string | undefined {
+				const value: unknown = this.records[this.themeSymbol];
+
+				if (value && typeof value === "string") {
+					return value;
+				}
+
+				return undefined;
+			},
+
+			/**
+			 * Sets debug container display record.
+			 *
+			 * @param value - Boolean value to set
+			 */
+			set(value: string) {
+				this.records[this.themeSymbol] = value;
+			}
+		},
+
+		/**
 		 * Theme window item.
 		 *
 		 * @returns Theme window item
@@ -186,15 +219,16 @@ export default defineComponent({
 			return {
 				icon: "fa-circle-half-stroke",
 
-				id: "theme",
+				id: this.themeSymbol,
 
 				// False negative
 				// eslint-disable-next-line @typescript-eslint/typedef
-				items: [
-					{ name: "dark", value: "dark" },
-					{ name: "light", value: "Light" },
-					{ name: "auto", value: "auto" }
-				],
+				items: Object.values(Theme).map(value => {
+					return {
+						name: this.t(`theme.${value}`),
+						value
+					};
+				}),
 
 				name: this.t("menuItem.theme"),
 
@@ -219,13 +253,16 @@ export default defineComponent({
 		// Infer type
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let data = {
-			// Symbol to index language in store records.
+			// Symbol to index language in store records
 			languageSymbol: Symbol("language"),
 
 			// A key to force re-render the list; Used for removing transitions and animations(VSelect), when rtl changes; Assigning to whole list might be a crude, but it is best performance for code impact; In principle this should be handled by Vuetify, as on language change other overlays would mess up
 			listKey: "tick" as "tick" | "tock",
 
-			optionsMenuDisplaySymbol: Symbol("options-menu-display")
+			optionsMenuDisplaySymbol: Symbol("options-menu-display"),
+
+			// Symbol to index theme in store
+			themeSymbol: Symbol("theme")
 		};
 
 		return data;
@@ -246,7 +283,7 @@ export default defineComponent({
 	 * @returns Records
 	 */
 	setup() {
-		return { ...useRecords(), ...useLocale() };
+		return { ...useRecords(), ...useLocale(), themeGlobal: useTheme().global };
 	},
 
 	watch: {
@@ -297,6 +334,15 @@ export default defineComponent({
 
 			// Overwrite given value immediately
 			immediate: true
+		},
+
+		/**
+		 * Watch theme and change theme.
+		 *
+		 * @param value - New theme value
+		 */
+		theme(value: string): void {
+			this.themeGlobal.name.value = value;
 		}
 	}
 });

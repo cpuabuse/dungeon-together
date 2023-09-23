@@ -24,6 +24,7 @@ import { createVueI18nAdapter } from "vuetify/locale/adapters/vue-i18n";
 import "../style/vuetify.scss";
 import { StatusNotificationWord } from "../../common/defaults/connection";
 import { Locale, locales } from "../../vue/core/locale";
+import { Theme } from "./themes";
 
 // Initialize FA
 library.add(fas);
@@ -50,6 +51,10 @@ const messages = {
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "تحقق من حولك",
 			[StatusNotificationWord.MimicAwaken]: "ظهر الميميك!"
+		},
+		theme: {
+			[Theme.Dark]: "الظلام",
+			[Theme.Light]: "ضوء"
 		}
 	},
 	en: {
@@ -67,6 +72,10 @@ const messages = {
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "You look around",
 			[StatusNotificationWord.MimicAwaken]: "Mimic awakens!"
+		},
+		theme: {
+			[Theme.Dark]: "Dark",
+			[Theme.Light]: "Light"
 		}
 	},
 	ja: {
@@ -85,6 +94,10 @@ const messages = {
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "周りを見回す",
 			[StatusNotificationWord.MimicAwaken]: "ミミックが現れた！"
+		},
+		theme: {
+			[Theme.Dark]: "ライト",
+			[Theme.Light]: "ダーク"
 		}
 	}
 };
