@@ -22,6 +22,7 @@ import { createVueI18nAdapter } from "vuetify/locale/adapters/vue-i18n";
 
 // Initialize Vuetify
 import "../style/vuetify.scss";
+import { StatusNotificationWord } from "../../common/defaults/connection";
 import { Locale, locales } from "../../vue/core/locale";
 
 // Initialize FA
@@ -37,17 +38,54 @@ const messages = {
 	ar: {
 		$vuetify: ar,
 		language: "اللغة",
-		locales: locales[Locale.Arabic]
+		locales: locales[Locale.Arabic],
+		menuItem: {
+			textDirection: "اتجاه النص",
+			theme: "موضوع"
+		},
+		menuTitle: {
+			options: "خيارات",
+			system: "النظام"
+		},
+		statusNotification: {
+			[StatusNotificationWord.Sync]: "تحقق من حولك",
+			[StatusNotificationWord.MimicAwaken]: "ظهر الميميك!"
+		}
 	},
 	en: {
 		$vuetify: en,
 		language: "Language",
-		locales: locales[Locale.English]
+		locales: locales[Locale.English],
+		menuItem: {
+			textDirection: "Text direction",
+			theme: "Theme"
+		},
+		menuTitle: {
+			options: "Options",
+			system: "System"
+		},
+		statusNotification: {
+			[StatusNotificationWord.Sync]: "You look around",
+			[StatusNotificationWord.MimicAwaken]: "Mimic awakens!"
+		}
 	},
 	ja: {
 		$vuetify: ja,
 		language: "言語",
-		locales: locales[Locale.Japanese]
+		locales: locales[Locale.Japanese],
+		menuItem: {
+			// Pronunciation: "しょじほうこう"
+			textDirection: "書字方向",
+			theme: "テーマ"
+		},
+		menuTitle: {
+			options: "オプション",
+			system: "システム"
+		},
+		statusNotification: {
+			[StatusNotificationWord.Sync]: "周りを見回す",
+			[StatusNotificationWord.MimicAwaken]: "ミミックが現れた！"
+		}
 	}
 };
 

@@ -128,7 +128,7 @@ export default defineComponent({
 							{ name: "auto", value: "auto" }
 						],
 
-						name: "Text direction",
+						name: this.t("menuItem.textDirection"),
 
 						type: OverlayListItemEntryType.Select
 					},
@@ -163,7 +163,7 @@ export default defineComponent({
 		 * @returns Title
 		 */
 		name(): string {
-			return "Options";
+			return this.t("menuTitle.options");
 		}
 	},
 
@@ -222,9 +222,8 @@ export default defineComponent({
 		language(value: string): void {
 			if (this.isValidLocale(value)) {
 				if (this.locale !== value) {
-					const isOldRtl: boolean = this.isRtl;
 					this.locale = value;
-					// `this.isRtl !== isOldRtl` check is ommited, to make behavior identical, regardless of locale direction
+					// `this.isRtl !== isOldRtl` check is omitted, to make behavior identical, regardless of locale direction
 					if (this.listKey === "tick") {
 						this.listKey = "tock";
 					} else {
