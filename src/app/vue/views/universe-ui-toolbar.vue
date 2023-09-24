@@ -235,7 +235,7 @@ export default defineComponent({
 							return {
 								clickRecordIndex: this.playerEntriesMap.get(player.playerUuid)?.clickRecordIndex,
 								icon: "fa-person",
-								name: "Player",
+								name: this.playerIcon,
 								nameSubtext
 							};
 						}),
@@ -267,6 +267,15 @@ export default defineComponent({
 				name: "Stats",
 				type: OverlayListItemEntryType.Slot
 			};
+		},
+
+		/**
+		 * Player Icon.
+		 *
+		 * @returns Player icon
+		 */
+		playerIcon(): string {
+			return this.t("menuTitle.player");
 		}
 	},
 

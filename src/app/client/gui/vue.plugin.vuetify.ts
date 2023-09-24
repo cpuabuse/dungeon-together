@@ -47,6 +47,7 @@ const messages = {
 		menuTitle: {
 			debug: "تصحيح الأخطاء",
 			options: "خيارات",
+			player: "اللاعب",
 			system: "النظام"
 		},
 		statusNotification: {
@@ -69,6 +70,7 @@ const messages = {
 		menuTitle: {
 			debug: "Debug",
 			options: "Options",
+			player: "Player",
 			system: "System"
 		},
 		statusNotification: {
@@ -92,6 +94,7 @@ const messages = {
 		menuTitle: {
 			debug: "デバッグ",
 			options: "オプション",
+			player: "プレイヤー",
 			system: "システム"
 		},
 		statusNotification: {
