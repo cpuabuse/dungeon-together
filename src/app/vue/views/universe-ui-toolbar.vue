@@ -130,7 +130,7 @@ export default defineComponent({
 		 * @returns Title
 		 */
 		debugName(): string {
-			return "Debug";
+			return this.t("menuTitle.debug");
 		},
 
 		/**
@@ -190,7 +190,7 @@ export default defineComponent({
 						{ clickRecordIndex: this.debugMenuDisplaySymbol, icon: "fa-bug-slash", name: this.debugName }
 					],
 					maxPinnedAmount: 1,
-					name: "System"
+					name: this.system
 				}
 			];
 		},
@@ -245,6 +245,15 @@ export default defineComponent({
 					};
 				}
 			);
+		},
+
+		/**
+		 * System.
+		 *
+		 * @returns System
+		 */
+		system(): string {
+			return this.t("menuTitle.system");
 		},
 
 		/**

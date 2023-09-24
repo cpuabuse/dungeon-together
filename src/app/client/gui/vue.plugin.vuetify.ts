@@ -45,6 +45,7 @@ const messages = {
 			theme: "موضوع"
 		},
 		menuTitle: {
+			debug: "تصحيح الأخطاء",
 			options: "خيارات",
 			system: "النظام"
 		},
@@ -66,6 +67,7 @@ const messages = {
 			theme: "Theme"
 		},
 		menuTitle: {
+			debug: "Debug",
 			options: "Options",
 			system: "System"
 		},
@@ -88,6 +90,7 @@ const messages = {
 			theme: "テーマ"
 		},
 		menuTitle: {
+			debug: "デバッグ",
 			options: "オプション",
 			system: "システム"
 		},
