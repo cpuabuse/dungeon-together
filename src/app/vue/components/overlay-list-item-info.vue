@@ -4,10 +4,12 @@
 	<OverlayListItemAssembler v-bind="assemblerProps">
 		<!-- Inline slot; Omit from display if no actions given -->
 		<template v-if="uiActions.length > 0" #inline>
-			<VBtnGroup v-if="uiActions.length > 0">
+			<VBtnGroup v-if="uiActions.length > 0" :density="isCompact ? 'compact' : 'default'">
+				<!-- Default button is very wide -->
 				<VBtn
 					v-for="({ icon: uiActionIcon, modeUuid, uiActionWord }, uiActionKey) in uiActions"
 					:key="uiActionKey"
+					:size="isCompact ? 'x-small' : 'small'"
 					@click="() => handleUiAction({ uiActionKey })"
 				>
 					<BaseIcon v-if="uiActionIcon || modeUuid" :mode-uuid="modeUuid" :icon="uiActionIcon" />

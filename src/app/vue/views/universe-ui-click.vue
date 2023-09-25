@@ -72,7 +72,7 @@ export default defineComponent({
 									unitUuid
 								},
 								{
-									icon: "fa-bug",
+									icon: "fa-question",
 									targetCellUuid: cell.cellUuid,
 									uiActionWord: OverlayContainerUiActionWords.CellDebugInfo
 								}
@@ -117,7 +117,7 @@ export default defineComponent({
 								// eslint-disable-next-line @typescript-eslint/typedef
 								() => {
 									return {
-										icon: "fa-bug",
+										icon: "fa-question",
 										targetEntityUuid,
 										uiActionWord: OverlayContainerUiActionWords.EntityDebugInfo
 									} satisfies OverlayContentUiActionParam;

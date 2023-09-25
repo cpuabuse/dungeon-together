@@ -4,8 +4,7 @@
 -->
 
 <template>
-	<!-- `pe` reduces extra spacing in the end, when terminated by caret. -->
-	<OverlayListItemWrapper :content-type="contentType" :list-item-class="{ 'pe-1': isCaretDisplayed }">
+	<OverlayListItemWrapper :content-type="contentType">
 		<template v-if="hasHeader" #header>
 			<!--
 				`VRow` doesn't receive list's density.

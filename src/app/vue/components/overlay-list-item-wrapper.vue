@@ -11,7 +11,7 @@
 			<VMenu v-if="$slots.content" v-model="isMenuOpen" location="end" :close-on-content-click="false">
 				<template #activator="{ props }">
 					<!-- The density will be inherited from `VList` -->
-					<VListItem v-bind="props" :class="listItemClass">
+					<VListItem v-bind="props" :class="effectiveListItemClass">
 						<!-- Header slot -->
 						<!-- Produce prop if expanded -->
 						<slot name="header" :is-expanded="isMenuOpen" />
@@ -26,7 +26,7 @@
 			<!-- Info only -->
 			<!-- Tonal for non interactive element -->
 			<!-- The density will be inherited from `VList` -->
-			<VListItem v-else :class="listItemClass">
+			<VListItem v-else :class="effectiveListItemClass">
 				<!-- Header slot -->
 				<slot v-if="$slots.header" name="header" />
 			</VListItem>
@@ -35,7 +35,7 @@
 		<!-- Block -->
 		<template v-else>
 			<!-- The density will be inherited from `VList` -->
-			<VListItem :class="listItemClass">
+			<VListItem :class="effectiveListItemClass">
 				<!-- Header slot -->
 				<slot v-if="$slots.header" name="header" />
 
@@ -53,6 +53,24 @@ import { overlayListSharedEmits, overlayListSharedProps, useOverlayListShared } 
 
 export default defineComponent({
 	components: { VListItem, VMenu },
+
+	computed: {
+		/**
+		 * Effective class applied to list item.
+		 *
+		 * @remarks
+		 * Reduce the ending padding for asymmetric visual design. When not compact leave at default.
+		 *
+		 * @returns Class object
+		 */
+		effectiveListItemClass(): Record<string, boolean> {
+			return {
+				"pe-1": this.isCompact,
+				"ps-2": this.isCompact,
+				...this.listItemClass
+			};
+		}
+	},
 
 	/**
 	 * Data.
