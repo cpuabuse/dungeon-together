@@ -6,7 +6,9 @@
 
 	<OverlayWindow v-model="isDebugMenuDisplayed" icon="fa-bug-slash" :name="debugName">
 		<template #body>
-			<OverlayList :items="debugWindowItems" :is-compact="false" />
+			<OverlayList :items="debugWindowItems" :is-compact="false">
+				<template #uuid-search> <UuidSearch /> </template>
+			</OverlayList>
 		</template>
 	</OverlayWindow>
 
@@ -42,6 +44,7 @@ import { Uuid } from "../../common/uuid";
 import { CoreDictionary } from "../../core/connection";
 import CompactToolbar from "../compact-toolbar.vue";
 import { OverlayList, OverlayWindow } from "../components";
+import UuidSearch from "../components/uuid-search.vue";
 import { CompactToolbarMenuBaseProps } from "../core/compact-toolbar";
 import { useLocale } from "../core/locale";
 import { OverlayListItemEntry, OverlayListItemEntryType, OverlayListItems, OverlayListTabs } from "../core/overlay";
@@ -80,7 +83,7 @@ type PlayerEntry = {
 type PlayerEntries = Array<[string, PlayerEntry]>;
 
 export default defineComponent({
-	components: { CompactToolbar, OverlayList, OverlayWindow, UniverseUiToolbarOptions },
+	components: { CompactToolbar, OverlayList, OverlayWindow, UniverseUiToolbarOptions, UuidSearch, UuidSearch },
 
 	computed: {
 		/**
@@ -145,6 +148,11 @@ export default defineComponent({
 					name: "Shards",
 					tabs: this.debugItemsShardTabs,
 					type: OverlayListItemEntryType.Tab
+				},
+				{
+					id: "uuid-search",
+					name: "UUID Search",
+					type: OverlayListItemEntryType.Slot
 				}
 			];
 		},
@@ -206,6 +214,15 @@ export default defineComponent({
 		},
 
 		/**
+		 * Player Icon.
+		 *
+		 * @returns Player icon
+		 */
+		playerIcon(): string {
+			return this.t("menuTitle.player");
+		},
+
+		/**
 		 * Menus per shard.
 		 *
 		 * @returns Array of menus
@@ -248,15 +265,6 @@ export default defineComponent({
 		},
 
 		/**
-		 * System.
-		 *
-		 * @returns System
-		 */
-		system(): string {
-			return this.t("menuTitle.system");
-		},
-
-		/**
 		 * Item for stat box.
 		 *
 		 * @returns Item entry
@@ -270,12 +278,12 @@ export default defineComponent({
 		},
 
 		/**
-		 * Player Icon.
+		 * System.
 		 *
-		 * @returns Player icon
+		 * @returns System
 		 */
-		playerIcon(): string {
-			return this.t("menuTitle.player");
+		system(): string {
+			return this.t("menuTitle.system");
 		}
 	},
 

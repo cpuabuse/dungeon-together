@@ -106,7 +106,7 @@ export function ServerEntityFactory({
 					// #if _DEBUG_ENABLED
 					(this.constructor as ServerEntityClass).universe.log({
 						level: LogLevel.Debug,
-						message: `Kind(kindUuid="${this.kindUuid}") was not found, and entity(entityUuid=${this.entityUuid}) was created with default kind instead.`
+						message: `Kind(kindUuid="${this.kindUuid}") was not found, and entity(entityUuid="${this.entityUuid}") was created with default kind instead.`
 					});
 					// #endif
 				}
