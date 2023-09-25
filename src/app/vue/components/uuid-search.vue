@@ -5,16 +5,15 @@
 <template>
 	<VTextField
 		v-model="model"
-		density="compact"
-		variant="solo"
 		label="Search templates"
 		append-inner-icon="fa-magnifying-glass"
-		single-line
 		hide-details
+		variant="solo-filled"
+		flat
 		@click:append-inner="onClick"
 	></VTextField>
 
-	<VCheckbox v-model="isNotFoundLogged" label="Log not found"></VCheckbox>
+	<VCheckbox v-model="isNotFoundLogged" label="Log not found" hide-details></VCheckbox>
 </template>
 
 <script setup lang="ts">

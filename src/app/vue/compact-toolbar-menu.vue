@@ -69,6 +69,7 @@ import {
 	compactToolbarMenuBaseProps,
 	compactToolbarSharedMenuProps
 } from "./core/compact-toolbar";
+import { useLocale } from "./core/locale";
 import { useRecords } from "./core/store";
 
 /**
@@ -129,6 +130,20 @@ export default defineComponent({
 	 * @returns - Computed object
 	 */
 	computed: {
+		/**
+		 * Button text computed.
+		 *
+		 * @returns - Button text data
+		 */
+		buttonText(): Record<"fontSize" | "width", string> {
+			return this.hasNoCapitalization
+				? {
+						fontSize: "1em",
+						width: "5em"
+				  }
+				: this.reducedButtonText;
+		},
+
 		/**
 		 * Items with index.
 		 *
@@ -200,6 +215,18 @@ export default defineComponent({
 
 				return result;
 			}, [] as Array<ItemGroup>);
+		},
+
+		/**
+		 * Button text reduced size.
+		 *
+		 * @returns - Button text data
+		 */
+		reducedButtonText(): Record<"fontSize" | "width", string> {
+			return {
+				fontSize: "0.6em",
+				width: "6.5em"
+			};
 		},
 
 		/**
@@ -325,7 +352,7 @@ export default defineComponent({
 	// Infer setup
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup() {
-		return useRecords();
+		return { ...useRecords(), ...useLocale() };
 	},
 
 	watch: {
@@ -345,26 +372,31 @@ export default defineComponent({
 
 <style scoped>
 .button-text {
-	/* Smaller font size for menu, as it is more of a tooltip */
-	font-size: 0.6em;
+	font-size: v-bind("buttonText.fontSize");
 
-	/* Max width will be based on font size; Simplest and most robust way to make same length buttons */
-	width: 6.5em;
+	width: v-bind("buttonText.width");
+}
+
+/* Always reduce font size for subtext */
+.button-text + .button-text {
+	font-size: v-bind("reducedButtonText.fontSize");
+
+	width: v-bind("reducedButtonText.width");
 }
 
 .compact-toolbar-menu-unerline {
 	/* Reserve space for potentially active text */
-	padding-bottom: calc(0.25em - 1px);
+	padding-bottom: calc(0.125rem - 1px);
 }
 .compact-toolbar-menu-has-labels .compact-toolbar-menu-item {
 	/* Reserve space for potentially active text in parent element, only can happen if labels are there */
-	padding-top: calc(0.25em - 1px);
+	padding-top: calc(0.125rem - 1px);
 }
 
-/* Override vuetify, only for active labels */
+/* Override vuetify, only for active labels; Set to root units, as size changes for subtext */
 .text-decoration-underline.compact-toolbar-menu-unerline {
 	text-decoration-color: rgb(var(--v-theme-primary)) !important;
-	text-decoration-thickness: 0.25em !important;
+	text-decoration-thickness: 0.125rem !important;
 }
 
 /* Stretch wrapper to fit content as if wrapper didn't exist; Unlike `contents` positional information for tooltip popup is preserved */

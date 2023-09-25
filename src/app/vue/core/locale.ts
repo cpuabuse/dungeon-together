@@ -9,7 +9,7 @@
  * @file
  */
 
-import { WritableComputedRef, computed, unref } from "vue";
+import { ComputedRef, WritableComputedRef, computed, unref } from "vue";
 import { useI18n } from "vue-i18n";
 import { RtlInstance, useLocale as useVuetifyLocale } from "vuetify";
 
@@ -111,5 +111,12 @@ export function useLocale() {
 		}
 	});
 
-	return { Locale, fallbackLocale, isRtl, isValidLocale, locale, locales, t };
+	/**
+	 * Computed property checking if current language has capitalization.
+	 */
+	const hasNoCapitalization: ComputedRef<boolean> = computed(() => {
+		return [Locale.Arabic].includes(locale.value);
+	});
+
+	return { Locale, fallbackLocale, hasNoCapitalization, isRtl, isValidLocale, locale, locales, t };
 }
