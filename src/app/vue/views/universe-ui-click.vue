@@ -59,17 +59,26 @@ export default defineComponent({
 						})
 						.flat(2);
 
-					// False negative
-					// eslint-disable-next-line @typescript-eslint/typedef
-					const cellUiActions: Array<OverlayContentUiActionParam> = playerUnitEntries.map(([player, unitUuid]) => {
-						return {
-							icon: "fa-person-walking-dashed-line-arrow-right",
-							player,
-							targetCellUuid: cell.cellUuid,
-							uiActionWord: OverlayContainerUiActionWords.ForceMovement,
-							unitUuid
-						} satisfies OverlayContentUiActionParam;
-					});
+					const cellUiActions: Array<OverlayContentUiActionParam> = playerUnitEntries
+						// False negative
+						// eslint-disable-next-line @typescript-eslint/typedef
+						.map(([player, unitUuid]) => {
+							return [
+								{
+									icon: "fa-person-walking-dashed-line-arrow-right",
+									player,
+									targetCellUuid: cell.cellUuid,
+									uiActionWord: OverlayContainerUiActionWords.ForceMovement,
+									unitUuid
+								},
+								{
+									icon: "fa-bug",
+									targetCellUuid: cell.cellUuid,
+									uiActionWord: OverlayContainerUiActionWords.CellDebugInfo
+								}
+							] satisfies Array<OverlayContentUiActionParam>;
+						})
+						.flat();
 
 					const entityItems: OverlayListItems = Array.from(this.rcMenuData.cell.entities).map(
 						// False negative
@@ -103,12 +112,23 @@ export default defineComponent({
 									} satisfies OverlayContentUiActionParam;
 								}
 							);
+							let entityDebugInfoUiActions: Array<OverlayContentUiActionParam> = playerUnitEntries.map(
+								// False negative
+								// eslint-disable-next-line @typescript-eslint/typedef
+								() => {
+									return {
+										icon: "fa-bug",
+										targetEntityUuid,
+										uiActionWord: OverlayContainerUiActionWords.EntityDebugInfo
+									} satisfies OverlayContentUiActionParam;
+								}
+							);
 
 							return {
 								modeUuid: entity.modeUuid,
 								name: "Entity",
 								type: OverlayListItemEntryType.InfoElement,
-								uiActions: [...entityAttackUiActions, ...entityUseUiActions]
+								uiActions: [...entityAttackUiActions, ...entityUseUiActions, ...entityDebugInfoUiActions]
 							} satisfies OverlayListItemEntry;
 						}
 					);
@@ -168,6 +188,16 @@ export default defineComponent({
 						data: targetEntity,
 						level: LogLevel.Informational,
 						message: `Debug info for entity(entityUuid="${uiAction.targetEntityUuid}")`
+					});
+					break;
+				}
+
+				case OverlayContainerUiActionWords.CellDebugInfo: {
+					const targetCell: ClientCell = this.universe.getCell({ cellUuid: uiAction.targetCellUuid });
+					this.universe.log({
+						data: targetCell,
+						level: LogLevel.Informational,
+						message: `Debug info for cell(cellUuid="${uiAction.targetCellUuid}")`
 					});
 					break;
 				}
@@ -236,6 +266,9 @@ export default defineComponent({
 
 				default:
 					this.universe.log({
+						// @ts-expect-error Switch must be exhaustive
+						// Never should not be reached
+						// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 						error: new Error(`Unknown UI action word: ${uiAction.uiActionWord}`),
 						level: LogLevel.Warning
 					});

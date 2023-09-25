@@ -213,6 +213,7 @@ export enum OverlayContainerUiActionWords {
 	EntityAction = "entityAction",
 	EntityInfo = "entityInfo",
 	EntityDebugInfo = "entityDebugInfo",
+	CellDebugInfo = "cellDebugInfo",
 	ForceMovement = "movement"
 }
 
@@ -281,6 +282,17 @@ export type OverlayContentUiActionParam = OverlayContentUiActionHelper<
 					 * Information to display.
 					 */
 					targetEntityUuid: Uuid;
+			  }
+			| {
+					/**
+					 * Cell debug info.
+					 */
+					uiActionWord: OverlayContainerUiActionWords.CellDebugInfo;
+
+					/**
+					 * Information to display.
+					 */
+					targetCellUuid: Uuid;
 			  }
 			| {
 					/**
