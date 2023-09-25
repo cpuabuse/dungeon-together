@@ -36,24 +36,31 @@
 		<VExpandXTransition v-for="(itemGroup, itemGroupKey) in itemGroups" :key="itemGroupKey">
 			<VToolbarItems v-show="itemGroup.isPinned || isExtended">
 				<template v-for="(item, itemKey) in itemGroup.items" :key="itemKey">
-					<VBtn
-						:disabled="!(item.mode === 'click' || item.clickRecordIndex)"
-						:stacked="hasLabels"
-						class="compact-toolbar-menu-item px-1"
-						@click="() => clickItem(item)"
-					>
-						<VIcon :icon="item.icon ?? 'fa-carrot'" size="x-large" />
+					<VTooltip :text="item.tooltip" :open-delay="openDelay" :location="tooltipLocation">
+						<template #activator="{ props }">
+							<div v-bind="props" class="compact-toolbar-tooltip-content-wrapper">
+								<!-- Since button is not child of toolbar anymore, remove rounded corners -->
+								<VBtn
+									:disabled="!(item.mode === 'click' || item.clickRecordIndex)"
+									:stacked="hasLabels"
+									class="compact-toolbar-menu-item px-1"
+									@click="() => clickItem(item)"
+								>
+									<VIcon :icon="item.icon ?? 'fa-carrot'" size="x-large" />
 
-						<!-- Labels -->
-						<span
-							v-for="(itemEntry, itemTextIndex) in item.labelEntries"
-							:key="itemTextIndex"
-							class="text-truncate button-text"
-							:class="itemEntry.class"
-						>
-							{{ itemEntry.text }}
-						</span>
-					</VBtn>
+									<!-- Labels -->
+									<span
+										v-for="(itemEntry, itemTextIndex) in item.labelEntries"
+										:key="itemTextIndex"
+										class="text-truncate button-text"
+										:class="itemEntry.class"
+									>
+										{{ itemEntry.text }}
+									</span>
+								</VBtn>
+							</div>
+						</template>
+					</VTooltip>
 				</template>
 			</VToolbarItems>
 		</VExpandXTransition>
@@ -76,7 +83,8 @@ import { useRecords } from "./core/store";
  * Item with meta.
  */
 type IndexedItem = CompactToolbarMenuItem &
-	Record<"id", number> & {
+	Record<"id", number> &
+	Record<"tooltip", string> & {
 		/**
 		 * Text entries for under the button.
 		 */
@@ -150,10 +158,8 @@ export default defineComponent({
 		 * @returns Array of items with index
 		 */
 		indexedItems(): Array<IndexedItem> {
-			return this.items.map((item, itemIndex) => ({
-				...item,
-				id: itemIndex,
-				labelEntries: this.hasLabels
+			return this.items.map((item, itemIndex) => {
+				const labelEntries: IndexedItem["labelEntries"] = this.hasLabels
 					? [item.name, item.nameSubtext]
 							.filter<string>((text: string | undefined): text is string => {
 								return Boolean(text && text.length > 0);
@@ -175,8 +181,15 @@ export default defineComponent({
 									text
 								};
 							})
-					: []
-			}));
+					: [];
+
+				return {
+					...item,
+					id: itemIndex,
+					labelEntries,
+					tooltip: labelEntries.map(entry => entry.text).join(" - ")
+				};
+			});
 		},
 
 		/**
