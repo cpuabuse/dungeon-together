@@ -112,11 +112,20 @@ export function useLocale() {
 	});
 
 	/**
-	 * Computed property checking if current language has capitalization.
+	 * Computed property checking if current language is visually short even if capitalized.
 	 */
-	const hasNoCapitalization: ComputedRef<boolean> = computed(() => {
+	const isShortWhenCapitalized: ComputedRef<boolean> = computed(() => {
 		return [Locale.Arabic].includes(locale.value);
 	});
 
-	return { Locale, fallbackLocale, hasNoCapitalization, isRtl, isValidLocale, locale, locales, t };
+	return {
+		Locale,
+		fallbackLocale,
+		isRtl,
+		isShortWhenCapitalized,
+		isValidLocale,
+		locale,
+		locales,
+		t
+	};
 }

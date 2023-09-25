@@ -144,7 +144,7 @@ export default defineComponent({
 		 * @returns - Button text data
 		 */
 		buttonText(): Record<"fontSize" | "width", string> {
-			return this.hasNoCapitalization
+			return this.isShortWhenCapitalized
 				? {
 						fontSize: "1em",
 						width: "5em"
