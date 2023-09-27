@@ -97,7 +97,9 @@ export default defineComponent({
 				// eslint-disable-next-line @typescript-eslint/typedef
 				items: Object.entries(this.Locale).map(([name, value]) => {
 					return {
-						name: `${this.locales[value][value]} (${value === this.fallbackLocale ? "" : `${name}, `}${value})`,
+						name: `${this.t(`locales.${value}`, 1, { locale: value })} (${
+							value === this.fallbackLocale ? "" : `${name}, `
+						}${value})`,
 						value
 					};
 				}),

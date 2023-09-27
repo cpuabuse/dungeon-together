@@ -1,6 +1,7 @@
 <!-- Universe UI toolbar menu and windows -->
 <template>
 	<CompactToolbar :menus="mainToolbarMenus" />
+	<StoryNotification />
 
 	<UniverseUiToolbarOptions v-model="optionsModel" />
 
@@ -44,6 +45,7 @@ import { Uuid } from "../../common/uuid";
 import { CoreDictionary } from "../../core/connection";
 import CompactToolbar from "../compact-toolbar.vue";
 import { OverlayList, OverlayWindow } from "../components";
+import StoryNotification from "../components/story-notification.vue";
 import UuidSearch from "../components/uuid-search.vue";
 import { CompactToolbarMenuBaseProps } from "../core/compact-toolbar";
 import { useLocale } from "../core/locale";
@@ -83,7 +85,14 @@ type PlayerEntry = {
 type PlayerEntries = Array<[string, PlayerEntry]>;
 
 export default defineComponent({
-	components: { CompactToolbar, OverlayList, OverlayWindow, UniverseUiToolbarOptions, UuidSearch, UuidSearch },
+	components: {
+		CompactToolbar,
+		OverlayList,
+		OverlayWindow,
+		StoryNotification,
+		UniverseUiToolbarOptions,
+		UuidSearch
+	},
 
 	computed: {
 		/**

@@ -9,6 +9,7 @@
  * @file
  */
 
+import { Locale } from "../../app/common/locale";
 import { ModuleFactoryParams } from "../../app/server/module";
 import { DoorKindClassFactory } from "./door";
 import { ExclusiveKindClass, ExclusiveKindClassFactory } from "./exclusive";
@@ -17,6 +18,7 @@ import { GuyKindClass, GuyKindClassFactory } from "./guy";
 import { LadderKindClassFactory } from "./ladder";
 import { MimicKindClassFactory } from "./mimic";
 import { MonsterKindClass, MonsterKindClassFactory } from "./monster";
+import { SystemStoryWords } from "./story";
 import { TrapKindClass, TrapKindClassFactory } from "./trap";
 import { TreasureKindClassFactory } from "./treasure";
 import { UnitKindClass, UnitKindClassFactory, UnitStatWords, UnitStats, defaultStats } from "./unit";
@@ -65,6 +67,56 @@ export function systemModuleFactory(...[{ universe, props }]: ModuleFactoryParam
 			trap: TrapKind,
 			treasure: TreasureKindClassFactory({ Base: universe.Entity.BaseKind }),
 			wall: WallKindClassFactory({ Base: ExclusiveKind })
+		}
+	};
+}
+
+/**
+ * Client module.
+ *
+ * @returns Client system module
+ */
+export function systemClientModule(): {
+	/**
+	 * Story info.
+	 */
+	story: {
+		/**
+		 * Messages.
+		 */
+		messages: Record<
+			string,
+			Record<
+				string,
+				{
+					/**
+					 * Paragraphs.
+					 */
+					paragraphs: Array<string>;
+				}
+			>
+		>;
+	};
+} {
+	return {
+		story: {
+			messages: {
+				[Locale.English]: {
+					[SystemStoryWords.Sync]: {
+						paragraphs: ["Welcome screen in English.", "Second message"]
+					}
+				},
+				[Locale.Japanese]: {
+					[SystemStoryWords.Sync]: {
+						paragraphs: ["Welcome screen in Japanese."]
+					}
+				},
+				[Locale.Arabic]: {
+					[SystemStoryWords.Sync]: {
+						paragraphs: ["Welcome screen in Arabic."]
+					}
+				}
+			}
 		}
 	};
 }

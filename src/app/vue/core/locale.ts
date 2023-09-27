@@ -10,17 +10,9 @@
  */
 
 import { ComputedRef, WritableComputedRef, computed, unref } from "vue";
-import { useI18n } from "vue-i18n";
+import { UseI18nOptions, useI18n } from "vue-i18n";
 import { RtlInstance, useLocale as useVuetifyLocale } from "vuetify";
-
-/**
- * Available locales.
- */
-export enum Locale {
-	English = "en",
-	Japanese = "ja",
-	Arabic = "ar"
-}
+import { Locale } from "../../common/locale";
 
 /**
  * Fallback locale.
@@ -31,29 +23,9 @@ export enum Locale {
 export const fallbackLocale: Locale.English = Locale.English;
 
 /**
- * Locales in respective locales.
+ * Alias for i18n node types.
  */
-export const locales: {
-	[L1 in Locale]: {
-		[L2 in Locale]: string;
-	};
-} = {
-	[Locale.English]: {
-		[Locale.English]: "English",
-		[Locale.Japanese]: "Japanese",
-		[Locale.Arabic]: "Arabic"
-	},
-	[Locale.Japanese]: {
-		[Locale.English]: "英語",
-		[Locale.Japanese]: "日本語",
-		[Locale.Arabic]: "アラビア語"
-	},
-	[Locale.Arabic]: {
-		[Locale.English]: "الإنجليزية",
-		[Locale.Japanese]: "اليابانية",
-		[Locale.Arabic]: "العربية"
-	}
-};
+type I18NMessage = string;
 
 /**
  * Locale composable.
@@ -63,9 +35,72 @@ export const locales: {
 // Force infer return type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function useLocale() {
+	/*
+		From [Composition API | Vue I18n (intlify.dev)](https://vue-i18n.intlify.dev/api/composition):
+		`rt` differs from `t` in that it processes the locale message directly, not the key of the locale message. There is no internal fallback with `rt`. You need to understand and use the structure of the locale messge returned by `tm`.
+	*/
 	// Infer type as it is not provided by library
 	// eslint-disable-next-line @typescript-eslint/typedef
-	const { t, locale: localeRef } = useI18n();
+	const {
+		t,
+		locale: localeRef,
+		// ESLint does not like library function
+		// eslint-disable-next-line @typescript-eslint/unbound-method
+		tm,
+		rt
+	} = useI18n<
+		UseI18nOptions<{
+			/**
+			 * Message schema definition for {@link UseI18nOptions}.
+			 */
+			message: {
+				/**
+				 * Stories.
+				 */
+				storyNotification: {
+					/**
+					 * Story messages.
+					 */
+					[StoryKey in string]: {
+						/**
+						 * Paragraphs.
+						 */
+						paragraphs: Array<I18NMessage>;
+					};
+				};
+
+				/**
+				 * Language.
+				 */
+				language: I18NMessage;
+
+				/**
+				 * Locales.
+				 */
+				locales: Record<Locale, I18NMessage>;
+
+				/**
+				 * Menu item info.
+				 */
+				menuItem: Record<string, I18NMessage>;
+
+				/**
+				 * Menu titles.
+				 */
+				menuTitle: Record<string, I18NMessage>;
+
+				/**
+				 * Status notification.
+				 */
+				statusNotification: Record<string, I18NMessage>;
+
+				/**
+				 * Theme.
+				 */
+				theme: Record<string, I18NMessage>;
+			};
+		}>
+	>();
 	const { isRtl }: RtlInstance = useVuetifyLocale();
 
 	/**
@@ -125,7 +160,8 @@ export function useLocale() {
 		isShortWhenCapitalized,
 		isValidLocale,
 		locale,
-		locales,
-		t
+		rt,
+		t,
+		tm
 	};
 }

@@ -53,6 +53,25 @@ const contrastFilter: ColorMatrixFilter = new ColorMatrixFilter();
 contrastFilter.contrast(1.0, false);
 
 /**
+ * Story notification type.
+ */
+type StoryNotification = {
+	/**
+	 * Notification ID.
+	 */
+	notificationId: string;
+	/**
+	 * Module ID.
+	 */
+	moduleId: string;
+
+	/**
+	 * Notification parameters.
+	 */
+	parameters: Array<string>;
+};
+
+/**
  * Message type client receives.
  */
 export type ClientMessage =
@@ -127,6 +146,17 @@ export type ClientMessage =
 				 */
 				notificationId: string;
 			};
+	  }
+	| {
+			/**
+			 * Story notification.
+			 */
+			type: MessageTypeWord.StoryNotification;
+
+			/**
+			 * Message body.
+			 */
+			body: CoreMessagePlayerBody & StoryNotification;
 	  };
 
 // Sound
@@ -181,6 +211,8 @@ export class ClientPlayer extends CorePlayer<ClientConnection> {
 	// False negative
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 	public notificationIds: Array<string> = new Array();
+
+	public storyNotifications: Array<StoryNotification> = new Array<StoryNotification>();
 }
 
 /**
@@ -328,6 +360,20 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 				this.universe.store.dispatch("updateNotifications").catch(error => {
 					this.universe.log({
 						error: new Error(`"Could not dispatch "updateNotifications" to universe store.`, {
+							cause: error
+						}),
+						level: LogLevel.Critical
+					});
+				});
+				break;
+			}
+
+			// Story notification update
+			case MessageTypeWord.StoryNotification: {
+				this.getPlayerEntry(message.body)?.player.storyNotifications.push(message.body);
+				this.universe.store.dispatch("updateStoryNotifications").catch(error => {
+					this.universe.log({
+						error: new Error(`"Could not dispatch "updateStoryNotifications" to universe store.`, {
 							cause: error
 						}),
 						level: LogLevel.Critical

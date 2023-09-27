@@ -22,8 +22,9 @@ import { createVueI18nAdapter } from "vuetify/locale/adapters/vue-i18n";
 
 // Initialize Vuetify
 import "../style/vuetify.scss";
+import { systemClientModule } from "../../../module/system";
 import { StatusNotificationWord } from "../../common/defaults/connection";
-import { Locale, locales } from "../../vue/core/locale";
+import { Locale } from "../../common/locale";
 import { Theme } from "./themes";
 
 // Initialize FA
@@ -39,7 +40,11 @@ const messages = {
 	ar: {
 		$vuetify: ar,
 		language: "اللغة",
-		locales: locales[Locale.Arabic],
+		locales: {
+			[Locale.English]: "الإنجليزية",
+			[Locale.Japanese]: "اليابانية",
+			[Locale.Arabic]: "العربية"
+		},
 		menuItem: {
 			textDirection: "اتجاه النص",
 			theme: "موضوع"
@@ -62,7 +67,11 @@ const messages = {
 	en: {
 		$vuetify: en,
 		language: "Language",
-		locales: locales[Locale.English],
+		locales: {
+			[Locale.English]: "English",
+			[Locale.Japanese]: "Japanese",
+			[Locale.Arabic]: "Arabic"
+		},
 		menuItem: {
 			textDirection: "Text direction",
 			theme: "Theme"
@@ -85,7 +94,11 @@ const messages = {
 	ja: {
 		$vuetify: ja,
 		language: "言語",
-		locales: locales[Locale.Japanese],
+		locales: {
+			[Locale.English]: "英語",
+			[Locale.Japanese]: "日本語",
+			[Locale.Arabic]: "アラビア語"
+		},
 		menuItem: {
 			// Pronunciation: "しょじほうこう"
 			textDirection: "書字方向",
@@ -129,6 +142,16 @@ export function useVuetifyPlugin({
 		// Vuetify does not support the legacy mode of vue-i18n
 		locale: "en",
 		messages
+	});
+
+	// TODO: Add proper module types
+	let systemModule: ReturnType<typeof systemClientModule> = systemClientModule();
+	// ESLint false negative
+	// eslint-disable-next-line @typescript-eslint/typedef
+	Object.entries(systemModule.story.messages).forEach(([language, msg]) => {
+		i18n.global.mergeLocaleMessage(language, {
+			storyNotification: msg
+		});
 	});
 
 	// Add icon component
