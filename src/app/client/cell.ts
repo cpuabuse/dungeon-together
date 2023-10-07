@@ -7,7 +7,8 @@
  * @file Squares on screen.
  */
 
-import { ColorMatrixFilter, Container } from "pixi.js";
+import { GlowFilter } from "@pixi/filter-glow";
+import { ColorMatrixFilter, Container, type Filter } from "pixi.js";
 import { CoreArgIds } from "../core/arg";
 import { CoreCellArg, CoreCellClassFactory } from "../core/cell";
 import { EntityPathOwn } from "../core/entity";
@@ -23,6 +24,38 @@ import { ClientShard } from "./shard";
  */
 const contrastFilter: ColorMatrixFilter = new ColorMatrixFilter();
 contrastFilter.contrast(2, false);
+
+/**
+ * Identifiers of filters.
+ */
+// Force infer the type
+// eslint-disable-next-line @typescript-eslint/typedef
+const filterNames = ["contrast", "glow"] as const;
+
+/**
+ * Filter name.
+ */
+type FilterName = (typeof filterNames)[number];
+
+/**
+ * Map of filter names to actual filters.
+ */
+const filterMap: {
+	[Key in FilterName]: Filter;
+} = {
+	contrast: contrastFilter,
+	glow: new GlowFilter({
+		innerStrength: 2,
+		outerStrength: 0
+	})
+};
+
+/**
+ * Filter state.
+ */
+type FilterState = {
+	[Key in FilterName]: boolean;
+};
 
 /**
  * Generator for the client cell class.
@@ -63,6 +96,34 @@ export function ClientCellFactory({
 		 */
 		public shard?: ClientShard;
 
+		/**
+		 * Dynamically generates filters.
+		 *
+		 * @returns Array of filters
+		 */
+		public get filters(): Array<Filter> {
+			return (
+				Object.entries(this.filterState)
+					// ESLint does not pick up types
+					// eslint-disable-next-line @typescript-eslint/typedef
+					.filter(([, isEnabled]) => {
+						return isEnabled;
+					})
+					// ESLint does not pick up types
+					// eslint-disable-next-line @typescript-eslint/typedef
+					.map(([name]) => {
+						return filterMap[name as FilterName];
+					})
+			);
+		}
+
+		protected filterState: FilterState = filterNames.reduce((result, name) => {
+			return {
+				...result,
+				[name]: false
+			};
+		}, {} as FilterState);
+
 		// ESLint params bug
 		// eslint-disable-next-line jsdoc/require-param
 		/**
@@ -84,7 +145,9 @@ export function ClientCellFactory({
 			super(cell, { attachHook, created }, baseParams);
 
 			// Fog
-			this.container.filters = [contrastFilter];
+			this.setFilters({
+				contrast: true
+			});
 		}
 
 		/**
@@ -99,6 +162,28 @@ export function ClientCellFactory({
 				this.container.removeChild(entity.sprite);
 				entity.sprite.stop();
 			}
+		}
+
+		/**
+		 * Remove or add filters to the cell.
+		 *
+		 * @param filterState - Object with list of filter states to change
+		 */
+		public setFilters(filterState: Partial<FilterState>): void {
+			// ESLint does not pick up types
+			// eslint-disable-next-line @typescript-eslint/typedef
+			Object.entries(filterState).forEach(([name, isEnabled]) => {
+				// Make sure that the value is a boolean and not undefined, as it might have still be passed via partial argument; Then only work with keys that are valid filter names
+				if (
+					typeof isEnabled === "boolean" &&
+					(filterNames.includes as (filterName: string) => filterName is FilterName)(name)
+				) {
+					this.filterState[name] = isEnabled;
+				}
+			});
+
+			// Set filters
+			this.container.filters = this.filters;
 		}
 
 		/**

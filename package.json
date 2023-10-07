@@ -107,6 +107,7 @@
 		"@fortawesome/free-solid-svg-icons": "^6.4.0",
 		"@fortawesome/vue-fontawesome": "^3.0.3",
 		"@highlightjs/vue-plugin": "^2.1.0",
+		"@pixi/filter-glow": "^5.2.1",
 		"@popperjs/core": "^2.11.8",
 		"axios": "^1.4.0",
 		"chalk": "^5.2.0",

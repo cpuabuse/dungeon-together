@@ -166,7 +166,8 @@ export default defineComponent({
 	data() {
 		return {
 			isOverlayClickDisplayed: true,
-			universe: (this as unknown as ThisVueStore).$store.state.universe
+			universe: (this as unknown as ThisVueStore).$store.state.universe,
+			previousCell: null as ClientCell | null
 		};
 	},
 
@@ -281,6 +282,32 @@ export default defineComponent({
 			default: null,
 			required: false,
 			type: Object as PropType<UniverseState["rcMenuData"]>
+		}
+	},
+
+	watch: {
+		rcMenuData: {
+			handler(value: UniverseState["rcMenuData"]): void {
+				let newCell: ClientCell | null = null;
+
+				// Unset the glow on the previous cell
+				if (this.previousCell) {
+					this.previousCell.setFilters({ glow: false });
+				}
+
+				// Sets the glow on the cell
+				if (value) {
+					if (value.type === ClientUniverseStateRcMenuDataWords.Cell) {
+						value.cell.setFilters({ glow: true });
+
+						// Cache the cell
+						newCell = value.cell;
+					}
+				}
+
+				// Update the previous cell
+				this.previousCell = newCell;
+			}
 		}
 	}
 });

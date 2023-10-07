@@ -540,7 +540,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 
 							// TODO: Visibility tracing
 							newCells.add(targetCell);
-							targetCell.container.filters = [];
+							targetCell.setFilters({ contrast: false });
 
 							// Terminate missing
 							targetCell.entities.forEach(targetEntity => {
@@ -734,7 +734,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 					callback: () => {
 						this.previouslyVisibleCells.forEach(cell => {
 							if (!newCells.has(cell)) {
-								cell.container.filters = [contrastFilter];
+								cell.setFilters({ contrast: true });
 							}
 						});
 						this.previouslyVisibleCells = newCells;

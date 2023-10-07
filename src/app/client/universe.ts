@@ -329,6 +329,9 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 				/**
 				 * Updates right-click menu data.
 				 *
+				 * @remarks
+				 * The whole data object will be overwritten each click, so it's safe to watch it.
+				 *
 				 * @param state - State context
 				 * @param data - Data to set to
 				 */
