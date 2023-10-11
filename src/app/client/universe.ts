@@ -25,6 +25,7 @@ import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, ShardPathExtended } from "../core/shard";
 import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
+import { Stores } from "../vue/core/store";
 import UniverseComponent from "../vue/pages/the-universe.vue";
 import { ClientBaseClass, ClientBaseConstructorParams, ClientBaseFactory } from "./base";
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
@@ -167,6 +168,11 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	public modesIndex: Map<Uuid, Array<Uuid>> = new Map();
 
 	/**
+	 * Stores for pinia.
+	 */
+	public readonly piniaStores: Stores;
+
+	/**
 	 * Client shards.
 	 *
 	 * Should be treated as "readonly". Use "addShard" and "removeShard" methods instead.
@@ -237,8 +243,14 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 
 		const {
 			vue,
-			store
+			store,
+			piniaStores
 		}: {
+			/**
+			 * Stores for pinia.
+			 */
+			piniaStores: Stores;
+
 			/**
 			 * App.
 			 */
@@ -343,6 +355,7 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 		});
 		this.vue = vue;
 		this.store = store;
+		this.piniaStores = piniaStores;
 
 		// Mount vue
 		let vueElement: HTMLElement = document.createElement("div");

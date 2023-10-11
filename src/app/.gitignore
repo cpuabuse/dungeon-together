@@ -1,3 +1,3 @@
-!vue.d.ts
-!glsl.d.ts
-!highlightjs-vue.d.ts
+!/vue.d.ts
+!/vue.sfc.d.ts
+!/glsl.d.ts

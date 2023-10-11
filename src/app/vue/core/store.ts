@@ -101,3 +101,49 @@ export function useRecords() {
 
 	return { getBooleanRecord, records, toggleBooleanRecord };
 }
+
+/**
+ * Names for actions in `useUpdateActionsStore`.
+ */
+// Infer const type
+// eslint-disable-next-line @typescript-eslint/typedef
+export const updateActionNames = [
+	// Dispatched when story notifiaction array is updated.
+	"updateStoryNotification"
+] as const;
+
+/**
+ * Union of action names in `useUpdateActionsStore`.
+ */
+export type UpdateActionNames = (typeof updateActionNames)[number];
+
+/**
+ * Provides object of stores to be generated/injected per app.
+ *
+ * @returns Object of stores
+ */
+// Infer composable types
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function composableStoreFactory() {
+	return {
+		useUpdateActionsStore: defineStore("updateActions", {
+			actions: updateActionNames.reduce((result, actionName) => {
+				return {
+					...result,
+
+					/**
+					 * Dispatched action.
+					 */
+					[actionName](): void {
+						// Do nothing
+					}
+				};
+			}, {} as Record<UpdateActionNames, () => void>)
+		})
+	};
+}
+
+/**
+ * Type of stores object for injection.
+ */
+export type Stores = ReturnType<typeof composableStoreFactory>;

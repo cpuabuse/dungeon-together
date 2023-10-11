@@ -55,7 +55,7 @@ contrastFilter.contrast(1.0, false);
 /**
  * Story notification type.
  */
-type StoryNotification = {
+export type StoryNotification = {
 	/**
 	 * Notification ID.
 	 */
@@ -68,7 +68,7 @@ type StoryNotification = {
 	/**
 	 * Notification parameters.
 	 */
-	parameters: Array<string>;
+	parameters?: Array<string | number>;
 };
 
 /**
@@ -345,6 +345,8 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 	let results: Array<Promise<void>> = new Array<Promise<void>>();
 
 	while (counter++ < vSocketMaxDequeue) {
+		let errorResult: Error | null = null;
+
 		// Get message
 		const message: ClientMessage = this.socket.readQueue();
 
@@ -370,15 +372,13 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 
 			// Story notification update
 			case MessageTypeWord.StoryNotification: {
-				this.getPlayerEntry(message.body)?.player.storyNotifications.push(message.body);
-				this.universe.store.dispatch("updateStoryNotifications").catch(error => {
-					this.universe.log({
-						error: new Error(`"Could not dispatch "updateStoryNotifications" to universe store.`, {
-							cause: error
-						}),
-						level: LogLevel.Critical
-					});
-				});
+				let player: ClientPlayer | undefined = this.getPlayerEntry(message.body)?.player;
+				if (player) {
+					player.storyNotifications.push(message.body);
+					this.universe.piniaStores.useUpdateActionsStore().updateStoryNotification();
+				} else {
+					errorResult = new Error(`"Player(playerUuid="${message.body.playerUuid}") not found.`);
+				}
 				break;
 			}
 
@@ -888,12 +888,20 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 			}
 
 			// Continue loop on default
-			default:
-				this.universe.log({
-					level: LogLevel.Warning,
-					// Casting, since if the switch is exhaustive, then type is `never`
-					message: `Unknown message type(type="${(message as ClientMessage).type}").`
-				});
+			default: {
+				// @ts-expect-error Union should exhaust
+				// DIsabling ESLint, since errors expected
+				// eslint-disable-next-line
+				let type: string = message.type;
+				errorResult = new Error(`Unknown message type(type="${type}").`);
+			}
+		}
+
+		if (errorResult) {
+			this.universe.log({
+				error: new Error(`Queue callback(message.type="${message.type}") failed.`, { cause: errorResult }),
+				level: LogLevel.Warning
+			});
 		}
 	}
 

@@ -12,6 +12,7 @@
 import { Pinia, createPinia } from "pinia";
 import { App, Component, createApp } from "vue";
 import { Store, StoreOptions, createStore } from "vuex";
+import { Stores, composableStoreFactory } from "../../vue/core/store";
 import { useHljsPlugin } from "./vue.plugin.hljs";
 
 // Static init
@@ -48,6 +49,11 @@ export function createVueApp<State extends object = object>({
 	 * Store.
 	 */
 	store: Store<State>;
+
+	/**
+	 * Stores for pinia.
+	 */
+	piniaStores: Stores;
 } {
 	let app: App = createApp(component);
 	useVuetifyPlugin({ app });
@@ -59,8 +65,10 @@ export function createVueApp<State extends object = object>({
 		state
 	});
 	const pinia: Pinia = createPinia();
+	const piniaStores: Stores = composableStoreFactory();
 	app.use(store);
 	app.use(pinia);
+	app.provide("stores", piniaStores);
 
-	return { store, vue: app };
+	return { piniaStores, store, vue: app };
 }

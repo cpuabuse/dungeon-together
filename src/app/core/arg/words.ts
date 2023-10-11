@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,6 +7,7 @@
  * @file Words and constraints for universe objects
  */
 
+import { toCapitalized } from "../../common/text";
 import { CoreArgIds } from ".";
 
 /**
@@ -63,23 +64,6 @@ const argPluralWords: CoreArgWordsDefinition<typeof argPluralWordsNonExhaustive>
 // eslint-disable-next-line @typescript-eslint/typedef
 export const coreArgObjectWords = Object.values(CoreArgIds).reduce(
 	(result, universeObjectId) => {
-		/**
-		 * Makes string capitalized.
-		 *
-		 * @param param - Destructured parameter
-		 * @returns Capitalized string
-		 */
-		function toCapitalized<T extends string>({
-			text
-		}: {
-			/**
-			 * Text to capitalize.
-			 */
-			text: string;
-		}): Capitalize<T> {
-			return `${[...text][0].toUpperCase()}${text.slice(1)}` as Capitalize<T>;
-		}
-
 		return {
 			...result,
 			[universeObjectId]: {
@@ -95,22 +79,22 @@ export const coreArgObjectWords = Object.values(CoreArgIds).reduce(
 			/**
 			 * Lowercase singular form of the word.
 			 */
-			singularLowercaseWord: typeof argSingularWords[K];
+			singularLowercaseWord: (typeof argSingularWords)[K];
 
 			/**
 			 * Capitalized singular form of the word.
 			 */
-			singularCapitalizedWord: Capitalize<typeof argSingularWords[K]>;
+			singularCapitalizedWord: Capitalize<(typeof argSingularWords)[K]>;
 
 			/**
 			 * Lowercase plural form of the word.
 			 */
-			pluralLowercaseWord: typeof argPluralWords[K];
+			pluralLowercaseWord: (typeof argPluralWords)[K];
 
 			/**
 			 * Capitalized plural form of the word.
 			 */
-			pluralUppercaseWord: Capitalize<typeof argPluralWords[K]>;
+			pluralUppercaseWord: Capitalize<(typeof argPluralWords)[K]>;
 		};
 	}
 );

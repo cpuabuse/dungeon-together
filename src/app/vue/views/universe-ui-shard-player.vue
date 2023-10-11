@@ -5,18 +5,76 @@
 		:notification-ids="player.notificationIds"
 		@shift-player-notifications="shiftPlayerNotifications"
 	/>
+	<!-- Story notification -->
+	<OverlayWindow v-model="isStoryNotificationMenuDisplayed" icon="fa-list-check" :name="storyNotificationMenuName">
+		<template #body>
+			<!-- Data type information lost, thus cast -->
+			<OverlayList :items="(storyNotificationMenuItems as OverlayListItems)"> </OverlayList>
+		</template>
+	</OverlayWindow>
 </template>
 <script lang="ts">
-import { PropType, defineComponent } from "vue";
-import { ClientPlayer } from "../../client/connection";
+import { PropType, Ref, defineComponent, ref } from "vue";
+import { ClientPlayer, StoryNotification } from "../../client/connection";
 import { ThisVueStore, UniverseState } from "../../client/gui";
 import { ClientShard } from "../../client/shard";
-import { StatusNotification } from "../components";
+import { OverlayList, StatusNotification } from "../components";
+import OverlayWindow from "../components/overlay-window.vue";
+import { OverlayListItemEntryType, OverlayListItems } from "../core/overlay";
 import { statusNotificationEmits, useStatusNotification } from "../core/status-notification";
+import { useRecords } from "../core/store";
 import { UniverseUiPlayerModel } from "../core/universe-ui";
 
+/**
+ * Type for story notification display.
+ */
+type StoryNotificationEntry = Pick<StoryNotification, "moduleId" | "notificationId">;
+
 export default defineComponent({
-	components: { StatusNotification },
+	components: { OverlayList, OverlayWindow, StatusNotification },
+
+	computed: {
+		/**
+		 * Display story notification menu or not.
+		 */
+		isStoryNotificationMenuDisplayed: {
+			/**
+			 * Gets story notification menu display record.
+			 *
+			 * @returns Boolean value
+			 */
+			get(): boolean {
+				return this.getBooleanRecord({ id: this.storyNotificationMenuDisplaySymbol });
+			},
+
+			/**
+			 * Sets story notification menu display record.
+			 *
+			 * @param value - Boolean value to set
+			 */
+			set(value: boolean) {
+				this.records[this.storyNotificationMenuDisplaySymbol] = value;
+			}
+		},
+
+		/**
+		 * Story notification menu items.
+		 *
+		 * @returns Carcass to display for story notification menu
+		 */
+		storyNotificationMenuItems(): OverlayListItems {
+			return [{ tabs: [{ items: [] }], type: OverlayListItemEntryType.Tab }];
+		},
+
+		/**
+		 * Name of the story notification menu.
+		 *
+		 * @returns Menu name
+		 */
+		storyNotificationMenuName(): string {
+			return "Story notification menu name not translated";
+		}
+	},
 
 	/**
 	 * Created callback.
@@ -27,7 +85,6 @@ export default defineComponent({
 	created() {
 		this.unsubscribeUpdateModel = (this as unknown as ThisVueStore).$store.subscribeAction(action => {
 			if (action.type === "updatePlayerDictionary") {
-				// Note: If model is epanded, spread this model
 				this.model = { dictionary: this.player.dictionary };
 				this.emitModel();
 			}
@@ -43,6 +100,7 @@ export default defineComponent({
 		const { universe }: UniverseState = (this as unknown as ThisVueStore).$store.state;
 		return {
 			model: this.modelValue,
+			storyNotificationMenuDisplaySymbol: Symbol("story-notification-menu-display"),
 			universe,
 			unsubscribeUpdateModel: null as (() => void) | null
 		};
@@ -86,7 +144,28 @@ export default defineComponent({
 	// Force vue inference
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, ctx) {
-		return useStatusNotification(ctx);
+		// Infer composable
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const { onUpdateStoryNotification, shiftPlayerNotifications } = useStatusNotification(ctx);
+
+		const storyNotificationEntries: Ref<Array<StoryNotificationEntry>> = ref(new Array<StoryNotificationEntry>());
+
+		onUpdateStoryNotification({
+			/**
+			 * Callback, when story notifications are updated.
+			 */
+			callback() {
+				let { storyNotifications }: ClientPlayer = props.player;
+				while (storyNotifications.length > 0) {
+					// Array is not empty
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					let storyNofication: StoryNotification = storyNotifications.shift()!;
+
+					storyNotificationEntries.value.push({ ...storyNofication });
+				}
+			}
+		});
+		return { ...useRecords(), shiftPlayerNotifications, storyNotificationEntries };
 	},
 
 	/**

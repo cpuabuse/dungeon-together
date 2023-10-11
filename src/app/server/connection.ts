@@ -555,6 +555,10 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 							{
 								body: { notificationId: StatusNotificationWord.Sync, playerUuid: player.playerUuid },
 								type: MessageTypeWord.StatusNotification
+							},
+							{
+								body: { notificationId: "sync", playerUuid: player.playerUuid },
+								type: MessageTypeWord.StoryNotification
 							}
 						] as const;
 					}).flat();
