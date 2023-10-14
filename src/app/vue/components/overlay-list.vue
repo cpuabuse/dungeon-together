@@ -1,6 +1,9 @@
 <!-- 
 	Content that goes into overlays, and it's sub-components.
 	Note - closes grandparent if parent non-menu is clicked(https://github.com/vuetifyjs/vuetify/issues/17004).
+
+	By design, `OverlayList` does not include shared props like name, description, etc., and is treated hierarchically differently than list items. The principle reason for this is when `OverlayList` is put directly into overlay container, extra prop values are meaningless.
+	Just as a note, if current approach was not chosen, this element would also use assembler; the body element would be used by assembler instead; the assembler would need an extra prop to manage the body(right now self-contained elements explicitly self-wrap with body); and `OverlayListItemList` would be removed and replaced with this.
 -->
 <template>
 	<OverlayListBody :content-type="contentType">

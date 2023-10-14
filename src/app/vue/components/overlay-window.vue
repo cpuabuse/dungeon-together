@@ -39,13 +39,13 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { VBtn, VCard, VIcon, VLocaleProvider, VSpacer, VToolbar, VToolbarTitle } from "vuetify/components";
+import { VBtn, VCard, VLocaleProvider, VSpacer, VToolbar, VToolbarTitle } from "vuetify/components";
 import { useDraggable } from "../core/draggable";
 import { overlayListItemNarrowProps } from "../core/overlay";
 import { BaseIcon } from ".";
 
 export default defineComponent({
-	components: { BaseIcon, VBtn, VCard, VIcon, VLocaleProvider, VSpacer, VToolbar, VToolbarTitle },
+	components: { BaseIcon, VBtn, VCard, VLocaleProvider, VSpacer, VToolbar, VToolbarTitle },
 
 	emits: ["update:modelValue"],
 
@@ -99,7 +99,7 @@ export default defineComponent({
 }
 
 .overlay-window-block {
-	/* Force LTR so that the content transform doesn't visuall change */
+	/* Force LTR so that the content transform doesn't visual change */
 	direction: ltr;
 }
 </style>

@@ -43,6 +43,9 @@ export type CompactToolbarMenuItem = {
 
 	/**
 	 * Symbol to index records state to change on click.
+	 *
+	 * @remarks
+	 * Undefined would mean a disabled button.
 	 */
 	clickRecordIndex?: string | symbol;
 } & (

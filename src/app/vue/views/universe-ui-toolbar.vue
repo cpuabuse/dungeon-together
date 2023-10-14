@@ -47,7 +47,7 @@ import CompactToolbar from "../compact-toolbar.vue";
 import { OverlayList, OverlayWindow } from "../components";
 import StoryNotification from "../components/story-notification.vue";
 import UuidSearch from "../components/uuid-search.vue";
-import { CompactToolbarMenuBaseProps } from "../core/compact-toolbar";
+import { CompactToolbarMenuBaseProps, CompactToolbarMenuItem } from "../core/compact-toolbar";
 import { useLocale } from "../core/locale";
 import { OverlayListItemEntry, OverlayListItemEntryType, OverlayListItems, OverlayListTabs } from "../core/overlay";
 import { useRecords } from "../core/store";
@@ -309,7 +309,7 @@ export default defineComponent({
 
 			hpColor: new Color("#1F8C2F"),
 
-			optionsModel: { menuItems: [], windowItems: [] },
+			optionsModel: { menuItems: new Array<CompactToolbarMenuItem>(), windowItems: new Array<OverlayListItemEntry>() },
 
 			playerEntries: new Array() as PlayerEntries,
 
