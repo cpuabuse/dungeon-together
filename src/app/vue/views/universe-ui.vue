@@ -17,6 +17,7 @@
 import { defineComponent } from "vue";
 import { ClientUniverseStateRcMenuData, ThisVueStore, UniverseState, UniverseStore } from "../../client/gui";
 import { Uuid } from "../../common/uuid";
+import { useOverlayBusParent } from "../core/overlay";
 import { UniverseUiShardEntries, UniverseUiShardModel } from "../core/universe-ui";
 import UniverseUiClick from "./universe-ui-click.vue";
 import UniverseUiShard from "./universe-ui-shard.vue";
@@ -107,6 +108,19 @@ export default defineComponent({
 					];
 				});
 		}
+	},
+
+	/**
+	 * Setup.
+	 *
+	 * @param props - Props
+	 * @param param - Context
+	 * @returns Composed properties
+	 */
+	// Force vue inference
+	// eslint-disable-next-line @typescript-eslint/typedef
+	setup() {
+		return useOverlayBusParent();
 	},
 
 	/**

@@ -8,6 +8,7 @@
 		:shard="shard"
 		:player="player"
 		@shift-player-notifications="() => onShiftPlayerNotifications(player)"
+		@menu-items="onMenuItems"
 	/>
 </template>
 
@@ -16,6 +17,7 @@ import { PropType, defineComponent } from "vue";
 import { ClientPlayer } from "../../client/connection";
 import { ThisVueStore, UniverseState } from "../../client/gui";
 import { ClientShard } from "../../client/shard";
+import { overlayBusEmits, useOverlayBusIntermediate } from "../core/overlay";
 import { PlayerEntries, UniverseUiShardModel } from "../core/universe-ui";
 import UniverseUiShardPlayer from "./universe-ui-shard-player.vue";
 
@@ -49,7 +51,7 @@ export default defineComponent({
 		};
 	},
 
-	emits: ["update:modelValue"],
+	emits: ["update:modelValue", ...overlayBusEmits],
 
 	methods: {
 		/**
@@ -97,6 +99,19 @@ export default defineComponent({
 			required: true,
 			type: Object as PropType<ClientShard>
 		}
+	},
+
+	/**
+	 * Setup.
+	 *
+	 * @param props - Props
+	 * @param param - Context
+	 * @returns Composed properties
+	 */
+	// Force vue inference
+	// eslint-disable-next-line @typescript-eslint/typedef
+	setup(props, { emit }) {
+		return useOverlayBusIntermediate({ emit });
 	},
 
 	/**

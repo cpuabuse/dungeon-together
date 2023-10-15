@@ -1,10 +1,14 @@
-<!-- Universe UI per shard per player -->
+<!--
+	Universe UI per shard per player.
+	Effectively this is per player, as there is only one shard per player.
+-->
 <template>
 	<StatusNotification
 		class="universe-ui-shard-player-status-notification"
 		:notification-ids="player.notificationIds"
 		@shift-player-notifications="shiftPlayerNotifications"
 	/>
+
 	<!-- Story notification -->
 	<OverlayWindow v-model="isStoryNotificationMenuDisplayed" icon="fa-list-check" :name="storyNotificationMenuName">
 		<template #body>
@@ -12,15 +16,27 @@
 			<OverlayList :items="(storyNotificationMenuItems as OverlayListItems)"> </OverlayList>
 		</template>
 	</OverlayWindow>
+
+	<!-- Windows for the player -->
+	<OverlayWindow
+		v-for="({ listItems }, displayItemKey) in displayItems"
+		:key="displayItemKey"
+		v-model="displayItems[displayItemKey]!.isDisplayed"
+	>
+		<template #body>
+			<OverlayList :items="listItems" />
+		</template>
+	</OverlayWindow>
 </template>
 <script lang="ts">
-import { PropType, Ref, defineComponent, ref } from "vue";
+import { PropType, Ref, computed, defineComponent, ref } from "vue";
 import { ClientPlayer, StoryNotification } from "../../client/connection";
 import { ThisVueStore, UniverseState } from "../../client/gui";
 import { ClientShard } from "../../client/shard";
 import { OverlayList, StatusNotification } from "../components";
 import OverlayWindow from "../components/overlay-window.vue";
-import { OverlayListItemEntryType, OverlayListItems } from "../core/overlay";
+import { CompactToolbarMenuItem } from "../core/compact-toolbar";
+import { OverlayListItemEntryType, OverlayListItems, overlayBusEmits, useOverlayBusChild } from "../core/overlay";
 import { statusNotificationEmits, useStatusNotification } from "../core/status-notification";
 import { useRecords } from "../core/store";
 import { UniverseUiPlayerModel } from "../core/universe-ui";
@@ -106,7 +122,7 @@ export default defineComponent({
 		};
 	},
 
-	emits: ["update:modelValue", ...statusNotificationEmits],
+	emits: ["update:modelValue", ...statusNotificationEmits, ...overlayBusEmits],
 
 	methods: {
 		/**
@@ -143,10 +159,30 @@ export default defineComponent({
 	 */
 	// Force vue inference
 	// eslint-disable-next-line @typescript-eslint/typedef
-	setup(props, ctx) {
+	setup(props, { emit }) {
 		// Infer composable
 		// eslint-disable-next-line @typescript-eslint/typedef
-		const { onUpdateStoryNotification, shiftPlayerNotifications } = useStatusNotification(ctx);
+		const usedRecords = useRecords();
+
+		// Infer composable
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const { displayItems } = useOverlayBusChild({
+			emit,
+			menuItemsRegistryIndex: Symbol(`menu-items-registry-index-${props.player.playerUuid}`),
+			overlayItems: [
+				{
+					listItems: computed(() => {
+						return [] satisfies Array<CompactToolbarMenuItem>;
+					}),
+					name: "Story"
+				}
+			],
+			usedRecords
+		});
+
+		// Infer composable
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const { onUpdateStoryNotification, shiftPlayerNotifications } = useStatusNotification({ emit });
 
 		const storyNotificationEntries: Ref<Array<StoryNotificationEntry>> = ref(new Array<StoryNotificationEntry>());
 
@@ -165,7 +201,7 @@ export default defineComponent({
 				}
 			}
 		});
-		return { ...useRecords(), shiftPlayerNotifications, storyNotificationEntries };
+		return { ...usedRecords, displayItems, shiftPlayerNotifications, storyNotificationEntries };
 	},
 
 	/**

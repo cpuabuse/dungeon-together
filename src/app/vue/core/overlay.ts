@@ -531,11 +531,12 @@ type OverlayBusEmitHelper<T extends SetupContextEmit<OverlayBusEmitsUnion>> = T;
 
 /**
  * Helper for record of menu items registry index.
+ * Identifier for the child component, from the perspective of a parent.
  */
 type MenuItemsRegistryIndexRecord = Record<"menuItemsRegistryIndex", symbol | string>;
 
 /**
- * Paylod for event.
+ * Payload for event.
  */
 type OverlayBusEmitMenuItemsPayload = MenuItemsRegistryIndexRecord & Record<"menuItems", Array<CompactToolbarMenuItem>>;
 
@@ -570,7 +571,7 @@ export function useOverlayBusChild({
 		 * @remarks
 		 * Overlay items is a reference itself, for if menu items are dynamically added or removed by component.
 		 * All keys of `CompactToolbarMenuItem` are references, for translation, etc.
-		 * List items array is a refernce, to track data displayed, and translations down the line (composable caller is supposed to create a compound reference array from multiple `CompactToolbarMenuItem`).
+		 * List items array is a reference, to track data displayed, and translations down the line (composable caller is supposed to create a compound reference array from multiple `CompactToolbarMenuItem`).
 		 */
 		overlayItems: MaybeRef<
 			Array<
@@ -588,6 +589,7 @@ export function useOverlayBusChild({
 		 */
 		emit: OverlayBusEmit;
 	}) {
+	// Whole array is a reference, as elements might be added
 	const displayItems: Ref<Array<Record<"isDisplayed", boolean> & Record<"listItems", Array<CompactToolbarMenuItem>>>> =
 		computed(() =>
 			// ESLint doesn't pick up types
@@ -619,7 +621,7 @@ export function useOverlayBusChild({
 			})
 		);
 
-	// A reference array, rather than array of references, as this operation and rare, and when it does happen, it would probably happen on all items; Moreover it removes need for dereferencing in parent
+	// A reference array, rather than array of references, as it's recomputation is rare, and when it does happen, it would probably happen on all items; Moreover it provides convenient target to watch
 	const menuItems: Ref<Array<CompactToolbarMenuItem>> = computed(() =>
 		// ESLint doesn't pick up types
 		// eslint-disable-next-line @typescript-eslint/typedef
@@ -664,12 +666,39 @@ export function useOverlayBusParent() {
 	/**
 	 * Callback for event.
 	 *
-	 * @param param - Desctructured parameter
+	 * @param param - Destructured parameter
 	 */
 	function onMenuItems({ menuItemsRegistryIndex, menuItems }: OverlayBusEmitMenuItemsPayload): void {
 		menuItemsRegistry.value.set(menuItemsRegistryIndex, menuItems);
 	}
 
 	return { menuItemsRegistry, onMenuItems };
+}
+
+/**
+ * Pass through the events from children to consumer.
+ *
+ * @param param - Destructured parameter
+ * @returns Composable
+ */
+// Infer for composable
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function useOverlayBusIntermediate({
+	emit
+}: {
+	/**
+	 * Emit function.
+	 */
+	emit: OverlayBusEmit;
+}) {
+	/**
+	 * Callback for event that re-emits to parent.
+	 *
+	 * @param payload - Payload to be emitted
+	 */
+	function onMenuItems(payload: OverlayBusEmitMenuItemsPayload): void {
+		emit("menuItems", payload);
+	}
+	return { onMenuItems };
 }
 // #endregion Composables
