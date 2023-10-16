@@ -1,5 +1,8 @@
 <!-- Universe UI -->
 <template>
+	<!-- Vuetify unconditionally displays bar at the top of the screen -->
+	<UniverseUiInfoBar :shard-entries="(shardEntries as UniverseUiShardEntries)" />
+
 	<UniverseUiClick :rc-menu-data="rcMenuData" />
 
 	<!-- Undefined assertion since index used in iteration -->
@@ -20,11 +23,12 @@ import { Uuid } from "../../common/uuid";
 import { useOverlayBusParent } from "../core/overlay";
 import { UniverseUiShardEntries, UniverseUiShardModel } from "../core/universe-ui";
 import UniverseUiClick from "./universe-ui-click.vue";
+import UniverseUiInfoBar from "./universe-ui-info-bar.vue";
 import UniverseUiShard from "./universe-ui-shard.vue";
 import UniverseUiToolbar from "./universe-ui-toolbar.vue";
 
 export default defineComponent({
-	components: { UniverseUiClick, UniverseUiShard, UniverseUiToolbar },
+	components: { UniverseUiClick, UniverseUiInfoBar, UniverseUiShard, UniverseUiToolbar },
 
 	computed: {
 		/**
