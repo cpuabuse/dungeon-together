@@ -35,8 +35,8 @@ import { ThisVueStore, UniverseState } from "../../client/gui";
 import { ClientShard } from "../../client/shard";
 import { OverlayList, StatusNotification } from "../components";
 import OverlayWindow from "../components/overlay-window.vue";
-import { CompactToolbarMenuItem } from "../core/compact-toolbar";
-import { OverlayListItemEntryType, OverlayListItems, overlayBusEmits, useOverlayBusChild } from "../core/overlay";
+import { useLocale } from "../core/locale";
+import { OverlayListItemEntryType, OverlayListItems, overlayBusEmits, useOverlayBusSource } from "../core/overlay";
 import { statusNotificationEmits, useStatusNotification } from "../core/status-notification";
 import { useRecords } from "../core/store";
 import { UniverseUiPlayerModel } from "../core/universe-ui";
@@ -166,15 +166,21 @@ export default defineComponent({
 
 		// Infer composable
 		// eslint-disable-next-line @typescript-eslint/typedef
-		const { displayItems } = useOverlayBusChild({
+		const { t } = useLocale();
+
+		// Infer composable
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const { displayItems } = useOverlayBusSource({
 			emit,
-			menuItemsRegistryIndex: Symbol(`menu-items-registry-index-${props.player.playerUuid}`),
+			menuItemsRegistryIndex: Symbol(`player-${props.player.playerUuid}`),
 			overlayItems: [
 				{
 					listItems: computed(() => {
-						return [] satisfies Array<CompactToolbarMenuItem>;
+						return [{ data: props.player.playerName, name: "Name" }] satisfies OverlayListItems;
 					}),
-					name: "Story"
+					menuItem: computed(() => {
+						return { clickRecordIndex: Symbol(`player-${props.player.playerUuid}`), name: t("menuTitle.player") };
+					})
 				}
 			],
 			usedRecords

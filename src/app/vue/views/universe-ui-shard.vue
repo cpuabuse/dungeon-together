@@ -8,7 +8,7 @@
 		:shard="shard"
 		:player="player"
 		@shift-player-notifications="() => onShiftPlayerNotifications(player)"
-		@menu-items="onMenuItems"
+		@update-menu-items="onUpdateMenuItems"
 	/>
 </template>
 
@@ -17,7 +17,8 @@ import { PropType, defineComponent } from "vue";
 import { ClientPlayer } from "../../client/connection";
 import { ThisVueStore, UniverseState } from "../../client/gui";
 import { ClientShard } from "../../client/shard";
-import { overlayBusEmits, useOverlayBusIntermediate } from "../core/overlay";
+import { overlayBusToCompactToolbarMenuEmits, useOverlayBusToCompactToolbarMenuSource } from "../core/compact-toolbar";
+import { useOverlayBusConsumer } from "../core/overlay";
 import { PlayerEntries, UniverseUiShardModel } from "../core/universe-ui";
 import UniverseUiShardPlayer from "./universe-ui-shard-player.vue";
 
@@ -51,7 +52,7 @@ export default defineComponent({
 		};
 	},
 
-	emits: ["update:modelValue", ...overlayBusEmits],
+	emits: ["update:modelValue", ...overlayBusToCompactToolbarMenuEmits],
 
 	methods: {
 		/**
@@ -111,7 +112,20 @@ export default defineComponent({
 	// Force vue inference
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, { emit }) {
-		return useOverlayBusIntermediate({ emit });
+		// Infer composable return
+		// eslint-disable-next-line @typescript-eslint/typedef
+		let usedOverlayBusConsumer = useOverlayBusConsumer();
+
+		// Infer composable return
+		// eslint-disable-next-line @typescript-eslint/typedef
+		let usedOverlayBusToCompactToolbarMenuSource = useOverlayBusToCompactToolbarMenuSource({
+			emit,
+			isEmittingUpdateMenu: true,
+			name: "Shard",
+			usedOverlayBusConsumer
+		});
+
+		return { ...usedOverlayBusConsumer, ...usedOverlayBusToCompactToolbarMenuSource };
 	},
 
 	/**

@@ -9,8 +9,9 @@
  * @file
  */
 
-import { PropType } from "vue";
-import { ExtractProps } from "../common/utility-types";
+import { PropType, Ref, ShallowRef, computed, ref, shallowRef, unref, watch } from "vue";
+import { ExtractProps, SetupContextEmit } from "../common/utility-types";
+import { type useOverlayBusConsumer } from "./overlay";
 
 /**
  * Menu modes.
@@ -95,6 +96,14 @@ export type CompactToolbarMenu = {
 };
 
 /**
+ * Default menu.
+ */
+export const defaultCompactToolbarMenu: CompactToolbarMenu = {
+	items: [],
+	name: "Uninitialized"
+};
+
+/**
  * Helper type for using compact toolbar.
  */
 export type CompactToolbarData = {
@@ -176,4 +185,134 @@ export function compactToolbarDataToMenuBaseProps({ menus }: CompactToolbarData)
 			...rest
 		};
 	});
+}
+
+/**
+ * Emits for overlay bus.
+ */
+export const overlayBusToCompactToolbarMenuEmits: ["updateMenu"] = ["updateMenu"];
+
+/**
+ * Emits list for overlay bus.
+ */
+export type OverlayBusToCompactToolbarMenuEmitsUnion = (typeof overlayBusToCompactToolbarMenuEmits)[any];
+
+/**
+ * Validator for overlay bus emit.
+ */
+type OverlayBusToCompactToolbarMenuEmitHelper<T extends SetupContextEmit<OverlayBusToCompactToolbarMenuEmitsUnion>> = T;
+
+/**
+ * Payload for event.
+ */
+type OverlayBusToCompactToolbarMenuEmitUpdateMenuPayload = Record<"menu", CompactToolbarMenu>;
+
+/**
+ * Emit type for overlay bus.
+ */
+export type OverlayBusToCompactToolbarMenuEmit = OverlayBusToCompactToolbarMenuEmitHelper<{
+	(param: "updateMenu", payload: OverlayBusToCompactToolbarMenuEmitUpdateMenuPayload): void;
+}>;
+
+/**
+ * Converts registry to menu.
+ *
+ * @param param - Destructured parameter
+ * @returns Menu
+ */
+export function useOverlayBusToCompactToolbarMenuSource({
+	usedOverlayBusConsumer,
+	name,
+	isEmittingUpdateMenu,
+	emit
+}: {
+	/**
+	 * Registry.
+	 */
+	usedOverlayBusConsumer: ReturnType<typeof useOverlayBusConsumer>;
+
+	/**
+	 * Name.
+	 */
+	name: string;
+} & (
+	| {
+			/**
+			 * Emit.
+			 */
+			emit: OverlayBusToCompactToolbarMenuEmit;
+
+			/**
+			 * Emit update menu or not.
+			 */
+			isEmittingUpdateMenu: true;
+	  }
+	| {
+			/**
+			 * Emit.
+			 */
+			emit: Pick<OverlayBusToCompactToolbarMenuEmit, never>;
+
+			/**
+			 * Emit update menu or not.
+			 */
+			isEmittingUpdateMenu: false;
+	  }
+)): Record<"menu", Ref<CompactToolbarMenu>> {
+	// TODO: Add other menu props and unref
+	const menu: Ref<CompactToolbarMenu> = computed(() => {
+		return {
+			items: Array.from(unref(usedOverlayBusConsumer.menuItemsRegistry))
+				// ESLint doesn't infer
+				// eslint-disable-next-line @typescript-eslint/typedef
+				.map(([, item]) => {
+					return item;
+				})
+				.flat(),
+			name
+		};
+	});
+
+	if (isEmittingUpdateMenu) {
+		watch(menu, () => emit("updateMenu", { menu: menu.value }), {
+			immediate: true
+		});
+	}
+
+	return { menu };
+}
+
+/**
+ * Type for {@link useCompactToolbarMenuConsumer} composable, and to be used for more complex objects inside consumer instance.
+ */
+export type CompactToolbarMenuConsumerEntry = {
+	/**
+	 * Menu.
+	 */
+	menu: ShallowRef<CompactToolbarMenu>;
+
+	/**
+	 * Update menu callback.
+	 */
+	onUpdateMenu: (payload: OverlayBusToCompactToolbarMenuEmitUpdateMenuPayload) => void;
+};
+
+/**
+ * Listens to menu emitted.
+ *
+ * @returns Composable
+ */
+export function useCompactToolbarMenuConsumer(): CompactToolbarMenuConsumerEntry {
+	let menu: ShallowRef<CompactToolbarMenu> = shallowRef(defaultCompactToolbarMenu);
+
+	/**
+	 * Callback for menu update.
+	 *
+	 * @param param - Destructured parameter
+	 */
+	function onUpdateMenu({ menu: newMenu }: OverlayBusToCompactToolbarMenuEmitUpdateMenuPayload): void {
+		menu.value = newMenu;
+	}
+
+	return { menu, onUpdateMenu };
 }

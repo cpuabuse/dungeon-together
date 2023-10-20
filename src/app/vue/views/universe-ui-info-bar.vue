@@ -20,7 +20,7 @@ export default defineComponent({
 		 */
 		gridLevels(): Array<number> {
 			return (
-				this.shardEntries
+				Array.from(this.shardEntries)
 					// ESlint does not infer
 					// eslint-disable-next-line @typescript-eslint/typedef
 					.map(([, { shard }]) => {
@@ -43,7 +43,7 @@ export default defineComponent({
 			 */
 			default: () => [],
 			required: false,
-			type: Array as PropType<UniverseUiShardEntries>
+			type: Map as PropType<UniverseUiShardEntries>
 		}
 	}
 });

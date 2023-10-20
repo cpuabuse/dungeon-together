@@ -13,6 +13,7 @@ import { ClientPlayer } from "../../client/connection";
 import { ClientShard } from "../../client/shard";
 import { Uuid } from "../../common/uuid";
 import { CoreDictionary } from "../../core/connection";
+import { CompactToolbarMenuConsumerEntry } from "./compact-toolbar";
 
 /**
  * Model type for universe UI player component.
@@ -73,6 +74,11 @@ export type UniverseUiShardEntry = {
 	 * Single model for perhaps multiple values is used, as it is already an iteration, and individual variables would only add complexity.
 	 */
 	model: UniverseUiShardModel;
+
+	/**
+	 * Menu.
+	 */
+	menuEntry: CompactToolbarMenuConsumerEntry;
 };
 
 /**
@@ -81,4 +87,4 @@ export type UniverseUiShardEntry = {
  * @remarks
  * To minimize cycles, this object should be passed between linked components directly, and each component that consumes it, would remap this.
  */
-export type UniverseUiShardEntries = Array<[Uuid, UniverseUiShardEntry]>;
+export type UniverseUiShardEntries = Map<Uuid, UniverseUiShardEntry>;

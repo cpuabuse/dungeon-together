@@ -47,7 +47,7 @@ import CompactToolbar from "../compact-toolbar.vue";
 import { OverlayList, OverlayWindow } from "../components";
 import StoryNotification from "../components/story-notification.vue";
 import UuidSearch from "../components/uuid-search.vue";
-import { CompactToolbarMenuBaseProps, CompactToolbarMenuItem } from "../core/compact-toolbar";
+import { CompactToolbarMenu, CompactToolbarMenuBaseProps, CompactToolbarMenuItem } from "../core/compact-toolbar";
 import { useLocale } from "../core/locale";
 import { OverlayListItemEntry, OverlayListItemEntryType, OverlayListItems, OverlayListTabs } from "../core/overlay";
 import { useRecords } from "../core/store";
@@ -153,7 +153,7 @@ export default defineComponent({
 		debugWindowItems(): Array<OverlayListItemEntry> {
 			return [
 				{
-					data: this.shardEntries.length.toString(),
+					data: Array.from(this.shardEntries).length.toString(),
 					name: "Shards",
 					tabs: this.debugItemsShardTabs,
 					type: OverlayListItemEntryType.Tab
@@ -199,6 +199,7 @@ export default defineComponent({
 		 */
 		mainToolbarMenus(): Array<CompactToolbarMenuBaseProps> {
 			return [
+				...this.shardMenusD,
 				...this.shardMenus,
 				{
 					icon: "fa-gear",
@@ -236,10 +237,10 @@ export default defineComponent({
 		 *
 		 * @returns Array of menus
 		 */
-		shardMenus(): Array<CompactToolbarMenuBaseProps> {
+		shardMenusD(): Array<CompactToolbarMenuBaseProps> {
 			// False negative
 			/* eslint-disable @typescript-eslint/typedef */
-			return this.shardEntries.map(
+			return Array.from(this.shardEntries).map(
 				([
 					,
 					{
@@ -324,7 +325,11 @@ export default defineComponent({
 	props: {
 		shardEntries: {
 			required: true,
-			type: Array as PropType<UniverseUiShardEntries>
+			type: Map as PropType<UniverseUiShardEntries>
+		},
+		shardMenus: {
+			required: true,
+			type: Array as PropType<Array<CompactToolbarMenu>>
 		}
 	},
 
@@ -349,7 +354,7 @@ export default defineComponent({
 			 * @param shardEntries - New value
 			 */
 			handler(shardEntries: UniverseUiShardEntries): void {
-				(this.playerEntries as PlayerEntries) = shardEntries
+				(this.playerEntries as PlayerEntries) = Array.from(shardEntries)
 					.map(
 						// False negative
 						/* eslint-disable @typescript-eslint/typedef */

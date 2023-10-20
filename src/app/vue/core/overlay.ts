@@ -9,7 +9,18 @@
  * @file
  */
 
-import { ComputedRef, ExtractPropTypes, PropType, Ref, computed, ref, unref, watch } from "vue";
+import {
+	ComputedRef,
+	ExtractPropTypes,
+	PropType,
+	Ref,
+	ShallowRef,
+	computed,
+	onUnmounted,
+	ref,
+	unref,
+	watch
+} from "vue";
 import { ClientPlayer } from "../../client/connection";
 import { Uuid } from "../../common/uuid";
 import { ActionWords } from "../../server/action";
@@ -517,7 +528,7 @@ export function useOverlayListItemShared({
 /**
  * Emits for overlay bus.
  */
-export const overlayBusEmits: ["menuItems"] = ["menuItems"];
+export const overlayBusEmits: ["updateMenuItems"] = ["updateMenuItems"];
 
 /**
  * Emits list for overlay bus.
@@ -538,14 +549,20 @@ type MenuItemsRegistryIndexRecord = Record<"menuItemsRegistryIndex", symbol | st
 /**
  * Payload for event.
  */
-type OverlayBusEmitMenuItemsPayload = MenuItemsRegistryIndexRecord & Record<"menuItems", Array<CompactToolbarMenuItem>>;
+type OverlayBusEmitMenuItemsPayload = MenuItemsRegistryIndexRecord &
+	Record<"menuItems", null | Array<CompactToolbarMenuItem>>;
 
 /**
  * Emit type for overlay bus.
  */
 export type OverlayBusEmit = OverlayBusEmitHelper<{
-	(param: "menuItems", payload: OverlayBusEmitMenuItemsPayload): void;
+	(param: "updateMenuItems", payload: OverlayBusEmitMenuItemsPayload): void;
 }>;
+
+/**
+ * Type for aggregation of menu items.
+ */
+export type MenuItemsRegistry = Ref<Map<string | symbol, Array<CompactToolbarMenuItem>>>;
 
 /**
  * For parent/child communication, when using overlay family.
@@ -554,15 +571,16 @@ export type OverlayBusEmit = OverlayBusEmitHelper<{
  * Bus is added to the name, to signify the purpose, and fact this is not required for usage of overlays.
  *
  * @param param - Destructured parameter
- * @returns Composable
+ * @returns Display items for constructing overlays
  */
 // Infer composable type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function useOverlayBusChild({
+export function useOverlayBusSource({
 	overlayItems,
 	usedRecords,
 	emit,
-	menuItemsRegistryIndex
+	menuItemsRegistryIndex,
+	usedOverlayBusConsumer
 }: MenuItemsRegistryIndexRecord &
 	Record<"usedRecords", ReturnType<typeof useRecords>> & {
 		/**
@@ -570,31 +588,54 @@ export function useOverlayBusChild({
 		 *
 		 * @remarks
 		 * Overlay items is a reference itself, for if menu items are dynamically added or removed by component.
-		 * All keys of `CompactToolbarMenuItem` are references, for translation, etc.
-		 * List items array is a reference, to track data displayed, and translations down the line (composable caller is supposed to create a compound reference array from multiple `CompactToolbarMenuItem`).
+		 * Each menu item is a reference, as it covers individual changes per menu.
+		 * List items array is a reference, to track data displayed, and translations down the line. Individual items are not references, as that is not a frequent operation.
 		 */
 		overlayItems: MaybeRef<
-			Array<
-				{ [Key in keyof CompactToolbarMenuItem]: MaybeRef<CompactToolbarMenuItem[Key]> } & {
-					/**
-					 * List items within menu.
-					 */
-					listItems: MaybeRef<Array<CompactToolbarMenuItem>>;
-				}
-			>
-		>;
+			Array<{
+				/**
+				 * Menu item.
+				 */
+				menuItem: MaybeRef<CompactToolbarMenuItem>;
 
-		/**
-		 * Context.
-		 */
-		emit: OverlayBusEmit;
-	}) {
+				/**
+				 * List items within menu.
+				 */
+				listItems: MaybeRef<OverlayListItems>;
+			}>
+		>;
+	} & (
+		| {
+				/**
+				 * Emit from component context.
+				 */
+				emit: Pick<OverlayBusEmit, never>;
+
+				/**
+				 * Emit or write into registry directly.
+				 */
+				usedOverlayBusConsumer: ReturnType<typeof useOverlayBusConsumer>;
+		  }
+		| {
+				/**
+				 * Emit from component context.
+				 */
+				emit: OverlayBusEmit;
+
+				/**
+				 * Emit or write into registry directly.
+				 */
+				usedOverlayBusConsumer?: undefined;
+		  }
+	)) {
 	// Whole array is a reference, as elements might be added
-	const displayItems: Ref<Array<Record<"isDisplayed", boolean> & Record<"listItems", Array<CompactToolbarMenuItem>>>> =
-		computed(() =>
+	const displayItems: Ref<Array<Record<"isDisplayed", boolean> & Record<"listItems", OverlayListItems>>> = computed(
+		() =>
 			// ESLint doesn't pick up types
 			// eslint-disable-next-line @typescript-eslint/typedef
-			unref(overlayItems).map(({ clickRecordIndex, listItems }) => {
+			unref(overlayItems).map(({ menuItem, listItems }) => {
+				const { clickRecordIndex }: CompactToolbarMenuItem = unref(menuItem);
+
 				return {
 					/**
 					 * Getter for `isDisplayed`.
@@ -619,30 +660,35 @@ export function useOverlayBusChild({
 					listItems: unref(listItems)
 				};
 			})
-		);
+	);
 
 	// A reference array, rather than array of references, as it's recomputation is rare, and when it does happen, it would probably happen on all items; Moreover it provides convenient target to watch
 	const menuItems: Ref<Array<CompactToolbarMenuItem>> = computed(() =>
 		// ESLint doesn't pick up types
 		// eslint-disable-next-line @typescript-eslint/typedef
-		unref(overlayItems).map(param => {
-			// Infer keys
-			// eslint-disable-next-line @typescript-eslint/typedef
-			const keys = ["name", "clickRecordIndex", "listItems", "icon", "mode", "nameSubtext"] as const;
-
-			// Awkward type check for exhaustiveness of keys; As need to transform source tuple to union first
-			return (keys as keyof CompactToolbarMenuItem extends (typeof keys)[any] ? typeof keys : unknown).reduce(
-				(result, key) => {
-					return { ...result, [key]: unref(param[key]) };
-				},
-				{} as CompactToolbarMenuItem
-			);
-		})
+		unref(overlayItems).map(({ menuItem }) => unref(menuItem))
 	);
 
 	// One way watch for changes in inner refs, and emit to parent
-	watch(menuItems, () => emit("menuItems", { menuItems: menuItems.value, menuItemsRegistryIndex }), {
-		immediate: true
+	watch(
+		menuItems,
+		usedOverlayBusConsumer
+			? (newMenuItems): void =>
+					usedOverlayBusConsumer.onUpdateMenuItems({ menuItems: newMenuItems, menuItemsRegistryIndex })
+			: (newMenuItems): void => emit("updateMenuItems", { menuItems: newMenuItems, menuItemsRegistryIndex }),
+		{
+			immediate: true
+		}
+	);
+
+	// Cleanup parent; Conditional event call code not reused, for performance
+	onUnmounted(() => {
+		// Condition is within unmounted, since peformance impact is minimal
+		if (usedOverlayBusConsumer) {
+			usedOverlayBusConsumer.onUpdateMenuItems({ menuItems: null, menuItemsRegistryIndex });
+		} else {
+			emit("updateMenuItems", { menuItems: null, menuItemsRegistryIndex });
+		}
 	});
 
 	return {
@@ -653,26 +699,28 @@ export function useOverlayBusChild({
 /**
  * For use from a parent component, receiving menu events.
  *
- * @returns Composable
+ * @returns Composable, `onMenuItems` callback, which needs to added to event of children, if any
  */
 // Infer composable type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function useOverlayBusParent() {
-	// Reactivity should trigger on `set()`
-	const menuItemsRegistry: Ref<Map<string | symbol, Array<CompactToolbarMenuItem>>> = ref(
-		new Map<string | symbol, Array<CompactToolbarMenuItem>>()
-	);
+export function useOverlayBusConsumer() {
+	// Reactivity with `ref` should trigger on `set()` (shallow would not)
+	const menuItemsRegistry: MenuItemsRegistry = ref(new Map<string | symbol, Array<CompactToolbarMenuItem>>());
 
 	/**
 	 * Callback for event.
 	 *
-	 * @param param - Destructured parameter
+	 * @param param - Destructured parameter; If `menuItems` is `null`, then it will be removed from registry
 	 */
-	function onMenuItems({ menuItemsRegistryIndex, menuItems }: OverlayBusEmitMenuItemsPayload): void {
-		menuItemsRegistry.value.set(menuItemsRegistryIndex, menuItems);
+	function onUpdateMenuItems({ menuItemsRegistryIndex, menuItems }: OverlayBusEmitMenuItemsPayload): void {
+		if (menuItems) {
+			menuItemsRegistry.value.set(menuItemsRegistryIndex, menuItems);
+		} else {
+			menuItemsRegistry.value.delete(menuItemsRegistryIndex);
+		}
 	}
 
-	return { menuItemsRegistry, onMenuItems };
+	return { menuItemsRegistry, onUpdateMenuItems };
 }
 
 /**
@@ -696,9 +744,9 @@ export function useOverlayBusIntermediate({
 	 *
 	 * @param payload - Payload to be emitted
 	 */
-	function onMenuItems(payload: OverlayBusEmitMenuItemsPayload): void {
-		emit("menuItems", payload);
+	function onUpdateMenuItems(payload: OverlayBusEmitMenuItemsPayload): void {
+		emit("updateMenuItems", payload);
 	}
-	return { onMenuItems };
+	return { onUpdateMenuItems };
 }
 // #endregion Composables

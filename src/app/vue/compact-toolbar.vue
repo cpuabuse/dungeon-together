@@ -58,12 +58,17 @@ export default defineComponent({
 
 		/**
 		 * Keys, persistently identifying menus.
+		 * It is a way to eliminate necessity of manually declaring keys.
+		 * Changes in names should trigger transition effects.
 		 *
 		 * @returns Unique key list
 		 */
 		menuKeys(): Array<string> {
 			let realKeys: Array<string> = this.menus.map(
-				menu => `${menu.name}/${menu.items.map(item => item.name).join("-")}`
+				menu =>
+					`${menu.nameSubtext ? `${menu.name}-${menu.nameSubtext}` : menu.name}/${menu.items
+						.map(item => (item.nameSubtext ? `${item.name}-${item.nameSubtext}` : item.name))
+						.join("-")}`
 			);
 
 			return realKeys;
