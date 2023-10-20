@@ -19,9 +19,10 @@
 
 	<!-- Windows for the player -->
 	<OverlayWindow
-		v-for="({ listItems }, displayItemKey) in displayItems"
+		v-for="({ listItems, name }, displayItemKey) in displayItems"
 		:key="displayItemKey"
 		v-model="displayItems[displayItemKey]!.isDisplayed"
+		:name="name"
 	>
 		<template #body>
 			<OverlayList :items="listItems" />
@@ -168,6 +169,8 @@ export default defineComponent({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		const { t } = useLocale();
 
+		const clickRecordIndex: symbol = Symbol(`menu-item-player-${props.player.playerUuid}`);
+
 		// Infer composable
 		// eslint-disable-next-line @typescript-eslint/typedef
 		const { displayItems } = useOverlayBusSource({
@@ -179,8 +182,9 @@ export default defineComponent({
 						return [{ data: props.player.playerName, name: "Name" }] satisfies OverlayListItems;
 					}),
 					menuItem: computed(() => {
-						return { clickRecordIndex: Symbol(`player-${props.player.playerUuid}`), name: t("menuTitle.player") };
-					})
+						return { clickRecordIndex, name: t("menuTitle.player") };
+					}),
+					name: computed(() => t("menuTitle.player"))
 				}
 			],
 			usedRecords

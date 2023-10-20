@@ -602,6 +602,11 @@ export function useOverlayBusSource({
 				 * List items within menu.
 				 */
 				listItems: MaybeRef<OverlayListItems>;
+
+				/**
+				 * Overlay name.
+				 */
+				name?: MaybeRef<string>;
 			}>
 		>;
 	} & (
@@ -629,37 +634,39 @@ export function useOverlayBusSource({
 		  }
 	)) {
 	// Whole array is a reference, as elements might be added
-	const displayItems: Ref<Array<Record<"isDisplayed", boolean> & Record<"listItems", OverlayListItems>>> = computed(
-		() =>
-			// ESLint doesn't pick up types
-			// eslint-disable-next-line @typescript-eslint/typedef
-			unref(overlayItems).map(({ menuItem, listItems }) => {
-				const { clickRecordIndex }: CompactToolbarMenuItem = unref(menuItem);
+	const displayItems: Ref<
+		Array<Record<"isDisplayed", boolean> & Record<"listItems", OverlayListItems> & Partial<Record<"name", string>>>
+	> = computed(() =>
+		// ESLint doesn't pick up types
+		// eslint-disable-next-line @typescript-eslint/typedef
+		unref(overlayItems).map(({ menuItem, listItems, name }) => {
+			const { clickRecordIndex }: CompactToolbarMenuItem = unref(menuItem);
 
-				return {
-					/**
-					 * Getter for `isDisplayed`.
-					 *
-					 * @returns Value from records
-					 */
-					get isDisplayed(): boolean {
-						return usedRecords.getBooleanRecord({ id: unref(clickRecordIndex) });
-					},
+			return {
+				/**
+				 * Getter for `isDisplayed`.
+				 *
+				 * @returns Value from records
+				 */
+				get isDisplayed(): boolean {
+					return usedRecords.getBooleanRecord({ id: unref(clickRecordIndex) });
+				},
 
-					/**
-					 * Setter for `isDisplayed`.
-					 *
-					 * @param value - Value to set
-					 */
-					set isDisplayed(value: boolean) {
-						let clickRecordIndexUnref: string | symbol | undefined = unref(clickRecordIndex);
-						if (clickRecordIndexUnref) {
-							usedRecords.records[clickRecordIndexUnref] = value;
-						}
-					},
-					listItems: unref(listItems)
-				};
-			})
+				/**
+				 * Setter for `isDisplayed`.
+				 *
+				 * @param value - Value to set
+				 */
+				set isDisplayed(value: boolean) {
+					let clickRecordIndexUnref: string | symbol | undefined = unref(clickRecordIndex);
+					if (clickRecordIndexUnref) {
+						usedRecords.records[clickRecordIndexUnref] = value;
+					}
+				},
+				listItems: unref(listItems),
+				name: unref(name)
+			};
+		})
 	);
 
 	// A reference array, rather than array of references, as it's recomputation is rare, and when it does happen, it would probably happen on all items; Moreover it provides convenient target to watch
