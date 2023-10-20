@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { ComputedRef, Ref, ShallowRef, computed, defineComponent, ref, shallowRef } from "vue";
+import { ComputedRef, Ref, ShallowRef, computed, defineComponent, shallowRef } from "vue";
 import { useStore } from "vuex";
 import { ClientUniverseStateRcMenuData, ThisVueStore, UniverseState, UniverseStore } from "../../client/gui";
 import { CompactToolbarMenu, useCompactToolbarMenuConsumer } from "../core/compact-toolbar";

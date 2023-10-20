@@ -9,14 +9,6 @@
 		@shift-player-notifications="shiftPlayerNotifications"
 	/>
 
-	<!-- Story notification -->
-	<OverlayWindow v-model="isStoryNotificationMenuDisplayed" icon="fa-list-check" :name="storyNotificationMenuName">
-		<template #body>
-			<!-- Data type information lost, thus cast -->
-			<OverlayList :items="(storyNotificationMenuItems as OverlayListItems)"> </OverlayList>
-		</template>
-	</OverlayWindow>
-
 	<!-- Windows for the player -->
 	<OverlayWindow
 		v-for="({ listItems, name }, displayItemKey) in displayItems"
@@ -25,17 +17,22 @@
 		:name="name"
 	>
 		<template #body>
-			<OverlayList :items="listItems" />
+			<OverlayList :items="listItems">
+				<template #storyAll>
+					<StoryNotification />
+				</template>
+			</OverlayList>
 		</template>
 	</OverlayWindow>
 </template>
 <script lang="ts">
 import { PropType, Ref, computed, defineComponent, ref } from "vue";
-import { ClientPlayer, StoryNotification } from "../../client/connection";
+import { ClientPlayer, StoryNotification as StoryNotificationType } from "../../client/connection";
 import { ThisVueStore, UniverseState } from "../../client/gui";
 import { ClientShard } from "../../client/shard";
 import { OverlayList, StatusNotification } from "../components";
 import OverlayWindow from "../components/overlay-window.vue";
+import StoryNotification from "../components/story-notification.vue";
 import { useLocale } from "../core/locale";
 import { OverlayListItemEntryType, OverlayListItems, overlayBusEmits, useOverlayBusSource } from "../core/overlay";
 import { statusNotificationEmits, useStatusNotification } from "../core/status-notification";
@@ -45,53 +42,10 @@ import { UniverseUiPlayerModel } from "../core/universe-ui";
 /**
  * Type for story notification display.
  */
-type StoryNotificationEntry = Pick<StoryNotification, "moduleId" | "notificationId">;
+type StoryNotificationEntry = Pick<StoryNotificationType, "moduleId" | "notificationId">;
 
 export default defineComponent({
-	components: { OverlayList, OverlayWindow, StatusNotification },
-
-	computed: {
-		/**
-		 * Display story notification menu or not.
-		 */
-		isStoryNotificationMenuDisplayed: {
-			/**
-			 * Gets story notification menu display record.
-			 *
-			 * @returns Boolean value
-			 */
-			get(): boolean {
-				return this.getBooleanRecord({ id: this.storyNotificationMenuDisplaySymbol });
-			},
-
-			/**
-			 * Sets story notification menu display record.
-			 *
-			 * @param value - Boolean value to set
-			 */
-			set(value: boolean) {
-				this.records[this.storyNotificationMenuDisplaySymbol] = value;
-			}
-		},
-
-		/**
-		 * Story notification menu items.
-		 *
-		 * @returns Carcass to display for story notification menu
-		 */
-		storyNotificationMenuItems(): OverlayListItems {
-			return [{ tabs: [{ items: [] }], type: OverlayListItemEntryType.Tab }];
-		},
-
-		/**
-		 * Name of the story notification menu.
-		 *
-		 * @returns Menu name
-		 */
-		storyNotificationMenuName(): string {
-			return "Story notification menu name not translated";
-		}
-	},
+	components: { OverlayList, OverlayWindow, StatusNotification, StoryNotification },
 
 	/**
 	 * Created callback.
@@ -169,7 +123,8 @@ export default defineComponent({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		const { t } = useLocale();
 
-		const clickRecordIndex: symbol = Symbol(`menu-item-player-${props.player.playerUuid}`);
+		const clickPlayerRecordIndex: symbol = Symbol(`menu-item-player-${props.player.playerUuid}`);
+		const clickStoryRecordIndex: symbol = Symbol(`menu-item-player-${props.player.playerUuid}`);
 
 		// Infer composable
 		// eslint-disable-next-line @typescript-eslint/typedef
@@ -177,14 +132,34 @@ export default defineComponent({
 			emit,
 			menuItemsRegistryIndex: Symbol(`player-${props.player.playerUuid}`),
 			overlayItems: [
+				// Player
 				{
 					listItems: computed(() => {
 						return [{ data: props.player.playerName, name: "Name" }] satisfies OverlayListItems;
 					}),
 					menuItem: computed(() => {
-						return { clickRecordIndex, name: t("menuTitle.player") };
+						return { clickRecordIndex: clickPlayerRecordIndex, name: t("menuTitle.player") };
 					}),
 					name: computed(() => t("menuTitle.player"))
+				},
+
+				// Story
+				{
+					listItems: computed(() => {
+						return [
+							{
+								tabs: [
+									{ items: [{ id: "storyAll", type: OverlayListItemEntryType.Slot }], name: "All" },
+									{ items: [], name: "New" }
+								],
+								type: OverlayListItemEntryType.Tab
+							}
+						] satisfies OverlayListItems;
+					}),
+					menuItem: computed(() => {
+						return { clickRecordIndex: clickStoryRecordIndex, name: "Story" };
+					}),
+					name: computed(() => "Story")
 				}
 			],
 			usedRecords
@@ -205,7 +180,7 @@ export default defineComponent({
 				while (storyNotifications.length > 0) {
 					// Array is not empty
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					let storyNofication: StoryNotification = storyNotifications.shift()!;
+					let storyNofication: StoryNotificationEntry = storyNotifications.shift()!;
 
 					storyNotificationEntries.value.push({ ...storyNofication });
 				}
