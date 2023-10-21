@@ -136,6 +136,11 @@ export function composableStoreFactory() {
 		 * Callback on subscription.
 		 */
 		callback: () => void;
+
+		/**
+		 * Whether to call callback immediately.
+		 */
+		isImmediate?: boolean;
 	};
 
 	/**
@@ -192,8 +197,12 @@ export function composableStoreFactory() {
 					 */
 					[`on${toCapitalized({ text: actionName })}`](
 						this: UpdateActionStoreInstance,
-						{ callback }: UpdateActionStoreOnTypeParam
+						{ callback, isImmediate = true }: UpdateActionStoreOnTypeParam
 					): void {
+						if (isImmediate) {
+							callback();
+						}
+
 						// ESLint doesn't infer
 						// eslint-disable-next-line @typescript-eslint/typedef
 						this.$onAction(({ name }) => {
