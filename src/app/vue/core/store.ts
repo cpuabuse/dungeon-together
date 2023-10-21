@@ -110,9 +110,9 @@ export function useRecords() {
 // Infer const type
 // eslint-disable-next-line @typescript-eslint/typedef
 export const updateActionNames = [
-	// Dispatched when story notifiaction array is updated.
+	// Dispatched when story notification array is updated.
 	"updateStoryNotification",
-	"knockKnock"
+	"updateGridLevel"
 ] as const;
 
 /**
