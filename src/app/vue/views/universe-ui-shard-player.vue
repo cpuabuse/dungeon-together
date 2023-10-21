@@ -19,7 +19,7 @@
 		<template #body>
 			<OverlayList :items="listItems">
 				<template #storyAll>
-					<StoryNotification />
+					<StoryNotification :story-notification-entries="storyNotificationEntries" />
 				</template>
 			</OverlayList>
 		</template>
@@ -27,7 +27,7 @@
 </template>
 <script lang="ts">
 import { PropType, Ref, computed, defineComponent, ref } from "vue";
-import { ClientPlayer, StoryNotification as StoryNotificationType } from "../../client/connection";
+import { ClientPlayer } from "../../client/connection";
 import { ThisVueStore, UniverseState } from "../../client/gui";
 import { ClientShard } from "../../client/shard";
 import { OverlayList, StatusNotification } from "../components";
@@ -37,12 +37,8 @@ import { useLocale } from "../core/locale";
 import { OverlayListItemEntryType, OverlayListItems, overlayBusEmits, useOverlayBusSource } from "../core/overlay";
 import { statusNotificationEmits, useStatusNotification } from "../core/status-notification";
 import { Stores, useRecords, useStores } from "../core/store";
+import { StoryNotificationEntry } from "../core/story-notification";
 import { UniverseUiPlayerModel } from "../core/universe-ui";
-
-/**
- * Type for story notification display.
- */
-type StoryNotificationEntry = Pick<StoryNotificationType, "moduleId" | "notificationId">;
 
 export default defineComponent({
 	components: { OverlayList, OverlayWindow, StatusNotification, StoryNotification },
@@ -185,9 +181,9 @@ export default defineComponent({
 				while (storyNotifications.length > 0) {
 					// Array is not empty
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					let storyNofication: StoryNotificationEntry = storyNotifications.shift()!;
+					let storyNotification: StoryNotificationEntry = storyNotifications.shift()!;
 
-					storyNotificationEntries.value.push({ ...storyNofication });
+					storyNotificationEntries.value.push({ ...storyNotification });
 				}
 			}
 		});

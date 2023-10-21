@@ -1,13 +1,19 @@
 <!-- Story notification content -->
 <template>
-	<div v-for="(paragraph, paragraphKey) in paragraphs" :key="paragraphKey">
-		{{ paragraph }}
-	</div>
+	<VRow v-for="({ paragraphs }, displayItemKey) in displayItems" :key="displayItemKey">
+		<VCol>
+			<p v-for="(paragraph, paragraphKey) in paragraphs" :key="paragraphKey">
+				{{ paragraph }}
+			</p>
+		</VCol>
+	</VRow>
 </template>
 
 <script setup lang="ts">
-import { ComputedRef, computed } from "vue";
+import { Ref, computed } from "vue";
+import { VCol, VRow } from "vuetify/components";
 import { useLocale } from "../core/locale";
+import { StoryNotificationEntry } from "../core/story-notification";
 
 /**
  * Locale composable.
@@ -17,7 +23,34 @@ import { useLocale } from "../core/locale";
 const { tm, rt } = useLocale();
 
 /**
- * Translated paragraphs.
+ * Props.
  */
-const paragraphs: ComputedRef<Array<string>> = computed(() => tm("storyNotification.sync.paragraphs").map(rt));
+// Infer props type
+// eslint-disable-next-line @typescript-eslint/typedef
+const props = defineProps<{
+	/**
+	 * Story notification entries.
+	 */
+	storyNotificationEntries: Array<StoryNotificationEntry>;
+}>();
+
+/**
+ * Display items.
+ */
+const displayItems: Ref<
+	Array<{
+		/**
+		 * Translated paragraphs.
+		 */
+		paragraphs: Array<string>;
+	}>
+> = computed(() => {
+	// ESLint does not infer
+	// eslint-disable-next-line @typescript-eslint/typedef
+	return props.storyNotificationEntries.map(({ notificationId }) => {
+		return {
+			paragraphs: tm(`storyNotification.${notificationId}.paragraphs`).map(rt)
+		};
+	});
+});
 </script>
