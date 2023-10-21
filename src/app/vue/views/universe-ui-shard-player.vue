@@ -36,7 +36,7 @@ import StoryNotification from "../components/story-notification.vue";
 import { useLocale } from "../core/locale";
 import { OverlayListItemEntryType, OverlayListItems, overlayBusEmits, useOverlayBusSource } from "../core/overlay";
 import { statusNotificationEmits, useStatusNotification } from "../core/status-notification";
-import { useRecords } from "../core/store";
+import { Stores, useRecords, useStores } from "../core/store";
 import { UniverseUiPlayerModel } from "../core/universe-ui";
 
 /**
@@ -115,6 +115,11 @@ export default defineComponent({
 	// Force vue inference
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, { emit }) {
+		const store: Stores = useStores();
+		// Infer store
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const { onUpdateStoryNotification } = store.useUpdateActionStore();
+
 		// Infer composable
 		// eslint-disable-next-line @typescript-eslint/typedef
 		const usedRecords = useRecords();
@@ -167,7 +172,7 @@ export default defineComponent({
 
 		// Infer composable
 		// eslint-disable-next-line @typescript-eslint/typedef
-		const { onUpdateStoryNotification, shiftPlayerNotifications } = useStatusNotification({ emit });
+		const { shiftPlayerNotifications } = useStatusNotification({ emit });
 
 		const storyNotificationEntries: Ref<Array<StoryNotificationEntry>> = ref(new Array<StoryNotificationEntry>());
 

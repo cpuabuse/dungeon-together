@@ -9,8 +9,10 @@
  * @file
  */
 
-import { defineStore } from "pinia";
+import { StoreDefinition, defineStore } from "pinia";
+import { inject } from "vue";
 import { UniverseStore } from "../../client/gui";
+import { toCapitalized } from "../../common/text";
 
 /**
  * Records store.
@@ -109,7 +111,8 @@ export function useRecords() {
 // eslint-disable-next-line @typescript-eslint/typedef
 export const updateActionNames = [
 	// Dispatched when story notifiaction array is updated.
-	"updateStoryNotification"
+	"updateStoryNotification",
+	"knockKnock"
 ] as const;
 
 /**
@@ -125,20 +128,82 @@ export type UpdateActionNames = (typeof updateActionNames)[number];
 // Infer composable types
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function composableStoreFactory() {
+	/**
+	 * Helper type for subscribe object.
+	 */
+	type UpdateActionStoreOnTypeParam = {
+		/**
+		 * Callback on subscription.
+		 */
+		callback: () => void;
+	};
+
+	/**
+	 * Primary actions and listeners for update action store.
+	 *
+	 * @remarks
+	 * When cast to this in `reduce()`, cannot verify type for dynamic keys, so have to be careful that the object is exhaustive. Also, note the use of `UpdateActionStoreInstance` for `this`.
+	 */
+	type UpdateActionStorePrimaryCallbackAndListenerRecord = Record<UpdateActionNames, () => void> &
+		Record<`on${Capitalize<UpdateActionNames>}`, (param: UpdateActionStoreOnTypeParam) => void>;
+
+	/**
+	 * Store definition for update action store.
+	 */
+	type UpdateActionStoreDefine = StoreDefinition<
+		"updateActions",
+		// Following native Pinia type
+		/* eslint-disable @typescript-eslint/ban-types */
+		{},
+		{},
+		/* eslint-enable @typescript-eslint/ban-types */
+		UpdateActionStorePrimaryCallbackAndListenerRecord
+	>;
+
+	/**
+	 * Store instace for update action store, used as `this`.
+	 */
+	type UpdateActionStoreInstance = ReturnType<UpdateActionStoreDefine>;
+
 	return {
-		useUpdateActionsStore: defineStore("updateActions", {
+		useUpdateActionStore: defineStore("updateActions", {
 			actions: updateActionNames.reduce((result, actionName) => {
+				// Cannot verify type for dynamic keys, so have to be careful that this is exhaustive
 				return {
 					...result,
 
 					/**
 					 * Dispatched action.
+					 *
+					 * @see `UpdateActionStorePrimaryCallbackAndListenerRecord`
 					 */
 					[actionName](): void {
 						// Do nothing
+					},
+
+					/**
+					 * Subscribe to update action.
+					 *
+					 * @remarks
+					 * Component will unsubscribe from actions automatically on unmount - {@link https://pinia.vuejs.org/core-concepts/actions.html#Subscribing-to-actions}.
+					 *
+					 * @see `UpdateActionStorePrimaryCallbackAndListenerRecord`
+					 * @param param - Destructured parameter
+					 */
+					[`on${toCapitalized({ text: actionName })}`](
+						this: UpdateActionStoreInstance,
+						{ callback }: UpdateActionStoreOnTypeParam
+					): void {
+						// ESLint doesn't infer
+						// eslint-disable-next-line @typescript-eslint/typedef
+						this.$onAction(({ name }) => {
+							if (name === actionName) {
+								callback();
+							}
+						});
 					}
 				};
-			}, {} as Record<UpdateActionNames, () => void>)
+			}, {} as UpdateActionStorePrimaryCallbackAndListenerRecord)
 		})
 	};
 }
@@ -147,3 +212,12 @@ export function composableStoreFactory() {
  * Type of stores object for injection.
  */
 export type Stores = ReturnType<typeof composableStoreFactory>;
+
+/**
+ * Per app stores object.
+ *
+ * @returns Object with uninstantiated stores
+ */
+export function useStores(): Stores {
+	return inject("stores");
+}
