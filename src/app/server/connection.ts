@@ -557,10 +557,10 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 								type: MessageTypeWord.StatusNotification
 							},
 							{
-								body: { notificationId: "sync", playerUuid: player.playerUuid },
+								body: { moduleId: "system", notificationId: "sync", playerUuid: player.playerUuid },
 								type: MessageTypeWord.StoryNotification
 							}
-						] as const;
+						] satisfies Array<ClientMessage>;
 					}).flat();
 
 					this.universe.log({

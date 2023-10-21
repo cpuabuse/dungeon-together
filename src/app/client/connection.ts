@@ -60,6 +60,7 @@ export type StoryNotification = {
 	 * Notification ID.
 	 */
 	notificationId: string;
+
 	/**
 	 * Module ID.
 	 */
