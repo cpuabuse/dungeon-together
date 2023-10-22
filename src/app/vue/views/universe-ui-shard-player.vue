@@ -18,18 +18,47 @@
 	>
 		<template #body>
 			<OverlayList :items="listItems">
+				<!-- All story -->
 				<template #storyAll>
 					<StoryNotification :story-notification-entries="storyNotificationEntries" />
+				</template>
+
+				<!-- Player stats -->
+				<template #stats>
+					<template v-for="{ unitUuid, hpMaxValue, hpValue, level, experience, attributes } in stats" :key="unitUuid">
+						<StatsBar :color="hpColor" name="HP" :value="hpValue" :max-value="hpMaxValue" />
+						<StatsBar :color="mpColor" name="MP" />
+						<VTable>
+							<tbody>
+								<tr>
+									<td>Level</td>
+									<td>{{ level }}</td>
+								</tr>
+								<tr>
+									<td>Experience</td>
+									<td>{{ experience }}</td>
+								</tr>
+								<tr>
+									<td>Attributes</td>
+									<td>{{ attributes }}</td>
+								</tr>
+							</tbody>
+						</VTable>
+					</template>
 				</template>
 			</OverlayList>
 		</template>
 	</OverlayWindow>
 </template>
 <script lang="ts">
+import Color from "color";
 import { PropType, Ref, computed, defineComponent, ref } from "vue";
+import { VTable } from "vuetify/components";
 import { ClientPlayer } from "../../client/connection";
 import { ThisVueStore, UniverseState } from "../../client/gui";
 import { ClientShard } from "../../client/shard";
+import { Uuid } from "../../common/uuid";
+import { CoreDictionary } from "../../core/connection";
 import { OverlayList, StatusNotification } from "../components";
 import OverlayWindow from "../components/overlay-window.vue";
 import StoryNotification from "../components/story-notification.vue";
@@ -39,9 +68,18 @@ import { statusNotificationEmits, useStatusNotification } from "../core/status-n
 import { Stores, useRecords, useStores } from "../core/store";
 import { StoryNotificationEntry } from "../core/story-notification";
 import { UniverseUiPlayerModel } from "../core/universe-ui";
+import StatsBar from "../stats-bar.vue";
+
+/**
+ * Player stats.
+ */
+// TODO: Attributes need to be typed
+type Stats = Partial<Record<"hpValue" | "hpMaxValue" | "level" | "experience", number>> &
+	Record<"unitUuid", Uuid> &
+	Partial<Record<"attributes", any>>;
 
 export default defineComponent({
-	components: { OverlayList, OverlayWindow, StatusNotification, StoryNotification },
+	components: { OverlayList, OverlayWindow, StatsBar, StatusNotification, StoryNotification, VTable },
 
 	/**
 	 * Created callback.
@@ -54,6 +92,26 @@ export default defineComponent({
 			if (action.type === "updatePlayerDictionary") {
 				this.model = { dictionary: this.player.dictionary };
 				this.emitModel();
+
+				// Update stats
+				let { units }: CoreDictionary = this.player.dictionary;
+				if (Array.isArray(units)) {
+					this.stats = (units satisfies Array<string | number> as Array<string | number>)
+						.filter<string>((unitUuid): unitUuid is string => typeof unitUuid === "string" && unitUuid.length > 0)
+						.map(unitUuid => {
+							let { maxHealth, level, experience, stats }: CoreDictionary = this.universe.getEntity({
+								entityUuid: unitUuid
+							}).dictionary;
+							return {
+								attributes: stats,
+								experience: typeof experience === "number" ? experience : undefined,
+								hpMaxValue: typeof maxHealth === "number" ? maxHealth : undefined,
+								hpValue: this.universe.getEntity({ entityUuid: unitUuid }).tempHealth,
+								level: typeof level === "number" ? level : undefined,
+								unitUuid
+							};
+						});
+				}
 			}
 		});
 	},
@@ -66,7 +124,10 @@ export default defineComponent({
 	data() {
 		const { universe }: UniverseState = (this as unknown as ThisVueStore).$store.state;
 		return {
+			hpColor: new Color("#1F8C2F"),
 			model: this.modelValue,
+			mpColor: new Color("#051DE8"),
+			stats: new Array<Stats>(),
 			storyNotificationMenuDisplaySymbol: Symbol("story-notification-menu-display"),
 			universe,
 			unsubscribeUpdateModel: null as (() => void) | null
@@ -136,7 +197,10 @@ export default defineComponent({
 				// Player
 				{
 					listItems: computed(() => {
-						return [{ data: props.player.playerName, name: "Name" }] satisfies OverlayListItems;
+						return [
+							{ data: props.player.playerName, name: "Name" },
+							{ id: "stats", name: "Stats", type: OverlayListItemEntryType.Slot }
+						] satisfies OverlayListItems;
 					}),
 					menuItem: computed(() => {
 						return { clickRecordIndex: clickPlayerRecordIndex, name: t("menuTitle.player") };

@@ -759,6 +759,17 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 					}
 				});
 
+				// TODO: Should be using a different action
+				// Finally notify state
+				this.universe.store.dispatch("updatePlayerDictionary").catch(error => {
+					this.universe.log({
+						error: new Error(`"Could not dispatch "updatePlayerDictionary" to universe store.`, {
+							cause: error
+						}),
+						level: LogLevel.Critical
+					});
+				});
+
 				break;
 			}
 

@@ -1,17 +1,18 @@
 <!-- Story notification content -->
 <template>
 	<VRow v-for="({ paragraphs }, displayItemKey) in displayItems" :key="displayItemKey">
-		<VCol>
+		<VCol class="justify-center">
 			<p v-for="(paragraph, paragraphKey) in paragraphs" :key="paragraphKey">
 				{{ paragraph }}
 			</p>
 		</VCol>
+		<VDivider />
 	</VRow>
 </template>
 
 <script setup lang="ts">
 import { Ref, computed } from "vue";
-import { VCol, VRow } from "vuetify/components";
+import { VCol, VDivider, VRow } from "vuetify/components";
 import { useLocale } from "../core/locale";
 import { StoryNotificationEntry } from "../core/story-notification";
 
