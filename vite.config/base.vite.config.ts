@@ -92,6 +92,11 @@ export function defineBase({
 			sourcemap: !isProduction
 		},
 
+		esbuild: {
+			// Force-transform the JSX here, so can set to `preserve` in `tsconfig`, and keep compilation linting
+			jsx: "transform"
+		},
+
 		// Vite mode
 		mode: isProduction ? "production" : "development",
 
