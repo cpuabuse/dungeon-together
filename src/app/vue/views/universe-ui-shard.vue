@@ -120,8 +120,10 @@ export default defineComponent({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let usedOverlayBusToCompactToolbarMenuSource = useOverlayBusToCompactToolbarMenuSource({
 			emit,
+			icon: "fa-globe",
 			isEmittingUpdateMenu: true,
 			name: "Shard",
+			nameSubtext: props.shard.shardName,
 			usedOverlayBusConsumer
 		});
 

@@ -9,7 +9,7 @@
  * @file
  */
 
-import { PropType, Ref, ShallowRef, computed, ref, shallowRef, unref, watch } from "vue";
+import { MaybeRef, PropType, Ref, ShallowRef, computed, shallowRef, unref, watch } from "vue";
 import { ExtractProps, SetupContextEmit } from "../common/utility-types";
 import { type useOverlayBusConsumer } from "./overlay";
 
@@ -114,11 +114,11 @@ export type CompactToolbarData = {
 };
 
 /**
- * Base props for compact toolbar menu.
+ * Base props for compact toolbar menu without items.
  */
 // Extract type
 // eslint-disable-next-line @typescript-eslint/typedef
-export const compactToolbarMenuBaseProps = {
+const compactToolbarMenuBasePropsWithoutItems = {
 	/**
 	 * Menu icon.
 	 */
@@ -126,11 +126,6 @@ export const compactToolbarMenuBaseProps = {
 		default: "fa-carrot",
 		type: String
 	},
-
-	/**
-	 * Menu items.
-	 */
-	items: { required: true, type: Array as PropType<Array<CompactToolbarMenuItem>> },
 
 	/**
 	 * Maximum pinned amount of items, when collapsed.
@@ -146,6 +141,39 @@ export const compactToolbarMenuBaseProps = {
 	 * Name subtext.
 	 */
 	nameSubtext: { required: false, type: String }
+} as const;
+
+/**
+ * Base prop type for toolbar menu without items.
+ */
+type CompactToolbarMenuWithoutItems = ExtractProps<typeof compactToolbarMenuBasePropsWithoutItems>;
+
+/**
+ * Refs of menu properties without items.
+ */
+type CompactToolbarMenuWithoutItemsRef = {
+	[Key in keyof CompactToolbarMenuWithoutItems]: MaybeRef<CompactToolbarMenuWithoutItems[Key]>;
+};
+
+/**
+ * Keys for compact toolbar menu without items.
+ */
+const compactToolbarMenuKeysWithoutItems: Array<keyof CompactToolbarMenuWithoutItems> = Object.keys(
+	compactToolbarMenuBasePropsWithoutItems
+) as Array<keyof CompactToolbarMenuWithoutItems>;
+
+/**
+ * Base props for compact toolbar menu.
+ */
+// Extract type
+// eslint-disable-next-line @typescript-eslint/typedef
+export const compactToolbarMenuBaseProps = {
+	...compactToolbarMenuBasePropsWithoutItems,
+
+	/**
+	 * Menu items.
+	 */
+	items: { required: true, type: Array as PropType<Array<CompactToolbarMenuItem>> }
 } as const;
 
 /**
@@ -220,45 +248,41 @@ export type OverlayBusToCompactToolbarMenuEmit = OverlayBusToCompactToolbarMenuE
  * @param param - Destructured parameter
  * @returns Menu
  */
-export function useOverlayBusToCompactToolbarMenuSource({
-	usedOverlayBusConsumer,
-	name,
-	isEmittingUpdateMenu,
-	emit
-}: {
-	/**
-	 * Registry.
-	 */
-	usedOverlayBusConsumer: ReturnType<typeof useOverlayBusConsumer>;
+export function useOverlayBusToCompactToolbarMenuSource(
+	param: CompactToolbarMenuWithoutItemsRef & {
+		/**
+		 * Registry.
+		 */
+		usedOverlayBusConsumer: ReturnType<typeof useOverlayBusConsumer>;
+	} & (
+			| {
+					/**
+					 * Emit.
+					 */
+					emit: OverlayBusToCompactToolbarMenuEmit;
 
-	/**
-	 * Name.
-	 */
-	name: string;
-} & (
-	| {
-			/**
-			 * Emit.
-			 */
-			emit: OverlayBusToCompactToolbarMenuEmit;
+					/**
+					 * Emit update menu or not.
+					 */
+					isEmittingUpdateMenu: true;
+			  }
+			| {
+					/**
+					 * Emit.
+					 */
+					emit: Pick<OverlayBusToCompactToolbarMenuEmit, never>;
 
-			/**
-			 * Emit update menu or not.
-			 */
-			isEmittingUpdateMenu: true;
-	  }
-	| {
-			/**
-			 * Emit.
-			 */
-			emit: Pick<OverlayBusToCompactToolbarMenuEmit, never>;
+					/**
+					 * Emit update menu or not.
+					 */
+					isEmittingUpdateMenu: false;
+			  }
+		)
+): Record<"menu", Ref<CompactToolbarMenu>> {
+	// Infer types from arguments
+	// eslint-disable-next-line @typescript-eslint/typedef
+	const { usedOverlayBusConsumer, isEmittingUpdateMenu, emit } = param;
 
-			/**
-			 * Emit update menu or not.
-			 */
-			isEmittingUpdateMenu: false;
-	  }
-)): Record<"menu", Ref<CompactToolbarMenu>> {
 	// TODO: Add other menu props and unref
 	const menu: Ref<CompactToolbarMenu> = computed(() => {
 		return {
@@ -269,7 +293,12 @@ export function useOverlayBusToCompactToolbarMenuSource({
 					return item;
 				})
 				.flat(),
-			name
+			...compactToolbarMenuKeysWithoutItems.reduce((result, menuPropertyKey) => {
+				return {
+					...result,
+					[menuPropertyKey]: unref(param[menuPropertyKey])
+				};
+			}, {} as CompactToolbarMenuWithoutItems)
 		};
 	});
 
