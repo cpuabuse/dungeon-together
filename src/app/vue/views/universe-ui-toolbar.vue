@@ -11,29 +11,6 @@
 			</OverlayList>
 		</template>
 	</OverlayWindow>
-
-	<!-- Non null assertion since access from iteration -->
-	<OverlayWindow
-		v-for="(
-			[
-				playerUuid,
-				{
-					playerEntry: {
-						model: { dictionary }
-					},
-					items
-				}
-			],
-			index
-		) in (playerEntries as PlayerEntries)"
-		:key="playerUuid"
-		v-model="playerEntries[index]![1].isPlayerMenuDisplayed"
-	>
-		<template #body>
-			Player dictionary: {{ dictionary }}
-			<OverlayList :items="items"></OverlayList>
-		</template>
-	</OverlayWindow>
 </template>
 
 <script lang="ts">
@@ -41,7 +18,6 @@ import Color from "color";
 import { PropType, defineComponent } from "vue";
 import { ThisVueStore, UniverseStore } from "../../client/gui";
 import { Uuid } from "../../common/uuid";
-import { CoreDictionary } from "../../core/connection";
 import CompactToolbar from "../compact-toolbar.vue";
 import { OverlayList, OverlayWindow } from "../components";
 import UuidSearch from "../components/uuid-search.vue";
@@ -196,7 +172,6 @@ export default defineComponent({
 		 */
 		mainToolbarMenus(): Array<CompactToolbarMenuBaseProps> {
 			return [
-				...this.shardMenusD,
 				...this.shardMenus,
 				{
 					icon: "fa-gear",
@@ -227,48 +202,6 @@ export default defineComponent({
 		 */
 		playerIcon(): string {
 			return this.t("menuTitle.player");
-		},
-
-		/**
-		 * Menus per shard.
-		 *
-		 * @returns Array of menus
-		 */
-		shardMenusD(): Array<CompactToolbarMenuBaseProps> {
-			// False negative
-			/* eslint-disable @typescript-eslint/typedef */
-			return Array.from(this.shardEntries).map(
-				([
-					,
-					{
-						shard,
-						model: { playerEntries }
-					}
-					/* eslint-enable @typescript-eslint/typedef */
-				]) => {
-					return {
-						icon: "fa-globe",
-						// False negative
-						// eslint-disable-next-line @typescript-eslint/typedef
-						items: playerEntries.map(([, { player }]) => {
-							const { userAliasDisplayName }: CoreDictionary = player.dictionary;
-							let nameSubtext: string = player.playerName;
-							if (typeof userAliasDisplayName === "string" && userAliasDisplayName.length > 0) {
-								nameSubtext = userAliasDisplayName;
-							}
-							return {
-								clickRecordIndex: this.playerEntriesMap.get(player.playerUuid)?.clickRecordIndex,
-								icon: "fa-person",
-								name: this.playerIcon,
-								nameSubtext
-							};
-						}),
-						maxPinnedAmount: 1,
-						name: "Shard",
-						nameSubtext: shard.shardName
-					};
-				}
-			);
 		},
 
 		/**
