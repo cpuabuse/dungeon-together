@@ -9,18 +9,7 @@
  * @file
  */
 
-import {
-	ComputedRef,
-	ExtractPropTypes,
-	PropType,
-	Ref,
-	ShallowRef,
-	computed,
-	onUnmounted,
-	ref,
-	unref,
-	watch
-} from "vue";
+import { ComputedRef, ExtractPropTypes, PropType, Ref, computed, onUnmounted, ref, unref, watch } from "vue";
 import { ClientPlayer } from "../../client/connection";
 import { Uuid } from "../../common/uuid";
 import { ActionWords } from "../../server/action";
@@ -604,7 +593,7 @@ export function useOverlayBusSource({
 				listItems: MaybeRef<OverlayListItems>;
 
 				/**
-				 * Overlay name.
+				 * Optional overlay name.
 				 */
 				name?: MaybeRef<string>;
 			}>
@@ -635,12 +624,23 @@ export function useOverlayBusSource({
 	)) {
 	// Whole array is a reference, as elements might be added
 	const displayItems: Ref<
-		Array<Record<"isDisplayed", boolean> & Record<"listItems", OverlayListItems> & Partial<Record<"name", string>>>
+		Array<
+			Record<"isDisplayed", boolean> &
+				Record<"listItems", OverlayListItems> & {
+					/**
+					 * Optional overlay name.
+					 *
+					 * @remarks
+					 * Would be generated from window information.
+					 */
+					name?: string;
+				}
+		>
 	> = computed(() =>
 		// ESLint doesn't pick up types
 		// eslint-disable-next-line @typescript-eslint/typedef
-		unref(overlayItems).map(({ menuItem, listItems, name }) => {
-			const { clickRecordIndex }: CompactToolbarMenuItem = unref(menuItem);
+		unref(overlayItems).map(({ menuItem, listItems, name: overlayName }) => {
+			const { clickRecordIndex, nameSubtext, name }: CompactToolbarMenuItem = unref(menuItem);
 
 			return {
 				/**
@@ -649,7 +649,7 @@ export function useOverlayBusSource({
 				 * @returns Value from records
 				 */
 				get isDisplayed(): boolean {
-					return usedRecords.getBooleanRecord({ id: unref(clickRecordIndex) });
+					return usedRecords.getBooleanRecord({ id: clickRecordIndex });
 				},
 
 				/**
@@ -658,13 +658,12 @@ export function useOverlayBusSource({
 				 * @param value - Value to set
 				 */
 				set isDisplayed(value: boolean) {
-					let clickRecordIndexUnref: string | symbol | undefined = unref(clickRecordIndex);
-					if (clickRecordIndexUnref) {
-						usedRecords.records[clickRecordIndexUnref] = value;
+					if (clickRecordIndex) {
+						usedRecords.records[clickRecordIndex] = value;
 					}
 				},
 				listItems: unref(listItems),
-				name: unref(name)
+				name: unref(overlayName) ?? (name ? `${name}${nameSubtext ? ` - ${nameSubtext}` : ""}` : nameSubtext)
 			};
 		})
 	);

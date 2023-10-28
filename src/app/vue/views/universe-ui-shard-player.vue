@@ -188,6 +188,14 @@ export default defineComponent({
 		const clickPlayerRecordIndex: symbol = Symbol(`menu-item-player-${props.player.playerUuid}`);
 		const clickStoryRecordIndex: symbol = Symbol(`menu-item-player-${props.player.playerUuid}`);
 
+		const playerNameSubtext: Ref<string> = computed(() => {
+			const { userAliasDisplayName }: CoreDictionary = props.player.dictionary;
+			if (typeof userAliasDisplayName === "string" && userAliasDisplayName.length > 0) {
+				return userAliasDisplayName;
+			}
+			return props.player.playerName;
+		});
+
 		// Infer composable
 		// eslint-disable-next-line @typescript-eslint/typedef
 		const { displayItems } = useOverlayBusSource({
@@ -203,9 +211,13 @@ export default defineComponent({
 						] satisfies OverlayListItems;
 					}),
 					menuItem: computed(() => {
-						return { clickRecordIndex: clickPlayerRecordIndex, name: t("menuTitle.player") };
-					}),
-					name: computed(() => t("menuTitle.player"))
+						return {
+							clickRecordIndex: clickPlayerRecordIndex,
+							icon: "fa-person",
+							name: t("menuTitle.player"),
+							nameSubtext: playerNameSubtext.value
+						};
+					})
 				},
 
 				// Story
@@ -222,9 +234,13 @@ export default defineComponent({
 						] satisfies OverlayListItems;
 					}),
 					menuItem: computed(() => {
-						return { clickRecordIndex: clickStoryRecordIndex, name: "Story" };
-					}),
-					name: computed(() => "Story")
+						return {
+							clickRecordIndex: clickStoryRecordIndex,
+							icon: "fa-book-open",
+							name: "Story",
+							nameSubtext: playerNameSubtext.value
+						};
+					})
 				}
 			],
 			usedRecords
