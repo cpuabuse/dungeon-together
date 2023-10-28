@@ -14,13 +14,6 @@ import { ExtractProps, SetupContextEmit } from "../common/utility-types";
 import { type useOverlayBusConsumer } from "./overlay";
 
 /**
- * Menu modes.
- */
-export enum CompactToolbarMenuItemMode {
-	Click = "click"
-}
-
-/**
  * Compact toolbar menu item(button).
  */
 export type CompactToolbarMenuItem = {
@@ -49,23 +42,7 @@ export type CompactToolbarMenuItem = {
 	 * Undefined would mean a disabled button.
 	 */
 	clickRecordIndex?: string | symbol;
-} & (
-	| {
-			/**
-			 * Item mode discriminator.
-			 *
-			 * @remarks
-			 * `undefined` refers to display only.
-			 */
-			mode?: undefined;
-	  }
-	| {
-			/**
-			 * Item mode for click.
-			 */
-			mode?: CompactToolbarMenuItemMode;
-	  }
-);
+};
 
 /**
  * Base prop type for toolbar menu.
@@ -75,25 +52,7 @@ export type CompactToolbarMenuBaseProps = ExtractProps<typeof compactToolbarMenu
 /**
  * Compact toolbar menu.
  */
-export type CompactToolbarMenu = {
-	[K1 in keyof CompactToolbarMenuBaseProps]: K1 extends "items"
-		? CompactToolbarMenuBaseProps[K1] extends Array<infer R>
-			? Array<
-					Omit<R, "mode"> & {
-						/**
-						 * Click callback.
-						 */
-						onClick?: () => void;
-
-						/**
-						 * Symbol to index records state to change on click.
-						 */
-						clickRecordIndex?: string | symbol;
-					}
-			  >
-			: never
-		: CompactToolbarMenuBaseProps[K1];
-};
+export type CompactToolbarMenu = CompactToolbarMenuBaseProps;
 
 /**
  * Default menu.
@@ -206,8 +165,7 @@ export function compactToolbarDataToMenuBaseProps({ menus }: CompactToolbarData)
 			items: items.map(item => {
 				return {
 					icon: item.icon,
-					name: item.name,
-					...(item.onClick ? { mode: CompactToolbarMenuItemMode.Click } : {})
+					name: item.name
 				};
 			}),
 			...rest
