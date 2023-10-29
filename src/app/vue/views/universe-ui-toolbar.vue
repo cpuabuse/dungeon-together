@@ -24,7 +24,7 @@ import UuidSearch from "../components/uuid-search.vue";
 import { CompactToolbarMenu, CompactToolbarMenuBaseProps, CompactToolbarMenuItem } from "../core/compact-toolbar";
 import { useLocale } from "../core/locale";
 import { OverlayListItemEntry, OverlayListItemEntryType, OverlayListItems, OverlayListTabs } from "../core/overlay";
-import { useRecords } from "../core/store";
+import { Stores, useStores } from "../core/store";
 import { UniverseUiPlayerEntry, UniverseUiShardEntries } from "../core/universe-ui";
 import UniverseUiToolbarOptions from "./universe-ui-toolbar-options.vue";
 
@@ -146,7 +146,7 @@ export default defineComponent({
 			 * @returns Boolean value
 			 */
 			get(): boolean {
-				const symbolValue: unknown = this.records[this.debugMenuDisplaySymbol];
+				const symbolValue: unknown = this.recordStore.records[this.debugMenuDisplaySymbol];
 
 				if (symbolValue) {
 					return true;
@@ -161,7 +161,7 @@ export default defineComponent({
 			 * @param value - Boolean value to set
 			 */
 			set(value: boolean) {
-				this.records[this.debugMenuDisplaySymbol] = value;
+				this.recordStore.records[this.debugMenuDisplaySymbol] = value;
 			}
 		},
 
@@ -269,7 +269,12 @@ export default defineComponent({
 	 * @returns Records
 	 */
 	setup() {
-		return { ...useRecords(), ...useLocale() };
+		const stores: Stores = useStores();
+		// Infer store
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const recordStore = stores.useRecordStore();
+
+		return { recordStore, ...useLocale() };
 	},
 
 	watch: {
@@ -307,7 +312,7 @@ export default defineComponent({
 								 * @returns An object with index and model getter/setter
 								 */
 								const generateEntryValue: () => PlayerEntry = () => {
-									const { records }: Record<"records", UniverseStore["state"]["records"]> = this;
+									const { records }: Record<"records", UniverseStore["state"]["records"]> = this.recordStore;
 
 									let clickRecordIndex: symbol = Symbol(`Menu for player(playerUuid="${playerUuid}")`);
 

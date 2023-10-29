@@ -18,13 +18,13 @@
 			<VSwitch
 				:density="isCompact ? 'compact' : 'default'"
 				hide-details
-				:model-value="records[id]"
+				:model-value="recordStore.records[id]"
 				inset
 				:class="{ 'my-n2': true, 'overlay-list-item-switch-compact': isCompact }"
 				@update:model-value="
 					value => {
 						if (typeof value == 'boolean') {
-							records[id] = value;
+							recordStore.records[id] = value;
 						}
 					}
 				"
@@ -45,7 +45,7 @@ import {
 	useOverlayListItemShared,
 	useOverlayListShared
 } from "../core/overlay";
-import { useRecords } from "../core/store";
+import { Stores, useStores } from "../core/store";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 
 export default defineComponent({
@@ -91,8 +91,13 @@ export default defineComponent({
 	// Infer setup
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, { emit }) {
+		const stores: Stores = useStores();
+		// Infer store
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const recordStore = stores.useRecordStore();
+
 		return {
-			...useRecords(),
+			recordStore,
 			...useOverlayListShared({ emit, props }),
 			...useOverlayListItemShared({ props }),
 			...useLocale()

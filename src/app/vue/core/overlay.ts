@@ -18,7 +18,7 @@ import { ExtractProps, ExtractPropsFromComponentClass, MaybeRef, SetupContextEmi
 import type OverlayListItemAssembler from "../components/overlay-list-item-assembler.vue";
 import { CompactToolbarMenuItem } from "./compact-toolbar";
 import { IconProps, iconProps } from "./icon";
-import { useRecords } from "./store";
+import { Stores } from "./store";
 
 // #region Items
 /**
@@ -566,12 +566,12 @@ export type MenuItemsRegistry = Ref<Map<string | symbol, Array<CompactToolbarMen
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function useOverlayBusSource({
 	overlayItems,
-	usedRecords,
+	recordStore,
 	emit,
 	menuItemsRegistryIndex,
 	usedOverlayBusConsumer
 }: MenuItemsRegistryIndexRecord &
-	Record<"usedRecords", ReturnType<typeof useRecords>> & {
+	Record<"recordStore", ReturnType<Stores["useRecordStore"]>> & {
 		/**
 		 * Menu items.
 		 *
@@ -579,6 +579,8 @@ export function useOverlayBusSource({
 		 * Overlay items is a reference itself, for if menu items are dynamically added or removed by component.
 		 * Each menu item is a reference, as it covers individual changes per menu.
 		 * List items array is a reference, to track data displayed, and translations down the line. Individual items are not references, as that is not a frequent operation.
+		 *
+		 * `isDisplayed` is to be used as a model, so it is a normal getter/setter.
 		 */
 		overlayItems: MaybeRef<
 			Array<{
@@ -641,27 +643,25 @@ export function useOverlayBusSource({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		unref(overlayItems).map(({ menuItem, listItems, name: overlayName }) => {
 			const { clickRecordIndex, nameSubtext, name }: CompactToolbarMenuItem = unref(menuItem);
+			const isDisplayed: Ref<boolean> = recordStore.computedRecord({ id: clickRecordIndex });
 
 			return {
 				/**
-				 * Getter for `isDisplayed`.
+				 * Is displayed getter.
 				 *
-				 * @returns Value from records
+				 * @returns `true` when displayed
 				 */
 				get isDisplayed(): boolean {
-					return usedRecords.getBooleanRecord({ id: clickRecordIndex });
+					return isDisplayed.value;
 				},
 
 				/**
-				 * Setter for `isDisplayed`.
-				 *
-				 * @param value - Value to set
+				 * Is displayed setter.
 				 */
 				set isDisplayed(value: boolean) {
-					if (clickRecordIndex) {
-						usedRecords.records[clickRecordIndex] = value;
-					}
+					isDisplayed.value = value;
 				},
+
 				listItems: unref(listItems),
 				name: unref(overlayName) ?? (name ? `${name}${nameSubtext ? ` - ${nameSubtext}` : ""}` : nameSubtext)
 			};

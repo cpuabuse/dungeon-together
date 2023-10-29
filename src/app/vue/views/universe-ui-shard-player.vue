@@ -65,7 +65,7 @@ import StoryNotification from "../components/story-notification.vue";
 import { useLocale } from "../core/locale";
 import { OverlayListItemEntryType, OverlayListItems, overlayBusEmits, useOverlayBusSource } from "../core/overlay";
 import { statusNotificationEmits, useStatusNotification } from "../core/status-notification";
-import { Stores, useRecords, useStores } from "../core/store";
+import { Stores, useStores } from "../core/store";
 import { StoryNotificationEntry } from "../core/story-notification";
 import { UniverseUiPlayerModel } from "../core/universe-ui";
 import StatsBar from "../stats-bar.vue";
@@ -179,7 +179,7 @@ export default defineComponent({
 
 		// Infer composable
 		// eslint-disable-next-line @typescript-eslint/typedef
-		const usedRecords = useRecords();
+		const recordStore = store.useRecordStore();
 
 		// Infer composable
 		// eslint-disable-next-line @typescript-eslint/typedef
@@ -243,7 +243,7 @@ export default defineComponent({
 					})
 				}
 			],
-			usedRecords
+			recordStore
 		});
 
 		// Infer composable
@@ -267,7 +267,7 @@ export default defineComponent({
 				}
 			}
 		});
-		return { ...usedRecords, displayItems, shiftPlayerNotifications, storyNotificationEntries };
+		return { displayItems, shiftPlayerNotifications, storyNotificationEntries };
 	},
 
 	/**

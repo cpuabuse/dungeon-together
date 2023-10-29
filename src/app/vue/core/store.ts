@@ -10,99 +10,10 @@
  */
 
 import { StoreDefinition, defineStore } from "pinia";
-import { inject } from "vue";
+import { WritableComputedRef, computed, inject } from "vue";
 import { UniverseStore } from "../../client/gui";
 import { toCapitalized } from "../../common/text";
-
-/**
- * Records store.
- */
-// Infer from store
-// eslint-disable-next-line @typescript-eslint/typedef
-export const useRecordsStore = defineStore("records", {
-	/**
-	 * State.
-	 *
-	 * @returns State
-	 */
-	state: () => {
-		return { records: {} as UniverseStore["state"]["records"] };
-	}
-});
-
-/**
- * Get the records.
- *
- * @returns Records
- */
-// Infer composable return type
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function useRecords() {
-	// Infer store type
-	// eslint-disable-next-line @typescript-eslint/typedef
-	const { records } = useRecordsStore();
-
-	/**
-	 * Gets the record from the store, or default value.
-	 *
-	 * @param v - Destructured parameter
-	 * @returns Void
-	 */
-	function getBooleanRecord({
-		id,
-		defaultValue = false
-	}: {
-		/**
-		 * ID.
-		 */
-		id: string | symbol | undefined;
-
-		/**
-		 * Value.
-		 */
-		defaultValue?: boolean;
-	}): boolean {
-		return id ? Boolean(records[id]) : defaultValue;
-	}
-
-	/**
-	 * Toggles boolean record, or sets the default value.
-	 *
-	 * @param param - Destructured parameter
-	 * @returns Boolean if toggle was successful, false if set to default
-	 */
-	function toggleBooleanRecord({
-		id,
-		defaultValue = true
-	}: {
-		/**
-		 * ID.
-		 */
-		id: string | symbol | undefined;
-
-		/**
-		 * Value.
-		 */
-		defaultValue?: boolean;
-	}): boolean {
-		let value: boolean = defaultValue;
-		let result: boolean = false;
-
-		if (id) {
-			const record: unknown = records[id];
-			if (typeof record === "boolean") {
-				value = !record;
-				result = true;
-			}
-
-			records[id] = value;
-		}
-
-		return result;
-	}
-
-	return { getBooleanRecord, records, toggleBooleanRecord };
-}
+import { MaybePartial } from "../../common/utility-types";
 
 /**
  * Names for actions in `useUpdateActionsStore`.
@@ -171,6 +82,153 @@ export function composableStoreFactory() {
 	type UpdateActionStoreInstance = ReturnType<UpdateActionStoreDefine>;
 
 	return {
+		// Records store
+		useRecordStore: defineStore("new-records", {
+			actions: {
+				/**
+				 * Generates computed property for record.
+				 *
+				 * @see `getRecord()` for default value and validator
+				 * @param param - Desctructured parameter
+				 * @returns Computed property
+				 */
+				computedRecord<Type = boolean>({
+					id,
+					defaultValue = false as Type,
+					validator = (value: unknown): value is Type => {
+						return typeof value === "boolean";
+					}
+				}: {
+					/**
+					 * Record ID.
+					 */
+					id: string | symbol | undefined;
+				} & MaybePartial<
+					Type extends boolean ? false : true,
+					{
+						/**
+						 * Validator.
+						 */
+						validator: (value: unknown) => value is Type;
+
+						/**
+						 * Value.
+						 */
+						defaultValue: Type;
+					}
+				>): WritableComputedRef<Type> {
+					return computed({
+						/**
+						 * Getter.
+						 *
+						 * @returns Record value or default
+						 */
+						get: (): Type => {
+							return this.getRecord<Type>({ defaultValue, id, validator });
+						},
+
+						/**
+						 * Setter.
+						 *
+						 * @param param - Record value to set
+						 */
+						set: (param: Type): void => {
+							if (id) {
+								this.records[id] = param;
+							}
+						}
+					});
+				},
+
+				/**
+				 * Gets the record from the store, or default value.
+				 *
+				 * @remarks
+				 * Defaults for validator and default value are set for boolean type parameter. If different type parameter is set, they would be required, hence type casting to adhere to generic within default parameters.
+				 *
+				 * @param param - Destructured parameter
+				 * @returns Void
+				 */
+				getRecord<Type = boolean>({
+					id,
+					defaultValue = false as Type,
+					validator = (value: unknown): value is Type => {
+						return typeof value === "boolean";
+					}
+				}: {
+					/**
+					 * ID.
+					 */
+					id: string | symbol | undefined;
+
+					/**
+					 * Value.
+					 */
+					defaultValue?: Type;
+				} & MaybePartial<
+					Type extends boolean ? false : true,
+					{
+						/**
+						 * Validator.
+						 */
+						validator: (value: unknown) => value is Type;
+
+						/**
+						 * Value.
+						 */
+						defaultValue: Type;
+					}
+				>): Type {
+					if (id) {
+						const record: unknown = this.records[id];
+						if (validator(record)) {
+							return record;
+						}
+					}
+					return defaultValue;
+				},
+
+				/**
+				 * Toggles boolean record, or sets the default value.
+				 *
+				 * @remarks
+				 * Would overwrite.
+				 * Calls `getRecord()`. If default value is true, `getRecord()` is called with default value of false. Then if `getRecord()` fails and returns default value, or if it correctly returns false, the record is set to true, which is required behavior for both paths.
+				 *
+				 * @param param - Destructured parameter
+				 */
+				toggleBooleanRecord({
+					id,
+					defaultValue = true
+				}: {
+					/**
+					 * ID.
+					 */
+					id: string | symbol | undefined;
+
+					/**
+					 * Value.
+					 */
+					defaultValue?: boolean;
+				}): void {
+					if (id) {
+						const record: boolean = this.getRecord({ defaultValue: !defaultValue, id });
+						this.records[id] = !record;
+					}
+				}
+			},
+
+			/**
+			 * State.
+			 *
+			 * @returns State
+			 */
+			state: () => {
+				return { records: {} as UniverseStore["state"]["records"] };
+			}
+		}),
+
+		// Update actions store
 		useUpdateActionStore: defineStore("updateActions", {
 			actions: updateActionNames.reduce((result, actionName) => {
 				// Cannot verify type for dynamic keys, so have to be careful that this is exhaustive

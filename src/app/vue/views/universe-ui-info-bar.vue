@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { PropType, Ref, defineComponent, ref, watch } from "vue";
+import { PropType, Ref, defineComponent, shallowRef, watch } from "vue";
 import { VSystemBar } from "vuetify/components";
 import { Stores, useStores } from "../core/store";
 import { UniverseUiShardEntries } from "../core/universe-ui";
@@ -40,7 +40,7 @@ export default defineComponent({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		const { onUpdateGridLevel } = store.useUpdateActionStore();
 
-		const gridLevels: Ref<Array<number>> = ref(new Array<number>());
+		const gridLevels: Ref<Array<number>> = shallowRef(new Array<number>());
 		// Watch shards to be reactive on shard add/remove
 		watch(
 			() => props.shardEntries,

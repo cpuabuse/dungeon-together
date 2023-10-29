@@ -105,6 +105,18 @@ export type MaybeDefined<
 	  };
 
 /**
+ * Maybe partial, maybe required.
+ * Creates a type conditionally.
+ * To be used for destructured optional parameters.
+ *
+ * If condition is true, returns the type, otherwise returns partial.
+ */
+export type MaybePartial<
+	PartialCondition extends boolean,
+	T extends Record<string, any>
+> = PartialCondition extends true ? T : Partial<T>;
+
+/**
  * Creates a constructor, to be used in module.
  *
  * @remarks

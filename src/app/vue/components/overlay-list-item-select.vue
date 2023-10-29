@@ -43,17 +43,17 @@ import {
 	useOverlayListItemShared,
 	useOverlayListShared
 } from "../core/overlay";
-import { useRecords } from "../core/store";
-import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
+import { Stores, useStores } from "../core/store";
 import OverlayListBody from "./overlay-list-body.vue";
+import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 
 export default defineComponent({
 	components: {
+		OverlayListBody,
 		OverlayListItemAssembler,
-		VSelect,
 		VList,
 		VListItem,
-		OverlayListBody
+		VSelect
 	},
 
 	/**
@@ -67,7 +67,7 @@ export default defineComponent({
 			 * @returns Model value
 			 */
 			get(): string | undefined {
-				const value: unknown = this.records[this.id];
+				const value: unknown = this.recordStore.records[this.id];
 				if (typeof value === "string") {
 					return value;
 				}
@@ -80,7 +80,7 @@ export default defineComponent({
 			 * @param value - Value to set to model
 			 */
 			set(value: string): void {
-				this.records[this.id] = value;
+				this.recordStore.records[this.id] = value;
 			}
 		}
 	},
@@ -116,7 +116,12 @@ export default defineComponent({
 	// Infer setup
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, { emit }) {
-		return { ...useRecords(), ...useOverlayListShared({ emit, props }), ...useOverlayListItemShared({ props }) };
+		const stores: Stores = useStores();
+		// Infer store
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const recordStore = stores.useRecordStore();
+
+		return { recordStore, ...useOverlayListShared({ emit, props }), ...useOverlayListItemShared({ props }) };
 	}
 });
 </script>

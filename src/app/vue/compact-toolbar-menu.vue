@@ -41,7 +41,7 @@
 							<div v-bind="props" class="compact-toolbar-tooltip-content-wrapper">
 								<!-- Since button is not child of toolbar anymore, remove rounded corners -->
 								<VBtn
-									:disabled="!(item.mode === 'click' || item.clickRecordIndex)"
+									:disabled="!item.clickRecordIndex"
 									:stacked="hasLabels"
 									class="compact-toolbar-menu-item px-1"
 									@click="() => clickItem(item)"
@@ -77,7 +77,7 @@ import {
 	compactToolbarSharedMenuProps
 } from "./core/compact-toolbar";
 import { useLocale } from "./core/locale";
-import { useRecords } from "./core/store";
+import { Stores, useStores } from "./core/store";
 
 /**
  * Item with meta.
@@ -170,7 +170,7 @@ export default defineComponent({
 										textIndex + 1 === textArray.length
 											? [
 													// Only produced when active
-													...(this.getBooleanRecord({ id: item.clickRecordIndex })
+													...(this.recordStore.getRecord({ id: item.clickRecordIndex })
 														? ["text-decoration-underline"]
 														: []),
 
@@ -288,7 +288,7 @@ export default defineComponent({
 		 * @param param - Destructured parameter
 		 */
 		clickItem({ id, clickRecordIndex }: IndexedItem) {
-			this.toggleBooleanRecord({ id: clickRecordIndex });
+			this.recordStore.toggleBooleanRecord({ id: clickRecordIndex });
 
 			this.useItem({ id });
 			this.$emit("click", { itemId: id });
@@ -365,7 +365,12 @@ export default defineComponent({
 	// Infer setup
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup() {
-		return { ...useRecords(), ...useLocale() };
+		const stores: Stores = useStores();
+		// Infer store;
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const recordStore = stores.useRecordStore();
+
+		return { recordStore, ...useLocale() };
 	},
 
 	watch: {

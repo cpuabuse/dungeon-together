@@ -15,7 +15,7 @@ import { OverlayList, OverlayWindow } from "../components";
 import { CompactToolbarMenuItem } from "../core/compact-toolbar";
 import { useLocale } from "../core/locale";
 import { OverlayListItemEntry, OverlayListItemEntryType } from "../core/overlay";
-import { useRecords } from "../core/store";
+import { Stores, useStores } from "../core/store";
 
 /**
  * Model type helper.
@@ -37,7 +37,7 @@ export default defineComponent({
 			 * @returns Boolean value
 			 */
 			get(): boolean {
-				const symbolValue: unknown = this.records[this.optionsMenuDisplaySymbol];
+				const symbolValue: unknown = this.recordStore.records[this.optionsMenuDisplaySymbol];
 
 				if (symbolValue) {
 					return true;
@@ -52,7 +52,7 @@ export default defineComponent({
 			 * @param value - Boolean value to set
 			 */
 			set(value: boolean) {
-				this.records[this.optionsMenuDisplaySymbol] = value;
+				this.recordStore.records[this.optionsMenuDisplaySymbol] = value;
 			}
 		},
 
@@ -63,7 +63,7 @@ export default defineComponent({
 			 * @returns Boolean value
 			 */
 			get(): string | undefined {
-				const value: unknown = this.records[this.languageSymbol];
+				const value: unknown = this.recordStore.records[this.languageSymbol];
 
 				if (value && typeof value === "string") {
 					return value;
@@ -78,7 +78,7 @@ export default defineComponent({
 			 * @param value - Boolean value to set
 			 */
 			set(value: string) {
-				this.records[this.languageSymbol] = value;
+				this.recordStore.records[this.languageSymbol] = value;
 			}
 		},
 
@@ -193,7 +193,7 @@ export default defineComponent({
 			 * @returns Boolean value
 			 */
 			get(): string | undefined {
-				const value: unknown = this.records[this.themeSymbol];
+				const value: unknown = this.recordStore.records[this.themeSymbol];
 
 				if (value && typeof value === "string") {
 					return value;
@@ -208,7 +208,7 @@ export default defineComponent({
 			 * @param value - Boolean value to set
 			 */
 			set(value: string) {
-				this.records[this.themeSymbol] = value;
+				this.recordStore.records[this.themeSymbol] = value;
 			}
 		},
 
@@ -285,7 +285,12 @@ export default defineComponent({
 	 * @returns Records
 	 */
 	setup() {
-		return { ...useRecords(), ...useLocale(), themeGlobal: useTheme().global };
+		const stores: Stores = useStores();
+		// Infer store
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const recordStore = stores.useRecordStore();
+
+		return { recordStore, ...useLocale(), themeGlobal: useTheme().global };
 	},
 
 	watch: {

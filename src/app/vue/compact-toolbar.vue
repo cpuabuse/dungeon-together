@@ -176,4 +176,3 @@ export default defineComponent({
 	position: absolute;
 }
 </style>
-./core ./core/compact-toolbar
