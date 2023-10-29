@@ -115,8 +115,8 @@ const messages = {
 			[StatusNotificationWord.MimicAwaken]: "ミミックが現れた！"
 		},
 		theme: {
-			[Theme.Dark]: "ライト",
-			[Theme.Light]: "ダーク"
+			[Theme.Dark]: "ダーク",
+			[Theme.Light]: "ライト"
 		}
 	}
 };
