@@ -10,7 +10,7 @@
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import { useTheme } from "vuetify/lib/framework.mjs";
-import { Theme } from "../../client/gui/themes";
+import { Theme, systemThemeLiteral } from "../../client/gui/themes";
 import { OverlayList, OverlayWindow } from "../components";
 import { CompactToolbarMenuItem } from "../core/compact-toolbar";
 import { useLocale } from "../core/locale";
@@ -65,7 +65,7 @@ export default defineComponent({
 			get(): string | undefined {
 				const value: unknown = this.recordStore.records[this.languageSymbol];
 
-				if (value && typeof value === "string") {
+				if (typeof value === "string") {
 					return value;
 				}
 
@@ -186,30 +186,17 @@ export default defineComponent({
 		 *
 		 * @returns Theme name
 		 */
-		theme: {
-			/**
-			 * Gets theme string.
-			 *
-			 * @returns Boolean value
-			 */
-			get(): string | undefined {
-				const value: unknown = this.recordStore.records[this.themeSymbol];
+		theme(): string | undefined {
+			const value: unknown = this.recordStore.records[this.themeSymbol];
 
-				if (value && typeof value === "string") {
-					return value;
+			if (typeof value === "string") {
+				if (value === systemThemeLiteral) {
+					return "dark";
 				}
-
-				return undefined;
-			},
-
-			/**
-			 * Sets debug container display record.
-			 *
-			 * @param value - Boolean value to set
-			 */
-			set(value: string) {
-				this.recordStore.records[this.themeSymbol] = value;
+				return value;
 			}
+
+			return undefined;
 		},
 
 		/**
@@ -225,13 +212,12 @@ export default defineComponent({
 
 				// False negative
 				// eslint-disable-next-line @typescript-eslint/typedef
-				items: Object.values(Theme).map(value => {
+				items: [systemThemeLiteral, ...Object.values(Theme)].map(value => {
 					return {
 						name: this.t(`theme.${value}`),
 						value
 					};
 				}),
-
 				name: this.t("menuItem.theme"),
 
 				type: OverlayListItemEntryType.Select

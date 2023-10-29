@@ -190,7 +190,20 @@ export type OverlayListItemEntry =
 						/**
 						 * Event ID.
 						 */
-						items: Array<Record<"name" | "value", string>>;
+						items: Array<{
+							/**
+							 * Display name.
+							 */
+							name: string;
+
+							/**
+							 * Storage value.
+							 *
+							 * @remarks
+							 * Vuetify does not seem to support symbols for `VSelect`.
+							 */
+							value: string;
+						}>;
 
 						/**
 						 * Record ID.

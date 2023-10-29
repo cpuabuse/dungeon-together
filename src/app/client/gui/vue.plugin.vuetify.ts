@@ -25,7 +25,7 @@ import "../style/vuetify.scss";
 import { systemClientModule } from "../../../module/system";
 import { StatusNotificationWord } from "../../common/defaults/connection";
 import { Locale } from "../../common/locale";
-import { Theme } from "./themes";
+import { Theme, systemThemeLiteral } from "./themes";
 
 // Initialize FA
 library.add(fas);
@@ -88,7 +88,8 @@ const messages = {
 		},
 		theme: {
 			[Theme.Dark]: "Dark",
-			[Theme.Light]: "Light"
+			[Theme.Light]: "Light",
+			[systemThemeLiteral]: "System"
 		}
 	},
 	ja: {
