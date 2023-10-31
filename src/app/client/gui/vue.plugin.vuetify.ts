@@ -25,6 +25,7 @@ import "../style/vuetify.scss";
 import { systemClientModule } from "../../../module/system";
 import { StatusNotificationWord } from "../../common/defaults/connection";
 import { Locale } from "../../common/locale";
+import { TextDirectionWords } from "../../vue/core/locale";
 import { Theme, systemThemeLiteral } from "./themes";
 
 // Initialize FA
@@ -85,6 +86,11 @@ const messages = {
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "You look around",
 			[StatusNotificationWord.MimicAwaken]: "Mimic awakens!"
+		},
+		textDirection: {
+			[TextDirectionWords.Auto]: "Auto",
+			[TextDirectionWords.Ltr]: "LTR",
+			[TextDirectionWords.Rtl]: "RTL"
 		},
 		theme: {
 			[Theme.Dark]: "Dark",

@@ -1,27 +1,32 @@
 <!-- Universe UI -->
 <template>
-	<!-- Vuetify unconditionally displays bar at the top of the screen -->
-	<UniverseUiInfoBar :shard-entries="(shardEntries as UniverseUiShardEntries)" />
+	<VLocaleProvider :rtl="isRtl">
+		<!-- Vuetify unconditionally displays bar at the top of the screen -->
+		<UniverseUiInfoBar :shard-entries="(shardEntries as UniverseUiShardEntries)" />
 
-	<UniverseUiClick :rc-menu-data="rcMenuData" />
+		<UniverseUiClick :rc-menu-data="rcMenuData" />
 
-	<!-- Undefined assertion since index used in iteration -->
-	<UniverseUiShard
-		v-for="[shardUuid, shardEntry] in shardEntries"
-		:key="shardUuid"
-		v-model="shardEntry.model"
-		:shard="shardEntry.shard"
-		@update-menu="shardEntry.menuEntry.onUpdateMenu"
-	/>
+		<!-- Undefined assertion since index used in iteration -->
+		<UniverseUiShard
+			v-for="[shardUuid, shardEntry] in shardEntries"
+			:key="shardUuid"
+			v-model="shardEntry.model"
+			:shard="shardEntry.shard"
+			@update-menu="shardEntry.menuEntry.onUpdateMenu"
+		/>
 
-	<UniverseUiToolbar :shard-entries="(shardEntries as UniverseUiShardEntries)" :shard-menus="shardMenus" />
+		<UniverseUiToolbar :shard-entries="(shardEntries as UniverseUiShardEntries)" :shard-menus="shardMenus" />
+	</VLocaleProvider>
 </template>
 
 <script lang="ts">
 import { ComputedRef, Ref, ShallowRef, computed, defineComponent, shallowRef } from "vue";
+import { VLocaleProvider } from "vuetify/components";
 import { useStore } from "vuex";
 import { ClientUniverseStateRcMenuData, ThisVueStore, UniverseState, UniverseStore } from "../../client/gui";
 import { CompactToolbarMenu, useCompactToolbarMenuConsumer } from "../core/compact-toolbar";
+import { TextDirectionWords, textDirectionSymbol } from "../core/locale";
+import { Stores, useStores } from "../core/store";
 import { UniverseUiShardEntries } from "../core/universe-ui";
 import UniverseUiClick from "./universe-ui-click.vue";
 import UniverseUiInfoBar from "./universe-ui-info-bar.vue";
@@ -29,7 +34,7 @@ import UniverseUiShard from "./universe-ui-shard.vue";
 import UniverseUiToolbar from "./universe-ui-toolbar.vue";
 
 export default defineComponent({
-	components: { UniverseUiClick, UniverseUiInfoBar, UniverseUiShard, UniverseUiToolbar },
+	components: { UniverseUiClick, UniverseUiInfoBar, UniverseUiShard, UniverseUiToolbar, VLocaleProvider },
 
 	computed: {
 		/**
@@ -84,6 +89,38 @@ export default defineComponent({
 	// Force vue inference
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup() {
+		const stores: Stores = useStores();
+		// Infer store
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const recordStore = stores.useRecordStore();
+
+		const textDirectionRecord: Ref<TextDirectionWords> = recordStore.computedRecord<TextDirectionWords>({
+			defaultValue: TextDirectionWords.Auto,
+			id: textDirectionSymbol,
+			/**
+			 * Validator.
+			 *
+			 * @param value - Value to validate
+			 * @returns True, if value is valid
+			 */
+			validator(value: unknown): value is TextDirectionWords {
+				// Casting to enum type, as `includes()` should work with any value
+				return Object.values(TextDirectionWords).includes(value as TextDirectionWords);
+			}
+		});
+		// Set initial here for now
+		textDirectionRecord.value = TextDirectionWords.Auto;
+		const isRtl: Ref<boolean | undefined> = computed(() => {
+			switch (textDirectionRecord.value) {
+				case TextDirectionWords.Rtl:
+					return true;
+				case TextDirectionWords.Ltr:
+					return false;
+				default:
+					return undefined;
+			}
+		});
+
 		const { state }: UniverseStore = useStore() as unknown as UniverseStore;
 
 		const { universe }: UniverseState = state;
@@ -127,7 +164,7 @@ export default defineComponent({
 			);
 		}
 
-		return { shardEntries, shardMenus, state, updateShardEntries };
+		return { isRtl, shardEntries, shardMenus, state, updateShardEntries };
 	},
 
 	/**

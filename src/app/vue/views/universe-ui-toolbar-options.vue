@@ -8,12 +8,12 @@
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from "vue";
+import { PropType, Ref, defineComponent } from "vue";
 import { useTheme } from "vuetify/lib/framework.mjs";
 import { Theme, systemThemeLiteral } from "../../client/gui/themes";
 import { OverlayList, OverlayWindow } from "../components";
 import { CompactToolbarMenuItem } from "../core/compact-toolbar";
-import { useLocale } from "../core/locale";
+import { TextDirectionWords, textDirectionSymbol, useLocale } from "../core/locale";
 import { OverlayListItemEntry, OverlayListItemEntryType } from "../core/overlay";
 import { Stores, useStores } from "../core/store";
 
@@ -173,15 +173,27 @@ export default defineComponent({
 		 * @returns Text direction window item
 		 */
 		textDirectionWindowItem(): OverlayListItemEntry {
+			const { Auto: autoWord, ...restWords }: typeof TextDirectionWords = TextDirectionWords;
+
 			return {
 				icon: "fa-arrow-right-arrow-left",
 
-				id: "direction",
+				id: textDirectionSymbol,
 
 				items: [
-					{ name: "ltr", value: "ltr" },
-					{ name: "rtl", value: "rtl" },
-					{ name: "auto", value: "auto" }
+					// Auto
+					{
+						name: `${this.t(`textDirection.${autoWord}`)} (${this.t(
+							`textDirection.${this.isRtl ? TextDirectionWords.Rtl : TextDirectionWords.Ltr}`
+						)})`,
+						value: autoWord
+					},
+
+					// Rest
+					...Object.values(restWords).map(textDirectionWord => ({
+						name: `${this.t(`textDirection.${textDirectionWord}`)}`,
+						value: textDirectionWord
+					}))
 				],
 
 				name: this.t("menuItem.textDirection"),
@@ -306,7 +318,22 @@ export default defineComponent({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		const recordStore = stores.useRecordStore();
 
-		return { recordStore, ...useLocale(), themeGlobal: useTheme().global };
+		const textDirectionRecord: Ref<TextDirectionWords> = recordStore.computedRecord<TextDirectionWords>({
+			defaultValue: TextDirectionWords.Auto,
+			id: textDirectionSymbol,
+			/**
+			 * Validator.
+			 *
+			 * @param value - Value to validate
+			 * @returns True, if value is valid
+			 */
+			validator(value: unknown): value is TextDirectionWords {
+				// Casting to enum type, as `includes()` should work with any value
+				return Object.values(TextDirectionWords).includes(value as TextDirectionWords);
+			}
+		});
+
+		return { recordStore, ...useLocale(), textDirectionRecord, themeGlobal: useTheme().global };
 	},
 
 	watch: {

@@ -15,6 +15,20 @@ import { RtlInstance, useLocale as useVuetifyLocale } from "vuetify";
 import { Locale } from "../../common/locale";
 
 /**
+ * Text direction index.
+ */
+export const textDirectionSymbol: unique symbol = Symbol("text-direction");
+
+/**
+ * Words to describe text direction.
+ */
+export enum TextDirectionWords {
+	Auto = "auto",
+	Ltr = "ltr",
+	Rtl = "rtl"
+}
+
+/**
  * Fallback locale.
  *
  * @remarks
