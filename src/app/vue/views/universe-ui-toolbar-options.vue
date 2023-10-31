@@ -159,6 +159,15 @@ export default defineComponent({
 		},
 
 		/**
+		 * System theme.
+		 *
+		 * @returns Theme
+		 */
+		systemTheme(): Theme {
+			return this.isSystemThemeDark ? Theme.Dark : Theme.Light;
+		},
+
+		/**
 		 * Text direction window item.
 		 *
 		 * @returns Text direction window item
@@ -191,7 +200,7 @@ export default defineComponent({
 
 			if (typeof value === "string") {
 				if (value === systemThemeLiteral) {
-					return "dark";
+					return this.systemTheme;
 				}
 				return value;
 			}
@@ -212,12 +221,18 @@ export default defineComponent({
 
 				// False negative
 				// eslint-disable-next-line @typescript-eslint/typedef
-				items: [systemThemeLiteral, ...Object.values(Theme)].map(value => {
-					return {
-						name: this.t(`theme.${value}`),
-						value
-					};
-				}),
+				items: [
+					{
+						name: `System (${this.t(`theme.${this.systemTheme}`)})`,
+						value: systemThemeLiteral
+					},
+					...Object.values(Theme).map(value => {
+						return {
+							name: this.t(`theme.${value}`),
+							value
+						};
+					})
+				],
 				name: this.t("menuItem.theme"),
 
 				type: OverlayListItemEntryType.Select
@@ -230,6 +245,14 @@ export default defineComponent({
 	 */
 	created() {
 		this.$emit("update:modelValue", this.model);
+
+		// Watch system theme
+		this.darkThemeMatchMedia.addEventListener("change", event => {
+			this.isSystemThemeDark = event.matches;
+		});
+
+		// Set current theme record
+		this.recordStore.records[this.themeSymbol] = systemThemeLiteral;
 	},
 
 	/**
@@ -238,9 +261,16 @@ export default defineComponent({
 	 * @returns Universe data
 	 */
 	data() {
+		const darkThemeMatchMedia: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
+
 		// Infer type
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let data = {
+			darkThemeMatchMedia,
+
+			// Initial state only
+			isSystemThemeDark: darkThemeMatchMedia.matches,
+
 			// Symbol to index language in store records
 			languageSymbol: Symbol("language"),
 
