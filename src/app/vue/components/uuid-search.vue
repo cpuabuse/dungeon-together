@@ -6,7 +6,8 @@
 	<!-- Prevent not to trigger potential parent form -->
 	<VTextField
 		v-model="model"
-		label="Search templates"
+		clearable
+		placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 		append-inner-icon="fa-magnifying-glass"
 		hide-details
 		variant="solo-filled"
