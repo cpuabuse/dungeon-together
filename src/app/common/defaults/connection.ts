@@ -62,7 +62,8 @@ export enum MessageTypeWord {
  */
 export enum StatusNotificationWord {
 	Sync = "sync",
-	MimicAwaken = "mimic-awaken"
+	MimicAwaken = "mimic-awaken",
+	DamageDealt = "damage-dealt"
 }
 
 /**

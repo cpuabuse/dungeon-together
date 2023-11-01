@@ -85,12 +85,13 @@ const messages = {
 		},
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "You look around",
-			[StatusNotificationWord.MimicAwaken]: "Mimic awakens!"
+			[StatusNotificationWord.MimicAwaken]: "Mimic awakens!",
+			[StatusNotificationWord.DamageDealt]: "⚔️"
 		},
 		textDirection: {
 			[TextDirectionWords.Auto]: "Auto",
-			[TextDirectionWords.Ltr]: "LTR",
-			[TextDirectionWords.Rtl]: "RTL"
+			[TextDirectionWords.Ltr]: "Left-to-right",
+			[TextDirectionWords.Rtl]: "Right-to-left"
 		},
 		theme: {
 			[Theme.Dark]: "Dark",

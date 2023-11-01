@@ -15,7 +15,9 @@
 export enum ActionWords {
 	Attack = "attack",
 
-	/** Default action. */
+	/**
+	 * Default action.
+	 */
 	Interact = "interact",
 	Talk = "talk",
 	Use = "use",

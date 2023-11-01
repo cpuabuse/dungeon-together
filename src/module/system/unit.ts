@@ -4,19 +4,24 @@
 */
 
 /**
- * Units to be occupying cells within the grid.
- *
  * @file
+ * Units to be occupying cells within the grid.
  */
 
+import { MessageTypeWord, StatusNotificationWord } from "../../app/common/defaults/connection";
+import { CoreEnvelope } from "../../app/core/connection";
+import { LogLevel } from "../../app/core/error";
 import { ActionWords } from "../../app/server/action";
 import { ServerCell } from "../../app/server/cell";
+import { ServerPlayer } from "../../app/server/connection";
 import {
 	EntityKind,
 	EntityKindActionArgs,
 	EntityKindConstructorParams,
+	ServerEntity,
 	ServerEntityClass
 } from "../../app/server/entity";
+import { ServerShard } from "../../app/server/shard";
 import { ExclusiveKindClass } from "./exclusive";
 
 /**
@@ -42,9 +47,10 @@ export type UnitStats = {
  * Words for unit attributes.
  */
 enum UnitAttributeWords {
-	Damage = "attack",
+	Damage = "damage",
 	Rate = "rate",
-	Power = "power"
+	Power = "power",
+	Accuracy = "accuracy"
 }
 
 /**
@@ -75,17 +81,28 @@ enum UnitUniqueAttributeWords {
 }
 
 /**
- * Unit attributes.
+ * Helper type.
+ * Generates an object per attribute per role.
  */
-export type UnitAttributes = {
-	[Attribute in UnitUniqueAttributeWords]: number;
-} & {
+type PerTypePerRolePerAttribute<T> = {
 	[AttributeType in UnitAttributeTypeWords]: {
 		[Role in UnitAttributeRoleWords]: {
-			[Attribute in UnitAttributeWords]: number;
+			[Attribute in UnitAttributeWords]: T;
 		};
 	};
 };
+
+/**
+ * Unit resourcesUnique unit attributes.
+ */
+type UnitResources = {
+	[Attribute in UnitUniqueAttributeWords]: number;
+};
+
+/**
+ * Unit action attributes.
+ */
+type UnitAttributes = PerTypePerRolePerAttribute<number>;
 
 /**
  * Unit level information.
@@ -282,10 +299,14 @@ export function UnitKindClassFactory({
 
 		// Order is important
 		/* eslint-disable @typescript-eslint/member-ordering */
-		/** Default faction created once to save on cycles. */
+		/**
+		 * Default faction created once to save on cycles.
+		 */
 		public static defaultFaction: UnitFaction = new UnitFaction();
 
-		/** A faction unit belongs to. */
+		/**
+		 * A faction unit belongs to.
+		 */
 		public faction: UnitFaction = UnitKind.defaultFaction;
 		/* eslint-enable @typescript-eslint/member-ordering */
 
@@ -376,6 +397,7 @@ export function UnitKindClassFactory({
 
 					if (sourceIsUnit) {
 						this.healthPoints -= sourceKind.attack;
+						sourceKind.onAttackSource();
 					} else {
 						// Temporary do some damage from non units source
 						this.healthPoints--;
@@ -402,6 +424,44 @@ export function UnitKindClassFactory({
 				default:
 					// Action was not successful
 					return false;
+			}
+		}
+
+		/**
+		 * Called when unit was the source of attack.
+		 */
+		public onAttackSource(): void {
+			let { playerUuid }: ServerEntity = this.entity;
+
+			if (playerUuid) {
+				const shard: ServerShard = (this.entity.constructor as ServerEntityClass).universe.getShard(this.entity);
+
+				// Player controlling the source entity
+				const player: ServerPlayer | undefined = shard.players.get(playerUuid);
+
+				// Check if player exists and if it does, send a message
+				if (player && player.connection) {
+					player.connection.socket
+						.send(
+							new CoreEnvelope({
+								messages: [
+									{
+										body: { notificationId: StatusNotificationWord.DamageDealt, playerUuid: player.playerUuid },
+										type: MessageTypeWord.StatusNotification
+									}
+								]
+							})
+						)
+						.catch(error => {
+							(this.entity.constructor as ServerEntityClass).universe.log({
+								error: new Error(
+									`Failed to notify about mimic("entityUuid=${this.entity.entityUuid}" to player("playerUuid=${player.playerUuid}").`,
+									{ cause: error instanceof Error ? error : undefined }
+								),
+								level: LogLevel.Warning
+							});
+						});
+				}
 			}
 		}
 
