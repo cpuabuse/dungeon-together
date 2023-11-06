@@ -2,13 +2,15 @@
 <template>
 	<OverlayWindow v-model="isOptionsMenuDisplayed" icon="fa-list-check" :name="name">
 		<template #body>
-			<OverlayList :key="listKey" :items="modelValue.windowItems" />
+			<OverlayList :key="listKey" :items="[...modelValue.windowItems, fullscreenOverlayListItem]" />
 		</template>
 	</OverlayWindow>
 </template>
 
 <script lang="ts">
-import { PropType, Ref, defineComponent } from "vue";
+// Library just exports an object as default
+import screenfull from "screenfull";
+import { PropType, Ref, WritableComputedRef, computed, defineComponent, watch } from "vue";
 import { useTheme } from "vuetify/lib/framework.mjs";
 import { Theme, systemThemeLiteral } from "../../client/gui/themes";
 import { OverlayList, OverlayWindow } from "../components";
@@ -318,6 +320,57 @@ export default defineComponent({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		const recordStore = stores.useRecordStore();
 
+		const fullscreenSymbol: symbol = Symbol("fullscreen");
+		const isFullscreen: Ref<boolean> = recordStore.computedRecord({
+			id: fullscreenSymbol
+		});
+		const isDocumentFullscreen: WritableComputedRef<boolean> = computed({
+			/**
+			 * Getter for fullscreen.
+			 *
+			 * @returns True, if document is in fullscreen
+			 */
+			get(): boolean {
+				return screenfull.isFullscreen;
+			},
+			/**
+			 * Setter for fullscreen.
+			 *
+			 * @remarks
+			 * It seems that it is impossible to track F11 fullscreen.
+			 *
+			 * @param value - Value to set
+			 */
+			set(value: boolean): void {
+				if (isFullscreen.value !== screenfull.isFullscreen) {
+					if (value) {
+						screenfull.request().catch(() => {
+							// TODO: Log error through universe
+						});
+					} else {
+						screenfull.exit().catch(() => {
+							// TODO: Log error through universe
+						});
+					}
+				}
+			}
+		});
+		watch(isFullscreen, value => {
+			isDocumentFullscreen.value = value;
+		});
+		// This listener lives together with the fullscreen record, not the component, thus it is not necessary to de-register
+		screenfull.onchange(() => {
+			isFullscreen.value = screenfull.isFullscreen;
+		});
+
+		const fullscreenOverlayListItem: OverlayListItemEntry = {
+			icon: "fa-expand",
+			id: fullscreenSymbol,
+			// TODO: Add translation
+			name: "Fullscreen",
+			type: OverlayListItemEntryType.Switch
+		};
+
 		const textDirectionRecord: Ref<TextDirectionWords> = recordStore.computedRecord<TextDirectionWords>({
 			defaultValue: TextDirectionWords.Auto,
 			id: textDirectionSymbol,
@@ -333,7 +386,13 @@ export default defineComponent({
 			}
 		});
 
-		return { recordStore, ...useLocale(), textDirectionRecord, themeGlobal: useTheme().global };
+		return {
+			recordStore,
+			...useLocale(),
+			fullscreenOverlayListItem,
+			textDirectionRecord,
+			themeGlobal: useTheme().global
+		};
 	},
 
 	watch: {
