@@ -16,6 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { App } from "vue";
 import { createI18n, useI18n } from "vue-i18n";
 import { createVuetify } from "vuetify";
+import * as directives from "vuetify/directives";
 import { aliases, fa } from "vuetify/iconsets/fa-svg";
 import { ar, en, ja } from "vuetify/locale";
 import { createVueI18nAdapter } from "vuetify/locale/adapters/vue-i18n";
@@ -169,6 +170,7 @@ export function useVuetifyPlugin({
 	// Add Vuetify
 	app.use(
 		createVuetify({
+			directives,
 			icons: {
 				aliases,
 				defaultSet: "fa",

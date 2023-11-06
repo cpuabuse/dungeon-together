@@ -249,6 +249,11 @@ export function ClientShardFactory({
 						// #if _DEBUG_ENABLED
 						inputDebug({ input: inputInterface as InputInterface, symbol: lcSymbol });
 						// #endif
+
+						(this.constructor as ClientShardClass).universe.store.commit(
+							"updateRcMenuData",
+							null satisfies ClientUniverseStateRcMenuData
+						);
 					});
 
 					// Add listeners for level up input
