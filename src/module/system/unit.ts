@@ -8,6 +8,7 @@
  * Units to be occupying cells within the grid.
  */
 
+import { StatusNotification } from "../../app/client/connection";
 import { MessageTypeWord, StatusNotificationWord } from "../../app/common/defaults/connection";
 import { CoreEnvelope } from "../../app/core/connection";
 import { LogLevel } from "../../app/core/error";
@@ -397,7 +398,7 @@ export function UnitKindClassFactory({
 
 					if (sourceIsUnit) {
 						this.healthPoints -= sourceKind.attack;
-						sourceKind.onAttackSource();
+						sourceKind.onAttackSource({ damage: sourceKind.attack });
 					} else {
 						// Temporary do some damage from non units source
 						this.healthPoints--;
@@ -429,40 +430,69 @@ export function UnitKindClassFactory({
 
 		/**
 		 * Called when unit was the source of attack.
+		 *
+		 * @param param - Destructured parameter
 		 */
-		public onAttackSource(): void {
+		public onAttackSource({
+			damage
+		}: {
+			/**
+			 * Damage dealt.
+			 */
+			damage: number;
+		}): void {
+			this.sendStatusNotification?.({
+				notificationId: StatusNotificationWord.DamageDealt,
+				notificationParameters: { damage }
+			});
+		}
+
+		/**
+		 * The getter for a function, that sends status notification.
+		 * May return undefined.
+		 * This is an optimization so that preparation of parameters for a function call can be skipped, if return function cannot be executed in principle(`playerUuid` is not associated). In that case undefined is returned and caller statement is skipped.
+		 *
+		 * @returns Function to send notification
+		 */
+		public get sendStatusNotification(): undefined | ((param: StatusNotification) => void) {
 			let { playerUuid }: ServerEntity = this.entity;
 
 			if (playerUuid) {
-				const shard: ServerShard = (this.entity.constructor as ServerEntityClass).universe.getShard(this.entity);
+				return ({ notificationId, notificationParameters }: StatusNotification): void => {
+					const shard: ServerShard = (this.entity.constructor as ServerEntityClass).universe.getShard(this.entity);
 
-				// Player controlling the source entity
-				const player: ServerPlayer | undefined = shard.players.get(playerUuid);
+					// Player controlling the source entity
+					// For some reason `playerUuid` is seen as possibly undefined
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					const player: ServerPlayer | undefined = shard.players.get(playerUuid!);
 
-				// Check if player exists and if it does, send a message
-				if (player && player.connection) {
-					player.connection.socket
-						.send(
-							new CoreEnvelope({
-								messages: [
-									{
-										body: { notificationId: StatusNotificationWord.DamageDealt, playerUuid: player.playerUuid },
-										type: MessageTypeWord.StatusNotification
-									}
-								]
-							})
-						)
-						.catch(error => {
-							(this.entity.constructor as ServerEntityClass).universe.log({
-								error: new Error(
-									`Failed to notify about mimic("entityUuid=${this.entity.entityUuid}" to player("playerUuid=${player.playerUuid}").`,
-									{ cause: error instanceof Error ? error : undefined }
-								),
-								level: LogLevel.Warning
+					// Check if player exists and if it does, send a message
+					if (player && player.connection) {
+						player.connection.socket
+							.send(
+								new CoreEnvelope({
+									messages: [
+										{
+											body: { notificationId, notificationParameters, playerUuid: player.playerUuid },
+											type: MessageTypeWord.StatusNotification
+										}
+									]
+								})
+							)
+							.catch(error => {
+								(this.entity.constructor as ServerEntityClass).universe.log({
+									error: new Error(
+										`Failed to notify about mimic("entityUuid=${this.entity.entityUuid}" to player("playerUuid=${player.playerUuid}").`,
+										{ cause: error instanceof Error ? error : undefined }
+									),
+									level: LogLevel.Warning
+								});
 							});
-						});
-				}
+					}
+				};
 			}
+
+			return undefined;
 		}
 
 		/**

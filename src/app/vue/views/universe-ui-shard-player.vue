@@ -5,7 +5,7 @@
 <template>
 	<StatusNotification
 		class="universe-ui-shard-player-status-notification"
-		:notification-ids="player.notificationIds"
+		:notifications="player.statusNotifications"
 		@shift-player-notifications="shiftPlayerNotifications"
 	/>
 

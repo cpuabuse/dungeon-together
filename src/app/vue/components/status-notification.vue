@@ -7,10 +7,11 @@
 <template>
 	<div class="d-flex status-notification">
 		<VScrollYTransition group>
+			<!-- Asserting `notificationParameters` as there is no overload for undefined, yet it should work with the potential argument checks of the translation library -->
 			<StatusNotificationItem
-				v-for="({ text, uuid }, index) in notificationEntries"
+				v-for="({ notificationId, notificationParameters, uuid }, index) in notificationEntries"
 				:key="uuid"
-				:text="t(`statusNotification.${text}`)"
+				:text="t(`statusNotification.${notificationId}`, notificationParameters!)"
 				@timeout="() => timeout({ index })"
 			/>
 		</VScrollYTransition>
@@ -21,6 +22,7 @@
 import { v4 } from "uuid";
 import { PropType, defineComponent } from "vue";
 import { VScrollYTransition } from "vuetify/components";
+import { StatusNotification } from "../../client/connection";
 import { ThisVueStore } from "../../client/gui";
 import { Uuid } from "../../common/uuid";
 import { useLocale } from "../core/locale";
@@ -37,7 +39,7 @@ export default defineComponent({
 		 @returns Notification IDs length
 		 */
 		notificationIdsLength(): number {
-			return this.notificationIds.length;
+			return this.notifications.length;
 		}
 	},
 
@@ -66,21 +68,16 @@ export default defineComponent({
 	data() {
 		return {
 			maxNotificationEntries: 5,
-			notificationEntries: new Array<{
-				/**
-				 *Text.
-				 *
-				 * @returns Text
-				 */
-				text: string;
-
-				/**
-				 *Uuid.
-				 *
-				 * @returns Uuid
-				 */
-				uuid: Uuid;
-			}>(),
+			notificationEntries: new Array<
+				StatusNotification & {
+					/**
+					 *Uuid.
+					 *
+					 * @returns Uuid
+					 */
+					uuid: Uuid;
+				}
+			>(),
 			unsubscribeUpdateNotifications: null as (() => void) | null
 		};
 	},
@@ -89,15 +86,17 @@ export default defineComponent({
 
 	methods: {
 		/**
-		 *Method to synchronize notifications.
+		 * Method to synchronize notifications.
 		 */
 		synchronizeNotifications(): void {
-			for (; this.notificationEntries.length < this.maxNotificationEntries && this.notificationIds.length > 0; ) {
+			for (; this.notificationEntries.length < this.maxNotificationEntries && this.notifications.length > 0; ) {
 				this.notificationEntries.push({
 					// TODO: Change notification type
 					// Since array length is more than 0, always defined
-					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					text: this.notificationIds[0]!,
+					/* eslint-disable @typescript-eslint/no-non-null-assertion */
+					notificationId: this.notifications[0]!.notificationId,
+					notificationParameters: this.notifications[0]!.notificationParameters,
+					/* eslint-enable @typescript-eslint/no-non-null-assertion */
 					uuid: v4()
 				});
 				this.shiftPlayerNotifications();
@@ -125,9 +124,9 @@ export default defineComponent({
 	},
 
 	props: {
-		notificationIds: {
+		notifications: {
 			required: true,
-			type: Array as PropType<Array<string>>
+			type: Array as PropType<Array<StatusNotification>>
 		}
 	},
 

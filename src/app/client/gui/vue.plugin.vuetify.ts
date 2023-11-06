@@ -86,7 +86,7 @@ const messages = {
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "You look around",
 			[StatusNotificationWord.MimicAwaken]: "Mimic awakens!",
-			[StatusNotificationWord.DamageDealt]: "⚔️"
+			[StatusNotificationWord.DamageDealt]: "⚔️ {damage}"
 		},
 		textDirection: {
 			[TextDirectionWords.Auto]: "Auto",

@@ -63,7 +63,7 @@ export default defineComponent({
 		onShiftPlayerNotifications(player: ClientPlayer): void {
 			// We are mutating notifications which is not directly a player prop
 			// eslint-disable-next-line vue/no-mutating-props
-			player.notificationIds.shift();
+			player.statusNotifications.shift();
 		},
 
 		/**

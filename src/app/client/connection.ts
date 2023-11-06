@@ -73,6 +73,21 @@ export type StoryNotification = {
 };
 
 /**
+ * Status notification payload.
+ */
+export type StatusNotification = {
+	/**
+	 * Notification ID.
+	 */
+	notificationId: string;
+
+	/**
+	 * Notification parameters.
+	 */
+	notificationParameters?: Record<string, string | number>;
+};
+
+/**
  * Message type client receives.
  */
 export type ClientMessage =
@@ -141,12 +156,7 @@ export type ClientMessage =
 			/**
 			 * Message body.
 			 */
-			body: CoreMessagePlayerBody & {
-				/**
-				 * Notification ID.
-				 */
-				notificationId: string;
-			};
+			body: CoreMessagePlayerBody & StatusNotification;
 	  }
 	| {
 			/**
@@ -211,7 +221,7 @@ export class ClientPlayer extends CorePlayer<ClientConnection> {
 	 */
 	// False negative
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-	public notificationIds: Array<string> = new Array();
+	public statusNotifications: Array<StatusNotification> = new Array();
 
 	public storyNotifications: Array<StoryNotification> = new Array<StoryNotification>();
 }
@@ -359,7 +369,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 
 			// Status notification update
 			case MessageTypeWord.StatusNotification: {
-				this.getPlayerEntry(message.body)?.player.notificationIds.push(message.body.notificationId);
+				this.getPlayerEntry(message.body)?.player.statusNotifications.push(message.body);
 				this.universe.store.dispatch("updateNotifications").catch(error => {
 					this.universe.log({
 						error: new Error(`"Could not dispatch "updateNotifications" to universe store.`, {
