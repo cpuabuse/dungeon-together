@@ -237,8 +237,8 @@ export function ClientShardFactory({
 								(this.constructor as ClientShardClass).universe.store.commit("updateRcMenuData", {
 									cell,
 									type: ClientUniverseStateRcMenuDataWords.Cell,
-									x: inputInterface.x,
-									y: inputInterface.y
+									x: this.sceneWidth * (x + 1),
+									y: this.sceneHeight * (y + 1)
 								} satisfies ClientUniverseStateRcMenuData);
 							}
 						});
