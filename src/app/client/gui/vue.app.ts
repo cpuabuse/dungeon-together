@@ -13,6 +13,7 @@ import { Pinia, createPinia } from "pinia";
 import { App, Component, createApp } from "vue";
 import { Store, StoreOptions, createStore } from "vuex";
 import { Stores, composableStoreFactory } from "../../vue/core/store";
+import { ClientUniverse } from "../universe";
 import { useHljsPlugin } from "./vue.plugin.hljs";
 
 // Static init
@@ -28,12 +29,18 @@ export function createVueApp<State extends object = object>({
 	component,
 	state,
 	mutations,
-	actions
+	actions,
+	universe
 }: {
 	/**
 	 * Root component.
 	 */
 	component: Component;
+
+	/**
+	 * Universe.
+	 */
+	universe: ClientUniverse;
 
 	/**
 	 * State.
@@ -65,7 +72,7 @@ export function createVueApp<State extends object = object>({
 		state
 	});
 	const pinia: Pinia = createPinia();
-	const piniaStores: Stores = composableStoreFactory();
+	const piniaStores: Stores = composableStoreFactory({ universe });
 	app.use(store);
 	app.use(pinia);
 	app.provide("stores", piniaStores);

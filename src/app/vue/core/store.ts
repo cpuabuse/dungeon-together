@@ -12,6 +12,7 @@
 import { StoreDefinition, defineStore } from "pinia";
 import { WritableComputedRef, computed, inject } from "vue";
 import { UniverseStore } from "../../client/gui";
+import { ClientUniverse } from "../../client/universe";
 import { toCapitalized } from "../../common/text";
 import { MaybePartial } from "../../common/utility-types";
 
@@ -34,11 +35,19 @@ export type UpdateActionNames = (typeof updateActionNames)[number];
 /**
  * Provides object of stores to be generated/injected per app.
  *
+ * @param param - Destructured parameter
  * @returns Object of stores
  */
 // Infer composable types
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function composableStoreFactory() {
+export function composableStoreFactory({
+	universe
+}: {
+	/**
+	 * Universe.
+	 */
+	universe: ClientUniverse;
+}) {
 	/**
 	 * Helper type for subscribe object.
 	 */
@@ -77,7 +86,7 @@ export function composableStoreFactory() {
 	>;
 
 	/**
-	 * Store instace for update action store, used as `this`.
+	 * Store instance for update action store, used as `this`.
 	 */
 	type UpdateActionStoreInstance = ReturnType<UpdateActionStoreDefine>;
 
@@ -228,6 +237,18 @@ export function composableStoreFactory() {
 			}
 		}),
 
+		// Universe store
+		useUniverseStore: defineStore("universe", {
+			/**
+			 * State.
+			 *
+			 * @returns State
+			 */
+			state: () => {
+				return { universe };
+			}
+		}),
+
 		// Update actions store
 		useUpdateActionStore: defineStore("updateActions", {
 			actions: updateActionNames.reduce((result, actionName) => {
@@ -283,7 +304,7 @@ export type Stores = ReturnType<typeof composableStoreFactory>;
 /**
  * Per app stores object.
  *
- * @returns Object with uninstantiated stores
+ * @returns Object with un-instantiated stores
  */
 export function useStores(): Stores {
 	return inject("stores");
