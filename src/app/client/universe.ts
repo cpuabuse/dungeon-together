@@ -351,7 +351,8 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 					state.rcMenuData = data;
 				}
 			},
-			state: { rcMenuData: null, records: { alert: true }, theme: Theme.Dark, universe: this }
+			state: { rcMenuData: null, records: { alert: true }, theme: Theme.Dark, universe: this },
+			universe: this
 		});
 		this.vue = vue;
 		this.store = store;
