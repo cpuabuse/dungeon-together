@@ -1,5 +1,6 @@
 <template>
-	<div class="base-icon">
+	<!-- Flex needed for identical alignment within flex containers -->
+	<div class="base-icon d-flex">
 		<VIcon :icon="icon ?? (base64ModeSrc ? undefined : 'fa-carrot')">
 			<!--
 				Wrap image into icon to duplicate size.

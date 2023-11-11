@@ -1,18 +1,22 @@
 <!-- Universe UI bar -->
 <template>
-	<VSystemBar>
-		<span v-for="(level, levelKey) in gridLevels" :key="levelKey">{{ level }}</span>
+	<VSystemBar align="start">
+		<span>00:00</span>
+		<VDivider class="ms-1" inset vertical />
+		<BaseIcon icon="fa-arrow-down-up-across-line" class="ms-1" />
+		<span v-for="(level, levelKey) in gridLevels" :key="levelKey" class="ms-1">{{ level }}</span>
 	</VSystemBar>
 </template>
 
 <script lang="ts">
 import { PropType, Ref, defineComponent, shallowRef, watch } from "vue";
-import { VSystemBar } from "vuetify/components";
+import { VDivider, VSystemBar } from "vuetify/components";
+import { BaseIcon } from "../components";
 import { Stores, useStores } from "../core/store";
 import { UniverseUiShardEntries } from "../core/universe-ui";
 
 export default defineComponent({
-	components: { VSystemBar },
+	components: { BaseIcon, VDivider, VSystemBar },
 	props: {
 		shardEntries: {
 			/**
