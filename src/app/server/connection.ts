@@ -416,7 +416,6 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 					// eslint-disable-next-line @typescript-eslint/typedef
 					.map(([cellUuid, cell]) => {
 						let events: Array<CellEvent> = [...cell.events];
-						cell.clear();
 
 						return {
 							cellUuid,
@@ -458,6 +457,12 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 				]
 			})
 		);
+
+		// TODO: Should be part of uni lifecycle, with cell hook
+		grid.cells.forEach(cell => {
+			// Needs to be called for all cells, not only processed ones
+			cell.clear();
+		});
 	};
 
 	// TODO: Use visibility
