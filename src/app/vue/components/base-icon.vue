@@ -1,7 +1,7 @@
 <template>
 	<!-- Flex needed for identical alignment within flex containers -->
 	<div class="base-icon d-flex">
-		<VIcon :icon="icon ?? (base64ModeSrc ? undefined : 'fa-carrot')">
+		<VIcon :icon="icon ?? (base64ModeSrc ? undefined : 'fa-carrot')" :size="iconSize">
 			<!--
 				Wrap image into icon to duplicate size.
 				Image will keep aspect ratio and fit the icon.
@@ -13,10 +13,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { PropType, defineComponent } from "vue";
 import { VIcon, VImg } from "vuetify/components";
 import { ThisVueStore } from "../../client/gui";
 import { ClientMode } from "../../client/mode";
+import { ElementSize } from "../common/element";
 import { iconProps } from "../core/icon";
 
 export default defineComponent({
@@ -26,6 +27,22 @@ export default defineComponent({
 	},
 
 	computed: {
+		/**
+		 * Converts to size for Vuetify.
+		 *
+		 * @returns Vuetify size string
+		 */
+		iconSize(): string | undefined {
+			switch (this.size) {
+				case ElementSize.Small:
+					return "small";
+				case ElementSize.Large:
+					return "large";
+				default:
+					return undefined;
+			}
+		},
+
 		/**
 		 * Mode.
 		 *
@@ -61,6 +78,12 @@ export default defineComponent({
 		modeUuid: {
 			required: false,
 			type: String
+		},
+
+		size: {
+			default: ElementSize.Medium,
+			requried: false,
+			type: String as PropType<ElementSize>
 		}
 	},
 
