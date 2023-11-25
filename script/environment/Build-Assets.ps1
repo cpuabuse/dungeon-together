@@ -13,7 +13,8 @@ Param(
 	$Build
 )
 
-[ValidateNotNullOrEmpty()][string[]]$private:RootDir = Join-Path $PSScriptRoot ../ ../
+# Resolving path to remove relative navigation
+[ValidateNotNullOrEmpty()][string[]]$private:RootDir = Join-Path $PSScriptRoot ../ ../ -Resolve
 [ValidateNotNullOrEmpty()][string[]]$private:BuildPublicPath = Join-Path $RootDir build/$Environment/$Build-public
 
 Write-Output $BuildPublicPath;
