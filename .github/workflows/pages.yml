@@ -45,7 +45,6 @@ jobs:
       - name: Build
         shell: pwsh
         run: |
-          ./script/environment/Build-Assets.ps1 -Environment dev -Build standalone
           npx vite build
 
       # Deploy

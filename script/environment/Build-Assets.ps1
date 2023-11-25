@@ -17,7 +17,6 @@ Param(
 [ValidateNotNullOrEmpty()][string[]]$private:RootDir = Join-Path $PSScriptRoot ../ ../ -Resolve
 [ValidateNotNullOrEmpty()][string[]]$private:BuildPublicPath = Join-Path $RootDir build/$Environment/$Build-public
 
-Write-Output $BuildPublicPath;
 New-Item -ItemType Directory -Path $BuildPublicPath; if (-not $?) { throw }
 
 # CSS
