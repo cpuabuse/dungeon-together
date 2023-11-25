@@ -21,18 +21,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: true
-
-      # Assets
-      - name: Use Deno 1
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-      - name: Assets
-        shell: pwsh
-        run: |
-          ./script/environment/Build-Assets.ps1 -Environment dev -Build standalone
-
-      # Build
+      # Dependencies
       - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
@@ -41,6 +30,21 @@ jobs:
         shell: pwsh
         run: |
           npm install
+      - name: Use Deno 1
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      # Assets
+      - name: Assets
+        shell: pwsh
+        run: |
+          ./script/environment/Build-Assets.ps1 -Environment dev -Build standalone
+
+      # Build
+      - name: Build
+        shell: pwsh
+        run: |
           ./script/environment/Build-Assets.ps1 -Environment dev -Build standalone
           npx vite build
 
