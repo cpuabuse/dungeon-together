@@ -7,11 +7,13 @@
  * @file Client connection to server.
  */
 
+import { join } from "path";
 import { Howl } from "howler";
 import nextTick from "next-tick";
 import { ColorMatrixFilter } from "pixi.js";
 import { DeferredPromise } from "../common/async";
 import { DirectionWord, MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
+import { env } from "../common/env";
 import { defaultFadeInMs, defaultFadeOutMs } from "../common/sound";
 import { Uuid } from "../common/uuid";
 import { Vector, defaultVector } from "../common/vector";
@@ -179,7 +181,7 @@ let splat: Howl = new Howl({
 	sprite: {
 		default: [defaultFadeInMs, defaultFadeOutMs]
 	},
-	src: ["/sound/effects/splattt-6295.mp3"]
+	src: [join(env.pathToRoot, "sound/effects/splattt-6295.mp3")]
 });
 
 // Allowed directions
