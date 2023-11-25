@@ -16,6 +16,7 @@ Param(
 [ValidateNotNullOrEmpty()][string[]]$private:RootDir = Join-Path $PSScriptRoot ../ ../
 [ValidateNotNullOrEmpty()][string[]]$private:BuildPublicPath = Join-Path $RootDir build/$Environment/$Build-public
 
+Write-Output $BuildPublicPath;
 npx mkdirp $BuildPublicPath; if (-not $?) { throw }
 
 # CSS
