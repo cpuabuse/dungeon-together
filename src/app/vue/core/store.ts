@@ -17,6 +17,31 @@ import { toCapitalized } from "../../common/text";
 import { MaybePartial } from "../../common/utility-types";
 
 /**
+ * Words to refer to stores.
+ */
+export enum StoreWord {
+	/**
+	 * Record store.
+	 */
+	Record = "record",
+
+	/**
+	 * Universe store.
+	 */
+	Universe = "universe",
+
+	/**
+	 * Update action store.
+	 */
+	UpdateAction = "updateAction"
+}
+
+/**
+ * Helper type for use name generation.
+ */
+type UseStoreWordStore<Word extends StoreWord> = `use${Capitalize<Word>}Store`;
+
+/**
  * Names for actions in `useUpdateActionsStore`.
  */
 // Infer const type
@@ -90,15 +115,25 @@ export function composableStoreFactory({
 	 */
 	type UpdateActionStoreInstance = ReturnType<UpdateActionStoreDefine>;
 
+	/**
+	 * Helper function that generates names for use store functions.
+	 *
+	 * @param key - Store name
+	 * @returns Name of the store use function
+	 */
+	function k<Word extends StoreWord>(key: Word): UseStoreWordStore<Word> {
+		return `use${toCapitalized({ text: key })}Store`;
+	}
+
 	return {
 		// Records store
-		useRecordStore: defineStore("new-records", {
+		[k(StoreWord.Record)]: defineStore(StoreWord.Record, {
 			actions: {
 				/**
 				 * Generates computed property for record.
 				 *
 				 * @see `getRecord()` for default value and validator
-				 * @param param - Desctructured parameter
+				 * @param param - Destructured parameter
 				 * @returns Computed property
 				 */
 				computedRecord<Type = boolean>({
@@ -238,7 +273,7 @@ export function composableStoreFactory({
 		}),
 
 		// Universe store
-		useUniverseStore: defineStore("universe", {
+		[k(StoreWord.Universe)]: defineStore(StoreWord.Universe, {
 			/**
 			 * State.
 			 *
@@ -249,8 +284,8 @@ export function composableStoreFactory({
 			}
 		}),
 
-		// Update actions store
-		useUpdateActionStore: defineStore("updateActions", {
+		// Update action store
+		[k(StoreWord.UpdateAction)]: defineStore(StoreWord.UpdateAction, {
 			actions: updateActionNames.reduce((result, actionName) => {
 				// Cannot verify type for dynamic keys, so have to be careful that this is exhaustive
 				return {
@@ -293,6 +328,8 @@ export function composableStoreFactory({
 				};
 			}, {} as UpdateActionStorePrimaryCallbackAndListenerRecord)
 		})
+	} satisfies {
+		[Word in StoreWord as UseStoreWordStore<Word>]: unknown;
 	};
 }
 
@@ -300,6 +337,11 @@ export function composableStoreFactory({
  * Type of stores object for injection.
  */
 export type Stores = ReturnType<typeof composableStoreFactory>;
+
+/**
+ * Extract store type.
+ */
+export type Store<Word extends StoreWord> = ReturnType<Stores[UseStoreWordStore<Word>]>;
 
 /**
  * Per app stores object.
