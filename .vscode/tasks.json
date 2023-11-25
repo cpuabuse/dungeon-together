@@ -40,6 +40,16 @@
 				"isDefault": false
 			},
 			"detail": "Serve Vite"
+		},
+		{
+			"label": "stg-standalone-vite-build",
+			"type": "shell",
+			"command": "npx vite build --config vite.config/staging.standalone.vite.config",
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"detail": "Build Vite"
 		}
 	]
 }

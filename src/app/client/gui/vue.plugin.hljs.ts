@@ -9,12 +9,14 @@
 
 // Load common languages
 import "highlight.js/lib/common";
+import { join } from "path";
 import vueHljs from "@highlightjs/vue-plugin";
 import { App } from "vue";
+import { env } from "../../common/env";
 
 // Statically initialize css
-injectLinkCss({ path: "/css/hljs/a11y-light.css", title: "a11y-light" });
-injectLinkCss({ path: "/css/hljs/a11y-dark.css", title: "a11y-dark" }).disabled = false;
+injectLinkCss({ path: join(env.pathToRoot, "/css/hljs/a11y-light.css"), title: "a11y-light" });
+injectLinkCss({ path: join(env.pathToRoot, "css/hljs/a11y-dark.css"), title: "a11y-dark" }).disabled = false;
 
 /**
  * Uses HLJS plugin on app.

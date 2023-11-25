@@ -17,8 +17,9 @@ import inject from "@rollup/plugin-inject";
 import vue from "@vitejs/plugin-vue";
 import glslify from "rollup-plugin-glslify";
 import jscc from "rollup-plugin-jscc";
-import nodePolyfills from "rollup-plugin-polyfill-node";
 import { UserConfigExport } from "vite";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
+import { ViteDefine } from "../src/app/common/env";
 
 /**
  * Relative depth of this file to project root, when compiled to JS.
@@ -77,20 +78,18 @@ export function defineBase({
 				input: join(...rootDir, "src", "html", `${build}.html`),
 
 				// Build only plugins
-				plugins: [
-					/*
-						Polyfill "url", and other modules.
-						Has to come before resolve, to replace the builtin modules, etc.
-						Apparently is combined with globals plugin.
-						Also seems it needs to be as part of rollup options.
-					*/
-					nodePolyfills()
-				]
+				plugins: []
 			},
 
 			// Build source map
 			sourcemap: !isProduction
 		},
+
+		define: Object.entries({
+			__VITE_DEFINE_PATH_TO_ROOT__: isProduction ? "./" : "../../"
+			// ESLint doesn't infer
+			// eslint-disable-next-line @typescript-eslint/typedef
+		} satisfies ViteDefine).reduce((result, [key, value]) => ({ ...result, [key]: JSON.stringify(value) }), {}),
 
 		esbuild: {
 			// Force-transform the JSX here, so can set to `preserve` in `tsconfig`, and keep compilation linting
@@ -116,7 +115,16 @@ export function defineBase({
 			jscc({
 				include: join(...rootDir, "src", "**", "*"),
 				values: { _DEBUG_ENABLED: !isProduction }
-			})
+			}),
+
+			/*
+				Polyfill "url", and other modules.
+				Has to come before resolve, to replace the builtin modules, etc.
+				Apparently is combined with globals plugin.
+				Also seems it needs to be as part of rollup options.
+				This specific library works with Vite out of the box.
+			*/
+			nodePolyfills()
 		],
 
 		// For `preview`

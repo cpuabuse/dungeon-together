@@ -16,24 +16,41 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+      # Checkout
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: true
-      - name: Use Node.js 18
+
+      # Assets
+      - name: Use Deno 1
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - name: Assets
+        shell: pwsh
+        run: |
+          ./script/environment/Build-Assets.ps1 -Environment dev -Build standalone
+
+      # Build
+      - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 20
       - name: Install
+        shell: pwsh
         run: |
           npm install
-          npm run build:run:standalone:browser
+          ./script/environment/Build-Assets.ps1 -Environment dev -Build standalone
+          npx vite build
+
+      # Deploy
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: "build/stage/standalone"
+          path: "build/dev/standalone"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1

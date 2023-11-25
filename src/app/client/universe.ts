@@ -7,6 +7,7 @@
  * @file Client universe
  */
 
+import { join } from "path";
 import Hammer from "hammerjs";
 import type HammerManager from "hammerjs";
 import { Howl, Howler } from "howler";
@@ -18,6 +19,7 @@ import { App } from "vue";
 import { Store } from "vuex";
 import { DeferredPromise } from "../common/async";
 import { defaultModeUuid } from "../common/defaults";
+import { env } from "../common/env";
 import { Uuid } from "../common/uuid";
 import { CoreArgIds } from "../core/arg";
 import { LogLevel } from "../core/error";
@@ -156,7 +158,7 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 					modeUuid,
 					new ClientMode({
 						modeUuid,
-						paths
+						paths: paths.map(path => join(env.pathToRoot, path))
 					})
 				] as const
 		)
@@ -399,9 +401,21 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 
 				// Sound
 				let bgSounds: Array<Howl> = [
-					{ endTime: 106000, src: "/sound/lexin-music/cinematic-ambient-piano-118668.mp3", startTime: 0 },
-					{ endTime: 131000, src: "/sound/lexin-music/cinematic-documentary-115669.mp3", startTime: 0 },
-					{ endTime: 88000, src: "/sound/amaranta-music/light-and-darkness-110414.mp3", startTime: 25000 }
+					{
+						endTime: 106000,
+						src: join(env.pathToRoot, "sound/lexin-music/cinematic-ambient-piano-118668.mp3"),
+						startTime: 0
+					},
+					{
+						endTime: 131000,
+						src: join(env.pathToRoot, "sound/lexin-music/cinematic-documentary-115669.mp3"),
+						startTime: 0
+					},
+					{
+						endTime: 88000,
+						src: join(env.pathToRoot, "sound/amaranta-music/light-and-darkness-110414.mp3"),
+						startTime: 25000
+					}
 					// False negative
 					// eslint-disable-next-line @typescript-eslint/typedef
 				].map(({ src, startTime, endTime }, index, array) => {
