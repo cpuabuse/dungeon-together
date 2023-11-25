@@ -16,33 +16,32 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      # Checkout
+      # Checkout & Dependencies
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: true
-      # Dependencies
       - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
           node-version: 20
-      - name: Install
-        shell: pwsh
-        run: |
-          npm install
       - name: Use Deno 1
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
 
-      # Assets
-      - name: Assets
+      # Install
+      - name: Install
+        shell: pwsh
+        run: |
+          npm install
+
+      # Build
+      - name: Build Assets
         shell: pwsh
         run: |
           ./script/environment/Build-Assets.ps1 -Environment dev -Build standalone
-
-      # Build
-      - name: Build
+      - name: Build App
         shell: pwsh
         run: |
           npx vite build

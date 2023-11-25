@@ -18,9 +18,11 @@
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import { join } from "path";
 import { StandaloneApplication } from "../app/application/standalone";
 import { ClientConnection, ClientMessage } from "../app/client/connection";
 import { ClientUniverse } from "../app/client/universe";
+import { env } from "../app/common/env";
 import { Uuid } from "../app/common/uuid";
 import { CoreStandaloneSocket, processInitWord } from "../app/core/connection";
 import { CoreLog, LogLevel } from "../app/core/error";
@@ -40,7 +42,7 @@ async function main(): Promise<void> {
 		records: [{ depends: {}, factory: systemModuleFactory, name: "system" }],
 		yamlList: {
 			cave: {
-				path: "/data/shard/cave.dt.yml",
+				path: join(env.pathToRoot, "data/shard/cave.dt.yml"),
 				type: "url"
 			}
 		}
