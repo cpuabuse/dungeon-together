@@ -388,7 +388,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 				let player: ClientPlayer | undefined = this.getPlayerEntry(message.body)?.player;
 				if (player) {
 					player.storyNotifications.push(message.body);
-					this.universe.piniaStores.useUpdateActionStore().updateStoryNotification();
+					this.universe.piniaStores.useUniverseStore().updateStoryNotification();
 				} else {
 					errorResult = new Error(`"Player(playerUuid="${message.body.playerUuid}") not found.`);
 				}

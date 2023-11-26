@@ -55,7 +55,7 @@ import Color from "color";
 import { PropType, Ref, computed, defineComponent, ref } from "vue";
 import { VTable } from "vuetify/components";
 import { ClientPlayer } from "../../client/connection";
-import { ThisVueStore, UniverseState } from "../../client/gui";
+import { ThisVueStore } from "../../client/gui";
 import { ClientShard } from "../../client/shard";
 import { Uuid } from "../../common/uuid";
 import { CoreDictionary } from "../../core/connection";
@@ -65,7 +65,7 @@ import StoryNotification from "../components/story-notification.vue";
 import { useLocale } from "../core/locale";
 import { OverlayListItemEntryType, OverlayListItems, overlayBusEmits, useOverlayBusSource } from "../core/overlay";
 import { statusNotificationEmits, useStatusNotification } from "../core/status-notification";
-import { Stores, useStores } from "../core/store";
+import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { StoryNotificationEntry } from "../core/story-notification";
 import { UniverseUiPlayerModel } from "../core/universe-ui";
 import StatsBar from "../stats-bar.vue";
@@ -88,6 +88,7 @@ export default defineComponent({
 	 * Initial model update is not necessary, as parent created model with correct data, but if that changes, model update must be added.
 	 */
 	created() {
+		// TODO: Add `updatePlayerDictionary` to pinia universe store
 		this.unsubscribeUpdateModel = (this as unknown as ThisVueStore).$store.subscribeAction(action => {
 			if (action.type === "updatePlayerDictionary") {
 				this.model = { dictionary: this.player.dictionary };
@@ -122,14 +123,12 @@ export default defineComponent({
 	 * @returns Data
 	 */
 	data() {
-		const { universe }: UniverseState = (this as unknown as ThisVueStore).$store.state;
 		return {
 			hpColor: new Color("#1F8C2F"),
 			model: this.modelValue,
 			mpColor: new Color("#051DE8"),
 			stats: new Array<Stats>(),
 			storyNotificationMenuDisplaySymbol: Symbol("story-notification-menu-display"),
-			universe,
 			unsubscribeUpdateModel: null as (() => void) | null
 		};
 	},
@@ -172,15 +171,13 @@ export default defineComponent({
 	// Force vue inference
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, { emit }) {
-		const store: Stores = useStores();
-		// Infer store
-		// eslint-disable-next-line @typescript-eslint/typedef
-		const { onUpdateStoryNotification } = store.useUpdateActionStore();
+		const stores: Stores = useStores();
+		const { onUpdateStoryNotification }: Store<StoreWord.Universe> = stores.useUniverseStore();
 
 		// Infer composable
-		// eslint-disable-next-line @typescript-eslint/typedef
-		const recordStore = store.useRecordStore();
+		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 
+		const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
 		// Infer composable
 		// eslint-disable-next-line @typescript-eslint/typedef
 		const { t } = useLocale();
@@ -267,7 +264,7 @@ export default defineComponent({
 				}
 			}
 		});
-		return { displayItems, shiftPlayerNotifications, storyNotificationEntries };
+		return { displayItems, shiftPlayerNotifications, storyNotificationEntries, universe };
 	},
 
 	/**

@@ -17,7 +17,7 @@ import { OverlayList, OverlayWindow } from "../components";
 import { CompactToolbarMenuItem } from "../core/compact-toolbar";
 import { TextDirectionWords, textDirectionSymbol, useLocale } from "../core/locale";
 import { OverlayListItemEntry, OverlayListItemEntryType } from "../core/overlay";
-import { Stores, useStores } from "../core/store";
+import { Store, StoreWord, Stores, useStores } from "../core/store";
 
 /**
  * Model type helper.
@@ -316,9 +316,7 @@ export default defineComponent({
 	 */
 	setup() {
 		const stores: Stores = useStores();
-		// Infer store
-		// eslint-disable-next-line @typescript-eslint/typedef
-		const recordStore = stores.useRecordStore();
+		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 
 		const fullscreenSymbol: symbol = Symbol("fullscreen");
 		const isFullscreen: Ref<boolean> = recordStore.computedRecord({

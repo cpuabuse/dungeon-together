@@ -77,7 +77,7 @@ import {
 	compactToolbarSharedMenuProps
 } from "./core/compact-toolbar";
 import { useLocale } from "./core/locale";
-import { Stores, useStores } from "./core/store";
+import { Store, StoreWord, Stores, useStores } from "./core/store";
 
 /**
  * Item with meta.
@@ -366,9 +366,8 @@ export default defineComponent({
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup() {
 		const stores: Stores = useStores();
-		// Infer store;
-		// eslint-disable-next-line @typescript-eslint/typedef
-		const recordStore = stores.useRecordStore();
+
+		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 
 		return { recordStore, ...useLocale() };
 	},

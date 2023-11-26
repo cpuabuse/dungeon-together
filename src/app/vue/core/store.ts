@@ -28,12 +28,7 @@ export enum StoreWord {
 	/**
 	 * Universe store.
 	 */
-	Universe = "universe",
-
-	/**
-	 * Update action store.
-	 */
-	UpdateAction = "updateAction"
+	Universe = "universe"
 }
 
 /**
@@ -42,7 +37,7 @@ export enum StoreWord {
 type UseStoreWordStore<Word extends StoreWord> = `use${Capitalize<Word>}Store`;
 
 /**
- * Names for actions in `useUpdateActionsStore`.
+ * Names for actions in `useUniverseStore.actions`.
  */
 // Infer const type
 // eslint-disable-next-line @typescript-eslint/typedef
@@ -53,7 +48,7 @@ export const updateActionNames = [
 ] as const;
 
 /**
- * Union of action names in `useUpdateActionsStore`.
+ * Union of action names in `useUniverseStore.actions`.
  */
 export type UpdateActionNames = (typeof updateActionNames)[number];
 
@@ -274,18 +269,7 @@ export function composableStoreFactory({
 
 		// Universe store
 		[k(StoreWord.Universe)]: defineStore(StoreWord.Universe, {
-			/**
-			 * State.
-			 *
-			 * @returns State
-			 */
-			state: () => {
-				return { universe };
-			}
-		}),
-
-		// Update action store
-		[k(StoreWord.UpdateAction)]: defineStore(StoreWord.UpdateAction, {
+			// Update action store
 			actions: updateActionNames.reduce((result, actionName) => {
 				// Cannot verify type for dynamic keys, so have to be careful that this is exhaustive
 				return {
@@ -326,7 +310,16 @@ export function composableStoreFactory({
 						});
 					}
 				};
-			}, {} as UpdateActionStorePrimaryCallbackAndListenerRecord)
+			}, {} as UpdateActionStorePrimaryCallbackAndListenerRecord),
+
+			/**
+			 * State.
+			 *
+			 * @returns State
+			 */
+			state: () => {
+				return { universe };
+			}
 		})
 	} satisfies {
 		[Word in StoreWord as UseStoreWordStore<Word>]: unknown;

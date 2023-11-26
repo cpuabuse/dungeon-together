@@ -112,7 +112,7 @@ export function ClientGridClassFactory({
 				this.levelIndex[level].visible = true;
 				this.levelIndex[this.currentLevel].visible = false;
 				this.currentLevel = level;
-				(this.constructor as ClientGridClass).universe.piniaStores.useUpdateActionStore().updateGridLevel();
+				(this.constructor as ClientGridClass).universe.piniaStores.useUniverseStore().updateGridLevel();
 			}
 		}
 

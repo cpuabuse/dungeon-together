@@ -26,7 +26,7 @@ import { useStore } from "vuex";
 import { ClientUniverseStateRcMenuData, ThisVueStore, UniverseState, UniverseStore } from "../../client/gui";
 import { CompactToolbarMenu, useCompactToolbarMenuConsumer } from "../core/compact-toolbar";
 import { TextDirectionWords, textDirectionSymbol } from "../core/locale";
-import { Stores, useStores } from "../core/store";
+import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { UniverseUiShardEntries } from "../core/universe-ui";
 import UniverseUiClick from "./universe-ui-click.vue";
 import UniverseUiInfoBar from "./universe-ui-info-bar.vue";
@@ -90,9 +90,11 @@ export default defineComponent({
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup() {
 		const stores: Stores = useStores();
-		// Infer store
-		// eslint-disable-next-line @typescript-eslint/typedef
-		const recordStore = stores.useRecordStore();
+		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
+		const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
+
+		// TODO: Migrate `RcMenuData` to pinia store
+		const { state }: UniverseStore = useStore() as unknown as UniverseStore;
 
 		const textDirectionRecord: Ref<TextDirectionWords> = recordStore.computedRecord<TextDirectionWords>({
 			defaultValue: TextDirectionWords.Auto,
@@ -120,10 +122,6 @@ export default defineComponent({
 					return undefined;
 			}
 		});
-
-		const { state }: UniverseStore = useStore() as unknown as UniverseStore;
-
-		const { universe }: UniverseState = state;
 
 		// This value is expected to be rewritten fully on change by child nodes
 		// Cast, since type information lost in ref

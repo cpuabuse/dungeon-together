@@ -12,7 +12,7 @@
 import { PropType, Ref, defineComponent, shallowRef, watch } from "vue";
 import { VDivider, VSystemBar } from "vuetify/components";
 import { BaseIcon } from "../components";
-import { Stores, useStores } from "../core/store";
+import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { UniverseUiShardEntries } from "../core/universe-ui";
 
 export default defineComponent({
@@ -39,10 +39,8 @@ export default defineComponent({
 	 */
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props) {
-		const store: Stores = useStores();
-		// Infer store
-		// eslint-disable-next-line @typescript-eslint/typedef
-		const { onUpdateGridLevel } = store.useUpdateActionStore();
+		const stores: Stores = useStores();
+		const { onUpdateGridLevel }: Store<StoreWord.Universe> = stores.useUniverseStore();
 
 		const gridLevels: Ref<Array<number>> = shallowRef(new Array<number>());
 		// Watch shards to be reactive on shard add/remove

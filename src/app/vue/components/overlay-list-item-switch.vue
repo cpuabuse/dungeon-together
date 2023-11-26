@@ -45,7 +45,7 @@ import {
 	useOverlayListItemShared,
 	useOverlayListShared
 } from "../core/overlay";
-import { Stores, useStores } from "../core/store";
+import { Store, StoreWord, Stores, useStores } from "../core/store";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 
 export default defineComponent({
@@ -92,9 +92,7 @@ export default defineComponent({
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, { emit }) {
 		const stores: Stores = useStores();
-		// Infer store
-		// eslint-disable-next-line @typescript-eslint/typedef
-		const recordStore = stores.useRecordStore();
+		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 
 		return {
 			recordStore,

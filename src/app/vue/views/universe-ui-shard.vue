@@ -15,10 +15,11 @@
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import { ClientPlayer } from "../../client/connection";
-import { ThisVueStore, UniverseState } from "../../client/gui";
+import { ThisVueStore } from "../../client/gui";
 import { ClientShard } from "../../client/shard";
 import { overlayBusToCompactToolbarMenuEmits, useOverlayBusToCompactToolbarMenuSource } from "../core/compact-toolbar";
 import { useOverlayBusConsumer } from "../core/overlay";
+import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { PlayerEntries, UniverseUiShardModel } from "../core/universe-ui";
 import UniverseUiShardPlayer from "./universe-ui-shard-player.vue";
 
@@ -31,6 +32,7 @@ export default defineComponent({
 	created() {
 		this.updatePlayerEntries();
 
+		// TODO: Add unsubscribe to Pinia store
 		this.unsubscribeUpdatePlayerEntries = (this as unknown as ThisVueStore).$store.subscribeAction(action => {
 			if (action.type === "updateUniverse") {
 				this.updatePlayerEntries();
@@ -44,10 +46,8 @@ export default defineComponent({
 	 * @returns Data
 	 */
 	data() {
-		const { universe }: UniverseState = (this as unknown as ThisVueStore).$store.state;
 		return {
 			playerEntries: new Array() as PlayerEntries,
-			universe,
 			unsubscribeUpdatePlayerEntries: null as (() => void) | null
 		};
 	},
@@ -112,6 +112,9 @@ export default defineComponent({
 	// Force vue inference
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, { emit }) {
+		const stores: Stores = useStores();
+		const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
+
 		// Infer composable return
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let usedOverlayBusConsumer = useOverlayBusConsumer();
@@ -127,7 +130,7 @@ export default defineComponent({
 			usedOverlayBusConsumer
 		});
 
-		return { ...usedOverlayBusConsumer, ...usedOverlayBusToCompactToolbarMenuSource };
+		return { ...usedOverlayBusConsumer, ...usedOverlayBusToCompactToolbarMenuSource, universe };
 	},
 
 	/**

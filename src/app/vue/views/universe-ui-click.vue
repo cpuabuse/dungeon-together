@@ -12,7 +12,7 @@ import { PropType, defineComponent } from "vue";
 import { ClientCell } from "../../client/cell";
 import { ClientPlayer } from "../../client/connection";
 import { ClientEntity } from "../../client/entity";
-import { ClientUniverseStateRcMenuDataWords, ThisVueStore, UniverseState } from "../../client/gui";
+import { ClientUniverseStateRcMenuDataWords, UniverseState } from "../../client/gui";
 import { MessageTypeWord } from "../../common/defaults/connection";
 import { CoreEnvelope, processQueueWord } from "../../core/connection";
 import { LogLevel } from "../../core/error";
@@ -28,6 +28,7 @@ import {
 	OverlayListItems,
 	OverlayListType
 } from "../core/overlay";
+import { Store, StoreWord, Stores, useStores } from "../core/store";
 
 export default defineComponent({
 	components: { OverlayClick, OverlayList },
@@ -166,7 +167,6 @@ export default defineComponent({
 	data() {
 		return {
 			isOverlayClickDisplayed: true,
-			universe: (this as unknown as ThisVueStore).$store.state.universe,
 			previousCell: null as ClientCell | null
 		};
 	},
@@ -285,8 +285,27 @@ export default defineComponent({
 		}
 	},
 
+	/**
+	 * Setup hook.
+	 *
+	 * @returns Universe store
+	 */
+	setup() {
+		const stores: Stores = useStores();
+		const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
+
+		return {
+			universe
+		};
+	},
+
 	watch: {
 		rcMenuData: {
+			/**
+			 * Process menu update.
+			 *
+			 * @param value - Value
+			 */
 			handler(value: UniverseState["rcMenuData"]): void {
 				let newCell: ClientCell | null = null;
 

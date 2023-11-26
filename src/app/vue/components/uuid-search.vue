@@ -23,11 +23,10 @@
 <script setup lang="ts">
 import { Ref, ref, unref } from "vue";
 import { VCheckbox, VTextField } from "vuetify/components";
-import { useStore } from "vuex";
 import { ClientEntity } from "../../client/entity";
-import { UniverseState, UniverseStore } from "../../client/gui";
 import { Uuid } from "../../common/uuid";
 import { LogLevel } from "../../core/error";
+import { Store, StoreWord, Stores, useStores } from "../core/store";
 
 /**
  * Return type of set timeout function.
@@ -55,11 +54,14 @@ const isNotFoundLogged: Ref<boolean> = ref(false);
 let loadingTimeoutHandle: Ref<TimeoutHandle | null> = ref(null);
 
 /**
+ * Stores.
+ */
+const stores: Stores = useStores();
+
+/**
  * Universe store.
  */
-const {
-	state: { universe }
-}: UniverseStore = useStore<UniverseState>();
+const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
 
 /**
  * Loading animation triggered temporarily to indicate to user that search is/was processed.

@@ -16,7 +16,7 @@
 <script lang="ts">
 import Color from "color";
 import { PropType, defineComponent } from "vue";
-import { ThisVueStore, UniverseStore } from "../../client/gui";
+import { UniverseStore } from "../../client/gui";
 import { Uuid } from "../../common/uuid";
 import CompactToolbar from "../compact-toolbar.vue";
 import { OverlayList, OverlayWindow } from "../components";
@@ -24,7 +24,7 @@ import UuidSearch from "../components/uuid-search.vue";
 import { CompactToolbarMenu, CompactToolbarMenuBaseProps, CompactToolbarMenuItem } from "../core/compact-toolbar";
 import { useLocale } from "../core/locale";
 import { OverlayListItemEntry, OverlayListItemEntryType, OverlayListItems, OverlayListTabs } from "../core/overlay";
-import { Stores, useStores } from "../core/store";
+import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { UniverseUiPlayerEntry, UniverseUiShardEntries } from "../core/universe-ui";
 import UniverseUiToolbarOptions from "./universe-ui-toolbar-options.vue";
 
@@ -244,8 +244,6 @@ export default defineComponent({
 
 			playerEntries: new Array() as PlayerEntries,
 
-			universe: (this as unknown as ThisVueStore).$store.state.universe,
-
 			unsubscribe: null as (() => void) | null
 		};
 
@@ -270,11 +268,10 @@ export default defineComponent({
 	 */
 	setup() {
 		const stores: Stores = useStores();
-		// Infer store
-		// eslint-disable-next-line @typescript-eslint/typedef
-		const recordStore = stores.useRecordStore();
+		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
+		const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
 
-		return { recordStore, ...useLocale() };
+		return { recordStore, ...useLocale(), universe };
 	},
 
 	watch: {

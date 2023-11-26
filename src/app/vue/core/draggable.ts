@@ -12,10 +12,9 @@
 import type { DragEvent, Interactable, ResizeEvent } from "@interactjs/types";
 import interact from "interactjs";
 import { Ref, onMounted, onUnmounted, ref, unref } from "vue";
-import { useStore } from "vuex";
-import { UniverseState, UniverseStore } from "../../client/gui";
 import { LogLevel } from "../../core/error";
 import { MaybeRefHTMLElementOrNull } from "../common/utility-types";
+import { Store, StoreWord, Stores, useStores } from "./store";
 
 /**
  * Listener for dragging.
@@ -88,8 +87,8 @@ export function useDraggable({
 	 */
 	handle?: MaybeRefHTMLElementOrNull;
 }) {
-	// Get store
-	const store: UniverseStore = useStore<UniverseState>();
+	const stores: Stores = useStores();
+	const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
 
 	// Prep refs
 	let elementUnref: HTMLElement | null = null;
@@ -127,7 +126,7 @@ export function useDraggable({
 		if (interactHandler) {
 			interactHandler.unset();
 		} else {
-			store.state.universe.log({
+			universe.log({
 				error: new Error(`Failed to deregister draggable(typeof interactHandler="${typeof interactHandler}")`),
 				level: LogLevel.Warning
 			});

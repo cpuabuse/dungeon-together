@@ -15,10 +15,10 @@
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import { VIcon, VImg } from "vuetify/components";
-import { ThisVueStore } from "../../client/gui";
 import { ClientMode } from "../../client/mode";
 import { ElementSize } from "../common/element";
 import { iconProps } from "../core/icon";
+import { Store, StoreWord, Stores, useStores } from "../core/store";
 
 export default defineComponent({
 	components: {
@@ -65,8 +65,7 @@ export default defineComponent({
 	data() {
 		return {
 			// Base64 mode source
-			base64ModeSrc: ClientMode.defaultBase64Src,
-			universe: (this as unknown as ThisVueStore).$store.state.universe
+			base64ModeSrc: ClientMode.defaultBase64Src
 		};
 	},
 
@@ -85,6 +84,20 @@ export default defineComponent({
 			requried: false,
 			type: String as PropType<ElementSize>
 		}
+	},
+
+	/**
+	 * Setup hook.
+	 *
+	 * @returns Universe store
+	 */
+	setup() {
+		const stores: Stores = useStores();
+		const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
+
+		return {
+			universe
+		};
 	},
 
 	watch: {

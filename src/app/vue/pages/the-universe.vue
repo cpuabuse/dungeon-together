@@ -13,6 +13,7 @@
 import { defineComponent } from "vue";
 import { VApp } from "vuetify/components";
 import { ThisVueStore } from "../../client/gui";
+import { Store, StoreWord, Stores, useStores } from "../core/store";
 import stateAlertBoxComponent from "../state-alert-box.vue";
 import tsxTestComponent from "../tsx/test.vue";
 import UniverseUi from "../views/universe-ui.vue";
@@ -43,6 +44,7 @@ export default defineComponent({
 		 * @returns Alert state
 		 */
 		alert(): boolean {
+			// TODO: Add to Pinia store
 			// Casting to boolean from temporary `any`
 			return (this as unknown as ThisVueStore).$store.state.records.alert as boolean;
 		}
@@ -66,11 +68,24 @@ export default defineComponent({
 		// Infer type
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let data = {
-			universe: (this as unknown as ThisVueStore).$store.state.universe,
 			what: 0
 		};
 
 		return data;
+	},
+
+	/**
+	 * Setup hook.
+	 *
+	 * @returns Universe store
+	 */
+	setup() {
+		const stores: Stores = useStores();
+		const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
+
+		return {
+			universe
+		};
 	}
 });
 </script>
