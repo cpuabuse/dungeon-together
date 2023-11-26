@@ -1,7 +1,9 @@
 <!-- Universe UI bar -->
 <template>
 	<VSystemBar align="start">
-		<span>00:00</span>
+		<BaseIcon icon="fa-clock" class="ms-1" :color="clockColor" />
+		<VDivider class="ms-1" inset vertical />
+		<span>{{ clockTime }}</span>
 		<VDivider class="ms-1" inset vertical />
 		<BaseIcon icon="fa-arrow-down-up-across-line" class="ms-1" />
 		<span v-for="(level, levelKey) in gridLevels" :key="levelKey" class="ms-1">{{ level }}</span>
@@ -15,8 +17,83 @@ import { BaseIcon } from "../components";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { UniverseUiShardEntries } from "../core/universe-ui";
 
+/**
+ * Milliseconds in one second.
+ */
+const oneSecondInMs: number = 1000;
+
+/**
+ * Milliseconds in one minute.
+ */
+const oneMinuteInMs: number = 60000;
+
+/**
+ * Green threshold in milliseconds.
+ */
+const greenThreshold: number = 5000;
+
+/**
+ * Orange threshold in milliseconds.
+ */
+const orangeThreshold: number = 60000;
+
+/**
+ * Number after which extra digit is not necessary.
+ */
+const secondDigitThreshold: number = 10;
+
 export default defineComponent({
 	components: { BaseIcon, VDivider, VSystemBar },
+
+	computed: {
+		/**
+		 * Clock color.
+		 *
+		 * @returns Color
+		 */
+		clockColor(): string {
+			if (this.upTime < greenThreshold) {
+				return "green";
+			}
+			if (this.upTime < orangeThreshold) {
+				return "orange";
+			}
+			return "red";
+		},
+
+		/**
+		 * Clock time in format `00:00` (`minutes:seconds`).
+		 *
+		 * @returns Clock time
+		 */
+		clockTime(): string {
+			const minutes: number = Math.floor(this.upTime / oneMinuteInMs);
+			const seconds: number = Math.floor((this.upTime % oneMinuteInMs) / oneSecondInMs);
+			return `${minutes < secondDigitThreshold ? "0" : ""}${minutes}:${
+				seconds < secondDigitThreshold ? "0" : ""
+			}${seconds}`;
+		}
+	},
+
+	/**
+	 * Update timer every second.
+	 */
+	created() {
+		// If JS event loop lags and time is inaccurately updated, it is not a big deal, as exact seconds do not matter much.
+		this.upTimeIntervalHandle = setInterval(() => {
+			this.$data.upTime = this.universe.application.state.upTime;
+		}, oneSecondInMs);
+	},
+
+	/**
+	 * Vue data.
+	 *
+	 * @returns Universe data
+	 */
+	data() {
+		return { upTime: 0, upTimeIntervalHandle: null as ReturnType<typeof setInterval> | null };
+	},
+
 	props: {
 		shardEntries: {
 			/**
@@ -40,8 +117,7 @@ export default defineComponent({
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props) {
 		const stores: Stores = useStores();
-		const { onUpdateGridLevel }: Store<StoreWord.Universe> = stores.useUniverseStore();
-
+		const { onUpdateGridLevel, universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
 		const gridLevels: Ref<Array<number>> = shallowRef(new Array<number>());
 		// Watch shards to be reactive on shard add/remove
 		watch(
@@ -82,8 +158,18 @@ export default defineComponent({
 		});
 
 		return {
-			gridLevels
+			gridLevels,
+			universe
 		};
+	},
+
+	/**
+	 * On unmounted.
+	 */
+	unmounted() {
+		if (this.upTimeIntervalHandle) {
+			clearInterval(this.upTimeIntervalHandle);
+		}
 	}
 });
 </script>

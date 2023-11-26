@@ -1,7 +1,7 @@
 <template>
 	<!-- Flex needed for identical alignment within flex containers -->
 	<div class="base-icon d-flex">
-		<VIcon :icon="icon ?? (base64ModeSrc ? undefined : 'fa-carrot')" :size="iconSize">
+		<VIcon :icon="icon ?? (base64ModeSrc ? undefined : 'fa-carrot')" :size="iconSize" :color="icon ? color : undefined">
 			<!--
 				Wrap image into icon to duplicate size.
 				Image will keep aspect ratio and fit the icon.
@@ -74,14 +74,20 @@ export default defineComponent({
 
 		// Default is undefined
 		// eslint-disable-next-line vue/require-default-prop
-		modeUuid: {
+		color: {
 			required: false,
 			type: String
 		},
 
+		// Default is undefined
+		// eslint-disable-next-line vue/require-default-prop
+		modeUuid: {
+			required: false,
+			type: String
+		},
 		size: {
 			default: ElementSize.Medium,
-			requried: false,
+			required: false,
 			type: String as PropType<ElementSize>
 		}
 	},
