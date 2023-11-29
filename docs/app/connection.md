@@ -65,8 +65,7 @@ classDiagram
 	}
 	CoreSocket --|> StandaloneSocket : extends
 
-	class WebSocket{
-	}
+	class WebSocket
 	CoreSocket --|> WebSocket : extends
 ```
 ---

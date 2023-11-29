@@ -4,27 +4,13 @@
 
 ```mermaid
 classDiagram
-	class Exclusive{
-
-	}
-	class Stackable{
-
-	}
-	class Cell{
-
-	}
-	class Occupant{
-
-	}
-	class Nowhere{
-
-	}
-	class Unit{
-
-	}
-	class None{
-
-	}
+	class Exclusive
+	class Stackable
+	class Cell
+	class Occupant
+	class Nowhere
+	class Unit
+	class None
 ```
 
 ## Unit
@@ -45,8 +31,7 @@ classDiagram
 		level: number;
 	}
 
-	class Centaur{
-	}
+	class Centaur
 
 	Monster <|-- Centaur : extends
 	Unit <|-- Monster : extends

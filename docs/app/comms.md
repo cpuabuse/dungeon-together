@@ -93,11 +93,9 @@ classDiagram
 		+Uuid: worldUuid
 	}
 
-	class ServerEntity{
-	}
+	class ServerEntity
 
-	class ClientEntity{
-	}
+	class ClientEntity
 
 	%% Comms
 	ShardPath <|-- CommsShard : extends

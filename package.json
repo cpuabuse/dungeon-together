@@ -67,6 +67,7 @@
 		"codacy-coverage": "^2.0.3",
 		"cpy-cli": "^4.2.0",
 		"cross-cat": "1.0.0",
+		"docsify": "^4.13.1",
 		"dungeon-together-assets": "file:include/dungeon-together-assets",
 		"eslint": "^8.10.0",
 		"eslint-config-airbnb-base": "^15.0.0",

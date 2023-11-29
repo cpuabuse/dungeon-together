@@ -45,6 +45,11 @@ Project root
 	- `comms` - client↔️server communication types
 	- `server` - server source
 	- `vue` - Vue GUI for client
+		- `components` - Base components
+		- `core` - Data shared between components
+		- `pages` - Pages
+		- `views` - Views
+		Folders, containing components, should not contain subfolders; Respective index file should export necessary components only; Local imports should not use index file exports
 	- `yaml` - source to deal with YAML files
 - `main` - entry points for app distributions
 - `module` - modules for app

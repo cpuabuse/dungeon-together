@@ -28,11 +28,9 @@ classDiagram
 		+ClientEntity [0..*] entities
 	}
 
-	class ServerEntity{
-	}
+	class ServerEntity
 
-	class ClientEntity{
-	}
+	class ClientEntity
 
 	class CommsProto{
 		+CommsUniverse universe
@@ -50,11 +48,9 @@ classDiagram
 		<<interface>>
 	}
 
-	class ClientUniverse{
-	}
+	class ClientUniverse
 
-	class ServerUniverse{
-	}
+	class ServerUniverse
 
 	%% CommsUniverse
 	CommsUniverse "1" *-- "1" CommsProto : contains
