@@ -16,7 +16,6 @@ import type { JoystickManager } from "nipplejs";
 import joystickLib from "nipplejs";
 import { utils } from "pixi.js";
 import { App } from "vue";
-import { Store } from "vuex";
 import { DeferredPromise } from "../common/async";
 import { defaultModeUuid } from "../common/defaults";
 import { env } from "../common/env";
@@ -34,8 +33,7 @@ import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
 import { ClientConnection } from "./connection";
 import { ClientEntity, ClientEntityClass, ClientEntityFactory } from "./entity";
 import { ClientGrid, ClientGridClass, ClientGridClassFactory } from "./grid";
-import { ClientUniverseStateRcMenuData, UniverseState, createVueApp } from "./gui";
-import { Theme } from "./gui/themes";
+import { createVueApp } from "./gui";
 import {
 	downSymbol,
 	lcSymbol,
@@ -170,11 +168,6 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	public modesIndex: Map<Uuid, Array<Uuid>> = new Map();
 
 	/**
-	 * Stores for pinia.
-	 */
-	public readonly piniaStores: Stores;
-
-	/**
 	 * Client shards.
 	 *
 	 * Should be treated as "readonly". Use "addShard" and "removeShard" methods instead.
@@ -190,9 +183,9 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	public readonly shardsIndex: Map<Uuid, ClientShard> = new Map();
 
 	/**
-	 * Vue store.
+	 * Stores for pinia.
 	 */
-	public readonly store: Store<UniverseState>;
+	public readonly stores: Stores;
 
 	/**
 	 * Universe element.
@@ -245,120 +238,23 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 
 		const {
 			vue,
-			store,
-			piniaStores
+			stores
 		}: {
 			/**
 			 * Stores for pinia.
 			 */
-			piniaStores: Stores;
+			stores: Stores;
 
 			/**
 			 * App.
 			 */
 			vue: App;
-
-			/**
-			 * Store.
-			 */
-			store: Store<UniverseState>;
-		} = createVueApp<UniverseState>({
-			actions: {
-				/**
-				 * Called when any entity dictionary changes.
-				 *
-				 * @param param - Destructured parameter
-				 */
-				// Infer argument
-				// eslint-disable-next-line @typescript-eslint/typedef
-				updateEntityDictionary({ state }) {
-					// Do nothing
-					state.universe.log({ level: LogLevel.Debug, message: "Entity dictionary update dispatched" });
-				},
-
-				/**
-				 * Called when universe changes.
-				 *
-				 * @param param - Destructured parameter
-				 */
-				// Infer argument
-				// eslint-disable-next-line @typescript-eslint/typedef
-				updateNotifications({ state }) {
-					// Do nothing
-					state.universe.log({ level: LogLevel.Debug, message: "Notifications store update dispatched" });
-				},
-
-				/**
-				 * Called when any player dictionary changes.
-				 *
-				 * @param param - Destructured parameter
-				 */
-				// Infer argument
-				// eslint-disable-next-line @typescript-eslint/typedef
-				updatePlayerDictionary({ state }) {
-					// Do nothing
-					state.universe.log({ level: LogLevel.Debug, message: "Player dictionary update dispatched" });
-				},
-
-				/**
-				 * Called when universe changes.
-				 *
-				 * @param param - Destructured parameter
-				 */
-				// Infer argument
-				// eslint-disable-next-line @typescript-eslint/typedef
-				updateUniverse({ state }) {
-					// Do nothing
-					state.universe.log({ level: LogLevel.Debug, message: "Universe store update dispatched" });
-				}
-			},
+		} = createVueApp({
 			component: UniverseComponent,
-			mutations: {
-				/**
-				 * @param state - State
-				 * @param param - Destructured parameter
-				 */
-				recordMutation(
-					state: UniverseState,
-					{
-						id,
-						value
-					}: {
-						/**
-						 * ID.
-						 */
-						id: string;
-
-						/**
-						 * Value.
-						 */
-						value: any;
-					}
-				) {
-					// Set record, which is defined as `any``
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					state.records[id] = value;
-				},
-
-				/**
-				 * Updates right-click menu data.
-				 *
-				 * @remarks
-				 * The whole data object will be overwritten each click, so it's safe to watch it.
-				 *
-				 * @param state - State context
-				 * @param data - Data to set to
-				 */
-				updateRcMenuData(state: UniverseState, data: ClientUniverseStateRcMenuData) {
-					state.rcMenuData = data;
-				}
-			},
-			state: { rcMenuData: null, records: { alert: true }, theme: Theme.Dark, universe: this },
 			universe: this
 		});
 		this.vue = vue;
-		this.store = store;
-		this.piniaStores = piniaStores;
+		this.stores = stores;
 
 		// Mount vue
 		let vueElement: HTMLElement = document.createElement("div");
@@ -814,14 +710,7 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 			})
 			.finally(() => {
 				// Finally notify state
-				this.store.dispatch("updateUniverse").catch(error => {
-					this.log({
-						error: new Error(`Could not dispatch "updateUniverse" to universe store.`, {
-							cause: error
-						}),
-						level: LogLevel.Critical
-					});
-				});
+				this.stores.useUniverseStore().updateUniverse();
 			});
 		let clientShard: ClientShard = super.addShard(...shardArgs);
 

@@ -4,7 +4,8 @@
 		<!-- Vuetify unconditionally displays bar at the top of the screen -->
 		<UniverseUiInfoBar :shard-entries="(shardEntries as UniverseUiShardEntries)" />
 
-		<UniverseUiClick :rc-menu-data="rcMenuData" />
+		<!-- Casting since class type information lost -->
+		<UniverseUiClick :rc-menu-data="(inputStore.rcMenuData as ClientUniverseStateRcMenuData)" />
 
 		<!-- Undefined assertion since index used in iteration -->
 		<UniverseUiShard
@@ -20,10 +21,12 @@
 </template>
 
 <script lang="ts">
+// Used in template only
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, import/order
+import { type ClientUniverseStateRcMenuData } from "../../client/gui";
+
 import { ComputedRef, Ref, ShallowRef, computed, defineComponent, shallowRef } from "vue";
 import { VLocaleProvider } from "vuetify/components";
-import { useStore } from "vuex";
-import { ClientUniverseStateRcMenuData, ThisVueStore, UniverseState, UniverseStore } from "../../client/gui";
 import { CompactToolbarMenu, useCompactToolbarMenuConsumer } from "../core/compact-toolbar";
 import { TextDirectionWords, textDirectionSymbol } from "../core/locale";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
@@ -36,30 +39,20 @@ import UniverseUiToolbar from "./universe-ui-toolbar.vue";
 export default defineComponent({
 	components: { UniverseUiClick, UniverseUiInfoBar, UniverseUiShard, UniverseUiToolbar, VLocaleProvider },
 
-	computed: {
-		/**
-		 * Right click menu data.
-		 *
-		 * @returns Right click menu data or `null` when to display nothing
-		 */
-		rcMenuData(): ClientUniverseStateRcMenuData {
-			// Casting since class type information lost
-			return (this.state as unknown as UniverseState).rcMenuData;
-		}
-	},
-
 	/**
 	 * Created callback.
 	 */
 	created() {
-		// Init entries
+		// Init & entries
 		this.updateShardEntries();
-
-		// Update entries
-		this.unsubscribe = (this as unknown as ThisVueStore).$store.subscribeAction(action => {
-			if (action.type === "updateUniverse") {
+		this.universeStore.onUpdateUniverse({
+			/**
+			 * Callback on universe update.
+			 */
+			callback: () => {
 				this.updateShardEntries();
-			}
+			},
+			isImmediate: true
 		});
 	},
 
@@ -72,8 +65,7 @@ export default defineComponent({
 		// Infer type
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let data = {
-			debugMenuDisplaySymbol: Symbol("debug-menu-display"),
-			unsubscribe: null as (() => void) | null
+			debugMenuDisplaySymbol: Symbol("debug-menu-display")
 		};
 
 		return data;
@@ -91,10 +83,8 @@ export default defineComponent({
 	setup() {
 		const stores: Stores = useStores();
 		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
-		const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
-
-		// TODO: Migrate `RcMenuData` to pinia store
-		const { state }: UniverseStore = useStore() as unknown as UniverseStore;
+		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
+		const inputStore: Store<StoreWord.Input> = stores.useInputStore();
 
 		const textDirectionRecord: Ref<TextDirectionWords> = recordStore.computedRecord<TextDirectionWords>({
 			defaultValue: TextDirectionWords.Auto,
@@ -147,7 +137,7 @@ export default defineComponent({
 			shardEntries.value = new Map(
 				// False negative
 				// eslint-disable-next-line @typescript-eslint/typedef
-				Array.from(universe.shards.entries()).map(([shardUuid, shard]) => {
+				Array.from(universeStore.universe.shards.entries()).map(([shardUuid, shard]) => {
 					return [
 						shardUuid,
 						{
@@ -162,16 +152,7 @@ export default defineComponent({
 			);
 		}
 
-		return { isRtl, shardEntries, shardMenus, state, updateShardEntries };
-	},
-
-	/**
-	 * Unmounted hook.
-	 */
-	unmounted() {
-		if (this.unsubscribe) {
-			this.unsubscribe();
-		}
+		return { inputStore, isRtl, shardEntries, shardMenus, universeStore, updateShardEntries };
 	}
 });
 </script>

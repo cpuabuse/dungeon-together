@@ -11,7 +11,6 @@
 
 import { Pinia, createPinia } from "pinia";
 import { App, Component, createApp } from "vue";
-import { Store, StoreOptions, createStore } from "vuex";
 import { Stores, composableStoreFactory } from "../../vue/core/store";
 import { ClientUniverse } from "../universe";
 import { useHljsPlugin } from "./vue.plugin.hljs";
@@ -25,11 +24,8 @@ import { useVuetifyPlugin } from "./vue.plugin.vuetify";
  * @param param - Destructured parameter
  * @returns Created app
  */
-export function createVueApp<State extends object = object>({
+export function createVueApp({
 	component,
-	state,
-	mutations,
-	actions,
 	universe
 }: {
 	/**
@@ -41,41 +37,25 @@ export function createVueApp<State extends object = object>({
 	 * Universe.
 	 */
 	universe: ClientUniverse;
-
-	/**
-	 * State.
-	 */
-	state: State;
-} & Pick<StoreOptions<State>, "actions" | "mutations">): {
+}): {
 	/**
 	 * Vue app.
 	 */
 	vue: App;
 
 	/**
-	 * Store.
-	 */
-	store: Store<State>;
-
-	/**
 	 * Stores for pinia.
 	 */
-	piniaStores: Stores;
+	stores: Stores;
 } {
 	let app: App = createApp(component);
 	useVuetifyPlugin({ app });
 	useHljsPlugin({ app });
 
-	const store: Store<State> = createStore<State>({
-		actions,
-		mutations,
-		state
-	});
 	const pinia: Pinia = createPinia();
-	const piniaStores: Stores = composableStoreFactory({ universe });
-	app.use(store);
+	const stores: Stores = composableStoreFactory({ universe });
 	app.use(pinia);
-	app.provide("stores", piniaStores);
+	app.provide("stores", stores);
 
-	return { piniaStores, store, vue: app };
+	return { stores, vue: app };
 }

@@ -77,6 +77,11 @@ export function defineBase({
 				// Input file
 				input: join(...rootDir, "src", "html", `${build}.html`),
 
+				output: {
+					// Do not create a new chunk for dynamic imports
+					inlineDynamicImports: true
+				},
+
 				// Build only plugins
 				plugins: []
 			},

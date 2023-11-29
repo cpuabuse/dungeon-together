@@ -24,6 +24,7 @@ import { LogLevel } from "../core/error";
 import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
+import { Store, StoreWord } from "../vue/core/store";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientCell } from "./cell";
 import { ClientConnection, ClientPlayer } from "./connection";
@@ -121,7 +122,9 @@ export function ClientShardFactory({
 		 */
 		public shardElement: HTMLElement = document.createElement("div");
 
-		/** Units. */
+		/**
+		 *  Units.
+		 */
 		public units: Set<string> = new Set();
 
 		/**
@@ -192,6 +195,10 @@ export function ClientShardFactory({
 						input: InputInterface;
 					};
 
+					const inputStore: Store<StoreWord.Input> = (
+						this.constructor as ClientShardClass
+					).universe.stores.useInputStore();
+
 					/**
 					 * Prints some input info.
 					 *
@@ -218,8 +225,9 @@ export function ClientShardFactory({
 					// Set scene for entity show
 					this.setScene();
 
+					// TODO: Create magic
 					// Element ball display test
-					new ElementBall({ container: this.gridContainer, scale: 500, ...ElementBall.windBall });
+					// new ElementBall({ container: this.gridContainer, scale: 500, ...ElementBall.windBall });
 
 					// Add listeners for right-click input
 					this.input.on(rcSymbol, (inputInterface: InputInterface) => {
@@ -234,12 +242,12 @@ export function ClientShardFactory({
 							const z: number = grid.currentLevel;
 							const cell: ClientCell | undefined = grid.cellIndex[z]?.[x]?.[y];
 							if (cell) {
-								(this.constructor as ClientShardClass).universe.store.commit("updateRcMenuData", {
+								inputStore.rcMenuData = {
 									cell,
 									type: ClientUniverseStateRcMenuDataWords.Cell,
 									x: this.sceneWidth * (x + 1),
 									y: this.sceneHeight * (y + 1)
-								} satisfies ClientUniverseStateRcMenuData);
+								} satisfies ClientUniverseStateRcMenuData;
 							}
 						});
 					});
@@ -250,10 +258,7 @@ export function ClientShardFactory({
 						inputDebug({ input: inputInterface as InputInterface, symbol: lcSymbol });
 						// #endif
 
-						(this.constructor as ClientShardClass).universe.store.commit(
-							"updateRcMenuData",
-							null satisfies ClientUniverseStateRcMenuData
-						);
+						inputStore.rcMenuData = null;
 					});
 
 					// Add listeners for level up input

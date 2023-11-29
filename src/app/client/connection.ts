@@ -39,6 +39,7 @@ import { CoreShardArg, ShardPathOwn } from "../core/shard";
 import { ActionWords } from "../server/action";
 import { CellEvent } from "../server/cell";
 import { ServerMessage } from "../server/connection";
+import { Store, StoreWord } from "../vue/core/store";
 import { ClientCell } from "./cell";
 import { ClientEntity } from "./entity";
 import { ClientGrid } from "./grid";
@@ -310,6 +311,8 @@ export const initProcessCallback: CoreProcessCallback<ClientConnection> = async 
 // Has to be async to work with VSocket
 // eslint-disable-next-line @typescript-eslint/require-await
 export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async function () {
+	const universeStore: Store<StoreWord.Universe> = this.universe.stores.useUniverseStore();
+
 	/**
 	 * Updates dictionary container.
 	 *
@@ -372,14 +375,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 			// Status notification update
 			case MessageTypeWord.StatusNotification: {
 				this.getPlayerEntry(message.body)?.player.statusNotifications.push(message.body);
-				this.universe.store.dispatch("updateNotifications").catch(error => {
-					this.universe.log({
-						error: new Error(`"Could not dispatch "updateNotifications" to universe store.`, {
-							cause: error
-						}),
-						level: LogLevel.Critical
-					});
-				});
+				universeStore.updateStatusNotification();
 				break;
 			}
 
@@ -388,7 +384,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 				let player: ClientPlayer | undefined = this.getPlayerEntry(message.body)?.player;
 				if (player) {
 					player.storyNotifications.push(message.body);
-					this.universe.piniaStores.useUniverseStore().updateStoryNotification();
+					universeStore.updateStoryNotification();
 				} else {
 					errorResult = new Error(`"Player(playerUuid="${message.body.playerUuid}") not found.`);
 				}
@@ -469,15 +465,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 				await Promise.resolve();
 
 				// Finally notify state
-				this.universe.store.dispatch("updatePlayerDictionary").catch(error => {
-					this.universe.log({
-						error: new Error(`"Could not dispatch "updatePlayerDictionary" to universe store.`, {
-							cause: error
-						}),
-						level: LogLevel.Critical
-					});
-				});
-
+				universeStore.updatePlayerDictionary();
 				break;
 			}
 
@@ -760,27 +748,13 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 					 * Callback.
 					 */
 					callback: () => {
-						this.universe.store.dispatch("updateEntityDictionary").catch(error => {
-							this.universe.log({
-								error: new Error(`"Could not dispatch "updateEntityDictionary" to universe store.`, {
-									cause: error
-								}),
-								level: LogLevel.Critical
-							});
-						});
+						universeStore.updateEntityDictionary();
 					}
 				});
 
 				// TODO: Should be using a different action
 				// Finally notify state
-				this.universe.store.dispatch("updatePlayerDictionary").catch(error => {
-					this.universe.log({
-						error: new Error(`"Could not dispatch "updatePlayerDictionary" to universe store.`, {
-							cause: error
-						}),
-						level: LogLevel.Critical
-					});
-				});
+				universeStore.updatePlayerDictionary();
 
 				break;
 			}

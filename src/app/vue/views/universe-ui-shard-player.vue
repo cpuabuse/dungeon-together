@@ -55,7 +55,6 @@ import Color from "color";
 import { PropType, Ref, computed, defineComponent, ref } from "vue";
 import { VTable } from "vuetify/components";
 import { ClientPlayer } from "../../client/connection";
-import { ThisVueStore } from "../../client/gui";
 import { ClientShard } from "../../client/shard";
 import { Uuid } from "../../common/uuid";
 import { CoreDictionary } from "../../core/connection";
@@ -88,9 +87,11 @@ export default defineComponent({
 	 * Initial model update is not necessary, as parent created model with correct data, but if that changes, model update must be added.
 	 */
 	created() {
-		// TODO: Add `updatePlayerDictionary` to pinia universe store
-		this.unsubscribeUpdateModel = (this as unknown as ThisVueStore).$store.subscribeAction(action => {
-			if (action.type === "updatePlayerDictionary") {
+		this.universeStore.onUpdatePlayerDictionary({
+			/**
+			 * Stats update callback.
+			 */
+			callback: () => {
 				this.model = { dictionary: this.player.dictionary };
 				this.emitModel();
 
@@ -100,14 +101,14 @@ export default defineComponent({
 					this.stats = (units satisfies Array<string | number> as Array<string | number>)
 						.filter<string>((unitUuid): unitUuid is string => typeof unitUuid === "string" && unitUuid.length > 0)
 						.map(unitUuid => {
-							let { maxHealth, level, experience, stats }: CoreDictionary = this.universe.getEntity({
+							let { maxHealth, level, experience, stats }: CoreDictionary = this.universeStore.universe.getEntity({
 								entityUuid: unitUuid
 							}).dictionary;
 							return {
 								attributes: stats,
 								experience: typeof experience === "number" ? experience : undefined,
 								hpMaxValue: typeof maxHealth === "number" ? maxHealth : undefined,
-								hpValue: this.universe.getEntity({ entityUuid: unitUuid }).tempHealth,
+								hpValue: this.universeStore.universe.getEntity({ entityUuid: unitUuid }).tempHealth,
 								level: typeof level === "number" ? level : undefined,
 								unitUuid
 							};
@@ -128,8 +129,7 @@ export default defineComponent({
 			model: this.modelValue,
 			mpColor: new Color("#051DE8"),
 			stats: new Array<Stats>(),
-			storyNotificationMenuDisplaySymbol: Symbol("story-notification-menu-display"),
-			unsubscribeUpdateModel: null as (() => void) | null
+			storyNotificationMenuDisplaySymbol: Symbol("story-notification-menu-display")
 		};
 	},
 
@@ -172,12 +172,11 @@ export default defineComponent({
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, { emit }) {
 		const stores: Stores = useStores();
-		const { onUpdateStoryNotification }: Store<StoreWord.Universe> = stores.useUniverseStore();
+		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
 
 		// Infer composable
 		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 
-		const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
 		// Infer composable
 		// eslint-disable-next-line @typescript-eslint/typedef
 		const { t } = useLocale();
@@ -249,7 +248,7 @@ export default defineComponent({
 
 		const storyNotificationEntries: Ref<Array<StoryNotificationEntry>> = ref(new Array<StoryNotificationEntry>());
 
-		onUpdateStoryNotification({
+		universeStore.onUpdateStoryNotification({
 			/**
 			 * Callback, when story notifications are updated.
 			 */
@@ -264,16 +263,7 @@ export default defineComponent({
 				}
 			}
 		});
-		return { displayItems, shiftPlayerNotifications, storyNotificationEntries, universe };
-	},
-
-	/**
-	 * Unmounted callback.
-	 */
-	unmounted() {
-		if (this.unsubscribeUpdateModel) {
-			this.unsubscribeUpdateModel();
-		}
+		return { displayItems, shiftPlayerNotifications, storyNotificationEntries, universeStore };
 	}
 });
 </script>

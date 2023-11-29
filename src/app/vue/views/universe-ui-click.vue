@@ -12,14 +12,13 @@ import { PropType, defineComponent } from "vue";
 import { ClientCell } from "../../client/cell";
 import { ClientPlayer } from "../../client/connection";
 import { ClientEntity } from "../../client/entity";
-import { ClientUniverseStateRcMenuDataWords, UniverseState } from "../../client/gui";
+import { ClientUniverseStateRcMenuData, ClientUniverseStateRcMenuDataWords } from "../../client/gui";
 import { MessageTypeWord } from "../../common/defaults/connection";
 import { CoreEnvelope, processQueueWord } from "../../core/connection";
 import { LogLevel } from "../../core/error";
 import { ActionWords } from "../../server/action";
 import { ExtractPropsFromComponentClass } from "../common/utility-types";
-import OverlayClick from "../components/overlay-click.vue";
-import OverlayList from "../components/overlay-list.vue";
+import { OverlayClick, OverlayList } from "../components";
 import {
 	OverlayContainerUiActionWords,
 	OverlayContentUiActionParam,
@@ -281,7 +280,7 @@ export default defineComponent({
 		rcMenuData: {
 			default: null,
 			required: false,
-			type: Object as PropType<UniverseState["rcMenuData"]>
+			type: Object as PropType<ClientUniverseStateRcMenuData>
 		}
 	},
 
@@ -306,7 +305,7 @@ export default defineComponent({
 			 *
 			 * @param value - Value
 			 */
-			handler(value: UniverseState["rcMenuData"]): void {
+			handler(value: ClientUniverseStateRcMenuData): void {
 				let newCell: ClientCell | null = null;
 
 				// Unset the glow on the previous cell

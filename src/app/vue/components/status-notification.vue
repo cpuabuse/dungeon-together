@@ -23,11 +23,11 @@ import { v4 } from "uuid";
 import { PropType, defineComponent } from "vue";
 import { VScrollYTransition } from "vuetify/components";
 import { StatusNotification } from "../../client/connection";
-import { ThisVueStore } from "../../client/gui";
 import { Uuid } from "../../common/uuid";
 import { useLocale } from "../core/locale";
 import { statusNotificationEmits, useStatusNotification } from "../core/status-notification";
 import StatusNotificationItem from "./status-notification-item.vue";
+import { Store, StoreWord, Stores, useStores } from "../core/store";
 
 export default defineComponent({
 	components: { StatusNotificationItem, VScrollYTransition },
@@ -51,12 +51,9 @@ export default defineComponent({
 	 */
 	created() {
 		// Synchronize notifications initially
-		this.synchronizeNotifications();
-
-		this.unsubscribeUpdateNotifications = (this as unknown as ThisVueStore).$store.subscribeAction(action => {
-			if (action.type === "updateNotifications") {
-				this.synchronizeNotifications();
-			}
+		this.universeStore.onUpdateStatusNotification({
+			callback: () => this.synchronizeNotifications(),
+			isImmediate: true
 		});
 	},
 
@@ -77,8 +74,7 @@ export default defineComponent({
 					 */
 					uuid: Uuid;
 				}
-			>(),
-			unsubscribeUpdateNotifications: null as (() => void) | null
+			>()
 		};
 	},
 
@@ -140,16 +136,10 @@ export default defineComponent({
 	// Force vue inference
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, ctx) {
-		return { ...useStatusNotification(ctx), ...useLocale() };
-	},
+		const stores: Stores = useStores();
+		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
 
-	/**
-	 * Unmounted callback.
-	 */
-	unmounted() {
-		if (this.unsubscribeUpdateNotifications) {
-			this.unsubscribeUpdateNotifications();
-		}
+		return { universeStore, ...useStatusNotification(ctx), ...useLocale() };
 	}
 });
 </script>

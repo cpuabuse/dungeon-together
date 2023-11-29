@@ -26,8 +26,7 @@
 		"tock",
 		"trit",
 		"vsocket",
-		"vuetify",
-		"vuex"
+		"vuetify"
 	],
 	"yaml.schemas": {
 		"./schema/dt.yml.json": ["*.dt.yml"]

@@ -11,7 +11,7 @@
 
 import { StoreDefinition, defineStore } from "pinia";
 import { WritableComputedRef, computed, inject } from "vue";
-import { UniverseStore } from "../../client/gui";
+import { ClientUniverseStateRcMenuData } from "../../client/gui";
 import { ClientUniverse } from "../../client/universe";
 import { toCapitalized } from "../../common/text";
 import { MaybePartial } from "../../common/utility-types";
@@ -28,7 +28,12 @@ export enum StoreWord {
 	/**
 	 * Universe store.
 	 */
-	Universe = "universe"
+	Universe = "universe",
+
+	/**
+	 * Input store.
+	 */
+	Input = "input"
 }
 
 /**
@@ -41,11 +46,19 @@ type UseStoreWordStore<Word extends StoreWord> = `use${Capitalize<Word>}Store`;
  */
 // Infer const type
 // eslint-disable-next-line @typescript-eslint/typedef
-export const updateActionNames = [
-	// Dispatched when story notification array is updated.
-	"updateStoryNotification",
-	"updateGridLevel"
-] as const;
+export const updateActionNames = (
+	[
+		// Dispatched when story notification array is updated.
+		"storyNotification",
+		"gridLevel",
+		"statusNotification",
+		"playerDictionary",
+		"universe",
+		"entityDictionary"
+	] as const
+).map(actionName => {
+	return `update${toCapitalized({ text: actionName })}` as const;
+});
 
 /**
  * Union of action names in `useUniverseStore.actions`.
@@ -263,7 +276,7 @@ export function composableStoreFactory({
 			 * @returns State
 			 */
 			state: () => {
-				return { records: {} as UniverseStore["state"]["records"] };
+				return { records: {} as Record<string | symbol, any> };
 			}
 		}),
 
@@ -319,6 +332,23 @@ export function composableStoreFactory({
 			 */
 			state: () => {
 				return { universe };
+			}
+		}),
+
+		// Input store
+		[k(StoreWord.Input)]: defineStore(StoreWord.Input, {
+			/**
+			 * State.
+			 *
+			 * @returns State
+			 */
+			state: () => {
+				return {
+					/**
+					 * Whether input is focused.
+					 */
+					rcMenuData: null as ClientUniverseStateRcMenuData
+				};
 			}
 		})
 	} satisfies {

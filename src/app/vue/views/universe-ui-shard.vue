@@ -15,7 +15,6 @@
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import { ClientPlayer } from "../../client/connection";
-import { ThisVueStore } from "../../client/gui";
 import { ClientShard } from "../../client/shard";
 import { overlayBusToCompactToolbarMenuEmits, useOverlayBusToCompactToolbarMenuSource } from "../core/compact-toolbar";
 import { useOverlayBusConsumer } from "../core/overlay";
@@ -30,13 +29,14 @@ export default defineComponent({
 	 * Created callback.
 	 */
 	created() {
-		this.updatePlayerEntries();
-
-		// TODO: Add unsubscribe to Pinia store
-		this.unsubscribeUpdatePlayerEntries = (this as unknown as ThisVueStore).$store.subscribeAction(action => {
-			if (action.type === "updateUniverse") {
+		this.universeStore.onUpdateUniverse({
+			/**
+			 * Callback on universe update.
+			 */
+			callback: () => {
 				this.updatePlayerEntries();
-			}
+			},
+			isImmediate: true
 		});
 	},
 
@@ -47,8 +47,7 @@ export default defineComponent({
 	 */
 	data() {
 		return {
-			playerEntries: new Array() as PlayerEntries,
-			unsubscribeUpdatePlayerEntries: null as (() => void) | null
+			playerEntries: new Array() as PlayerEntries
 		};
 	},
 
@@ -113,7 +112,7 @@ export default defineComponent({
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, { emit }) {
 		const stores: Stores = useStores();
-		const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
+		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
 
 		// Infer composable return
 		// eslint-disable-next-line @typescript-eslint/typedef
@@ -130,16 +129,7 @@ export default defineComponent({
 			usedOverlayBusConsumer
 		});
 
-		return { ...usedOverlayBusConsumer, ...usedOverlayBusToCompactToolbarMenuSource, universe };
-	},
-
-	/**
-	 * Unmounted callback.
-	 */
-	unmounted() {
-		if (this.unsubscribeUpdatePlayerEntries) {
-			this.unsubscribeUpdatePlayerEntries();
-		}
+		return { ...usedOverlayBusConsumer, ...usedOverlayBusToCompactToolbarMenuSource, universeStore };
 	}
 });
 </script>
