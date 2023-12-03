@@ -6,6 +6,6 @@
 #>
 
 # Log
-& $Paths.WriteMessage -Message "Building app"
+. $Paths.WriteMessage -Message "Building app"
 
 npx vite build; if (-not $?) { throw }

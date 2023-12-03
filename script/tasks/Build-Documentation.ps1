@@ -18,7 +18,7 @@ Param(
 )
 
 # Log
-& $Paths.WriteMessage -Message "Building docs"
+. $Paths.WriteMessage -Message "Building docs"
 
 # Const
 [ValidateNotNullOrEmpty()][string]$private:BuildDocumentationPath = Join-Path "build" $Environment "$Build-docs"
@@ -29,7 +29,7 @@ Param(
 [ValidateNotNullOrEmpty()][string]$private:CoverpagePath = Join-Path $BuildDocumentationPath  $DocsTargetSubdirectory "_coverpage.md"
 
 # Build directory
-& $Paths.NewDirectoryIfNotExists -Path $BuildDocumentationPath
+. $Paths.NewDirectoryIfNotExists -Path $BuildDocumentationPath
 
 # Build, overwrite if exists
 Get-ChildItem -Path $DocsSourcePath | ForEach-Object {

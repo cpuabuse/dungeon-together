@@ -8,19 +8,19 @@
 . $(Join-Path $PSScriptRoot ".." "common" "Start-Script.ps1")
 
 # Log
-& $Paths.WriteMessage -Message "Building site"
+. $Paths.WriteMessage -Message "Building site"
 
 # Install deps
-& $Paths.InstallDependencies
+. $Paths.InstallDependencies
 
 # Build Assets
-& $Paths.BuildAssets -Environment dev -Build standalone
+. $Paths.BuildAssets -Environment dev -Build standalone
 
 # Build app
-& $Paths.BuildApplication
+. $Paths.BuildApplication
 
 # Build docs
-& $Paths.BuildDocumentation -Environment dev -Build standalone
+. $Paths.BuildDocumentation -Environment dev -Build standalone
 
 # Stop Pipeline
-& $Paths.StopScript
+. $Paths.StopScript

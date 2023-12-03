@@ -5,10 +5,10 @@
 . $(Join-Path $PSScriptRoot ".." "common" "Start-Script.ps1")
 
 # Install-Dependencies
-& $Paths.InstallDependencies
+. $Paths.InstallDependencies
 
 # Run coverage and get lcov
 npm run codacy; if (-not $?) { throw }
 
 # Stop Pipeline
-& $Paths.StopPipeline
+. $Paths.StopPipeline

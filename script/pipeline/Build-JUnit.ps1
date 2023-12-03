@@ -4,10 +4,10 @@
 . $(Join-Path $PSScriptRoot ".." "common" "Start-Script.ps1")
 
 # Install-Dependencies
-& $Paths.InstallDependencies
+. $Paths.InstallDependencies
 
 # Build
 npm run junit; if (-not $?) { throw }
 
 # Stop Pipeline
-& $Paths.StopPipeline
+. $Paths.StopPipeline

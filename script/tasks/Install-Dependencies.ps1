@@ -5,7 +5,7 @@
 #>
 
 # Log
-& $Paths.WriteMessage -Message "Installing dependencies"
+. $Paths.WriteMessage -Message "Installing dependencies"
 
 # Install
 npm install; if (-not $?) { throw }

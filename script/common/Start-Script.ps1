@@ -27,7 +27,7 @@ if ($null -eq (Get-Variable -Name "StartScriptGuard" -Scope "Global" -ErrorActio
 		BuildApplication        = Join-Path "script" "tasks" "Build-Application.ps1";
 	}
 
-	& $Paths.WriteMessage -Message "Starting script"
+	. $Paths.WriteMessage -Message "Starting script"
 
 	Write-Host Paths -ForegroundColor DarkGreen -NoNewline
 	$(Format-Table -HideTableHeaders -InputObject $Paths | Out-String).TrimEnd()

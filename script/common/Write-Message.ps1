@@ -15,9 +15,9 @@ Param(
 [string]$private:Indent = "`n";
 
 # Set newline for first run
-if ($null -eq (Get-Variable -Name "WriteMessageGuard" -Scope "Global" -ErrorAction "Ignore")) {
+if ($null -eq (Get-Variable -Name "WriteMessageGuard" -Scope "Script" -ErrorAction "Ignore")) {
 	# Guard
-	New-Variable -Name "WriteMessageGuard" -Scope "Global"
+	New-Variable -Name "WriteMessageGuard" -Scope "Script"
 	$Indent = $null
 }
 
