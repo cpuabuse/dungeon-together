@@ -1,10 +1,12 @@
 #!/usr/bin/env pwsh
-# File is to be dot-sourced
+#requires -PSEdition Core
+<#
+	Sets up global variables.
+	File is to be dot-sourced.
+	Stop script should be run in `finally` within caller of this, but this should go before the `try`.
+#>
 
 if ($null -eq (Get-Variable -Name "StartScriptGuard" -Scope "Global" -ErrorAction "Ignore")) {
-	# Guard
-	New-Variable -Name "StartScriptGuard" -Scope "Global"
-	
 	# Set the error action; Should stop execution on "pwsh cmdlets", but not external commands
 	$script:ErrorActionPreferenceOriginal = $ErrorActionPreference
 	$ErrorActionPreference = "Stop"
@@ -30,5 +32,8 @@ if ($null -eq (Get-Variable -Name "StartScriptGuard" -Scope "Global" -ErrorActio
 	. $Paths.WriteMessage -Message "Starting script"
 
 	Write-Host Paths -ForegroundColor DarkGreen -NoNewline
-	$(Format-Table -HideTableHeaders -InputObject $Paths | Out-String).TrimEnd()
+	(Format-Table -HideTableHeaders -InputObject $Paths | Out-String).TrimEnd()
+
+	# Set guard last, as this won't be part of `try` block
+	New-Variable -Name "StartScriptGuard" -Scope "Global"
 }

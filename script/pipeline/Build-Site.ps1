@@ -7,20 +7,23 @@
 # Start Pipeline
 . $(Join-Path $PSScriptRoot ".." "common" "Start-Script.ps1")
 
-# Log
-. $Paths.WriteMessage -Message "Building site"
+try {
+	# Log
+	. $Paths.WriteMessage -Message "Building site"
 
-# Install deps
-. $Paths.InstallDependencies
+	# Install deps
+	. $Paths.InstallDependencies
 
-# Build Assets
-. $Paths.BuildAssets -Environment dev -Build standalone
+	# Build Assets
+	. $Paths.BuildAssets -Environment dev -Build standalone
 
-# Build app
-. $Paths.BuildApplication
+	# Build app
+	. $Paths.BuildApplication
 
-# Build docs
-. $Paths.BuildDocumentation -Environment dev -Build standalone
-
-# Stop Pipeline
-. $Paths.StopScript
+	# Build docs
+	. $Paths.BuildDocumentation -Environment dev -Build standalone
+}
+finally {
+	# Stop Pipeline
+	. $Paths.StopScript
+}
