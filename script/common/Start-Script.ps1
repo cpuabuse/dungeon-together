@@ -6,7 +6,7 @@
 	Stop script should be run in `finally` within caller of this, but this should go before the `try`.
 #>
 
-if ($null -eq (Get-Variable -Name "StartScriptGuard" -Scope "Global" -ErrorAction "Ignore")) {
+if ($null -eq (Get-Variable -Name "StartScriptGuard" -Scope "Script" -ErrorAction "Ignore")) {
 	# Set the error action; Should stop execution on "pwsh cmdlets", but not external commands
 	$script:ErrorActionPreferenceOriginal = $ErrorActionPreference
 	$ErrorActionPreference = "Stop"
@@ -35,5 +35,5 @@ if ($null -eq (Get-Variable -Name "StartScriptGuard" -Scope "Global" -ErrorActio
 	(Format-Table -HideTableHeaders -InputObject $Paths | Out-String).TrimEnd()
 
 	# Set guard last, as this won't be part of `try` block
-	New-Variable -Name "StartScriptGuard" -Scope "Global"
+	New-Variable -Name "StartScriptGuard" -Scope "Script"
 }
