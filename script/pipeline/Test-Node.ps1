@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 
-# Start-Pipeline
-. $(Join-Path -Path $PSScriptRoot -ChildPath "common" "Start-Pipeline.ps1")
+# Start Pipeline
+. $(Join-Path $PSScriptRoot ".." "common" "Start-Script.ps1")
 
 # Install-Dependencies
 & $Paths.InstallDependencies
@@ -10,5 +10,5 @@
 npm run build:test:standalone:node; if (-not $?) { throw }
 npm run run:test:standalone:node; if (-not $?) { throw }
 
-# Stop-Pipeline
-$Paths.StopPipeline
+# Stop Pipeline
+& $Paths.StopPipeline

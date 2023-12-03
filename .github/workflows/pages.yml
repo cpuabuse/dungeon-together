@@ -30,21 +30,11 @@ jobs:
         with:
           deno-version: v1.x
 
-      # Install
-      - name: Install
-        shell: pwsh
-        run: |
-          npm install
-
       # Build
-      - name: Build Assets
+      - name: Build
         shell: pwsh
         run: |
-          ./script/environment/Build-Assets.ps1 -Environment dev -Build standalone
-      - name: Build App
-        shell: pwsh
-        run: |
-          npx vite build
+          ./script/pipeline/Build-Site.ps1
 
       # Deploy
       - name: Setup Pages
@@ -52,7 +42,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: "build/dev/standalone"
+          path: "build/dev/standalone-docs"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1

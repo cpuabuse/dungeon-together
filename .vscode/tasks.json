@@ -2,9 +2,9 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "dev-standalone-build-assets",
+			"label": "dev-standalone-build-dev",
 			"type": "shell",
-			"command": "./script/environment/Build-Assets.ps1 -Environment dev -Build standalone",
+			"command": "./script/environment/Build-Development.ps1",
 			"group": {
 				"kind": "build",
 				"isDefault": true
