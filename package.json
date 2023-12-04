@@ -119,7 +119,7 @@
 		"hammerjs": "^2.0.8",
 		"highlight.js": "^11.8.0",
 		"howler": "^2.2.3",
-		"interactjs": "^1.10.19",
+		"interactjs": "1.10.23",
 		"io-ts": "^2.2.20",
 		"js-base64": "^3.7.5",
 		"js-yaml": "^4.1.0",
