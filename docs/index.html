@@ -12,12 +12,13 @@
 
 		<script>
 			// Shared constants
-			const basePath = "./";
+			const basePath = ".";
 			const logo = "img/logo.svg";
 
 			// Docsify
 			window.$docsify = {
-				name: "Dungeon Together",
+				// TODO: Base path inline concatenation is a temporary solution, and should be replaced with `urlJoin`, when this whole file moves to module imports
+				name: `<div style="display: flex; align-items: center; justify-content: center"><img src="${basePath}/img/logo.svg" alt="Dungeon Together"><span style="margin-inline-start: 1em; text-wrap: nowrap">Dungeon Together</span></div>`,
 				repo: "cpuabuse/dungeon-together",
 				loadSidebar: true,
 				homepage: "_homepage.md",
@@ -27,8 +28,7 @@
 					// Note, if relativePath is set to `true`, it would recompute the sidebar links
 					"/.*/_sidebar.md": "/_sidebar.md"
 				},
-				basePath,
-				logo
+				basePath
 			};
 		</script>
 		<script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
@@ -46,10 +46,7 @@
 		<script src="//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 		<script src="//cdn.jsdelivr.net/npm/docsify-latex@0"></script>
 
-		<!--
-			Icon.
-			Note, module will be deferred by default.
-		-->
+		<!-- Icon; Note, module will be deferred by default -->
 		<script type="module">
 			import urlJoin from "https://cdn.jsdelivr.net/npm/url-join@5.0.0/+esm";
 

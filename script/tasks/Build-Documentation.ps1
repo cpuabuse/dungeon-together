@@ -46,7 +46,7 @@ Get-ChildItem -Path $DocsSourcePath | ForEach-Object {
 # Replace index
 . $Paths.WriteMessage -Message "Replacing index" -Deep
 [ValidateNotNullOrEmpty()][string]$private:IndexContent = Get-Content -Path $IndexPath -Raw
-$IndexContent = $IndexContent -replace "const basePath = `"./`";", "const basePath = `"$DocsTargetSubdirectoryName`";"
+$IndexContent = $IndexContent -replace "const basePath = `".`";", "const basePath = `"$DocsTargetSubdirectoryName`";"
 Set-Content -Path $IndexPath -Value $IndexContent
 
 . $Paths.WriteMessage -Message "Replacing coverage" -Deep
