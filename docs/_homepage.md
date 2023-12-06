@@ -6,6 +6,11 @@ Dungeon Together is an open source game under development.
 
 ### How it works
 
+Client and server part of the application exchange messages.
+Server processes updates.
+Pixi renders updates.
+Vue, invoked by client, provides the UI.
+
 ```mermaid
 
 flowchart LR
@@ -46,7 +51,7 @@ flowchart LR
 
 ## How it's built
 
-Dungeon Together is an [SPA](https://en.wikipedia.org/wiki/Single-page_application) application, loaded as a single JS module into a simple HTML skeleton.
+Dungeon Together is compiled into an [SPA](https://en.wikipedia.org/wiki/Single-page_application) application, loaded as a single JS module into a simple HTML skeleton.
 
 ```mermaid
 flowchart LR
@@ -68,6 +73,7 @@ flowchart LR
 	end
 
 	subgraph app_build[App build]
+		direction TB
 		vite[
 			<span><a href='https://vitejs.dev'><img src='https://upload.wikimedia.org/wikipedia/commons/f/f1/Vitejs-logo.svg' alt='Vite' />Vite</a></span>
 		]
@@ -78,7 +84,29 @@ flowchart LR
 		]
 		class rollup image-node-marker
 
-		direction TB
+		subgraph Source
+			direction TB
+			ts[
+				<span><a href='https://www.typescriptlang.org'><img src='img/ts.svg' alt='TypeScript' />TypeScript</a></span>
+			]
+			class ts image-node-marker
+
+			vue[
+				<span><a href='https://vuejs.org'><img src='https://upload.wikimedia.org/wikipedia/commons/9/95/Vue.js_Logo_2.svg' alt='Vue.js' />Vue</a></span>
+			]
+			class vue image-node-marker
+
+			sass[
+				<a href='https://sass-lang.com'><img src='https://upload.wikimedia.org/wikipedia/commons/9/96/Sass_Logo_Color.svg' alt='Sass' /></a></span>
+			]
+			class sass image-node-marker
+
+			glsl[
+				<span><a href='https://www.khronos.org/opengl/wiki/OpenGL_Shading_Language'><img src='img/opengl.svg' alt='GLSL' />GLSL</a></span>
+			]
+			class glsl image-node-marker
+		end
+
 		subgraph App
 			direction TB
 			index[index.html]
@@ -86,7 +114,7 @@ flowchart LR
 			index -- includes --> Assets
 		end
 
-		vite --> rollup -- ts/vue/scss/glsl --> App
+		vite --> rollup --> Source --> App
 	end
 
 	docsify[
@@ -111,7 +139,11 @@ flowchart LR
 # How to play
 
 Instructions appear automatically when game loads.
-Scroll to the top of the page for link to play.
+Scroll to the top of the page for a link to play.
+
+---
+<small>
+OpenGL® and the oval logo are trademarks or registered trademarks of Hewlett Packard Enterprise in the United States and/or other countries worldwide.</small>
 
 <style>
 	/* Style goes into the end to not interfere with page CSS */
