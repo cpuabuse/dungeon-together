@@ -4,7 +4,28 @@
 		<meta charset="UTF-8" />
 		<title>Dungeon Together</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
-		<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
+
+		<!-- "docsify-themeable" styles -->
+		<link
+			rel="stylesheet"
+			href="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/style.min.css"
+			type="text/css"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css"
+			title="light"
+		/>
+		<link
+			rel="stylesheet alternative"
+			href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css"
+			title="dark"
+		/>
+		<style>
+			:root {
+				--content-max-width: 96em;
+			}
+		</style>
 	</head>
 
 	<body>
@@ -29,7 +50,9 @@
 
 			// Mermaid
 			mermaid.initialize({
-				startOnLoad: true
+				startOnLoad: true,
+				// Mermaid doesn't seem to allow to dynamically change themes, so selecting "neutral" for both dark/light
+				theme: "neutral"
 			});
 			window.mermaid = mermaid; // Needed for `docsify-mermaid`
 
@@ -45,12 +68,20 @@
 					// Note, if relativePath is set to `true`, it would recompute the sidebar links
 					"/.*/_sidebar.md": "/_sidebar.md"
 				},
-				basePath
+				basePath,
+				search: {
+					paths: "auto"
+				}
 			};
 		</script>
 
 		<!-- Docsify -->
 		<script src="//cdn.jsdelivr.net/npm/docsify@4" defer></script>
+		<script src="//cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js" defer></script>
+
+		<!-- Theme "docsify-darklight-theme" -->
+		<script src="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/main.min.js" defer></script>
+		<script src="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/index.min.js" defer></script>
 
 		<!-- Connect mermaid -->
 		<script src="//cdn.jsdelivr.net/npm/docsify-mermaid@2/dist/docsify-mermaid.js" defer></script>
