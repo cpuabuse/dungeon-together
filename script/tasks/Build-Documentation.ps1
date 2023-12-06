@@ -29,6 +29,7 @@ Param(
 [ValidateNotNullOrEmpty()][string]$private:DocsTargetSubdirectoryName = "docs"
 [ValidateNotNullOrEmpty()][string]$private:DocsTargetSubdirectoryPath = Join-Path $BuildDocumentationPath $DocsTargetSubdirectoryName
 [ValidateNotNullOrEmpty()][string]$private:CoverpagePath = Join-Path $DocsTargetSubdirectoryPath "_coverpage.md"
+[ValidateNotNullOrEmpty()][string]$Version = (Get-Content package.json | ConvertFrom-Json).version
 
 # Create folders
 . $Paths.NewDirectoryIfNotExists -Path $BuildDocumentationPath # Present for clarity
@@ -52,6 +53,7 @@ Set-Content -Path $IndexPath -Value $IndexContent
 . $Paths.WriteMessage -Message "Replacing coverage" -Deep
 [ValidateNotNullOrEmpty()][string]$private:CoverpageContent = Get-Content -Path $CoverpagePath -Raw
 $CoverpageContent = $CoverpageContent -replace "../build/dev/standalone/src/html/standalone.html", "standalone/src/html/standalone.html"
+$CoverpageContent = $CoverpageContent -replace "__SCRIPT_VERSION__", $Version
 Set-Content -Path $CoverpagePath -Value $CoverpageContent
 
 # Copy app, overwrite if exists
