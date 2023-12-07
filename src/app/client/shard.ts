@@ -289,19 +289,26 @@ export function ClientShardFactory({
 						// Async callback for event emitter
 						// eslint-disable-next-line @typescript-eslint/no-misused-promises
 						this.input.on(symbol, async inputInterface => {
-							let connection: ClientConnection | undefined = Array.from(this.players)[0]?.[1].connection;
-							connection?.socket.writeQueue({
-								body: {
-									direction,
-									hasDirection: true,
-									playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
-									// TODO: Add active unit system
-									unitUuid: Array.from(this.units)[0]
-								},
-								type: MessageTypeWord.Movement
-							});
-							await connection?.tick({ word: processQueueWord });
-
+							let unitUuid: Uuid | undefined = Array.from(this.units)[0];
+							if (unitUuid) {
+								let connection: ClientConnection | undefined = Array.from(this.players)[0]?.[1].connection;
+								connection?.socket.writeQueue({
+									body: {
+										direction,
+										hasDirection: true,
+										playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
+										// TODO: Add active unit system
+										unitUuid
+									},
+									type: MessageTypeWord.Movement
+								});
+								await connection?.tick({ word: processQueueWord });
+							} else {
+								(this.constructor as typeof ClientShard).universe.log({
+									error: new Error("Unit missing"),
+									level: LogLevel.Alert
+								});
+							}
 							// #if _DEBUG_ENABLED
 							inputDebug({ input: inputInterface as InputInterface, symbol: leftSymbol });
 							// #endif
@@ -312,15 +319,24 @@ export function ClientShardFactory({
 					// Async callback for event emitter
 					// eslint-disable-next-line @typescript-eslint/no-misused-promises
 					this.input.on(localActionSymbol, async inputInterface => {
-						let connection: ClientConnection | undefined = Array.from(this.players)[0]?.[1].connection;
-						connection?.socket.writeQueue({
-							body: {
-								playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
-								unitUuid: Array.from(this.units)[0]
-							},
-							type: MessageTypeWord.LocalAction
-						});
-						await connection?.tick({ word: processQueueWord });
+						let unitUuid: Uuid | undefined = Array.from(this.units)[0];
+						if (unitUuid) {
+							// TODO: Retrieval of connection
+							let connection: ClientConnection | undefined = Array.from(this.players)[0]?.[1].connection;
+							connection?.socket.writeQueue({
+								body: {
+									playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
+									unitUuid
+								},
+								type: MessageTypeWord.LocalAction
+							});
+							await connection?.tick({ word: processQueueWord });
+						} else {
+							(this.constructor as typeof ClientShard).universe.log({
+								error: new Error("Unit missing"),
+								level: LogLevel.Alert
+							});
+						}
 					});
 
 					// Add listeners for scroll input

@@ -1,13 +1,13 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
-
-import { CoreLog, LogLevel } from "../core/error";
 
 /**
  * @file Vectors
  */
+
+import { CoreLog, LogLevel } from "../core/error";
 
 /**
  * Vector coords.
@@ -19,7 +19,7 @@ export const vectorCoords = ["x", "y", "z"] as const;
 /**
  * Vector coords.
  */
-export type VectorCoords = typeof vectorCoords[number];
+export type VectorCoords = (typeof vectorCoords)[number];
 
 /**
  * The vector representing a point of display.
@@ -141,7 +141,9 @@ export class VectorArray<T> extends Array<(T | undefined)[][]> implements Vector
 		try {
 			// Z check omitted, as overflow produces undefined
 			if (x >= 0 && y >= 0 && x <= this.x && y <= this.y) {
-				return this[x][y][z];
+				// Statement is within "try-catch" block
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				return this[x]![y]![z];
 			}
 		} catch (error) {
 			CoreLog.global.log({
@@ -176,7 +178,18 @@ export class VectorArray<T> extends Array<(T | undefined)[][]> implements Vector
 	}): void {
 		if (element !== undefined) {
 			if (vector.x <= this.x && vector.y <= this.y && vector.z <= this.z) {
-				this[vector.x][vector.y][vector.z] = element;
+				try {
+					// Statement is within "try-catch" block
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					this[vector.x]![vector.y]![vector.z] = element;
+				} catch (error) {
+					CoreLog.global.log({
+						error: new Error(`Vector(x=${vector.x}, y=${vector.y}, z=${vector.z}) out of bounds.`, {
+							cause: error
+						}),
+						level: LogLevel.Error
+					});
+				}
 			}
 		}
 	}

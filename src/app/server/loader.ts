@@ -20,6 +20,7 @@ import { CoreArgIds, CoreArgMeta, coreArgMetaGenerate } from "../core/arg";
 import { LogLevel } from "../core/error";
 import { CoreShardArg } from "../core/shard";
 import { RootType, YamlOptions, compile, yamlOptions } from "../yaml";
+import { EntityKind } from "./entity";
 import { Module, ModuleFactoryRecordList, ModuleFactoryRecordListConstraint, ModuleList } from "./module";
 import { ServerOptions, serverOptions } from "./options";
 import { ServerUniverse } from "./universe";
@@ -130,7 +131,9 @@ export class ServerLoader<R extends string, T extends ModuleFactoryRecordListCon
 		this.application = application;
 		// Reverting from generic to concrete type
 		this.records = records as unknown as ModuleFactoryRecordList;
-		this.yamlList = new Map(Object.getOwnPropertyNames(yamlList).map(key => [key, yamlList[key]]));
+		// "key" must exist in list, as it is retrieved from it
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		this.yamlList = new Map(Object.getOwnPropertyNames(yamlList).map(key => [key, yamlList[key]!]));
 	}
 
 	/**
@@ -194,7 +197,9 @@ export class ServerLoader<R extends string, T extends ModuleFactoryRecordListCon
 					[name]: id
 				};
 			} else {
-				newResult[module][name] = id;
+				// Assertion performed with "hasOwnProperty"
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				newResult[module]![name] = id;
 			}
 
 			return newResult;
@@ -216,7 +221,15 @@ export class ServerLoader<R extends string, T extends ModuleFactoryRecordListCon
 				// False negative on type inference
 				// eslint-disable-next-line @typescript-eslint/typedef
 				modules: Object.entries(record.depends).reduce((result, [key, value]) => {
-					return { ...result, [key]: moduleList[value] };
+					let moduleValue: Module | undefined = moduleList[value];
+					if (moduleValue) {
+						return { ...result, [key]: moduleValue };
+					}
+					universe.log({
+						error: new Error(`Module dependency("${value}") for module("${moduleName}") not found`),
+						level: LogLevel.Alert
+					});
+					return result;
 				}, {} as ModuleList),
 				universe
 			});
@@ -241,7 +254,9 @@ export class ServerLoader<R extends string, T extends ModuleFactoryRecordListCon
 					namespace = `kind/${moduleName}`;
 				}
 
-				universe.Entity.addKind({ Kind: module.kinds[kindName], id, namespace });
+				// "kindName" is retrieved as key already
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				universe.Entity.addKind({ Kind: module.kinds[kindName]!, id, namespace });
 			});
 		});
 

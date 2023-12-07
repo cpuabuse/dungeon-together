@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -240,9 +240,12 @@ export function coreArgOptionIdsToOptions<I extends CoreArgSimpleOptionIds, S ex
 			return {
 				...result,
 				[id]: ((): S => {
-					for (let i: number = 0; i < symbolSet.size; i++) {
-						if (symbolIndexArray.includes(symbolSetArray[i])) {
-							return symbolSetArray[i];
+					for (let i: number = 0; i < symbolSetArray.length; i++) {
+						// "symbolSetArray" is always indexable by "i"
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+						let symbolSetArrayEntry: S = symbolSetArray[i]!;
+						if (symbolIndexArray.includes(symbolSetArrayEntry)) {
+							return symbolSetArrayEntry;
 						}
 					}
 

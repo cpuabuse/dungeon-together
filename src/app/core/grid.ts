@@ -41,6 +41,7 @@ import {
 } from "./arg";
 import { CoreBaseClassNonRecursive, CoreBaseNonRecursiveParameters } from "./base";
 import { CoreCellArg, CoreCellInstance } from "./cell";
+import { LogLevel } from "./error";
 import {
 	CoreCellArgGrandparentIds,
 	CoreCellArgParentId,
@@ -743,7 +744,23 @@ export function CoreGridClassFactory<
 		// Super first
 		let cell: Cell = (Object.getPrototypeOf(CoreGrid.prototype) as CoreGrid).addCell.call(this, ...args);
 
-		this.cellIndex[cell.z][cell.x][cell.y] = cell;
+		try {
+			// Part of "try-catch" block
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			this.cellIndex[cell.z]![cell.x]![cell.y] = cell;
+		} catch {
+			(
+				(this.constructor as CoreGridClass<BaseParams, Options, Cell>).universe as CoreUniverse<
+					BaseClass,
+					BaseParams,
+					Options
+				>
+			).log({
+				data: { cell, grid: this },
+				error: new Error("Could not add cell to index"),
+				level: LogLevel.Error
+			});
+		}
 
 		return cell;
 	};

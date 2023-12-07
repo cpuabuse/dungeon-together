@@ -10,6 +10,7 @@
 import { Container } from "pixi.js";
 import { CoreArgIds } from "../core/arg";
 import { CellPathOwn } from "../core/cell";
+import { LogLevel } from "../core/error";
 import { CoreGridArg, CoreGridClassFactory } from "../core/grid";
 import { CoreGridArgParentIds } from "../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
@@ -90,8 +91,17 @@ export function ClientGridClassFactory({
 				container.visible = false;
 				return container;
 			});
+
 			// Make only the surface level visible
-			this.levelIndex[0].visible = true;
+			let firstLevel: Container | undefined = this.levelIndex[0];
+			if (firstLevel) {
+				firstLevel.visible = true;
+			} else {
+				(this.constructor as typeof ClientGrid).universe.log({
+					error: new Error("Levels not initialized"),
+					level: LogLevel.Alert
+				});
+			}
 		}
 
 		/**
@@ -109,10 +119,19 @@ export function ClientGridClassFactory({
 		}): void {
 			if (level < this.zLength && level >= 0 && this.currentLevel !== level) {
 				// Enable visibility first to avoid blank screen
-				this.levelIndex[level].visible = true;
-				this.levelIndex[this.currentLevel].visible = false;
-				this.currentLevel = level;
-				(this.constructor as ClientGridClass).universe.stores.useUniverseStore().updateGridLevel();
+				let levelContainer: Container | undefined = this.levelIndex[level];
+				let thisLevelContainer: Container | undefined = this.levelIndex[this.currentLevel];
+				if (levelContainer && thisLevelContainer) {
+					levelContainer.visible = true;
+					thisLevelContainer.visible = false;
+					this.currentLevel = level;
+					(this.constructor as ClientGridClass).universe.stores.useUniverseStore().updateGridLevel();
+				} else {
+					(this.constructor as typeof ClientGrid).universe.log({
+						error: new Error("Levels not initialized"),
+						level: LogLevel.Alert
+					});
+				}
 			}
 		}
 
@@ -124,8 +143,16 @@ export function ClientGridClassFactory({
 		public hideCell(path: CellPathOwn): void {
 			let cell: ClientCell = this.getCell(path);
 
-			// Add container
-			this.levelIndex[cell.z].removeChild(cell.container);
+			// Remove container
+			let levelContainer: Container | undefined = this.levelIndex[cell.z];
+			if (levelContainer) {
+				levelContainer.removeChild(cell.container);
+			} else {
+				(this.constructor as typeof ClientGrid).universe.log({
+					error: new Error("Could not find cell container"),
+					level: LogLevel.Error
+				});
+			}
 
 			// Not deferred for performance
 			cell.entities.forEach(entity => {
@@ -155,7 +182,15 @@ export function ClientGridClassFactory({
 			cell.container.y = sceneHeight * cell.y;
 
 			// Add container
-			this.levelIndex[cell.z].addChild(cell.container);
+			let levelContainer: Container | undefined = this.levelIndex[cell.z];
+			if (levelContainer) {
+				levelContainer.addChild(cell.container);
+			} else {
+				(this.constructor as typeof ClientGrid).universe.log({
+					error: new Error("Could not find cell container"),
+					level: LogLevel.Error
+				});
+			}
 
 			// Post-attach (decoration); Not deferred to process a cell at time, for performance
 			cell.entities.forEach(entity => {

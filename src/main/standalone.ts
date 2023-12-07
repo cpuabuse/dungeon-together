@@ -66,9 +66,9 @@ async function main(): Promise<void> {
 		universe: serverUniverse,
 		userAlias: { displayName: "CarrotHunter42" }
 	});
-	let shard: ServerShard = Array.from(serverUniverse.shards)[1][1];
+	let shard: ServerShard = Array.from(serverUniverse.shards)[1]![1]!;
 	shard.dictionary.shardName = "Game";
-	let playerUuid: Uuid = Array.from(shard.players)[0][0];
+	let playerUuid: Uuid = Array.from(shard.players)[0]![0]!;
 	serverConnection.registerShard({ playerUuid, shardUuid: shard.shardUuid });
 
 	// Dispatch init process
