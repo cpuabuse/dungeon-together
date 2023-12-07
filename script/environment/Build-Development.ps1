@@ -17,6 +17,9 @@ try {
 	# Build App
 	. $Paths.BuildApplication
 
+	# Build Reference
+	. $Paths.BuildReference -Environment dev -Build standalone
+
 	# Build docs
 	. $Paths.BuildDocumentation -Environment dev -Build standalone
 }

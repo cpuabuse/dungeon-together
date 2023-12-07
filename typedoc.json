@@ -1,7 +1,4 @@
 {
 	"$schema": "https://typedoc.org/schema.json",
-	"entryPoints": ["src/app/yaml", "src/app/application/standalone.ts"],
-	"out": "build/typedoc",
-	"tsconfig": "tsconfig/typedoc.tsconfig.json",
-	"exclude": ["node_modules"]
+	"tsconfig": "tsconfig/typedoc.tsconfig.json"
 }

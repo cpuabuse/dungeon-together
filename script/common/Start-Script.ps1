@@ -25,6 +25,7 @@ if ($null -eq (Get-Variable -Name "StartScriptGuard" -Scope "Script" -ErrorActio
 		NewDirectoryIfNotExists = Join-Path "script" "common" "New-DirectoryIfNotExists.ps1";
 		BuildAssets             = Join-Path "script" "tasks" "Build-Assets.ps1";
 		BuildDocumentation      = Join-Path "script" "tasks" "Build-Documentation.ps1";
+		BuildReference          = Join-Path "script" "tasks" "Build-Reference.ps1";
 		InstallDependencies     = Join-Path "script" "tasks" "Install-Dependencies.ps1";
 		BuildApplication        = Join-Path "script" "tasks" "Build-Application.ps1";
 	}
