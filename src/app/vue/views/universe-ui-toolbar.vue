@@ -17,7 +17,6 @@
 <script lang="ts">
 import Color from "color";
 import { PropType, defineComponent } from "vue";
-import { UniverseStore } from "../../client/gui";
 import { Uuid } from "../../common/uuid";
 import CompactToolbar from "../compact-toolbar.vue";
 import { OverlayList, OverlayWindow } from "../components";
@@ -312,7 +311,7 @@ export default defineComponent({
 								 * @returns An object with index and model getter/setter
 								 */
 								const generateEntryValue: () => PlayerEntry = () => {
-									const { records }: Record<"records", UniverseStore["state"]["records"]> = this.recordStore;
+									const recordStore: Store<StoreWord.Record> = this.recordStore;
 
 									let clickRecordIndex: symbol = Symbol(`Menu for player(playerUuid="${playerUuid}")`);
 
@@ -325,7 +324,7 @@ export default defineComponent({
 										 * @returns To display or not
 										 */
 										get isPlayerMenuDisplayed(): boolean {
-											return !!records[clickRecordIndex];
+											return !!recordStore.records[clickRecordIndex];
 										},
 
 										/**
@@ -334,7 +333,7 @@ export default defineComponent({
 										// Infers from getter
 										// eslint-disable-next-line @typescript-eslint/typedef
 										set isPlayerMenuDisplayed(value) {
-											records[clickRecordIndex] = value;
+											recordStore.records[clickRecordIndex] = value;
 										},
 
 										items: [this.statItem],
