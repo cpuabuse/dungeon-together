@@ -3,6 +3,7 @@
 	<CompactToolbar :menus="mainToolbarMenus" />
 
 	<UniverseUiToolbarOptions v-model="optionsModel" />
+	<UniverseUiInfoBarMusicControl />
 	<UniverseUiToolbarWelcome />
 
 	<OverlayWindow v-model="isDebugMenuDisplayed" icon="fa-bug-slash" :name="debugName">
@@ -26,6 +27,7 @@ import { useLocale } from "../core/locale";
 import { OverlayListItemEntry, OverlayListItemEntryType, OverlayListItems, OverlayListTabs } from "../core/overlay";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { UniverseUiPlayerEntry, UniverseUiShardEntries } from "../core/universe-ui";
+import UniverseUiInfoBarMusicControl from "./universe-ui-info-bar-music-control.vue";
 import UniverseUiToolbarOptions from "./universe-ui-toolbar-options.vue";
 import UniverseUiToolbarWelcome from "./universe-ui-toolbar-welcome.vue";
 
@@ -64,6 +66,7 @@ export default defineComponent({
 		CompactToolbar,
 		OverlayList,
 		OverlayWindow,
+		UniverseUiInfoBarMusicControl,
 		UniverseUiToolbarOptions,
 		UniverseUiToolbarWelcome,
 		UuidSearch
