@@ -270,6 +270,11 @@ export function useOverlayBusToCompactToolbarMenuSource(
 }
 
 /**
+ * Return type of {@link useOverlayBusToCompactToolbarMenuSource}.
+ */
+export type UsedOverlayBusToCompactToolbarMenuSource = ReturnType<typeof useOverlayBusToCompactToolbarMenuSource>;
+
+/**
  * Type for {@link useCompactToolbarMenuConsumer} composable, and to be used for more complex objects inside consumer instance.
  */
 export type CompactToolbarMenuConsumerEntry = {
@@ -290,6 +295,7 @@ export type CompactToolbarMenuConsumerEntry = {
  * @returns Composable
  */
 export function useCompactToolbarMenuConsumer(): CompactToolbarMenuConsumerEntry {
+	// It is OK to ref to default object, as reference would be overwritten on events
 	let menu: ShallowRef<CompactToolbarMenu> = shallowRef(defaultCompactToolbarMenu);
 
 	/**

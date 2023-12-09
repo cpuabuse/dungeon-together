@@ -61,7 +61,7 @@ import { CoreDictionary } from "../../core/connection";
 import { OverlayList, StatusNotification } from "../components";
 import OverlayWindow from "../components/overlay-window.vue";
 import StoryNotification from "../components/story-notification.vue";
-import { useLocale } from "../core/locale";
+import { UsedLocale, useLocale } from "../core/locale";
 import { OverlayListItemEntryType, OverlayListItems, overlayBusEmits, useOverlayBusSource } from "../core/overlay";
 import { statusNotificationEmits, useStatusNotification } from "../core/status-notification";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
@@ -177,9 +177,7 @@ export default defineComponent({
 		// Infer composable
 		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 
-		// Infer composable
-		// eslint-disable-next-line @typescript-eslint/typedef
-		const { t } = useLocale();
+		const { t }: UsedLocale = useLocale();
 
 		const clickPlayerRecordIndex: symbol = Symbol(`menu-item-player-${props.player.playerUuid}`);
 		const clickStoryRecordIndex: symbol = Symbol(`menu-item-player-${props.player.playerUuid}`);

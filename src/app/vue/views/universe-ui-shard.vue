@@ -16,7 +16,11 @@
 import { PropType, defineComponent } from "vue";
 import { ClientPlayer } from "../../client/connection";
 import { ClientShard } from "../../client/shard";
-import { overlayBusToCompactToolbarMenuEmits, useOverlayBusToCompactToolbarMenuSource } from "../core/compact-toolbar";
+import {
+	UsedOverlayBusToCompactToolbarMenuSource,
+	overlayBusToCompactToolbarMenuEmits,
+	useOverlayBusToCompactToolbarMenuSource
+} from "../core/compact-toolbar";
 import { useOverlayBusConsumer } from "../core/overlay";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { PlayerEntries, UniverseUiShardModel } from "../core/universe-ui";
@@ -119,15 +123,15 @@ export default defineComponent({
 		let usedOverlayBusConsumer = useOverlayBusConsumer();
 
 		// Infer composable return
-		// eslint-disable-next-line @typescript-eslint/typedef
-		let usedOverlayBusToCompactToolbarMenuSource = useOverlayBusToCompactToolbarMenuSource({
-			emit,
-			icon: "fa-globe",
-			isEmittingUpdateMenu: true,
-			name: "Shard",
-			nameSubtext: props.shard.shardName,
-			usedOverlayBusConsumer
-		});
+		let usedOverlayBusToCompactToolbarMenuSource: UsedOverlayBusToCompactToolbarMenuSource =
+			useOverlayBusToCompactToolbarMenuSource({
+				emit,
+				icon: "fa-globe",
+				isEmittingUpdateMenu: true,
+				name: "Shard",
+				nameSubtext: props.shard.shardName,
+				usedOverlayBusConsumer
+			});
 
 		return { ...usedOverlayBusConsumer, ...usedOverlayBusToCompactToolbarMenuSource, universeStore };
 	}

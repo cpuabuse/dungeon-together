@@ -13,15 +13,13 @@
 <script setup lang="ts">
 import { Ref, computed } from "vue";
 import { VCol, VDivider, VRow } from "vuetify/components";
-import { useLocale } from "../core/locale";
+import { UsedLocale, useLocale } from "../core/locale";
 import { StoryNotificationEntry } from "../core/story-notification";
 
 /**
  * Locale composable.
  */
-// Infer composable type
-// eslint-disable-next-line @typescript-eslint/typedef
-const { tm, rt } = useLocale();
+const { tm, rt }: UsedLocale = useLocale();
 
 /**
  * Props.

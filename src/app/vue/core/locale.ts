@@ -179,3 +179,8 @@ export function useLocale() {
 		tm
 	};
 }
+
+/**
+ * Return type of `useLocale()`.
+ */
+export type UsedLocale = ReturnType<typeof useLocale>;

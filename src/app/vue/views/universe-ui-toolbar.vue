@@ -2,9 +2,32 @@
 <template>
 	<CompactToolbar :menus="mainToolbarMenus" />
 
-	<UniverseUiToolbarOptions v-model="optionsModel" />
+	<UniverseUiToolbarOptions
+		v-model="
+			// Inference breaks for vue, need casting
+			// eslint-disable-next-line vue/valid-v-model
+			(optionsModel as OptionsModelType)
+		"
+	/>
+
 	<UniverseUiInfoBarMusicControl />
-	<UniverseUiToolbarWelcome />
+
+	<!-- Overlays display -->
+	<OverlayWindow
+		v-for="({ listItems, name }, displayItemKey) in displayItems"
+		:key="displayItemKey"
+		v-model="displayItems[displayItemKey]!.isDisplayed"
+		:name="name"
+	>
+		<template #body>
+			<OverlayList :items="listItems">
+				<!-- All story -->
+				<template #welcome>
+					<UniverseUiToolbarWelcome />
+				</template>
+			</OverlayList>
+		</template>
+	</OverlayWindow>
 
 	<OverlayWindow v-model="isDebugMenuDisplayed" icon="fa-bug-slash" :name="debugName">
 		<template #body>
@@ -17,14 +40,27 @@
 
 <script lang="ts">
 import Color from "color";
-import { PropType, defineComponent } from "vue";
+import { PropType, computed, defineComponent } from "vue";
 import { Uuid } from "../../common/uuid";
 import CompactToolbar from "../compact-toolbar.vue";
 import { OverlayList, OverlayWindow } from "../components";
 import UuidSearch from "../components/uuid-search.vue";
-import { CompactToolbarMenu, CompactToolbarMenuBaseProps, CompactToolbarMenuItem } from "../core/compact-toolbar";
-import { useLocale } from "../core/locale";
-import { OverlayListItemEntry, OverlayListItemEntryType, OverlayListItems, OverlayListTabs } from "../core/overlay";
+import {
+	CompactToolbarMenu,
+	CompactToolbarMenuBaseProps,
+	CompactToolbarMenuItem,
+	UsedOverlayBusToCompactToolbarMenuSource,
+	useOverlayBusToCompactToolbarMenuSource
+} from "../core/compact-toolbar";
+import { UsedLocale, useLocale } from "../core/locale";
+import {
+	OverlayListItemEntry,
+	OverlayListItemEntryType,
+	OverlayListItems,
+	OverlayListTabs,
+	useOverlayBusConsumer,
+	useOverlayBusSource
+} from "../core/overlay";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { UniverseUiPlayerEntry, UniverseUiShardEntries } from "../core/universe-ui";
 import UniverseUiInfoBarMusicControl from "./universe-ui-info-bar-music-control.vue";
@@ -60,6 +96,16 @@ type PlayerEntry = {
  * Helper type for casting to player entries array element, as class information lost.
  */
 type PlayerEntries = Array<[string, PlayerEntry]>;
+
+// TODO: Change in favor of bus
+/**
+ * Model type helper.
+ *
+ * @remarks
+ * Both properties being an array removes necessity for many checks.
+ */
+type OptionsModelType = Record<"windowItems", Array<OverlayListItemEntry>> &
+	Record<"menuItems", Array<CompactToolbarMenuItem>>;
 
 export default defineComponent({
 	components: {
@@ -185,8 +231,9 @@ export default defineComponent({
 						{ clickRecordIndex: this.debugMenuDisplaySymbol, icon: "fa-bug-slash", name: this.debugName }
 					],
 					maxPinnedAmount: 1,
-					name: this.system
-				}
+					name: "SystemR"
+				},
+				this.systemMenu
 			];
 		},
 
@@ -220,15 +267,6 @@ export default defineComponent({
 				name: "Stats",
 				type: OverlayListItemEntryType.Slot
 			};
-		},
-
-		/**
-		 * System.
-		 *
-		 * @returns System
-		 */
-		system(): string {
-			return this.t("menuTitle.system");
 		}
 	},
 
@@ -245,7 +283,10 @@ export default defineComponent({
 
 			hpColor: new Color("#1F8C2F"),
 
-			optionsModel: { menuItems: new Array<CompactToolbarMenuItem>(), windowItems: new Array<OverlayListItemEntry>() },
+			optionsModel: {
+				menuItems: new Array<CompactToolbarMenuItem>(),
+				windowItems: new Array<OverlayListItemEntry>()
+			} satisfies OptionsModelType,
 
 			playerEntries: new Array() as PlayerEntries,
 
@@ -269,14 +310,58 @@ export default defineComponent({
 	/**
 	 * Setup script.
 	 *
+	 * @param props - Component props
+	 * @param param - Context
 	 * @returns Records
 	 */
-	setup() {
+	// Infer setup param type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	setup(props, { emit }) {
 		const stores: Stores = useStores();
+		const { t }: UsedLocale = useLocale();
 		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 		const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
+		const welcomeOverlaySymbol: symbol = Symbol(`menu-universe-ui-toolbar-${universe.universeUuid}`);
+		const welcomeDisplaySymbol: symbol = Symbol(`click-welcome-${universe.universeUuid}`);
+		// Infer composable
+		// eslint-disable-next-line @typescript-eslint/typedef
+		let usedOverlayBusConsumer = useOverlayBusConsumer();
+		// Infer composable
+		// eslint-disable-next-line @typescript-eslint/typedef
+		const { displayItems } = useOverlayBusSource({
+			emit,
+			menuItemsRegistryIndex: welcomeOverlaySymbol,
+			overlayItems: [
+				// Welcome screen
+				{
+					listItems: computed(() => {
+						return [{ id: "welcome", type: OverlayListItemEntryType.Slot }] satisfies OverlayListItems;
+					}),
+					menuItem: computed(() => {
+						return {
+							clickRecordIndex: welcomeDisplaySymbol,
+							icon: "fa-door-open",
+							name: "Welcome"
+						} satisfies CompactToolbarMenuItem;
+					})
+				}
+			],
+			recordStore,
+			usedOverlayBusConsumer
+		});
+		// Display menu at start
+		recordStore.records[welcomeDisplaySymbol] = true;
 
-		return { recordStore, ...useLocale(), universe };
+		const { menu: systemMenu }: UsedOverlayBusToCompactToolbarMenuSource = useOverlayBusToCompactToolbarMenuSource({
+			emit,
+			icon: "fa-gear",
+			isEmittingUpdateMenu: false,
+			maxPinnedAmount: 1,
+			name: t("menuTitle.system"),
+			usedOverlayBusConsumer
+		});
+
+		return { displayItems, recordStore, systemMenu, t, universe };
 	},
 
 	watch: {
@@ -314,7 +399,7 @@ export default defineComponent({
 								 * @returns An object with index and model getter/setter
 								 */
 								const generateEntryValue: () => PlayerEntry = () => {
-									const recordStore: Store<StoreWord.Record> = this.recordStore;
+									const { recordStore }: Record<"recordStore", Store<StoreWord.Record>> = this;
 
 									let clickRecordIndex: symbol = Symbol(`Menu for player(playerUuid="${playerUuid}")`);
 
