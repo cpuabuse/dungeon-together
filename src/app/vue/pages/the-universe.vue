@@ -3,7 +3,6 @@
 		<div class="app-content">
 			<div class="time">Hello: {{ what }}</div>
 			<tsxtest />
-			<statealertbox v-show="alert" />
 			<UniverseUi />
 		</div>
 	</VApp>
@@ -13,7 +12,6 @@
 import { defineComponent } from "vue";
 import { VApp } from "vuetify/components";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
-import stateAlertBoxComponent from "../state-alert-box.vue";
 import tsxTestComponent from "../tsx/test.vue";
 import UniverseUi from "../views/universe-ui.vue";
 
@@ -29,23 +27,7 @@ export default defineComponent({
 	components: {
 		UniverseUi,
 		VApp,
-		statealertbox: stateAlertBoxComponent,
 		tsxtest: tsxTestComponent
-	},
-
-	/**
-	 * Computed props.
-	 */
-	computed: {
-		/**
-		 * To display alert or not.
-		 *
-		 * @returns Alert state
-		 */
-		alert(): boolean {
-			// TODO: Use store
-			return true;
-		}
 	},
 
 	/**
