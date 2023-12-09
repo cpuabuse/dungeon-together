@@ -1,10 +1,23 @@
 <!-- Universe UI bar -->
 <template>
-	<VSystemBar align="start">
+	<VSystemBar class="universe-ui-info-bar" align="start">
+		<VMenu class="ms-1" location="bottom">
+			<template #activator="{ props }">
+				<div v-bind="props" style="cursor: pointer; height: 100%">
+					<!-- Size is small because there is menu between button and bar -->
+					<BaseIcon v-ripple icon="fa-bell" />
+				</div>
+			</template>
+			<stateAlertBox />
+		</VMenu>
+		<VDivider class="ms-1" inset vertical />
+
 		<BaseIcon icon="fa-clock" class="ms-1" :color="clockColor" />
 		<VDivider class="ms-1" inset vertical />
+
 		<span>{{ clockTime }}</span>
 		<VDivider class="ms-1" inset vertical />
+
 		<BaseIcon icon="fa-arrow-down-up-across-line" class="ms-1" />
 		<span v-for="(level, levelKey) in gridLevels" :key="levelKey" class="ms-1">{{ level }}</span>
 	</VSystemBar>
@@ -12,10 +25,11 @@
 
 <script lang="ts">
 import { PropType, Ref, defineComponent, shallowRef, watch } from "vue";
-import { VDivider, VSystemBar } from "vuetify/components";
+import { VDivider, VMenu, VSystemBar } from "vuetify/components";
 import { BaseIcon } from "../components";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { UniverseUiShardEntries } from "../core/universe-ui";
+import stateAlertBoxComponent from "../state-alert-box.vue";
 
 /**
  * Milliseconds in one second.
@@ -43,7 +57,7 @@ const orangeThreshold: number = 60000;
 const secondDigitThreshold: number = 10;
 
 export default defineComponent({
-	components: { BaseIcon, VDivider, VSystemBar },
+	components: { BaseIcon, VDivider, VMenu, VSystemBar, stateAlertBox: stateAlertBoxComponent },
 
 	computed: {
 		/**
@@ -174,4 +188,9 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang="css"></style>
+<style scoped lang="css">
+.universe-ui-info-bar {
+	/* Added to catch events */
+	pointer-events: auto;
+}
+</style>
