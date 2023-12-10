@@ -35,9 +35,9 @@ export default defineComponent({
 		iconSize(): string | undefined {
 			switch (this.size) {
 				case ElementSize.Small:
-					return "small";
+					return "x-small";
 				case ElementSize.Large:
-					return "large";
+					return "x-large";
 				default:
 					return undefined;
 			}
@@ -131,9 +131,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* Override reduction in size of VIcon inside the VBtn, as sizing is tied to mode  */
-.v-btn .base-icon {
-	font-size: 1rem;
+/* Override reduction in size of VIcon inside the VBtn, as sizing is tied to mode, and in other containers */
+.base-icon {
+	font-size: initial;
 }
 .v-btn .v-icon {
 	--v-icon-size-multiplier: 1;

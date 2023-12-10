@@ -1,35 +1,54 @@
-<!-- Universe UI bar -->
+<!--
+	Universe UI bar.
+	Has two sections, separated by spacer.
+	First section contains informational elements, separated by a divider, second contains interactive elements.
+	Buttons and icons are downsized not take too much space.
+	Buttons have "fill-height" to adjust where pop-up shows.
+-->
 <template>
-	<VSystemBar class="universe-ui-info-bar" align="start">
+	<VSystemBar class="universe-ui-info-bar">
+		<!-- Informational elements -->
+		<BaseIcon icon="fa-clock" class="me-1" :color="clockColor" :size="ElementSize.Small" />
+		<span class="universe-ui-info-bar-clock-text">{{ clockTime }}</span>
+		<VDivider class="mx-1" inset vertical />
+
+		<BaseIcon icon="fa-arrow-down-up-across-line" :size="ElementSize.Small" />
+		<span v-for="(level, levelKey) in gridLevels" :key="levelKey" class="ms-1 universe-ui-info-bar-level-text">{{
+			level
+		}}</span>
+
+		<VSpacer />
+
+		<!-- Interactive elements -->
 		<VMenu class="ms-1" location="bottom">
 			<template #activator="{ props }">
-				<div v-bind="props" style="cursor: pointer; height: 100%">
-					<!-- Size is small because there is menu between button and bar -->
-					<BaseIcon v-ripple icon="fa-bell" />
-				</div>
+				<VBtn v-bind="props" variant="text" class="fill-height" size="x-small">
+					<BaseIcon icon="fa-music" :size="ElementSize.Small" />
+				</VBtn>
+			</template>
+			<UniverseUiInfoBarMusicControl />
+		</VMenu>
+
+		<VMenu class="ms-1" location="bottom">
+			<template #activator="{ props }">
+				<VBtn v-bind="props" variant="text" class="fill-height" size="x-small">
+					<BaseIcon icon="fa-bell" :size="ElementSize.Small" />
+				</VBtn>
 			</template>
 			<stateAlertBox />
 		</VMenu>
-		<VDivider class="ms-1" inset vertical />
-
-		<BaseIcon icon="fa-clock" class="ms-1" :color="clockColor" />
-		<VDivider class="ms-1" inset vertical />
-
-		<span>{{ clockTime }}</span>
-		<VDivider class="ms-1" inset vertical />
-
-		<BaseIcon icon="fa-arrow-down-up-across-line" class="ms-1" />
-		<span v-for="(level, levelKey) in gridLevels" :key="levelKey" class="ms-1">{{ level }}</span>
 	</VSystemBar>
 </template>
 
 <script lang="ts">
 import { PropType, Ref, defineComponent, shallowRef, watch } from "vue";
-import { VDivider, VMenu, VSystemBar } from "vuetify/components";
+import { VBtn, VDivider, VMenu, VSpacer, VSystemBar } from "vuetify/components";
+import { ElementSize } from "../common/element";
 import { BaseIcon } from "../components";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { UniverseUiShardEntries } from "../core/universe-ui";
 import stateAlertBoxComponent from "../state-alert-box.vue";
+import UniverseUiInfoBarMusicControl from "./universe-ui-info-bar-music-control.vue";
 
 /**
  * Milliseconds in one second.
@@ -57,7 +76,16 @@ const orangeThreshold: number = 60000;
 const secondDigitThreshold: number = 10;
 
 export default defineComponent({
-	components: { BaseIcon, VDivider, VMenu, VSystemBar, stateAlertBox: stateAlertBoxComponent },
+	components: {
+		BaseIcon,
+		UniverseUiInfoBarMusicControl,
+		VBtn,
+		VDivider,
+		VMenu,
+		VSpacer,
+		VSystemBar,
+		stateAlertBox: stateAlertBoxComponent
+	},
 
 	computed: {
 		/**
@@ -105,7 +133,7 @@ export default defineComponent({
 	 * @returns Universe data
 	 */
 	data() {
-		return { upTime: 0, upTimeIntervalHandle: null as ReturnType<typeof setInterval> | null };
+		return { ElementSize, upTime: 0, upTimeIntervalHandle: null as ReturnType<typeof setInterval> | null };
 	},
 
 	props: {
@@ -192,5 +220,11 @@ export default defineComponent({
 .universe-ui-info-bar {
 	/* Added to catch events */
 	pointer-events: auto;
+}
+
+.universe-ui-info-bar-clock-text,
+.universe-ui-info-bar-level-text {
+	/* Text changes, must preserve sizing */
+	font-family: monospace, monospace;
 }
 </style>

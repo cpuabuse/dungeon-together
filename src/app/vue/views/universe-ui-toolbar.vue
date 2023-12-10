@@ -10,8 +10,6 @@
 		"
 	/>
 
-	<UniverseUiInfoBarMusicControl />
-
 	<!-- Overlays display -->
 	<OverlayWindow
 		v-for="({ listItems, name }, displayItemKey) in displayItems"
@@ -63,7 +61,6 @@ import {
 } from "../core/overlay";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { UniverseUiPlayerEntry, UniverseUiShardEntries } from "../core/universe-ui";
-import UniverseUiInfoBarMusicControl from "./universe-ui-info-bar-music-control.vue";
 import UniverseUiToolbarOptions from "./universe-ui-toolbar-options.vue";
 import UniverseUiToolbarWelcome from "./universe-ui-toolbar-welcome.vue";
 
@@ -112,7 +109,6 @@ export default defineComponent({
 		CompactToolbar,
 		OverlayList,
 		OverlayWindow,
-		UniverseUiInfoBarMusicControl,
 		UniverseUiToolbarOptions,
 		UniverseUiToolbarWelcome,
 		UuidSearch
