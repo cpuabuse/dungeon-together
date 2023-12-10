@@ -28,6 +28,7 @@ import {
 	OverlayListType
 } from "../core/overlay";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
+import { shallowRef } from "vue";
 
 export default defineComponent({
 	components: { OverlayClick, OverlayList },
@@ -165,8 +166,7 @@ export default defineComponent({
 	 */
 	data() {
 		return {
-			isOverlayClickDisplayed: true,
-			previousCell: null as ClientCell | null
+			isOverlayClickDisplayed: true
 		};
 	},
 
@@ -294,7 +294,8 @@ export default defineComponent({
 		const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
 
 		return {
-			universe
+			universe,
+			previousCell: shallowRef(null as ClientCell | null)
 		};
 	},
 

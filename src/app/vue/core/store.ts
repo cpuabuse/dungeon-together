@@ -331,7 +331,7 @@ export function composableStoreFactory({
 			 * @returns State
 			 */
 			state: () => {
-				return { universe };
+				return { universe: shallowRef(universe) };
 			}
 		}),
 
@@ -346,9 +346,6 @@ export function composableStoreFactory({
 				return {
 					/**
 					 * Whether input is focused.
-					 *
-					 * @remarks
-					 * Ref is shallow, so that class type is untouched by reactivity transformation.
 					 */
 					rcMenuData: shallowRef(null as ClientUniverseStateRcMenuData)
 				};

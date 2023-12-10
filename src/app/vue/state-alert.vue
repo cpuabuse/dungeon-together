@@ -34,7 +34,7 @@ export default defineComponent({
 		 *
 		 * @returns - Alert class
 		 */
-		alertClass(): string {
+		alertClass(): AlertClass {
 			return this.styles[this.level].alertClass;
 		},
 

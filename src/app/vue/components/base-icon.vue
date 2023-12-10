@@ -50,9 +50,9 @@ export default defineComponent({
 		 */
 		mode(): ClientMode {
 			return (
-				(this.modeUuid ? this.universe.modes.get(this.modeUuid) : undefined) ??
+				(this.modeUuid ? this.universeStore.universe.modes.get(this.modeUuid) : undefined) ??
 				// Casting because of Vue class type erasure
-				(this.universe.defaultMode as ClientMode)
+				(this.universeStore.universe.defaultMode as ClientMode)
 			);
 		}
 	},
@@ -99,10 +99,10 @@ export default defineComponent({
 	 */
 	setup() {
 		const stores: Stores = useStores();
-		const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
+		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
 
 		return {
-			universe
+			universeStore
 		};
 	},
 

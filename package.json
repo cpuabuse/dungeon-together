@@ -97,11 +97,13 @@
 		"terser": "^5.17.7",
 		"ts-node": "^10.9.1",
 		"tslib": "^2.5.3",
-		"typedoc": "^0.24.8",
+		"typedoc": "^0.25.4",
 		"typedoc-plugin-merge-modules": "^5.1.0",
-		"typescript": "^5.0.2",
+		"typescript": "^5.3.3",
+		"vite-plugin-checker": "^0.6.2",
 		"vite-plugin-node-polyfills": "^0.16.0",
-		"vue-eslint-parser": "^9.3.0"
+		"vue-eslint-parser": "^9.3.0",
+		"vue-tsc": "^1.8.25"
 	},
 	"dependencies": {
 		"@fortawesome/fontawesome-svg-core": "^6.4.0",
