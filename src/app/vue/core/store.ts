@@ -10,7 +10,7 @@
  */
 
 import { StoreDefinition, defineStore } from "pinia";
-import { WritableComputedRef, computed, inject } from "vue";
+import { WritableComputedRef, computed, inject, shallowRef } from "vue";
 import { ClientUniverseStateRcMenuData } from "../../client/gui";
 import { ClientUniverse } from "../../client/universe";
 import { toCapitalized } from "../../common/text";
@@ -346,8 +346,11 @@ export function composableStoreFactory({
 				return {
 					/**
 					 * Whether input is focused.
+					 *
+					 * @remarks
+					 * Ref is shallow, so that class type is untouched by reactivity transformation.
 					 */
-					rcMenuData: null as ClientUniverseStateRcMenuData
+					rcMenuData: shallowRef(null as ClientUniverseStateRcMenuData)
 				};
 			}
 		})

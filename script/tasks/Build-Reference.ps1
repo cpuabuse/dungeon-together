@@ -85,13 +85,11 @@ $ReflectionConfigs | Foreach-Object -Process {
 
 	# Save reflection params as json
 	($BaseConfig + $_ + @{
-		json              = Join-Path $ConfigAndReflectionPathToRoot $CurrentReflectionPath
-		validation        = @{
+		json       = Join-Path $ConfigAndReflectionPathToRoot $CurrentReflectionPath
+		validation = @{
 			notExported = $false # Ignore for partial reflections
 		}
-		# TODO: Fix pipeline
-		skipErrorChecking = $true
-		plugin            = @(
+		plugin     = @(
 			"typedoc-plugin-merge-modules"
 		)
 	}) | ConvertTo-Json | Out-File -FilePath $CurrentConfigPath

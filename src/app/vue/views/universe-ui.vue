@@ -5,7 +5,7 @@
 		<UniverseUiInfoBar :shard-entries="(shardEntries as UniverseUiShardEntries)" />
 
 		<!-- Casting since class type information lost -->
-		<UniverseUiClick :rc-menu-data="(inputStore.rcMenuData as ClientUniverseStateRcMenuData)" />
+		<UniverseUiClick :rc-menu-data="inputStore.rcMenuData" />
 
 		<!-- Undefined assertion since index used in iteration -->
 		<UniverseUiShard
