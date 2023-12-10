@@ -32,6 +32,7 @@ Param(
 	"extends"       = Join-Path $ConfigAndReflectionPathToRoot "typedoc.json"
 	"hideGenerator" = $true
 	"showConfig"    = $true
+	"logLevel"      = "Verbose"
 };
 [ValidateNotNull()][hashtable[]]$private:ReflectionConfigs = @(
 	@{
