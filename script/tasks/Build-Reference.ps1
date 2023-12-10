@@ -31,7 +31,6 @@ Param(
 [ValidateNotNull()][hashtable]$private:BaseConfig = @{
 	"extends"       = Join-Path $ConfigAndReflectionPathToRoot "typedoc.json"
 	"hideGenerator" = $true
-	"showConfig"    = $true
 	"logLevel"      = "Verbose"
 };
 [ValidateNotNull()][hashtable[]]$private:ReflectionConfigs = @(
@@ -119,7 +118,6 @@ $ReflectionConfigs | Foreach-Object -Process {
 # Log
 . $Paths.WriteMessage -Message "Merging reference" -Deep
 
-throw;
 
 # Build
 npx typedoc "--options" $MergeConfigPath; if (-not $?) { throw }
@@ -138,3 +136,5 @@ Get-ChildItem -Path $BuildReferencePath -Filter "*.html" -Recurse | Foreach-Obje
 	$Content = $Content -replace "__SCRIPT_PLAY_HREF__", $([IO.Path]::GetRelativePath(".", $(Join-Path $LinkToRoot ".." ".." "standalone/src/html/standalone.html")) -replace "\\", "/")
 	Set-Content $_ $Content
 }
+
+throw;
