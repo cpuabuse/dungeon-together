@@ -99,7 +99,7 @@
 		"tslib": "^2.5.3",
 		"typedoc": "^0.24.8",
 		"typedoc-plugin-merge-modules": "^5.1.0",
-		"typescript": "^5.0.2",
+		"typescript": "^5.1.6",
 		"vite-plugin-node-polyfills": "^0.16.0",
 		"vue-eslint-parser": "^9.3.0"
 	},
@@ -128,7 +128,7 @@
 		"mousetrap": "^1.6.5",
 		"next-tick": "^1.1.0",
 		"nipplejs": "^0.10.1",
-		"pinia": "^2.1.6",
+		"pinia": "^2.1.7",
 		"pixi.js": "^7.2.4",
 		"replace-in-file": "^7.0.1",
 		"screenfull": "^6.0.2",
