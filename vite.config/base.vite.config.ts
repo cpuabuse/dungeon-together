@@ -4,9 +4,9 @@
 */
 
 /**
- * Vite base config.
- *
  * @file
+ *
+ * Vite base config.
  */
 
 // This is file for compilation
@@ -17,7 +17,8 @@ import inject from "@rollup/plugin-inject";
 import vue from "@vitejs/plugin-vue";
 import glslify from "rollup-plugin-glslify";
 import jscc from "rollup-plugin-jscc";
-import { UserConfigExport } from "vite";
+import { PluginOption, UserConfigExport } from "vite";
+import checker from "vite-plugin-checker";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import { ViteDefine } from "../src/app/common/env";
 
@@ -30,6 +31,13 @@ const relativeDirDepth: number = 1;
  * Project root directory.
  */
 const rootDir: Array<string> = [__dirname, ...new Array<string>(relativeDirDepth).fill("..")];
+
+/**
+ * Reusable record for checker plugin configs.
+ */
+const checkerConfigRecord: Record<"tsconfigPath", string> = {
+	tsconfigPath: "tsconfig/vite-check.tsconfig.json"
+};
 
 /**
  * Base config for Vite.
@@ -106,21 +114,29 @@ export function defineBase({
 
 		// Global plugins
 		plugins: [
+			checker({
+				typescript: checkerConfigRecord,
+				vueTsc: checkerConfigRecord
+			}),
+
 			vue({
 				template: { compilerOptions: { comments: false } }
 			}),
 
+			// Casting, Rollup plugin not typed for Vite
 			// Inject jsx transpilation dependencies (`import { h } from "vue"`);
-			inject({ vueJsxPragma: ["vue", "h"] }),
+			inject({ vueJsxPragma: ["vue", "h"] }) as PluginOption,
 
+			// Casting, Rollup plugin not typed for Vite
 			// Imports glsl files
-			glslify({ compress: isProduction }),
+			glslify({ compress: isProduction }) as PluginOption,
 
+			// Casting, Rollup plugin not typed for Vite
 			// For debug compilation
 			jscc({
 				include: join(...rootDir, "src", "**", "*"),
 				values: { _DEBUG_ENABLED: !isProduction }
-			}),
+			}) as PluginOption,
 
 			/*
 				Polyfill "url", and other modules.

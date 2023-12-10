@@ -18,5 +18,5 @@
 		/* JSX itself needs to be explicitly set, for compilation/linting of imports */
 		"jsx": "preserve"
 	},
-	"include": ["src/**/*", "test/**/*", "src/**/*.vue", "test/**/*.vue", "**/*vite.config.ts"]
+	"include": ["src/**/*", "test/**/*", "src/**/*.vue", "test/**/*.vue", "**/*vite.config.ts", "**/*.deno.ts"]
 }

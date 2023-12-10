@@ -5,8 +5,6 @@ rules:
   mocha/no-exports: off
 overrides:
   - files: ["*.deno.*"]
-    parserOptions:
-      project: "./tsconfig/deno.tsconfig.json"
     rules:
       "import/extensions": off
       "import/no-unresolved": off
