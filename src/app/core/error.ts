@@ -1,14 +1,16 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * @file Error processing in client
+ * @file
+ * Error processing in client.
  */
 
 import { Chalk, ChalkInstance } from "chalk";
-import { Logger, noConflict } from "loglevel";
+// Destructuring import is not a friend of ts-node
+import loglevel, { type Logger } from "loglevel";
 import { HexColors } from "../common/color";
 import { CoreTimer } from "./timer";
 
@@ -139,7 +141,7 @@ export class CoreLog {
 	 * `noConflict` does not modify global scope.
 	 */
 	protected static logger: Logger = ((): Logger => {
-		let logger: Logger = noConflict() as Logger;
+		let logger: Logger = loglevel.noConflict() as Logger;
 		logger.enableAll();
 
 		return logger;
