@@ -7,7 +7,13 @@
  * @file Tests for core
  */
 
-import { childMetaIdToExpected, childMetaIdToId, childMetaIdToOwn, tTest } from "./core/child-meta";
+import {
+	childMetaIdToExpected,
+	childMetaIdToId,
+	childMetaIdToIdWithId,
+	childMetaIdToOwn,
+	tTest
+} from "./core/child-meta";
 import { unitTest } from "./core/convert-arg";
 
 /**
@@ -29,6 +35,10 @@ export function unitCoreTest(): void {
 
 		describe("ID to expected", function () {
 			it("should produce correct meta", childMetaIdToExpected);
+		});
+
+		describe("ID to ID with ID", function () {
+			it("should produce correct meta", childMetaIdToIdWithId);
 		});
 	});
 }

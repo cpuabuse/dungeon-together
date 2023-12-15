@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -24,6 +24,7 @@ import {
 	CoreArgOptionsUnion,
 	CoreArgOptionsWithNavUnion,
 	CoreArgOptionsWithoutVectorUnion,
+	CoreArgPath,
 	CoreArgPathOwnOrExtended,
 	CoreArgPathReduced,
 	CoreArgPathUuidPropertyName,
@@ -75,7 +76,7 @@ export type CoreArgMeta<
 				 * Namespace used for system generated paths, when ID is undefined.
 				 */
 				systemNamespace: UrlPath;
-		  }
+			}
 		: unknown) &
 	(SourceOptions extends CoreArgOptionsPathOwnUnion
 		? TargetOptions extends CoreArgOptionsPathExtendedUnion
@@ -86,7 +87,7 @@ export type CoreArgMeta<
 					 * Contains only parent information, of target options.
 					 */
 					parentArgPath: CoreArgPathOwnOrExtended<ParentIds>;
-			  }
+				}
 			: unknown
 		: unknown);
 
@@ -129,7 +130,8 @@ export function coreArgMetaGenerate<
 	meta,
 	sourceOptions,
 	targetOptions,
-	index
+	index,
+	childPath
 }: {
 	/**
 	 * Index of child.
@@ -155,6 +157,11 @@ export function coreArgMetaGenerate<
 	 * Meta.
 	 */
 	meta: CoreArgMeta<ParentId, SourceOptions, TargetOptions, GrandparentIds>;
+
+	/**
+	 * Child arg.
+	 */
+	childPath: CoreArgPath<ChildId, SourceOptions, ParentId | GrandparentIds>;
 } & MaybeDefined<
 	// In case `ParentId` is never, will be evaluated to `never` if not a tuple
 	[ParentId] extends [never] ? false : true,
@@ -203,9 +210,9 @@ export function coreArgMetaGenerate<
 	>;
 
 	/**
-	 * Arg in case the path is common.
+	 * Arg for child, if ID.
 	 */
-	type ParentArgPathId = CoreArg<ParentId, CoreArgOptionsPathId, GrandparentIds>;
+	type ChildArgPathId = CoreArgPath<ChildId, CoreArgOptionsPathId, ParentId | GrandparentIds>;
 
 	/**
 	 * Arg in case the path is common.
@@ -217,17 +224,17 @@ export function coreArgMetaGenerate<
 		// Casting, since no overlaps
 		// Infer for simplicity
 		// eslint-disable-next-line @typescript-eslint/typedef
-		let { paths, ...rest } = meta as unknown as ParentMetaPathIdToExtended;
+		let { paths, ...rest } = meta as ParentMetaPathIdToExtended;
 		let path: string;
 
 		if (typeof parentId === "undefined") {
 			path = `${(meta as unknown as ParentMetaPathIdToExtended).systemNamespace}${separator}${index}`;
-		} else if (typeof (parentArg as ParentArgPathId).id === "undefined") {
-			path = `${paths[parentId]}${separator}${index}`;
-		} else {
+		} else if ((childPath as ChildArgPathId).id) {
 			path = `${(meta as unknown as ParentMetaPathIdToExtended).userNamespace}${separator}${
-				(parentArg as ParentArgPathId).id as UrlPath
+				(childPath as ChildArgPathId).id as UrlPath
 			}`;
+		} else {
+			path = `${paths[parentId]}${separator}${index}`;
 		}
 
 		// New meta; `paths` is an object, but it is destructured, thus the original meta data is not modified
@@ -271,7 +278,7 @@ export function coreArgMetaGenerate<
 		// New meta; `paths` is an object, but it is destructured, thus the original meta data is not modified
 		return {
 			...rest,
-			paths: {
+			parentArgPath: {
 				...parentArgPath,
 				...{ [parentArgUuidPropertyName]: (parentArg as ParentArgPathOwn)[parentArgUuidPropertyName] }
 			}
