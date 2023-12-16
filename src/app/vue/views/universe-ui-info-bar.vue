@@ -32,11 +32,17 @@
 		<VSpacer />
 
 		<!-- Interactive elements -->
-		<VMenu class="ms-1" location="bottom">
+		<VMenu v-model="musicModelEntry.menu" class="ms-1" location="bottom">
 			<template #activator="{ props: menu }">
-				<VTooltip text="Music" location="bottom">
+				<VTooltip v-model="musicModelEntry.tooltip" text="Music" location="bottom">
 					<template #activator="{ props: tooltip }">
-						<VBtn v-bind="mergeProps(menu, tooltip)" variant="text" class="fill-height" size="x-small">
+						<VBtn
+							v-bind="mergeProps(menu, tooltip)"
+							variant="text"
+							class="fill-height"
+							size="x-small"
+							@click="() => onMenuClick(musicModelEntry)"
+						>
 							<BaseIcon icon="fa-music" :size="ElementSize.Small" />
 						</VBtn>
 					</template>
@@ -45,11 +51,17 @@
 			<UniverseUiInfoBarMusicControl />
 		</VMenu>
 
-		<VMenu class="ms-1" location="bottom">
+		<VMenu v-model="notificationModelEntry.menu" class="ms-1" location="bottom">
 			<template #activator="{ props: menu }">
-				<VTooltip text="Notifications" location="bottom">
+				<VTooltip v-model="notificationModelEntry.tooltip" text="Notifications" location="bottom">
 					<template #activator="{ props: tooltip }">
-						<VBtn v-bind="mergeProps(menu, tooltip)" variant="text" class="fill-height" size="x-small">
+						<VBtn
+							v-bind="mergeProps(menu, tooltip)"
+							variant="text"
+							class="fill-height"
+							size="x-small"
+							@click="() => onMenuClick(notificationModelEntry)"
+						>
 							<BaseIcon icon="fa-bell" :size="ElementSize.Small" />
 						</VBtn>
 					</template>
@@ -69,6 +81,21 @@ import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { UniverseUiShardEntries } from "../core/universe-ui";
 import stateAlertBoxComponent from "../state-alert-box.vue";
 import UniverseUiInfoBarMusicControl from "./universe-ui-info-bar-music-control.vue";
+
+/**
+ * Type for storage of models for menu and tooltip.
+ */
+type ElementModelEntry = {
+	/**
+	 * Menu model.
+	 */
+	menu: boolean;
+
+	/**
+	 * Tooltip model.
+	 */
+	tooltip: boolean;
+};
 
 /**
  * Milliseconds in one second.
@@ -154,11 +181,28 @@ export default defineComponent({
 	 * @returns Universe data
 	 */
 	data() {
-		return { ElementSize, upTime: 0, upTimeIntervalHandle: null as ReturnType<typeof setInterval> | null };
+		return {
+			ElementSize,
+			musicModelEntry: { menu: false, tooltip: false } satisfies ElementModelEntry,
+			notificationModelEntry: { menu: false, tooltip: false } satisfies ElementModelEntry,
+			upTime: 0,
+			upTimeIntervalHandle: null as ReturnType<typeof setInterval> | null
+		};
 	},
 
 	methods: {
-		mergeProps
+		mergeProps,
+
+		/**
+		 * This is a function to hide tooltip when menu is opened.
+		 *
+		 * @param modelEntry - A collection of models for modification; Not destructured to preserve reactivity
+		 */
+		onMenuClick(modelEntry: ElementModelEntry): void {
+			if (modelEntry.menu) {
+				modelEntry.tooltip = false;
+			}
+		}
 	},
 
 	props: {
