@@ -28,6 +28,8 @@ if ($null -eq (Get-Variable -Name "StartScriptGuard" -Scope "Script" -ErrorActio
 		BuildReference          = Join-Path "script" "tasks" "Build-Reference.ps1";
 		InstallDependencies     = Join-Path "script" "tasks" "Install-Dependencies.ps1";
 		BuildApplication        = Join-Path "script" "tasks" "Build-Application.ps1";
+		BuildTest               = Join-Path "script" "tasks" "Build-Test.ps1";
+		InvokeTest              = Join-Path "script" "tasks" "Invoke-Test.ps1";
 	}
 
 	. $Paths.WriteMessage -Message "Starting script"

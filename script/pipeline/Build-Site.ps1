@@ -25,6 +25,12 @@ try {
 
 	# Build docs
 	. $Paths.BuildDocumentation -Environment dev -Build standalone
+
+	# Build Test
+	. $Paths.BuildTest -Environment "shell"
+
+	# Run test
+	. $Paths.InvokeTest -Environment "shell"
 }
 finally {
 	# Stop Pipeline

@@ -4,9 +4,8 @@
 */
 
 /**
- * Performs loading of the server.
- *
  * @file
+ * Performs loading of the server.
  */
 
 import axios from "axios";
@@ -20,7 +19,6 @@ import { CoreArgIds, CoreArgMeta, coreArgMetaGenerate } from "../core/arg";
 import { LogLevel } from "../core/error";
 import { CoreShardArg } from "../core/shard";
 import { RootType, YamlOptions, compile, yamlOptions } from "../yaml";
-import { EntityKind } from "./entity";
 import { Module, ModuleFactoryRecordList, ModuleFactoryRecordListConstraint, ModuleList } from "./module";
 import { ServerOptions, serverOptions } from "./options";
 import { ServerUniverse } from "./universe";
@@ -269,6 +267,7 @@ export class ServerLoader<R extends string, T extends ModuleFactoryRecordListCon
 							let created: DeferredPromise<void> = new DeferredPromise<void>();
 							nextTick(() => {
 								let meta: CoreArgMeta<CoreArgIds.Shard, YamlOptions, ServerOptions> = coreArgMetaGenerate({
+									childPath: shard,
 									id: CoreArgIds.Shard,
 									index,
 									meta: {

@@ -489,22 +489,23 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 			// Sync command
 			case MessageTypeWord.Sync:
 				{
-					let meta: CoreArgMeta<CoreArgIds.Shard, ServerOptions, ClientOptions> = coreArgMetaGenerate({
-						id: CoreArgIds.Shard,
-						index: 1,
-						meta: {
-							origin: appUrl,
-							paths: {},
-							systemNamespace: "system",
-							userNamespace: "user"
-						},
-						sourceOptions: serverOptions,
-						targetOptions: clientOptions
-					});
-
 					// ESLint false negative
 					// eslint-disable-next-line @typescript-eslint/typedef
 					let messages: Array<ClientMessage> = this.forEachShard(({ shard, player }) => {
+						let meta: CoreArgMeta<CoreArgIds.Shard, ServerOptions, ClientOptions> = coreArgMetaGenerate({
+							childPath: shard,
+							id: CoreArgIds.Shard,
+							index: 1,
+							meta: {
+								origin: appUrl,
+								paths: {},
+								systemNamespace: "system",
+								userNamespace: "user"
+							},
+							sourceOptions: serverOptions,
+							targetOptions: clientOptions
+						});
+
 						// Get temp shard data
 						// Axios returns an object
 						let body: CoreShardArg<ClientOptions> = this.universe.Shard.convertShard({

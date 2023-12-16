@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -190,6 +190,7 @@ export function coreArgConvertContainer<
 		childMeta: CoreArgMeta<ChildId, SourceOptions, TargetOptions, Id | ParentIds>;
 	} {
 		let childMeta: CoreArgMeta<ChildId, SourceOptions, TargetOptions, Id | ParentIds> = coreArgMetaGenerate({
+			childPath: child,
 			id: childId,
 			index,
 			meta,
@@ -215,7 +216,9 @@ export function coreArgConvertContainer<
 			// Cast to expected type
 			targetOptions
 			// Have to cast, as cannot infer generic keys from child
-		} as Parameters<CoreArgConverter<SourceChildArg, TargetChildArg, ChildId, SourceOptions, TargetOptions, Id | ParentIds>>[0]);
+		} as Parameters<
+			CoreArgConverter<SourceChildArg, TargetChildArg, ChildId, SourceOptions, TargetOptions, Id | ParentIds>
+		>[0]);
 
 		if (link !== undefined) {
 			link.source.set(child, targetChild);
