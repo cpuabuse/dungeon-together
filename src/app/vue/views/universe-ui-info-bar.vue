@@ -32,7 +32,7 @@
 		<VSpacer />
 
 		<!-- Interactive elements -->
-		<VMenu v-model="musicModelEntry.menu" class="ms-1" location="bottom">
+		<VMenu v-model="musicModelEntry.menu" location="bottom">
 			<template #activator="{ props: menu }">
 				<VTooltip v-model="musicModelEntry.tooltip" text="Music" location="bottom">
 					<template #activator="{ props: tooltip }">
@@ -51,7 +51,7 @@
 			<UniverseUiInfoBarMusicControl />
 		</VMenu>
 
-		<VMenu v-model="notificationModelEntry.menu" class="ms-1" location="bottom">
+		<VMenu v-model="notificationModelEntry.menu" location="bottom">
 			<template #activator="{ props: menu }">
 				<VTooltip v-model="notificationModelEntry.tooltip" text="Notifications" location="bottom">
 					<template #activator="{ props: tooltip }">
