@@ -1,26 +1,49 @@
 <template>
 	<div>
 		<div>
-			<strong>Keyboard controls</strong>
-			<VRow>
-				<!-- Panel section -->
-				<VCol v-for="(panel, panelKey) in keyboardControlPanels" :key="panelKey" align-self="center">
-					<!-- keyboard panel -->
-					<VContainer v-if="panel">
-						<VRow no-gutters justify="center">
-							<VCol cols="auto">
-								<VKbd class="universe-ui-toolbar-welcome-keyboard">{{ panel[0] }}</VKbd>
-							</VCol>
-						</VRow>
+			<strong>How to play</strong>
+			<p class="pt-2 pb-2">Descend to the lowest level of the dungeon, while defending against the monsters.</p>
+		</div>
 
-						<!-- Description of movement -->
-						<VRow no-gutters justify="center">
-							<VCol v-for="(button, buttonKey) in panel.slice(1)" :key="buttonKey" cols="auto">
-								<VKbd class="universe-ui-toolbar-welcome-keyboard">{{ button }}</VKbd>
-							</VCol>
-						</VRow>
-					</VContainer>
-					<div v-else class="text-center">Directional movement and attack</div>
+		<VDivider />
+
+		<div>
+			<strong>Keyboard controls</strong>
+			<VRow class="align-center" justify="space-around">
+				<!-- Movement section -->
+				<VCol cols="auto">
+					<VRow no-gutters>
+						<VCol v-for="(panel, panelKey) in keyboardControlPanels" :key="panelKey">
+							<VContainer>
+								<!-- First row of keys -->
+								<VRow no-gutters justify="center">
+									<VCol cols="auto">
+										<VKbd class="universe-ui-toolbar-welcome-keyboard">{{ panel[0] }}</VKbd>
+									</VCol>
+								</VRow>
+
+								<!-- Second row of keys -->
+								<VRow class="flex-nowrap" no-gutters justify="center">
+									<VCol v-for="(button, buttonKey) in panel.slice(1)" :key="buttonKey" cols="auto">
+										<VKbd class="universe-ui-toolbar-welcome-keyboard">{{ button }}</VKbd>
+									</VCol>
+								</VRow>
+							</VContainer>
+						</VCol>
+					</VRow>
+
+					<!-- Description -->
+					<VRow no-gutters><VCol class="text-center">Directional movement and attack</VCol></VRow>
+				</VCol>
+
+				<!-- Individual key section -->
+				<VCol v-for="(panel, panelKey) in keyboardIndividualsPanels" :key="panelKey" cols="auto">
+					<VRow v-for="(panelEntry, panelEntryKey) in panel" :key="panelEntryKey" no-gutters>
+						<VCol cols="auto" align-self="center"
+							><VKbd class="universe-ui-toolbar-welcome-keyboard">{{ panelEntry.key }}</VKbd></VCol
+						>
+						<VCol cols="auto" align-self="center">{{ panelEntry.description }}</VCol>
+					</VRow>
 				</VCol>
 			</VRow>
 		</div>
@@ -78,7 +101,17 @@ export default defineComponent({
 	 */
 	data() {
 		return {
-			keyboardControlPanels: [["W", "A", "S", "D"], null, ["↑", "←", "↓", "→"]] as const
+			keyboardControlPanels: [
+				["W", "A", "S", "D"],
+				["↑", "←", "↓", "→"]
+			] as const,
+			keyboardIndividualsPanels: [
+				[
+					{ description: "Camera level up", key: "O" },
+					{ description: "Camera level down", key: "P" }
+				],
+				[{ description: "Use", key: "E", subtext: "(Use the ladder to descend)" }]
+			]
 		};
 	}
 });
