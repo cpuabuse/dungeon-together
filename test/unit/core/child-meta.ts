@@ -1,5 +1,5 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -10,11 +10,19 @@
 import { ok } from "assert";
 import { assert } from "chai";
 import { MaybeDefined } from "../../../src/app/common/utility-types";
-import { CoreArg, CoreArgIds, CoreArgMeta, CoreArgOptionsUnion, coreArgMetaGenerate } from "../../../src/app/core/arg";
+import {
+	CoreArg,
+	CoreArgIds,
+	CoreArgMeta,
+	CoreArgOptionsUnion,
+	CoreArgPath,
+	coreArgMetaGenerate
+} from "../../../src/app/core/arg";
 import { optionsPathId, optionsPathOwn } from "./lib/options";
 import {
 	defaultCellPath,
 	defaultGridPath,
+	defaultId,
 	defaultOrigin,
 	defaultSystemNameSpace,
 	defaultUserNameSpace
@@ -39,6 +47,11 @@ function metaGenerateTest<
 		 * Expected meta.
 		 */
 		expected: CoreArgMeta<Id, SourceOptions, TargetOptions, ParentId | GrandparentIds>;
+
+		/**
+		 * Child arg.
+		 */
+		childPath: CoreArgPath<Id, SourceOptions, ParentId | GrandparentIds>;
 
 		/**
 		 * Index of child.
@@ -112,6 +125,7 @@ export function tTest(): void {
  * Test ID to ID.
  */
 export const childMetaIdToId: () => void = metaGenerateTest({
+	childPath: {},
 	expected: {
 		origin: defaultOrigin,
 		paths: {
@@ -139,9 +153,43 @@ export const childMetaIdToId: () => void = metaGenerateTest({
 });
 
 /**
+ * Test ID to ID with ID.
+ */
+export const childMetaIdToIdWithId: () => void = metaGenerateTest({
+	childPath: {
+		id: defaultId
+	},
+	expected: {
+		origin: defaultOrigin,
+		paths: {
+			[CoreArgIds.Cell]: `${defaultUserNameSpace}/${defaultId}`
+		},
+		systemNamespace: defaultSystemNameSpace,
+		userNamespace: defaultUserNameSpace
+	},
+	id: CoreArgIds.Cell,
+	index: 0,
+	meta: {
+		origin: defaultOrigin,
+		paths: {
+			[CoreArgIds.Grid]: defaultGridPath
+		},
+		systemNamespace: defaultSystemNameSpace,
+		userNamespace: defaultUserNameSpace
+	},
+	parentArg: {
+		id: "test"
+	},
+	parentId: CoreArgIds.Grid,
+	sourceOptions: optionsPathId,
+	targetOptions: optionsPathId
+});
+
+/**
  * Test ID to own.
  */
 export const childMetaIdToOwn: () => void = metaGenerateTest({
+	childPath: {},
 	expected: {
 		origin: defaultOrigin,
 		paths: {

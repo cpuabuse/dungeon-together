@@ -1,8 +1,0 @@
-{
-	"compilerOptions": {
-		"outDir": "../../build/test"
-	},
-	"extends": "./base.json",
-	"include": ["../../test/standalone.ts"],
-	"exclude": ["../../build/**/*"]
-}
