@@ -9,31 +9,35 @@
 	<VSystemBar class="universe-ui-info-bar">
 		<VTooltip text="Timer" location="bottom">
 			<template #activator="{ props }">
-				<!-- Informational elements -->
-				<BaseIcon v-bind="props" icon="fa-clock" class="me-1" :color="clockColor" :size="ElementSize.Small" />
+				<div v-bind="props" class="fill-height d-flex align-center">
+					<!-- Informational elements -->
+					<BaseIcon icon="fa-clock" class="me-1" :color="clockColor" :size="ElementSize.Small" />
+					<span class="universe-ui-info-bar-clock-text">{{ clockTime }}</span>
+				</div>
 			</template>
 		</VTooltip>
-		<span class="universe-ui-info-bar-clock-text">{{ clockTime }}</span>
 		<VDivider class="mx-1" inset vertical />
 
 		<VTooltip text="Current level" location="bottom">
 			<template #activator="{ props }">
-				<BaseIcon v-bind="props" icon="fa-arrow-down-up-across-line" :size="ElementSize.Small" />
+				<div v-bind="props" class="fill-height d-flex align-center">
+					<BaseIcon icon="fa-arrow-down-up-across-line" :size="ElementSize.Small" />
+					<span v-for="(level, levelKey) in gridLevels" :key="levelKey" class="ms-1 universe-ui-info-bar-level-text">{{
+						level
+					}}</span>
+				</div>
 			</template>
 		</VTooltip>
-		<span v-for="(level, levelKey) in gridLevels" :key="levelKey" class="ms-1 universe-ui-info-bar-level-text">{{
-			level
-		}}</span>
 
 		<VSpacer />
 
 		<!-- Interactive elements -->
 		<VMenu class="ms-1" location="bottom">
 			<template #activator="{ props: menu }">
-				<VTooltip text="Music & sound" location="bottom">
+				<VTooltip text="Music" location="bottom">
 					<template #activator="{ props: tooltip }">
-						<VBtn v-bind="menu" variant="text" class="fill-height" size="x-small">
-							<BaseIcon v-bind="tooltip" icon="fa-music" :size="ElementSize.Small" />
+						<VBtn v-bind="mergeProps(menu, tooltip)" variant="text" class="fill-height" size="x-small">
+							<BaseIcon icon="fa-music" :size="ElementSize.Small" />
 						</VBtn>
 					</template>
 				</VTooltip>
@@ -43,10 +47,10 @@
 
 		<VMenu class="ms-1" location="bottom">
 			<template #activator="{ props: menu }">
-				<VTooltip text="Alert level" location="bottom">
+				<VTooltip text="Notifications" location="bottom">
 					<template #activator="{ props: tooltip }">
-						<VBtn v-bind="menu" variant="text" class="fill-height" size="x-small">
-							<BaseIcon v-bind="tooltip" icon="fa-bell" :size="ElementSize.Small" />
+						<VBtn v-bind="mergeProps(menu, tooltip)" variant="text" class="fill-height" size="x-small">
+							<BaseIcon icon="fa-bell" :size="ElementSize.Small" />
 						</VBtn>
 					</template>
 				</VTooltip>
@@ -57,7 +61,7 @@
 </template>
 
 <script lang="ts">
-import { PropType, Ref, defineComponent, shallowRef, watch } from "vue";
+import { PropType, Ref, defineComponent, mergeProps, shallowRef, watch } from "vue";
 import { VBtn, VDivider, VMenu, VSpacer, VSystemBar, VTooltip } from "vuetify/components";
 import { ElementSize } from "../common/element";
 import { BaseIcon } from "../components";
@@ -151,6 +155,10 @@ export default defineComponent({
 	 */
 	data() {
 		return { ElementSize, upTime: 0, upTimeIntervalHandle: null as ReturnType<typeof setInterval> | null };
+	},
+
+	methods: {
+		mergeProps
 	},
 
 	props: {
