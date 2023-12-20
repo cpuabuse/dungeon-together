@@ -114,6 +114,7 @@
 		"mousetrap": "^1.6.5",
 		"next-tick": "^1.1.0",
 		"nipplejs": "^0.10.1",
+		"perfect-scrollbar": "^1.5.5",
 		"pinia": "^2.1.7",
 		"pixi.js": "^7.3.2",
 		"replace-in-file": "^7.0.2",

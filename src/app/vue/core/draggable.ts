@@ -4,9 +4,8 @@
 */
 
 /**
- * Interact composables.
- *
  * @file
+ * Interact composables.
  */
 
 import type { DragEvent, Interactable, ResizeEvent } from "@interactjs/types";
@@ -75,7 +74,9 @@ function resizeMoveListener({ target, rect, deltaRect }: ResizeEvent): void {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function useDraggable({
 	element,
-	handle
+	handle,
+	resizeCallback,
+	resizeMargin: margin
 }: {
 	/**
 	 * Element.
@@ -86,6 +87,16 @@ export function useDraggable({
 	 * Optional handle, if not given, element is used.
 	 */
 	handle?: MaybeRefHTMLElementOrNull;
+
+	/**
+	 * Resize callback.
+	 */
+	resizeCallback?: () => void;
+
+	/**
+	 * Resize hitbox.
+	 */
+	resizeMargin?: number;
 }) {
 	const stores: Stores = useStores();
 	const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
@@ -143,15 +154,26 @@ export function useDraggable({
 
 			// Set draggable
 			interactHandler
-
 				.resizable({
 					edges: { bottom: true, left: true, right: true, top: true },
 
 					enabled: true,
 
 					listeners: {
-						move: resizeMoveListener
+						/**
+						 * Processes resize event.
+						 *
+						 * @param param - Resize event received
+						 */
+						move(param: ResizeEvent) {
+							resizeMoveListener(param);
+							if (resizeCallback) {
+								resizeCallback();
+							}
+						}
 					},
+
+					margin,
 
 					modifiers: []
 				})
