@@ -4,9 +4,8 @@
 */
 
 /**
- * Shared functionality between Switch and Slider elements.
- *
  * @file
+ * Pinia stores.
  */
 
 import { StoreDefinition, defineStore } from "pinia";

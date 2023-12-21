@@ -2,14 +2,7 @@
 <template>
 	<CompactToolbar :menus="mainToolbarMenus" />
 
-	<UniverseUiToolbarOptions
-		v-model="
-			// Inference breaks for vue, need casting
-			// eslint-disable-next-line vue/valid-v-model
-			optionsModel as OptionsModelType
-		"
-		@update-menu-items="onUpdateMenuItems"
-	/>
+	<UniverseUiToolbarOptions @update-menu-items="onUpdateMenuItems" />
 
 	<!-- Overlays display -->
 	<OverlayWindow
@@ -95,16 +88,6 @@ type PlayerEntry = {
  * Helper type for casting to player entries array element, as class information lost.
  */
 type PlayerEntries = Array<[string, PlayerEntry]>;
-
-// TODO: Change in favor of bus
-/**
- * Model type helper.
- *
- * @remarks
- * Both properties being an array removes necessity for many checks.
- */
-type OptionsModelType = Record<"windowItems", Array<OverlayListItemEntry>> &
-	Record<"menuItems", Array<CompactToolbarMenuItem>>;
 
 export default defineComponent({
 	components: {
@@ -224,10 +207,7 @@ export default defineComponent({
 				...this.shardMenus,
 				{
 					icon: "fa-gear",
-					items: [
-						...this.optionsModel.menuItems,
-						{ clickRecordIndex: this.debugMenuDisplaySymbol, icon: "fa-bug-slash", name: this.debugName }
-					],
+					items: [{ clickRecordIndex: this.debugMenuDisplaySymbol, icon: "fa-bug-slash", name: this.debugName }],
 					maxPinnedAmount: 1,
 					name: "SystemR"
 				},
@@ -280,11 +260,6 @@ export default defineComponent({
 			debugMenuDisplaySymbol: Symbol("debug-menu-display"),
 
 			hpColor: new Color("#1F8C2F"),
-
-			optionsModel: {
-				menuItems: new Array<CompactToolbarMenuItem>(),
-				windowItems: new Array<OverlayListItemEntry>()
-			} satisfies OptionsModelType,
 
 			playerEntries: new Array() as PlayerEntries,
 

@@ -12,6 +12,7 @@
 import { defineComponent } from "vue";
 import { VApp } from "vuetify/components";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
+import { useAppTheme } from "../core/theme";
 import tsxTestComponent from "../tsx/test.vue";
 import UniverseUi from "../views/universe-ui.vue";
 
@@ -35,7 +36,7 @@ export default defineComponent({
 	 */
 	created() {
 		setInterval(() => {
-			this.$data.what = this.universe.application.state.upTime;
+			this.$data.what = this.universeStore.universe.application.state.upTime;
 		}, oneSecondInMs);
 	},
 
@@ -61,10 +62,15 @@ export default defineComponent({
 	 */
 	setup() {
 		const stores: Stores = useStores();
-		const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
+		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
+		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
+
+		// TODO: This needs to be called from an initialization view component
+		// Initialize theme control
+		useAppTheme({ isRoot: true, recordStore });
 
 		return {
-			universe
+			universeStore
 		};
 	}
 });
@@ -90,4 +96,3 @@ export default defineComponent({
 	color: red;
 }
 </style>
-./core ./core/compact-toolbar

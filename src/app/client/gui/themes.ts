@@ -7,6 +7,7 @@
  * @file Defines themes
  */
 
+// TODO: Move and add a prefix
 /**
  * Enum for theme identification.
  *
