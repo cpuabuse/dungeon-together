@@ -146,6 +146,7 @@ export default defineComponent({
 </script>
 
 <style lang="css">
+/* Note, positition(left, top) has to be 0, so that resize matches mouse movement */
 .overlay-window {
 	/** Needed for drag on mobile */
 	touch-action: none;
@@ -159,9 +160,6 @@ export default defineComponent({
 	width: 300px;
 
 	pointer-events: auto;
-
-	bottom: calc(50% - 250px);
-	left: calc(50% - 150px);
 }
 
 .overlay-window-toolbar-title {

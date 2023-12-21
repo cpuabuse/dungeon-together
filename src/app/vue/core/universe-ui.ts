@@ -4,9 +4,8 @@
 */
 
 /**
- * Universe UI related types.
- *
  * @file
+ * Universe UI related types.
  */
 
 import { ClientPlayer } from "../../client/connection";

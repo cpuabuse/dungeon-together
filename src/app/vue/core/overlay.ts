@@ -567,6 +567,36 @@ export type OverlayBusEmit = OverlayBusEmitHelper<{
 export type MenuItemsRegistry = Ref<Map<string | symbol, Array<CompactToolbarMenuItem>>>;
 
 /**
+ * Overlay bus from source.
+ */
+export type OverlayBusSource = {
+	/**
+	 * Display items aggregate property.
+	 */
+	displayItems: Ref<
+		Array<{
+			/**
+			 * Is displayed or not.
+			 */
+			isDisplayed: boolean;
+
+			/**
+			 * List items to display.
+			 */
+			listItems: OverlayListItems;
+
+			/**
+			 * Optional overlay name.
+			 *
+			 * @remarks
+			 * Would be generated from window information.
+			 */
+			name?: string;
+		}>
+	>;
+};
+
+/**
  * For parent/child communication, when using overlay family.
  *
  * @remarks
@@ -636,22 +666,9 @@ export function useOverlayBusSource({
 				 */
 				usedOverlayBusConsumer?: undefined;
 		  }
-	)) {
+	)): OverlayBusSource {
 	// Whole array is a reference, as elements might be added
-	const displayItems: Ref<
-		Array<
-			Record<"isDisplayed", boolean> &
-				Record<"listItems", OverlayListItems> & {
-					/**
-					 * Optional overlay name.
-					 *
-					 * @remarks
-					 * Would be generated from window information.
-					 */
-					name?: string;
-				}
-		>
-	> = computed(() =>
+	const displayItems: OverlayBusSource["displayItems"] = computed(() =>
 		// ESLint doesn't pick up types
 		// eslint-disable-next-line @typescript-eslint/typedef
 		unref(overlayItems).map(({ menuItem, listItems, name: overlayName }) => {

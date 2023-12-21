@@ -1,8 +1,20 @@
 <!-- Universe UI toolbar options menu -->
 <template>
-	<OverlayWindow v-model="isOptionsMenuDisplayed" icon="fa-list-check" :name="name">
+	<OverlayWindow v-model="isOptionsMenuDisplayed" icon="fa-list-check" :name="title">
 		<template #body>
-			<OverlayList :key="listKey" :items="[...modelValue.windowItems, fullscreenOverlayListItem]" />
+			<OverlayList :key="listKey" :items="[...modelValue.windowItems]" />
+		</template>
+	</OverlayWindow>
+
+	<!-- Overlays display -->
+	<OverlayWindow
+		v-for="({ listItems, name }, displayItemKey) in displayItems"
+		:key="displayItemKey"
+		v-model="displayItems[displayItemKey]!.isDisplayed"
+		:name="name"
+	>
+		<template #body>
+			<OverlayList :items="listItems" />
 		</template>
 	</OverlayWindow>
 </template>
@@ -16,7 +28,14 @@ import { Theme, systemThemeLiteral } from "../../client/gui/themes";
 import { OverlayList, OverlayWindow } from "../components";
 import { CompactToolbarMenuItem } from "../core/compact-toolbar";
 import { TextDirectionWords, textDirectionSymbol, useLocale } from "../core/locale";
-import { OverlayListItemEntry, OverlayListItemEntryType } from "../core/overlay";
+import {
+	OverlayBusSource,
+	OverlayListItemEntry,
+	OverlayListItemEntryType,
+	OverlayListItems,
+	overlayBusEmits,
+	useOverlayBusSource
+} from "../core/overlay";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
 
 /**
@@ -125,7 +144,7 @@ export default defineComponent({
 				{
 					clickRecordIndex: this.optionsMenuDisplaySymbol,
 					icon: "fa-list-check",
-					name: this.name
+					name: this.title
 				}
 			];
 		},
@@ -149,15 +168,6 @@ export default defineComponent({
 					// Compact UI
 				]
 			};
-		},
-
-		/**
-		 * Options window title.
-		 *
-		 * @returns Title
-		 */
-		name(): string {
-			return this.t("menuTitle.options");
 		},
 
 		/**
@@ -251,6 +261,15 @@ export default defineComponent({
 
 				type: OverlayListItemEntryType.Select
 			};
+		},
+
+		/**
+		 * Options window title.
+		 *
+		 * @returns Title
+		 */
+		title(): string {
+			return this.t("menuTitle.options");
 		}
 	},
 
@@ -300,7 +319,7 @@ export default defineComponent({
 		return data;
 	},
 
-	emits: ["update:modelValue"],
+	emits: ["update:modelValue", ...overlayBusEmits],
 
 	props: {
 		modelValue: {
@@ -312,12 +331,23 @@ export default defineComponent({
 	/**
 	 * Setup script.
 	 *
+	 * @param props - Setup props
+	 * @param emit - Emit
 	 * @returns Records
 	 */
-	setup() {
+	// Infer setup param types
+	// eslint-disable-next-line @typescript-eslint/typedef
+	setup(props, { emit }) {
 		const stores: Stores = useStores();
 		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
+		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
 
+		const optionsOverlaySymbol: symbol = Symbol(
+			`menu-universe-ui-toolbar-options-${universeStore.universe.universeUuid}`
+		);
+		const optionsDisplaySymbol: symbol = Symbol(
+			`menu-universe-ui-toolbar-options-${universeStore.universe.universeUuid}`
+		);
 		const fullscreenSymbol: symbol = Symbol("fullscreen");
 		const isFullscreen: Ref<boolean> = recordStore.computedRecord({
 			id: fullscreenSymbol
@@ -361,14 +391,6 @@ export default defineComponent({
 			isFullscreen.value = screenfull.isFullscreen;
 		});
 
-		const fullscreenOverlayListItem: OverlayListItemEntry = {
-			icon: "fa-expand",
-			id: fullscreenSymbol,
-			// TODO: Add translation
-			name: "Fullscreen",
-			type: OverlayListItemEntryType.Switch
-		};
-
 		const textDirectionRecord: Ref<TextDirectionWords> = recordStore.computedRecord<TextDirectionWords>({
 			defaultValue: TextDirectionWords.Auto,
 			id: textDirectionSymbol,
@@ -384,10 +406,39 @@ export default defineComponent({
 			}
 		});
 
+		const { displayItems }: OverlayBusSource = useOverlayBusSource({
+			emit,
+			menuItemsRegistryIndex: optionsOverlaySymbol,
+			overlayItems: [
+				// Welcome screen
+				{
+					listItems: computed(() => {
+						return [
+							{
+								icon: "fa-expand",
+								id: fullscreenSymbol,
+								// TODO: Add translation
+								name: "Fullscreen",
+								type: OverlayListItemEntryType.Switch
+							}
+						] satisfies OverlayListItems;
+					}),
+					menuItem: computed(() => {
+						return {
+							clickRecordIndex: optionsDisplaySymbol,
+							icon: "fa-list-check",
+							name: "Options"
+						} satisfies CompactToolbarMenuItem;
+					})
+				}
+			],
+			recordStore
+		});
+
 		return {
 			recordStore,
 			...useLocale(),
-			fullscreenOverlayListItem,
+			displayItems,
 			textDirectionRecord,
 			themeGlobal: useTheme().global
 		};
