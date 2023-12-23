@@ -4,14 +4,14 @@
 */
 
 /**
- * Locale vars.
- *
  * @file
+ * Locale vars.
  */
 
 import { ComputedRef, WritableComputedRef, computed, unref } from "vue";
-import { UseI18nOptions, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 import { RtlInstance, useLocale as useVuetifyLocale } from "vuetify";
+import { ExternalMessageSchema, InternalMessageSchema } from "../../client/gui/vue.plugin.vuetify";
 import { Locale } from "../../common/locale";
 
 /**
@@ -37,12 +37,10 @@ export enum TextDirectionWords {
 export const fallbackLocale: Locale.English = Locale.English;
 
 /**
- * Alias for i18n node types.
- */
-type I18NMessage = string;
-
-/**
  * Locale composable.
+ *
+ * @remarks
+ * It seems in order to do stricter type checking, we would need to wrap the translation functions, and perhaps that is not really needed, and it should stay flexible.
  *
  * @returns Locale composable instance members
  */
@@ -62,59 +60,7 @@ export function useLocale() {
 		// eslint-disable-next-line @typescript-eslint/unbound-method
 		tm,
 		rt
-	} = useI18n<
-		UseI18nOptions<{
-			/**
-			 * Message schema definition for {@link UseI18nOptions}.
-			 */
-			message: {
-				/**
-				 * Stories.
-				 */
-				storyNotification: {
-					/**
-					 * Story messages.
-					 */
-					[StoryKey in string]: {
-						/**
-						 * Paragraphs.
-						 */
-						paragraphs: Array<I18NMessage>;
-					};
-				};
-
-				/**
-				 * Language.
-				 */
-				language: I18NMessage;
-
-				/**
-				 * Locales.
-				 */
-				locales: Record<Locale, I18NMessage>;
-
-				/**
-				 * Menu item info.
-				 */
-				menuItem: Record<string, I18NMessage>;
-
-				/**
-				 * Menu titles.
-				 */
-				menuTitle: Record<string, I18NMessage>;
-
-				/**
-				 * Status notification.
-				 */
-				statusNotification: Record<string, I18NMessage>;
-
-				/**
-				 * Theme.
-				 */
-				theme: Record<string, I18NMessage>;
-			};
-		}>
-	>();
+	} = useI18n<InternalMessageSchema & ExternalMessageSchema, Locale>();
 	const { isRtl }: RtlInstance = useVuetifyLocale();
 
 	/**

@@ -43,7 +43,7 @@ const systemTheme: ShallowRef<Theme> = computed(() => (isSystemThemeDark.value ?
  * Composable to control theme.
  *
  * @remarks
- * When called from root, performs connection of record used by potentially other components, to actual global theme, that would control `html` element.
+ * When called from root, performs connection of record used by potentially other components, to actual global theme, that would control `html` element. If theme was to be set through props, it would affect only that component.
  *
  * @param param - Destructured parameter
  * @returns Composable
