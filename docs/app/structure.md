@@ -37,16 +37,16 @@ Project root
 	flowchart LR
 		client --- vue
 		server --- yaml
-		core[common<br>core<br>comms] --- client & server --- application
+		core[common<br>core] --- client & server --- application
 	```
+	- `core` - functionality to dynamically create core objects, the code is grouped not only as the reusable base code, but also more of a module within the app itself, which `client` and `server` extend
 	- `application` - standard apps for fast initialization
 	- `client` - client source
-	- `common` - common shared libraries, unrelated to app itself
-	- `comms` - client↔️server communication types
+	- `common` - common shared libraries, unaware of app context, including for Vue (should not import client or server specific functionality, only types, to avoid unnecessary initializations)
 	- `server` - server source
 	- `vue` - Vue GUI for client
 		- `components` - Base components
-		- `core` - Data shared between components
+		- `core` - Data shared between components and necessary glue of Vue and client universe; `app`'s `core` folder already exists, there `core` prefix is used extensively, but this folder is there for code organization purpose only, and has no modular meaning; It is best to avoid using `core` prefix in code located here to avoid confusion; For easier code organization, composables go here
 		- `pages` - Pages
 		- `views` - Views
 		Folders, containing components, should not contain subfolders; Respective index file should export necessary components only; Local imports should not use index file exports

@@ -4,11 +4,11 @@
 */
 
 /**
- * Modules.
- *
  * @file
+ * Modules.
  */
 
+import { ModuleLocalePartialMessages } from "../core/module";
 import { EntityKindClass } from "./entity";
 import { ServerUniverse } from "./universe";
 
@@ -22,6 +22,11 @@ export type Module = {
 	kinds: {
 		[key: string]: EntityKindClass;
 	};
+
+	/**
+	 * Translation messages.
+	 */
+	messages?: ModuleLocalePartialMessages;
 };
 
 /**
@@ -79,10 +84,10 @@ type ToGlobal<List, Name extends string> = List extends readonly [infer E, ...in
 		? Name extends E["name"]
 			? EmptyModuleList
 			: R extends ModuleFactoryRecordList
-			? ToGlobal<R, Name> & {
-					[key in E["name"]]: ReturnType<E["factory"]>;
-			  }
-			: EmptyModuleList
+				? ToGlobal<R, Name> & {
+						[key in E["name"]]: ReturnType<E["factory"]>;
+					}
+				: EmptyModuleList
 		: EmptyModuleList
 	: EmptyModuleList;
 
@@ -110,6 +115,9 @@ export type ModuleFactoryParams<Depends extends ModuleList = EmptyModuleList> = 
 
 		/**
 		 * Module name, as registered into universe.
+		 *
+		 * @remarks
+		 * Is referred to as name rather than ID, since it is named to be registered into universe, rather than having it's own inherent ID.
 		 */
 		moduleName: string;
 	}
@@ -127,10 +135,10 @@ export type ModuleFactoryRecordListConstraint<T> = {
 	[K in keyof T]: T[K] extends ModuleFactoryRecord
 		? T[K]["name"] extends {
 				[O in keyof T]: K extends O ? never : T[O] extends ModuleFactoryRecord ? T[O]["name"] : never;
-		  }[keyof T]
+			}[keyof T]
 			? ["Type error", "Duplicate name", T[K]["name"]]
 			: T[K] extends ModuleFactoryRecord<Parameters<T[K]["factory"]>[0]["modules"], ToGlobal<T, T[K]["name"]>>
-			? T[K]
-			: ["Type error", "Dependency is missing or of wrong type", Parameters<T[K]["factory"]>[0]["modules"]]
+				? T[K]
+				: ["Type error", "Dependency is missing or of wrong type", Parameters<T[K]["factory"]>[0]["modules"]]
 		: ["Type error", "Tuple element is not a module factory record"];
 };

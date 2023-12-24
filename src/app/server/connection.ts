@@ -547,6 +547,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 								body: {
 									...body,
 									dictionary: { ...shard.dictionary, ...player?.dictionary },
+									messages: this.universe.messages,
 									playerUuid: player.playerUuid,
 									units: Array.from(shard.units)
 										// ESLint false negative
@@ -563,7 +564,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 								type: MessageTypeWord.StatusNotification
 							},
 							{
-								body: { moduleId: "system", notificationId: "sync", playerUuid: player.playerUuid },
+								body: { moduleName: "system", notificationId: "sync", playerUuid: player.playerUuid },
 								type: MessageTypeWord.StoryNotification
 							}
 						] satisfies Array<ClientMessage>;

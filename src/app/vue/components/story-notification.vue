@@ -46,9 +46,10 @@ const displayItems: Ref<
 > = computed(() => {
 	// ESLint does not infer
 	// eslint-disable-next-line @typescript-eslint/typedef
-	return props.storyNotificationEntries.map(({ notificationId }) => {
+	return props.storyNotificationEntries.map(({ notificationId, moduleName }) => {
+		let srcParagraphs: Array<string> = tm(`module.${moduleName}.storyNotification.${notificationId}.paragraphs`);
 		return {
-			paragraphs: tm(`storyNotification.${notificationId}.paragraphs`).map(rt)
+			paragraphs: Array.isArray(srcParagraphs) ? srcParagraphs.map(rt) : []
 		};
 	});
 });

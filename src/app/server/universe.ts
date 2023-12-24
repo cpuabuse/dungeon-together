@@ -10,6 +10,7 @@
 import { DeferredPromise } from "../common/async";
 import { defaultKindUuid, defaultWorldUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
+import { ModuleLocaleMessagesRegistry } from "../core/module";
 import { CoreShardArg } from "../core/shard";
 import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
 import { ServerBaseClass, ServerBaseConstructorParams, ServerBaseFactory } from "./base";
@@ -72,6 +73,11 @@ export class ServerUniverse extends CoreUniverseClassFactory<
 	 * Default shard.
 	 */
 	public defaultShard: ServerShard;
+
+	/**
+	 * Messages from modules.
+	 */
+	public messages: ModuleLocaleMessagesRegistry = {};
 
 	/**
 	 * Game worlds.

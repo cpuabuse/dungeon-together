@@ -11,7 +11,7 @@
 import { ComputedRef, WritableComputedRef, computed, unref } from "vue";
 import { useI18n } from "vue-i18n";
 import { RtlInstance, useLocale as useVuetifyLocale } from "vuetify";
-import { ExternalMessageSchema, InternalMessageSchema } from "../../client/gui/vue.plugin.vuetify";
+import { MessageSchema } from "../../client/gui/vue.plugin.vuetify";
 import { Locale } from "../../common/locale";
 
 /**
@@ -60,7 +60,15 @@ export function useLocale() {
 		// eslint-disable-next-line @typescript-eslint/unbound-method
 		tm,
 		rt
-	} = useI18n<InternalMessageSchema & ExternalMessageSchema, Locale>();
+	} = useI18n<
+		{
+			/**
+			 * Message definition.
+			 */
+			message: MessageSchema;
+		},
+		Locale
+	>();
 	const { isRtl }: RtlInstance = useVuetifyLocale();
 
 	/**

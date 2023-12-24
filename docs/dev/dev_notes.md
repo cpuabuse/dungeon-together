@@ -10,3 +10,4 @@
 - For non-primitive values, prefer shallow refs for local use, comment reason for full ref
 - Pinia stores should not be destructured, and be injected into component context and accessed as a whole
 - For very general types and objects, prefix them with `app`, signifying it is originated from the app, to evade ambiguity (Instead of `Theme` use `AppTheme`)
+- When working with translation functions, have to perform checks before doing operations onto returns, since they might not match type if translation was missing, like in arrays

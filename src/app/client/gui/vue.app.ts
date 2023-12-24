@@ -3,10 +3,10 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
+// TODO: Rename to `vue.ts`
 /**
- * Initializes the Vue app.
- *
  * @file
+ * Initializes the Vue app.
  */
 
 import { Pinia, createPinia } from "pinia";
@@ -16,8 +16,29 @@ import { ClientUniverse } from "../universe";
 import { useHljsPlugin } from "./vue.plugin.hljs";
 
 // Static init
-import { useVuetifyPlugin } from "./vue.plugin.vuetify";
+import { AppI18n, useVuetifyPlugin } from "./vue.plugin.vuetify";
 
+/**
+ * Type returned during initialization of Vue, with prefix to avoid ambiguity.
+ */
+export type AppVue = {
+	/**
+	 * Vue app.
+	 */
+	vue: App;
+
+	/**
+	 * Stores for pinia.
+	 */
+	stores: Stores;
+
+	/**
+	 * Internationalization plugin.
+	 */
+	i18n: AppI18n;
+};
+
+// TODO: Rename to "createVue"
 /**
  * Creates vue app.
  *
@@ -37,19 +58,9 @@ export function createVueApp({
 	 * Universe.
 	 */
 	universe: ClientUniverse;
-}): {
-	/**
-	 * Vue app.
-	 */
-	vue: App;
-
-	/**
-	 * Stores for pinia.
-	 */
-	stores: Stores;
-} {
+}): AppVue {
 	let app: App = createApp(component);
-	useVuetifyPlugin({ app });
+	let i18n: AppI18n = useVuetifyPlugin({ app });
 	useHljsPlugin({ app });
 
 	const pinia: Pinia = createPinia();
@@ -57,5 +68,5 @@ export function createVueApp({
 	app.use(pinia);
 	app.provide("stores", stores);
 
-	return { stores, vue: app };
+	return { i18n, stores, vue: app };
 }
