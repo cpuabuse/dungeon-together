@@ -4,16 +4,21 @@
 */
 
 /**
- * Ways to extends entities.
- *
  * @file
+ * Ways to extends entities.
  */
 
+import { StoryNotification } from "../../client/connection";
+import { MessageTypeWord } from "../../common/defaults/connection";
 import { Uuid } from "../../common/uuid";
 import { Nav } from "../../core/arg";
+import { CoreEnvelope } from "../../core/connection";
+import { LogLevel } from "../../core/error";
 import { ActionWords } from "../action";
 import { ServerCell } from "../cell";
+import { ServerPlayer } from "../connection";
 import { ServerGrid } from "../grid";
+import { ServerShard } from "../shard";
 import { ServerUniverse } from "../universe";
 import { ServerEntity, ServerEntityClass } from "./entity";
 
@@ -123,6 +128,11 @@ export function BaseEntityKindClassFactory({
 		 * Link to entity.
 		 */
 		public entity: ServerEntity;
+
+		/**
+		 * Optional module ID.
+		 */
+		public static moduleName?: string;
 
 		/**
 		 * Props.
@@ -282,6 +292,58 @@ export function BaseEntityKindClassFactory({
 		// eslint-disable-next-line class-methods-use-this
 		public onTerminateEntity(): void {
 			// Does nothing
+		}
+
+		/**
+		 * Sends story notification to client, relative to module.
+		 * Can be called from class extending this, to invoke from parent module scope.
+		 *
+		 * @example Parent module scope invocation
+		 * ```typescript
+		 * Object.getPrototypeOf(this).sendStatusNotification(param);
+		 * ```
+		 *
+		 * @param param - Destructured parameter
+		 */
+		public sendStoryNotification({ notificationId, parameters }: Omit<StoryNotification, "moduleName">): void {
+			let { moduleName }: EntityKindClass = this.constructor as EntityKindClass;
+			let { playerUuid }: ServerEntity = this.entity;
+
+			if (playerUuid && moduleName) {
+				const shard: ServerShard = (this.entity.constructor as ServerEntityClass).universe.getShard(this.entity);
+
+				// Player controlling the source entity
+				const player: ServerPlayer | undefined = shard.players.get(playerUuid);
+
+				// Check if player exists and if it does, send a message
+				if (player && player.connection) {
+					player.connection.socket
+						.send(
+							new CoreEnvelope({
+								messages: [
+									{
+										body: {
+											moduleName,
+											notificationId,
+											parameters,
+											playerUuid
+										},
+										type: MessageTypeWord.StoryNotification
+									}
+								]
+							})
+						)
+						.catch(error => {
+							(this.entity.constructor as ServerEntityClass).universe.log({
+								error: new Error(
+									`Failed to notify about mimic("entityUuid=${this.entity.entityUuid}" to player("playerUuid=${player.playerUuid}").`,
+									{ cause: error instanceof Error ? error : undefined }
+								),
+								level: LogLevel.Warning
+							});
+						});
+				}
+			}
 		}
 
 		/**

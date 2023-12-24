@@ -2,7 +2,7 @@
 <template>
 	<!-- Undefined assertion since index used in iteration -->
 	<UniverseUiShardPlayer
-		v-for="([playerUuid, { player } ], index) in (playerEntries as PlayerEntries)"
+		v-for="([playerUuid, { player }], index) in playerEntries as PlayerEntries"
 		:key="playerUuid"
 		v-model="playerEntries[index]![1].model"
 		:shard="shard"
@@ -17,7 +17,7 @@ import { PropType, defineComponent } from "vue";
 import { ClientPlayer } from "../../client/connection";
 import { ClientShard } from "../../client/shard";
 import {
-	UsedOverlayBusToCompactToolbarMenuSource,
+	OverlayBusToCompactToolbarMenuSource,
 	overlayBusToCompactToolbarMenuEmits,
 	useOverlayBusToCompactToolbarMenuSource
 } from "../core/compact-toolbar";
@@ -122,8 +122,7 @@ export default defineComponent({
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let usedOverlayBusConsumer = useOverlayBusConsumer();
 
-		// Infer composable return
-		let usedOverlayBusToCompactToolbarMenuSource: UsedOverlayBusToCompactToolbarMenuSource =
+		let overlayBusToCompactToolbarMenuSource: OverlayBusToCompactToolbarMenuSource =
 			useOverlayBusToCompactToolbarMenuSource({
 				emit,
 				icon: "fa-globe",
@@ -133,7 +132,7 @@ export default defineComponent({
 				usedOverlayBusConsumer
 			});
 
-		return { ...usedOverlayBusConsumer, ...usedOverlayBusToCompactToolbarMenuSource, universeStore };
+		return { ...usedOverlayBusConsumer, ...overlayBusToCompactToolbarMenuSource, universeStore };
 	}
 });
 </script>

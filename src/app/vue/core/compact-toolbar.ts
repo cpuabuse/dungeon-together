@@ -272,7 +272,7 @@ export function useOverlayBusToCompactToolbarMenuSource(
 /**
  * Return type of {@link useOverlayBusToCompactToolbarMenuSource}.
  */
-export type UsedOverlayBusToCompactToolbarMenuSource = ReturnType<typeof useOverlayBusToCompactToolbarMenuSource>;
+export type OverlayBusToCompactToolbarMenuSource = ReturnType<typeof useOverlayBusToCompactToolbarMenuSource>;
 
 /**
  * Type for {@link useCompactToolbarMenuConsumer} composable, and to be used for more complex objects inside consumer instance.

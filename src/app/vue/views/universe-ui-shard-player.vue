@@ -62,7 +62,13 @@ import { OverlayList, StatusNotification } from "../components";
 import OverlayWindow from "../components/overlay-window.vue";
 import StoryNotification from "../components/story-notification.vue";
 import { UsedLocale, useLocale } from "../core/locale";
-import { OverlayListItemEntryType, OverlayListItems, overlayBusEmits, useOverlayBusSource } from "../core/overlay";
+import {
+	OverlayBusSource,
+	OverlayListItemEntryType,
+	OverlayListItems,
+	overlayBusEmits,
+	useOverlayBusSource
+} from "../core/overlay";
 import { statusNotificationEmits, useStatusNotification } from "../core/status-notification";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { StoryNotificationEntry } from "../core/story-notification";
@@ -190,9 +196,7 @@ export default defineComponent({
 			return props.player.playerName;
 		});
 
-		// Infer composable
-		// eslint-disable-next-line @typescript-eslint/typedef
-		const { displayItems } = useOverlayBusSource({
+		const { displayItems }: OverlayBusSource = useOverlayBusSource({
 			emit,
 			menuItemsRegistryIndex: Symbol(`player-${props.player.playerUuid}`),
 			overlayItems: [

@@ -35,6 +35,7 @@ import {
 	processInitWord
 } from "../core/connection";
 import { LogLevel } from "../core/error";
+import { ModuleLocaleMessagesRegistry, ModuleLocalePartialMessages } from "../core/module";
 import { CoreShardArg, ShardPathOwn } from "../core/shard";
 import { ActionWords } from "../server/action";
 import { CellEvent } from "../server/cell";
@@ -67,7 +68,7 @@ export type StoryNotification = {
 	/**
 	 * Module ID.
 	 */
-	moduleId: string;
+	moduleName: string;
 
 	/**
 	 * Notification parameters.
@@ -110,6 +111,11 @@ export type ClientMessage =
 					 * Player dictionary.
 					 */
 					dictionary: CoreDictionary;
+
+					/**
+					 * Messages from server.
+					 */
+					messages: ModuleLocaleMessagesRegistry;
 				};
 
 			/**
@@ -396,6 +402,24 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 				this.universe.log({
 					level: LogLevel.Informational,
 					message: `Synchronization started`
+				});
+
+				// Before anything, sync the messages
+				// ESLint false negative
+				// eslint-disable-next-line @typescript-eslint/typedef
+				Object.entries(message.body.messages).forEach(([moduleName, messagesEntry]) => {
+					if (messagesEntry) {
+						// ESLint false negative
+						// eslint-disable-next-line @typescript-eslint/typedef
+						Object.entries(messagesEntry).forEach(([language, msg]) => {
+							// The library does not support partial schemas, so actual schema is non partial, and we cannot check if this object satisfies it or not, since it is partial, so to do type checking, need to be careful and use runtime checks when translating, also make sure that modules correctly define it's translations
+							this.universe.i18n.global.mergeLocaleMessage(language, {
+								module: {
+									[moduleName]: msg
+								} satisfies ModuleLocalePartialMessages
+							});
+						});
+					}
 				});
 
 				let created: DeferredPromise<void> = new DeferredPromise();

@@ -156,7 +156,11 @@ export class ServerLoader<R extends string, T extends ModuleFactoryRecordListCon
 		const universeCreated: DeferredPromise<void> = new DeferredPromise();
 		const universe: ServerUniverse = this.application.addUniverse({
 			Universe: ServerUniverse,
-			args: [{ created: universeCreated }]
+			args: [
+				{
+					created: universeCreated
+				}
+			]
 		});
 		await universeCreated;
 
@@ -236,6 +240,11 @@ export class ServerLoader<R extends string, T extends ModuleFactoryRecordListCon
 
 			// Populate module list
 			moduleList[moduleName] = module;
+
+			// Add messages to universe
+			if (module.messages) {
+				universe.messages[moduleName] = module.messages;
+			}
 
 			// Register kinds
 			Object.keys(moduleKinds).forEach(kindName => {

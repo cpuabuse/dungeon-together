@@ -1,12 +1,11 @@
 /*
-	Copyright 2022 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * Client loader.
- *
  * @file
+ * Client loader.
  */
 
 import { DeferredPromise } from "../common/async";
@@ -51,6 +50,7 @@ export class ClientLoader {
 	 * Adds universe.
 	 *
 	 * @param param - Destructured parameters
+	 * @returns - Promise with client universe
 	 */
 	public async addUniverse(): Promise<ClientUniverse> {
 		const universeCreated: DeferredPromise<void> = new DeferredPromise();

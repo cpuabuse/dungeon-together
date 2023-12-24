@@ -155,6 +155,7 @@ export function defineBase({
 			...(isClient
 				? [
 						vue({
+							isProduction,
 							template: { compilerOptions: { comments: false } }
 						}),
 

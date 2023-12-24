@@ -4,9 +4,8 @@
 */
 
 /**
- * Story notification composables.
- *
  * @file
+ * Story notification composables.
  */
 
 import { StoryNotification } from "../../client/connection";
@@ -14,4 +13,4 @@ import { StoryNotification } from "../../client/connection";
 /**
  * Type for story notification display.
  */
-export type StoryNotificationEntry = Pick<StoryNotification, "moduleId" | "notificationId">;
+export type StoryNotificationEntry = Pick<StoryNotification, "moduleName" | "notificationId">;

@@ -2,13 +2,7 @@
 <template>
 	<CompactToolbar :menus="mainToolbarMenus" />
 
-	<UniverseUiToolbarOptions
-		v-model="
-			// Inference breaks for vue, need casting
-			// eslint-disable-next-line vue/valid-v-model
-			(optionsModel as OptionsModelType)
-		"
-	/>
+	<UniverseUiToolbarOptions @update-menu-items="onUpdateMenuItems" />
 
 	<!-- Overlays display -->
 	<OverlayWindow
@@ -47,11 +41,12 @@ import {
 	CompactToolbarMenu,
 	CompactToolbarMenuBaseProps,
 	CompactToolbarMenuItem,
-	UsedOverlayBusToCompactToolbarMenuSource,
+	OverlayBusToCompactToolbarMenuSource,
 	useOverlayBusToCompactToolbarMenuSource
 } from "../core/compact-toolbar";
 import { UsedLocale, useLocale } from "../core/locale";
 import {
+	OverlayBusSource,
 	OverlayListItemEntry,
 	OverlayListItemEntryType,
 	OverlayListItems,
@@ -93,16 +88,6 @@ type PlayerEntry = {
  * Helper type for casting to player entries array element, as class information lost.
  */
 type PlayerEntries = Array<[string, PlayerEntry]>;
-
-// TODO: Change in favor of bus
-/**
- * Model type helper.
- *
- * @remarks
- * Both properties being an array removes necessity for many checks.
- */
-type OptionsModelType = Record<"windowItems", Array<OverlayListItemEntry>> &
-	Record<"menuItems", Array<CompactToolbarMenuItem>>;
 
 export default defineComponent({
 	components: {
@@ -222,10 +207,7 @@ export default defineComponent({
 				...this.shardMenus,
 				{
 					icon: "fa-gear",
-					items: [
-						...this.optionsModel.menuItems,
-						{ clickRecordIndex: this.debugMenuDisplaySymbol, icon: "fa-bug-slash", name: this.debugName }
-					],
+					items: [{ clickRecordIndex: this.debugMenuDisplaySymbol, icon: "fa-bug-slash", name: this.debugName }],
 					maxPinnedAmount: 1,
 					name: "SystemR"
 				},
@@ -279,11 +261,6 @@ export default defineComponent({
 
 			hpColor: new Color("#1F8C2F"),
 
-			optionsModel: {
-				menuItems: new Array<CompactToolbarMenuItem>(),
-				windowItems: new Array<OverlayListItemEntry>()
-			} satisfies OptionsModelType,
-
 			playerEntries: new Array() as PlayerEntries,
 
 			unsubscribe: null as (() => void) | null
@@ -322,9 +299,7 @@ export default defineComponent({
 		// Infer composable
 		// eslint-disable-next-line @typescript-eslint/typedef
 		let usedOverlayBusConsumer = useOverlayBusConsumer();
-		// Infer composable
-		// eslint-disable-next-line @typescript-eslint/typedef
-		const { displayItems } = useOverlayBusSource({
+		const { displayItems }: OverlayBusSource = useOverlayBusSource({
 			emit,
 			menuItemsRegistryIndex: welcomeOverlaySymbol,
 			overlayItems: [
@@ -348,7 +323,7 @@ export default defineComponent({
 		// Display menu at start
 		recordStore.records[welcomeDisplaySymbol] = true;
 
-		const { menu: systemMenu }: UsedOverlayBusToCompactToolbarMenuSource = useOverlayBusToCompactToolbarMenuSource({
+		const { menu: systemMenu }: OverlayBusToCompactToolbarMenuSource = useOverlayBusToCompactToolbarMenuSource({
 			emit,
 			icon: "fa-gear",
 			isEmittingUpdateMenu: false,
@@ -357,7 +332,7 @@ export default defineComponent({
 			usedOverlayBusConsumer
 		});
 
-		return { displayItems, recordStore, systemMenu, t, universe };
+		return { displayItems, recordStore, systemMenu, t, universe, ...usedOverlayBusConsumer };
 	},
 
 	watch: {

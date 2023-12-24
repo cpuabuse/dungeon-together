@@ -4,7 +4,8 @@
 */
 
 /**
- * @file Client universe
+ * @file
+ * Client universe.
  */
 
 import { join } from "path";
@@ -34,6 +35,8 @@ import { ClientConnection } from "./connection";
 import { ClientEntity, ClientEntityClass, ClientEntityFactory } from "./entity";
 import { ClientGrid, ClientGridClass, ClientGridClassFactory } from "./grid";
 import { createVueApp } from "./gui";
+import { AppVue } from "./gui/vue.app";
+import { AppI18n } from "./gui/vue.plugin.vuetify";
 import {
 	downSymbol,
 	lcSymbol,
@@ -125,6 +128,11 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 	 * Grids index.
 	 */
 	public readonly gridsIndex: Map<Uuid, ClientGrid> = new Map();
+
+	/**
+	 * Internationalization plugin.
+	 */
+	public i18n: AppI18n;
 
 	/**
 	 * Modes.
@@ -236,25 +244,13 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 		this.Cell = ClientCellFactory({ Base: this.Base });
 		this.Entity = ClientEntityFactory({ Base: this.Base });
 
-		const {
-			vue,
-			stores
-		}: {
-			/**
-			 * Stores for pinia.
-			 */
-			stores: Stores;
-
-			/**
-			 * App.
-			 */
-			vue: App;
-		} = createVueApp({
+		const { vue, stores, i18n }: AppVue = createVueApp({
 			component: UniverseComponent,
 			universe: this
 		});
 		this.vue = vue;
 		this.stores = stores;
+		this.i18n = i18n;
 
 		// Mount vue
 		let vueElement: HTMLElement = document.createElement("div");
@@ -278,14 +274,6 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 			[]
 		);
 		defaultShardAttach
-			.catch(error => {
-				this.log({
-					error: new Error(`Failed to attach default shard in universe(universeUuid="${this.universeUuid}").`, {
-						cause: error instanceof Error ? error : undefined
-					}),
-					level: LogLevel.Warning
-				});
-			})
 			.then(async () => {
 				// Wait for all images to load
 				await Promise.all(Array.from(this.modes.values()).map(mode => mode.isInitialized));
@@ -320,21 +308,24 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 						 * Queueing.
 						 */
 						onplay: (): void => {
-							setTimeout(() => {
-								// Start fading this
-								howl.fade(bgVolume, 0, fadeTime);
+							setTimeout(
+								() => {
+									// Start fading this
+									howl.fade(bgVolume, 0, fadeTime);
 
-								// Get next
-								let newIndex: number = index + 1;
-								let newHowl: Howl | undefined = bgSounds[newIndex < array.length ? newIndex : 0];
+									// Get next
+									let newIndex: number = index + 1;
+									let newHowl: Howl | undefined = bgSounds[newIndex < array.length ? newIndex : 0];
 
-								if (newHowl) {
-									// Play and fade next
-									newHowl.play("default");
-									newHowl.fade(0, bgVolume, fadeTime);
-								}
-								// Negative delay should be OK
-							}, endTime - startTime - fadeTime);
+									if (newHowl) {
+										// Play and fade next
+										newHowl.play("default");
+										newHowl.fade(0, bgVolume, fadeTime);
+									}
+									// Negative delay should be OK
+								},
+								endTime - startTime - fadeTime
+							);
 						},
 						sprite: {
 							// *Should* work fine with negative duration
@@ -566,6 +557,14 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 							y: 0
 						});
 					});
+				});
+			})
+			.catch(error => {
+				this.log({
+					error: new Error(`Failed to attach default shard in universe(universeUuid="${this.universeUuid}").`, {
+						cause: error instanceof Error ? error : undefined
+					}),
+					level: LogLevel.Warning
 				});
 			})
 			.finally(() => {
