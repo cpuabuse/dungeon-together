@@ -547,7 +547,12 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 							targetCell.entities.forEach(targetEntity => {
 								if (!sourceEntityUuidSet.has(targetEntity.entityUuid)) {
 									// TODO: Move death to cell events
-									if (targetEntity.modeUuid === "mode/user/enemy/default" || targetEntity.modeUuid === "mimic-attack") {
+									// TODO: Death event should send final emits
+									if (
+										targetEntity.modeUuid === "mode/user/enemy/default" ||
+										targetEntity.modeUuid === "mimic-attack" ||
+										targetEntity.modeUuid === "mode/user/mimic/default"
+									) {
 										if (
 											sourceCell.events.length > 0 &&
 											sourceCell.events[0]?.targetEntityUuid === targetEntity.entityUuid &&
