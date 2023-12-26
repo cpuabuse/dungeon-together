@@ -105,6 +105,7 @@ export default defineComponent({
 		const stores: Stores = useStores();
 		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
+		const fpsValues: Set<number> = new Set([15, 30, 60, 90, 120]);
 
 		// Theme
 		const { themeSymbol, isSystemThemeDark }: AppTheme = useAppTheme({ recordStore });
@@ -210,6 +211,7 @@ export default defineComponent({
 
 			type: OverlayListItemEntryType.Select
 		}));
+
 		const textDirectionListItemEntry: Ref<OverlayListItemEntry> = computed(() => ({
 			icon: "fa-arrow-right-arrow-left",
 
@@ -235,6 +237,22 @@ export default defineComponent({
 
 			type: OverlayListItemEntryType.Select
 		}));
+
+		const fpsListItemEntry: Ref<OverlayListItemEntry> = computed(() => ({
+			id: "fps",
+
+			items: Array.from(fpsValues).map(numberValue => {
+				let value: string = numberValue.toString();
+				return {
+					name: value,
+					value
+				};
+			}),
+
+			name: "FPS",
+			type: OverlayListItemEntryType.Select
+		}));
+
 		const fullscreenListItemEntry: Ref<OverlayListItemEntry> = computed(() => ({
 			icon: "fa-expand",
 			id: fullscreenSymbol,
@@ -303,7 +321,7 @@ export default defineComponent({
 
 									// Video tab
 									{
-										items: [],
+										items: [fpsListItemEntry.value],
 										name: "Video"
 									},
 
