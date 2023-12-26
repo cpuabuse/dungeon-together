@@ -275,17 +275,46 @@ export default defineComponent({
 				{
 					listItems: computed(() => {
 						return [
-							// Language
-							languageListItemEntry.value,
+							{
+								tabs: [
+									// System tab
+									{
+										items: [
+											// Language
+											languageListItemEntry.value,
 
-							// Text direction
-							textDirectionListItemEntry.value,
+											// Text direction
+											textDirectionListItemEntry.value,
 
-							// Theme
-							themeListItemEntry.value,
+											// Theme
+											themeListItemEntry.value,
 
-							// Fullscreen
-							fullscreenListItemEntry.value
+											// Fullscreen
+											fullscreenListItemEntry.value
+										],
+										name: "System"
+									},
+
+									// Game tab
+									{
+										items: [],
+										name: "Game"
+									},
+
+									// Video tab
+									{
+										items: [],
+										name: "Video"
+									},
+
+									// Audio tab
+									{
+										items: [],
+										name: "Audio"
+									}
+								],
+								type: OverlayListItemEntryType.Tab
+							}
 						] satisfies OverlayListItems;
 					}),
 					menuItem: computed(() => {
