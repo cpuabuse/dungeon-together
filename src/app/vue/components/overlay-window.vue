@@ -4,10 +4,10 @@
 	<!-- Need a block display wrapper for draggable; Will also have fixed direction, so that transform doesn't move window, child locale provide will revert it back -->
 	<VLocaleProvider :rtl="false" class="overlay-window-block">
 		<!-- `v-show` is used to acquire refs and for performance; if `v-if`, then should be in parent component -->
-		<div v-show="modelValue" ref="overlayWindow" class="overlay-window">
+		<div v-show="modelValue" ref="overlayWindow" class="overlay-window" @mousedown="upOverlay">
 			<VLocaleProvider :rtl="isRtl">
-				<!-- Flex to enable body's overflow -->
-				<VCard class="h-100 w-100 overflow-hidden d-flex flex-column">
+				<!-- Flex to enable body's overflow; Border for clarity when cards overlap -->
+				<VCard class="h-100 w-100 overflow-hidden d-flex flex-column" :border="true">
 					<div ref="overlayWindowHandle">
 						<!-- Compact density always, to preserve intended ratio -->
 						<VToolbar density="compact">
@@ -42,12 +42,12 @@
 
 <script lang="ts">
 import PerfectScrollbar from "perfect-scrollbar";
-import { Ref, computed, defineComponent, nextTick, onMounted, ref } from "vue";
+import { Ref, computed, defineComponent, nextTick, onMounted, ref, watch } from "vue";
 import { VBtn, VCard, VLocaleProvider, VSpacer, VToolbar, VToolbarTitle } from "vuetify/components";
 import { useDraggable } from "../core/draggable";
 import { TextDirectionWords, textDirectionSymbol } from "../core/locale";
 import { overlayListItemNarrowProps } from "../core/overlay";
-import { Store, StoreWord, Stores, useStores } from "../core/store";
+import { GuiStoreOverlayRecord, Store, StoreWord, Stores, useStores } from "../core/store";
 import { BaseIcon } from ".";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 
@@ -66,9 +66,12 @@ export default defineComponent({
 	/**
 	 * Setup for refs.
 	 *
+	 * @param props - Component props
 	 * @returns Refs
 	 */
-	setup() {
+	// Infer prop type
+	// eslint-disable-next-line @typescript-eslint/typedef
+	setup(props) {
 		// Infer refs
 		/* eslint-disable @typescript-eslint/typedef */
 		const overlayWindow = ref<HTMLDivElement | null>(null);
@@ -77,9 +80,17 @@ export default defineComponent({
 		const scrollbarHandle = ref<PerfectScrollbar | null>(null);
 		/* eslint-enable @typescript-eslint/typedef */
 
+		// Stores
 		const stores: Stores = useStores();
 		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
+		const guiStore: Store<StoreWord.Gui> = stores.useGuiStore();
 
+		// Margin constants
+		const resizeMargin: number = 8;
+		const cssMarginResizeMargin: string = `${resizeMargin + 1}px`;
+
+		// TODO: Move to composable
+		// Text direction
 		const textDirectionRecord: Ref<TextDirectionWords> = recordStore.computedRecord<TextDirectionWords>({
 			defaultValue: TextDirectionWords.Auto,
 			id: textDirectionSymbol,
@@ -94,7 +105,6 @@ export default defineComponent({
 				return Object.values(TextDirectionWords).includes(value as TextDirectionWords);
 			}
 		});
-
 		const isRtl: Ref<boolean | undefined> = computed(() => {
 			switch (textDirectionRecord.value) {
 				case TextDirectionWords.Rtl:
@@ -106,9 +116,18 @@ export default defineComponent({
 			}
 		});
 
-		const resizeMargin: number = 8;
-		const cssMarginResizeMargin: string = `${resizeMargin + 1}px`;
+		// Deal with "z-index"
+		const { handle, zIndex }: GuiStoreOverlayRecord = guiStore.registerOverlay();
+		watch(
+			() => props.modelValue,
+			value => {
+				if (value) {
+					guiStore.upOverlay({ handle });
+				}
+			}
+		);
 
+		// Mounted
 		onMounted(() =>
 			// One-liner return
 			// eslint-disable-next-line vue/valid-next-tick
@@ -139,27 +158,35 @@ export default defineComponent({
 			}),
 			cssMarginResizeMargin,
 			overlayBodyHandle,
-			scrollbarHandle
+			scrollbarHandle,
+			/**
+			 * Ups the overlay.
+			 */
+			upOverlay(): void {
+				guiStore.upOverlay({ handle });
+			},
+			zIndex
 		};
 	}
 });
 </script>
 
 <style lang="css">
-/* Note, positition(left, top) has to be 0, so that resize matches mouse movement */
 .overlay-window {
 	/** Needed for drag on mobile */
 	touch-action: none;
 
 	/** Needed for z-index override, multiple resize in container */
 	position: absolute;
-
-	z-index: auto;
+	z-index: v-bind(zIndex);
 
 	height: 500px;
 	width: 300px;
 
 	pointer-events: auto;
+
+	left: calc(50% - 150px);
+	top: calc(50% - 250px);
 }
 
 .overlay-window-toolbar-title {

@@ -37,7 +37,7 @@ darkThemeMatchMedia.addEventListener("change", event => {
 /**
  * System theme.
  */
-const systemTheme: ShallowRef<Theme> = computed(() => (isSystemThemeDark.value ? Theme.Dark : Theme.Light));
+const systemTheme: ComputedRef<Theme> = computed(() => (isSystemThemeDark.value ? Theme.Dark : Theme.Light));
 
 /**
  * Composable to control theme.

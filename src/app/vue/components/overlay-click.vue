@@ -29,7 +29,7 @@ export default defineComponent({
 		},
 
 		zIdx: {
-			default: 100,
+			default: 2000,
 			type: Number
 		}
 	}

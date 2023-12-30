@@ -9,11 +9,12 @@
  */
 
 import { StoreDefinition, defineStore } from "pinia";
-import { WritableComputedRef, computed, inject, shallowRef } from "vue";
+import { ComputedRef, ShallowRef, WritableComputedRef, computed, inject, shallowRef } from "vue";
 import { ClientUniverseStateRcMenuData } from "../../client/gui";
 import { ClientUniverse } from "../../client/universe";
 import { toCapitalized } from "../../common/text";
 import { MaybePartial } from "../../common/utility-types";
+import { LogLevel } from "../../core/error";
 
 /**
  * Words to refer to stores.
@@ -32,7 +33,12 @@ export enum StoreWord {
 	/**
 	 * Input store.
 	 */
-	Input = "input"
+	Input = "input",
+
+	/**
+	 * GUI store.
+	 */
+	Gui = "gui"
 }
 
 /**
@@ -63,6 +69,31 @@ export const updateActionNames = (
  * Union of action names in `useUniverseStore.actions`.
  */
 export type UpdateActionNames = (typeof updateActionNames)[number];
+
+/**
+ * Arbitrary base for "z-index" of overlay.
+ */
+const baseZIndex: number = 1000;
+
+/**
+ * Type for handle passed for "z-index".
+ */
+type OverlayRegistryHandle = ShallowRef<number>;
+
+/**
+ * Type for overlay registration return.
+ */
+export type GuiStoreOverlayRecord = {
+	/**
+	 * Handle to know which overlay to move.
+	 */
+	handle: OverlayRegistryHandle;
+
+	/**
+	 * Z-index calculated from handle and base, in string form for ease of use.
+	 */
+	zIndex: ComputedRef<string>;
+};
 
 /**
  * Provides object of stores to be generated/injected per app.
@@ -349,6 +380,74 @@ export function composableStoreFactory({
 					rcMenuData: shallowRef(null as ClientUniverseStateRcMenuData)
 				};
 			}
+		}),
+
+		// GUI store
+		[k(StoreWord.Gui)]: defineStore(StoreWord.Gui, () => {
+			// Overlay "z-index" registry
+			let overlayRegistry: Array<OverlayRegistryHandle> = new Array<OverlayRegistryHandle>();
+
+			/**
+			 * Registers overlay for "z-index".
+			 *
+			 * @remarks
+			 * Could be extended to support multiple registries at the same time, but that would be done when required.
+			 *
+			 * @returns Handle and "z-index" tied together
+			 */
+			function registerOverlay(): GuiStoreOverlayRecord {
+				const handle: OverlayRegistryHandle = shallowRef(overlayRegistry.length);
+				overlayRegistry.push(handle);
+
+				return {
+					handle,
+					zIndex: computed(() => {
+						return (baseZIndex + handle.value).toString();
+					})
+				};
+			}
+
+			/**
+			 * Recalculates "z-indices".
+			 */
+			function recalc(): void {
+				overlayRegistry.forEach((fixHandle, fixIndex) => {
+					fixHandle.value = fixIndex;
+				});
+			}
+
+			/**
+			 * Moves overlay up ("z-index").
+			 *
+			 * @param param - Destructured parameter
+			 */
+			function upOverlay({ handle }: Record<"handle", OverlayRegistryHandle>): void {
+				let idx: number = handle.value;
+
+				// Only act if not already last
+				if (idx < overlayRegistry.length) {
+					if (handle === overlayRegistry[idx]) {
+						const beginning: Array<OverlayRegistryHandle> = overlayRegistry.slice(0, idx);
+						const rest: Array<OverlayRegistryHandle> = overlayRegistry.slice(idx + 1);
+
+						// Rearrange registry
+						overlayRegistry = [...beginning, ...rest, handle];
+					} else {
+						universe.log({
+							error: new Error(
+								`Overlay registry handle is invalid for handle with index ${idx}, will attempt to correct`
+							),
+							level: LogLevel.Error
+						});
+
+						// Fix code, should not really be invoked, but can happen if something is wrong with queueing, if that happens, code must be restructured
+						overlayRegistry = Array.from(new Set(overlayRegistry));
+					}
+					recalc();
+				}
+			}
+
+			return { registerOverlay, upOverlay };
 		})
 	} satisfies {
 		[Word in StoreWord as UseStoreWordStore<Word>]: unknown;
