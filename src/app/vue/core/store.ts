@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -447,7 +447,9 @@ export function composableStoreFactory({
 				}
 			}
 
-			return { registerOverlay, upOverlay };
+			const universeUiElementRecordId: symbol = Symbol("universeUiElementRecordId");
+
+			return { registerOverlay, universeUiElementRecordId, upOverlay };
 		})
 	} satisfies {
 		[Word in StoreWord as UseStoreWordStore<Word>]: unknown;

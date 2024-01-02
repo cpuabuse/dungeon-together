@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -9,63 +9,32 @@
  */
 
 import type { DragEvent, Interactable, ResizeEvent } from "@interactjs/types";
+import { useResizeObserver } from "@vueuse/core";
 import interact from "interactjs";
-import { Ref, onMounted, onUnmounted, ref, unref } from "vue";
+import {
+	ComputedRef,
+	Ref,
+	ShallowRef,
+	computed,
+	isRef,
+	nextTick,
+	onMounted,
+	onUnmounted,
+	ref,
+	unref,
+	watch,
+	watchEffect
+} from "vue";
 import { LogLevel } from "../../core/error";
+import { ElementVector } from "../common/element";
 import { MaybeRefHTMLElementOrNull } from "../common/utility-types";
 import { Store, StoreWord, Stores, useStores } from "./store";
-
-/**
- * Listener for dragging.
- *
- * @param event - Event received
- */
-function dragMoveListener({ target, dx, dy }: DragEvent): void {
-	// Keep the dragged position in the data-x/data-y attributes
-	let x: number = (parseFloat(target.getAttribute("data-x") as string) || 0) + dx;
-	let y: number = (parseFloat(target.getAttribute("data-y") as string) || 0) + dy;
-
-	// Translate the element
-	target.style.transform = `translate(${x}px, ${y}px)`;
-
-	// Update the position attributes
-	target.setAttribute("data-x", x.toString());
-	target.setAttribute("data-y", y.toString());
-}
-
-/**
- * Listener for resizing.
- *
- * @param event - Event received
- */
-function resizeMoveListener({ target, rect, deltaRect }: ResizeEvent): void {
-	let dataX: string | null = target.getAttribute("data-x");
-	let dataY: string | null = target.getAttribute("data-y");
-	let x: number = dataX ? parseFloat(dataX) : 0;
-	let y: number = dataY ? parseFloat(dataY) : 0;
-
-	// update the element's style
-	target.style.width = `${rect.width}px`;
-	target.style.height = `${rect.height}px`;
-
-	// translate when resizing from top or left edges
-	if (deltaRect) {
-		x += deltaRect.left;
-		y += deltaRect.top;
-	}
-
-	target.style.transform = `translate(${x}px,${y}px)`;
-
-	target.setAttribute("data-x", x.toString());
-	target.setAttribute("data-y", y.toString());
-}
 
 /**
  * Draggable.
  *
  * @remarks
  * Modifies global state, should not be used twice on same element.
- * There is an underlying library bug, and cannot be in container with `flex-direction: column-reverse`.
  *
  * @param param - Destructured parameter
  * @returns Control refs, draggable and resizable booleans with interchangeable toggle functions
@@ -76,8 +45,23 @@ export function useDraggable({
 	element,
 	handle,
 	resizeCallback,
-	resizeMargin: margin
+	resizeMargin: margin,
+	ancestorElement,
+	initialSize = { x: 300, y: 500 },
+	initialPositionRatio = { x: 0.5, y: 0.5 }
 }: {
+	/**
+	 * Element to contain the child in, not necessarily direct parent.
+	 *
+	 * @remarks
+	 * - Receives desired ancestor, instead of figuring out `offsetParent`, as there is no way to reactively retrieve it. This also means, that there should be no positioned element in between component and ancestor, as absolute position would be relative to it.
+	 * - Element should not have "transform", "width", "height", "left", "top" inline styles set, as they will be modified.
+	 * - Axis based refs are stored independently, since their mutations are independent.
+	 * - Using cartesian coodinates. CSS' left is x, top is y. Axis direction always assumed LTR.
+	 * CSS "transform" is used for performance, it is much faster than position.
+	 */
+	ancestorElement: MaybeRefHTMLElementOrNull;
+
 	/**
 	 * Element.
 	 */
@@ -97,15 +81,111 @@ export function useDraggable({
 	 * Resize hitbox.
 	 */
 	resizeMargin?: number;
+
+	/**
+	 * Initial size.
+	 */
+	initialSize?: ElementVector;
+
+	/**
+	 * Initial position as a fraction of ancestor size.
+	 */
+	initialPositionRatio?: ElementVector;
 }) {
+	// Stores
 	const stores: Stores = useStores();
-	const { universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
+	const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
 
-	// Prep refs
-	let elementUnref: HTMLElement | null = null;
-	let handleUnref: HTMLElement | null = null;
+	// Track dimensions
+	const width: Ref<number> = ref(initialSize.x);
+	const height: Ref<number> = ref(initialSize.y);
 
-	// Vars
+	// Track position
+	const x: ShallowRef<number> = ref(0);
+	const y: ShallowRef<number> = ref(0);
+
+	// Styles
+	const widthStyle: ComputedRef<string> = computed(() => {
+		return `${width.value}px`;
+	});
+	const heightStyle: ComputedRef<string> = computed(() => {
+		return `${height.value}px`;
+	});
+	const transformStyle: ComputedRef<string> = computed(() => {
+		return `translate(${x.value}px, ${y.value}px)`;
+	});
+
+	// Update styles
+	watchEffect(() => {
+		unref(element)?.style.setProperty("transform", transformStyle.value);
+	});
+	watchEffect(() => {
+		unref(element)?.style.setProperty("width", widthStyle.value);
+	});
+	watchEffect(() => {
+		unref(element)?.style.setProperty("height", heightStyle.value);
+	});
+	watchEffect(() => {
+		unref(element)?.style.setProperty("left", "0px");
+	});
+	watchEffect(() => {
+		unref(element)?.style.setProperty("top", "0px");
+	});
+	if (isRef(element)) {
+		watch(element, (value, oldValue) => {
+			if (oldValue) {
+				["transform", "width", "height", "left", "top"].forEach((style: string) => {
+					oldValue.style.removeProperty(style);
+				});
+			}
+		});
+	}
+
+	/*
+		Track ancestor dimensions, since this operation is rare, extra logic is added, to not impact normal interact events.
+		`useResizeObserver` is immediate, but only run when ancestor element is rendered. Which guarantees no redundant runs, and initial tracked values update. Also, library source code suggest that the observer would be updated and run on change of ancestor element ref.
+		Size and position are manipulated outside of observer/watcher, so observer tracks that, to identify if stored percentage position is still accurate.
+		Watcher will initialize initial ratio position.
+	*/
+	const ancestorWidth: Ref<number> = ref<number>(0);
+	const ancestorHeight: Ref<number> = ref<number>(0);
+	// ESLint fails inference
+	// eslint-disable-next-line @typescript-eslint/typedef
+	useResizeObserver(ancestorElement, ([event]) => {
+		if (event) {
+			ancestorWidth.value = event.contentRect.width;
+			ancestorHeight.value = event.contentRect.height;
+		}
+	});
+	(
+		[
+			{ axis: "x", position: x, size: width, target: ancestorWidth },
+			{ axis: "y", position: y, size: height, target: ancestorHeight }
+		] as const
+	)
+		// ESLint fails inference
+		// eslint-disable-next-line @typescript-eslint/typedef
+		.forEach(({ target, size, position, axis }) => {
+			let lastPosition: number = position.value;
+			let lastPositionRatio: number = initialPositionRatio[axis];
+			let lastSize: number = size.value;
+			watch(target, (newAncestorSizeUnref, oldAncestorSizeUnref) => {
+				// If any of the values changed outside of observer/watcher, recalculate percentage
+				if (!(size.value === lastSize && position.value === lastPosition)) {
+					// Recalculate percentage; Have to make sure no division by zero
+					let divider: number = oldAncestorSizeUnref - size.value;
+					if (divider !== 0) {
+						lastPositionRatio = position.value / divider;
+					}
+				}
+				// Update coordinates
+				let newPosition: number = lastPositionRatio * (newAncestorSizeUnref - size.value);
+				position.value = newPosition;
+				lastPosition = newPosition;
+			});
+		});
+
+	// Interact vars
 	let interactHandler: Interactable | null = null as Interactable | null;
 	let isDraggable: Ref<boolean> = ref<boolean>(true);
 	let isResizable: Ref<boolean> = ref<boolean>(true);
@@ -136,71 +216,117 @@ export function useDraggable({
 	function unsetInteract(): void {
 		if (interactHandler) {
 			interactHandler.unset();
-		} else {
-			universe.log({
-				error: new Error(`Failed to deregister draggable(typeof interactHandler="${typeof interactHandler}")`),
-				level: LogLevel.Warning
-			});
 		}
 	}
 
-	onMounted(() => {
-		// Init refs
-		elementUnref = unref(element);
-		handleUnref = handle ? unref(handle) : elementUnref;
+	// Interact mounted
+	onMounted(async () => {
+		// Next tick is called to ensure that the elements are rendered and can extract element properties
+		await nextTick(() => {
+			// Restriction, defaults to body
+			const restriction: ComputedRef<HTMLElement> = computed(() => {
+				return unref(ancestorElement) ?? document.body;
+			});
 
-		if (elementUnref && handleUnref) {
-			interactHandler = interact(elementUnref);
-
-			// Set draggable
-			interactHandler
-				.resizable({
-					edges: { bottom: true, left: true, right: true, top: true },
-
-					enabled: true,
-
-					listeners: {
-						/**
-						 * Processes resize event.
-						 *
-						 * @param param - Resize event received
-						 */
-						move(param: ResizeEvent) {
-							resizeMoveListener(param);
-							if (resizeCallback) {
-								resizeCallback();
-							}
+			// Resizable default options, used for reinitialization of interact
+			const resizableRestrictModifier: ReturnType<typeof interact.modifiers.restrictEdges> =
+				interact.modifiers.restrictEdges();
+			watchEffect(() => {
+				resizableRestrictModifier.options.outer = restriction.value;
+			});
+			const resizableOptions: Parameters<Interactable["resizable"]>[0] = {
+				edges: { bottom: true, left: true, right: true, top: true },
+				listeners: {
+					/**
+					 * Listener for resizing.
+					 *
+					 * @param event - Event received
+					 */
+					move({ deltaRect }: ResizeEvent): void {
+						// Update the element's style
+						if (deltaRect) {
+							width.value += deltaRect.width;
+							height.value += deltaRect.height;
+							x.value += deltaRect.left;
+							y.value += deltaRect.top;
 						}
-					},
 
-					margin,
+						// Call callback
+						if (resizeCallback) {
+							resizeCallback();
+						}
+					}
+				},
+				margin,
+				modifiers: [resizableRestrictModifier]
+			};
+			watchEffect(() => {
+				resizableOptions.enabled = isResizable.value;
+			});
 
-					modifiers: []
-				})
-				.draggable({
-					allowFrom: handleUnref,
+			// Draggable default options, used for reinitialization of interact
+			const draggableRestrictModifier: ReturnType<typeof interact.modifiers.restrictRect> =
+				interact.modifiers.restrictRect();
+			watchEffect(() => {
+				draggableRestrictModifier.options.restriction = restriction.value;
+			});
+			const draggableOptions: Parameters<Interactable["draggable"]>[0] = {
+				listeners: {
+					// Call this function on every drag move event
+					/**
+					 * Listener for dragging.
+					 *
+					 * @param event - Event received
+					 */
+					move({ dx, dy }: DragEvent): void {
+						x.value += dx;
+						y.value += dy;
+					}
+				},
+				modifiers: [draggableRestrictModifier]
+			};
+			watchEffect(() => {
+				draggableOptions.enabled = isDraggable.value;
+			});
 
-					// Start pinned or not
-					enabled: isDraggable.value,
+			/*
+				Watch effect is chosen over watch, as there are optional maybe refs, so typing would be messy, and extra logic would need to be added.
+				Watch effect runs immediately.
+				Callback is chunky, so need to be extra careful with unreleated dereferences within it.
+			*/
+			watchEffect(() => {
+				// Init refs; These should be the only dereferences within this function
+				const elementUnref: HTMLElement | null = unref(element);
+				let handleUnref: HTMLElement | null = unref(handle) ?? elementUnref;
 
-					listeners: {
-						// Call this function on every drag move event
-						move: dragMoveListener
-					},
+				if (elementUnref && handleUnref) {
+					// Firstly, reset
+					unsetInteract();
+					interactHandler = interact(elementUnref);
 
-					// Keep the element within the area of it's parent
-					modifiers: [
-						interact.modifiers.restrictRect({
-							endOnly: true
-						})
-					]
-				});
-		}
+					// Set draggable
+					interactHandler
+						// Note: Inertia doesn't work well with resize
+						.resizable(resizableOptions)
+						.draggable({
+							...draggableOptions,
+							allowFrom: handleUnref
+						});
+				} else {
+					// Log error
+					universeStore.universe.log({
+						error: new Error(`Could not dereference HTML elements for interact`),
+						level: LogLevel.Warning
+					});
+				}
+			});
+		});
 	});
 
+	// Unmounted
 	onUnmounted(() => {
 		unsetInteract();
 	});
 
-	return { isDraggable, isResizable, toggleDrag, toggleResize };
+	return { isDraggable, isResizable, toggleDrag, toggleResize, transform: transformStyle };
 }

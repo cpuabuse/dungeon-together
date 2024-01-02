@@ -1,49 +1,42 @@
 <!-- Dialog modal -->
 
 <template>
-	<!-- Need a block display wrapper for draggable; Will also have fixed direction, so that transform doesn't move window, child locale provide will revert it back -->
-	<VLocaleProvider :rtl="false" class="overlay-window-block">
-		<!-- `v-show` is used to acquire refs and for performance; if `v-if`, then should be in parent component -->
-		<div v-show="modelValue" ref="overlayWindow" class="overlay-window" @mousedown="upOverlay">
-			<VLocaleProvider :rtl="isRtl">
-				<!-- Flex to enable body's overflow; Border for clarity when cards overlap -->
-				<VCard class="h-100 w-100 overflow-hidden d-flex flex-column" :border="true">
-					<div ref="overlayWindowHandle">
-						<!-- Compact density always, to preserve intended ratio -->
-						<VToolbar density="compact">
-							<BaseIcon v-if="icon || modeUuid" :icon="icon" :mode-uuid="modeUuid" class="ms-4" />
-							<VToolbarTitle v-if="name" class="font-weight-bold overlay-window-toolbar-title">{{
-								name
-							}}</VToolbarTitle>
-							<VSpacer />
-							<VBtn
-								size="small"
-								icon="fa-thumbtack"
-								:variant="isDraggable ? undefined : 'tonal'"
-								@click="
-									() => {
-										toggleResize();
-										toggleDrag();
-									}
-								"
-							/>
-							<VBtn size="small" icon="fa-x" @click="$emit('update:modelValue', false)" />
-						</VToolbar>
-					</div>
+	<!-- `v-show` is used to acquire refs and for performance; if `v-if`, then should be in parent component -->
+	<div v-show="modelValue" ref="overlayWindow" class="overlay-window" @mousedown="upOverlay">
+		<!-- Flex to enable body's overflow; Border for clarity when cards overlap -->
+		<VCard class="h-100 w-100 overflow-hidden d-flex flex-column" :border="true">
+			<div ref="overlayWindowHandle">
+				<!-- Compact density always, to preserve intended ratio -->
+				<VToolbar density="compact">
+					<BaseIcon v-if="icon || modeUuid" :icon="icon" :mode-uuid="modeUuid" class="ms-4" />
+					<VToolbarTitle v-if="name" class="font-weight-bold overlay-window-toolbar-title">{{ name }}</VToolbarTitle>
+					<VSpacer />
+					<VBtn
+						size="small"
+						icon="fa-thumbtack"
+						:variant="isDraggable ? undefined : 'tonal'"
+						@click="
+							() => {
+								toggleResize();
+								toggleDrag();
+							}
+						"
+					/>
+					<VBtn size="small" icon="fa-x" @click="$emit('update:modelValue', false)" />
+				</VToolbar>
+			</div>
 
-					<div ref="overlayBodyHandle" class="overlay-window-body">
-						<slot name="body"></slot>
-					</div>
-				</VCard>
-			</VLocaleProvider>
-		</div>
-	</VLocaleProvider>
+			<div ref="overlayBodyHandle" class="overlay-window-body">
+				<slot name="body"></slot>
+			</div>
+		</VCard>
+	</div>
 </template>
 
 <script lang="ts">
 import PerfectScrollbar from "perfect-scrollbar";
 import { Ref, computed, defineComponent, nextTick, onMounted, ref, watch } from "vue";
-import { VBtn, VCard, VLocaleProvider, VSpacer, VToolbar, VToolbarTitle } from "vuetify/components";
+import { VBtn, VCard, VSpacer, VToolbar, VToolbarTitle } from "vuetify/components";
 import { useDraggable } from "../core/draggable";
 import { TextDirectionWords, textDirectionSymbol } from "../core/locale";
 import { overlayListItemNarrowProps } from "../core/overlay";
@@ -52,7 +45,7 @@ import { BaseIcon } from ".";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 
 export default defineComponent({
-	components: { BaseIcon, VBtn, VCard, VLocaleProvider, VSpacer, VToolbar, VToolbarTitle },
+	components: { BaseIcon, VBtn, VCard, VSpacer, VToolbar, VToolbarTitle },
 
 	emits: ["update:modelValue"],
 
@@ -89,33 +82,6 @@ export default defineComponent({
 		const resizeMargin: number = 8;
 		const cssMarginResizeMargin: string = `${resizeMargin + 1}px`;
 
-		// TODO: Move to composable
-		// Text direction
-		const textDirectionRecord: Ref<TextDirectionWords> = recordStore.computedRecord<TextDirectionWords>({
-			defaultValue: TextDirectionWords.Auto,
-			id: textDirectionSymbol,
-			/**
-			 * Validator.
-			 *
-			 * @param value - Value to validate
-			 * @returns True, if value is valid
-			 */
-			validator(value: unknown): value is TextDirectionWords {
-				// Casting to enum type, as `includes()` should work with any value
-				return Object.values(TextDirectionWords).includes(value as TextDirectionWords);
-			}
-		});
-		const isRtl: Ref<boolean | undefined> = computed(() => {
-			switch (textDirectionRecord.value) {
-				case TextDirectionWords.Rtl:
-					return true;
-				case TextDirectionWords.Ltr:
-					return false;
-				default:
-					return undefined;
-			}
-		});
-
 		// Deal with "z-index"
 		const { handle, zIndex }: GuiStoreOverlayRecord = guiStore.registerOverlay();
 		watch(
@@ -140,12 +106,27 @@ export default defineComponent({
 		);
 
 		return {
-			isRtl,
 			overlayWindow,
 			overlayWindowHandle,
 			...useDraggable({
+				// Rewrap ancestor, to be reactive
+				ancestorElement: recordStore.computedRecord<HTMLElement | null>({
+					defaultValue: null,
+					id: guiStore.universeUiElementRecordId,
+					/**
+					 * Validator for HTML element.
+					 *
+					 * @param value - Value validator receives
+					 * @returns If instance or not of HTML element
+					 */
+					validator(value: unknown): value is HTMLElement {
+						return value instanceof HTMLElement;
+					}
+				}),
 				element: overlayWindow,
+
 				handle: overlayWindowHandle,
+
 				/**
 				 * Resize callback.
 				 */
@@ -153,7 +134,6 @@ export default defineComponent({
 					// Update to make bar visible on resize
 					scrollbarHandle.value?.update();
 				},
-
 				resizeMargin
 			}),
 			cssMarginResizeMargin,
@@ -180,13 +160,7 @@ export default defineComponent({
 	position: absolute;
 	z-index: v-bind(zIndex);
 
-	height: 500px;
-	width: 300px;
-
 	pointer-events: auto;
-
-	left: calc(50% - 150px);
-	top: calc(50% - 250px);
 }
 
 .overlay-window-toolbar-title {

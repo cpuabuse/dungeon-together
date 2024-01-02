@@ -1,32 +1,33 @@
 <!-- Universe UI -->
 <template>
-	<VLocaleProvider :rtl="isRtl">
-		<!-- Vuetify unconditionally displays bar at the top of the screen -->
-		<UniverseUiInfoBar :shard-entries="(shardEntries as UniverseUiShardEntries)" />
+	<div ref="universeUiElement" class="h-100 w-100 d-flex flex-column-reverse">
+		<VLocaleProvider :rtl="isRtl">
+			<!-- Vuetify unconditionally displays bar at the top of the screen -->
+			<UniverseUiInfoBar :shard-entries="shardEntries" />
 
-		<!-- Casting since class type information lost -->
-		<UniverseUiClick :rc-menu-data="inputStore.rcMenuData" />
+			<!-- Casting since class type information lost -->
+			<UniverseUiClick :rc-menu-data="inputStore.rcMenuData" />
 
-		<!-- Undefined assertion since index used in iteration -->
-		<UniverseUiShard
-			v-for="[shardUuid, shardEntry] in shardEntries"
-			:key="shardUuid"
-			v-model="shardEntry.model"
-			:shard="shardEntry.shard"
-			@update-menu="shardEntry.menuEntry.onUpdateMenu"
-		/>
+			<!-- Undefined assertion since index used in iteration -->
+			<UniverseUiShard
+				v-for="[shardUuid, shardEntry] in shardEntries"
+				:key="shardUuid"
+				v-model="shardEntry.model"
+				:shard="shardEntry.shard"
+				@update-menu="shardEntry.menuEntry.onUpdateMenu"
+			/>
 
-		<UniverseUiToolbar :shard-entries="(shardEntries as UniverseUiShardEntries)" :shard-menus="shardMenus" />
-	</VLocaleProvider>
+			<UniverseUiToolbar :shard-entries="shardEntries" :shard-menus="shardMenus" />
+		</VLocaleProvider>
+	</div>
 </template>
 
 <script lang="ts">
 // Used in template only
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, import/order
-import { type ClientUniverseStateRcMenuData } from "../../client/gui";
-
-import { ComputedRef, Ref, ShallowRef, computed, defineComponent, shallowRef } from "vue";
+import { ComputedRef, Ref, ShallowRef, computed, defineComponent, onMounted, shallowRef } from "vue";
 import { VLocaleProvider } from "vuetify/components";
+
 import { CompactToolbarMenu, useCompactToolbarMenuConsumer } from "../core/compact-toolbar";
 import { TextDirectionWords, textDirectionSymbol } from "../core/locale";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
@@ -85,6 +86,13 @@ export default defineComponent({
 		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
 		const inputStore: Store<StoreWord.Input> = stores.useInputStore();
+		const guiStore: Store<StoreWord.Gui> = stores.useGuiStore();
+
+		// Draggable ref
+		const universeUiElement: ShallowRef<HTMLDivElement | null> = shallowRef(null);
+		onMounted(() => {
+			recordStore.records[guiStore.universeUiElementRecordId] = universeUiElement.value;
+		});
 
 		const textDirectionRecord: Ref<TextDirectionWords> = recordStore.computedRecord<TextDirectionWords>({
 			defaultValue: TextDirectionWords.Auto,
@@ -152,7 +160,7 @@ export default defineComponent({
 			);
 		}
 
-		return { inputStore, isRtl, shardEntries, shardMenus, universeStore, updateShardEntries };
+		return { inputStore, isRtl, shardEntries, shardMenus, universeStore, universeUiElement, updateShardEntries };
 	}
 });
 </script>
