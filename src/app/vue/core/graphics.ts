@@ -88,7 +88,7 @@ export function useGraphics({
 		});
 
 		// Set initial FPS
-		fps.value = useDisplay().mobile ? defaultMobileFps : defaultFps;
+		fps.value = useDisplay().mobile.value ? defaultMobileFps : defaultFps;
 	}
 
 	return { fps };
