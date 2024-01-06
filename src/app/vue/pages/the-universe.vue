@@ -11,6 +11,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { VApp } from "vuetify/components";
+import { useGraphics } from "../core/graphics";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { useAppTheme } from "../core/theme";
 import tsxTestComponent from "../tsx/test.vue";
@@ -68,6 +69,13 @@ export default defineComponent({
 		// TODO: This needs to be called from an initialization view component
 		// Initialize theme control
 		useAppTheme({ isRoot: true, recordStore });
+
+		// Initialize graphics for universe
+		useGraphics({
+			isRoot: true,
+			recordStore,
+			universeStore
+		});
 
 		return {
 			universeStore

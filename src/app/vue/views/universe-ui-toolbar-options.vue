@@ -16,10 +16,13 @@
 <script lang="ts">
 // Library just exports an object as default
 import screenfull from "screenfull";
-import { Ref, WritableComputedRef, computed, defineComponent, watch } from "vue";
+import { Ref, WritableComputedRef, computed, defineComponent, watch, watchEffect } from "vue";
 import { Theme, systemThemeLiteral } from "../../client/gui/themes";
+import { defaultFps, defaultMobileFps } from "../../common/graphics";
 import { OverlayList, OverlayWindow } from "../components";
 import { CompactToolbarMenuItem } from "../core/compact-toolbar";
+
+import { fpsRecordId } from "../core/graphics";
 import { TextDirectionWords, UsedLocale, textDirectionSymbol, useLocale } from "../core/locale";
 import {
 	OverlayBusSource,
@@ -105,7 +108,7 @@ export default defineComponent({
 		const stores: Stores = useStores();
 		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
-		const fpsValues: Set<number> = new Set([15, 30, 60, 90, 120]);
+		const fpsValues: Set<number> = new Set([defaultFps, defaultMobileFps, 15, 30, 60, 90, 120].sort());
 
 		// Theme
 		const { themeSymbol, isSystemThemeDark }: AppTheme = useAppTheme({ recordStore });
@@ -185,6 +188,24 @@ export default defineComponent({
 			isFullscreen.value = screenfull.isFullscreen;
 		});
 
+		// FPS local string symbol for select item, and synchronize values, for actual application of new FPS values; Since we are manipulating records directly, no inifinite loop should trigger
+		const fpsStringRecordId: symbol = Symbol(
+			`menu-universe-ui-toolbar-options-fps-string-${universeStore.universe.universeUuid}`
+		);
+		watchEffect(() => {
+			const fps: unknown = recordStore.records[fpsRecordId];
+			if (typeof fps === "number") {
+				recordStore.records[fpsStringRecordId] = fps.toString();
+			}
+		});
+		watchEffect(() => {
+			const fpsString: unknown = recordStore.records[fpsStringRecordId];
+			if (typeof fpsString === "string") {
+				// "NaN" would work fine with the way graphics fps processes it, as default would be provided
+				recordStore.records[fpsRecordId] = parseInt(fpsString, 10);
+			}
+		});
+
 		// Menu data
 		const languageListItemEntry: Ref<OverlayListItemEntry> = computed(() => ({
 			icon: "fa-language",
@@ -239,7 +260,7 @@ export default defineComponent({
 		}));
 
 		const fpsListItemEntry: Ref<OverlayListItemEntry> = computed(() => ({
-			id: "fps",
+			id: fpsStringRecordId,
 
 			items: Array.from(fpsValues).map(numberValue => {
 				let value: string = numberValue.toString();
