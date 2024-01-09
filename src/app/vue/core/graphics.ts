@@ -53,7 +53,7 @@ export function useGraphics({
 	 */
 	function changeFps(value: number): void {
 		universeStore.universe.shards.forEach(shard => {
-			shard.app.ticker.maxFPS = value;
+			shard.setFps({ fps: value });
 		});
 	}
 

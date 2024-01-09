@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -18,6 +18,7 @@ import {
 	defaultMobileEntityWidth
 } from "../common/defaults";
 import { DirectionWord, MessageTypeWord } from "../common/defaults/connection";
+import { defaultFps, defaultMobileFps } from "../common/graphics";
 import { Uuid } from "../common/uuid";
 import { CoreArgIds } from "../core/arg";
 import { MovementWord, processQueueWord } from "../core/connection";
@@ -226,6 +227,9 @@ export function ClientShardFactory({
 					// Set scene for entity show
 					this.setScene();
 
+					// Set FPS
+					this.setFps({ fps: utils.isMobile.any ? defaultMobileFps : defaultFps });
+
 					// TODO: Create magic
 					// Element ball display test
 					// new ElementBall({ container: this.gridContainer, scale: 500, ...ElementBall.windBall });
@@ -384,6 +388,22 @@ export function ClientShardFactory({
 		 */
 		public fireInput(inputSymbol: symbol, inputInterface: InputInterface): void {
 			this.input.emit(inputSymbol, inputInterface);
+		}
+
+		/**
+		 * Set FPS depending on device.
+		 *
+		 * @param fps - Destructured parameter
+		 */
+		public setFps({
+			fps
+		}: {
+			/**
+			 * FPS to set.
+			 */
+			fps: number;
+		}): void {
+			this.app.ticker.maxFPS = fps;
 		}
 
 		/**

@@ -15,6 +15,7 @@
 
 <script lang="ts">
 // Library just exports an object as default
+import { utils } from "pixi.js";
 import screenfull from "screenfull";
 import { Ref, WritableComputedRef, computed, defineComponent, watch, watchEffect } from "vue";
 import { Theme, systemThemeLiteral } from "../../client/gui/themes";
@@ -259,20 +260,26 @@ export default defineComponent({
 			type: OverlayListItemEntryType.Select
 		}));
 
-		const fpsListItemEntry: Ref<OverlayListItemEntry> = computed(() => ({
-			id: fpsStringRecordId,
+		const fpsListItemEntry: Ref<OverlayListItemEntry> = computed(() => {
+			let isMobile: boolean = utils.isMobile.any;
+			let defaultValue: string = (isMobile ? defaultMobileFps : defaultFps).toString();
+			let defaultDescription: string = ` (Default ${isMobile ? "mobile" : "desktop"})`;
 
-			items: Array.from(fpsValues).map(numberValue => {
-				let value: string = numberValue.toString();
-				return {
-					name: value,
-					value
-				};
-			}),
+			return {
+				id: fpsStringRecordId,
+				items: Array.from(fpsValues).map(numberValue => {
+					let value: string = numberValue.toString();
 
-			name: "FPS",
-			type: OverlayListItemEntryType.Select
-		}));
+					// Default value might already be set, so there is not way to optimize the algorithm for mapping
+					return {
+						name: `${value}${value === defaultValue ? defaultDescription : ""}`,
+						value
+					};
+				}),
+				name: "FPS",
+				type: OverlayListItemEntryType.Select
+			};
+		});
 
 		const fullscreenListItemEntry: Ref<OverlayListItemEntry> = computed(() => ({
 			icon: "fa-expand",
