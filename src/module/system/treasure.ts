@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -10,7 +10,8 @@
  */
 
 import { ActionWords } from "../../app/server/action";
-import { EntityKindActionArgs, EntityKindClass } from "../../app/server/entity";
+import { ServerCell } from "../../app/server/cell";
+import { EntityKindActionArgs, EntityKindClass, ServerEntityClass } from "../../app/server/entity";
 
 /**
  * Treasure kind factory.
@@ -72,6 +73,15 @@ export function TreasureKindClassFactory({
 					} else {
 						this.entity.modeUuid = this.closedModeUuid;
 					}
+					return true;
+				}
+
+				// Player attacks treasure entity and makes it disappear
+				case ActionWords.Attack: {
+					super.action({ action, ...rest });
+					let cell: ServerCell = (this.entity.constructor as ServerEntityClass).universe.getCell(this.entity);
+					cell.addEvent({ name: "death", targetEntityUuid: this.entity.entityUuid });
+					cell.removeEntity(this.entity);
 					return true;
 				}
 
