@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -380,7 +380,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 						// False negative
 						// eslint-disable-next-line @typescript-eslint/typedef
 						.filter(([entityUuid]) => {
-							return entityUuid !== targetCell.defaultEntity.entityUuid;
+							return entityUuid !== sourceCell.defaultEntity.entityUuid;
 						})
 						// False negative
 						// eslint-disable-next-line @typescript-eslint/typedef
