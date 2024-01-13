@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -504,6 +504,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 				let newCells: Set<ClientCell> = new Set();
 
 				this.universe.log({ level: LogLevel.Informational, message: `Update started.` });
+
 				// Create cells if missing
 				message.body.cells.forEach(sourceCell => {
 					let targetCell: ClientCell = this.universe.getCell(sourceCell);
@@ -555,57 +556,27 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 
 				// Detach
 				message.body.cells.forEach(sourceCell => {
-					let sourceEntityUuidSet: Set<Uuid> = new Set(sourceCell.entities.map(entity => entity.entityUuid));
 					this.universe.universeQueue.addCallback({
 						/**
 						 * Callback.
 						 */
 						callback: () => {
+							let sourceEntityUuidSet: Set<Uuid> = new Set(sourceCell.entities.map(entity => entity.entityUuid));
 							let targetCell: ClientCell = this.universe.getCell(sourceCell);
 
 							// TODO: Visibility tracing
 							newCells.add(targetCell);
 							targetCell.setFilters({ contrast: false });
 
-							// Terminate missing
+							// Detach
 							targetCell.entities.forEach(targetEntity => {
-								if (!sourceEntityUuidSet.has(targetEntity.entityUuid)) {
-									// TODO: Move death to cell events
-									// TODO: Death event should send final emits
-									if (
-										targetEntity.modeUuid === "mode/user/enemy/default" ||
-										targetEntity.modeUuid === "mimic-attack" ||
-										targetEntity.modeUuid === "mode/user/mimic/default"
-									) {
-										if (
-											sourceCell.events.length > 0 &&
-											sourceCell.events[0]?.targetEntityUuid === targetEntity.entityUuid &&
-											sourceCell.events[0]?.name === "death"
-										) {
-											splat.play("default");
-
-											let toast: ClientToast = new ClientToast({
-												cell: targetCell,
-												displayTime: 1000
-											});
-
-											// TODO: Should not be using shard
-											toast.show({
-												modeUuid: "death",
-												x: 0,
-												y: 0,
-												z: 0
-											});
-
-											targetCell.removeEntity(targetEntity);
-										} else {
-											targetCell.detachEntity(targetEntity);
-											detachedEntities.add([targetEntity, sourceCell, targetCell]);
-										}
-									} else if (targetEntity.modeUuid === "mode/user/player/default") {
-										targetCell.detachEntity(targetEntity);
-										detachedEntities.add([targetEntity, sourceCell, targetCell]);
-									}
+								// TODO: Check should be by object not by UUID, right now sync is sending server initial bunnies, which overwrite client bunnies, so sync needs to be rework not to do that
+								if (
+									targetCell.defaultEntity.entityUuid !== targetEntity.entityUuid &&
+									!sourceEntityUuidSet.has(targetEntity.entityUuid)
+								) {
+									targetCell.detachEntity(targetEntity);
+									detachedEntities.add([targetEntity, sourceCell, targetCell]);
 								}
 							});
 						}
@@ -717,42 +688,91 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 					});
 				});
 
+				// Cell events
+				message.body.cells.forEach(sourceCell => {
+					if (sourceCell.events.length > 0 && sourceCell.events[0]?.name === "death") {
+						let targetCell: ClientCell = this.universe.getCell(sourceCell);
+
+						splat.play("default");
+
+						let toast: ClientToast = new ClientToast({
+							cell: targetCell,
+							displayTime: 1000
+						});
+
+						// TODO: Should not be using shard
+						toast.show({
+							modeUuid: "death",
+							x: 0,
+							y: 0,
+							z: 0
+						});
+					}
+				});
+
 				// Mirage and phantom
 				this.universe.universeQueue.addCallback({
 					/**
 					 * Callback.
 					 */
 					callback: () => {
-						// ESLint false negative
-						// eslint-disable-next-line @typescript-eslint/typedef
-						detachedEntities.forEach(([entity, sourceCell, targetCell]) => {
-							// `entity.isInUniverse` to make sure we do special effects for entities that exist
-							if (!attachedEntities.has(entity) && entity.isInUniverse) {
-								let trailEvent: (Record<"name", "trail"> & CellEvent) | undefined = sourceCell.events.find(event => {
-									// TODO: Trail can be recursive
-									return event.name === "trail" && event.targetEntityUuid === entity.entityUuid;
-									// Casting since `find()` does not narrow type
-								}) as (Record<"name", "trail"> & CellEvent) | undefined;
+						if (detachedEntities.size > 0) {
+							// Cache source cell UUIDs for reuse optiomization
+							const sourceCellUuids: Set<Uuid> = new Set(message.body.cells.map(cell => cell.cellUuid));
 
-								if (trailEvent) {
-									// Trail the next location
-									this.universe.getCell({ cellUuid: trailEvent.targetCellUuid }).attachEntity(entity);
-								} else {
-									// Show mirage in case of no event move, or rerendering past visited cell
-									let mirage: ClientToast = new ClientToast({
-										cell: targetCell,
-										displayTime: 1000
-									});
-									mirage.show({
-										isFloating: false,
-										modeUuid: entity.modeUuid,
-										x: 0,
-										y: 0,
-										z: 0
-									});
+							// ESLint false negative
+							// eslint-disable-next-line @typescript-eslint/typedef
+							detachedEntities.forEach(([entity, sourceCell, targetCell]) => {
+								// `entity.isInUniverse` to make sure we do special effects for entities that exist
+								if (!attachedEntities.has(entity) && entity.isInUniverse) {
+									let trailEvent: (Record<"name", "trail"> & CellEvent) | undefined = sourceCell.events.find(event => {
+										// TODO: Trail can be recursive
+										return event.name === "trail" && event.targetEntityUuid === entity.entityUuid;
+										// Casting since `find()` does not narrow type
+									}) as (Record<"name", "trail"> & CellEvent) | undefined;
+
+									// Process death if event was there or in trail location
+									if (
+										[
+											...sourceCell.events,
+
+											// We would be here, if trail was not for phantom
+											...(trailEvent
+												? // Assert trail event, as it will not change during `find()`, and is conditionally asserted right above
+													// ESLint does not infer
+													// eslint-disable-next-line @typescript-eslint/typedef
+													message.body.cells.find(({ cellUuid }) => cellUuid === trailEvent!.targetCellUuid)?.events ??
+													[]
+												: [])
+										].some(event => event.name === "death" && event.targetEntityUuid === entity.entityUuid)
+									) {
+										// Death has been verified, so we can at least clean up some entities
+										targetCell.removeEntity(entity);
+									}
+
+									// Process phantom, when applicable
+									else if (trailEvent && !sourceCellUuids.has(trailEvent.targetCellUuid)) {
+										// Trail the next location
+										this.universe.getCell({ cellUuid: trailEvent.targetCellUuid }).attachEntity(entity);
+									}
+
+									// If we cannot terminate it, or show it somewhere else on the screen, show mirage in case of no event move, or rerendering past visited cell
+									else {
+										let mirage: ClientToast = new ClientToast({
+											cell: targetCell,
+											displayTime: 1000
+										});
+										mirage.show({
+											isFloating: false,
+											modeUuid: entity.modeUuid,
+											x: 0,
+											y: 0,
+											z: 0
+										});
+									}
 								}
-							}
-						});
+							});
+						}
 					}
 				});
 
