@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -159,7 +159,7 @@ export function ClientCellFactory({
 		public hideEntity(path: EntityPathOwn): void {
 			let entity: ClientEntity = this.getEntity(path);
 			if (entity.isInUniverse) {
-				this.container.removeChild(entity.sprite);
+				this.container.removeChild(entity.container);
 				entity.sprite.stop();
 			}
 		}
