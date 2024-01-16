@@ -109,7 +109,7 @@ export default defineComponent({
 		const stores: Stores = useStores();
 		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
-		const fpsValues: Set<number> = new Set([defaultFps, defaultMobileFps, 15, 30, 60, 90, 120].sort());
+		const fpsValues: Set<number> = new Set([defaultFps, defaultMobileFps, 15, 30, 60, 90, 120].sort((a, b) => a - b));
 
 		// Theme
 		const { themeSymbol, isSystemThemeDark }: AppTheme = useAppTheme({ recordStore });

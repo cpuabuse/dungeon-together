@@ -8,7 +8,8 @@
  * Graphics.
  */
 
-import { WritableComputedRef, watch } from "vue";
+import { useIntervalFn } from "@vueuse/core";
+import { ComputedRef, WritableComputedRef, computed, watch } from "vue";
 import { useDisplay } from "vuetify";
 import { defaultFps, defaultMobileFps, maxFps } from "../../common/graphics";
 import { Store, StoreWord } from "./store";
@@ -19,9 +20,35 @@ import { Store, StoreWord } from "./store";
 export const fpsRecordId: symbol = Symbol("fps");
 
 /**
+ * Average FPS record ID.
+ */
+export const averageFpsRecordId: symbol = Symbol("average-fps");
+
+/**
+ * Checks FPS record.
+ *
+ * @param value - Record value
+ * @returns Whether the value is a valid FPS
+ */
+function validator(value: unknown): value is number {
+	return typeof value === "number" && value > 0 && value < maxFps;
+}
+
+/**
+ * Number of FPS data instances to average.
+ *
+ * @remarks
+ * Should not be too large, to recover from initial FPS values fast.
+ */
+const averageFpsAmount: number = 3;
+
+/**
  * Graphics store.
  *
  * @param param - Destructured parameters
+ * @remarks
+ * Average FPS is just an approximation, during the addition and removal of shards, otherwise it is close enough, which is solved with less overall interval(interval time multiplied by amount of data points).
+ *
  * @returns FPS composable
  */
 // Infer composable type
@@ -59,18 +86,17 @@ export function useGraphics({
 
 	const fps: WritableComputedRef<number> = recordStore.computedRecord({
 		defaultValue: 60,
-
 		id: fpsRecordId,
-		/**
-		 * Checks FPS record.
-		 *
-		 * @param value - Record value
-		 * @returns Whether the value is a valid FPS
-		 */
-		validator(value: unknown): value is number {
-			return typeof value === "number" && value > 0 && value < maxFps;
-		}
+		validator
 	});
+
+	const averageFps: ComputedRef<number> = computed(() =>
+		recordStore.getRecord({
+			defaultValue: 60,
+			id: averageFpsRecordId,
+			validator
+		})
+	);
 
 	// Run only once
 	if (isRoot) {
@@ -86,10 +112,48 @@ export function useGraphics({
 				changeFps(fps.value);
 			}
 		});
+		fps.value = useDisplay().mobile.value ? defaultMobileFps : defaultFps; // Set initial FPS
 
-		// Set initial FPS
-		fps.value = useDisplay().mobile.value ? defaultMobileFps : defaultFps;
+		// Average real FPS
+		let observedFpsList: Array<number> = new Array<number>();
+		universeStore.onUpdateUniverse({
+			/**
+			 * Manages the list of FPS values on change of amount of shards.
+			 *
+			 * @remarks
+			 * When shards increase, fps list increased by current average FPS, defaulting to default FPS.
+			 * When shards decrease, last values are used.
+			 */
+			callback() {
+				let desiredFpsListLength: number = universeStore.universe.shards.size * averageFpsAmount;
+				let currentFpsListLength: number = observedFpsList.length;
+
+				if (desiredFpsListLength === currentFpsListLength) {
+					// Fast termination
+				} else if (desiredFpsListLength > currentFpsListLength) {
+					// Insert data to be shifted
+					observedFpsList = new Array<number>(desiredFpsListLength - currentFpsListLength)
+						.fill(averageFps.value)
+						.concat(observedFpsList);
+				} else {
+					observedFpsList = observedFpsList.slice(-desiredFpsListLength);
+				}
+			}
+		});
+		// Default interval is 1000 milliseconds
+		useIntervalFn(() => {
+			universeStore.universe.shards.forEach(shard => {
+				observedFpsList.shift();
+				observedFpsList.push(shard.app.ticker.FPS);
+			});
+
+			// Calculate average FPS
+			let sum: number = observedFpsList.reduce((a, b) => a + b);
+			let targetFpsUnref: number = fps.value;
+			let newAverageFps: number = Math.ceil(sum / observedFpsList.length);
+			recordStore.records[averageFpsRecordId] = newAverageFps > targetFpsUnref ? targetFpsUnref : newAverageFps;
+		});
 	}
 
-	return { fps };
+	return { averageFps, fps };
 }
