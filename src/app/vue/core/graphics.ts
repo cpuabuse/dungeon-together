@@ -12,6 +12,7 @@ import { useIntervalFn } from "@vueuse/core";
 import { ComputedRef, WritableComputedRef, computed, watch } from "vue";
 import { useDisplay } from "vuetify";
 import { defaultFps, defaultMobileFps, maxFps } from "../../common/graphics";
+import { UsedDevice } from "./device";
 import { Store, StoreWord } from "./store";
 
 /**
@@ -56,7 +57,8 @@ const averageFpsAmount: number = 3;
 export function useGraphics({
 	isRoot = false,
 	recordStore,
-	universeStore
+	universeStore,
+	usedDevice
 }: {
 	/**
 	 * Whether this is run from the root of the application. Should only be run as root once.
@@ -72,6 +74,11 @@ export function useGraphics({
 	 * Universe store.
 	 */
 	universeStore: Store<StoreWord.Universe>;
+
+	/**
+	 * Used device composable.
+	 */
+	usedDevice: UsedDevice;
 }) {
 	/**
 	 * Changes FPS for each shard.
@@ -96,6 +103,11 @@ export function useGraphics({
 			id: averageFpsRecordId,
 			validator
 		})
+	);
+
+	// For the current device, the FPS is different, mobile or desktop
+	const defaultDeviceFps: ComputedRef<number> = computed(() =>
+		usedDevice.isMobile.value ? defaultMobileFps : defaultFps
 	);
 
 	// Run only once
@@ -154,5 +166,10 @@ export function useGraphics({
 		});
 	}
 
-	return { averageFps, targetFps };
+	return { averageFps, defaultDeviceFps, targetFps };
 }
+
+/**
+ * Device composable type.
+ */
+export type UsedGraphics = ReturnType<typeof useGraphics>;

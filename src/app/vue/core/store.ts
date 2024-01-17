@@ -9,7 +9,7 @@
  */
 
 import { StoreDefinition, defineStore } from "pinia";
-import { ComputedRef, ShallowRef, WritableComputedRef, computed, inject, shallowRef } from "vue";
+import { ComputedRef, MaybeRef, ShallowRef, WritableComputedRef, computed, inject, shallowRef, unref } from "vue";
 import { ClientUniverseStateRcMenuData } from "../../client/gui";
 import { ClientUniverse } from "../../client/universe";
 import { toCapitalized } from "../../common/text";
@@ -196,7 +196,7 @@ export function composableStoreFactory({
 						/**
 						 * Value.
 						 */
-						defaultValue: Type;
+						defaultValue: MaybeRef<Type>;
 					}
 				>): WritableComputedRef<Type> {
 					return computed({
@@ -246,7 +246,7 @@ export function composableStoreFactory({
 					/**
 					 * Value.
 					 */
-					defaultValue?: Type;
+					defaultValue?: MaybeRef<Type>;
 				} & MaybePartial<
 					Type extends boolean ? false : true,
 					{
@@ -258,7 +258,7 @@ export function composableStoreFactory({
 						/**
 						 * Value.
 						 */
-						defaultValue: Type;
+						defaultValue: MaybeRef<Type>;
 					}
 				>): Type {
 					if (id) {
@@ -267,7 +267,7 @@ export function composableStoreFactory({
 							return record;
 						}
 					}
-					return defaultValue;
+					return unref(defaultValue);
 				},
 
 				/**

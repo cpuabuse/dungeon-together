@@ -15,15 +15,14 @@
 
 <script lang="ts">
 // Library just exports an object as default
-import { utils } from "pixi.js";
 import screenfull from "screenfull";
 import { Ref, WritableComputedRef, computed, defineComponent, watch, watchEffect } from "vue";
 import { Theme, systemThemeLiteral } from "../../client/gui/themes";
 import { defaultFps, defaultMobileFps } from "../../common/graphics";
 import { OverlayList, OverlayWindow } from "../components";
 import { CompactToolbarMenuItem } from "../core/compact-toolbar";
-
-import { targetFpsRecordId } from "../core/graphics";
+import { UsedDevice, useDevice } from "../core/device";
+import { UsedGraphics, targetFpsRecordId, useGraphics } from "../core/graphics";
 import { TextDirectionWords, UsedLocale, textDirectionSymbol, useLocale } from "../core/locale";
 import {
 	OverlayBusSource,
@@ -109,7 +108,14 @@ export default defineComponent({
 		const stores: Stores = useStores();
 		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
+		// This is initializing a variable
+		// eslint-disable-next-line no-magic-numbers
 		const fpsValues: Set<number> = new Set([defaultFps, defaultMobileFps, 15, 30, 60, 90, 120].sort((a, b) => a - b));
+
+		// Device and graphics
+		let usedDevice: UsedDevice = useDevice({ recordStore });
+		let { isMobile }: UsedDevice = usedDevice;
+		let { defaultDeviceFps }: UsedGraphics = useGraphics({ recordStore, universeStore, usedDevice });
 
 		// Theme
 		const { themeSymbol, isSystemThemeDark }: AppTheme = useAppTheme({ recordStore });
@@ -261,9 +267,7 @@ export default defineComponent({
 		}));
 
 		const fpsListItemEntry: Ref<OverlayListItemEntry> = computed(() => {
-			let isMobile: boolean = utils.isMobile.any;
-			let defaultValue: string = (isMobile ? defaultMobileFps : defaultFps).toString();
-			let defaultDescription: string = ` (Default ${isMobile ? "mobile" : "desktop"})`;
+			let defaultDescription: string = ` (Default ${isMobile.value ? "mobile" : "desktop"})`;
 
 			return {
 				id: fpsStringRecordId,
@@ -272,7 +276,7 @@ export default defineComponent({
 
 					// Default value might already be set, so there is not way to optimize the algorithm for mapping
 					return {
-						name: `${value}${value === defaultValue ? defaultDescription : ""}`,
+						name: `${value}${numberValue === defaultDeviceFps.value ? defaultDescription : ""}`,
 						value
 					};
 				}),

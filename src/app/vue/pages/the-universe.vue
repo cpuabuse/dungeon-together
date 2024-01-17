@@ -11,6 +11,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { VApp } from "vuetify/components";
+import { UsedDevice, useDevice } from "../core/device";
 import { useGraphics } from "../core/graphics";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { useAppTheme } from "../core/theme";
@@ -66,6 +67,9 @@ export default defineComponent({
 		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
 		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 
+		// Composables
+		const usedDevice: UsedDevice = useDevice({ recordStore });
+
 		// TODO: This needs to be called from an initialization view component
 		// Initialize theme control
 		useAppTheme({ isRoot: true, recordStore });
@@ -74,7 +78,8 @@ export default defineComponent({
 		useGraphics({
 			isRoot: true,
 			recordStore,
-			universeStore
+			universeStore,
+			usedDevice
 		});
 
 		return {
