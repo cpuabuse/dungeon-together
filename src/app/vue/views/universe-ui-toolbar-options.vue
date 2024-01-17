@@ -23,7 +23,7 @@ import { defaultFps, defaultMobileFps } from "../../common/graphics";
 import { OverlayList, OverlayWindow } from "../components";
 import { CompactToolbarMenuItem } from "../core/compact-toolbar";
 
-import { fpsRecordId } from "../core/graphics";
+import { targetFpsRecordId } from "../core/graphics";
 import { TextDirectionWords, UsedLocale, textDirectionSymbol, useLocale } from "../core/locale";
 import {
 	OverlayBusSource,
@@ -194,7 +194,7 @@ export default defineComponent({
 			`menu-universe-ui-toolbar-options-fps-string-${universeStore.universe.universeUuid}`
 		);
 		watchEffect(() => {
-			const fps: unknown = recordStore.records[fpsRecordId];
+			const fps: unknown = recordStore.records[targetFpsRecordId];
 			if (typeof fps === "number") {
 				recordStore.records[fpsStringRecordId] = fps.toString();
 			}
@@ -203,7 +203,7 @@ export default defineComponent({
 			const fpsString: unknown = recordStore.records[fpsStringRecordId];
 			if (typeof fpsString === "string") {
 				// "NaN" would work fine with the way graphics fps processes it, as default would be provided
-				recordStore.records[fpsRecordId] = parseInt(fpsString, 10);
+				recordStore.records[targetFpsRecordId] = parseInt(fpsString, 10);
 			}
 		});
 

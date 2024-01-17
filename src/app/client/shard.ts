@@ -228,7 +228,7 @@ export function ClientShardFactory({
 					this.setScene();
 
 					// Set FPS
-					this.setFps({ fps: utils.isMobile.any ? defaultMobileFps : defaultFps });
+					this.setFps({ targetFps: utils.isMobile.any ? defaultMobileFps : defaultFps });
 
 					// TODO: Create magic
 					// Element ball display test
@@ -393,17 +393,17 @@ export function ClientShardFactory({
 		/**
 		 * Set FPS depending on device.
 		 *
-		 * @param fps - Destructured parameter
+		 * @param targetFps - Destructured parameter
 		 */
 		public setFps({
-			fps
+			targetFps
 		}: {
 			/**
 			 * FPS to set.
 			 */
-			fps: number;
+			targetFps: number;
 		}): void {
-			this.app.ticker.maxFPS = fps;
+			this.app.ticker.maxFPS = targetFps;
 		}
 
 		/**

@@ -17,7 +17,7 @@ import { Store, StoreWord } from "./store";
 /**
  * That is how we address FPS in record store.
  */
-export const fpsRecordId: symbol = Symbol("fps");
+export const targetFpsRecordId: symbol = Symbol("fps");
 
 /**
  * Average FPS record ID.
@@ -80,13 +80,13 @@ export function useGraphics({
 	 */
 	function changeFps(value: number): void {
 		universeStore.universe.shards.forEach(shard => {
-			shard.setFps({ fps: value });
+			shard.setFps({ targetFps: value });
 		});
 	}
 
-	const fps: WritableComputedRef<number> = recordStore.computedRecord({
+	const targetFps: WritableComputedRef<number> = recordStore.computedRecord({
 		defaultValue: 60,
-		id: fpsRecordId,
+		id: targetFpsRecordId,
 		validator
 	});
 
@@ -101,7 +101,7 @@ export function useGraphics({
 	// Run only once
 	if (isRoot) {
 		// Change FPS on record change, and addition of shards
-		watch(fps, changeFps);
+		watch(targetFps, changeFps);
 		universeStore.onUpdateUniverse({
 			// ESLint does not infer void return
 			// eslint-disable-next-line jsdoc/require-returns
@@ -109,10 +109,10 @@ export function useGraphics({
 			 * Callback to change FPS.
 			 */
 			callback: (): void => {
-				changeFps(fps.value);
+				changeFps(targetFps.value);
 			}
 		});
-		fps.value = useDisplay().mobile.value ? defaultMobileFps : defaultFps; // Set initial FPS
+		targetFps.value = useDisplay().mobile.value ? defaultMobileFps : defaultFps; // Set initial FPS
 
 		// Average real FPS
 		let observedFpsList: Array<number> = new Array<number>();
@@ -146,14 +146,13 @@ export function useGraphics({
 				observedFpsList.shift();
 				observedFpsList.push(shard.app.ticker.FPS);
 			});
-
 			// Calculate average FPS
 			let sum: number = observedFpsList.reduce((a, b) => a + b);
-			let targetFpsUnref: number = fps.value;
+			let targetFpsUnref: number = targetFps.value;
 			let newAverageFps: number = Math.ceil(sum / observedFpsList.length);
 			recordStore.records[averageFpsRecordId] = newAverageFps > targetFpsUnref ? targetFpsUnref : newAverageFps;
 		});
 	}
 
-	return { averageFps, fps };
+	return { averageFps, targetFps };
 }
