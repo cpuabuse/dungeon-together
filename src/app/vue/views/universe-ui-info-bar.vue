@@ -21,7 +21,7 @@
 		<VTooltip text="FPS" location="bottom">
 			<template #activator="{ props }">
 				<div v-bind="props" class="fill-height d-flex align-center">
-					<BaseIcon icon="fa-solid fa-wave-square" :size="ElementSize.Small" />
+					<BaseIcon icon="fa-solid fa-wave-square" :color="fpsColor" :size="ElementSize.Small" />
 					<span class="universe-ui-info-bar-text ms-1">{{ fps }}</span>
 				</div>
 			</template>
@@ -110,6 +110,16 @@ type ElementModelEntry = {
 };
 
 /**
+ * Multiplier for green FPS threshold.
+ */
+const greenFpsThresholdMultiplier: number = 0.9;
+
+/**
+ * Multiplier for orange FPS threshold.
+ */
+const orangeFpsThresholdMultiplier: number = 0.5;
+
+/**
  * Milliseconds in one second.
  */
 const oneSecondInMs: number = 1000;
@@ -185,6 +195,21 @@ export default defineComponent({
 			const targetFps: string = this.targetFps.toString();
 			const averageFps: string = this.averageFps.toString().padStart(targetFps.length, "0");
 			return `${averageFps}/${targetFps}`;
+		},
+
+		/**
+		 * FPS state colors.
+		 *
+		 * @returns Green at 90%, orange at 50%, red otherwise
+		 */
+		fpsColor(): string {
+			if (this.averageFps >= this.targetFps * greenFpsThresholdMultiplier) {
+				return "green";
+			}
+			if (this.averageFps >= this.targetFps * orangeFpsThresholdMultiplier) {
+				return "orange";
+			}
+			return "red";
 		}
 	},
 
