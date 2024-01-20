@@ -161,7 +161,7 @@ export function useGraphics({
 			// Calculate average FPS
 			let sum: number = observedFpsList.reduce((a, b) => a + b);
 			let targetFpsUnref: number = targetFps.value;
-			let newAverageFps: number = Math.ceil(sum / observedFpsList.length);
+			let newAverageFps: number = Math.round(sum / observedFpsList.length);
 			recordStore.records[averageFpsRecordId] = newAverageFps > targetFpsUnref ? targetFpsUnref : newAverageFps;
 		});
 	}

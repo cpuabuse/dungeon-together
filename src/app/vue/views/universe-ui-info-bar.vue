@@ -7,12 +7,22 @@
 -->
 <template>
 	<VSystemBar class="universe-ui-info-bar">
+		<!-- Informational elements -->
 		<VTooltip text="Timer" location="bottom">
 			<template #activator="{ props }">
 				<div v-bind="props" class="fill-height d-flex align-center">
-					<!-- Informational elements -->
-					<BaseIcon icon="fa-clock" class="me-1" :color="clockColor" :size="ElementSize.Small" />
-					<span class="universe-ui-info-bar-clock-text">{{ clockTime }}</span>
+					<BaseIcon icon="fa-clock" :color="clockColor" :size="ElementSize.Small" />
+					<span class="universe-ui-info-bar-text ms-1">{{ clockTime }}</span>
+				</div>
+			</template>
+		</VTooltip>
+		<VDivider class="mx-1" inset vertical />
+
+		<VTooltip text="FPS" location="bottom">
+			<template #activator="{ props }">
+				<div v-bind="props" class="fill-height d-flex align-center">
+					<BaseIcon icon="fa-solid fa-wave-square" :size="ElementSize.Small" />
+					<span class="universe-ui-info-bar-text ms-1">{{ fps }}</span>
 				</div>
 			</template>
 		</VTooltip>
@@ -22,7 +32,7 @@
 			<template #activator="{ props }">
 				<div v-bind="props" class="fill-height d-flex align-center">
 					<BaseIcon icon="fa-arrow-down-up-across-line" :size="ElementSize.Small" />
-					<span v-for="(level, levelKey) in gridLevels" :key="levelKey" class="ms-1 universe-ui-info-bar-level-text">{{
+					<span v-for="(level, levelKey) in gridLevels" :key="levelKey" class="ms-1 universe-ui-info-bar-text">{{
 						level
 					}}</span>
 				</div>
@@ -77,6 +87,8 @@ import { PropType, Ref, defineComponent, mergeProps, shallowRef, watch } from "v
 import { VBtn, VDivider, VMenu, VSpacer, VSystemBar, VTooltip } from "vuetify/components";
 import { ElementSize } from "../common/element";
 import { BaseIcon } from "../components";
+import { UsedDevice, useDevice } from "../core/device";
+import { UsedGraphics, useGraphics } from "../core/graphics";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { UniverseUiShardEntries } from "../core/universe-ui";
 import stateAlertBoxComponent from "../state-alert-box.vue";
@@ -162,6 +174,17 @@ export default defineComponent({
 			return `${minutes < secondDigitThreshold ? "0" : ""}${minutes}:${
 				seconds < secondDigitThreshold ? "0" : ""
 			}${seconds}`;
+		},
+
+		/**
+		 * FPS padded to format `00/00` (`average/target`).
+		 *
+		 * @returns FPS string
+		 */
+		fps(): string {
+			const targetFps: string = this.targetFps.toString();
+			const averageFps: string = this.averageFps.toString().padStart(targetFps.length, "0");
+			return `${averageFps}/${targetFps}`;
 		}
 	},
 
@@ -227,9 +250,18 @@ export default defineComponent({
 	 */
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props) {
+		// Initialize stores
 		const stores: Stores = useStores();
-		const { onUpdateGridLevel, universe }: Store<StoreWord.Universe> = stores.useUniverseStore();
+		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
+		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
+
+		// Initialize graphics
+		let usedDevice: UsedDevice = useDevice({ recordStore });
+		let { averageFps, targetFps }: UsedGraphics = useGraphics({ recordStore, universeStore, usedDevice });
+
+		// #region Grids
 		const gridLevels: Ref<Array<number>> = shallowRef(new Array<number>());
+
 		// Watch shards to be reactive on shard add/remove
 		watch(
 			() => props.shardEntries,
@@ -256,7 +288,7 @@ export default defineComponent({
 		}
 
 		// TODO: Remove watcher and move this functionality to shard/grid component, enable immediate
-		onUpdateGridLevel({
+		universeStore.onUpdateGridLevel({
 			/**
 			 * Callback when grid level is updated.
 			 */
@@ -267,10 +299,13 @@ export default defineComponent({
 			// Not needed right now as initial value is watched
 			isImmediate: false
 		});
+		// #endregion
 
 		return {
+			averageFps,
 			gridLevels,
-			universe
+			targetFps,
+			universe: universeStore.universe
 		};
 	},
 
@@ -291,8 +326,7 @@ export default defineComponent({
 	pointer-events: auto;
 }
 
-.universe-ui-info-bar-clock-text,
-.universe-ui-info-bar-level-text {
+.universe-ui-info-bar-text {
 	/* Text changes, must preserve sizing */
 	font-family: monospace, monospace;
 }
