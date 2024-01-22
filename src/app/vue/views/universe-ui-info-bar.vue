@@ -8,7 +8,7 @@
 <template>
 	<VSystemBar class="universe-ui-info-bar">
 		<!-- Informational elements -->
-		<VTooltip text="Timer" location="bottom">
+		<VTooltip :text="t('infoBar.uptime')" location="bottom">
 			<template #activator="{ props }">
 				<div v-bind="props" class="fill-height d-flex align-center">
 					<BaseIcon icon="fa-clock" :color="clockColor" :size="ElementSize.Small" />
@@ -18,6 +18,7 @@
 		</VTooltip>
 		<VDivider class="mx-1" inset vertical />
 
+		<!-- FPS translation is omitted intentionally -->
 		<VTooltip text="FPS" location="bottom">
 			<template #activator="{ props }">
 				<div v-bind="props" class="fill-height d-flex align-center">
@@ -28,7 +29,7 @@
 		</VTooltip>
 		<VDivider class="mx-1" inset vertical />
 
-		<VTooltip text="Current level" location="bottom">
+		<VTooltip :text="t('infoBar.level')" location="bottom">
 			<template #activator="{ props }">
 				<div v-bind="props" class="fill-height d-flex align-center">
 					<BaseIcon icon="fa-arrow-down-up-across-line" :size="ElementSize.Small" />
@@ -44,7 +45,7 @@
 		<!-- Interactive elements -->
 		<VMenu v-model="musicModelEntry.menu" location="bottom">
 			<template #activator="{ props: menu }">
-				<VTooltip v-model="musicModelEntry.tooltip" text="Music" location="bottom">
+				<VTooltip v-model="musicModelEntry.tooltip" :text="t('infoBar.music')" location="bottom">
 					<template #activator="{ props: tooltip }">
 						<VBtn
 							v-bind="mergeProps(menu, tooltip)"
@@ -63,7 +64,7 @@
 
 		<VMenu v-model="notificationModelEntry.menu" location="bottom">
 			<template #activator="{ props: menu }">
-				<VTooltip v-model="notificationModelEntry.tooltip" text="Notifications" location="bottom">
+				<VTooltip v-model="notificationModelEntry.tooltip" :text="t('infoBar.notifications')" location="bottom">
 					<template #activator="{ props: tooltip }">
 						<VBtn
 							v-bind="mergeProps(menu, tooltip)"
@@ -89,6 +90,7 @@ import { ElementSize } from "../common/element";
 import { BaseIcon } from "../components";
 import { UsedDevice, useDevice } from "../core/device";
 import { UsedGraphics, useGraphics } from "../core/graphics";
+import { UsedLocale, useLocale } from "../core/locale";
 import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { UniverseUiShardEntries } from "../core/universe-ui";
 import stateAlertBoxComponent from "../state-alert-box.vue";
@@ -280,6 +282,9 @@ export default defineComponent({
 		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
 
+		// Initialize locale
+		const { t }: UsedLocale = useLocale();
+
 		// Initialize graphics
 		let usedDevice: UsedDevice = useDevice({ recordStore });
 		let { averageFps, targetFps }: UsedGraphics = useGraphics({ recordStore, universeStore, usedDevice });
@@ -329,6 +334,7 @@ export default defineComponent({
 		return {
 			averageFps,
 			gridLevels,
+			t,
 			targetFps,
 			universe: universeStore.universe
 		};

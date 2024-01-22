@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -58,6 +58,31 @@ export type InternalMessageSchema = {
 	};
 
 	/**
+	 * Info bar related information.
+	 */
+	infoBar: {
+		/**
+		 * Notification status.
+		 */
+		notifications: I18NMessage;
+
+		/**
+		 * Music.
+		 */
+		music: I18NMessage;
+
+		/**
+		 * Current level information.
+		 */
+		level: I18NMessage;
+
+		/**
+		 * Time passed.
+		 */
+		uptime: I18NMessage;
+	};
+
+	/**
 	 * Data going into menu items.
 	 */
 	menuItem: Record<string, I18NMessage>;
@@ -108,6 +133,12 @@ export type ExternalMessageSchema = {
 // eslint-disable-next-line @typescript-eslint/typedef
 export const internalLocaleMessages = {
 	[Locale.Arabic]: {
+		infoBar: {
+			level: "مستوى",
+			music: "موسيقى",
+			notifications: "إشعارات",
+			uptime: "زمن التشغيل"
+		},
 		language: "اللغة",
 		locales: {
 			[Locale.English]: "الإنجليزية",
@@ -139,6 +170,12 @@ export const internalLocaleMessages = {
 		}
 	} satisfies InternalMessageSchema,
 	[Locale.English]: {
+		infoBar: {
+			level: "Level",
+			music: "Music",
+			notifications: "Notifications",
+			uptime: "Uptime"
+		},
 		language: "Language",
 		locales: {
 			[Locale.English]: "English",
@@ -172,6 +209,12 @@ export const internalLocaleMessages = {
 		}
 	} satisfies InternalMessageSchema,
 	[Locale.Japanese]: {
+		infoBar: {
+			level: "レベル",
+			music: "音楽",
+			notifications: "通知",
+			uptime: "稼働時間"
+		},
 		language: "言語",
 		locales: {
 			[Locale.English]: "英語",
