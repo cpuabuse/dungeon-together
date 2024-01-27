@@ -515,29 +515,34 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 							sourceOptions: serverOptions,
 							targetOptions: clientOptions
 						});
+
+						// TODO: Refactor sync and update
 						// ESLint false negative
 						// eslint-disable-next-line @typescript-eslint/typedef
-						let unitCells: Array<ServerCell> = Array.from(shard.units).map(([, unitPath]) => {
-							return this.universe.getCell(unitPath);
-						});
+						// let unitCells: Array<ServerCell> = Array.from(shard.units).map(([, unitPath]) => {
+						// 	return this.universe.getCell(unitPath);
+						// });
 						// TODO: Use visibility
 						body.grids.forEach(grid => {
 							grid.cells = new Map(
 								// ESLint false negative
 								// eslint-disable-next-line @typescript-eslint/typedef
 								[...grid.cells].map(([cellUuid, cell]) => {
-									let isEntitiesIncluded: boolean = unitCells
-										// ESLint false negative
-										// eslint-disable-next-line @typescript-eslint/typedef
-										.filter(({ gridUuid }) => gridUuid === grid.gridUuid)
-										.some(
-											// ESLint false negative
-											// eslint-disable-next-line @typescript-eslint/typedef
-											({ x, y, z }) =>
-												Math.abs(cell.x - x) < cellViewDistance &&
-												Math.abs(cell.y - y) < cellViewDistance &&
-												cell.z === z
-										);
+									let isEntitiesIncluded: boolean = false;
+
+									// TODO: Refactor sync and update
+									// let isEntitiesIncluded: boolean = unitCells
+									// 	// ESLint false negative
+									// 	// eslint-disable-next-line @typescript-eslint/typedef
+									// 	.filter(({ gridUuid }) => gridUuid === grid.gridUuid)
+									// 	.some(
+									// 		// ESLint false negative
+									// 		// eslint-disable-next-line @typescript-eslint/typedef
+									// 		({ x, y, z }) =>
+									// 			Math.abs(cell.x - x) < cellViewDistance &&
+									// 			Math.abs(cell.y - y) < cellViewDistance &&
+									// 			cell.z === z
+									// 	);
 									return [cellUuid, isEntitiesIncluded ? cell : { ...cell, entities: new Map() }];
 								})
 							);

@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -58,7 +58,7 @@ export function systemModuleFactory(...[{ universe, props, moduleName }]: Module
 	const UnitKind: UnitKindClass = UnitKindClassFactory({ Base: ExclusiveKind, stats });
 	const GuyKind: GuyKindClass = GuyKindClassFactory({ Base: UnitKind, stats });
 	// TODO: Target should be allied units
-	const TrapKind: TrapKindClass = TrapKindClassFactory({ Base, Targets: [GuyKind] });
+	const TrapKind: TrapKindClass = TrapKindClassFactory({ Base, Targets: [GuyKind], UnitBase: UnitKind });
 	const MonsterKind: MonsterKindClass = MonsterKindClassFactory({ Base: UnitKind, stats });
 
 	// Infer type to check other languages

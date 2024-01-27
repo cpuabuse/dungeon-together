@@ -305,7 +305,7 @@ export function BaseEntityKindClassFactory({
 		 *
 		 * @example Parent module scope invocation
 		 * ```typescript
-		 * Object.getPrototypeOf(this).sendStatusNotification(param);
+		 * Object.getPrototypeOf(this).sendStoryNotification(param);
 		 * ```
 		 *
 		 * @param param - Destructured parameter

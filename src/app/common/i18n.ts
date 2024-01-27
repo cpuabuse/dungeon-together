@@ -195,7 +195,8 @@ export const internalLocaleMessages = {
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "You look around",
 			[StatusNotificationWord.MimicAwaken]: "Mimic awakens!",
-			[StatusNotificationWord.DamageDealt]: "⚔️ {damage}"
+			[StatusNotificationWord.DamageDealt]: "⚔️ {damage}",
+			[StatusNotificationWord.TrapActivated]: "Trap activated!"
 		},
 		textDirection: {
 			[TextDirectionWords.Auto]: "Auto",

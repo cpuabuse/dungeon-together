@@ -4,18 +4,14 @@
 */
 
 /**
- * Trap.
- *
  * @file
+ *
+ * Trap.
  */
 
+import { StatusNotificationWord } from "../../app/common/defaults/connection";
 import { ActionWords } from "../../app/server/action";
-import {
-	EntityKindActionArgs,
-	EntityKindClass,
-	EntityKindConstructorParams,
-	ServerEntity
-} from "../../app/server/entity";
+import { EntityKindClass, EntityKindConstructorParams, ServerEntity } from "../../app/server/entity";
 import { UnitKindClass } from "./unit";
 
 /**
@@ -28,7 +24,8 @@ import { UnitKindClass } from "./unit";
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function TrapKindClassFactory({
 	Targets = [],
-	Base
+	Base,
+	UnitBase
 }: {
 	/**
 	 * Server entity.
@@ -39,6 +36,11 @@ export function TrapKindClassFactory({
 	 * Targets for the trap.
 	 */
 	Targets?: Array<UnitKindClass>;
+
+	/**
+	 * Unit base.
+	 */
+	UnitBase: UnitKindClass;
 }) {
 	/**
 	 * Actual trap. The player can fall or loose HP depending on the trap class (spike/hole)
@@ -57,6 +59,8 @@ export function TrapKindClassFactory({
 		 */
 		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
 			super({ entity, ...rest });
+			// Randomly changes the visibility of the trap
+			this.isVisible = Math.random() > 0.5;
 		}
 
 		/**
@@ -92,14 +96,15 @@ export function TrapKindClassFactory({
 				});
 			}
 
-			this.randomizeVisibility();
-		}
+			if (!this.isVisible) {
+				this.isVisible = true;
 
-		/**
-		 * Randomly changes the visibility of the trap.
-		 */
-		public randomizeVisibility(): void {
-			this.isVisible = Math.random() > 0.5;
+				if (entity.kind instanceof UnitBase) {
+					entity.kind.sendStatusNotification?.({
+						notificationId: StatusNotificationWord.TrapActivated
+					});
+				}
+			}
 		}
 	}
 	return TrapKind;
