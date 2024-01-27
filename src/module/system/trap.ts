@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -45,15 +45,6 @@ export function TrapKindClassFactory({
 	 */
 	class TrapKind extends Base {
 		/**
-		 * Emits health.
-		 *
-		 * @returns Emitted object
-		 */
-		public get emits(): Record<string, any> {
-			return { ...super.emits };
-		}
-
-		/**
 		 * The damage the trap can cause to the player.
 		 */
 		public damage: number = 0;
@@ -62,15 +53,19 @@ export function TrapKindClassFactory({
 		public isActive: boolean = false;
 
 		/**
-		 * The visibility of trap, wether its visible or not.
-		 */
-		public visible: boolean = true;
-
-		/**
 		 * @param param - Destructured parameter
 		 */
 		public constructor({ entity, ...rest }: EntityKindConstructorParams) {
 			super({ entity, ...rest });
+		}
+
+		/**
+		 * Emits health.
+		 *
+		 * @returns Emitted object
+		 */
+		public get emits(): Record<string, any> {
+			return { ...super.emits };
 		}
 
 		/**
@@ -96,6 +91,15 @@ export function TrapKindClassFactory({
 					sourceEntity: this.entity
 				});
 			}
+
+			this.randomizeVisibility();
+		}
+
+		/**
+		 * Randomly changes the visibility of the trap.
+		 */
+		public randomizeVisibility(): void {
+			this.isVisible = Math.random() > 0.5;
 		}
 	}
 	return TrapKind;

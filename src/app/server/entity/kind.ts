@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -128,6 +128,11 @@ export function BaseEntityKindClassFactory({
 		 * Link to entity.
 		 */
 		public entity: ServerEntity;
+
+		/**
+		 * Whether the entity is visible or not.
+		 */
+		public isVisible: boolean = true;
 
 		/**
 		 * Optional module ID.

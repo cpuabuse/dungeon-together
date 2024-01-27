@@ -422,8 +422,9 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 							entities: Array.from(cell.entities)
 								// False negative
 								// eslint-disable-next-line @typescript-eslint/typedef
-								.filter(([entityUuid]) => {
-									return entityUuid !== cell.defaultEntity.entityUuid;
+								.filter(([entityUuid, entity]) => {
+									// Sends visibility information of entities to client and also filters out default entities
+									return entityUuid !== cell.defaultEntity.entityUuid && entity.kind.isVisible;
 								})
 								// False negative
 								// eslint-disable-next-line @typescript-eslint/typedef
