@@ -312,7 +312,7 @@ export default defineComponent({
 						return {
 							clickRecordIndex: welcomeDisplaySymbol,
 							icon: "fa-door-open",
-							name: "Welcome"
+							name: t("menuTitle.welcome")
 						} satisfies CompactToolbarMenuItem;
 					})
 				}
