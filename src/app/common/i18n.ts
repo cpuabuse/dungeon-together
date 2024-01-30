@@ -157,7 +157,9 @@ export const internalLocaleMessages = {
 		},
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "تحقق من حولك",
-			[StatusNotificationWord.MimicAwaken]: "ظهر الميميك!"
+			[StatusNotificationWord.MimicAwaken]: "ظهر الميميك!",
+			[StatusNotificationWord.DamageDealt]: "⚔️ {ضرر}",
+			[StatusNotificationWord.TrapActivated]: "تم تنشيط الفخ!"
 		},
 		textDirection: {
 			[TextDirectionWords.Auto]: "Auto",
@@ -235,7 +237,9 @@ export const internalLocaleMessages = {
 		},
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "周りを見回す",
-			[StatusNotificationWord.MimicAwaken]: "ミミックが現れた！"
+			[StatusNotificationWord.MimicAwaken]: "ミミックが現れた！",
+			[StatusNotificationWord.DamageDealt]: "⚔️ {ダメージ }",
+			[StatusNotificationWord.TrapActivated]: "罠が作動しまた！"
 		},
 		textDirection: {
 			[TextDirectionWords.Auto]: "Auto",
