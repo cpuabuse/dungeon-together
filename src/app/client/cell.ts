@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,22 +7,60 @@
  * @file Squares on screen.
  */
 
-import {
-	defaultKindUuid,
-	defaultModeUuid,
-	defaultWorldUuid,
-	entityUuidUrlPath,
-	urlPathSeparator
-} from "../common/defaults";
-import { Uuid, getDefaultUuid } from "../common/uuid";
-import { CommsCell, CommsCellArgs } from "../comms/cell";
-import { CommsEntityArgs, EntityPath } from "../comms/entity";
-import { ClientBaseClass } from "./base";
+import { GlowFilter } from "@pixi/filter-glow";
+import { ColorMatrixFilter, Container, type Filter } from "pixi.js";
+import { CoreArgIds } from "../core/arg";
+import { CoreCellArg, CoreCellClassFactory } from "../core/cell";
+import { EntityPathOwn } from "../core/entity";
+import { CoreCellArgParentIds } from "../core/parents";
+import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
+import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientEntity } from "./entity";
+import { ClientOptions, clientOptions } from "./options";
+import { ClientShard } from "./shard";
+
+/**
+ * Burn.
+ */
+const contrastFilter: ColorMatrixFilter = new ColorMatrixFilter();
+contrastFilter.contrast(2, false);
+
+/**
+ * Identifiers of filters.
+ */
+// Force infer the type
+// eslint-disable-next-line @typescript-eslint/typedef
+const filterNames = ["contrast", "glow"] as const;
+
+/**
+ * Filter name.
+ */
+type FilterName = (typeof filterNames)[number];
+
+/**
+ * Map of filter names to actual filters.
+ */
+const filterMap: {
+	[Key in FilterName]: Filter;
+} = {
+	contrast: contrastFilter,
+	glow: new GlowFilter({
+		innerStrength: 2,
+		outerStrength: 0
+	})
+};
+
+/**
+ * Filter state.
+ */
+type FilterState = {
+	[Key in FilterName]: boolean;
+};
 
 /**
  * Generator for the client cell class.
  *
+ * @param param - Destructured parameter
  * @returns Client cell class
  */
 // Force type inference to extract class type
@@ -38,165 +76,171 @@ export function ClientCellFactory({
 	/**
 	 * Square(Vector).
 	 */
-	class ClientCell extends Base implements CommsCell {
-		/**
-		 * This CommsCell UUID.
-		 */
-		public readonly cellUuid: Uuid;
+	class ClientCell extends CoreCellClassFactory<
+		ClientBaseClass,
+		ClientBaseConstructorParams,
+		ClientOptions,
+		ClientEntity
+	>({
+		Base,
+		options: clientOptions
+	}) {
+		/** Cell owned display container. */
+		public container: Container = new Container();
 
 		/**
-		 * UUID for default [[ClientEntity]].
+		 * Parent shard.
+		 *
+		 * @remarks
+		 * This member's purpose is not to contain a shard. It is just a symbolic replacement (for simplicity) for client specific properties, that shard contains, like container(canvas).
 		 */
-		public readonly defaultEntityUuid: Uuid;
+		public shard?: ClientShard;
 
 		/**
-		 * Contents of client-cell.
+		 * Dynamically generates filters.
+		 *
+		 * @returns Array of filters
 		 */
-		public readonly entities: Map<Uuid, ClientEntity> = new Map();
+		public get filters(): Array<Filter> {
+			return (
+				Object.entries(this.filterState)
+					// ESLint does not pick up types
+					// eslint-disable-next-line @typescript-eslint/typedef
+					.filter(([, isEnabled]) => {
+						return isEnabled;
+					})
+					// ESLint does not pick up types
+					// eslint-disable-next-line @typescript-eslint/typedef
+					.map(([name]) => {
+						return filterMap[name as FilterName];
+					})
+			);
+		}
 
+		protected filterState: FilterState = filterNames.reduce((result, name) => {
+			return {
+				...result,
+				[name]: false
+			};
+		}, {} as FilterState);
+
+		// ESLint params bug
+		// eslint-disable-next-line jsdoc/require-param
 		/**
-		 * This id.
+		 * Public constructor.
+		 *
+		 * @param param - Destructure parameter
 		 */
-		public readonly gridUuid: Uuid;
+		public constructor(
+			// ESLint bug - nested args
+			// eslint-disable-next-line @typescript-eslint/typedef
+			...[cell, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
+				ClientBaseConstructorParams,
+				CoreCellArg<ClientOptions>,
+				CoreArgIds.Cell,
+				ClientOptions,
+				CoreCellArgParentIds
+			>
+		) {
+			super(cell, { attachHook, created }, baseParams);
 
-		/**
-		 * CommsShard path.
-		 */
-		public readonly shardUuid: Uuid;
-
-		/**
-		 * Worlds of this.
-		 */
-		public worlds: Set<Uuid> = new Set();
-
-		/**
-		 * X coordinate.
-		 */
-		public x: number;
-
-		/**
-		 * Y coordinate.
-		 */
-		public y: number;
-
-		/**
-		 * Z coordinate.
-		 */
-		public z: number;
-
-		/**
-		 * Constructs square.
-		 */
-		public constructor({ shardUuid, cellUuid, gridUuid, entities, x, y, z }: CommsCellArgs) {
-			super();
-
-			// Initialize path
-			this.shardUuid = shardUuid;
-			this.cellUuid = cellUuid;
-			this.gridUuid = gridUuid;
-
-			// Initialize coordinates
-			this.x = x;
-			this.y = y;
-			this.z = z;
-
-			// Set default Uuid
-			this.shardUuid = shardUuid;
-			this.defaultEntityUuid = getDefaultUuid({
-				path: `${entityUuidUrlPath}${urlPathSeparator}${this.cellUuid}`
-			});
-
-			setTimeout(() => {
-				// Populate with default [[ClientEntity]]
-				this.addEntity({
-					// Take path from this
-					...this,
-					entityUuid: this.defaultEntityUuid,
-					kindUuid: defaultKindUuid,
-					modeUuid: defaultModeUuid,
-					worldUuid: defaultWorldUuid
-				});
-
-				// Fill entities
-				entities.forEach(entity => {
-					this.entities.set(entity.entityUuid, new this.universe.Entity(entity));
-				});
+			// Fog
+			this.setFilters({
+				contrast: true
 			});
 		}
 
 		/**
-		 * Adds [[CommsEntity]].
+		 * Stops display of entity in canvas.
 		 *
-		 * @param entity - Arguments for the [[ClientEntity]] constructor
+		 * @param path - Client entity path
+		 * @see {@link ClientCell.showEntity}
 		 */
-		public addEntity(entity: CommsEntityArgs): void {
-			if (this.entities.has(entity.shardUuid)) {
-				// Clear the shard if it already exists
-				this.doRemoveEntity(entity);
-			}
-			// It does not perform the check for "entityUuid" because there is no default
-			this.entities.set(entity.entityUuid, new this.universe.Entity(entity));
-		}
-
-		/**
-		 * Shortcut to get the [[ClientEntity]].
-		 *
-		 * @returns [[ClientEntity]], the smallest renderable
-		 */
-		public getEntity({ entityUuid }: EntityPath): ClientEntity {
-			let clientEntity: ClientEntity | undefined = this.entities.get(entityUuid);
-			// Default scene is always there
-			return clientEntity === undefined ? (this.entities.get(this.defaultEntityUuid) as ClientEntity) : clientEntity;
-		}
-
-		/**
-		 * Actually remove the [[ClientEntity]] instance from "clientCell".
-		 *
-		 * Unlike other clientProtos, this function does not use "doRemoveEntity", because there is no default scene.
-		 *
-		 * @param path - Path to entity
-		 */
-		public removeEntity(path: EntityPath): void {
-			if (path.entityUuid !== this.defaultEntityUuid) {
-				this.doRemoveEntity(path);
+		public hideEntity(path: EntityPathOwn): void {
+			let entity: ClientEntity = this.getEntity(path);
+			if (entity.isInUniverse) {
+				this.container.removeChild(entity.container);
+				entity.sprite.stop();
 			}
 		}
 
 		/**
-		 * Terminates the [[Cell]].
-		 */
-		public terminate(): void {
-			this.entities.forEach(clientEntity => {
-				this.removeEntity(clientEntity);
-			});
-		}
-
-		/**
-		 * Updates the cell's entities.
+		 * Remove or add filters to the cell.
 		 *
-		 * Eventually, when the entity is not in the arguments but is present in this cell, it should be either made invisible, or sent to a separate world.
+		 * @param filterState - Object with list of filter states to change
 		 */
-		public update({ shardUuid, cellUuid, gridUuid, entities, x, y, z }: CommsCellArgs): void {
-			// Rewrite coordinates
-			this.x = x;
-			this.y = y;
-			this.z = z;
+		public setFilters(filterState: Partial<FilterState>): void {
+			// ESLint does not pick up types
+			// eslint-disable-next-line @typescript-eslint/typedef
+			Object.entries(filterState).forEach(([name, isEnabled]) => {
+				// Make sure that the value is a boolean and not undefined, as it might have still be passed via partial argument; Then only work with keys that are valid filter names
+				if (
+					typeof isEnabled === "boolean" &&
+					(filterNames.includes as (filterName: string) => filterName is FilterName)(name)
+				) {
+					this.filterState[name] = isEnabled;
+				}
+			});
 
-			// Move entities here
-			entities.forEach(entity => {});
+			// Set filters
+			this.container.filters = this.filters;
 		}
 
 		/**
-		 * Actually removes the entity.
+		 * Displays entity appropriately.
+		 * Changes canvas state in relation to the state of the entity.
+		 *
+		 * @param path - Client entity path
+		 * @remarks
+		 * During the initialization, the decorate will not be run as part of attach cell function, since no entity would be attached yet. This results in decorate function running only once, from attach entity function.
+		 *
+		 * Should usually be called within `setTimeout`.
 		 */
-		private doRemoveEntity({ entityUuid }: EntityPath): void {
-			let clientEntity: ClientEntity | undefined = this.entities.get(entityUuid);
-			if (clientEntity !== undefined) {
-				clientEntity.terminate();
-				this.entities.delete(entityUuid);
+		public showEntity(path: EntityPathOwn): void {
+			let entity: ClientEntity = this.getEntity(path);
+			if (entity.isInUniverse) {
+				const sceneWidth: number = this.shard?.sceneWidth ?? 0;
+				const sceneHeight: number = this.shard?.sceneHeight ?? 0;
+
+				entity.sprite.height = sceneWidth;
+				entity.sprite.width = sceneHeight;
+
+				// Register entity to canvas
+				this.container.addChild(entity.container);
+				entity.sprite.play();
 			}
 		}
 	}
+
+	/**
+	 * Attaches client entity.
+	 *
+	 * @param this - Client cell
+	 * @param entity - Entity
+	 */
+	ClientCell.prototype.attachEntity = function (this: ClientCell, entity: ClientEntity): void {
+		// Super first
+		(Object.getPrototypeOf(ClientCell.prototype) as ClientCell).attachEntity.call(this, entity);
+
+		entity.isInUniverse = true;
+
+		// Post-attach (decoration)
+		this.showEntity(entity);
+	};
+
+	/**
+	 * Detaches client entity.
+	 *
+	 * @param this - Client cell
+	 * @param path - Entity path
+	 */
+	ClientCell.prototype.detachEntity = function (this: ClientCell, path: EntityPathOwn): void {
+		// Hide first
+		this.hideEntity(path);
+
+		// Super last
+		(Object.getPrototypeOf(ClientCell.prototype) as ClientCell).detachEntity.call(this, path);
+	};
 
 	// Return the class
 	return ClientCell;

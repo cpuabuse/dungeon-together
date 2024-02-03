@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,21 +7,27 @@
  * @file Cells on screen.
  */
 
-import { cellUuidUrlPath, defaultCellVector, defaultWorldUuid, urlPathSeparator } from "../common/defaults";
-import { Uuid, getDefaultUuid } from "../common/uuid";
-import { CellPath, CommsCellArgs } from "../comms/cell";
-import { CommsGrid, CommsGridArgs } from "../comms/grid";
-import { ClientBaseClass } from "./base";
+import { Container } from "pixi.js";
+import { CoreArgIds } from "../core/arg";
+import { CellPathOwn } from "../core/cell";
+import { LogLevel } from "../core/error";
+import { CoreGridArg, CoreGridClassFactory } from "../core/grid";
+import { CoreGridArgParentIds } from "../core/parents";
+import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
+import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientCell } from "./cell";
+import { ClientOptions, clientOptions } from "./options";
+import { ClientShard } from "./shard";
 
 /**
  * Generator for the client grid class.
  *
+ * @param param - Destructured parameter
  * @returns Client grid class
  */
 // Force type inference to extract class type
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function ClientGridFactory({
+export function ClientGridClassFactory({
 	Base
 }: {
 	/**
@@ -32,115 +38,193 @@ export function ClientGridFactory({
 	/**
 	 * Vector Array Object.
 	 */
-	class ClientGrid extends Base implements CommsGrid {
+	class ClientGrid extends CoreGridClassFactory<
+		ClientBaseClass,
+		ClientBaseConstructorParams,
+		ClientOptions,
+		ClientCell
+	>({
+		Base,
+		options: clientOptions
+	}) {
 		/**
-		 * Locations.
+		 * Display of current level.
 		 */
-		public readonly cells: Map<Uuid, ClientCell> = new Map();
+		public currentLevel: number = 0;
 
 		/**
-		 * UUID for default [[ClientGrid]].
+		 * An array of containers sorted by the depth.
 		 */
-		public readonly defaultCellUuid: Uuid;
+		public levelIndex: Array<Container>;
 
 		/**
-		 * This id.
+		 * Parent shard.
+		 *
+		 * @remarks
+		 * This member's purpose is not to contain a shard. It is just a symbolic replacement (for simplicity) for client specific properties, that shard contains, like container(canvas).
 		 */
-		public readonly gridUuid: Uuid;
+		public shard?: ClientShard;
 
-		/**
-		 *  Shard path.
-		 */
-		public readonly shardUuid: Uuid;
-
+		// ESLint params bug
+		// eslint-disable-next-line jsdoc/require-param
 		/**
 		 * Constructor.
+		 *
+		 * @param param - Destructure parameter
 		 */
-		public constructor({ shardUuid, cells, gridUuid }: CommsGridArgs) {
-			super();
+		public constructor(
+			// ESLint bug - nested args
+			// eslint-disable-next-line @typescript-eslint/typedef
+			...[grid, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
+				ClientBaseConstructorParams,
+				CoreGridArg<ClientOptions>,
+				CoreArgIds.Grid,
+				ClientOptions,
+				CoreGridArgParentIds
+			>
+		) {
+			super(grid, { attachHook, created }, baseParams);
 
-			// Assign path
-			this.shardUuid = shardUuid;
-			this.gridUuid = gridUuid;
-
-			// Set default Uuid
-			this.shardUuid = shardUuid;
-			this.defaultCellUuid = getDefaultUuid({ path: `${cellUuidUrlPath}${urlPathSeparator}${this.gridUuid}` });
-
-			setTimeout(() => {
-				// Set default cell
-				this.addCell({
-					// Take path from this
-					...this,
-					cellUuid: this.defaultCellUuid,
-					entities: new Map(),
-					worlds: new Set([defaultWorldUuid]),
-					...defaultCellVector
-				});
-
-				cells.forEach(cell => {
-					this.addCell(cell);
-				});
+			// Initialize zIndex
+			this.levelIndex = Array.from(new Array(this.zLength), () => {
+				let container: Container = new Container();
+				container.visible = false;
+				return container;
 			});
-		}
 
-		/**
-		 * Adds [[CommsCell]].
-		 *
-		 * @param cell - Arguments for the [[ClientCell]] constructor
-		 */
-		public addCell(cell: CommsCellArgs): void {
-			if (this.cells.has(cell.shardUuid)) {
-				// Clear the shard if it already exists
-				this.doRemoveCell(cell);
-			}
-			this.cells.set(cell.cellUuid, new this.universe.Cell(cell));
-		}
-
-		/**
-		 * Shortcut to get the [[ClientCell]].
-		 *
-		 * @returns [[ClientCell]], a cell in the grid
-		 */
-		public getCell({ cellUuid }: CellPath): ClientCell {
-			let clientCell: ClientCell | undefined = this.cells.get(cellUuid);
-			// Default client cell is always there
-			return clientCell === undefined ? (this.cells.get(this.defaultCellUuid) as ClientCell) : clientCell;
-		}
-
-		/**
-		 * Removes the [[ClientCell]]
-		 *
-		 * @param uuid - UUID of the [[ClientCell]]
-		 *
-		 * @param path - Path to cell
-		 */
-		public removeCell(path: CellPath): void {
-			if (path.cellUuid !== this.defaultCellUuid) {
-				this.doRemoveCell(path);
+			// Make only the surface level visible
+			let firstLevel: Container | undefined = this.levelIndex[0];
+			if (firstLevel) {
+				firstLevel.visible = true;
+			} else {
+				(this.constructor as typeof ClientGrid).universe.log({
+					error: new Error("Levels not initialized"),
+					level: LogLevel.Alert
+				});
 			}
 		}
 
 		/**
-		 * Performs the necessary cleanup when removed.
+		 * Change level visibility.
+		 *
+		 * @param param - Change level
 		 */
-		public terminate(): void {
-			this.cells.forEach(clientCell => {
-				this.doRemoveCell(clientCell);
+		public changeLevel({
+			level
+		}: {
+			/**
+			 * Target level.
+			 */
+			level: number;
+		}): void {
+			if (level < this.zLength && level >= 0 && this.currentLevel !== level) {
+				// Enable visibility first to avoid blank screen
+				let levelContainer: Container | undefined = this.levelIndex[level];
+				let thisLevelContainer: Container | undefined = this.levelIndex[this.currentLevel];
+				if (levelContainer && thisLevelContainer) {
+					levelContainer.visible = true;
+					thisLevelContainer.visible = false;
+					this.currentLevel = level;
+					(this.constructor as ClientGridClass).universe.stores.useUniverseStore().updateGridLevel();
+				} else {
+					(this.constructor as typeof ClientGrid).universe.log({
+						error: new Error("Levels not initialized"),
+						level: LogLevel.Alert
+					});
+				}
+			}
+		}
+
+		/**
+		 * Hides cell.
+		 *
+		 * @param path - Target cell path
+		 */
+		public hideCell(path: CellPathOwn): void {
+			let cell: ClientCell = this.getCell(path);
+
+			// Remove container
+			let levelContainer: Container | undefined = this.levelIndex[cell.z];
+			if (levelContainer) {
+				levelContainer.removeChild(cell.container);
+			} else {
+				(this.constructor as typeof ClientGrid).universe.log({
+					error: new Error("Could not find cell container"),
+					level: LogLevel.Error
+				});
+			}
+
+			// Not deferred for performance
+			cell.entities.forEach(entity => {
+				cell.hideEntity(entity);
 			});
+			cell.shard = undefined;
 		}
 
 		/**
-		 * Actually remove the [[ClientCell]] instance from "cells".
+		 * Shows cell.
+		 *
+		 * @remarks
+		 * Should usually be called within `setTimeout`.
+		 *
+		 * @param path - Target cell path
 		 */
-		private doRemoveCell({ cellUuid }: CellPath): void {
-			let cell: ClientCell | undefined = this.cells.get(cellUuid);
-			if (cell !== undefined) {
-				cell.terminate();
-				this.cells.delete(cellUuid);
+		public showCell(path: CellPathOwn): void {
+			let cell: ClientCell = this.getCell(path);
+
+			// Bind to shard
+			cell.shard = this.shard;
+
+			// Update cell container position, do it before adding to grid container, to avoid jumps on screen
+			const sceneWidth: number = this.shard?.sceneWidth ?? 0;
+			const sceneHeight: number = this.shard?.sceneHeight ?? 0;
+			cell.container.x = sceneWidth * cell.x;
+			cell.container.y = sceneHeight * cell.y;
+
+			// Add container
+			let levelContainer: Container | undefined = this.levelIndex[cell.z];
+			if (levelContainer) {
+				levelContainer.addChild(cell.container);
+			} else {
+				(this.constructor as typeof ClientGrid).universe.log({
+					error: new Error("Could not find cell container"),
+					level: LogLevel.Error
+				});
 			}
+
+			// Post-attach (decoration); Not deferred to process a cell at time, for performance
+			cell.entities.forEach(entity => {
+				cell.showEntity(entity);
+			});
 		}
 	}
+
+	/**
+	 * Attaches client cell.
+	 *
+	 * @param this - Client grid
+	 * @param cell - Cell
+	 */
+	ClientGrid.prototype.attachCell = function (this: ClientGrid, cell: ClientCell): void {
+		// Super first
+		(Object.getPrototypeOf(ClientGrid.prototype) as ClientGrid).attachCell.call(this, cell);
+
+		this.showCell(cell);
+	};
+
+	/**
+	 * Detaches client cell.
+	 *
+	 * @param this - Client grid
+	 * @param path - Cell path
+	 */
+	ClientGrid.prototype.detachCell = function (this: ClientGrid, path: CellPathOwn): void {
+		// Hide queued first
+		this.hideCell(path);
+
+		// Super last
+		(Object.getPrototypeOf(ClientGrid.prototype) as ClientGrid).detachCell.call(this, path);
+	};
 
 	// Return the class
 	return ClientGrid;
@@ -149,7 +233,7 @@ export function ClientGridFactory({
 /**
  * Type of client grid class.
  */
-export type ClientGridClass = ReturnType<typeof ClientGridFactory>;
+export type ClientGridClass = ReturnType<typeof ClientGridClassFactory>;
 
 /**
  * Instance type of client grid.

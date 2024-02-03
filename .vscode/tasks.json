@@ -1,0 +1,55 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "dev-standalone-build-dev",
+			"type": "shell",
+			"command": "./script/environment/Build-Development.ps1",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "Build standalone dev environment"
+		},
+		{
+			"label": "dev-standalone-launch-vite-hmr",
+			"type": "shell",
+			"command": "npx vite dev",
+			"group": {
+				"kind": "none",
+				"isDefault": false
+			},
+			"detail": "Launch vite HMR"
+		},
+		{
+			"label": "dev-standalone-vite-build",
+			"type": "shell",
+			"command": "npx vite build",
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"detail": "Build Vite"
+		},
+		{
+			"label": "dev-standalone-vite-preview",
+			"type": "shell",
+			"command": "npx vite preview",
+			"group": {
+				"kind": "none",
+				"isDefault": false
+			},
+			"detail": "Serve Vite"
+		},
+		{
+			"label": "stg-standalone-vite-build",
+			"type": "shell",
+			"command": "npx vite build --config vite.config/staging.standalone.vite.config",
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"detail": "Build Vite"
+		}
+	]
+}

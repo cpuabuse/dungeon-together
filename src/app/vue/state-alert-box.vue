@@ -1,5 +1,7 @@
 <template>
-	<statealert v-for="(alert, index) in alerts" :key="index" :message="alert.message" :level="alert.level" />
+	<div>
+		<statealert v-for="(alert, index) in alerts" :key="index" :message="alert.message" :level="alert.level" />
+	</div>
 </template>
 
 <script lang="ts">
@@ -27,7 +29,7 @@ export default defineComponent({
 				message: string;
 
 				/**
-				 * Warninglevel to be passed.
+				 * Warning level to be passed.
 				 */
 				level: AlertLevel;
 			}>;

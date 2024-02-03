@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2022 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,7 +7,7 @@
  * @file Utilities for error handling
  */
 
-import { SingleErrorArgs } from "../client/error";
+import { SingleErrorArgs } from "../core/error";
 
 /**
  * Convention for return type with error included.

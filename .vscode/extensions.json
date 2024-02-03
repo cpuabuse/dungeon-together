@@ -1,0 +1,28 @@
+{
+	"recommendations": [
+		// Prettier
+		"esbenp.prettier-vscode",
+
+		// Vue
+		"Vue.volar",
+		"Vue.vscode-typescript-vue-plugin",
+
+		// GLSL
+		"raczzalan.webgl-glsl-editor",
+
+		// For launch configs
+		"ritwickdey.LiveServer",
+
+		// For launch configs
+		"ms-edgedevtools.vscode-edge-devtools",
+
+		// For code formatting
+		"dbaeumer.vscode-eslint",
+
+		// For scripts
+		"denoland.vscode-deno",
+
+		// Vite server
+		"antfu.vite"
+	]
+}

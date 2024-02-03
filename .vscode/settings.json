@@ -3,24 +3,71 @@
 	"editor.insertSpaces": false,
 	"files.eol": "\n",
 	"cSpell.words": [
+		"bivariance",
+		"bivariant",
+		"buble",
 		"builtins",
 		"combinator",
 		"comms",
+		"composable",
+		"composables",
 		"cpuabuse",
+		"destructure",
+		"destructured",
+		"endregion",
 		"errored",
+		"highlightjs",
+		"interactable",
+		"interactjs",
 		"jscc",
-		"vuex",
+		"loglevel",
+		"onwarn",
 		"pixi",
 		"tock",
-		"destructure",
-		"destructured"
+		"trit",
+		"vsocket",
+		"vuetify"
 	],
 	"yaml.schemas": {
 		"./schema/dt.yml.json": ["*.dt.yml"]
 	},
+	"json.schemas": [{ "url": "https://json.schemastore.org/tsconfig", "fileMatch": ["*.tsconfig.json"] }],
 	"files.associations": {
-		"*.azure-pipelines.yml": "azure-pipelines"
+		"*.azure-pipelines.yml": "azure-pipelines",
+		"*.tsconfig.json": "jsonc"
 	},
 	"eslint.probe": ["typescript", "html", "vue"],
-	"vetur.validation.templateProps": true
+	"editor.semanticTokenColorCustomizations": {
+		"enabled": true,
+		"rules": { "typeParameter": "#22AA22" }
+	},
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"liveServer.settings.NoBrowser": true,
+	"liveServer.settings.port": 5500,
+	"liveServer.settings.ignoreFiles": ["src/**"],
+	"vscode-edge-devtools.timeout": 100000,
+	"[typescript]": {
+		// Overrides prettier extensions, so that it does not auto-format conditional compilation directives
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
+	},
+	"typescript.preferences.autoImportFileExcludePatterns": ["node_modules/io-ts", "node_modules/fp-ts"],
+	"[glsl]": {
+		"editor.defaultFormatter": "raczzalan.webgl-glsl-editor"
+	},
+	"vue.codeActions.savingTimeLimit": 20000,
+	"vue.updateImportsOnFileMove.enabled": true,
+	"vue.inlayHints.inlineHandlerLeading": true,
+	"vue.inlayHints.missingProps": true,
+	"deno.enable": true,
+	"deno.enablePaths": ["script"],
+	"deno.documentPreloadLimit": 1000,
+
+	// Does not open embedded browser
+	"vite.browserType": "system",
+	// Port for server
+	"vite.port": 8080,
+	// Start manually
+	"vite.autoStart": false,
+	// Do not switch to terminal
+	"vite.showTerminal": false
 }

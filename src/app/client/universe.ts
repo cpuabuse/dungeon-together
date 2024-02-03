@@ -1,52 +1,64 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * @file Client universe
+ * @file
+ * Client universe.
  */
 
-import vueHljs from "@highlightjs/vue-plugin";
+import { join } from "path";
 import Hammer from "hammerjs";
 import type HammerManager from "hammerjs";
+import { Howl, Howler } from "howler";
 import Mousetrap from "mousetrap";
-import { BaseTexture, Texture } from "pixi.js";
-import { App, createApp } from "vue";
-import { createStore } from "vuex";
-import { defaultModeUuid, defaultShardUuid } from "../common/defaults";
-import { StaticImplements } from "../common/utility-types";
+import type { JoystickManager } from "nipplejs";
+import joystickLib from "nipplejs";
+import { utils } from "pixi.js";
+import { App } from "vue";
+import { DeferredPromise } from "../common/async";
+import { defaultModeUuid } from "../common/defaults";
+import { env } from "../common/env";
 import { Uuid } from "../common/uuid";
-import { CellPath } from "../comms/cell";
-import { CommsConnectionArgs } from "../comms/connection";
-import { EntityPath } from "../comms/entity";
-import { GridPath } from "../comms/grid";
-import { CommsShardArgs, ShardPath } from "../comms/shard";
-import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassStatic } from "../comms/universe";
-import UniverseComponent from "../vue/universe.vue";
-import { ClientBaseClass, ClientBaseFactory } from "./base";
+import { CoreArgIds } from "../core/arg";
+import { LogLevel } from "../core/error";
+import { CoreShardArgParentIds } from "../core/parents";
+import { CoreShardArg, ShardPathExtended } from "../core/shard";
+import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
+import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
+import { Stores } from "../vue/core/store";
+import UniverseComponent from "../vue/pages/the-universe.vue";
+import { ClientBaseClass, ClientBaseConstructorParams, ClientBaseFactory } from "./base";
 import { ClientCell, ClientCellClass, ClientCellFactory } from "./cell";
 import { ClientConnection } from "./connection";
 import { ClientEntity, ClientEntityClass, ClientEntityFactory } from "./entity";
-import { ClientGrid, ClientGridClass, ClientGridFactory } from "./grid";
-import { UniverseState } from "./gui";
-import { Theme } from "./gui/themes";
-import { downSymbol, lcSymbol, leftSymbol, rcSymbol, rightSymbol, scrollSymbol, upSymbol } from "./input";
-import { Mode } from "./mode";
+import { ClientGrid, ClientGridClass, ClientGridClassFactory } from "./grid";
+import { createVueApp } from "./gui";
+import { AppVue } from "./gui/vue.app";
+import { AppI18n } from "./gui/vue.plugin.vuetify";
+import {
+	downSymbol,
+	lcSymbol,
+	leftSymbol,
+	levelDownSymbol,
+	levelUpSymbol,
+	localActionSymbol,
+	rcSymbol,
+	rightSymbol,
+	scrollSymbol,
+	upSymbol
+} from "./input";
+import { ClientMode } from "./mode";
+import { ClientOptions, clientOptions } from "./options";
 import { ClientShard, ClientShardClass, ClientShardFactory } from "./shard";
 
-// Static init
-import "./gui/static-init";
-
 /**
- * Constructor args for client universe.
+ * Joystick create function.
  */
-export interface ClientUniverseArgs extends CoreUniverseArgs {
-	/**
-	 * HTML element.
-	 */
-	element: HTMLElement;
-}
+// Infer import destructuring
+// eslint-disable-next-line @typescript-eslint/typedef
+const { create: createJoystick } = joystickLib;
 
 /**
  * All instances in client.
@@ -54,10 +66,20 @@ export interface ClientUniverseArgs extends CoreUniverseArgs {
  * Termination of the client is impossible, because it is global.
  * For same reason [[Client]] does not store "defaultInstanceUuid" inside.
  */
-export class ClientUniverse
-	extends CoreUniverse
-	implements StaticImplements<CoreUniverseClassStatic, typeof ClientUniverse>
-{
+export class ClientUniverse extends CoreUniverseClassFactory<
+	ClientBaseClass,
+	ClientBaseConstructorParams,
+	ClientOptions,
+	ClientEntity,
+	ClientCell,
+	ClientGrid,
+	ClientShard
+>({ logSource: "Client", options: clientOptions }) {
+	/**
+	 * Base class.
+	 */
+	public readonly Base: ClientBaseClass;
+
 	/**
 	 * A shard constructor.
 	 */
@@ -79,77 +101,73 @@ export class ClientUniverse
 	public readonly Shard: ClientShardClass;
 
 	/**
-	 * Vue.
+	 * Cells index.
 	 */
-	public readonly vue: App;
+	public readonly cellsIndex: Map<Uuid, ClientCell> = new Map();
 
 	/**
-	 * Collection of connections.
+	 * Client connections.
 	 */
-	public connections: Set<ClientConnection> = new Set();
+	public readonly connections: Map<Uuid, ClientConnection> = new Map();
+
+	// Order is important
+	/* eslint-disable @typescript-eslint/member-ordering */
+	public defaultModeUuid: Uuid = defaultModeUuid;
+
+	public defaultMode: ClientMode = new ClientMode({ modeUuid: this.defaultModeUuid });
+	/* eslint-enable @typescript-eslint/member-ordering */
+
+	public defaultShard: ClientShard;
+
+	/**
+	 * Entities index.
+	 */
+	public readonly entitiesIndex: Map<Uuid, ClientEntity> = new Map();
+
+	/**
+	 * Grids index.
+	 */
+	public readonly gridsIndex: Map<Uuid, ClientGrid> = new Map();
+
+	/**
+	 * Internationalization plugin.
+	 */
+	public i18n: AppI18n;
 
 	/**
 	 * Modes.
 	 */
-	public modes: Map<Uuid, Mode> = new Map([
-		[
-			defaultModeUuid,
-			{
-				textures: [
-					new Texture(new BaseTexture("img/bunny-red.svg")),
-					new Texture(new BaseTexture("img/bunny-green.svg")),
-					new Texture(new BaseTexture("img/bunny-blue.svg"))
-				]
-			}
-		],
-		[
-			"treasure",
-			{
-				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/chest_full_open_anim_f0.png"))]
-			}
-		],
-		[
-			"trap",
-			{
-				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_spikes_anim_f0.png"))]
-			}
-		],
-		[
-			"door",
-			{
-				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/doors_leaf_closed.png"))]
-			}
-		],
-		[
-			"floor",
-			{
-				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_1.png"))]
-			}
-		],
-		[
-			"wall",
-			{
-				textures: [new Texture(new BaseTexture("img/rltiles/dc-dngn/wall/brick_brown2.bmp"))]
-			}
-		],
-		[
-			"enemy",
-			{
-				textures: [new Texture(new BaseTexture("img/rltiles/dc-mon64/balrug.bmp"))]
-			}
-		],
-		[
-			"player",
-			{
-				textures: [new Texture(new BaseTexture("img/rltiles/player/base/human_m.bmp"))]
-			}
-		],
-		[
-			"ladder",
-			{
-				textures: [new Texture(new BaseTexture("img/dungeontileset-ii/floor_ladder.png"))]
-			}
-		]
+	public modes: Map<Uuid, ClientMode> = new Map([
+		[defaultModeUuid, this.defaultMode],
+		...(
+			[
+				["mode/user/treasure/default", ["/img/dungeontileset-ii/chest_full_open_anim_f0.png"]],
+				["treasure-open", ["/img/dungeontileset-ii/chest_full_open_anim_f2.png"]],
+				["mode/user/mimic/default", ["/img/dungeontileset-ii/chest_full_open_anim_f0.png"]],
+				["mimic-attack", ["/img/dungeontileset-ii/chest_mimic_open_anim_f2.png"]],
+				["mode/user/trap/default", ["/img/dungeontileset-ii/floor_spikes_anim_f0.png"]],
+				["trap-activate", ["/img/dungeontileset-ii/floor_spikes_anim_f3.png"]],
+				["mode/user/door/default", ["/img/dungeontileset-ii/doors_leaf_closed.png"]],
+				["door-open", ["/img/dungeontileset-ii/doors_leaf_open.png"]],
+				["mode/user/floor/default", ["/img/dungeontileset-ii/floor_1.png"]],
+				["mode/user/wall/default", ["/img/rltiles/dc-dngn/wall/brick_brown2.png"]],
+				["mode/user/enemy/default", ["/img/rltiles/dc-mon64/balrug.png"]],
+				["mode/user/player/default", ["/img/rltiles/player/base/human_m.png"]],
+				["mode/user/ladder/default", ["/img/dungeontileset-ii/floor_ladder.png"]],
+				["death", ["/img/rltiles/nh-mon1/w/wraith.png"]]
+			] as Array<[string, Array<string>]>
+		).map(
+			// False negative
+			// eslint-disable-next-line @typescript-eslint/typedef
+			([modeUuid, paths]) =>
+				[
+					modeUuid,
+					new ClientMode({
+						modeUuid,
+						paths: paths.map(path => join(env.pathToRoot, path))
+					})
+				] as const
+		)
 	]);
 
 	/**
@@ -168,265 +186,548 @@ export class ClientUniverse
 	public readonly shards: Map<Uuid, ClientShard> = new Map();
 
 	/**
-	 * Base class for client objects.
+	 * Shards index.
 	 */
-	protected readonly Base: ClientBaseClass;
+	public readonly shardsIndex: Map<Uuid, ClientShard> = new Map();
+
+	/**
+	 * Stores for pinia.
+	 */
+	public readonly stores: Stores;
+
+	/**
+	 * Universe element.
+	 */
+	public readonly universeElement: HTMLElement;
+
+	/**
+	 * Vue.
+	 */
+	public readonly vue: App;
 
 	/**
 	 * Constructor.
 	 * The constructor can never be called more than once, during the execution of the program.
 	 *
-	 * @param element - HTML elements
+	 * @param superParams - Super parameters
+	 * @param param - Destructured parameter
 	 */
-	public constructor({ application, element }: ClientUniverseArgs) {
+	public constructor(
+		superParams: CoreUniverseRequiredConstructorParameter,
+		{
+			created,
+			element
+		}: {
+			/**
+			 * HTML element.
+			 */
+			element: HTMLElement;
+
+			/**
+			 * Created promise.
+			 */
+			created: DeferredPromise<void>;
+		}
+	) {
 		// Call superclass
-		super({ application });
+		// TODO: Add universe UUID
+		super(superParams);
+
+		this.universeElement = element;
 
 		// Generate base class
 		this.Base = ClientBaseFactory({ element, universe: this });
 
 		// Generate object classes
 		this.Shard = ClientShardFactory({ Base: this.Base });
-		this.Grid = ClientGridFactory({ Base: this.Base });
+		this.Grid = ClientGridClassFactory({ Base: this.Base });
 		this.Cell = ClientCellFactory({ Base: this.Base });
 		this.Entity = ClientEntityFactory({ Base: this.Base });
 
-		// Create vue
-		this.vue = createApp(UniverseComponent);
+		const { vue, stores, i18n }: AppVue = createVueApp({
+			component: UniverseComponent,
+			universe: this
+		});
+		this.vue = vue;
+		this.stores = stores;
+		this.i18n = i18n;
 
-		// Object initialization
-		setTimeout(() => {
-			this.addShard({ grids: new Map(), shardUuid: defaultShardUuid });
+		// Mount vue
+		let vueElement: HTMLElement = document.createElement("div");
+		this.vue.mount(vueElement);
 
-			// Init vue after initialization
-			this.vue.use(createStore<UniverseState>({ state: { theme: Theme.Dark, universe: this } }));
-			this.vue.use(vueHljs);
+		// Display vue
+		element.after(vueElement);
 
-			// Mount vue
-			let vueElement: HTMLElement = document.createElement("div");
-			this.vue.mount(vueElement);
+		// Default shard
+		let defaultShardCreated: DeferredPromise = new DeferredPromise();
+		let defaultShardAttach: Promise<void> = new Promise((resolve, reject) => {
+			defaultShardCreated.then(resolve).catch(reject);
+		});
+		let defaultShardArg: CoreShardArg<ClientOptions> = {
+			grids: new Map(),
+			shardUuid: this.getDefaultShardUuid()
+		};
+		this.defaultShard = this.addShard(
+			defaultShardArg,
+			{ attachHook: defaultShardAttach, created: defaultShardCreated },
+			[]
+		);
+		defaultShardAttach
+			.then(async () => {
+				// Wait for all images to load
+				await Promise.all(Array.from(this.modes.values()).map(mode => mode.isInitialized));
+				const fadeTime: number = 5000;
+				const bgVolume: number = 0.1;
 
-			// Display vue
-			element.after(vueElement);
-		});
+				// Mute initially
+				Howler.mute(true);
 
-		// JavaScript based events
-		element.addEventListener("contextmenu", event => {
-			// Stops showing default context menu
-			event.preventDefault();
+				// Sound
+				let bgSounds: Array<Howl> = [
+					{
+						endTime: 106000,
+						src: join(env.pathToRoot, "sound/lexin-music/cinematic-ambient-piano-118668.mp3"),
+						startTime: 0
+					},
+					{
+						endTime: 131000,
+						src: join(env.pathToRoot, "sound/lexin-music/cinematic-documentary-115669.mp3"),
+						startTime: 0
+					},
+					{
+						endTime: 88000,
+						src: join(env.pathToRoot, "sound/amaranta-music/light-and-darkness-110414.mp3"),
+						startTime: 25000
+					}
+					// False negative
+					// eslint-disable-next-line @typescript-eslint/typedef
+				].map(({ src, startTime, endTime }, index, array) => {
+					let howl: Howl = new Howl({
+						/**
+						 * Queueing.
+						 */
+						onplay: (): void => {
+							setTimeout(
+								() => {
+									// Start fading this
+									howl.fade(bgVolume, 0, fadeTime);
 
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(rcSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
+									// Get next
+									let newIndex: number = index + 1;
+									let newHowl: Howl | undefined = bgSounds[newIndex < array.length ? newIndex : 0];
 
-		// Scroll does not work on mobile phone
-		element.addEventListener("wheel", event => {
-			// Prevent zoom in HTML
-			event.preventDefault();
+									if (newHowl) {
+										// Play and fade next
+										newHowl.play("default");
+										newHowl.fade(0, bgVolume, fadeTime);
+									}
+									// Negative delay should be OK
+								},
+								endTime - startTime - fadeTime
+							);
+						},
+						sprite: {
+							// *Should* work fine with negative duration
+							default: [startTime, endTime - startTime]
+						},
+						src,
+						volume: bgVolume
+					});
 
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(scrollSymbol, {
-					x: 0,
-					y: event.deltaY
+					// Return
+					return howl;
 				});
-			});
-		});
-		// Keyboard events
-		// Prepare mousetrap instance
-		let mousetrap: Mousetrap.MousetrapInstance = new Mousetrap(element);
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("up", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(upSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("w", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(upSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("down", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(downSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("s", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(downSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("right", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(rightSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("d", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(rightSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("left", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(leftSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
-		// We don't care about return
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-		mousetrap.bind("a", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(leftSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
 
-		// Touch events
-		let hammer: HammerManager = new Hammer(element);
+				bgSounds[0]?.play("default");
 
-		// Tap works both for the browser's mouseclick and the mobile tap
-		hammer.on("tap", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(lcSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
+				// Cannot play if user did not interact with page; It seems that playing, even if muted, actually begins after context is acquired; To avoid cacophony from simultaneous sounds on first user interaction, advanced audiovisual effects queue should depend on core state readiness, which this function should initialize (Similar effect would be achieved by making sound queue dequeue based on sound lifecycle callbacks, but in that case visual effects would have to be tied to sounds, but it is better for both to be controlled by an independent queue)
+				if (Howler.ctx.state === "running") {
+					Howler.mute(false);
+				} else {
+					/**
+					 * Plays the sound.
+					 */
+					// eslint-disable-next-line no-inner-declarations
+					let playSound: () => void = () => {
+						if (Howler.ctx.state === "running") {
+							Howler.mute(false);
+							Howler.ctx.removeEventListener("statechange", playSound);
+						}
+					};
 
-		// Press works only on mobile phone
-		hammer.on("press", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(rcSymbol, {
-					x: 0,
-					y: 0
-				});
-			});
-		});
+					Howler.ctx.addEventListener("statechange", playSound);
+				}
 
-		// Pinch does not work on mousescroll
-		hammer.on("pinch", () => {
-			// Iterates through shards conditionally
-			this.shards.forEach(clientShard => {
-				// Send events to the relevant shards
-				clientShard.fireInput(scrollSymbol, {
-					x: 0,
-					y: 0
+				// JavaScript based events
+				element.addEventListener("contextmenu", event => {
+					// Stops showing default context menu
+					event.preventDefault();
+
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// TODO: Calculate and store shard offsets; Terminate iteration on first
+						// Send events to the relevant shards
+						clientShard.fireInput(rcSymbol, {
+							x: event.x,
+							y: event.y
+						});
+					});
 				});
+
+				// Scroll does not work on mobile phone
+				element.addEventListener("wheel", event => {
+					// Prevent zoom in HTML
+					event.preventDefault();
+
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(scrollSymbol, {
+							x: 0,
+							y: event.deltaY
+						});
+					});
+				});
+				// Keyboard events
+				// Prepare mousetrap instance
+				let mousetrap: Mousetrap.MousetrapInstance = new Mousetrap();
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("up", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(upSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("w", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(upSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("down", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(downSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("s", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(downSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("right", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(rightSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("d", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(rightSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("left", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(leftSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("a", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(leftSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("o", () => {
+					this.shards.forEach(clientShard => {
+						clientShard.fireInput(levelUpSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("p", () => {
+					this.shards.forEach(clientShard => {
+						clientShard.fireInput(levelDownSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("e", () => {
+					this.shards.forEach(clientShard => {
+						clientShard.fireInput(localActionSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+
+				// Touch events
+				let hammer: HammerManager = new Hammer(element);
+
+				// Tap works both for the browser's mouseclick and the mobile tap
+				hammer.on("tap", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(lcSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+
+				// Press works only on mobile phone
+				hammer.on("press", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// TODO: Add coordinates from Hammer and move dispatching to separate function together with right-click
+						// Send events to the relevant shards
+						clientShard.fireInput(rcSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+
+				// Pinch does not work on mouse scroll
+				hammer.on("pinch", () => {
+					// Iterates through shards conditionally
+					this.shards.forEach(clientShard => {
+						// Send events to the relevant shards
+						clientShard.fireInput(scrollSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+			})
+			.catch(error => {
+				this.log({
+					error: new Error(`Failed to attach default shard in universe(universeUuid="${this.universeUuid}").`, {
+						cause: error instanceof Error ? error : undefined
+					}),
+					level: LogLevel.Warning
+				});
+			})
+			.finally(() => {
+				created.resolve();
 			});
-		});
 	}
 
 	/**
-	 * Adds connection, which subsequently adds a shard.
+	 * Adds shard (Client universe level).
 	 *
-	 * @param connectionArgs - Connection args
-	 * @returns - The connection added
+	 * @remarks
+	 * Exists to appropriately verbally implement super.
 	 */
-	public addConnection(connectionArgs: CommsConnectionArgs): ClientConnection {
-		let connection: ClientConnection = new ClientConnection(connectionArgs);
-		this.connections.add(connection);
-		return connection;
-	}
+	public addShard(
+		...shardArgs: [
+			...coreParams: CoreUniverseObjectConstructorParameters<
+				ClientBaseConstructorParams,
+				CoreShardArg<ClientOptions>,
+				CoreArgIds.Shard,
+				ClientOptions,
+				CoreShardArgParentIds
+			>,
+			clientParams?: {
+				/**
+				 * Append or not.
+				 */
+				doAppend: boolean;
+			}
+		]
+	): ClientShard;
 
 	/**
-	 * Add [[ClientShard]] to [[ClientUniverse]].
+	 * Adds shard (Pass through extra shard parameters).
 	 *
-	 * Adds the modes from the shard.
-	 *
-	 * @param shard - Arguments for the [[ClientShard]] constructor
+	 * If this overload doesn't exist, subclass(just for future-proof if there would be one) doesn't pick up that argument depending on `this` is a tuple, when calling superclass, similarly to calling superclass in {@link CoreUniverse.addShard} implementation.
 	 */
-	public addShard(shard: CommsShardArgs): void {
-		if (this.shards.has(shard.shardUuid)) {
-			// Clear the shard if it already exists
-			this.doRemoveShard(shard);
-		}
+	public addShard(...shardArgs: ConstructorParameters<this["Shard"]>): ClientShard;
 
-		// Set the shard and reset modes index
-		let modesIndex: Array<Uuid> = new Array();
-		let clientShard: ClientShard = new this.Shard(shard);
-		this.shards.set(clientShard.shardUuid, new this.Shard(shard));
-		this.modesIndex.set(shard.shardUuid, modesIndex);
+	// ESLint params bug
+	// eslint-disable-next-line jsdoc/require-param
+	/**
+	 * Adds a shard.
+	 *
+	 * @remarks
+	 * Appends HTML here, since if there is multiple shards, universe might want to control css.
+	 *
+	 * @param param - Destructured parameter
+	 * @override
+	 */
+	public addShard(
+		// ESLint bug - nested args
+		// eslint-disable-next-line @typescript-eslint/typedef
+		...shardArgs: ConstructorParameters<this["Shard"]>
+	): ClientShard {
+		// False positive
+		// eslint-disable-next-line @typescript-eslint/typedef
+		let [, { attachHook }, , clientShardOptions]: ConstructorParameters<this["Shard"]> = shardArgs;
+		attachHook
+			// Append before other attach hook functionality
+			.then(() => {
+				if (clientShardOptions?.doAppend) {
+					let element: HTMLElement = this.universeElement;
 
-		// Populate the universe modes
-		clientShard.modes.forEach((mode, uuid) => {
-			this.modes.set(uuid, mode);
-			modesIndex.push(uuid);
-		});
+					// Attach shard to universe and update dimensions the css changes
+					element.appendChild(clientShard.shardElement);
+
+					// Work with joystick
+					if (utils.isMobile.any) {
+						const moveDelta: number = 250;
+						let joystickElement: HTMLElement = document.createElement("div");
+						joystickElement.classList.add("joystick");
+						clientShard.shardElement.appendChild(joystickElement);
+						let joystickManager: JoystickManager = createJoystick({
+							color: "slateblue",
+							dynamicPage: true,
+							mode: "static",
+							position: {
+								left: "50%",
+								top: "50%"
+							},
+							threshold: 0.7,
+							zone: joystickElement
+						});
+						let intervalId: ReturnType<typeof setInterval> | undefined;
+
+						// Joystick movements
+						joystickManager.on("dir", (event, joystick) => {
+							if (intervalId !== undefined) {
+								clearInterval(intervalId);
+							}
+
+							intervalId = setInterval(() => {
+								this.shards.forEach(clientShard => {
+									// Up movement
+									if (joystick.direction.angle === "up") {
+										clientShard.fireInput(upSymbol, {
+											x: 0,
+											y: 0
+										});
+									}
+
+									// Down movement
+									if (joystick.direction.angle === "down") {
+										clientShard.fireInput(downSymbol, {
+											x: 0,
+											y: 0
+										});
+									}
+
+									// Right movement
+									if (joystick.direction.angle === "right") {
+										clientShard.fireInput(rightSymbol, {
+											x: 0,
+											y: 0
+										});
+									}
+
+									// Left movement
+									if (joystick.direction.angle === "left") {
+										clientShard.fireInput(leftSymbol, {
+											x: 0,
+											y: 0
+										});
+									}
+								});
+							}, moveDelta);
+						});
+
+						joystickManager.on("end", () => {
+							if (intervalId !== undefined) {
+								clearInterval(intervalId);
+							}
+						});
+					}
+				}
+			})
+			.catch(error => {
+				this.log({
+					error: new Error("Could not append element.", { cause: error instanceof Error ? error : undefined }),
+					level: LogLevel.Critical
+				});
+			})
+			.finally(() => {
+				// Finally notify state
+				this.stores.useUniverseStore().updateUniverse();
+			});
+		let clientShard: ClientShard = super.addShard(...shardArgs);
+
+		return clientShard;
 	}
 
 	/**
 	 * Remove [[ClientShard]] from [[ClientUniverse]].
 	 *
 	 * Removes unused modes.
+	 *
+	 * @param param - Destructured parameter
 	 */
-	public doRemoveShard({ shardUuid }: ShardPath): void {
+	public doRemoveShard({ shardUuid }: ShardPathExtended): void {
 		// Checks if there is something to delete in the first place; Then within all the modes associated with the uuid of the shard to delete, we check that they are not within an array made up from all the other mode associations from "modesIndex" to other shards; And if there is no match, then we delete the mode; Finally we delete the shard and the "modesIndex" entry
 		if (this.shards.has(shardUuid)) {
 			// Tell shard it is about to be deleted
-			(this.shards.get(shardUuid) as ClientShard).terminate();
+			this.shards.get(shardUuid)?.terminateShard();
 
 			// Clean up the modes
 			if (this.modesIndex.has(shardUuid)) {
@@ -434,9 +735,13 @@ export class ClientUniverse
 				(this.modesIndex.get(shardUuid) as Array<Uuid>).forEach(modeUuid => {
 					if (
 						!Array.from(this.modesIndex)
+							// False negative
+							// eslint-disable-next-line @typescript-eslint/typedef
 							.filter(function ([key]) {
 								return key !== shardUuid;
 							})
+							// False negative
+							// eslint-disable-next-line @typescript-eslint/typedef
 							.reduce(function (result, [, modesArray]) {
 								return new Set([...Array.from(result), ...modesArray]);
 							}, new Set())
@@ -454,96 +759,31 @@ export class ClientUniverse
 	}
 
 	/**
-	 * Get [[ClientCell]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @param path - Path to cell
-	 *
-	 * @returns [[ ClientCell]]
-	 */
-	public getCell(path: CellPath): ClientCell {
-		return this.getShard(path).getGrid(path).getCell(path);
-	}
-
-	/**
-	 * Get [[ClientEntity]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @param path - Path to entity
-	 *
-	 * @returns [[ClientEntity]], the smallest renderable
-	 */
-	public getEntity(path: EntityPath): ClientEntity {
-		return this.getShard(path).getGrid(path).getCell(path).getEntity(path);
-	}
-
-	/**
-	 * Get [[ClientGrid]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @param path - Path to grid
-	 *
-	 * @returns [[ ClientGrid]]
-	 */
-	public getGrid(path: GridPath): ClientGrid {
-		return this.getShard(path).getGrid(path);
-	}
-
-	/**
 	 * Get [[Mode]].
 	 *
 	 * A shortcut function.
 	 *
+	 * @param param - Destructured parameter
 	 * @returns Modes for client
 	 */
 	public getMode({
 		uuid
 	}: {
 		/**
-		 *
+		 * Uuid of the mode.
 		 */
 		uuid: Uuid;
-	}): Mode {
-		let mode: Mode | undefined = this.modes.get(uuid);
+	}): ClientMode {
+		let mode: ClientMode | undefined = this.modes.get(uuid);
 		if (mode === undefined) {
-			// Default mode is always there
-			return this.modes.get(defaultModeUuid) as Mode;
+			this.log({
+				level: LogLevel.Notice,
+				message: `Mode(modeUuid="${uuid}") was not found in universe(universeUuid="${this.universeUuid}"), and was substituted with default mode.`
+			});
+
+			// Return default mode
+			return this.defaultMode;
 		}
 		return mode;
-	}
-
-	/**
-	 * Get [[ClientShard]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @returns [[clientShard]], everything happening on the screen
-	 */
-	public getShard({ shardUuid }: ShardPath): ClientShard {
-		let clientShard: ClientShard | undefined = this.shards.get(shardUuid);
-
-		if (clientShard === undefined) {
-			// "defaultShardUuid" is always present, since it is initialized and cannot be removed or overwritten
-			return this.shards.get(defaultShardUuid) as ClientShard;
-		}
-		return clientShard;
-	}
-
-	/**
-	 * Remove [[ClientShard]] from [[ClientUniverse]].
-	 *
-	 * Removes unused modes.
-	 *
-	 * @param path - Path to shard
-	 */
-	public removeShard(path: ShardPath): void {
-		// Never remove "defaultShardUuid"
-		if (path.shardUuid === defaultShardUuid) {
-			return;
-		}
-		this.doRemoveShard(path);
 	}
 }

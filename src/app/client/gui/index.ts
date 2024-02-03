@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,37 +7,58 @@
  * @file File for vue definitions
  */
 
-import { Component, defineComponent } from "@vue/runtime-core";
-import { Store } from "vuex";
-import { ClientUniverse } from "../universe";
-import { Theme } from "./themes";
+import { ExhaustiveUnion } from "../../common/utility-types";
+import { ClientCell } from "../cell";
 
 /**
- * State type for vuex.
+ * Reexport.
  */
-export interface UniverseState {
-	/**
-	 * Reference to client universe instance.
-	 */
-	universe: ClientUniverse;
+export { createVueApp } from "./vue.app";
 
-	/**
-	 * If theme is light.
-	 */
-	theme: Theme;
+/**
+ * Words for right-click menu data type.
+ */
+export enum ClientUniverseStateRcMenuDataWords {
+	Cell = "cell",
+	Empty = "empty"
 }
 
 /**
- * Universe store.
+ * Right-click menu data.
  */
-export type UniverseStore = Store<UniverseState>;
+export type ClientUniverseStateRcMenuData =
+	| null
+	| (ExhaustiveUnion<
+			| {
+					/**
+					 * Cell type.
+					 */
+					type: ClientUniverseStateRcMenuDataWords.Cell;
 
-/**
- * Cast this to access store.
- */
-export type ThisVueStore = {
-	/**
-	 * Vuex store.
-	 */
-	$store: UniverseStore;
-};
+					/**
+					 * Cell link.
+					 */
+					cell: ClientCell;
+			  }
+			| {
+					/**
+					 * Empty type.
+					 *
+					 * @remarks
+					 * Display when no context given.
+					 */
+					type: ClientUniverseStateRcMenuDataWords.Empty;
+			  },
+			"type",
+			ClientUniverseStateRcMenuDataWords
+	  > & {
+			/**
+			 * Pixel position on "x".
+			 */
+			x: number;
+
+			/**
+			 * Pixel position on "y".
+			 */
+			y: number;
+	  });

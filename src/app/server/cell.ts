@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,42 +7,52 @@
  * @file Cells making up the grid.
  */
 
-import {
-	defaultKindUuid,
-	defaultModeUuid,
-	defaultWorldUuid,
-	entityUuidUrlPath,
-	navAmount,
-	urlPathSeparator
-} from "../common/defaults";
-import { Uuid, getDefaultUuid } from "../common/uuid";
-import { CellPath, CommsCell, CommsCellArgs } from "../comms/cell";
-import { EntityPath } from "../comms/entity";
-import { ServerBaseClass } from "./base";
-import { ServerEntity, ServerEntityArgs, ServerEntityClassConcrete } from "./entity";
+import { Uuid } from "../common/uuid";
+import { CoreArgIds } from "../core/arg";
+import { CoreCellArg, CoreCellClassFactory } from "../core/cell";
+import { EntityPathExtended } from "../core/entity";
+import { CoreCellArgParentIds } from "../core/parents";
+import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
+import { ServerBaseClass, ServerBaseConstructorParams } from "./base";
+import { ServerEntity } from "./entity";
+import { ServerOptions, serverOptions } from "./options";
 
 /**
- * Navigation.
+ * Cell event.
  */
-export type Nav = Array<CellPath>;
+export type CellEvent =
+	| {
+			/**
+			 * Death type.
+			 */
+			name: "death";
 
-/**
- * Arguments for the [[ServerCell]] constructor.
- */
-export interface ServerCellArgs extends CommsCellArgs {
-	/**
-	 *
-	 */
-	nav: Nav;
-	/**
-	 *
-	 */
-	entities: Map<Uuid, ServerEntityArgs>;
-}
+			/**
+			 * Target entity UUID.
+			 */
+			targetEntityUuid: Uuid;
+	  }
+	| {
+			/**
+			 * Trail type.
+			 */
+			name: "trail";
+
+			/**
+			 * Target entity UUID.
+			 */
+			targetEntityUuid: Uuid;
+
+			/**
+			 * Target cell UUID.
+			 */
+			targetCellUuid: Uuid;
+	  };
 
 /**
  * Generator for the server cell class.
  *
+ * @param param - Destructured parameter
  * @returns Server cell class
  */
 // Force type inference to extract class type
@@ -58,215 +68,110 @@ export function ServerCellFactory({
 	/**
 	 * The cell within the grid.
 	 */
-	class ServerCell extends Base implements CommsCell {
-		/**
-		 * Coordinates in grid. An id given during creation. Does not represent anything visually or logically.
-		 */
-		public readonly cellUuid: string;
+	class ServerCell extends CoreCellClassFactory<
+		ServerBaseClass,
+		ServerBaseConstructorParams,
+		ServerOptions,
+		ServerEntity
+	>({
+		Base,
+		options: serverOptions
+	}) {
+		/** Cell events. */
+		public events: Array<CellEvent> = new Array<CellEvent>();
 
 		/**
-		 * Default [[ServerEntity]] UUID.
+		 * Whether the cell has been updated.
+		 * Should be updated by kind only when kind specific information must be sent to the client.
 		 */
-		public defaultEntityUuid: Uuid;
+		public isUpdated: boolean = false;
 
-		/**
-		 * Place entities.
-		 */
-		public readonly entities: Map<Uuid, ServerEntity> = new Map();
-
-		/**
-		 * CommsGrid path.
-		 */
-		public readonly gridUuid: Uuid;
-
-		/**
-		 * Navigation.
-		 */
-		public readonly nav: Nav = new Array(navAmount).fill(this);
-
-		/**
-		 * Parent universe.
-		 */
-		public readonly shardUuid: Uuid;
-
-		/**
-		 * Indicates which world this cell is part of.
-		 */
-		public worlds: Set<Uuid>;
-
-		/**
-		 * X representation.
-		 */
-		public x: number;
-
-		/**
-		 * Y representation.
-		 */
-		public y: number;
-
-		/**
-		 * Z representation.
-		 */
-		public z: number;
-
+		// ESLint params bug
+		// eslint-disable-next-line jsdoc/require-param
 		/**
 		 * Cell constructor.
 		 *
 		 * Creates nowhere by default.
+		 */
+		public constructor(
+			// Nested args ESLint bug
+			// eslint-disable-next-line @typescript-eslint/typedef
+			...[cell, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
+				ServerBaseConstructorParams,
+				CoreCellArg<ServerOptions>,
+				CoreArgIds.Cell,
+				ServerOptions,
+				CoreCellArgParentIds
+			>
+		) {
+			// Super
+			super(cell, { attachHook, created }, baseParams);
+		}
+
+		/**
+		 * Adds an event to the cell, and flags cell as updated.
 		 *
-		 * @param nav - Can be less than [[navAmount]], then `this.nav` will be filled with `this`, if longer than [[navAmount]], then extra values will be ignored
+		 * @param event - Event to add
 		 */
-		public constructor({ shardUuid, cellUuid, gridUuid, nav, entities, worlds, x, y, z }: ServerCellArgs) {
-			// ServerProto
-			super();
-
-			// Set path
-			this.shardUuid = shardUuid;
-			this.gridUuid = gridUuid;
-			this.cellUuid = cellUuid;
-
-			// Set coordinates
-			this.x = x;
-			this.y = y;
-			this.z = z;
-
-			// Set nav, but be gentle about the values we recieve
-			for (let i: number = 0; i < navAmount && i < nav.length; i++) {
-				this.nav[i] = nav[i];
-			}
-
-			// Initialize "defaultEntityUuid"
-			this.defaultEntityUuid = getDefaultUuid({
-				path: `${entityUuidUrlPath}${urlPathSeparator}${this.cellUuid}`
-			});
-
-			// Set world; Generate a new object
-			this.worlds = new Set([...worlds, defaultWorldUuid]);
-
-			setTimeout(() => {
-				// Set default entity
-				this.addEntity({
-					...this,
-					entityUuid: this.defaultEntityUuid,
-					kindUuid: defaultKindUuid,
-					modeUuid: defaultModeUuid,
-					worldUuid: defaultWorldUuid
-				});
-
-				// Initialize manifests
-				this.worlds.forEach(worldUuid => {
-					let {
-						kinds
-					}: {
-						/**
-						 *
-						 */
-						kinds: Set<Uuid>;
-					} = this.universe.getWorld({
-						uuid: worldUuid
-					});
-
-					kinds.forEach(kindUuid => {
-						this.universe
-							.getKind({
-								uuid: kindUuid
-							})
-							.typeOfEntity.initialize({
-								...this,
-								kindUuid,
-								worldUuid
-							});
-					});
-				});
-
-				// Initialize entities
-				entities.forEach(entity => {
-					this.addEntity(entity);
-				});
-			});
+		public addEvent(event: CellEvent): void {
+			this.events.push(event);
+			this.isUpdated = true;
 		}
 
 		/**
-		 * Adds [[ServerEntity]].
-		 *
-		 * @param entity - Arguments for the [[ServerEntity]] constructor
+		 * Clears cell events and other things.
 		 */
-		public addEntity(entity: ServerEntityArgs): void {
-			if (this.entities.has(entity.shardUuid)) {
-				// Clear the shard if it already exists
-				this.doRemoveEntity(entity);
-			}
-			let TypeOfEntity: ServerEntityClassConcrete = this.universe.getKind({ uuid: entity.kind }).typeOfEntity;
-
-			// The "TypeOfEntity" will be classes extending "ServerEntity", so abstract class should not be created
-			// @ts-ignore
-			new TypeOfEntity({
-				...entity,
-				cellUuid: this.cellUuid,
-				gridUuid: this.gridUuid,
-				shardUuid: this.shardUuid
-			}).initialize();
-		}
-
-		/**
-		 * Attach [[ServerEntity]] to [[CommsCell]].
-		 *
-		 * @param entity - [[ServerEntity]], anything that resides within a cell
-		 */
-		public attach(entity: ServerEntity): void {
-			this.entities.set(entity.entityUuid, entity);
-		}
-
-		/**
-		 * Detach [[ServerEntity]] from [[CommsCell]].
-		 */
-		public detach({ entityUuid }: ServerEntity): void {
-			if (this.entities.has(entityUuid)) {
-				this.entities.delete(entityUuid);
-			}
-		}
-
-		/**
-		 * Gets [[CommsEntity]].
-		 *
-		 * @returns [[entity]], anything that resides within a cell
-		 */
-		public getEntity({ entityUuid }: EntityPath): ServerEntity {
-			let entity: ServerEntity | undefined = this.entities.get(entityUuid);
-			// Default clientEntity is always there
-			return entity === undefined ? this.entities.get(this.defaultEntityUuid) : entity;
-		}
-
-		/**
-		 * Removes [[CommsEntity]].
-		 *
-		 * @param path - Path to entity
-		 */
-		public removeEntity(path: EntityPath): void {
-			if (path.entityUuid !== this.defaultEntityUuid) {
-				this.doRemoveEntity(path);
-			}
-		}
-
-		/**
-		 * Terminate `this`.
-		 */
-		public terminate(): void {
-			this.entities.forEach(entity => {
-				this.doRemoveEntity(entity);
-			});
-		}
-
-		/**
-		 * Actually removes [[CommsEntity]].
-		 */
-		private doRemoveEntity({ entityUuid }: EntityPath): void {
-			let entity: ServerEntity | undefined = this.entities.get(entityUuid);
-			if (entity !== undefined) {
-				entity.terminate();
-			}
+		public clear(): void {
+			this.events = new Array<CellEvent>();
 		}
 	}
+
+	/**
+	 * Detaches server entity.
+	 *
+	 * @param this - Server cell
+	 * @param path - Entity path
+	 */
+	ServerCell.prototype.detachEntity = function (this: ServerCell, path: EntityPathExtended): void {
+		let entityToDetach: ServerEntity = this.getEntity(path);
+
+		// Notify other entities in cell; Done first so that other entities can locate the entity
+		this.entities.forEach(entityToNotify => {
+			// Skip this entity because it will be notified separately, and it is still not detached
+			if (entityToNotify.entityUuid !== entityToDetach.entityUuid) {
+				entityToNotify.kind.onCellDetachEntity(entityToDetach);
+			}
+		});
+
+		// Notify entity itself of detachment
+		entityToDetach.kind.onDetachEntity();
+
+		// Super last
+		(Object.getPrototypeOf(ServerCell.prototype) as ServerCell).detachEntity.call(this, path);
+	};
+
+	/**
+	 * Attaches server entity.
+	 *
+	 * @param this - Server cell
+	 * @param path - Entity path
+	 * @param entityToAttach - Entity to attach
+	 */
+	ServerCell.prototype.attachEntity = function (this: ServerCell, entityToAttach: ServerEntity): void {
+		// Super first
+		(Object.getPrototypeOf(ServerCell.prototype) as ServerCell).attachEntity.call(this, entityToAttach);
+
+		// Notify entity itself of attachment
+		entityToAttach.kind.onAttachEntity();
+
+		// Notify other entities in cell
+		this.entities.forEach(entityToNotify => {
+			// Skip this entity because it will be notified separately
+			if (entityToNotify.entityUuid !== entityToAttach.entityUuid) {
+				entityToNotify.kind.onCellAttachEntity(entityToAttach);
+			}
+		});
+	};
 
 	// Return class
 	return ServerCell;

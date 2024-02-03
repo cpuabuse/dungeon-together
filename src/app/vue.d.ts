@@ -1,15 +1,25 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * @file Vue module augmentation
+ * Vue module overrides.
+ *
+ * @remarks
+ * To use `ComponentCustomProperties` must be a module to augument global properties, with `export {};`.
+ *
+ * @file
  */
 
-declare module "*.vue" {
-	import { defineComponent } from "vue";
+import { Stores } from "./vue/core/store";
 
-	const component: ReturnType<typeof defineComponent>;
-	export default component;
+declare module "vue" {
+	/**
+	 * Injection override for stores resource.
+	 *
+	 * @param name - Name of injected resource
+	 * @returns Stores object
+	 */
+	export function inject(name: "stores"): Stores;
 }

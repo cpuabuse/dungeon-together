@@ -1,10 +1,11 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
 /**
- * @file Displays server information to canvas.
+ * @file
+ * Displays server information to canvas.
  */
 
 import { Application, Container, Matrix, Renderer, utils } from "pixi.js";
@@ -14,32 +15,40 @@ import {
 	defaultMinimumEntityInColumn,
 	defaultMinimumEntityInRow,
 	defaultMobileEntityHeight,
-	defaultMobileEntityWidth,
-	gridUuidUrlPath,
-	urlPathSeparator
+	defaultMobileEntityWidth
 } from "../common/defaults";
-import { MessageTypeWord, MovementWord } from "../common/defaults/connection";
-import { Uuid, getDefaultUuid } from "../common/uuid";
-import { VSocket } from "../common/vsocket";
-import { Envelope } from "../comms/connection";
-import { CommsGridArgs, GridPath } from "../comms/grid";
-import { CommsShard, CommsShardArgs } from "../comms/shard";
-import { ClientBaseClass } from "./base";
+import { DirectionWord, MessageTypeWord } from "../common/defaults/connection";
+import { defaultFps, defaultMobileFps } from "../common/graphics";
+import { Uuid } from "../common/uuid";
+import { CoreArgIds } from "../core/arg";
+import { MovementWord, processQueueWord } from "../core/connection";
+import { LogLevel } from "../core/error";
+import { CoreShardArgParentIds } from "../core/parents";
+import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
+import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
+import { Store, StoreWord } from "../vue/core/store";
+import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
+import { ClientCell } from "./cell";
+import { ClientConnection, ClientPlayer } from "./connection";
+import { ElementBall } from "./element-ball";
 import { ClientGrid } from "./grid";
+import { ClientUniverseStateRcMenuData, ClientUniverseStateRcMenuDataWords } from "./gui";
 import {
 	Input,
 	InputInterface,
 	downSymbol,
 	lcSymbol,
 	leftSymbol,
+	levelDownSymbol,
+	levelUpSymbol,
+	localActionSymbol,
 	rcSymbol,
 	rightSymbol,
 	scrollSymbol,
 	upSymbol
 } from "./input";
-import { Mode } from "./mode";
-import { ClientUniverse } from "./universe";
-import { View } from "./view";
+import { ClientOptions, clientOptions } from "./options";
+import { uuidToName } from "./text";
 
 /**
  * Created a client shard class.
@@ -64,22 +73,29 @@ export function ClientShardFactory({
 	 *
 	 * Each shard to not interact with another and be treated as a separate thread.
 	 */
-	class ClientShard extends Base implements CommsShard, View {
+	class ClientShard extends CoreShardClassFactory<
+		ClientBaseClass,
+		ClientBaseConstructorParams,
+		ClientOptions,
+		ClientGrid
+	>({
+		Base,
+		options: clientOptions
+	}) {
+		/**
+		 * Shard name for display.
+		 *
+		 * @returns Shard name
+		 */
+		public get shardName(): string {
+			// TODO: Add shard dictionary sync
+			return uuidToName({ uuid: this.shardUuid });
+		}
+
 		/**
 		 * Pixi application.
 		 */
-		public readonly app: Application = new Application({
-			antialias: true,
-			autoDensity: true,
-			height: 750,
-			transparent: true,
-			width: 750
-		});
-
-		/**
-		 * UUID for default [[ClientGrid]].
-		 */
-		public readonly defaultGridUuid: Uuid;
+		public readonly app: Application<HTMLCanvasElement>;
 
 		/**
 		 * Container for pixi.
@@ -87,16 +103,11 @@ export function ClientShardFactory({
 		public readonly gridContainer: Container = new Container();
 
 		/**
-		 * Grids for the client shard.
-		 *
-		 * Should be treated as "readonly".
-		 */
-		public readonly grids: Map<Uuid, ClientGrid> = new Map();
-
-		/**
 		 * Viewport for this client shard.
 		 */
 		public matrix: Matrix = Matrix.IDENTITY;
+
+		public readonly players: Map<Uuid, ClientPlayer> = new Map();
 
 		/**
 		 * Scene height.
@@ -111,17 +122,12 @@ export function ClientShardFactory({
 		/**
 		 * Element for shard container.
 		 */
-		public shardElement: HTMLElement | null = null;
+		public shardElement: HTMLElement = document.createElement("div");
 
 		/**
-		 * This UUID.
+		 *  Units.
 		 */
-		public readonly shardUuid: Uuid;
-
-		/**
-		 * An array of sockets.
-		 */
-		protected sockets: Array<VSocket<ClientUniverse>> = new Array() as Array<VSocket<ClientUniverse>>;
+		public units: Set<string> = new Set();
 
 		/**
 		 * Input events.
@@ -133,109 +139,236 @@ export function ClientShardFactory({
 		 */
 		private isAttached: boolean = false;
 
+		// ESLint params bug
+		// eslint-disable-next-line jsdoc/require-param
 		/**
 		 * Constructor for a screen.
+		 *
+		 * @param param - Destructured parameter
 		 */
-		public constructor({ shardUuid, grids }: CommsShardArgs) {
+		public constructor(
+			// ESLint bug - nested args
+			// eslint-disable-next-line @typescript-eslint/typedef
+			...[shard, { attachHook, created }, baseParams]: [
+				...coreParams: CoreUniverseObjectConstructorParameters<
+					ClientBaseConstructorParams,
+					CoreShardArg<ClientOptions>,
+					CoreArgIds.Shard,
+					ClientOptions,
+					CoreShardArgParentIds
+				>,
+				clientParams?: {
+					/**
+					 * Append or not.
+					 */
+					doAppend: boolean;
+				}
+			]
+		) {
 			// Call super constructor
-			super();
+			super(shard, { attachHook, created }, baseParams);
 
-			// Set this fields
-			this.shardUuid = shardUuid;
-			this.defaultGridUuid = getDefaultUuid({
-				path: `${gridUuidUrlPath}${urlPathSeparator}${this.shardUuid}`
+			this.app = new Application({
+				antialias: true,
+				autoDensity: true,
+				backgroundAlpha: 0,
+				resizeTo: this.shardElement
 			});
-
-			// Set scene
-			this.setScene();
 
 			// Add container to renderer
 			this.app.stage.addChild(this.gridContainer);
 
-			setTimeout(() => {
-				// Initialize children
-				this.addGrid({
-					// Take path from this
-					...this,
-					cells: new Map(),
-					gridUuid: this.defaultGridUuid
-				});
+			/* eslint-disable no-magic-numbers, no-console, @typescript-eslint/no-unused-vars */
+			// After attach
+			attachHook
+				.then(() => {
+					// #if _DEBUG_ENABLED
+					/**
+					 * Type of debug params.
+					 */
+					type InputDebugParam = {
+						/**
+						 * Input symbol.
+						 */
+						symbol: symbol;
+						/**
+						 * Input data.
+						 */
+						input: InputInterface;
+					};
 
-				// Extract data from [CommsShard]
-				grids.forEach(grid => {
-					this.addGrid(grid);
-				});
-			});
+					const inputStore: Store<StoreWord.Input> = (
+						this.constructor as ClientShardClass
+					).universe.stores.useInputStore();
 
-			// Add listeners for right-click input
-			this.input.on(rcSymbol, inputInterface => {
-				alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
-			});
+					/**
+					 * Prints some input info.
+					 *
+					 * @param param - Destructured parameter
+					 */
+					let inputDebug: (arg: InputDebugParam) => void = ({ symbol, input }: InputDebugParam) => {
+						(this.constructor as typeof ClientShard).universe.log({
+							level: LogLevel.Debug,
+							message: `Shard received input(description="${symbol.description ?? "No description"}") at location(x="${
+								input.x
+							}", y="${input.y}").`
+						});
+					};
+					// #endif
 
-			// Add listeners for left-click input
-			this.input.on(lcSymbol, inputInterface => {
-				alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
-			});
+					// If we are here, we might already be attached, append shard and one-time resize
+					// ESLint false negative
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+					this.shardElement.appendChild(this.app.view);
+					// ESLint false negative
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+					this.app.resize();
 
-			// Add listeners for up input
-			// Async callback for event emitter
-			// eslint-disable-next-line @typescript-eslint/no-misused-promises
-			this.input.on(upSymbol, async inputInterface => {
-				// Even though when array is empty an envelope will not be used, in those situations performance is irrelevant, at least on the client side
-				let envelope: Envelope = new Envelope({
-					messages: [
-						{
-							body: { direction: MovementWord.Up },
-							type: MessageTypeWord.Movement
-						}
-					]
-				});
-				await Promise.all(this.sockets.map(socket => socket.send({ envelope })));
-			});
+					// Set scene for entity show
+					this.setScene();
 
-			// Add listeners for down input
-			this.input.on(downSymbol, inputInterface => {
-				alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
-			});
+					// Set FPS
+					this.setFps({ targetFps: utils.isMobile.any ? defaultMobileFps : defaultFps });
 
-			// Add listeners for right input
-			this.input.on(rightSymbol, inputInterface => {
-				alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
-			});
+					// TODO: Create magic
+					// Element ball display test
+					// new ElementBall({ container: this.gridContainer, scale: 500, ...ElementBall.windBall });
 
-			// Add listeners for left input
-			this.input.on(leftSymbol, inputInterface => {
-				alert(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
-			});
+					// Add listeners for right-click input
+					this.input.on(rcSymbol, (inputInterface: InputInterface) => {
+						// #if _DEBUG_ENABLED
+						inputDebug({ input: inputInterface, symbol: rcSymbol });
+						// #endif
 
-			// Add listeners for scroll input
-			this.input.on(scrollSymbol, inputInterface => {
-				console.log(`x is ${(inputInterface as InputInterface).x} and y is ${(inputInterface as InputInterface).y}`);
-
-				// Prototype only
-				this.sceneHeight *= 1 + (inputInterface as InputInterface).y / 1000;
-				this.sceneWidth *= 1 + (inputInterface as InputInterface).y / 1000;
-				this.grids.forEach(grid => {
-					grid.cells.forEach(cell => {
-						cell.entities.forEach(entity => {
-							// entity.updateCoordinates();
+						// TODO: Hold grid offsets; Terminate on first
+						this.grids.forEach(grid => {
+							const x: number = Math.floor(inputInterface.x / this.sceneWidth);
+							const y: number = Math.floor(inputInterface.y / this.sceneHeight);
+							const z: number = grid.currentLevel;
+							const cell: ClientCell | undefined = grid.cellIndex[z]?.[x]?.[y];
+							if (cell) {
+								inputStore.rcMenuData = {
+									cell,
+									type: ClientUniverseStateRcMenuDataWords.Cell,
+									x: this.sceneWidth * (x + 1),
+									y: this.sceneHeight * (y + 1)
+								} satisfies ClientUniverseStateRcMenuData;
+							}
 						});
 					});
-				});
-			});
-		}
 
-		/**
-		 * Adds [[ClientGrid]].
-		 *
-		 * @param grid - Arguments for the [[ClientGrid]] constructor
-		 */
-		public addGrid(grid: CommsGridArgs): void {
-			if (this.grids.has(grid.shardUuid)) {
-				// Clear the shard if it already exists
-				this.doRemoveGrid(grid);
-			}
-			this.grids.set(grid.gridUuid, new this.universe.Grid(grid));
+					// Add listeners for left-click input
+					this.input.on(lcSymbol, inputInterface => {
+						// #if _DEBUG_ENABLED
+						inputDebug({ input: inputInterface as InputInterface, symbol: lcSymbol });
+						// #endif
+
+						inputStore.rcMenuData = null;
+					});
+
+					// Add listeners for level up input
+					this.input.on(levelDownSymbol, inputInterface => {
+						this.grids.forEach(grid => {
+							grid.changeLevel({ level: grid.currentLevel + 1 });
+						});
+					});
+
+					// Add listeners for level down input
+					this.input.on(levelUpSymbol, inputInterface => {
+						this.grids.forEach(grid => {
+							grid.changeLevel({ level: grid.currentLevel - 1 });
+						});
+					});
+
+					let movementInputEntries: [symbol: symbol, direction: MovementWord][] = [
+						[downSymbol, DirectionWord.Down],
+						[leftSymbol, DirectionWord.Left],
+						[rightSymbol, DirectionWord.Right],
+						[upSymbol, DirectionWord.Up]
+					];
+
+					// Add listeners for movement inputs
+					// ESLint false negative
+					// eslint-disable-next-line @typescript-eslint/typedef
+					movementInputEntries.forEach(([symbol, direction]) => {
+						// Async callback for event emitter
+						// eslint-disable-next-line @typescript-eslint/no-misused-promises
+						this.input.on(symbol, async inputInterface => {
+							let unitUuid: Uuid | undefined = Array.from(this.units)[0];
+							if (unitUuid) {
+								let connection: ClientConnection | undefined = Array.from(this.players)[0]?.[1].connection;
+								connection?.socket.writeQueue({
+									body: {
+										direction,
+										hasDirection: true,
+										playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
+										// TODO: Add active unit system
+										unitUuid
+									},
+									type: MessageTypeWord.Movement
+								});
+								await connection?.tick({ word: processQueueWord });
+							} else {
+								(this.constructor as typeof ClientShard).universe.log({
+									error: new Error("Unit missing"),
+									level: LogLevel.Alert
+								});
+							}
+							// #if _DEBUG_ENABLED
+							inputDebug({ input: inputInterface as InputInterface, symbol: leftSymbol });
+							// #endif
+						});
+					});
+
+					// Add listeners for local action
+					// Async callback for event emitter
+					// eslint-disable-next-line @typescript-eslint/no-misused-promises
+					this.input.on(localActionSymbol, async inputInterface => {
+						let unitUuid: Uuid | undefined = Array.from(this.units)[0];
+						if (unitUuid) {
+							// TODO: Retrieval of connection
+							let connection: ClientConnection | undefined = Array.from(this.players)[0]?.[1].connection;
+							connection?.socket.writeQueue({
+								body: {
+									playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
+									unitUuid
+								},
+								type: MessageTypeWord.LocalAction
+							});
+							await connection?.tick({ word: processQueueWord });
+						} else {
+							(this.constructor as typeof ClientShard).universe.log({
+								error: new Error("Unit missing"),
+								level: LogLevel.Alert
+							});
+						}
+					});
+
+					// Add listeners for scroll input
+					this.input.on(scrollSymbol, inputInterface => {
+						// #if _DEBUG_ENABLED
+						inputDebug({ input: inputInterface as InputInterface, symbol: scrollSymbol });
+						// #endif
+
+						// Prototype only
+						this.sceneHeight *= 1 + (inputInterface as InputInterface).y / 1000;
+						this.sceneWidth *= 1 + (inputInterface as InputInterface).y / 1000;
+						this.grids.forEach(grid => {
+							grid.cells.forEach(cell => {
+								cell.entities.forEach(entity => {
+									// entity.updateCoordinates();
+								});
+							});
+						});
+					});
+				})
+				.catch(error => {
+					(this.constructor as typeof ClientShard).universe.log({
+						error: new Error("Error in attach hook execution", { cause: error instanceof Error ? error : undefined }),
+						level: LogLevel.Alert
+					});
+				});
+			/* eslint-enable no-magic-numbers, no-console, no-alert, @typescript-eslint/no-unused-vars */
 		}
 
 		/**
@@ -248,127 +381,36 @@ export function ClientShardFactory({
 		}
 
 		/**
-		 * Adds socket if does not exist.
-		 */
-		public addSocket({
-			socket
-		}: {
-			/**
-			 * Client socket to add.
-			 */
-			socket: VSocket<ClientUniverse>;
-		}): void {
-			if (!this.sockets.includes(socket)) {
-				this.sockets.push(socket);
-			}
-		}
-
-		/**
-		 * Removes socket.
-		 */
-		public removeSocket({
-			socket
-		}: {
-			/**
-			 * Client socket to remove.
-			 */
-			socket: VSocket<ClientUniverse>;
-		}): void {
-			let socketIndex: number = this.sockets.indexOf(socket);
-			if (socketIndex > -1) {
-				this.sockets.splice(socketIndex, 1);
-			}
-		}
-
-		/**
-		 * Attach to HTML canvas.
-		 * Can only be attached once, and never detached.
-		 *
-		 * @param element - Any HTML element
-		 */
-		public attach(): void {
-			// Performing once, as pixi library does not allow to detach
-			if (!this.isAttached) {
-				let element: HTMLElement = this.universeElement;
-				this.isAttached = true;
-				element.addEventListener("resize", () => {
-					this.app.renderer.resize(element.offsetWidth, element.offsetHeight);
-					this.setScene();
-				});
-
-				// Attach to canvas
-				element.appendChild(this.app.view);
-			}
-		}
-
-		/**
 		 * The function that fires the input received.
 		 *
 		 * @param inputSymbol - Input symbol received
-		 *
 		 * @param inputInterface - Input event received
-		 *
 		 */
-		public fireInput(inputSymbol: symbol, inputInterface: InputInterface) {
+		public fireInput(inputSymbol: symbol, inputInterface: InputInterface): void {
 			this.input.emit(inputSymbol, inputInterface);
 		}
 
 		/**
-		 * Shortcut to get the [[ClientGrid]].
+		 * Set FPS depending on device.
 		 *
-		 * @returns [[clientGrid]], a vector array object
+		 * @param targetFps - Destructured parameter
 		 */
-		public getGrid({ gridUuid }: GridPath): ClientGrid {
-			let clientGrid: ClientGrid | undefined = this.grids.get(gridUuid);
-
-			// Default grid is always there
-			return clientGrid === undefined ? (this.grids.get(this.defaultGridUuid) as ClientGrid) : clientGrid;
-		}
-
-		/**
-		 * Get the modes from the server.
-		 *
-		 * @returns A map containing uuid and modes
-		 */
-		public get modes(): Map<Uuid, Mode> {
-			return new Map();
-		}
-
-		/**
-		 * Removes the [[ClientGrid]]
-		 *
-		 * @param uuid - UUID of the [[ClientGrid]]
-		 *
-		 * @param path - Path to grid
-		 */
-		public removeGrid(path: GridPath): void {
-			if (path.gridUuid !== this.defaultGridUuid) {
-				this.doRemoveGrid(path);
-			}
-		}
-
-		/**
-		 * Performs the necessary cleanup when shard is removed, as a connection to server.
-		 */
-		public terminate(): void {
-			this.grids.forEach(grid => {
-				this.doRemoveGrid(grid);
-			});
-		}
-
-		/**
-		 * Actually remove the [[ClientGrid]] shard from "grids".
-		 */
-		private doRemoveGrid({ gridUuid }: GridPath): void {
-			let grid: ClientGrid | undefined = this.grids.get(gridUuid);
-			if (grid !== undefined) {
-				grid.terminate();
-				this.grids.delete(gridUuid);
-			}
+		public setFps({
+			targetFps
+		}: {
+			/**
+			 * FPS to set.
+			 */
+			targetFps: number;
+		}): void {
+			this.app.ticker.maxFPS = targetFps;
 		}
 
 		/**
 		 * Set default scene dimensions.
+		 *
+		 * @remarks
+		 * Pixi supports floating point sizes, so `ceil` not used.
 		 */
 		private setScene(): void {
 			// Set defaults
@@ -377,19 +419,15 @@ export function ClientShardFactory({
 			let aspectRatio: number = entityHeight / entityWidth;
 
 			// Fix height
-			if (entityHeight > 0) {
-				if (this.app.screen.height / entityHeight < defaultMinimumEntityInColumn) {
-					entityHeight = defaultMinimumEntityInColumn;
-					entityWidth = Math.ceil(entityHeight / aspectRatio);
-				}
+			if (this.app.screen.height / entityHeight < defaultMinimumEntityInColumn) {
+				entityHeight = this.app.screen.height / defaultMinimumEntityInColumn;
+				entityWidth = entityHeight / aspectRatio;
 			}
 
-			// Fix width
-			if (entityWidth > 0) {
-				if (this.app.screen.width / entityWidth < defaultMinimumEntityInRow) {
-					entityWidth = defaultMinimumEntityInRow;
-					entityHeight = Math.ceil(entityWidth * aspectRatio);
-				}
+			// Fix width, if still does not fit based on height
+			if (this.app.screen.width / entityWidth < defaultMinimumEntityInRow) {
+				entityWidth = this.app.screen.width / defaultMinimumEntityInRow;
+				entityHeight = entityWidth * aspectRatio;
 			}
 
 			// Set actual values
@@ -397,6 +435,32 @@ export function ClientShardFactory({
 			this.sceneWidth = entityWidth;
 		}
 	}
+
+	/**
+	 * Attaches client grid.
+	 *
+	 * @param this - Client shard
+	 * @param grid - Grid
+	 */
+	ClientShard.prototype.attachGrid = function (this: ClientShard, grid: ClientGrid): void {
+		// Super first
+		(Object.getPrototypeOf(ClientShard.prototype) as ClientShard).attachGrid.call(this, grid);
+
+		// Basically show grid
+		grid.shard = this;
+
+		// Adding to container reversed, so that surface level is rendered last
+		// TODO: Change to `toReversed()` when migrate to Node.js 20 - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toReversed#browser_compatibility
+		Array.from(grid.levelIndex)
+			.reverse()
+			.forEach(container => {
+				this.gridContainer.addChild(container);
+			});
+
+		grid.cells.forEach(cell => {
+			grid.showCell(cell);
+		});
+	};
 
 	// Return the shard class
 	return ClientShard;

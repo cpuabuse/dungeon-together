@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -13,7 +13,7 @@ import { Vector } from "./vector";
 /**
  * App namespace.
  */
-export const appUrl: string = "https://cpuabuse.com/dt";
+export const appUrl: URL = new URL("https://cpuabuse.com/dt");
 
 /**
  * Default URL for a server.
@@ -73,6 +73,27 @@ export const defaultShardUuid: Uuid = getDefaultUuid({
 });
 
 /**
+ * Default grid UUID.
+ */
+export const defaultGridUuid: Uuid = getDefaultUuid({
+	path: `${gridUuidUrlPath}${urlPathSeparator}${defaultUuidUrlKeyword}`
+});
+
+/**
+ * Default cell UUID.
+ */
+export const defaultCellUuid: Uuid = getDefaultUuid({
+	path: `${cellUuidUrlPath}${urlPathSeparator}${defaultUuidUrlKeyword}`
+});
+
+/**
+ * Default entity UUID.
+ */
+export const defaultEntityUuid: Uuid = getDefaultUuid({
+	path: `${entityUuidUrlPath}${urlPathSeparator}${defaultUuidUrlKeyword}`
+});
+
+/**
  * Default kind UUID.
  */
 export const defaultKindUuid: Uuid = getDefaultUuid({
@@ -116,12 +137,12 @@ export const defaultEntityWidth: number = 50;
 /**
  * Minimum number of entity to fit in row in canvas.
  */
-export const defaultMinimumEntityInColumn: number = 12;
+export const defaultMinimumEntityInColumn: number = 15;
 
 /**
  * Minimum number of entities to fit in column in clientShard.
  */
-export const defaultMinimumEntityInRow: number = 12;
+export const defaultMinimumEntityInRow: number = 15;
 
 /**
  * Default vector for default cells.

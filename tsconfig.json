@@ -1,13 +1,22 @@
 {
 	"compilerOptions": {
+		"forceConsistentCasingInFileNames": true,
 		"esModuleInterop": true,
-		"jsx": "preserve",
-		"lib": ["DOM", "es2020"],
-		"module": "ES2020",
+		"lib": ["ES2022", "DOM"],
+		"module": "ES2022",
 		"moduleResolution": "node",
 		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noUncheckedIndexedAccess": true,
 		"strict": true,
-		"target": "es2020"
+		"target": "ES2022",
+		/* Multiple unfixable modules, like - https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/64302 */
+		"skipLibCheck": true,
+		/* Will be auto-imported and renamed by Vite's plugin */
+		"jsxFactory": "vueJsxPragma",
+		/* JSX itself needs to be explicitly set, for compilation/linting of imports */
+		"jsx": "preserve"
 	},
-	"include": ["src/**/*", "test/**/*", "src/**/*.vue", "test/**/*.vue"]
+	"include": ["src/**/*", "test/**/*", "src/**/*.vue", "test/**/*.vue", "**/*vite.config.ts", "**/*.deno.ts"]
 }

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Dungeon together</title>
+		<style>
+			html {
+				/* Vuetify override */
+				overflow: hidden !important;
+			}
+
+			body {
+				margin: 0;
+				height: 100vh;
+				width: 100vw;
+			}
+
+			.client-universe {
+				height: 100%;
+				width: 100%;
+			}
+
+			.client-universe > div:first-child {
+				height: 100%;
+				width: 100%;
+				position: absolute;
+			}
+
+			.client-universe > div:first-child > div {
+				height: 100%;
+				width: 100%;
+
+				/* Pixi's `resizeTo` generate rudimentary overflow. */
+				overflow: hidden;
+			}
+
+			.joystick {
+				position: absolute;
+				bottom: 20px;
+				left: 20px;
+				width: 400px;
+				height: 400px;
+			}
+
+			@media (prefers-color-scheme: dark) {
+				.body {
+					background: darkslategrey;
+				}
+			}
+		</style>
+		<script type="module" src="../main/standalone.ts"></script>
+	</head>
+	<body>
+		<div id="client-universe" class="client-universe" tabindex="0"></div>
+	</body>
+</html>

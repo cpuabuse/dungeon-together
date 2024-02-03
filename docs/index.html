@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Dungeon Together</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
+
+		<!-- "docsify-themeable" styles -->
+		<link
+			rel="stylesheet"
+			href="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/style.min.css"
+			type="text/css"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css"
+			title="light"
+		/>
+		<link
+			rel="stylesheet alternative"
+			href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css"
+			title="dark"
+		/>
+		<style>
+			:root {
+				--content-max-width: 96em;
+			}
+
+			#docsify-darklight-theme {
+				/* Fixes smaller screen clipping */
+				right: 1em;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="app"></div>
+
+		<!-- Note, module will be deferred by default -->
+		<script type="module">
+			import urlJoin from "https://cdn.jsdelivr.net/npm/url-join@5/+esm";
+			import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/+esm";
+
+			// Shared constants
+			const basePath = ".";
+			const logo = "img/snake.svg";
+			const pathToLogo = urlJoin(basePath, logo);
+
+			// Firstly, favicon
+			const link = document.createElement("link");
+			link.type = "image/svg+xml";
+			link.rel = "icon";
+			link.href = pathToLogo;
+			document.head.appendChild(link);
+
+			// Mermaid
+			mermaid.initialize({
+				startOnLoad: true,
+				// Mermaid doesn't seem to allow to dynamically change themes, so selecting "neutral" for both dark/light
+				theme: "neutral"
+			});
+			window.mermaid = mermaid; // Needed for `docsify-mermaid`
+
+			// Docsify
+			window.$docsify = {
+				name: `<div style="display: flex; align-items: center; justify-content: center"><img src="${pathToLogo}" alt="Dungeon Together"><span style="margin-inline-start: 1em; text-wrap: nowrap">Dungeon Together</span></div>`,
+				repo: "cpuabuse/dungeon-together",
+				loadSidebar: true,
+				homepage: "_homepage.md",
+				subMaxLevel: 2,
+				coverpage: true,
+				alias: {
+					// Note, if relativePath is set to `true`, it would recompute the sidebar links
+					"/.*/_sidebar.md": "/_sidebar.md"
+				},
+				basePath,
+				search: {
+					paths: "auto"
+				},
+				// Closer to GFM
+				markdown: {
+					breaks: true
+				}
+			};
+		</script>
+
+		<!-- Docsify -->
+		<script src="//cdn.jsdelivr.net/npm/docsify@4" defer></script>
+		<script src="//cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js" defer></script>
+
+		<!-- Theme "docsify-darklight-theme" -->
+		<script src="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/main.min.js" defer></script>
+		<script src="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/docsify-themeable/index.min.js" defer></script>
+
+		<!-- Connect mermaid -->
+		<script src="//cdn.jsdelivr.net/npm/docsify-mermaid@2/dist/docsify-mermaid.js" defer></script>
+
+		<!-- Latex -->
+		<script src="//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+		<script src="//cdn.jsdelivr.net/npm/docsify-latex@0" defer></script>
+	</body>
+</html>

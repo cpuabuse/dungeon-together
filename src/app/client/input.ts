@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -8,6 +8,11 @@
  */
 
 import { EventEmitter } from "events";
+
+/**
+ * Identifier for a local action.
+ */
+export const localActionSymbol: symbol = Symbol("local-action");
 
 /**
  * Identifier for the up movement input.
@@ -20,7 +25,7 @@ export const upSymbol: symbol = Symbol("up");
 export const downSymbol: symbol = Symbol("down");
 
 /**
- * Identifier for the righ movement input.
+ * Identifier for the right movement input.
  */
 export const rightSymbol: symbol = Symbol("right");
 
@@ -43,6 +48,16 @@ export const lcSymbol: symbol = Symbol("left-click");
  * Identifier for the up scroll input.
  */
 export const scrollSymbol: symbol = Symbol("scroll");
+
+/**
+ * Identifier for the level up input.
+ */
+export const levelUpSymbol: symbol = Symbol("level-up");
+
+/**
+ * Identifier for the level down input.
+ */
+export const levelDownSymbol: symbol = Symbol("level-down");
 
 /**
  * An interface representing the input event.

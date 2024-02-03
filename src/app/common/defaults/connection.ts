@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -12,13 +12,18 @@
 /**
  * Enum representing words used to depict directions.
  */
-export enum MovementWord {
-	Up,
-	Down,
-	Left,
-	Right,
-	ZUp,
-	ZDown
+export enum DirectionWord {
+	Up = "up",
+	Down = "down",
+	Left = "left",
+	Right = "right",
+	ZUp = "z-up",
+	ZDown = "z-down",
+
+	/**
+	 * Should not be used for actual movement but should be used to represent relative position.
+	 */
+	Here = "here"
 }
 
 /**
@@ -35,7 +40,31 @@ export enum MessageTypeWord {
 	/**
 	 * Update shard in the client, sent from server.
 	 */
-	Update = "update"
+	Update = "update",
+
+	EntityAction = "action",
+
+	LocalAction = "local-action",
+
+	/**
+	 * Notification about a story progress, which player may spend time to read.
+	 */
+	StoryNotification = "story-notification",
+
+	/**
+	 * Notification about action result, or any turn by turn quick information.
+	 */
+	StatusNotification = "status-notification"
+}
+
+/**
+ * Words for status notification messages.
+ */
+export enum StatusNotificationWord {
+	Sync = "sync",
+	MimicAwaken = "mimic-awaken",
+	DamageDealt = "damage-dealt",
+	TrapActivated = "trap-activated"
 }
 
 /**

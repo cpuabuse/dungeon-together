@@ -4,29 +4,52 @@
 	"title": "Dungeon Together schema",
 	"description": "A schema for generation of Dungeon Together shards",
 	"type": "object",
-	"required": ["base_url", "data", "type", "url_path"],
+	"required": ["data", "kinds"],
 	"additionalProperties": false,
 	"definitions": {
-		"type": {
-			"description": "Object type",
-			"type": "string",
-			"enum": ["shard", "grid", "cell", "entity"]
-		},
 		"data": {
 			"description": "Data to generate",
-			"oneOf": [
-				{ "$ref": "#/definitions/shard" },
-				{ "$ref": "#/definitions/grid" },
-				{ "$ref": "#/definitions/cell" },
-				{ "$ref": "#/definitions/entity" }
-			]
+			"type": "object",
+			"required": ["shards"],
+			"additionalProperties": false,
+			"properties": {
+				"shards": {
+					"description": "Array of shards",
+					"type": "array",
+					"items": { "$ref": "#/definitions/shard" }
+				}
+			}
+		},
+		"kinds": {
+			"description": "Entity kinds",
+			"type": "object",
+			"additionalProperties": {
+				"$ref": "#/definitions/kind"
+			}
+		},
+		"kind": {
+			"description": "Entity kinds",
+			"type": "object",
+			"required": ["name", "module"],
+			"additionalProperties": false,
+			"properties": {
+				"name": {
+					"description": "Internal module kind ID",
+					"type": "string"
+				},
+				"module": {
+					"description": "Module name",
+					"type": "string"
+				}
+			}
 		},
 		"shard": {
 			"description": "Shard to generate",
-			"type": ["object", "null"],
+			"type": "object",
+			"required": ["grids"],
 			"additionalProperties": false,
 			"properties": {
-				"id": { "$ref": "#/definitions/uuid", "description": "ID path" },
+				"id": { "$ref": "#/definitions/id", "description": "ID path" },
 				"grids": {
 					"description": "Array of grids",
 					"type": ["array", "null"],
@@ -36,61 +59,63 @@
 		},
 		"grid": {
 			"description": "Grid to generate",
-			"type": ["object", "null"],
+			"type": "object",
+			"required": ["cells", "worlds", "x", "y", "z"],
 			"additionalProperties": false,
 			"properties": {
-				"id": { "$ref": "#/definitions/uuid", "description": "ID path" },
+				"id": { "$ref": "#/definitions/id", "description": "ID path" },
 				"cells": {
 					"description": "Array of cells",
-					"type": ["array", "null"],
+					"type": "array",
 					"items": { "$ref": "#/definitions/cell" }
-				}
+				},
+				"worlds": {
+					"description": "Array of worlds",
+					"type": "array",
+					"items": { "$ref": "#/definitions/id" }
+				},
+				"x": { "description": "Cells in X-axis", "type": "number" },
+				"y": { "description": "Cells in Y-axis", "type": "number" },
+				"z": { "description": "Cells in Z-axis", "type": "number" }
 			}
 		},
 		"cell": {
 			"description": "Cell to generate",
-			"type": ["object", "null"],
+			"type": "object",
+			"required": ["entities", "x", "y", "z"],
 			"additionalProperties": false,
 			"properties": {
-				"id": { "$ref": "#/definitions/uuid", "description": "ID path" },
-				"x": { "description": "X coordinate", "type": "number" },
-				"y": { "description": "Y coordinate", "type": "number" },
-				"z": { "description": "Z coordinate", "type": "number" },
+				"id": { "$ref": "#/definitions/id", "description": "ID path" },
 				"entities": {
 					"description": "Array of entities",
-					"type": ["array", "null"],
+					"type": "array",
 					"items": { "$ref": "#/definitions/entity" }
-				}
-			},
-			"required": ["x", "y", "z"]
+				},
+				"x": { "description": "X coordinate", "type": "number" },
+				"y": { "description": "Y coordinate", "type": "number" },
+				"z": { "description": "Z coordinate", "type": "number" }
+			}
 		},
 		"entity": {
 			"description": "Entity to generate",
-			"type": ["object", "null"],
+			"type": "object",
+			"required": ["kind"],
 			"additionalProperties": false,
 			"properties": {
-				"id": { "$ref": "#/definitions/uuid", "description": "ID path" },
-				"kind": { "$ref": "#/definitions/uuid", "description": "Kind path" },
-				"mode": { "$ref": "#/definitions/uuid", "description": "Mode path" },
-				"world": { "$ref": "#/definitions/uuid", "description": "World path" }
+				"id": { "$ref": "#/definitions/id", "description": "ID path" },
+				"kind": { "$ref": "#/definitions/id", "description": "Kind path" },
+				"mode": { "$ref": "#/definitions/id", "description": "Mode path" },
+				"world": { "$ref": "#/definitions/id", "description": "World path" }
 			}
 		},
-		"uuid": {
+		"id": {
 			"description": "URI path pattern",
-			"type": ["string", "null"],
+			"type": "string",
 			"pattern": "^[/a-zA-Z0-9][/a-zA-Z0-9-]+$"
 		}
 	},
 	"properties": {
-		"type": { "$ref": "#/definitions/type" },
 		"data": { "$ref": "#/definitions/data" },
-		"url_path": {
-			"description": "URL path used for generation of UUID",
-			"type": "uri-reference"
-		},
-		"base_url": {
-			"description": "Base URL used for generation of UUID",
-			"type": ["uri"]
-		}
+		"kinds": { "$ref": "#/definitions/kinds" }
 	}
 }

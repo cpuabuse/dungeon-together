@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,14 +7,20 @@
  * @file Entity that can be rendered.
  */
 
-import { AnimatedSprite } from "pixi.js";
-import { Uuid } from "../common/uuid";
-import { CommsEntity, CommsEntityArgs } from "../comms/entity";
-import { ClientBaseClass } from "./base";
+import { AnimatedSprite, Container, Text } from "pixi.js";
+import { CoreArgIds } from "../core/arg";
+import { CoreDictionary } from "../core/connection";
+import { CoreEntityArg, CoreEntityClassFactory } from "../core/entity";
+import { CoreEntityArgParentIds } from "../core/parents";
+import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
+import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
+import { ClientOptions, clientOptions } from "./options";
+import { ProgressBar, enemyHpBarColors, friendlyHpBarColors } from "./progess-bar";
 
 /**
  * Generator for the client entity class.
  *
+ * @param param - Destructured parameter
  * @returns Client entity class
  */
 // Force type inference to extract class type
@@ -28,38 +34,84 @@ export function ClientEntityFactory({
 	Base: ClientBaseClass;
 }) {
 	/**
-	 * Render unit, representing the smallest renderable.
+	 * Render unit, representing set of animations.
 	 */
-	class ClientEntity extends Base implements CommsEntity {
+	class ClientEntity extends CoreEntityClassFactory<ClientBaseClass, ClientBaseConstructorParams, ClientOptions>({
+		Base,
+		options: clientOptions
+	}) {
 		/**
-		 * Parent location.
+		 * Temporary text, showing health.
 		 */
-		public cellUuid: Uuid;
+		public basicText: Text | null = null;
+
+		public container: Container = new Container();
 
 		/**
-		 * This.
+		 * Dictionary getter.
+		 *
+		 * @returns Local dictionary
 		 */
-		public entityUuid: Uuid;
+		public get dictionary(): CoreDictionary {
+			return this.internalDictionary;
+		}
 
 		/**
-		 * Map.
+		 * Dictionary setter.
 		 */
-		public gridUuid: Uuid;
+		public set dictionary(dictionary: CoreDictionary) {
+			this.internalDictionary = dictionary;
+		}
+
+		public healthBar: ProgressBar | null = null;
 
 		/**
-		 * Kind.
+		 * Temporary health.
 		 */
-		public kindUuid: Uuid;
+		public set health(health: number | null) {
+			if (this.basicText) {
+				if (health === null) {
+					this.basicText.destroy();
+					this.tempHealth = 0;
+				} else {
+					this.tempHealth = health;
+					this.basicText.text = health;
+				}
+
+				if (this.healthBar) {
+					if (health === null) {
+						// Nothing
+						this.tempHealth = 0;
+					} else {
+						this.tempHealth = health;
+						this.healthBar.value = health;
+					}
+				}
+			} else if (health) {
+				this.basicText = new Text(health);
+				// TODO: Determining of bar color should not be mode
+				// TODO: Centering should be done more elegantly
+				this.healthBar = new ProgressBar({
+					colors: this.modeUuid === "mode/user/player/default" ? friendlyHpBarColors : enemyHpBarColors,
+					container: this.container,
+					scale: this.sprite.width * 0.9
+				});
+				this.healthBar.mesh.x = this.sprite.width * 0.05;
+				this.healthBar.mesh.y = this.sprite.height * 0.025;
+				this.healthBar.maxValue = typeof this.dictionary.maxHealth === "number" ? this.dictionary.maxHealth : 3;
+				this.tempHealth = health;
+				this.healthBar.value = health;
+				this.sprite.addChild(this.basicText);
+			}
+		}
 
 		/**
-		 * Mode.
+		 * Wether universe contains this.
+		 *
+		 * @remarks
+		 * Basically with this we are allowing cells to contain entities that are not part of the universe or are already terminated, at least for now.
 		 */
-		public modeUuid: Uuid;
-
-		/**
-		 * Shard.
-		 */
-		public shardUuid: Uuid;
+		public isInUniverse: boolean = false;
 
 		/**
 		 * Animated sprite.
@@ -67,69 +119,58 @@ export function ClientEntityFactory({
 		public sprite: AnimatedSprite;
 
 		/**
-		 * World.
+		 * Storing health.
+		 * TODO: Move to emits.
 		 */
-		public worldUuid: Uuid;
+		public tempHealth: number = 0;
 
+		protected internalDictionary: CoreDictionary = {};
+
+		// ESLint params bug
+		// eslint-disable-next-line jsdoc/require-param
 		/**
-		 * Initializes RU.
+		 * Initializes client entity.
+		 *
+		 * @param param - Destructure parameter
 		 */
-		public constructor({ shardUuid, cellUuid, kindUuid, gridUuid, modeUuid, entityUuid, worldUuid }: CommsEntityArgs) {
+		public constructor(
+			// Nested args ESLint bug
+			// eslint-disable-next-line @typescript-eslint/typedef
+			...[entity, { attachHook, created }, baseParams]: CoreUniverseObjectConstructorParameters<
+				ClientBaseConstructorParams,
+				CoreEntityArg<ClientOptions>,
+				CoreArgIds.Entity,
+				ClientOptions,
+				CoreEntityArgParentIds
+			>
+		) {
 			// Call super constructor
-			super();
-
-			// Assing members from interface
-			this.shardUuid = shardUuid;
-			this.cellUuid = cellUuid;
-			this.kindUuid = kindUuid;
-			this.gridUuid = gridUuid;
-			this.modeUuid = modeUuid;
-			this.entityUuid = entityUuid;
-			this.worldUuid = worldUuid;
+			super(entity, { attachHook, created }, baseParams);
 
 			// Create a new Sprite from texture
-			this.sprite = new AnimatedSprite(this.universe.getMode({ uuid: this.modeUuid }).textures);
+			this.sprite = new AnimatedSprite(ClientEntity.universe.getMode({ uuid: this.modeUuid }).textures);
 
-			// Set coordinates initially
-			this.updateCoordinates();
-
-			// Add to container
-			this.universe.getShard(this).gridContainer.addChild(this.sprite);
-
-			// Set ticker
-			this.universe.getShard(this).app.ticker.add(this.tick, this);
-
-			// Start
-			this.sprite.play();
-		}
-
-		/**
-		 * Terminates the [[ClientEntity]].
-		 */
-		public terminate(): void {
-			// Stop
-			this.sprite.stop();
-			this.universe.getShard(this).app.ticker.remove(this.tick, this);
-			this.universe.getShard(this).gridContainer.removeChild(this.sprite);
-		}
-
-		/**
-		 * Render tick.
-		 */
-		private tick(): void {
-			this.updateCoordinates();
-		}
-
-		/**
-		 * Updates coordinates for render.
-		 */
-		private updateCoordinates(): void {
-			this.sprite.x = this.universe.getShard(this).sceneWidth * this.universe.getCell(this).x;
-			this.sprite.y = this.universe.getShard(this).sceneHeight * this.universe.getCell(this).y;
-			this.sprite.height = this.universe.getShard(this).sceneWidth;
-			this.sprite.width = this.universe.getShard(this).sceneHeight;
+			this.container.addChild(this.sprite);
 		}
 	}
+
+	/**
+	 * Terminates client entity.
+	 *
+	 * @param this - Client entity
+	 */
+	ClientEntity.prototype.terminateEntity = function (this: ClientEntity): void {
+		// Stop
+		this.sprite.destroy();
+
+		this.container.destroy();
+
+		// Remove from universe
+		this.isInUniverse = false;
+
+		// Super terminate
+		(Object.getPrototypeOf(ClientEntity.prototype) as ClientEntity).terminateEntity.call(this);
+	};
 
 	// Return class
 	return ClientEntity;

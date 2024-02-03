@@ -1,0 +1,11 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "chrome",
+			"request": "launch",
+			"name": "chrome-dev",
+			"url": "http://localhost:8080/src/html/standalone.html"
+		}
+	]
+}

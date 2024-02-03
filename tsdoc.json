@@ -1,13 +1,4 @@
 {
 	"$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
-	"tagDefinitions": [
-		{
-			"tagName": "@license",
-			"syntaxKind": "block"
-		},
-		{
-			"tagName": "@file",
-			"syntaxKind": "modifier"
-		}
-	]
+	"extends": ["@cpuabuse/eslint-config/dist/release/tsdoc/tsdoc.json"]
 }

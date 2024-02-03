@@ -1,5 +1,5 @@
 /*
-	Copyright 2021 cpuabuse.com
+	Copyright 2023 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,41 +7,43 @@
  * @file Server Universe.
  */
 
-import { defaultKindUuid, defaultShardUuid, defaultWorldUuid } from "../common/defaults";
-import { StaticImplements } from "../common/utility-types";
+import { DeferredPromise } from "../common/async";
+import { defaultKindUuid, defaultWorldUuid } from "../common/defaults";
 import { Uuid } from "../common/uuid";
-import { CellPath } from "../comms/cell";
-import { CommsConnectionArgs } from "../comms/connection";
-import { EntityPath } from "../comms/entity";
-import { GridPath } from "../comms/grid";
-import { ShardPath } from "../comms/shard";
-import { CoreUniverse, CoreUniverseArgs, CoreUniverseClassStatic } from "../comms/universe";
-import { ServerBaseClass, ServerBaseFactory } from "./base";
+import { ModuleLocaleMessagesRegistry } from "../core/module";
+import { CoreShardArg } from "../core/shard";
+import { CoreUniverseClassFactory, CoreUniverseRequiredConstructorParameter } from "../core/universe";
+import { ServerBaseClass, ServerBaseConstructorParams, ServerBaseFactory } from "./base";
 import { ServerCell, ServerCellClass, ServerCellFactory } from "./cell";
 import { ServerConnection } from "./connection";
-import {
-	DefaultServerEntityFactory,
-	ServerEntity,
-	ServerEntityClassOriginalAbstract,
-	ServerEntityFactory
-} from "./entity";
+import { ServerEntity, ServerEntityClass, ServerEntityFactory } from "./entity";
 import { ServerGrid, ServerGridClass, ServerGridFactory } from "./grid";
-import { Kind } from "./kind";
-import { ServerShard, ServerShardArgs, ServerShardClass, ServerShardFactory } from "./shard";
+import { ServerOptions, serverOptions } from "./options";
+import { ServerShard, ServerShardClass, ServerShardFactory } from "./shard";
 import { World } from "./world";
 
 /**
  * Constructor args for server universe.
  */
-export type ServerUniverseArgs = CoreUniverseArgs;
+export type ServerUniverseArgs = CoreUniverseRequiredConstructorParameter;
 
 /**
  * Server-side shard.
  */
-export class ServerUniverse
-	extends CoreUniverse
-	implements StaticImplements<CoreUniverseClassStatic, typeof ServerUniverse>
-{
+export class ServerUniverse extends CoreUniverseClassFactory<
+	ServerBaseClass,
+	ServerBaseConstructorParams,
+	ServerOptions,
+	ServerEntity,
+	ServerCell,
+	ServerGrid,
+	ServerShard
+>({ logSource: "Server", options: serverOptions }) {
+	/**
+	 * Base class for server objects.
+	 */
+	public readonly Base: ServerBaseClass;
+
 	/**
 	 * A shard constructor.
 	 */
@@ -50,7 +52,7 @@ export class ServerUniverse
 	/**
 	 * A shard constructor.
 	 */
-	public readonly Entity: ServerEntityClassOriginalAbstract;
+	public readonly Entity: ServerEntityClass;
 
 	/**
 	 * A shard constructor.
@@ -63,26 +65,19 @@ export class ServerUniverse
 	public readonly Shard: ServerShardClass;
 
 	/**
-	 * Collection of connections.
+	 * Server connections.
 	 */
-	public connections: Set<ServerConnection> = new Set();
+	public readonly connections: Map<Uuid, ServerConnection> = new Map();
 
 	/**
-	 * Shards.
+	 * Default shard.
 	 */
-	public readonly shards: Map<Uuid, ServerShard> = new Map();
+	public defaultShard: ServerShard;
 
 	/**
-	 * Base class for server objects.
+	 * Messages from modules.
 	 */
-	protected readonly Base: ServerBaseClass;
-
-	/**
-	 * Entity kinds.
-	 *
-	 * Generate default factory once.
-	 */
-	private readonly kinds: Map<Uuid, Kind>;
+	public messages: ModuleLocaleMessagesRegistry = {};
 
 	/**
 	 * Game worlds.
@@ -91,10 +86,23 @@ export class ServerUniverse
 
 	/**
 	 * Constructor.
+	 *
+	 * @param superParams - Super parameters
+	 * @param param - Destructured parameters
 	 */
-	public constructor({ application }: ServerUniverseArgs) {
+	public constructor(
+		superParams: CoreUniverseRequiredConstructorParameter,
+		{
+			created
+		}: {
+			/**
+			 * Created promise.
+			 */
+			created: DeferredPromise<void>;
+		}
+	) {
 		// Call superclass
-		super({ application });
+		super(superParams);
 
 		// Generate base class
 		this.Base = ServerBaseFactory({ universe: this });
@@ -105,311 +113,34 @@ export class ServerUniverse
 		this.Cell = ServerCellFactory({ Base: this.Base });
 		this.Entity = ServerEntityFactory({ Base: this.Base });
 
-		// Set kinds
-		this.kinds = new Map([
-			[
-				defaultKindUuid,
-				{
-					typeOfEntity: DefaultServerEntityFactory({
-						Entity: this.Entity
-					})
-				}
-			]
-		]);
-
-		setTimeout(() => {
-			// Set default shard
-			this.addShard({ grids: new Map(), shardUuid: defaultShardUuid });
+		// Default shard
+		let defaultShardCreated: DeferredPromise = new DeferredPromise();
+		let defaultShardAttach: Promise<void> = new Promise((resolve, reject) => {
+			defaultShardCreated.then(resolve).catch(reject);
 		});
-	}
+		let defaultShardArg: CoreShardArg<ServerOptions> = {
+			grids: new Map(),
+			shardUuid: this.getDefaultShardUuid()
+		};
+		this.defaultShard = this.addShard(
+			defaultShardArg,
+			{ attachHook: defaultShardAttach, created: defaultShardCreated },
+			[]
+		);
 
-	/**
-	 * Adds connection, which subsequently adds a shard.
-	 *
-	 * @param connectionArgs - Connection args
-	 * @returns - The connection added
-	 */
-	public addConnection(connectionArgs: CommsConnectionArgs): ServerConnection {
-		let connection: ServerConnection = new ServerConnection(connectionArgs);
-		this.connections.add(connection);
-		return connection;
-	}
-
-	/**
-	 * Adds the kind.
-	 */
-	public addKind({
-		uuid,
-		kind
-	}: {
-		/**
-		 *
-		 */
-		uuid: Uuid;
-		/**
-		 *
-		 */
-		kind: Kind;
-	}): void {
-		if (uuid !== defaultKindUuid) {
-			this.doAddKind({ kind, uuid });
-		}
-	}
-
-	/**
-	 * Add shard to CommsUniverse.
-	 *
-	 * @param shard - Arguments for the [[ServerShard]]
-	 */
-	public addShard(shard: ServerShardArgs): void {
-		this.shards.set(shard.shardUuid, new this.Shard(shard));
-	}
-
-	/**
-	 * Adds the world.
-	 */
-	public addWorld({
-		uuid,
-		world
-	}: {
-		/**
-		 *
-		 */
-		uuid: Uuid;
-		/**
-		 *
-		 */
-		/**
-		 *
-		 */
-		world: World;
-	}): void {
-		if (uuid !== defaultWorldUuid) {
-			this.doAddWorld({ uuid, world });
-		}
-	}
-
-	/**
-	 * Get [[ServerCell]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @param path - Path to cell
-	 *
-	 * @returns [[ServerCell]], the cell within the grid
-	 */
-	public getCell(path: CellPath): ServerCell {
-		return this.getShard(path).getGrid(path).getCell(path);
-	}
-
-	/**
-	 * Get [[ServerEntity]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @param path - Path to entity
-	 *
-	 * @returns [[ServerEntity]], anything residing within a cell
-	 */
-	public getEntity(path: EntityPath): ServerEntity {
-		return this.getShard(path).getGrid(path).getCell(path).getEntity(path);
-	}
-
-	/**
-	 * Get [[ServerGrid]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @param path - Path to grid
-	 *
-	 * @returns [[ServerGrid]], the grid itself
-	 */
-	public getGrid(path: GridPath): ServerGrid {
-		return this.getShard(path).getGrid(path);
-	}
-
-	/**
-	 * Gets the kind.
-	 *
-	 * @returns Kind
-	 */
-	public getKind({
-		uuid
-	}: {
-		/**
-		 *
-		 */
-		uuid: Uuid;
-	}): Kind {
-		let kind: Kind | undefined = this.kinds.get(uuid);
-		if (kind === undefined) {
-			// Default kind is always there
-			return this.kinds.get(defaultKindUuid) as Kind;
-		}
-		return kind;
-	}
-
-	/**
-	 * Get [[ServerShard]].
-	 *
-	 * A shortcut function.
-	 *
-	 * @returns [[shard]], a whole universe
-	 */
-	public getShard({ shardUuid }: ShardPath): ServerShard {
-		let shard: ServerShard | undefined = this.shards.get(shardUuid);
-
-		if (shard === undefined) {
-			// "defaultShardUuid" is always present, since it is initialized and cannot be removed or overwritten
-			return this.shards.get(defaultShardUuid) as ServerShard;
-		}
-		return shard;
-	}
-
-	/**
-	 * Gets the world.
-	 *
-	 * @returns [[World]], whole world
-	 */
-	public getWorld({
-		uuid
-	}: {
-		/**
-		 *
-		 */
-		uuid: Uuid;
-	}): World {
-		let world: World | undefined = this.worlds.get(uuid);
-		if (world === undefined) {
-			// Default world is always there
-			return this.worlds.get(defaultWorldUuid) as World;
-		}
-		return world;
-	}
-
-	/**
-	 * Removes the kind.
-	 */
-	public removeKind({
-		uuid
-	}: {
-		/**
-		 *
-		 */
-		uuid: Uuid;
-	}): void {
-		if (uuid !== defaultKindUuid) {
-			this.doRemoveKind({ uuid });
-		}
-	}
-
-	/**
-	 * Remove commsShard from CommmsUniverse.
-	 *
-	 * @param shard - Path to shard
-	 *
-	 * @returns `true` on success, `false` on failure
-	 */
-	public removeShard(shard: ShardPath): void {
-		this.doRemoveShard(shard);
-	}
-
-	/**
-	 * Removes the world.
-	 */
-	public removeWorld({
-		uuid
-	}: {
-		/**
-		 *
-		 */
-		uuid: Uuid;
-	}): void {
-		if (uuid !== defaultWorldUuid) {
-			this.doRemoveWorld({ uuid });
-		}
-	}
-
-	/**
-	 * Adds the kind.
-	 */
-	private doAddKind({
-		kind,
-		uuid
-	}: {
-		/**
-		 *
-		 */
-		kind: Kind;
-		/**
-		 *
-		 */
-		/**
-		 *
-		 */
-		uuid: Uuid;
-	}): void {
-		this.kinds.set(uuid, kind);
-	}
-
-	/**
-	 * Adds the world.
-	 */
-	private doAddWorld({
-		uuid,
-		world
-	}: {
-		/**
-		 *
-		 */
-		uuid: Uuid;
-		/**
-		 *
-		 */
-		/**
-		 *
-		 */
-		world: World;
-	}): void {
-		this.worlds.set(uuid, world);
-	}
-
-	/**
-	 * Removes the kind.
-	 */
-	private doRemoveKind({
-		uuid
-	}: {
-		/**
-		 *
-		 */
-		uuid: Uuid;
-	}): void {
-		this.kinds.delete(uuid);
-	}
-
-	/**
-	 * Actually removes the commsShard.
-	 */
-	private doRemoveShard({ shardUuid }: ShardPath): void {
-		let shard: ServerShard | undefined = this.shards.get(shardUuid);
-		if (shard !== undefined) {
-			shard.terminate();
-			this.shards.delete(shardUuid);
-		}
-	}
-
-	/**
-	 * Removes the world.
-	 */
-	private doRemoveWorld({
-		uuid
-	}: {
-		/**
-		 *
-		 */
-		uuid: Uuid;
-	}): void {
-		this.worlds.delete(uuid);
+		// After default shard added, resolve universe creation
+		defaultShardAttach
+			.catch(() => {
+				// TODO: Process error
+			})
+			// Process unconditionally
+			.finally(() => {
+				created.resolve();
+			});
 	}
 }
+
+/**
+ * Server universe class.
+ */
+export type ServerUniverseClass = typeof ServerUniverse;
