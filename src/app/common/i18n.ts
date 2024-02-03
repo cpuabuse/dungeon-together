@@ -55,6 +55,11 @@ export type InternalMessageSchema = {
 		 * System menu.
 		 */
 		system: I18NMessage;
+
+		/**
+		 * Welcome menu.
+		 */
+		welcome: I18NMessage;
 	};
 
 	/**
@@ -153,7 +158,8 @@ export const internalLocaleMessages = {
 			debug: "تصحيح الأخطاء",
 			options: "خيارات",
 			player: "اللاعب",
-			system: "النظام"
+			system: "النظام",
+			welcome: "!مرحبا"
 		},
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "تحقق من حولك",
@@ -192,7 +198,8 @@ export const internalLocaleMessages = {
 			debug: "Debug",
 			options: "Options",
 			player: "Player",
-			system: "System"
+			system: "System",
+			welcome: "Welcome!"
 		},
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "You look around",
@@ -233,7 +240,8 @@ export const internalLocaleMessages = {
 			debug: "デバッグ",
 			options: "オプション",
 			player: "プレイヤー",
-			system: "システム"
+			system: "システム",
+			welcome: "ようこそ!"
 		},
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "周りを見回す",

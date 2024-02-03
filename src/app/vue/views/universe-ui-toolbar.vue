@@ -12,7 +12,7 @@
 		:name="name"
 	>
 		<template #body>
-			<OverlayList :items="listItems">
+			<OverlayList :text="t('menuTitle.welcome')" :items="listItems">
 				<!-- All story -->
 				<template #welcome>
 					<UniverseUiToolbarWelcome />
