@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -113,6 +113,27 @@ export interface CoreMessageSync extends CoreMessageBase {
 	 * Type of the message.
 	 */
 	type: MessageTypeWord.Sync;
+}
+
+/**
+ *  Message for when a player waits/skips his turn.
+ */
+export interface CoreMessageWait extends CoreMessageBase {
+	/**
+	 * Message data.
+	 */
+	body: CoreMessagePlayerBody & {
+		// TODO: Remove, as not needed
+		/**
+		 * Unit UUID.
+		 */
+		unitUuid: Uuid;
+	};
+
+	/**
+	 * Type of the message.
+	 */
+	type: MessageTypeWord.Wait;
 }
 
 /**

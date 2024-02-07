@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -33,6 +33,11 @@ export const rightSymbol: symbol = Symbol("right");
  * Identifier for the left movement input.
  */
 export const leftSymbol: symbol = Symbol("left");
+
+/**
+ * Identifier for the wait turn input.
+ */
+export const waitSymbol: symbol = Symbol("wait");
 
 /**
  * Identifier for the up right-click input.

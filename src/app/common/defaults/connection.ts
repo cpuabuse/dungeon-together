@@ -54,7 +54,12 @@ export enum MessageTypeWord {
 	/**
 	 * Notification about action result, or any turn by turn quick information.
 	 */
-	StatusNotification = "status-notification"
+	StatusNotification = "status-notification",
+
+	/**
+	 * Client sends information about a player skipping his turn to play.
+	 */
+	Wait = "wait"
 }
 
 /**

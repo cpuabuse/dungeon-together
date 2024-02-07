@@ -21,7 +21,7 @@ import { DirectionWord, MessageTypeWord } from "../common/defaults/connection";
 import { defaultFps, defaultMobileFps } from "../common/graphics";
 import { Uuid } from "../common/uuid";
 import { CoreArgIds } from "../core/arg";
-import { MovementWord, processQueueWord } from "../core/connection";
+import { CoreEnvelope, MovementWord, processQueueWord } from "../core/connection";
 import { LogLevel } from "../core/error";
 import { CoreShardArgParentIds } from "../core/parents";
 import { CoreShardArg, CoreShardClassFactory } from "../core/shard";
@@ -45,7 +45,8 @@ import {
 	rcSymbol,
 	rightSymbol,
 	scrollSymbol,
-	upSymbol
+	upSymbol,
+	waitSymbol
 } from "./input";
 import { ClientOptions, clientOptions } from "./options";
 import { uuidToName } from "./text";
@@ -278,6 +279,39 @@ export function ClientShardFactory({
 						this.grids.forEach(grid => {
 							grid.changeLevel({ level: grid.currentLevel - 1 });
 						});
+					});
+
+					// Add listeners for wait turn input
+					// Async callback for event emitter
+					// eslint-disable-next-line @typescript-eslint/no-misused-promises
+					this.input.on(waitSymbol, async inputInterface => {
+						// #if _DEBUG_ENABLED
+						inputDebug({ input: inputInterface as InputInterface, symbol: waitSymbol });
+						// #endif
+
+						let unitUuid: Uuid | undefined = Array.from(this.units)[0];
+						if (unitUuid) {
+							// TODO: Retrieval of connection
+							let connection: ClientConnection | undefined = Array.from(this.players)[0]?.[1].connection;
+							await connection?.socket.send(
+								new CoreEnvelope({
+									messages: [
+										{
+											body: {
+												playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
+												unitUuid
+											},
+											type: MessageTypeWord.Wait
+										}
+									]
+								})
+							);
+						} else {
+							(this.constructor as typeof ClientShard).universe.log({
+								error: new Error("Unit missing"),
+								level: LogLevel.Alert
+							});
+						}
 					});
 
 					let movementInputEntries: [symbol: symbol, direction: MovementWord][] = [
