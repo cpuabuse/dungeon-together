@@ -12,7 +12,7 @@
 		:name="name"
 	>
 		<template #body>
-			<OverlayList :items="listItems">
+			<OverlayList :text="t('menuTitle.welcome')" :items="listItems">
 				<!-- All story -->
 				<template #welcome>
 					<UniverseUiToolbarWelcome />
@@ -312,7 +312,7 @@ export default defineComponent({
 						return {
 							clickRecordIndex: welcomeDisplaySymbol,
 							icon: "fa-door-open",
-							name: "Welcome"
+							name: t("menuTitle.welcome")
 						} satisfies CompactToolbarMenuItem;
 					})
 				}
