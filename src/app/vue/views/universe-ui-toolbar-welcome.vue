@@ -146,7 +146,10 @@ export default defineComponent({
 					{ description: "Camera level up", keyboardKey: "O" },
 					{ description: "Camera level down", keyboardKey: "P" }
 				],
-				[{ description: "Use", keyboardKey: "E", subtext: "(Use the ladder to descend)" }]
+				[
+					{ description: "Use", keyboardKey: "E", subtext: "(Use the ladder to descend)" },
+					{ description: "Wait", keyboardKey: "R", subtext: "(Skip your turn)" }
+				]
 			]
 		};
 	}
