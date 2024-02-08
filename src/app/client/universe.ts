@@ -48,7 +48,8 @@ import {
 	rightSymbol,
 	scrollSymbol,
 	upSymbol,
-	waitSymbol
+	waitSymbol,
+	waitUntilHealedSymbol
 } from "./input";
 import { ClientMode } from "./mode";
 import { ClientOptions, clientOptions } from "./options";
@@ -524,6 +525,17 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 				mousetrap.bind("r", () => {
 					this.shards.forEach(clientShard => {
 						clientShard.fireInput(waitSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("t", () => {
+					this.shards.forEach(clientShard => {
+						clientShard.fireInput(waitUntilHealedSymbol, {
 							x: 0,
 							y: 0
 						});

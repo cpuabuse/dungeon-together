@@ -46,7 +46,8 @@ import {
 	rightSymbol,
 	scrollSymbol,
 	upSymbol,
-	waitSymbol
+	waitSymbol,
+	waitUntilHealedSymbol
 } from "./input";
 import { ClientOptions, clientOptions } from "./options";
 import { uuidToName } from "./text";
@@ -312,6 +313,17 @@ export function ClientShardFactory({
 								level: LogLevel.Alert
 							});
 						}
+					});
+
+					// Add listeners for wait turn until fully healed input
+					// Async callback for event emitter
+					// eslint-disable-next-line @typescript-eslint/no-misused-promises
+					this.input.on(waitUntilHealedSymbol, inputInterface => {
+						// #if _DEBUG_ENABLED
+						inputDebug({ input: inputInterface as InputInterface, symbol: waitUntilHealedSymbol });
+						// #endif
+
+						// TODO: Check if there is no surrounding monsters, and health is not fully healed
 					});
 
 					let movementInputEntries: [symbol: symbol, direction: MovementWord][] = [

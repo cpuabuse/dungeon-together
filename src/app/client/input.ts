@@ -40,6 +40,11 @@ export const leftSymbol: symbol = Symbol("left");
 export const waitSymbol: symbol = Symbol("wait");
 
 /**
+ * Identifier for the wait turn until fully healed input.
+ */
+export const waitUntilHealedSymbol: symbol = Symbol("wait-until-healed");
+
+/**
  * Identifier for the up right-click input.
  */
 export const rcSymbol: symbol = Symbol("right-click");
