@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -7,7 +7,7 @@
  * @file Entity that can be rendered.
  */
 
-import { AnimatedSprite, Container, Text } from "pixi.js";
+import { AnimatedSprite, Container } from "pixi.js";
 import { CoreArgIds } from "../core/arg";
 import { CoreDictionary } from "../core/connection";
 import { CoreEntityArg, CoreEntityClassFactory } from "../core/entity";
@@ -16,6 +16,16 @@ import { CoreUniverseObjectConstructorParameters } from "../core/universe-object
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientOptions, clientOptions } from "./options";
 import { ProgressBar, enemyHpBarColors, friendlyHpBarColors } from "./progess-bar";
+
+/**
+ * Progress bar scale.
+ */
+const progressBarScale: number = 0.9;
+
+/**
+ * Default max health.
+ */
+const defaultMaxHealth: number = 100;
 
 /**
  * Generator for the client entity class.
@@ -40,11 +50,6 @@ export function ClientEntityFactory({
 		Base,
 		options: clientOptions
 	}) {
-		/**
-		 * Temporary text, showing health.
-		 */
-		public basicText: Text | null = null;
-
 		public container: Container = new Container();
 
 		/**
@@ -68,41 +73,34 @@ export function ClientEntityFactory({
 		/**
 		 * Temporary health.
 		 */
-		public set health(health: number | null) {
-			if (this.basicText) {
-				if (health === null) {
-					this.basicText.destroy();
-					this.tempHealth = 0;
-				} else {
-					this.tempHealth = health;
-					this.basicText.text = health;
-				}
 
-				if (this.healthBar) {
-					if (health === null) {
-						// Nothing
-						this.tempHealth = 0;
-					} else {
-						this.tempHealth = health;
-						this.healthBar.value = health;
-					}
-				}
-			} else if (health) {
-				this.basicText = new Text(health);
-				// TODO: Determining of bar color should not be mode
-				// TODO: Centering should be done more elegantly
-				this.healthBar = new ProgressBar({
-					colors: this.modeUuid === "mode/user/player/default" ? friendlyHpBarColors : enemyHpBarColors,
-					container: this.container,
-					scale: this.sprite.width * 0.9
-				});
-				this.healthBar.mesh.x = this.sprite.width * 0.05;
-				this.healthBar.mesh.y = this.sprite.height * 0.025;
-				this.healthBar.maxValue = typeof this.dictionary.maxHealth === "number" ? this.dictionary.maxHealth : 3;
-				this.tempHealth = health;
-				this.healthBar.value = health;
-				this.sprite.addChild(this.basicText);
+		/**
+		 * Health getter.
+		 *
+		 * @returns Health
+		 */
+		public get health(): number | null {
+			const { health }: CoreDictionary = this.dictionary;
+			if (typeof health === "number") {
+				return health;
 			}
+			return null;
+		}
+
+		/**
+		 * Max health getter.
+		 *
+		 * @returns Max health
+		 */
+		public get maxHealth(): number {
+			const { maxHealth }: CoreDictionary = this.dictionary;
+			if (typeof maxHealth === "number") {
+				return maxHealth;
+			}
+			if (this.health !== null) {
+				return this.health <= defaultMaxHealth ? defaultMaxHealth : this.health;
+			}
+			return defaultMaxHealth;
 		}
 
 		/**
@@ -151,6 +149,40 @@ export function ClientEntityFactory({
 			this.sprite = new AnimatedSprite(ClientEntity.universe.getMode({ uuid: this.modeUuid }).textures);
 
 			this.container.addChild(this.sprite);
+		}
+
+		/**
+		 * To be called when dictionary is updated.
+		 */
+		public onUpdateDictionary(): void {
+			if (this.health) {
+				if (this.healthBar) {
+					// Update health
+					this.healthBar.value = this.health;
+				} else {
+					// TODO: Determining of bar color should not be mode
+					// TODO: Centering should be done more elegantly
+					// Create health bar
+					this.healthBar = new ProgressBar({
+						colors: this.modeUuid === "mode/user/player/default" ? friendlyHpBarColors : enemyHpBarColors,
+						container: this.container,
+						scale: this.sprite.width * progressBarScale
+					});
+
+					// Set aspect ratio
+					this.healthBar.mesh.x = 0.05;
+					this.healthBar.mesh.y = 0.025;
+
+					// Set current values
+					this.healthBar.maxValue = this.maxHealth;
+					this.healthBar.value = this.health;
+				}
+			} else if (this.healthBar) {
+				// Destroy and deregister health bar
+				this.healthBar.destroy();
+				this.healthBar = null;
+			}
+			// Do nothing if health bar and health both not specified
 		}
 	}
 

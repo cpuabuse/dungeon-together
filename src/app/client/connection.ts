@@ -450,11 +450,14 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 							attachHook
 								.then(() => {
 									this.registerShard({ playerUuid: message.body.playerUuid, shardUuid: message.body.shardUuid });
+									const player: ClientPlayer | undefined = shard.players.get(message.body.playerUuid);
+
 									message.body.units.forEach(unitUuid => {
 										shard.units.add(unitUuid);
+										if (player) {
+											player.units.add(unitUuid);
+										}
 									});
-
-									const player: ClientPlayer | undefined = shard.players.get(message.body.playerUuid);
 
 									if (player) {
 										updateDictionaryContainer({ dictionary: message.body.dictionary, dictionaryContainer: player });
@@ -608,9 +611,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 									}
 								});
 
-								if (typeof emits.health === "number") {
-									this.universe.getEntity({ entityUuid }).health = emits.health;
-								}
+								entity.onUpdateDictionary();
 
 								// Reattach present
 								if (!targetCell.entities.has(entityUuid)) {
