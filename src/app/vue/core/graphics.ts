@@ -131,11 +131,19 @@ export function useGraphics({
 		});
 		isUnexploredFowEnabled.value = true;
 		isExploredFowEnabled.value = true;
-		watch(isUnexploredFowEnabled, () => {
-			// console.log("Unexplored FOW toggled");
+		watch(isUnexploredFowEnabled, newValue => {
+			if (newValue) {
+				// console.log("Unexplored FOW enabled");
+			} else {
+				// console.log("Unexplored FOW disabled");
+			}
 		});
-		watch(isExploredFowEnabled, () => {
-			// console.log("Explored FOW toggled");
+		watch(isExploredFowEnabled, newValue => {
+			if (newValue) {
+				// console.log("Explored FOW enabled");
+			} else {
+				// console.log("Explored FOW disabled");
+			}
 		});
 
 		// Change FPS on record change, and addition of shards
