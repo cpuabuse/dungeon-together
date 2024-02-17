@@ -8,15 +8,17 @@
  * Fog of war graphics.
  */
 
+import { ColorMatrixFilter } from "pixi.js";
 import { ObjectLikeGraphicsContainer } from "./graphics";
 
 /**
  * Words used to describe FOW status.
  */
 export enum FowWords {
-	White = "white",
+	BlackEffect = "black-effect",
+	Black = "black",
 	Grey = "grey",
-	Black = "black"
+	White = "white"
 }
 
 /**
@@ -38,5 +40,13 @@ export class FowContainer extends ObjectLikeGraphicsContainer<FowWords> {
 		super({
 			values: new Set(Object.values(FowWords))
 		});
+
+		// Make black layer hidden
+		this.containers[FowWords.Black].visible = false;
+
+		// Burn grey
+		const contrastFilter: ColorMatrixFilter = new ColorMatrixFilter();
+		contrastFilter.contrast(2, false);
+		this.containers[FowWords.Grey].filters = [contrastFilter];
 	}
 }
