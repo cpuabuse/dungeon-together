@@ -26,6 +26,16 @@ export const targetFpsRecordId: symbol = Symbol("fps");
 export const averageFpsRecordId: symbol = Symbol("average-fps");
 
 /**
+ * Whether unexplored FOW is enabled for all shards or not.
+ */
+export const isUnexploredFowEnabledRecordId: symbol = Symbol("is-unexplored-fow-enabled");
+
+/**
+ * Whether explored FOW is enabled for all shards or not.
+ */
+export const isExploredFowEnabledRecordId: symbol = Symbol("is-explored-fow-enabled");
+
+/**
  * Checks FPS record.
  *
  * @param value - Record value
@@ -112,6 +122,30 @@ export function useGraphics({
 
 	// Run only once
 	if (isRoot) {
+		// Initialize FOW
+		const isUnexploredFowEnabled: WritableComputedRef<boolean> = recordStore.computedRecord({
+			id: isUnexploredFowEnabledRecordId
+		});
+		const isExploredFowEnabled: WritableComputedRef<boolean> = recordStore.computedRecord({
+			id: isExploredFowEnabledRecordId
+		});
+		isUnexploredFowEnabled.value = true;
+		isExploredFowEnabled.value = true;
+		watch(isUnexploredFowEnabled, newValue => {
+			if (newValue) {
+				// console.log("Unexplored FOW enabled");
+			} else {
+				// console.log("Unexplored FOW disabled");
+			}
+		});
+		watch(isExploredFowEnabled, newValue => {
+			if (newValue) {
+				// console.log("Explored FOW enabled");
+			} else {
+				// console.log("Explored FOW disabled");
+			}
+		});
+
 		// Change FPS on record change, and addition of shards
 		watch(targetFps, changeFps);
 		universeStore.onUpdateUniverse({

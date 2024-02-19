@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -16,6 +16,7 @@ import { CoreGridArgParentIds } from "../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientCell } from "./cell";
+import { FowContainer, FowWords } from "./fow";
 import { ClientOptions, clientOptions } from "./options";
 import { ClientShard } from "./shard";
 
@@ -55,7 +56,7 @@ export function ClientGridClassFactory({
 		/**
 		 * An array of containers sorted by the depth.
 		 */
-		public levelIndex: Array<Container>;
+		public levelIndex: Array<FowContainer>;
 
 		/**
 		 * Parent shard.
@@ -87,7 +88,7 @@ export function ClientGridClassFactory({
 
 			// Initialize zIndex
 			this.levelIndex = Array.from(new Array(this.zLength), () => {
-				let container: Container = new Container();
+				let container: FowContainer = new FowContainer();
 				container.visible = false;
 				return container;
 			});
@@ -182,7 +183,7 @@ export function ClientGridClassFactory({
 			cell.container.y = sceneHeight * cell.y;
 
 			// Add container
-			let levelContainer: Container | undefined = this.levelIndex[cell.z];
+			let levelContainer: Container | undefined = this.levelIndex[cell.z]?.containers[FowWords.Black];
 			if (levelContainer) {
 				levelContainer.addChild(cell.container);
 			} else {

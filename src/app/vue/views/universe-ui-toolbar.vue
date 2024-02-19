@@ -44,6 +44,7 @@ import {
 	OverlayBusToCompactToolbarMenuSource,
 	useOverlayBusToCompactToolbarMenuSource
 } from "../core/compact-toolbar";
+import { isExploredFowEnabledRecordId, isUnexploredFowEnabledRecordId } from "../core/graphics";
 import { UsedLocale, useLocale } from "../core/locale";
 import {
 	OverlayBusSource,
@@ -162,6 +163,18 @@ export default defineComponent({
 					name: "Shards",
 					tabs: this.debugItemsShardTabs,
 					type: OverlayListItemEntryType.Tab
+				},
+				{
+					icon: "fa-eye-slash",
+					id: isUnexploredFowEnabledRecordId,
+					name: "Enable unexplored FOW",
+					type: OverlayListItemEntryType.Switch
+				},
+				{
+					icon: "fa-eye-low-vision",
+					id: isExploredFowEnabledRecordId,
+					name: "Enable explored FOW",
+					type: OverlayListItemEntryType.Switch
 				},
 				{
 					id: "uuid-search",

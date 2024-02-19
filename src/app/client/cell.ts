@@ -143,11 +143,6 @@ export function ClientCellFactory({
 			>
 		) {
 			super(cell, { attachHook, created }, baseParams);
-
-			// Fog
-			this.setFilters({
-				contrast: true
-			});
 		}
 
 		/**

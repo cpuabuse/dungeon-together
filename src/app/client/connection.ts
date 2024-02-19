@@ -10,7 +10,7 @@
 import { join } from "path";
 import { Howl } from "howler";
 import nextTick from "next-tick";
-import { ColorMatrixFilter } from "pixi.js";
+import { ColorMatrixFilter, Container } from "pixi.js";
 import { DeferredPromise } from "../common/async";
 import { DirectionWord, MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { env } from "../common/env";
@@ -43,6 +43,7 @@ import { ServerMessage } from "../server/connection";
 import { Store, StoreWord } from "../vue/core/store";
 import { ClientCell } from "./cell";
 import { ClientEntity } from "./entity";
+import { FowWords } from "./fow";
 import { ClientGrid } from "./grid";
 import { ClientOptions } from "./options";
 import { ClientShard } from "./shard";
@@ -235,11 +236,30 @@ export class ClientPlayer extends CorePlayer<ClientConnection> {
 	public storyNotifications: Array<StoryNotification> = new Array<StoryNotification>();
 }
 
+// TODO: Either make sure that grids and cells do not get changed between cycles or write an appropriate documentation
+/**
+ * Type to track cells between cycles.
+ */
+type VisibilityMap = Map<
+	Uuid,
+	{
+		/**
+		 * Cell.
+		 */
+		cell: ClientCell;
+
+		/**
+		 * Grid.
+		 */
+		grid: ClientGrid;
+	}
+>;
+
 /**
  * Client connection.
  */
 export class ClientConnection extends CoreConnection<ClientUniverse, ClientMessage, ServerMessage, ClientPlayer> {
-	public previouslyVisibleCells: Set<ClientCell> = new Set();
+	public previouslyVisibleCellEntries: VisibilityMap = new Map();
 
 	/**
 	 * Constructor.
@@ -501,7 +521,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 				type UpdateCell = typeof message.body.cells extends Array<infer Cell> ? Cell : never;
 				let detachedEntities: Set<[ClientEntity, UpdateCell, ClientCell]> = new Set();
 				let attachedEntities: Set<ClientEntity> = new Set();
-				let newCells: Set<ClientCell> = new Set();
+				let newCellEntries: VisibilityMap = new Map();
 
 				this.universe.log({ level: LogLevel.Informational, message: `Update started.` });
 
@@ -563,10 +583,20 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 						callback: () => {
 							let sourceEntityUuidSet: Set<Uuid> = new Set(sourceCell.entities.map(entity => entity.entityUuid));
 							let targetCell: ClientCell = this.universe.getCell(sourceCell);
+							let targetGrid: ClientGrid = this.universe.getGrid(sourceCell);
 
 							// TODO: Visibility tracing
-							newCells.add(targetCell);
-							targetCell.setFilters({ contrast: false });
+							newCellEntries.set(sourceCell.cellUuid, { cell: targetCell, grid: targetGrid });
+							let levelContainer: Container | undefined =
+								targetGrid.levelIndex[targetCell.z]?.containers[FowWords.White];
+							if (levelContainer) {
+								levelContainer.addChild(targetCell.container);
+							} else {
+								this.universe.log({
+									error: new Error("Could not find cell container"),
+									level: LogLevel.Error
+								});
+							}
 
 							// Detach
 							targetCell.entities.forEach(targetEntity => {
@@ -782,12 +812,22 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 					 * Callback.
 					 */
 					callback: () => {
-						this.previouslyVisibleCells.forEach(cell => {
-							if (!newCells.has(cell)) {
-								cell.setFilters({ contrast: true });
+						// ESLint does not infer
+						// eslint-disable-next-line @typescript-eslint/typedef
+						this.previouslyVisibleCellEntries.forEach(({ cell, grid }, cellUuid) => {
+							if (!newCellEntries.has(cellUuid)) {
+								let levelContainer: Container | undefined = grid.levelIndex[cell.z]?.containers[FowWords.Grey];
+								if (levelContainer) {
+									levelContainer.addChild(cell.container);
+								} else {
+									this.universe.log({
+										error: new Error("Could not find cell container"),
+										level: LogLevel.Error
+									});
+								}
 							}
 						});
-						this.previouslyVisibleCells = newCells;
+						this.previouslyVisibleCellEntries = newCellEntries;
 					}
 				});
 
