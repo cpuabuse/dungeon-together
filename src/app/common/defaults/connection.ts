@@ -59,7 +59,12 @@ export enum MessageTypeWord {
 	/**
 	 * Client sends information about a player skipping his turn to play.
 	 */
-	Wait = "wait"
+	Wait = "wait",
+
+	/**
+	 * Client sends information about a player ending his turn.
+	 */
+	Turn = "turn"
 }
 
 /**

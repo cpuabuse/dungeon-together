@@ -86,6 +86,16 @@ export interface CoreMessageMovement extends CoreMessageBase {
 }
 
 /**
+ * Turn message interface.
+ */
+export interface CoreMessageTurn extends CoreMessageBase {
+	/**
+	 * Type of the message.
+	 */
+	type: MessageTypeWord.Turn;
+}
+
+/**
  * Empty message interface.
  */
 export interface CoreMessageEmpty extends CoreMessageBase {

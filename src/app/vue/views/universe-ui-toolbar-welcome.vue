@@ -149,7 +149,7 @@ export default defineComponent({
 				[
 					{ description: "Use", keyboardKey: "E", subtext: "(Use the ladder to descend)" },
 					{ description: "Wait", keyboardKey: "R", subtext: "(Skip your turn)" },
-					{ description: "Wait until healed", keyboardKey: "T", subtext: "(Or event/danger)" }
+					{ description: "Start/stop waiting until healed", keyboardKey: "T", subtext: "(Or event/danger)" }
 				]
 			]
 		};

@@ -29,8 +29,9 @@ import { CoreUniverseObjectConstructorParameters } from "../core/universe-object
 import { Store, StoreWord } from "../vue/core/store";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientCell } from "./cell";
-import { ClientConnection, ClientPlayer } from "./connection";
+import { ClientConnection, ClientPlayer, turnEventSymbol } from "./connection";
 import { ElementBall } from "./element-ball";
+import { ClientEntity } from "./entity";
 import { ClientGrid } from "./grid";
 import { ClientUniverseStateRcMenuData, ClientUniverseStateRcMenuDataWords } from "./gui";
 import {
@@ -140,6 +141,12 @@ export function ClientShardFactory({
 		 * Attached to HTML Canvas or not.
 		 */
 		private isAttached: boolean = false;
+
+		// TODO: Eventually to be moved to player or control set
+		/**
+		 * It is a handler used to remove a listener from connection emitter on user input, for waiting until healed.
+		 */
+		private waitUntilHealedHandler: null | (() => void) = null;
 
 		// ESLint params bug
 		// eslint-disable-next-line jsdoc/require-param
@@ -323,7 +330,74 @@ export function ClientShardFactory({
 						inputDebug({ input: inputInterface as InputInterface, symbol: waitUntilHealedSymbol });
 						// #endif
 
-						// TODO: Check if there is no surrounding monsters, and health is not fully healed
+						// TODO: Retrieval of connection
+						let connection: ClientConnection | undefined = Array.from(this.players)[0]?.[1].connection;
+						let unitUuid: Uuid | undefined = Array.from(this.units)[0];
+
+						if (unitUuid) {
+							/**
+							 * Functionality for waiting player turn and heal.
+							 */
+							const onTurn: () => void = () => {
+								if (unitUuid) {
+									// TODO: Check if there is no surrounding monsters, and health is not fully healed
+									// TODO: Connect player to control set
+									this.players.forEach(player => {
+										if (
+											undefined ===
+											// Will be undefined when no units with health less than max health exist
+											Array.from(player.units).find(entityUuid => {
+												const entity: ClientEntity = (this.constructor as ClientShardClass).universe.getEntity({
+													entityUuid
+												});
+												return entity.health !== null && entity.health < entity.maxHealth;
+											})
+										) {
+											connection?.emitter.removeListener(turnEventSymbol, onTurn);
+											this.waitUntilHealedHandler = null;
+										}
+									});
+
+									connection?.socket
+										.send(
+											new CoreEnvelope({
+												messages: [
+													{
+														body: {
+															playerUuid: Array.from(this.players)[0]?.[1].playerUuid ?? "nothing",
+															unitUuid
+														},
+														type: MessageTypeWord.Wait
+													}
+												]
+											})
+										)
+										.catch(error => {
+											(this.constructor as typeof ClientShard).universe.log({
+												error: new Error("Error while sending wait message", { cause: error }),
+												level: LogLevel.Error
+											});
+										});
+								} else {
+									(this.constructor as typeof ClientShard).universe.log({
+										error: new Error("Unit missing"),
+										level: LogLevel.Alert
+									});
+								}
+							};
+
+							// Add listener
+							this.waitUntilHealedHandler = onTurn;
+							connection?.emitter.on(turnEventSymbol, onTurn);
+
+							// Wait initially
+							onTurn();
+						} else {
+							(this.constructor as typeof ClientShard).universe.log({
+								error: new Error("Unit missing"),
+								level: LogLevel.Alert
+							});
+						}
 					});
 
 					let movementInputEntries: [symbol: symbol, direction: MovementWord][] = [
@@ -433,6 +507,15 @@ export function ClientShardFactory({
 		 * @param inputInterface - Input event received
 		 */
 		public fireInput(inputSymbol: symbol, inputInterface: InputInterface): void {
+			if (this.waitUntilHealedHandler) {
+				let connection: ClientConnection | undefined = Array.from(this.players)[0]?.[1].connection;
+				connection?.emitter.removeListener(turnEventSymbol, this.waitUntilHealedHandler);
+				this.waitUntilHealedHandler = null;
+
+				// Do not restart skipping turns since waiting until healed is used to stop waiting as well
+				return;
+			}
+
 			this.input.emit(inputSymbol, inputInterface);
 		}
 

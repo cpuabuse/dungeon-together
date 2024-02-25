@@ -7,6 +7,7 @@
  * @file Client connection to server.
  */
 
+import EventEmitter from "events";
 import { join } from "path";
 import { Howl } from "howler";
 import nextTick from "next-tick";
@@ -27,6 +28,7 @@ import {
 	CoreMessageEmpty,
 	CoreMessageMovement,
 	CoreMessagePlayerBody,
+	CoreMessageTurn,
 	CorePlayer,
 	CoreProcessCallback,
 	CoreScheduler,
@@ -136,6 +138,7 @@ export type ClientMessage =
 			type: MessageTypeWord.Update;
 	  }
 	| CoreMessageMovement
+	| CoreMessageTurn
 	| {
 			/**
 			 * Local action body.
@@ -179,6 +182,11 @@ export type ClientMessage =
 			 */
 			body: CoreMessagePlayerBody & StoryNotification;
 	  };
+
+/**
+ * The symbol for the event to be emitted after each turn.
+ */
+export const turnEventSymbol: symbol = Symbol("turn");
 
 // Sound
 /**
@@ -259,6 +267,14 @@ type VisibilityMap = Map<
  * Client connection.
  */
 export class ClientConnection extends CoreConnection<ClientUniverse, ClientMessage, ServerMessage, ClientPlayer> {
+	/**
+	 * Connection level event emitter.
+	 *
+	 * @remarks
+	 * For now, turn hook is in emitter that is per connection, but could be moved to be per player if needed in the future.
+	 */
+	public emitter: EventEmitter = new EventEmitter();
+
 	public previouslyVisibleCellEntries: VisibilityMap = new Map();
 
 	/**
@@ -397,6 +413,12 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 			// Queue is empty
 			case MessageTypeWord.Empty:
 				return true;
+
+			// Turn event
+			case MessageTypeWord.Turn: {
+				this.emitter.emit(turnEventSymbol);
+				break;
+			}
 
 			// Status notification update
 			case MessageTypeWord.StatusNotification: {

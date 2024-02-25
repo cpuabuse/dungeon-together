@@ -7,6 +7,7 @@
  * @file Server connection to client.
  */
 
+import nextTick from "next-tick";
 import { ClientMessage } from "../client/connection";
 import { ClientOptions, clientOptions } from "../client/options";
 import { appUrl } from "../common/defaults";
@@ -466,6 +467,29 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 			// Needs to be called for all cells, not only processed ones
 			cell.clear();
 		});
+
+		// TODO: Add accumulation of players and final updates together, instead of each message; Perhaps a check during dequeue for a turn has finished, essentially refactor the dequeueing as a lifecycle
+		// TODO: `await` has been removed to fix infinite loop, but in general the queue process callback has to be refactored to prevent this
+		// Notify turn is ended
+		nextTick(() => {
+			this.socket
+				.send(
+					new CoreEnvelope({
+						messages: [
+							{
+								body: null,
+								type: MessageTypeWord.Turn
+							}
+						]
+					})
+				)
+				.catch(error => {
+					this.universe.log({
+						error: new Error("Error while sending turn message", { cause: error }),
+						level: LogLevel.Error
+					});
+				});
+		});
 	};
 
 	// TODO: Use visibility
@@ -802,7 +826,6 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 		}
 	}
 
-	// TODO: Add accumulation of players and final updates together, instead of each message
 	// Return
 	return false;
 };
