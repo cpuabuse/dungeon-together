@@ -7,6 +7,7 @@
  * @file Client connection to server.
  */
 
+import EventEmitter from "events";
 import { join } from "path";
 import { Howl } from "howler";
 import nextTick from "next-tick";
@@ -27,6 +28,7 @@ import {
 	CoreMessageEmpty,
 	CoreMessageMovement,
 	CoreMessagePlayerBody,
+	CoreMessageTurn,
 	CorePlayer,
 	CoreProcessCallback,
 	CoreScheduler,
@@ -136,6 +138,7 @@ export type ClientMessage =
 			type: MessageTypeWord.Update;
 	  }
 	| CoreMessageMovement
+	| CoreMessageTurn
 	| {
 			/**
 			 * Local action body.
@@ -179,6 +182,11 @@ export type ClientMessage =
 			 */
 			body: CoreMessagePlayerBody & StoryNotification;
 	  };
+
+/**
+ * The symbol for the event to be emitted after each turn.
+ */
+export const turnEventSymbol: symbol = Symbol("turn");
 
 // Sound
 /**
@@ -259,6 +267,14 @@ type VisibilityMap = Map<
  * Client connection.
  */
 export class ClientConnection extends CoreConnection<ClientUniverse, ClientMessage, ServerMessage, ClientPlayer> {
+	/**
+	 * Connection level event emitter.
+	 *
+	 * @remarks
+	 * For now, turn hook is in emitter that is per connection, but could be moved to be per player if needed in the future.
+	 */
+	public emitter: EventEmitter = new EventEmitter();
+
 	public previouslyVisibleCellEntries: VisibilityMap = new Map();
 
 	/**
@@ -398,6 +414,12 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 			case MessageTypeWord.Empty:
 				return true;
 
+			// Turn event
+			case MessageTypeWord.Turn: {
+				this.emitter.emit(turnEventSymbol);
+				break;
+			}
+
 			// Status notification update
 			case MessageTypeWord.StatusNotification: {
 				this.getPlayerEntry(message.body)?.player.statusNotifications.push(message.body);
@@ -470,11 +492,14 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 							attachHook
 								.then(() => {
 									this.registerShard({ playerUuid: message.body.playerUuid, shardUuid: message.body.shardUuid });
+									const player: ClientPlayer | undefined = shard.players.get(message.body.playerUuid);
+
 									message.body.units.forEach(unitUuid => {
 										shard.units.add(unitUuid);
+										if (player) {
+											player.units.add(unitUuid);
+										}
 									});
-
-									const player: ClientPlayer | undefined = shard.players.get(message.body.playerUuid);
 
 									if (player) {
 										updateDictionaryContainer({ dictionary: message.body.dictionary, dictionaryContainer: player });
@@ -638,9 +663,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 									}
 								});
 
-								if (typeof emits.health === "number") {
-									this.universe.getEntity({ entityUuid }).health = emits.health;
-								}
+								entity.onUpdateDictionary();
 
 								// Reattach present
 								if (!targetCell.entities.has(entityUuid)) {

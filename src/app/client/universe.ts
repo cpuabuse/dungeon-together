@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -47,7 +47,9 @@ import {
 	rcSymbol,
 	rightSymbol,
 	scrollSymbol,
-	upSymbol
+	upSymbol,
+	waitSymbol,
+	waitUntilHealedSymbol
 } from "./input";
 import { ClientMode } from "./mode";
 import { ClientOptions, clientOptions } from "./options";
@@ -513,6 +515,27 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 				mousetrap.bind("e", () => {
 					this.shards.forEach(clientShard => {
 						clientShard.fireInput(localActionSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("r", () => {
+					this.shards.forEach(clientShard => {
+						clientShard.fireInput(waitSymbol, {
+							x: 0,
+							y: 0
+						});
+					});
+				});
+
+				// We don't care about return
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				mousetrap.bind("t", () => {
+					this.shards.forEach(clientShard => {
+						clientShard.fireInput(waitUntilHealedSymbol, {
 							x: 0,
 							y: 0
 						});

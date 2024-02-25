@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -333,5 +333,13 @@ export class ProgressBar {
 		this.mesh = new Mesh(ProgressBar.geometry, this.shader);
 		this.scale = scale;
 		this.container.addChild(this.mesh);
+	}
+
+	/**
+	 * Remove progress bar dependencies from graphical memory, but preserve static objects for use by other bars.
+	 */
+	public destroy(): void {
+		this.mesh.destroy();
+		this.shader.destroy();
 	}
 }

@@ -7,6 +7,7 @@
  * @file Server connection to client.
  */
 
+import nextTick from "next-tick";
 import { ClientMessage } from "../client/connection";
 import { ClientOptions, clientOptions } from "../client/options";
 import { appUrl } from "../common/defaults";
@@ -27,6 +28,7 @@ import {
 	CoreMessageEmpty,
 	CoreMessageMovement,
 	CoreMessageSync,
+	CoreMessageWait,
 	CorePlayer,
 	CoreProcessCallback,
 	MovementWord,
@@ -64,6 +66,7 @@ export type ServerMessage =
 	| CoreMessageMovement
 	| CoreMessageEmpty
 	| CoreMessageSync
+	| CoreMessageWait
 	| {
 			/**
 			 * Message data.
@@ -464,6 +467,29 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 			// Needs to be called for all cells, not only processed ones
 			cell.clear();
 		});
+
+		// TODO: Add accumulation of players and final updates together, instead of each message; Perhaps a check during dequeue for a turn has finished, essentially refactor the dequeueing as a lifecycle
+		// TODO: `await` has been removed to fix infinite loop, but in general the queue process callback has to be refactored to prevent this
+		// Notify turn is ended
+		nextTick(() => {
+			this.socket
+				.send(
+					new CoreEnvelope({
+						messages: [
+							{
+								body: null,
+								type: MessageTypeWord.Turn
+							}
+						]
+					})
+				)
+				.catch(error => {
+					this.universe.log({
+						error: new Error("Error while sending turn message", { cause: error }),
+						level: LogLevel.Error
+					});
+				});
+		});
 	};
 
 	// TODO: Use visibility
@@ -667,6 +693,34 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 					unitUuid: message.body.unitUuid
 				});
 
+				break;
+			}
+
+			// Wait command
+			case MessageTypeWord.Wait: {
+				// TODO: Add processing for player UUID
+				// Await is inside of the loop, but also the switch
+				// eslint-disable-next-line no-await-in-loop
+				await this.forUnit({
+					/**
+					 * Callback function.
+					 *
+					 * @param param - Destructured parameters
+					 * @returns Synchronization promise
+					 */
+					// ESLint false negative; For some reason detects a loop
+					// eslint-disable-next-line @typescript-eslint/typedef, no-loop-func
+					callback: async ({ grid, cell }) => {
+						// Tick first, so that enemy has upper hand, and later can process ticks while awaiting player input
+						this.universe.Entity.kinds.forEach(Kind => {
+							Kind.onTick();
+						});
+
+						await sendUpdate({ grid, sourceCell: cell, targetCell: cell });
+					},
+					playerUuid: message.body.playerUuid,
+					unitUuid: message.body.unitUuid
+				});
 				break;
 			}
 
