@@ -8,8 +8,9 @@
  * Fog of war graphics.
  */
 
-import { ColorMatrixFilter } from "pixi.js";
-import { ObjectLikeGraphicsContainer } from "./graphics";
+import { ColorMatrixFilter, Filter, Graphics } from "pixi.js";
+import { ObjectLikeGraphicsContainer } from "../graphics";
+import fragmentSrc from "./fragment.glsl";
 
 /**
  * Words used to describe FOW status.
@@ -33,6 +34,10 @@ export enum FowWords {
  * ```
  */
 export class FowContainer extends ObjectLikeGraphicsContainer<FowWords> {
+	public static readonly blackEffectFilter: Filter = new Filter(undefined, fragmentSrc);
+
+	public static readonly contrastFilter: ColorMatrixFilter = new ColorMatrixFilter();
+
 	/**
 	 * Public constructor.
 	 */
@@ -45,8 +50,16 @@ export class FowContainer extends ObjectLikeGraphicsContainer<FowWords> {
 		this.containers[FowWords.Black].visible = false;
 
 		// Burn grey
-		const contrastFilter: ColorMatrixFilter = new ColorMatrixFilter();
-		contrastFilter.contrast(2, false);
-		this.containers[FowWords.Grey].filters = [contrastFilter];
+		this.containers[FowWords.Grey].filters = [FowContainer.contrastFilter];
+
+		this.containers[FowWords.BlackEffect].filters = [FowContainer.blackEffectFilter];
+
+		// TODO:Find a way to add a full screen object to be used as a dummy for a shader
+		const graphics: Graphics = new Graphics();
+		graphics.beginFill(0xffffff);
+		graphics.drawRect(0, 0, 2000, 2000);
+		graphics.endFill();
+		this.containers[FowWords.BlackEffect].addChild(graphics);
 	}
 }
+FowContainer.contrastFilter.contrast(2, false);
