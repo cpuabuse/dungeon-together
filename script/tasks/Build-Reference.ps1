@@ -126,7 +126,7 @@ npx typedoc "--options" $MergeConfigPath; if (-not $?) { throw }
 # Cleanup
 Get-ChildItem -Path $BuildReferencePath -Filter "*.html" -Recurse | Foreach-Object { 
 	[ValidateNotNullOrEmpty()][string]$private:Content = Get-Content $_ -Raw
-	$Content -match '<a href="(?<LinkToRoot>.*?)" class="title">' | Out-Null # Returns if match found; Silencing
+	$Content -match '.*<a href="(?<LinkToRoot>.*?)" class="title">' | Out-Null # A relaxed match, so more can be caught and veryfied; Returns if match found; Silencing
 	[ValidateNotNullOrEmpty()][string]$private:LinkToRoot = $Matches.LinkToRoot
 	if ($LinkToRoot -notlike "*.html") { throw "Link to root is unexpected" } # Error, since there will be accounting for extra level when merging relative paths
 	$Content = $Content -replace "__SCRIPT_HOME_HREF__", $([IO.Path]::GetRelativePath(".", $(Join-Path $LinkToRoot ".." "..")) -replace "\\", "/")
