@@ -59,7 +59,8 @@ export const updateActionNames = (
 		"statusNotification",
 		"playerDictionary",
 		"universe",
-		"entityDictionary"
+		"entityDictionary",
+		"gameStatus"
 	] as const
 ).map(actionName => {
 	return `update${toCapitalized({ text: actionName })}` as const;
