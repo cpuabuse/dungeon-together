@@ -5,7 +5,6 @@
 
 		// Vue
 		"Vue.volar",
-		"Vue.vscode-typescript-vue-plugin",
 
 		// GLSL
 		"raczzalan.webgl-glsl-editor",
