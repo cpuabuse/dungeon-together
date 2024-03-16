@@ -15,6 +15,7 @@ import { DoorKindClassFactory } from "./door";
 import { ExclusiveKindClass, ExclusiveKindClassFactory } from "./exclusive";
 import { FloorKindClassFactory } from "./floor";
 import { GuyKindClass, GuyKindClassFactory } from "./guy";
+import { ItemKindClassFactory } from "./item";
 import { LadderKindClassFactory } from "./ladder";
 import { MimicKindClassFactory } from "./mimic";
 import { MonsterKindClass, MonsterKindClassFactory } from "./monster";
@@ -82,6 +83,7 @@ export function systemModuleFactory(...[{ universe, props, moduleName }]: Module
 			UnitKind,
 			door: DoorKindClassFactory({ Base: ExclusiveKind }),
 			floor: FloorKindClassFactory({ Base }),
+			gold: ItemKindClassFactory({ Base }).GoldKind,
 			guy: GuyKind,
 			ladder: LadderKindClassFactory({ Base }),
 			mimic: MimicKindClassFactory({ Base: MonsterKind }),

@@ -378,6 +378,15 @@ export function UnitKindClassFactory({
 		}
 
 		/**
+		 * Death of a unit.
+		 */
+		public die(): void {
+			let cell: ServerCell = (this.entity.constructor as ServerEntityClass).universe.getCell(this.entity);
+			cell.addEvent({ name: "death", targetEntityUuid: this.entity.entityUuid });
+			cell.removeEntity(this.entity);
+		}
+
+		/**
 		 * Action.
 		 *
 		 * @param param - Destructured parameter
@@ -413,8 +422,8 @@ export function UnitKindClassFactory({
 							sourceKind.experience += this.experience;
 						}
 
-						cell.addEvent({ name: "death", targetEntityUuid: this.entity.entityUuid });
-						cell.removeEntity(this.entity);
+						// Die
+						this.die();
 					}
 					return true;
 				}
