@@ -64,7 +64,12 @@ export enum MessageTypeWord {
 	/**
 	 * Client sends information about a player ending his turn.
 	 */
-	Turn = "turn"
+	Turn = "turn",
+
+	/**
+	 * Game over word.
+	 */
+	GameOver = "game-over"
 }
 
 /**
