@@ -17,6 +17,7 @@
 			-->
 			<VSwitch
 				:density="isCompact ? 'compact' : 'default'"
+				color="primary"
 				hide-details
 				:model-value="recordStore.records[id]"
 				inset
