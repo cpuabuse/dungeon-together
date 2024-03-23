@@ -37,6 +37,9 @@
 		"*.tsconfig.json": "jsonc"
 	},
 	"eslint.probe": ["typescript", "html", "vue"],
+	"eslint.rules.customizations": [{
+		"rule": "header/header", "severity": "off"
+	}],
 	"editor.semanticTokenColorCustomizations": {
 		"enabled": true,
 		"rules": { "typeParameter": "#22AA22" }

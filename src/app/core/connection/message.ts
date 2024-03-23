@@ -96,6 +96,21 @@ export interface CoreMessageTurn extends CoreMessageBase {
 }
 
 /**
+ * Player's death message interface.
+ */
+export interface CoreMessageGameOver extends CoreMessageBase {
+	/**
+	 * Message data.
+	 */
+	body: CoreMessagePlayerBody;
+
+	/**
+	 * Type of the message.
+	 */
+	type: MessageTypeWord.GameOver;
+}
+
+/**
  * Empty message interface.
  */
 export interface CoreMessageEmpty extends CoreMessageBase {
