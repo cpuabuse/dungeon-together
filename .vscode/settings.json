@@ -72,5 +72,6 @@
 	// Start manually
 	"vite.autoStart": false,
 	// Do not switch to terminal
-	"vite.showTerminal": false
+	"vite.showTerminal": false,
+	"cSpell.enableFiletypes": ["glsl"]
 }

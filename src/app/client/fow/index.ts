@@ -8,7 +8,7 @@
  * Fog of war graphics.
  */
 
-import { ColorMatrixFilter, Filter, Graphics } from "pixi.js";
+import { ColorMatrixFilter, Filter, Graphics, Ticker } from "pixi.js";
 import { ObjectLikeGraphicsContainer } from "../graphics";
 import fragmentSrc from "./fragment.glsl";
 
@@ -34,7 +34,10 @@ export enum FowWords {
  * ```
  */
 export class FowContainer extends ObjectLikeGraphicsContainer<FowWords> {
-	public static readonly blackEffectFilter: Filter = new Filter(undefined, fragmentSrc);
+	public static readonly blackEffectFilter: Filter = new Filter(undefined, fragmentSrc, {
+		// Time in milliseconds since the shader started
+		time: 0.5
+	});
 
 	public static readonly contrastFilter: ColorMatrixFilter = new ColorMatrixFilter();
 
@@ -60,6 +63,15 @@ export class FowContainer extends ObjectLikeGraphicsContainer<FowWords> {
 		graphics.drawRect(0, 0, 2000, 2000);
 		graphics.endFill();
 		this.containers[FowWords.BlackEffect].addChild(graphics);
+
+		FowContainer.blackEffectFilter.uniforms.time = 0;
 	}
 }
 FowContainer.contrastFilter.contrast(2, false);
+/**
+ * Pass a time uniform through Pixi ticker to able motion to our FOW.
+ */
+const ticker: Ticker = Ticker.shared;
+ticker.add(time => {
+	FowContainer.blackEffectFilter.uniforms.time += time;
+});
