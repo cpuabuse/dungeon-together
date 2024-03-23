@@ -49,6 +49,13 @@
 			</OverlayList>
 		</template>
 	</OverlayWindow>
+
+	<!-- Game over screen -->
+	<OverlayWindow v-model="isGameOver">
+		<template #body>
+			<UniverseUiGameOver />
+		</template>
+	</OverlayWindow>
 </template>
 <script lang="ts">
 import Color from "color";
@@ -74,6 +81,7 @@ import { Store, StoreWord, Stores, useStores } from "../core/store";
 import { StoryNotificationEntry } from "../core/story-notification";
 import { UniverseUiPlayerModel } from "../core/universe-ui";
 import StatsBar from "../stats-bar.vue";
+import UniverseUiGameOver from "./universe-ui-game-over.vue";
 
 /**
  * Player stats.
@@ -84,7 +92,15 @@ type Stats = Partial<Record<"hpValue" | "hpMaxValue" | "level" | "experience", n
 	Partial<Record<"attributes", any>>;
 
 export default defineComponent({
-	components: { OverlayList, OverlayWindow, StatsBar, StatusNotification, StoryNotification, VTable },
+	components: {
+		OverlayList,
+		OverlayWindow,
+		StatsBar,
+		StatusNotification,
+		StoryNotification,
+		VTable,
+		UniverseUiGameOver
+	},
 
 	/**
 	 * Created callback.
@@ -185,6 +201,17 @@ export default defineComponent({
 
 		const { t }: UsedLocale = useLocale();
 
+		// Game status
+		const isGameOver: Ref<boolean> = ref(props.player.isGameOver);
+		universeStore.onUpdateGameStatus({
+			/**
+			 * Callback, when player is updated.
+			 */
+			callback() {
+				isGameOver.value = props.player.isGameOver;
+			}
+		});
+
 		const clickPlayerRecordIndex: symbol = Symbol(`menu-item-player-${props.player.playerUuid}`);
 		const clickStoryRecordIndex: symbol = Symbol(`menu-item-player-${props.player.playerUuid}`);
 
@@ -265,7 +292,7 @@ export default defineComponent({
 				}
 			}
 		});
-		return { displayItems, shiftPlayerNotifications, storyNotificationEntries, universeStore };
+		return { displayItems, shiftPlayerNotifications, storyNotificationEntries, universeStore, isGameOver };
 	}
 });
 </script>

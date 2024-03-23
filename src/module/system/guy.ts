@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -9,6 +9,9 @@
  * @file
  */
 
+import { MessageTypeWord } from "../../app/common/defaults/connection";
+import { CoreEnvelope } from "../../app/core/connection";
+import { LogLevel } from "../../app/core/error";
 import { ServerCell } from "../../app/server/cell";
 import { ServerPlayer } from "../../app/server/connection";
 import { EntityKindConstructorParams, ServerEntityClass } from "../../app/server/entity";
@@ -95,8 +98,41 @@ export function GuyKindClassFactory({
 
 			// Register to shard
 			shard.players.set(this.player.playerUuid, this.player);
+
 			// Set unit (for screen update/control)
 			shard.units.set(this.entity.entityUuid, this.entity);
+		}
+
+		/**
+		 * Notifies client of game being over.
+		 *
+		 */
+		public onTerminateEntity(): void {
+			super.onTerminateEntity();
+
+			// Send message to client about game being over
+			if (this.player?.connection) {
+				this.player.connection.socket
+					.send(
+						new CoreEnvelope({
+							messages: [
+								{
+									body: { playerUuid: this.player.playerUuid },
+									type: MessageTypeWord.GameOver
+								}
+							]
+						})
+					)
+					.catch(error => {
+						(this.entity.constructor as ServerEntityClass).universe.log({
+							error: new Error(
+								`Failed to notify about game being over for player("playerUuid=${this.player.playerUuid}").`,
+								{ cause: error instanceof Error ? error : undefined }
+							),
+							level: LogLevel.Warning
+						});
+					});
+			}
 		}
 	}
 

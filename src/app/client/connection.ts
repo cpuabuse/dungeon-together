@@ -26,6 +26,7 @@ import {
 	CoreDictionary,
 	CoreEnvelope,
 	CoreMessageEmpty,
+	CoreMessageGameOver,
 	CoreMessageMovement,
 	CoreMessagePlayerBody,
 	CoreMessageTurn,
@@ -139,6 +140,7 @@ export type ClientMessage =
 	  }
 	| CoreMessageMovement
 	| CoreMessageTurn
+	| CoreMessageGameOver
 	| {
 			/**
 			 * Local action body.
@@ -235,12 +237,21 @@ export class ClientPlayer extends CorePlayer<ClientConnection> {
 	public connection?: ClientConnection = undefined;
 
 	/**
+	 * Whether the game is over for this player.
+	 * Initialized to `false`, and modified through the connection.
+	 */
+	public isGameOver: boolean = false;
+
+	/**
 	 * Notification ID array.
 	 */
 	// False negative
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 	public statusNotifications: Array<StatusNotification> = new Array();
 
+	/**
+	 * Story notifications.
+	 */
 	public storyNotifications: Array<StoryNotification> = new Array<StoryNotification>();
 }
 
@@ -275,6 +286,9 @@ export class ClientConnection extends CoreConnection<ClientUniverse, ClientMessa
 	 */
 	public emitter: EventEmitter = new EventEmitter();
 
+	/**
+	 * Previously visible cell entries.
+	 */
 	public previouslyVisibleCellEntries: VisibilityMap = new Map();
 
 	/**
@@ -417,6 +431,20 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 			// Turn event
 			case MessageTypeWord.Turn: {
 				this.emitter.emit(turnEventSymbol);
+				break;
+			}
+
+			// Game over event
+			case MessageTypeWord.GameOver: {
+				let player: ClientPlayer | undefined = this.getPlayerEntry(message.body)?.player;
+				if (player) {
+					player.isGameOver = true;
+					universeStore.updateGameStatus();
+				} else {
+					errorResult = new Error(
+						`"Could not initialize game over screen because player(playerUuid="${message.body.playerUuid}") was not found.`
+					);
+				}
 				break;
 			}
 
