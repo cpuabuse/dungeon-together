@@ -4,17 +4,58 @@
 */
 
 #define TWOPI 6.2831853072
+
+/*
+	Adjusts the FOW's zoom level. Increasing the value zooms in.
+*/
 #define SCENE_ZOOM_COEFFICIENT 0.01
+
+/*
+	Adjusts the rotation speed of the scene. Higher values increase speed.
+*/
 #define SCENE_TIME_SHIFT_COEFFICIENT 0.00005
+
+/*	
+	Adjusts the scene's circular motion. Increasing the value enlarges the circle of movement.
+*/
 #define SCENE_SHIFT_MULTI 1000.0
+
+/*
+	Coordinates for the dot product in the hash function, chosen randomly, affects the pseudo-random number output between 0 and 1 used for creating noise patterns. Changes to this value alter smoke pattern.
+*/
 #define DOT_X 15.0
 #define DOT_Y 80.0
+
+/*
+	Randomly chosen multiplier for the dot product in the hash function influences the pseudo-random output of the hash function. Modifying this value alters the smoke pattern.
+*/
 #define DOT_MULTI 45000.0
+
+/*
+	Adjusts the speed of circular movement of layers within FBM. Increasing it makes smoke jiggle faster.
+*/
 #define FBM_TIME_COEFFICIENT 0.001
+
+/*
+	The initial amplitude in the fractional brownian motion function influences each layer's contribution to the final noise pattern. Increasing the amplitude enhances the first layer's contribution, adding larger, broader patterns, while decreasing it reduces the contribution, adding smaller, finer patterns.
+*/
 #define FBM_AMP_INIT 0.5
+
+/*
+	The number of octaves in the FBM function determines the complexity and detail of the noise pattern and smoke effect. More octaves lead to more complex, detailed effects, while fewer octaves result in simpler, less detailed effects.
+*/
 #define FBM_OCTAVE_NUM 7
+
+/*
+	The multiplier for the amplitude in the FBM function affects the contribution of each noise layer to the final pattern. Increasing it emphasizes small-scale, high-frequency features, while decreasing it can highlight large-scale, low-frequency features in the smoke effect.
+*/
 #define FBM_AMP_MULTI 0.5
+
+/*
+	The curve or multiplier for the frequency in consecutive layers in the FBM function, which affects the detail and granularity of the noise pattern and smoke effect. Increasing it results in a more grainy effect.
+*/
 #define FBM_FREQ_MULTI 2.2
+
 precision mediump float;
 uniform float time;
 
