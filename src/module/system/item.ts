@@ -74,6 +74,15 @@ export function ItemKindClassFactory({
 		public amount: number = 1;
 
 		/**
+		 * Emits amount.
+		 *
+		 * @returns Emitted object
+		 */
+		public get emits(): Record<string, any> {
+			return { ...super.emits, amount: this.amount };
+		}
+
+		/**
 		 * Action.
 		 *
 		 * @param param - Destructured parameter

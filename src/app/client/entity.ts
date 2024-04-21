@@ -7,7 +7,7 @@
  * @file Entity that can be rendered.
  */
 
-import { AnimatedSprite, Container } from "pixi.js";
+import { AnimatedSprite, Container, Text, TextStyle } from "pixi.js";
 import { CoreArgIds } from "../core/arg";
 import { CoreDictionary } from "../core/connection";
 import { CoreEntityArg, CoreEntityClassFactory } from "../core/entity";
@@ -26,6 +26,21 @@ const progressBarScale: number = 0.9;
  * Default max health.
  */
 const defaultMaxHealth: number = 100;
+
+/**
+ * Minimum font size.
+ */
+const minFontSize: number = 8;
+
+/**
+ * Font size to sprite height ratio.
+ */
+const spriteHeightToSubtextFontSizeRatio = 3;
+
+/**
+ * Stroke thickness to font ratio.
+ */
+const strokeThicknessRatio = 0.05;
 
 /**
  * Generator for the client entity class.
@@ -50,7 +65,51 @@ export function ClientEntityFactory({
 		Base,
 		options: clientOptions
 	}) {
+		/**
+		 * Container.
+		 */
 		public container: Container = new Container();
+
+		/**
+		 * Health bar.
+		 */
+		public healthBar: ProgressBar | null = null;
+
+		/**
+		 * Wether universe contains this.
+		 *
+		 * @remarks
+		 * Basically with this we are allowing cells to contain entities that are not part of the universe or are already terminated, at least for now.
+		 */
+		public isInUniverse: boolean = false;
+
+		/**
+		 * Animated sprite.
+		 */
+		public sprite: AnimatedSprite;
+
+		/**
+		 * Amount text.
+		 */
+		public subtext: Text | null = null;
+
+		/**
+		 * Subtext font size.
+		 */
+		public subtextFontSize: number = minFontSize;
+
+		/**
+		 * Subtext style.
+		 *
+		 * @remarks
+		 * Order matters, must be declared after font size.
+		 */
+		public subtextStyle = new TextStyle({
+			align: "right",
+			fontSize: this.subtextFontSize,
+			stroke: "white",
+			strokeThickness: this.subtextStrokeThickness
+		});
 
 		/**
 		 * Dictionary getter.
@@ -67,12 +126,6 @@ export function ClientEntityFactory({
 		public set dictionary(dictionary: CoreDictionary) {
 			this.internalDictionary = dictionary;
 		}
-
-		public healthBar: ProgressBar | null = null;
-
-		/**
-		 * Temporary health.
-		 */
 
 		/**
 		 * Health getter.
@@ -104,17 +157,17 @@ export function ClientEntityFactory({
 		}
 
 		/**
-		 * Wether universe contains this.
+		 * Amount getter.
 		 *
-		 * @remarks
-		 * Basically with this we are allowing cells to contain entities that are not part of the universe or are already terminated, at least for now.
+		 * @returns Amount
 		 */
-		public isInUniverse: boolean = false;
-
-		/**
-		 * Animated sprite.
-		 */
-		public sprite: AnimatedSprite;
+		public get amount(): number {
+			const { amount }: CoreDictionary = this.dictionary;
+			if (typeof amount === "number") {
+				return amount;
+			}
+			return 0;
+		}
 
 		/**
 		 * Storing health.
@@ -122,6 +175,18 @@ export function ClientEntityFactory({
 		 */
 		public tempHealth: number = 0;
 
+		/**
+		 * Subtext stroke thickness getter.
+		 *
+		 * @returns Subtext stroke thickness
+		 */
+		public get subtextStrokeThickness(): number {
+			return this.subtextFontSize * strokeThicknessRatio;
+		}
+
+		/**
+		 * Internal dictionary.
+		 */
 		protected internalDictionary: CoreDictionary = {};
 
 		// ESLint params bug
@@ -183,9 +248,39 @@ export function ClientEntityFactory({
 				this.healthBar = null;
 			}
 			// Do nothing if health bar and health both not specified
+			if (this.amount) {
+				let subtextFontSize: number = Math.max(minFontSize, this.sprite.width / spriteHeightToSubtextFontSizeRatio);
+				let isFontSizeChanged: boolean = subtextFontSize !== this.subtextFontSize;
+				let isSubtextInitialized: boolean = this.subtext !== null;
+
+				// Changes the font size if font size is changed
+				if (isFontSizeChanged) {
+					this.subtextFontSize = subtextFontSize;
+					this.subtextStyle.fontSize = this.subtextFontSize;
+					this.subtextStyle.strokeThickness = this.subtextStrokeThickness;
+				}
+
+				if (this.subtext) {
+					this.subtext.text = this.amount;
+				} else {
+					// Create new subtext if not initialized
+					this.subtext = new Text(this.amount, this.subtextStyle);
+
+					// Sets the subtext to the right of the cell
+					this.subtext.anchor.x = 1; // 1 means 100%
+					this.subtext.x = this.sprite.width;
+
+					// Adds subtext to container
+					this.container.addChild(this.subtext);
+				}
+
+				// Sets the subtext to the bottom of the cell
+				if (isFontSizeChanged || !isSubtextInitialized) {
+					this.subtext.y = this.sprite.height - this.subtextFontSize;
+				}
+			}
 		}
 	}
-
 	/**
 	 * Terminates client entity.
 	 *
