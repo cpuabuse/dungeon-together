@@ -9,6 +9,7 @@
  */
 
 import { ColorMatrixFilter, Filter, Graphics, Ticker } from "pixi.js";
+import { whiteBin } from "../../common/color";
 import { ObjectLikeGraphicsContainer } from "../graphics";
 import fragmentSrc from "./fragment.glsl";
 
@@ -23,6 +24,23 @@ export enum FowWords {
 }
 
 /**
+ * Uniform type interface.
+ */
+export type FowShaderUniforms = {
+	/**
+	 * Uniforms.
+	 */
+	time: number;
+};
+
+/**
+ * FOW uniforms.
+ */
+const fowFilterUniforms: FowShaderUniforms = {
+	time: 0
+};
+
+/**
  * Container for levels in the grid with a child container for different FOW statuses.
  *
  * @example
@@ -34,10 +52,7 @@ export enum FowWords {
  * ```
  */
 export class FowContainer extends ObjectLikeGraphicsContainer<FowWords> {
-	public static readonly blackEffectFilter: Filter = new Filter(undefined, fragmentSrc, {
-		// Time in milliseconds since the shader started
-		time: 0.5
-	});
+	public static readonly blackEffectFilter: Filter = new Filter(undefined, fragmentSrc, fowFilterUniforms);
 
 	public static readonly contrastFilter: ColorMatrixFilter = new ColorMatrixFilter();
 
@@ -55,19 +70,22 @@ export class FowContainer extends ObjectLikeGraphicsContainer<FowWords> {
 		// Burn grey
 		this.containers[FowWords.Grey].filters = [FowContainer.contrastFilter];
 
+		// Set a black effect
 		this.containers[FowWords.BlackEffect].filters = [FowContainer.blackEffectFilter];
 
+		// Set shader area
 		// TODO:Find a way to add a full screen object to be used as a dummy for a shader
 		const graphics: Graphics = new Graphics();
-		graphics.beginFill(0xffffff);
+		graphics.beginFill(whiteBin);
 		graphics.drawRect(0, 0, 2000, 2000);
 		graphics.endFill();
 		this.containers[FowWords.BlackEffect].addChild(graphics);
-
-		FowContainer.blackEffectFilter.uniforms.time = 0;
 	}
 }
+
+// Initialize contrast filter
 FowContainer.contrastFilter.contrast(2, false);
+
 /**
  * Pass a time uniform through Pixi ticker to able motion to our FOW.
  */

@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -21,6 +21,11 @@ export enum HexColors {
 	White = "#FFFFFF",
 	Black = "#000000"
 }
+
+/**
+ * White color.
+ */
+export const whiteBin: number = 0xffffff;
 
 /**
  * Color palette.
