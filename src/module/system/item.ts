@@ -10,7 +10,8 @@
  */
 
 import { ActionWords } from "../../app/server/action";
-import { EntityKindActionArgs, EntityKindClass } from "../../app/server/entity";
+import { ServerCell } from "../../app/server/cell";
+import { EntityKindActionArgs, EntityKindClass, ServerEntityClass } from "../../app/server/entity";
 
 /**
  * Item kind factory.
@@ -53,11 +54,6 @@ export function ItemKindClassFactory({
 					// TODO: Add conditional pickup or drop
 					return true;
 
-				case ActionWords.Use: {
-					// TODO: Implement use
-					return true;
-				}
-
 				default:
 					return super.action(param);
 			}
@@ -69,9 +65,28 @@ export function ItemKindClassFactory({
 	 */
 	class CountableItemKind extends ItemKind {
 		/**
-		 * Amount of items.
+		 * Getter of internal amount of items.
+		 *
+		 * @returns Amount of internal items
 		 */
-		public amount: number = 1;
+		public get amount(): number {
+			return this.internalAmount;
+		}
+
+		/**
+		 * Setter of internal amount of items.
+		 */
+		public set amount(value: number) {
+			this.internalAmount = value;
+			if (this.internalAmount <= 0) {
+				this.destroy();
+			}
+		}
+
+		/**
+		 * Amount of internal items.
+		 */
+		private internalAmount: number = 3;
 
 		/**
 		 * Emits amount.
@@ -89,15 +104,28 @@ export function ItemKindClassFactory({
 		 * @returns Whether action was successful
 		 */
 		public action(param: EntityKindActionArgs): boolean {
-			let { action }: EntityKindActionArgs = param;
+			let { action, ...rest }: EntityKindActionArgs = param;
 			switch (action) {
+				case ActionWords.Interact: {
+					return this.action({ action: ActionWords.Pickup, ...rest });
+				}
+
 				case ActionWords.Pickup:
-					// TODO: Implement stackable pickup
+					this.amount = 0;
 					return true;
 
 				default:
 					return super.action(param);
 			}
+		}
+
+		/**
+		 * Destroys item, removing it from the cell, when picked up.
+		 */
+		public destroy(): void {
+			let cell: ServerCell = (this.entity.constructor as ServerEntityClass).universe.getCell(this.entity);
+			cell.addEvent({ name: "pickup", targetEntityUuid: this.entity.entityUuid });
+			cell.removeEntity(this.entity);
 		}
 	}
 
