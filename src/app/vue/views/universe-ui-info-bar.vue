@@ -6,85 +6,104 @@
 	Buttons have "fill-height" to adjust where pop-up shows.
 -->
 <template>
-	<VSystemBar class="universe-ui-info-bar">
+	<VSystemBar class="universe-ui-info-bar" :min-width="mdAndUp ? 300 : '20vh'">
 		<!-- Informational elements -->
-		<VTooltip :text="t('infoBar.uptime')" location="bottom">
-			<template #activator="{ props }">
-				<div v-bind="props" class="fill-height d-flex align-center">
-					<BaseIcon icon="fa-clock" :color="clockColor" :size="ElementSize.Small" />
-					<span class="universe-ui-info-bar-text ms-1">{{ clockTime }}</span>
-				</div>
-			</template>
-		</VTooltip>
-		<VDivider class="mx-1" inset vertical />
+		<section class="d-flex fill-height">
+			<VTooltip :text="t('infoBar.uptime')" location="bottom">
+				<template #activator="{ props }">
+					<div v-bind="props" class="d-flex align-center mr-2">
+						<BaseIcon icon="fa-clock" :color="clockColor" :size="ElementSize.Small" />
+						<span class="universe-ui-info-bar-text ms-1">{{ clockTime }}</span>
+					</div>
+				</template>
+			</VTooltip>
 
-		<!-- FPS translation is omitted intentionally -->
-		<VTooltip text="FPS" location="bottom">
-			<template #activator="{ props }">
-				<div v-bind="props" class="fill-height d-flex align-center">
-					<BaseIcon icon="fa-solid fa-wave-square" :color="fpsColor" :size="ElementSize.Small" />
-					<span class="universe-ui-info-bar-text ms-1">{{ fps }}</span>
-				</div>
-			</template>
-		</VTooltip>
-		<VDivider class="mx-1" inset vertical />
+			<!-- FPS translation is omitted intentionally -->
+			<VTooltip text="FPS" location="bottom">
+				<template #activator="{ props }">
+					<div v-bind="props" class="d-flex align-center mr-2">
+						<BaseIcon icon="fa-solid fa-wave-square" :color="fpsColor" :size="ElementSize.Small" />
+						<span class="universe-ui-info-bar-text ms-1">{{ fps }}</span>
+					</div>
+				</template>
+			</VTooltip>
 
-		<VTooltip :text="t('infoBar.level')" location="bottom">
-			<template #activator="{ props }">
-				<div v-bind="props" class="fill-height d-flex align-center">
-					<BaseIcon icon="fa-arrow-down-up-across-line" :size="ElementSize.Small" />
-					<span v-for="(level, levelKey) in gridLevels" :key="levelKey" class="ms-1 universe-ui-info-bar-text">{{
-						level
-					}}</span>
+			<VTooltip :text="t('infoBar.level')" location="bottom">
+				<template #activator="{ props }">
+					<div v-bind="props" class="d-flex align-center mr-2">
+						<BaseIcon icon="fa-arrow-down-up-across-line" :size="ElementSize.Small" />
+						<span v-for="(level, levelKey) in gridLevels" :key="levelKey" class="ms-1 universe-ui-info-bar-text">{{
+							level
+						}}</span>
+					</div>
+				</template>
+			</VTooltip>
+			<VDivider class="mx-1" inset vertical />
+		</section>
+
+		<VSpacer />
+
+		<section class="universe-ui-info-bar-section">
+			<div v-for="player in players" :key="player.playerUuid" class="d-flex align-center">
+				<div v-for="resource in player.resources" :key="resource.icon" class="d-flex align-center mr-2">
+					<VTooltip :text="resource.name" location="bottom">
+						<template #activator="{ props }">
+							<BaseIcon :icon="resource.icon" :size="ElementSize.Small" v-bind="props" />
+							<span class="universe-ui-info-bar-text ms-1">{{ resource.value }}</span>
+						</template>
+					</VTooltip>
 				</div>
-			</template>
-		</VTooltip>
+			</div>
+		</section>
 
 		<VSpacer />
 
 		<!-- Interactive elements -->
-		<VMenu v-model="musicModelEntry.menu" location="bottom">
-			<template #activator="{ props: menu }">
-				<VTooltip v-model="musicModelEntry.tooltip" :text="t('infoBar.music')" location="bottom">
-					<template #activator="{ props: tooltip }">
-						<VBtn
-							v-bind="mergeProps(menu, tooltip)"
-							variant="text"
-							class="fill-height"
-							size="x-small"
-							@click="() => onMenuClick(musicModelEntry)"
-						>
-							<BaseIcon icon="fa-music" :size="ElementSize.Small" />
-						</VBtn>
-					</template>
-				</VTooltip>
-			</template>
-			<UniverseUiInfoBarMusicControl />
-		</VMenu>
+		<section class="d-flex fill-height">
+			<VMenu v-model="musicModelEntry.menu" location="bottom">
+				<template #activator="{ props: menu }">
+					<VTooltip v-model="musicModelEntry.tooltip" :text="t('infoBar.music')" location="bottom">
+						<template #activator="{ props: tooltip }">
+							<VBtn
+								v-bind="mergeProps(menu, tooltip)"
+								variant="text"
+								class="fill-height"
+								size="x-small"
+								@click="() => onMenuClick(musicModelEntry)"
+							>
+								<BaseIcon icon="fa-music" :size="ElementSize.Small" />
+							</VBtn>
+						</template>
+					</VTooltip>
+				</template>
+				<UniverseUiInfoBarMusicControl />
+			</VMenu>
 
-		<VMenu v-model="notificationModelEntry.menu" location="bottom">
-			<template #activator="{ props: menu }">
-				<VTooltip v-model="notificationModelEntry.tooltip" :text="t('infoBar.notifications')" location="bottom">
-					<template #activator="{ props: tooltip }">
-						<VBtn
-							v-bind="mergeProps(menu, tooltip)"
-							variant="text"
-							class="fill-height"
-							size="x-small"
-							@click="() => onMenuClick(notificationModelEntry)"
-						>
-							<BaseIcon icon="fa-bell" :size="ElementSize.Small" />
-						</VBtn>
-					</template>
-				</VTooltip>
-			</template>
-			<stateAlertBox />
-		</VMenu>
+			<VMenu v-model="notificationModelEntry.menu" location="bottom">
+				<template #activator="{ props: menu }">
+					<VTooltip v-model="notificationModelEntry.tooltip" :text="t('infoBar.notifications')" location="bottom">
+						<template #activator="{ props: tooltip }">
+							<VBtn
+								v-bind="mergeProps(menu, tooltip)"
+								variant="text"
+								class="fill-height"
+								size="x-small"
+								@click="() => onMenuClick(notificationModelEntry)"
+							>
+								<BaseIcon icon="fa-bell" :size="ElementSize.Small" />
+							</VBtn>
+						</template>
+					</VTooltip>
+				</template>
+				<stateAlertBox />
+			</VMenu>
+		</section>
 	</VSystemBar>
 </template>
 
 <script lang="ts">
 import { PropType, Ref, defineComponent, mergeProps, shallowRef, watch } from "vue";
+import { useDisplay } from "vuetify";
 import { VBtn, VDivider, VMenu, VSpacer, VSystemBar, VTooltip } from "vuetify/components";
 import { ElementSize } from "../common/element";
 import { BaseIcon } from "../components";
@@ -235,6 +254,16 @@ export default defineComponent({
 			ElementSize,
 			musicModelEntry: { menu: false, tooltip: false } satisfies ElementModelEntry,
 			notificationModelEntry: { menu: false, tooltip: false } satisfies ElementModelEntry,
+			players: [
+				{
+					playerUuid: "player0",
+					resources: [
+						{ icon: " fa-solid fa-coins", name: "Gold", value: 0 },
+						{ icon: "fa-solid fa-gem", name: "Crystals", value: 0 }
+					]
+				}
+			],
+			sectionWidth: 0,
 			upTime: 0,
 			upTimeIntervalHandle: null as ReturnType<typeof setInterval> | null
 		};
@@ -281,6 +310,23 @@ export default defineComponent({
 		const stores: Stores = useStores();
 		const recordStore: Store<StoreWord.Record> = stores.useRecordStore();
 		const universeStore: Store<StoreWord.Universe> = stores.useUniverseStore();
+
+		// Adjustment of display size
+		const {
+			xs,
+			mdAndUp
+		}: {
+			/**
+			 * Extra small display.
+			 */
+			xs: Ref<boolean> /**
+			 */;
+
+			/**
+			 * Medium and up display.
+			 */
+			mdAndUp: Ref<boolean>;
+		} = useDisplay();
 
 		// Initialize locale
 		const { t }: UsedLocale = useLocale();
@@ -334,9 +380,11 @@ export default defineComponent({
 		return {
 			averageFps,
 			gridLevels,
+			mdAndUp,
 			t,
 			targetFps,
-			universe: universeStore.universe
+			universe: universeStore.universe,
+			xs
 		};
 	},
 
@@ -360,5 +408,12 @@ export default defineComponent({
 .universe-ui-info-bar-text {
 	/* Text changes, must preserve sizing */
 	font-family: monospace, monospace;
+}
+
+.universe-ui-info-bar-section {
+	position: absolute;
+	/* new */
+	left: 50%;
+	transform: translateX(-50%);
 }
 </style>
