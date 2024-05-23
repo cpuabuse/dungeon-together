@@ -7,13 +7,19 @@
 			<VBtnGroup v-if="uiActions.length > 0" :density="isCompact ? 'compact' : 'default'">
 				<!-- Default button is very wide -->
 				<VBtn
-					v-for="({ icon: uiActionIcon, modeUuid, uiActionWord }, uiActionKey) in uiActions"
+					v-for="(uiAction, uiActionKey) in uiActions"
 					:key="uiActionKey"
 					:size="isCompact ? 'x-small' : 'small'"
 					@click="() => handleUiAction({ uiActionKey })"
 				>
-					<BaseIcon v-if="uiActionIcon || modeUuid" :mode-uuid="modeUuid" :icon="uiActionIcon" />
-					<span v-else>{{ uiActionWord }}</span>
+					<VTooltip :text="handleUiActionTooltip(uiAction)" location="bottom">
+						<template #activator="{ props }">
+							<div v-bind="props">
+								<BaseIcon v-if="uiAction.icon || modeUuid" :mode-uuid="modeUuid" :icon="uiAction.icon" />
+								<span v-else>{{ uiAction.uiActionWord }}</span>
+							</div>
+						</template>
+					</VTooltip>
 				</VBtn>
 			</VBtnGroup>
 		</template>
@@ -22,8 +28,10 @@
 
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
-import { VBtn, VBtnGroup } from "vuetify/components";
+import { VBtn, VBtnGroup, VTooltip } from "vuetify/components";
+import { ActionWords } from "../../server/action";
 import {
+	OverlayContainerUiActionWords,
 	OverlayContentUiActionParam,
 	overlayListChildSharedProps,
 	overlayListItemNarrowProps,
@@ -35,12 +43,36 @@ import {
 import BaseIcon from "./base-icon.vue";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
 
+/**
+ * Words to be displayed for UI actions, in the tooltip.
+ */
+const uiActionTooltipMain: Record<OverlayContainerUiActionWords, string> = {
+	[OverlayContainerUiActionWords.EntityAction]: "Action",
+	[OverlayContainerUiActionWords.EntityInfo]: "Info",
+	[OverlayContainerUiActionWords.EntityDebugInfo]: "Debug Info",
+	[OverlayContainerUiActionWords.CellDebugInfo]: "Cell Debug Info",
+	[OverlayContainerUiActionWords.ForceMovement]: "Move"
+};
+
+/**
+ * Words to be displayed for entity actions, in the tooltip.
+ */
+const uiActionTooltipEntityActionCtx: Record<ActionWords, string> = {
+	[ActionWords.Attack]: "Attack",
+	[ActionWords.Interact]: "Interact",
+	[ActionWords.Drop]: "Drop",
+	[ActionWords.Pickup]: "Pickup",
+	[ActionWords.Talk]: "Talk",
+	[ActionWords.Use]: "Use"
+};
+
 export default defineComponent({
 	components: {
 		BaseIcon,
 		OverlayListItemAssembler,
 		VBtn,
-		VBtnGroup
+		VBtnGroup,
+		VTooltip
 	},
 
 	emits: overlayListSharedEmits,
@@ -62,6 +94,24 @@ export default defineComponent({
 			// This function is called from a for loop inside of a template, so the value with that key exists
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			this.emitUiAction(this.uiActions[uiActionKey]!);
+		},
+
+		/**
+		 * Handle tooltip for UI action.
+		 *
+		 * @param param - UI action parameter
+		 * @returns Tooltip text
+		 */
+		handleUiActionTooltip(param: OverlayContentUiActionParam): string {
+			// Tooltipmain of type string, set tooltipmain based on uiActionWord, extract from uiActionTooltipMain
+			const tooltipMain: string = uiActionTooltipMain[param.uiActionWord];
+
+			const tooltipCtx: string | null =
+				param.uiActionWord === OverlayContainerUiActionWords.EntityAction
+					? uiActionTooltipEntityActionCtx[param.entityActionWord] ?? undefined
+					: null;
+
+			return tooltipCtx ? `${tooltipMain} - ${tooltipCtx}` : `${tooltipMain}`;
 		}
 	},
 
@@ -72,7 +122,7 @@ export default defineComponent({
 
 		uiActions: {
 			default: new Array<OverlayContentUiActionParam>(),
-			required: false,
+			required: true,
 			type: Array as PropType<Array<OverlayContentUiActionParam>>
 		}
 	},

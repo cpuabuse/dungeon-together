@@ -156,7 +156,8 @@ export class ClientUniverse extends CoreUniverseClassFactory<
 				["mode/user/enemy/default", ["/img/rltiles/dc-mon64/balrug.png"]],
 				["mode/user/player/default", ["/img/rltiles/player/base/human_m.png"]],
 				["mode/user/ladder/default", ["/img/dungeontileset-ii/floor_ladder.png"]],
-				["death", ["/img/rltiles/nh-mon1/w/wraith.png"]]
+				["death", ["/img/rltiles/nh-mon1/w/wraith.png"]],
+				["gold", ["/img/rltiles/item/gem/gold_piece.png"]]
 			] as Array<[string, Array<string>]>
 		).map(
 			// False negative

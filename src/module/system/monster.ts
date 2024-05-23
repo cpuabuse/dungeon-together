@@ -10,6 +10,8 @@
  */
 
 // TODO: Use visibility
+import { v4 } from "uuid";
+import { DeferredPromise } from "../../app/common/async";
 import { Nav } from "../../app/core/arg";
 import { ActionWords } from "../../app/server/action";
 import { ServerCell } from "../../app/server/cell";
@@ -159,6 +161,58 @@ export function MonsterKindClassFactory({
 					}
 				});
 			}
+		}
+
+		/**
+		 * Death of monster.
+		 */
+		public die(): void {
+			// Drop a coin
+			let cell: ServerCell = (this.entity.constructor as ServerEntityClass).universe.getCell(this.entity);
+			let created: DeferredPromise<void> = new DeferredPromise();
+			let attachHook: Promise<void> = new Promise<void>((resolve, reject) => {
+				// TODO: Synchronize with connection queue
+				// Position into correct queue
+				(this.entity.constructor as ServerEntityClass).universe.universeQueue.addCallback({
+					/**
+					 * Callback.
+					 */
+					callback: () => {
+						cell.addEntity(
+							{
+								cellUuid: cell.cellUuid,
+								entityUuid: v4(),
+								gridUuid: cell.gridUuid,
+								// TODO: Extract proper kind UUID from the module
+								kindUuid: "kind/system/gold",
+								// TODO: Implement mode generation by kind; Potentially remove mode UUID argument requirement
+								modeUuid: "gold",
+								shardUuid: cell.shardUuid,
+								worldUuid: this.entity.worldUuid
+							},
+							{ attachHook, created },
+							[]
+						);
+						created
+							.catch(error => {
+								reject(
+									new Error(
+										`"Could not drop a coin in universe with UUID "${
+											(this.entity.constructor as ServerEntityClass).universe.universeUuid
+										}".`,
+										{ cause: error instanceof Error ? error : undefined }
+									)
+								);
+							})
+							.finally(() => {
+								resolve();
+							});
+					}
+				});
+			});
+
+			// Call super
+			super.die();
 		}
 
 		/**

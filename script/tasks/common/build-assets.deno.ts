@@ -83,6 +83,7 @@ if (environment && build && rootDir) {
 	await mkdirp(join(compiledAssetPath, imagePath, "rltiles/dc-mon64"));
 	await mkdirp(join(compiledAssetPath, imagePath, "rltiles/player/base"));
 	await mkdirp(join(compiledAssetPath, imagePath, "rltiles/nh-mon1/w"));
+	await mkdirp(join(compiledAssetPath, imagePath, "rltiles/item/gem"));
 
 	await Promise.all(
 		[
@@ -114,7 +115,8 @@ if (environment && build && rootDir) {
 			"rltiles/dc-dngn/wall/brick_brown2",
 			"rltiles/dc-mon64/balrug",
 			"rltiles/player/base/human_m",
-			"rltiles/nh-mon1/w/wraith"
+			"rltiles/nh-mon1/w/wraith",
+			"rltiles/item/gem/gold_piece"
 		].map(
 			file =>
 				new Promise<void>((resolve, reject) => {

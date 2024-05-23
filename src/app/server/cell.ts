@@ -23,6 +23,17 @@ import { ServerOptions, serverOptions } from "./options";
 export type CellEvent =
 	| {
 			/**
+			 * Pickup type.
+			 */
+			name: "pickup";
+
+			/**
+			 * Target entity UUID.
+			 */
+			targetEntityUuid: Uuid;
+	  }
+	| {
+			/**
 			 * Death type.
 			 */
 			name: "death";

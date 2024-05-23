@@ -37,9 +37,12 @@
 		"*.tsconfig.json": "jsonc"
 	},
 	"eslint.probe": ["typescript", "html", "vue"],
-	"eslint.rules.customizations": [{
-		"rule": "header/header", "severity": "off"
-	}],
+	"eslint.rules.customizations": [
+		{
+			"rule": "header/header",
+			"severity": "off"
+		}
+	],
 	"editor.semanticTokenColorCustomizations": {
 		"enabled": true,
 		"rules": { "typeParameter": "#22AA22" }
@@ -49,10 +52,6 @@
 	"liveServer.settings.port": 5500,
 	"liveServer.settings.ignoreFiles": ["src/**"],
 	"vscode-edge-devtools.timeout": 100000,
-	"[typescript]": {
-		// Overrides prettier extensions, so that it does not auto-format conditional compilation directives
-		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
-	},
 	"typescript.preferences.autoImportFileExcludePatterns": ["node_modules/io-ts", "node_modules/fp-ts"],
 	"[glsl]": {
 		"editor.defaultFormatter": "raczzalan.webgl-glsl-editor"

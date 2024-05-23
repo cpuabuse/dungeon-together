@@ -85,51 +85,47 @@ export default defineComponent({
 						// False negative
 						// eslint-disable-next-line @typescript-eslint/typedef
 						([targetEntityUuid, entity]) => {
-							let entityAttackUiActions: Array<OverlayContentUiActionParam> = playerUnitEntries.map(
+							let entityUiActions: Array<Array<OverlayContentUiActionParam>> = playerUnitEntries.map(
 								// False negative
 								// eslint-disable-next-line @typescript-eslint/typedef
-								([player, unitUuid]) => {
-									return {
+								([player, unitUuid]) => [
+									{
 										entityActionWord: ActionWords.Attack,
 										icon: "fa-khanda",
 										player,
 										targetEntityUuid,
 										uiActionWord: OverlayContainerUiActionWords.EntityAction,
 										unitUuid
-									} satisfies OverlayContentUiActionParam;
-								}
-							);
-							let entityUseUiActions: Array<OverlayContentUiActionParam> = playerUnitEntries.map(
-								// False negative
-								// eslint-disable-next-line @typescript-eslint/typedef
-								([player, unitUuid]) => {
-									return {
+									} satisfies OverlayContentUiActionParam,
+									{
 										entityActionWord: ActionWords.Use,
 										icon: "fa-hand",
 										player,
 										targetEntityUuid,
 										uiActionWord: OverlayContainerUiActionWords.EntityAction,
 										unitUuid
-									} satisfies OverlayContentUiActionParam;
-								}
-							);
-							let entityDebugInfoUiActions: Array<OverlayContentUiActionParam> = playerUnitEntries.map(
-								// False negative
-								// eslint-disable-next-line @typescript-eslint/typedef
-								() => {
-									return {
+									} satisfies OverlayContentUiActionParam,
+									{
+										entityActionWord: ActionWords.Pickup,
+										icon: "fa-hand-lizard",
+										player,
+										targetEntityUuid,
+										uiActionWord: OverlayContainerUiActionWords.EntityAction,
+										unitUuid
+									} satisfies OverlayContentUiActionParam,
+									{
 										icon: "fa-question",
 										targetEntityUuid,
 										uiActionWord: OverlayContainerUiActionWords.EntityDebugInfo
-									} satisfies OverlayContentUiActionParam;
-								}
+									} satisfies OverlayContentUiActionParam
+								]
 							);
 
 							return {
 								modeUuid: entity.modeUuid,
 								name: "Entity",
 								type: OverlayListItemEntryType.InfoElement,
-								uiActions: [...entityAttackUiActions, ...entityUseUiActions, ...entityDebugInfoUiActions]
+								uiActions: entityUiActions.flat()
 							} satisfies OverlayListItemEntry;
 						}
 					);
