@@ -9,7 +9,9 @@
  */
 
 import { Theme, systemThemeLiteral } from "../client/gui/themes";
+import { ActionWords } from "../server/action";
 import { TextDirectionWords } from "../vue/core/locale";
+import { OverlayContainerUiActionWords } from "../vue/core/overlay";
 import { StatusNotificationWord } from "./defaults/connection";
 import { Locale } from "./locale";
 
@@ -63,6 +65,20 @@ export type InternalMessageSchema = {
 	};
 
 	/**
+	 * Right click menu.
+	 */
+	rightClickMenu: {
+		/**
+		 * Main actions.
+		 */
+		uiActionTooltipMain: Record<OverlayContainerUiActionWords, I18NMessage>;
+		/**
+		 * Entity actions.
+		 */
+		uiActionTooltipEntityActionCtx: Record<ActionWords, I18NMessage>;
+	};
+
+	/**
 	 * Info bar related information.
 	 */
 	infoBar: {
@@ -85,6 +101,11 @@ export type InternalMessageSchema = {
 		 * Time passed.
 		 */
 		uptime: I18NMessage;
+
+		/**
+		 * Resources.
+		 */
+		resources: Record<string, I18NMessage>;
 	};
 
 	/**
@@ -142,6 +163,10 @@ export const internalLocaleMessages = {
 			level: "مستوى",
 			music: "موسيقى",
 			notifications: "إشعارات",
+			resources: {
+				Crystals: "كريستال",
+				Gold: "ذهب"
+			},
 			uptime: "زمن التشغيل"
 		},
 		language: "اللغة",
@@ -160,6 +185,23 @@ export const internalLocaleMessages = {
 			player: "اللاعب",
 			system: "النظام",
 			welcome: "!مرحبا"
+		},
+		rightClickMenu: {
+			uiActionTooltipEntityActionCtx: {
+				[ActionWords.Attack]: "هجوم",
+				[ActionWords.Drop]: "إسقاط",
+				[ActionWords.Interact]: "تفاعل",
+				[ActionWords.Pickup]: "التقاط",
+				[ActionWords.Talk]: "التحدث",
+				[ActionWords.Use]: "استخدام"
+			},
+			uiActionTooltipMain: {
+				[OverlayContainerUiActionWords.EntityAction]: "إجراء الكيان",
+				[OverlayContainerUiActionWords.EntityInfo]: "معلومات الكيان",
+				[OverlayContainerUiActionWords.EntityDebugInfo]: "معلومات الكيان",
+				[OverlayContainerUiActionWords.CellDebugInfo]: "معلومات الخلية",
+				[OverlayContainerUiActionWords.ForceMovement]: "حركة القوة"
+			}
 		},
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "تحقق من حولك",
@@ -182,6 +224,10 @@ export const internalLocaleMessages = {
 			level: "Level",
 			music: "Music",
 			notifications: "Notifications",
+			resources: {
+				Crystals: "Crystals",
+				Gold: "Gold"
+			},
 			uptime: "Uptime"
 		},
 		language: "Language",
@@ -200,6 +246,23 @@ export const internalLocaleMessages = {
 			player: "Player",
 			system: "System",
 			welcome: "Welcome!"
+		},
+		rightClickMenu: {
+			uiActionTooltipEntityActionCtx: {
+				[ActionWords.Attack]: "Attack",
+				[ActionWords.Interact]: "Interact",
+				[ActionWords.Drop]: "Drop",
+				[ActionWords.Pickup]: "Pickup",
+				[ActionWords.Talk]: "Talk",
+				[ActionWords.Use]: "Use"
+			},
+			uiActionTooltipMain: {
+				[OverlayContainerUiActionWords.EntityAction]: "Action",
+				[OverlayContainerUiActionWords.EntityInfo]: "Info",
+				[OverlayContainerUiActionWords.EntityDebugInfo]: "Debug Info",
+				[OverlayContainerUiActionWords.CellDebugInfo]: "Cell Debug Info",
+				[OverlayContainerUiActionWords.ForceMovement]: "Move"
+			}
 		},
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "You look around",
@@ -223,6 +286,10 @@ export const internalLocaleMessages = {
 			level: "レベル",
 			music: "音楽",
 			notifications: "通知",
+			resources: {
+				Crystals: "結晶",
+				Gold: "ゴールド"
+			},
 			uptime: "稼働時間"
 		},
 		language: "言語",
@@ -242,6 +309,23 @@ export const internalLocaleMessages = {
 			player: "プレイヤー",
 			system: "システム",
 			welcome: "ようこそ!"
+		},
+		rightClickMenu: {
+			uiActionTooltipEntityActionCtx: {
+				[ActionWords.Attack]: "攻撃",
+				[ActionWords.Drop]: "ドロップ",
+				[ActionWords.Interact]: "相互作用",
+				[ActionWords.Pickup]: "拾う",
+				[ActionWords.Talk]: "話す",
+				[ActionWords.Use]: "使用"
+			},
+			uiActionTooltipMain: {
+				[OverlayContainerUiActionWords.EntityAction]: "アクション",
+				[OverlayContainerUiActionWords.EntityInfo]: "情報",
+				[OverlayContainerUiActionWords.EntityDebugInfo]: "デバッグ情報",
+				[OverlayContainerUiActionWords.CellDebugInfo]: "セルデバッグ情報",
+				[OverlayContainerUiActionWords.ForceMovement]: "移動"
+			}
 		},
 		statusNotification: {
 			[StatusNotificationWord.Sync]: "周りを見回す",
