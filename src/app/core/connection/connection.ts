@@ -1,5 +1,5 @@
 /*
-	Copyright 2023 cpuabuse.com
+	Copyright 2024 cpuabuse.com
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
@@ -43,6 +43,9 @@ export class CorePlayer<
 
 	/** Player dictionary. */
 	public dictionary: CoreDictionary = {};
+
+	/** Public grid inventory. */
+	public inventoryGridUuid: Uuid | null = null;
 
 	/** Player UUID. */
 	public playerUuid: Uuid;

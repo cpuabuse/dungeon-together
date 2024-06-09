@@ -109,6 +109,16 @@ export interface ServerUserAlias {
  */
 export class ServerPlayer extends CorePlayer<ServerConnection> {
 	/**
+	 * @param param - Destructured parameter
+	 */
+	public constructor(...param: ConstructorParameters<typeof CorePlayer>) {
+		super(...param);
+
+		// TODO: Get the proper UUID
+		this.inventoryGridUuid = "inventory";
+	}
+
+	/**
 	 * Connections to connection.
 	 *
 	 * @param connection - Connection to connect
@@ -128,6 +138,9 @@ export class ServerPlayer extends CorePlayer<ServerConnection> {
  * Client connection.
  */
 export class ServerConnection extends CoreConnection<ServerUniverse, ServerMessage, ClientMessage, ServerPlayer> {
+	/**
+	 * User alias.
+	 */
 	public userAlias: ServerUserAlias;
 
 	/**
@@ -545,8 +558,8 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 						// TODO: Refactor sync and update
 						// ESLint false negative
 						// eslint-disable-next-line @typescript-eslint/typedef
-						// let unitCells: Array<ServerCell> = Array.from(shard.units).map(([, unitPath]) => {
-						// 	return this.universe.getCell(unitPath);
+						// Let unitCells: Array<ServerCell> = Array.from(shard.units).map(([, unitPath]) => {
+						// 	Return this.universe.getCell(unitPath);
 						// });
 						// TODO: Use visibility
 						body.grids.forEach(grid => {
@@ -557,7 +570,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 									let isEntitiesIncluded: boolean = false;
 
 									// TODO: Refactor sync and update
-									// let isEntitiesIncluded: boolean = unitCells
+									// Let isEntitiesIncluded: boolean = unitCells
 									// 	// ESLint false negative
 									// 	// eslint-disable-next-line @typescript-eslint/typedef
 									// 	.filter(({ gridUuid }) => gridUuid === grid.gridUuid)
@@ -567,7 +580,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 									// 		({ x, y, z }) =>
 									// 			Math.abs(cell.x - x) < cellViewDistance &&
 									// 			Math.abs(cell.y - y) < cellViewDistance &&
-									// 			cell.z === z
+									// 			Cell.z === z
 									// 	);
 									return [cellUuid, isEntitiesIncluded ? cell : { ...cell, entities: new Map() }];
 								})
