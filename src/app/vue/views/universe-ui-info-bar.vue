@@ -46,7 +46,7 @@
 		<section class="universe-ui-info-bar-section">
 			<div v-for="player in players" :key="player.playerUuid" class="d-flex align-center">
 				<div v-for="resource in player.resources" :key="resource.icon" class="d-flex align-center mr-2">
-					<VTooltip :text="resource.name" location="bottom">
+					<VTooltip :text="t(`infoBar.resources.${resource.name}`)" location="bottom">
 						<template #activator="{ props }">
 							<BaseIcon :icon="resource.icon" :size="ElementSize.Small" v-bind="props" />
 							<span class="universe-ui-info-bar-text ms-1">{{ resource.value }}</span>
