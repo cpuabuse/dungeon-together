@@ -600,7 +600,12 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 										.filter(([unitUuid]) => player?.units.has(unitUuid))
 										// ESLint false negative
 										// eslint-disable-next-line @typescript-eslint/typedef
-										.map(([unitUuid]) => unitUuid)
+										.map(([unitUuid]) => [
+											unitUuid,
+											{
+												inventoryGridUuid: null
+											}
+										])
 								},
 								type: MessageTypeWord.Sync
 							},

@@ -12,6 +12,7 @@ import { join } from "path";
 import { Howl } from "howler";
 import nextTick from "next-tick";
 import { ColorMatrixFilter, Container } from "pixi.js";
+import { UnitKind } from "../../module/system/unit";
 import { DeferredPromise } from "../common/async";
 import { DirectionWord, MessageTypeWord, vSocketMaxDequeue } from "../common/defaults/connection";
 import { env } from "../common/env";
@@ -109,7 +110,7 @@ export type ClientMessage =
 					/**
 					 * Unit Uuids.
 					 */
-					units: Array<Uuid>;
+					units: Array<[Uuid, Pick<UnitKind, "inventoryGridUuid">]>;
 
 					/**
 					 * Player dictionary.
@@ -522,7 +523,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 									this.registerShard({ playerUuid: message.body.playerUuid, shardUuid: message.body.shardUuid });
 									const player: ClientPlayer | undefined = shard.players.get(message.body.playerUuid);
 
-									message.body.units.forEach(unitUuid => {
+									message.body.units.forEach(([unitUuid]) => {
 										shard.units.add(unitUuid);
 										if (player) {
 											player.units.add(unitUuid);
