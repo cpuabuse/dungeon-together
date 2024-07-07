@@ -17,6 +17,7 @@ import {
 	StatusNotificationWord,
 	vSocketMaxDequeue
 } from "../common/defaults/connection";
+import { hasOwnProperty } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import { ClientUpdate } from "../comms";
 import { CoreArgIds, CoreArgMeta, Nav, coreArgMetaGenerate } from "../core/arg";
@@ -600,12 +601,25 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 										.filter(([unitUuid]) => player?.units.has(unitUuid))
 										// ESLint false negative
 										// eslint-disable-next-line @typescript-eslint/typedef
-										.map(([unitUuid]) => [
-											unitUuid,
-											{
-												inventoryGridUuid: null
+										.map(([unitUuid, unitPath]) => {
+											// Since specific kind used is unknown, it's more convenient to cast
+											// eslint-disable-next-line prefer-destructuring
+											let kind: object = this.universe.getEntity(unitPath).kind;
+											let inventoryGridUuid: Uuid | null = null;
+
+											// Verify that unit's kind is correct class
+											// TODO: Add uuid dedicated type checker
+											if (hasOwnProperty(kind, "inventoryGridUuid") && typeof kind.inventoryGridUuid === "string") {
+												inventoryGridUuid = kind.inventoryGridUuid;
 											}
-										])
+
+											return [
+												unitUuid,
+												{
+													inventoryGridUuid
+												}
+											];
+										})
 								},
 								type: MessageTypeWord.Sync
 							},

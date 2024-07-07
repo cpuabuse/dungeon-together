@@ -110,7 +110,17 @@ export type ClientMessage =
 					/**
 					 * Unit Uuids.
 					 */
-					units: Array<[Uuid, Pick<UnitKind, "inventoryGridUuid">]>;
+					units: Array<
+						[
+							Uuid,
+							{
+								/**
+								 * UUID for inventory, attached to unit, if any.
+								 */
+								inventoryGridUuid: Uuid | null;
+							}
+						]
+					>;
 
 					/**
 					 * Player dictionary.
