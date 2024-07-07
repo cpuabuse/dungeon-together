@@ -29,7 +29,7 @@
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import { VBtn, VBtnGroup, VTooltip } from "vuetify/components";
-import { ActionWords } from "../../server/action";
+import { UsedLocale, useLocale } from "../core/locale";
 import {
 	OverlayContainerUiActionWords,
 	OverlayContentUiActionParam,
@@ -42,29 +42,6 @@ import {
 } from "../core/overlay";
 import BaseIcon from "./base-icon.vue";
 import OverlayListItemAssembler from "./overlay-list-item-assembler.vue";
-
-/**
- * Words to be displayed for UI actions, in the tooltip.
- */
-const uiActionTooltipMain: Record<OverlayContainerUiActionWords, string> = {
-	[OverlayContainerUiActionWords.EntityAction]: "Action",
-	[OverlayContainerUiActionWords.EntityInfo]: "Info",
-	[OverlayContainerUiActionWords.EntityDebugInfo]: "Debug Info",
-	[OverlayContainerUiActionWords.CellDebugInfo]: "Cell Debug Info",
-	[OverlayContainerUiActionWords.ForceMovement]: "Move"
-};
-
-/**
- * Words to be displayed for entity actions, in the tooltip.
- */
-const uiActionTooltipEntityActionCtx: Record<ActionWords, string> = {
-	[ActionWords.Attack]: "Attack",
-	[ActionWords.Interact]: "Interact",
-	[ActionWords.Drop]: "Drop",
-	[ActionWords.Pickup]: "Pickup",
-	[ActionWords.Talk]: "Talk",
-	[ActionWords.Use]: "Use"
-};
 
 export default defineComponent({
 	components: {
@@ -104,11 +81,11 @@ export default defineComponent({
 		 */
 		handleUiActionTooltip(param: OverlayContentUiActionParam): string {
 			// Tooltipmain of type string, set tooltipmain based on uiActionWord, extract from uiActionTooltipMain
-			const tooltipMain: string = uiActionTooltipMain[param.uiActionWord];
+			const tooltipMain: string = this.t(`rightClickMenu.uiActionTooltipMain.${param.uiActionWord}`);
 
 			const tooltipCtx: string | null =
 				param.uiActionWord === OverlayContainerUiActionWords.EntityAction
-					? uiActionTooltipEntityActionCtx[param.entityActionWord] ?? undefined
+					? this.t(`rightClickMenu.uiActionTooltipEntityActionCtx.${param.entityActionWord}`, { fallback: undefined })
 					: null;
 
 			return tooltipCtx ? `${tooltipMain} - ${tooltipCtx}` : `${tooltipMain}`;
@@ -137,7 +114,8 @@ export default defineComponent({
 	// Infer setup
 	// eslint-disable-next-line @typescript-eslint/typedef
 	setup(props, { emit }) {
-		return { ...useOverlayListShared({ emit, props }), ...useOverlayListItemShared({ props }) };
+		const { t }: UsedLocale = useLocale();
+		return { ...useOverlayListShared({ emit, props }), ...useOverlayListItemShared({ props }), t };
 	}
 });
 </script>
