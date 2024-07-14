@@ -3,25 +3,14 @@
 	Licensed under the ISC License (https://opensource.org/licenses/ISC)
 */
 
-/**
- * @file
- * Fog of war graphics.
- */
-
-import { ColorMatrixFilter, Filter, Graphics, Ticker } from "pixi.js";
+import { Container, Filter, Graphics, Ticker } from "pixi.js";
 import { whiteBin } from "../../common/color";
-import { ObjectLikeGraphicsContainer } from "../graphics";
 import fragmentSrc from "./fragment.glsl";
 
 /**
- * Words used to describe FOW status.
+ * @file
+ * Fog of war effect.
  */
-export enum FowWords {
-	BlackEffect = "black-effect",
-	Black = "black",
-	Grey = "grey",
-	White = "white"
-}
 
 /**
  * Uniform type interface.
@@ -41,37 +30,33 @@ const fowFilterUniforms: FowShaderUniforms = {
 };
 
 /**
- * Container for levels in the grid with a child container for different FOW statuses.
+ * Container for FOW in the grid with a child container for different FOW statuses.
  *
  * @example
  * ```
- * // Create a sprite container and add to a FOW container
- * let spriteContainer: Container = new Container();
+ * // Add FOW to root
+ * let rootContainer: Container = new Container();
  * let fowContainer: FowContainer = new FowContainer();
- * fowContainer.containers[FowWords.White].addChild(spriteContainer);
+ * rootContainer.addChild(fowContainer.container);
  * ```
  */
-export class FowContainer extends ObjectLikeGraphicsContainer<FowWords> {
-	public static readonly blackEffectFilter: Filter = new Filter(undefined, fragmentSrc, fowFilterUniforms);
+export class FowContainer {
+	/**
+	 * Pixi container for FOW.
+	 */
+	public container: Container = new Container();
 
-	public static readonly contrastFilter: ColorMatrixFilter = new ColorMatrixFilter();
+	/**
+	 * FOW effect filter.
+	 */
+	public static readonly fowEffectFilter: Filter = new Filter(undefined, fragmentSrc, fowFilterUniforms);
 
 	/**
 	 * Public constructor.
 	 */
 	public constructor() {
-		super({
-			values: new Set(Object.values(FowWords))
-		});
-
-		// Make black layer hidden
-		this.containers[FowWords.Black].visible = false;
-
-		// Burn grey
-		this.containers[FowWords.Grey].filters = [FowContainer.contrastFilter];
-
-		// Set a black effect
-		this.containers[FowWords.BlackEffect].filters = [FowContainer.blackEffectFilter];
+		// Set a fow effect
+		this.container.filters = [FowContainer.fowEffectFilter];
 
 		// Set shader area
 		// TODO:Find a way to add a full screen object to be used as a dummy for a shader
@@ -79,17 +64,18 @@ export class FowContainer extends ObjectLikeGraphicsContainer<FowWords> {
 		graphics.beginFill(whiteBin);
 		graphics.drawRect(0, 0, 2000, 2000);
 		graphics.endFill();
-		this.containers[FowWords.BlackEffect].addChild(graphics);
+		this.container.addChild(graphics);
 	}
 }
 
-// Initialize contrast filter
-FowContainer.contrastFilter.contrast(2, false);
-
 /**
  * Pass a time uniform through Pixi ticker to able motion to our FOW.
+ *
+ * @remarks
+ * Even though ideally shards' respective tickers should be used, since we are sharing static shader, for performance purposes we will use
+ * a shared ticker.
  */
 const ticker: Ticker = Ticker.shared;
 ticker.add(time => {
-	FowContainer.blackEffectFilter.uniforms.time += time;
+	FowContainer.fowEffectFilter.uniforms.time += time;
 });

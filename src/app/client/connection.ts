@@ -46,8 +46,8 @@ import { ServerMessage } from "../server/connection";
 import { Store, StoreWord } from "../vue/core/store";
 import { ClientCell } from "./cell";
 import { ClientEntity } from "./entity";
-import { FowWords } from "./fow";
 import { ClientGrid } from "./grid";
+import { LevelWords } from "./level";
 import { ClientOptions } from "./options";
 import { ClientShard } from "./shard";
 import { uuidToName } from "./text";
@@ -641,7 +641,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 							// TODO: Visibility tracing
 							newCellEntries.set(sourceCell.cellUuid, { cell: targetCell, grid: targetGrid });
 							let levelContainer: Container | undefined =
-								targetGrid.levelIndex[targetCell.z]?.containers[FowWords.White];
+								targetGrid.levelIndex[targetCell.z]?.containers[LevelWords.White];
 							if (levelContainer) {
 								levelContainer.addChild(targetCell.container);
 							} else {
@@ -867,7 +867,7 @@ export const queueProcessCallback: CoreProcessCallback<ClientConnection> = async
 						// eslint-disable-next-line @typescript-eslint/typedef
 						this.previouslyVisibleCellEntries.forEach(({ cell, grid }, cellUuid) => {
 							if (!newCellEntries.has(cellUuid)) {
-								let levelContainer: Container | undefined = grid.levelIndex[cell.z]?.containers[FowWords.Grey];
+								let levelContainer: Container | undefined = grid.levelIndex[cell.z]?.containers[LevelWords.Grey];
 								if (levelContainer) {
 									levelContainer.addChild(cell.container);
 								} else {

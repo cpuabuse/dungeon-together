@@ -32,6 +32,7 @@ import { ClientCell } from "./cell";
 import { ClientConnection, ClientPlayer, turnEventSymbol } from "./connection";
 import { ElementBall } from "./element-ball";
 import { ClientEntity } from "./entity";
+import { FowContainer } from "./fow";
 import { ClientGrid } from "./grid";
 import { ClientUniverseStateRcMenuData, ClientUniverseStateRcMenuDataWords } from "./gui";
 import {
@@ -110,6 +111,9 @@ export function ClientShardFactory({
 		 */
 		public matrix: Matrix = Matrix.IDENTITY;
 
+		/**
+		 * Players.
+		 */
 		public readonly players: Map<Uuid, ClientPlayer> = new Map();
 
 		/**
@@ -184,6 +188,9 @@ export function ClientShardFactory({
 				resizeTo: this.shardElement
 			});
 
+			// Add FOW
+			this.app.stage.addChild(new FowContainer().container);
+
 			// Add container to renderer
 			this.app.stage.addChild(this.gridContainer);
 
@@ -241,7 +248,7 @@ export function ClientShardFactory({
 
 					// TODO: Create magic
 					// Element ball display test
-					// new ElementBall({ container: this.gridContainer, scale: 500, ...ElementBall.windBall });
+					// New ElementBall({ container: this.gridContainer, scale: 500, ...ElementBall.windBall });
 
 					// Add listeners for right-click input
 					this.input.on(rcSymbol, (inputInterface: InputInterface) => {
@@ -476,7 +483,7 @@ export function ClientShardFactory({
 						this.grids.forEach(grid => {
 							grid.cells.forEach(cell => {
 								cell.entities.forEach(entity => {
-									// entity.updateCoordinates();
+									// Entity.updateCoordinates();
 								});
 							});
 						});

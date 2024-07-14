@@ -7,7 +7,7 @@
  * @file Cells on screen.
  */
 
-import { Container } from "pixi.js";
+import { Container, Renderer } from "pixi.js";
 import { CoreArgIds } from "../core/arg";
 import { CellPathOwn } from "../core/cell";
 import { LogLevel } from "../core/error";
@@ -16,7 +16,7 @@ import { CoreGridArgParentIds } from "../core/parents";
 import { CoreUniverseObjectConstructorParameters } from "../core/universe-object";
 import { ClientBaseClass, ClientBaseConstructorParams } from "./base";
 import { ClientCell } from "./cell";
-import { FowContainer, FowWords } from "./fow";
+import { LevelContainer, LevelWords } from "./level";
 import { ClientOptions, clientOptions } from "./options";
 import { ClientShard } from "./shard";
 
@@ -56,7 +56,12 @@ export function ClientGridClassFactory({
 		/**
 		 * An array of containers sorted by the depth.
 		 */
-		public levelIndex: Array<FowContainer>;
+		public levelIndex: Array<LevelContainer>;
+
+		/**
+		 * Pixi renderer.
+		 */
+		public renderer: Renderer | null = null;
 
 		/**
 		 * Parent shard.
@@ -88,7 +93,7 @@ export function ClientGridClassFactory({
 
 			// Initialize zIndex
 			this.levelIndex = Array.from(new Array(this.zLength), () => {
-				let container: FowContainer = new FowContainer();
+				let container: LevelContainer = new LevelContainer();
 				container.visible = false;
 				return container;
 			});
@@ -183,7 +188,7 @@ export function ClientGridClassFactory({
 			cell.container.y = sceneHeight * cell.y;
 
 			// Add container
-			let levelContainer: Container | undefined = this.levelIndex[cell.z]?.containers[FowWords.Black];
+			let levelContainer: Container | undefined = this.levelIndex[cell.z]?.containers[LevelWords.Black];
 			if (levelContainer) {
 				levelContainer.addChild(cell.container);
 			} else {
