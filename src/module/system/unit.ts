@@ -9,7 +9,9 @@
  */
 
 import { StatusNotification } from "../../app/client/connection";
+import { DeferredPromise } from "../../app/common/async";
 import { MessageTypeWord, StatusNotificationWord } from "../../app/common/defaults/connection";
+import { Uuid } from "../../app/common/uuid";
 import { CoreEnvelope } from "../../app/core/connection";
 import { LogLevel } from "../../app/core/error";
 import { ActionWords } from "../../app/server/action";
@@ -285,6 +287,11 @@ export function UnitKindClassFactory({
 		public healthPoints: number = 3;
 
 		/**
+		 * Inventory grid UUID.
+		 */
+		public inventoryGridUuid: Uuid | null = null;
+
+		/**
 		 * Is not hidden property to emit unit specific properties.
 		 */
 		public isNotHidden: boolean = true;
@@ -384,6 +391,56 @@ export function UnitKindClassFactory({
 			let cell: ServerCell = (this.entity.constructor as ServerEntityClass).universe.getCell(this.entity);
 			cell.addEvent({ name: "death", targetEntityUuid: this.entity.entityUuid });
 			cell.removeEntity(this.entity);
+		}
+
+		/**
+		 * Adds inventory grid on guy creation.
+		 *
+		 * @remarks This function needs to be called from `onCreateEntity`, not in the constructor because if it is called in the constructor, the grid will not be created in time for the entity to be attached to it.
+		 */
+		public addInventoryGrid(): void {
+			let created: DeferredPromise<void> = new DeferredPromise();
+			let attachHook: Promise<void> = new Promise<void>((resolve, reject) => {
+				(this.entity.constructor as ServerEntityClass).universe.universeQueue.addCallback({
+					/**
+					 * Callback.
+					 */
+					callback: () => {
+						if (!this.inventoryGridUuid) {
+							// TODO: Create cells and worlds
+							this.inventoryGridUuid = `grid/${this.entity.entityUuid}/inventory`;
+							let shard: ServerShard = (this.entity.constructor as ServerEntityClass).universe.getShard(this.entity);
+
+							shard.addGrid(
+								{
+									cells: new Map(),
+									gridUuid: this.inventoryGridUuid,
+									shardUuid: shard.shardUuid,
+									worlds: new Set(),
+									x: 0,
+									y: 0,
+									z: 0
+								},
+								{ attachHook, created },
+								[]
+							);
+
+							created
+								.then(() => {
+									resolve();
+								})
+								.catch(error => {
+									reject(error);
+								});
+						} else {
+							(this.entity.constructor as ServerEntityClass).universe.log({
+								level: LogLevel.Error,
+								message: `Inventory grid("gridUuid=${this.inventoryGridUuid}") already exists for entity("entityUuid=${this.entity.entityUuid}").`
+							});
+						}
+					}
+				});
+			});
 		}
 
 		/**
