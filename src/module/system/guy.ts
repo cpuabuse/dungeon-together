@@ -4,9 +4,7 @@
 */
 
 /**
- * Guy.
- *
- * @file
+ * @file Guy.
  */
 
 import { MessageTypeWord } from "../../app/common/defaults/connection";
@@ -101,6 +99,9 @@ export function GuyKindClassFactory({
 
 			// Set unit (for screen update/control)
 			shard.units.set(this.entity.entityUuid, this.entity);
+
+			// Set inventory grid
+			// This.addInventoryGrid();
 		}
 
 		/**

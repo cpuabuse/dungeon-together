@@ -17,6 +17,7 @@ import {
 	StatusNotificationWord,
 	vSocketMaxDequeue
 } from "../common/defaults/connection";
+import { hasOwnProperty } from "../common/utility-types";
 import { Uuid } from "../common/uuid";
 import { ClientUpdate } from "../comms";
 import { CoreArgIds, CoreArgMeta, Nav, coreArgMetaGenerate } from "../core/arg";
@@ -109,6 +110,16 @@ export interface ServerUserAlias {
  */
 export class ServerPlayer extends CorePlayer<ServerConnection> {
 	/**
+	 * @param param - Destructured parameter
+	 */
+	public constructor(...param: ConstructorParameters<typeof CorePlayer>) {
+		super(...param);
+
+		// TODO: Get the proper UUID
+		this.inventoryGridUuid = "inventory";
+	}
+
+	/**
 	 * Connections to connection.
 	 *
 	 * @param connection - Connection to connect
@@ -128,6 +139,9 @@ export class ServerPlayer extends CorePlayer<ServerConnection> {
  * Client connection.
  */
 export class ServerConnection extends CoreConnection<ServerUniverse, ServerMessage, ClientMessage, ServerPlayer> {
+	/**
+	 * User alias.
+	 */
 	public userAlias: ServerUserAlias;
 
 	/**
@@ -545,8 +559,8 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 						// TODO: Refactor sync and update
 						// ESLint false negative
 						// eslint-disable-next-line @typescript-eslint/typedef
-						// let unitCells: Array<ServerCell> = Array.from(shard.units).map(([, unitPath]) => {
-						// 	return this.universe.getCell(unitPath);
+						// Let unitCells: Array<ServerCell> = Array.from(shard.units).map(([, unitPath]) => {
+						// 	Return this.universe.getCell(unitPath);
 						// });
 						// TODO: Use visibility
 						body.grids.forEach(grid => {
@@ -557,7 +571,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 									let isEntitiesIncluded: boolean = false;
 
 									// TODO: Refactor sync and update
-									// let isEntitiesIncluded: boolean = unitCells
+									// Let isEntitiesIncluded: boolean = unitCells
 									// 	// ESLint false negative
 									// 	// eslint-disable-next-line @typescript-eslint/typedef
 									// 	.filter(({ gridUuid }) => gridUuid === grid.gridUuid)
@@ -567,7 +581,7 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 									// 		({ x, y, z }) =>
 									// 			Math.abs(cell.x - x) < cellViewDistance &&
 									// 			Math.abs(cell.y - y) < cellViewDistance &&
-									// 			cell.z === z
+									// 			Cell.z === z
 									// 	);
 									return [cellUuid, isEntitiesIncluded ? cell : { ...cell, entities: new Map() }];
 								})
@@ -587,7 +601,25 @@ export const queueProcessCallback: CoreProcessCallback<ServerConnection> = async
 										.filter(([unitUuid]) => player?.units.has(unitUuid))
 										// ESLint false negative
 										// eslint-disable-next-line @typescript-eslint/typedef
-										.map(([unitUuid]) => unitUuid)
+										.map(([unitUuid, unitPath]) => {
+											// Since specific kind used is unknown, it's more convenient to cast
+											// eslint-disable-next-line prefer-destructuring
+											let kind: object = this.universe.getEntity(unitPath).kind;
+											let inventoryGridUuid: Uuid | null = null;
+
+											// Verify that unit's kind is correct class
+											// TODO: Add uuid dedicated type checker
+											if (hasOwnProperty(kind, "inventoryGridUuid") && typeof kind.inventoryGridUuid === "string") {
+												inventoryGridUuid = kind.inventoryGridUuid;
+											}
+
+											return [
+												unitUuid,
+												{
+													inventoryGridUuid
+												}
+											];
+										})
 								},
 								type: MessageTypeWord.Sync
 							},
