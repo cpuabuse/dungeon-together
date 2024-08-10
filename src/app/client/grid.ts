@@ -8,7 +8,7 @@
  */
 
 import { Container, Renderer } from "pixi.js";
-import { CoreArgIds } from "../core/arg";
+import { CoreArgIds, coreArgObjectWords } from "../core/arg";
 import { CellPathOwn } from "../core/cell";
 import { LogLevel } from "../core/error";
 import { CoreGridArg, CoreGridClassFactory } from "../core/grid";
@@ -19,6 +19,12 @@ import { ClientCell } from "./cell";
 import { LevelContainer, LevelWords } from "./level";
 import { ClientOptions, clientOptions } from "./options";
 import { ClientShard } from "./shard";
+
+/**
+ * An index to display universe object hierarchy in HTML, explicitly defined to evade spelling mistakes.
+ * Right way is type, but this is fast and easy.
+ */
+const datasetUniverseObjectType = "universeObjectType";
 
 /**
  * Generator for the client grid class.
@@ -52,6 +58,11 @@ export function ClientGridClassFactory({
 		 * Display of current level.
 		 */
 		public currentLevel: number = 0;
+
+		/**
+		 * Grid HTML element.
+		 */
+		public readonly gridElement = document.createElement("div");
 
 		/**
 		 * An array of containers sorted by the depth.
@@ -90,6 +101,13 @@ export function ClientGridClassFactory({
 			>
 		) {
 			super(grid, { attachHook, created }, baseParams);
+
+			// Initialize HTML
+			this.gridElement.dataset[datasetUniverseObjectType] = coreArgObjectWords[CoreArgIds.Grid].singularLowercaseWord;
+			this.gridElement.dataset[datasetUniverseObjectType] = coreArgObjectWords[CoreArgIds.Grid].pluralLowercaseWord;
+
+			// Set UUID to dataset
+			this.gridElement.dataset[datasetUniverseObjectType] = this.gridUuid;
 
 			// Initialize zIndex
 			this.levelIndex = Array.from(new Array(this.zLength), () => {

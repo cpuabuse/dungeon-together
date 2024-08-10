@@ -197,6 +197,9 @@ export function ClientShardFactory({
 			this.shardElement.appendChild(this.gridsElement).dataset[datasetUniverseObjectType] =
 				coreArgObjectWords[CoreArgIds.Grid].pluralLowercaseWord;
 
+			// Set UUID to dataset
+			this.shardElement.dataset[datasetUniverseObjectType] = this.shardUuid;
+
 			this.app = new Application({
 				antialias: true,
 				autoDensity: true,
@@ -525,8 +528,8 @@ export function ClientShardFactory({
 
 		/**
 		 *
-		 * @param grid
-		 * @param isGridViewRequired
+		 * @param grid - Grid
+		 * @param isGridViewRequired - Condition to check if grid view is required
 		 */
 		public addGridProto(grid: ClientGrid, isGridViewRequired: boolean): void {
 			if (isGridViewRequired) {
@@ -538,6 +541,11 @@ export function ClientShardFactory({
 					height: 600,
 					width: 800
 				});
+
+				// Pixi's application is generic but renderer is not, so fastest way to fix types is casting
+				grid.gridElement.appendChild(grid.renderer.view as HTMLCanvasElement);
+				this.gridsElement.appendChild(grid.gridElement);
+				// Append rederer.new to gridElement
 			}
 		}
 
