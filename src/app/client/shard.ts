@@ -20,7 +20,7 @@ import {
 import { DirectionWord, MessageTypeWord } from "../common/defaults/connection";
 import { defaultFps, defaultMobileFps } from "../common/graphics";
 import { Uuid } from "../common/uuid";
-import { CoreArgIds } from "../core/arg";
+import { CoreArgIds, coreArgObjectWords } from "../core/arg";
 import { CoreEnvelope, MovementWord, processQueueWord } from "../core/connection";
 import { LogLevel } from "../core/error";
 import { CoreShardArgParentIds } from "../core/parents";
@@ -53,6 +53,12 @@ import {
 } from "./input";
 import { ClientOptions, clientOptions } from "./options";
 import { uuidToName } from "./text";
+
+/**
+ * An index to display universe object hierarchy in HTML, explicitly defined to evade spelling mistakes.
+ * Right way is type, but this is fast and easy.
+ */
+const datasetUniverseObjectType = "universeObjectType";
 
 /**
  * Created a client shard class.
@@ -105,6 +111,11 @@ export function ClientShardFactory({
 		 * Container for pixi.
 		 */
 		public readonly gridContainer: Container = new Container();
+
+		/**
+		 * Grids HTML element.
+		 */
+		public readonly gridsElement = document.createElement("div");
 
 		/**
 		 * Viewport for this client shard.
@@ -180,6 +191,11 @@ export function ClientShardFactory({
 		) {
 			// Call super constructor
 			super(shard, { attachHook, created }, baseParams);
+
+			// Initialize HTML
+			this.shardElement.dataset[datasetUniverseObjectType] = coreArgObjectWords[CoreArgIds.Shard].singularLowercaseWord;
+			this.shardElement.appendChild(this.gridsElement).dataset[datasetUniverseObjectType] =
+				coreArgObjectWords[CoreArgIds.Grid].pluralLowercaseWord;
 
 			this.app = new Application({
 				antialias: true,
@@ -505,6 +521,24 @@ export function ClientShardFactory({
 		 */
 		public addGridContainer(renderer: Renderer): void {
 			renderer.render(this.gridContainer);
+		}
+
+		/**
+		 *
+		 * @param grid
+		 * @param isGridViewRequired
+		 */
+		public addGridProto(grid: ClientGrid, isGridViewRequired: boolean): void {
+			if (isGridViewRequired) {
+				grid.renderer = new Renderer({
+					antialias: true,
+					autoDensity: true,
+					backgroundAlpha: 0,
+					// TODO - Dynamically recalculate based on grid size
+					height: 600,
+					width: 800
+				});
+			}
 		}
 
 		/**
