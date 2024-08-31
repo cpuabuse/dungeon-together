@@ -26,6 +26,13 @@ import { ClientShard } from "./shard";
  */
 const datasetUniverseObjectType = "universeObjectType";
 
+// TODO: Constant also used in shard. Move to shared constants.
+/**
+ * An index for data for UUID.
+ *
+ */
+const dataSetUniverseObjectUuid = "universeObjectUuid";
+
 /**
  * Generator for the client grid class.
  *
@@ -107,7 +114,7 @@ export function ClientGridClassFactory({
 			this.gridElement.dataset[datasetUniverseObjectType] = coreArgObjectWords[CoreArgIds.Grid].pluralLowercaseWord;
 
 			// Set UUID to dataset
-			this.gridElement.dataset[datasetUniverseObjectType] = this.gridUuid;
+			this.gridElement.dataset[dataSetUniverseObjectUuid] = this.gridUuid;
 
 			// Initialize zIndex
 			this.levelIndex = Array.from(new Array(this.zLength), () => {

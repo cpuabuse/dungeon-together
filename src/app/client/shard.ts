@@ -61,6 +61,11 @@ import { uuidToName } from "./text";
 const datasetUniverseObjectType = "universeObjectType";
 
 /**
+ * An index for data for UUID.
+ */
+const dataSetUniverseObjectUuid = "universeObjectUuid";
+
+/**
  * Created a client shard class.
  *
  * Static members initialization cannot reference base universe class.
@@ -198,7 +203,7 @@ export function ClientShardFactory({
 				coreArgObjectWords[CoreArgIds.Grid].pluralLowercaseWord;
 
 			// Set UUID to dataset
-			this.shardElement.dataset[datasetUniverseObjectType] = this.shardUuid;
+			this.shardElement.dataset[dataSetUniverseObjectUuid] = this.shardUuid;
 
 			this.app = new Application({
 				antialias: true,
@@ -545,7 +550,7 @@ export function ClientShardFactory({
 				// Pixi's application is generic but renderer is not, so fastest way to fix types is casting
 				grid.gridElement.appendChild(grid.renderer.view as HTMLCanvasElement);
 				this.gridsElement.appendChild(grid.gridElement);
-				// Append rederer.new to gridElement
+				// Append renderer.new to gridElement
 			}
 		}
 
