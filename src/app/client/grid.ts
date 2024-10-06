@@ -111,7 +111,6 @@ export function ClientGridClassFactory({
 
 			// Initialize HTML
 			this.gridElement.dataset[datasetUniverseObjectType] = coreArgObjectWords[CoreArgIds.Grid].singularLowercaseWord;
-			this.gridElement.dataset[datasetUniverseObjectType] = coreArgObjectWords[CoreArgIds.Grid].pluralLowercaseWord;
 
 			// Set UUID to dataset
 			this.gridElement.dataset[dataSetUniverseObjectUuid] = this.gridUuid;

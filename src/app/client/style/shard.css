@@ -1,0 +1,17 @@
+.dungeon-together-client-shard > canvas {
+	position: absolute;
+}
+
+.dungeon-together-client-shard-grids {
+	margin: 1em;
+	display: flex;
+	justify-content: flex-end;
+	align-items: flex-end;
+	flex-direction: column;
+}
+
+.dungeon-together-client-shard-grid {
+	margin: 1em;
+	border: solid 1px black;
+	position: relative;
+}

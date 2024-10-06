@@ -413,12 +413,69 @@ export function UnitKindClassFactory({
 
 							shard.addGrid(
 								{
-									cells: new Map(),
+									cells: new Map([
+										[
+											"0,0,0",
+											{
+												cellUuid: "0,0,0",
+												entities: new Map(),
+												gridUuid: this.inventoryGridUuid,
+												nav: new Map(),
+												shardUuid: shard.shardUuid,
+												worlds: new Set(),
+												x: 1,
+												y: 1,
+												z: 0
+											}
+										],
+										[
+											"1,0,0",
+											{
+												cellUuid: "1,0,0",
+												entities: new Map(),
+												gridUuid: this.inventoryGridUuid,
+												nav: new Map(),
+												shardUuid: shard.shardUuid,
+												worlds: new Set(),
+												x: 1,
+												y: 1,
+												z: 0
+											}
+										],
+										[
+											"0,1,0",
+											{
+												cellUuid: "0,1,0",
+												entities: new Map(),
+												gridUuid: this.inventoryGridUuid,
+												nav: new Map(),
+												shardUuid: shard.shardUuid,
+												worlds: new Set(),
+												x: 1,
+												y: 1,
+												z: 0
+											}
+										],
+										[
+											"1,1,0",
+											{
+												cellUuid: "1,1,0",
+												entities: new Map(),
+												gridUuid: this.inventoryGridUuid,
+												nav: new Map(),
+												shardUuid: shard.shardUuid,
+												worlds: new Set(),
+												x: 1,
+												y: 1,
+												z: 0
+											}
+										]
+									]),
 									gridUuid: this.inventoryGridUuid,
 									shardUuid: shard.shardUuid,
 									worlds: new Set(),
-									x: 0,
-									y: 0,
+									x: 1,
+									y: 1,
 									z: 0
 								},
 								{ attachHook, created },

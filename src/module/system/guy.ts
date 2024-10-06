@@ -101,7 +101,7 @@ export function GuyKindClassFactory({
 			shard.units.set(this.entity.entityUuid, this.entity);
 
 			// Set inventory grid
-			// This.addInventoryGrid();
+			this.addInventoryGrid();
 		}
 
 		/**

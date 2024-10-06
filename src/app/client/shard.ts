@@ -54,6 +54,9 @@ import {
 import { ClientOptions, clientOptions } from "./options";
 import { uuidToName } from "./text";
 
+//
+import "./style/shard.css";
+
 /**
  * An index to display universe object hierarchy in HTML, explicitly defined to evade spelling mistakes.
  * Right way is type, but this is fast and easy.
@@ -198,9 +201,11 @@ export function ClientShardFactory({
 			super(shard, { attachHook, created }, baseParams);
 
 			// Initialize HTML
+			this.shardElement.classList.add("dungeon-together-client-shard");
 			this.shardElement.dataset[datasetUniverseObjectType] = coreArgObjectWords[CoreArgIds.Shard].singularLowercaseWord;
 			this.shardElement.appendChild(this.gridsElement).dataset[datasetUniverseObjectType] =
 				coreArgObjectWords[CoreArgIds.Grid].pluralLowercaseWord;
+			this.gridsElement.classList.add("dungeon-together-client-shard-grids");
 
 			// Set UUID to dataset
 			this.shardElement.dataset[dataSetUniverseObjectUuid] = this.shardUuid;
@@ -259,7 +264,7 @@ export function ClientShardFactory({
 					// If we are here, we might already be attached, append shard and one-time resize
 					// ESLint false negative
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-					this.shardElement.appendChild(this.app.view);
+					this.shardElement.prepend(this.app.view);
 					// ESLint false negative
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
 					this.app.resize();
@@ -532,29 +537,6 @@ export function ClientShardFactory({
 		}
 
 		/**
-		 *
-		 * @param grid - Grid
-		 * @param isGridViewRequired - Condition to check if grid view is required
-		 */
-		public addGridProto(grid: ClientGrid, isGridViewRequired: boolean): void {
-			if (isGridViewRequired) {
-				grid.renderer = new Renderer({
-					antialias: true,
-					autoDensity: true,
-					backgroundAlpha: 0,
-					// TODO - Dynamically recalculate based on grid size
-					height: 600,
-					width: 800
-				});
-
-				// Pixi's application is generic but renderer is not, so fastest way to fix types is casting
-				grid.gridElement.appendChild(grid.renderer.view as HTMLCanvasElement);
-				this.gridsElement.appendChild(grid.gridElement);
-				// Append renderer.new to gridElement
-			}
-		}
-
-		/**
 		 * The function that fires the input received.
 		 *
 		 * @param inputSymbol - Input symbol received
@@ -618,6 +600,51 @@ export function ClientShardFactory({
 			this.sceneWidth = entityWidth;
 		}
 	}
+
+	/**
+	 * Overrides Add grid.
+	 *
+	 * @param this - Client shard
+	 * @param args - Arguments
+	 * @returns Client grid
+	 */
+	ClientShard.prototype.addGrid = function (
+		this: ClientShard,
+		...args: Parameters<ClientShard["addGrid"]>
+	): ClientGrid {
+		// Super first
+		const grid: ClientGrid = (Object.getPrototypeOf(ClientShard.prototype) as ClientShard).addGrid.call(this, ...args);
+
+		let [, { attachHook }]: Parameters<ClientShard["addGrid"]> = args;
+		// Add grid to shard
+		attachHook
+			.then(() => {
+				const isGridViewRequired = true;
+				if (isGridViewRequired) {
+					grid.renderer = new Renderer({
+						antialias: true,
+						autoDensity: true,
+						backgroundAlpha: 0,
+						// TODO - Dynamically recalculate based on grid size
+						height: 60,
+						width: 60
+					});
+					// Pixi's application is generic but renderer is not, so fastest way to fix types is casting
+					grid.gridElement.appendChild(grid.renderer.view as HTMLCanvasElement);
+					grid.gridElement.classList.add("dungeon-together-client-shard-grid");
+					this.gridsElement.appendChild(grid.gridElement);
+				}
+			})
+			.catch(error => {
+				(this.constructor as typeof ClientShard).universe.log({
+					error: new Error(`Failed to initialize grid("gridUuid=${grid.gridUuid}") renderer.`, {
+						cause: error instanceof Error ? error : undefined
+					}),
+					level: LogLevel.Alert
+				});
+			});
+		return grid;
+	};
 
 	/**
 	 * Attaches client grid.
